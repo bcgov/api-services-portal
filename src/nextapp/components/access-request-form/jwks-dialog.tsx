@@ -94,6 +94,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
             >
               <FormControl mb={4}>
                 <FormLabel>Current JWKS URL</FormLabel>
+                <Box height="0.1rem"></Box>
                 <Flex>
                   <Input
                     isRequired

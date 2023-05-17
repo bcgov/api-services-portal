@@ -22,6 +22,7 @@ import RegenerateCredentialsDialog from '../access-request-form/regenerate-crede
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 import JwksDialog from '../access-request-form/jwks-dialog';
 import PublicKeyDialog from '../access-request-form/public-key-dialog';
+import SecretText from '../secret-text';
 
 interface AccessListRowProps {
   data: AccessRequest & ServiceAccess;
@@ -52,14 +53,14 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
 
   return (
     <Tr>
-      <Td>
+      <Td width="20%">
         <AccessStatus
           isIssued={data.isIssued ?? data.active}
           isComplete={data.isComplete ?? data.active}
           isApproved={data.isApproved ?? data.active}
         />
       </Td>
-      <Td>
+      <Td width="10%">
         <Tag
           colorScheme={data.productEnvironment?.name}
           variant="outline"
@@ -68,8 +69,10 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
           {data.productEnvironment?.name}
         </Tag>
       </Td>
-      <Td>{data.application?.name}</Td>
-      <Td color="bc-blue">{data.name}</Td>
+      <Td width="30%">{data.application?.name}</Td>
+      <Td color="bc-blue" whiteSpace="nowrap" overflow="hidden">
+        <SecretText>{data.name}</SecretText>
+      </Td>
       <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
         {(has(data, 'isApproved') ||
           has(data, 'isIssued') ||

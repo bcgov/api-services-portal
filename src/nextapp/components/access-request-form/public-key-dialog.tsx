@@ -96,6 +96,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
             >
               <FormControl mb={4}>
                 <FormLabel>Current Public Key</FormLabel>
+                <Box height="0.1rem"></Box>
                 <Flex>
                   <Textarea
                     isRequired
@@ -109,15 +110,13 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
               </FormControl>
               <FormControl mb={4}>
                 <FormLabel>New Public Key</FormLabel>
-                <Flex>
-                  <Textarea
-                    isRequired
-                    height="64px"
-                    name="clientCertificate"
-                    variant="code"
-                    placeholder={publicKeyPlaceholder}
-                  />
-                </Flex>
+                <Textarea
+                  isRequired
+                  height="64px"
+                  name="clientCertificate"
+                  variant="code"
+                  placeholder={publicKeyPlaceholder}
+                />
               </FormControl>
               <Heading size="sm" mb={2}>
                 Issuer

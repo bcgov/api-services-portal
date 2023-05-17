@@ -122,6 +122,26 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
             >
               <Stack direction="column">
                 <Radio
+                  value="publicKey"
+                  data-testid={`access-rqst-app-env-public-key`}
+                >
+                  Public Key
+                </Radio>
+                {authMethod === 'publicKey' && (
+                  <Box ml={2} mb={4} pl={6}>
+                    <FormHelperText mt={0} mb={2} color="bc-component">
+                      Enter the public key for authentication.
+                    </FormHelperText>
+                    <Textarea
+                      isRequired
+                      height="64px"
+                      name="clientCertificate"
+                      variant="code"
+                      placeholder={publicKeyPlaceholder}
+                    />
+                  </Box>
+                )}
+                <Radio
                   value="jwks"
                   data-testid={`access-rqst-app-env-jwks-url`}
                 >
@@ -129,7 +149,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
                 </Radio>
                 {authMethod === 'jwks' && (
                   <Box ml={2} mb={4} pl={7}>
-                    <FormHelperText>
+                    <FormHelperText mt={0} mb={2} color="bc-component">
                       Enter the URL where the JWKS is hosted for authentication.
                     </FormHelperText>
                     <Input
@@ -141,28 +161,8 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
                     />
                   </Box>
                 )}
-                <Radio
-                  value="publicKey"
-                  data-testid={`access-rqst-app-env-public-key`}
-                >
-                  Public Key
-                </Radio>
               </Stack>
             </RadioGroup>
-            {authMethod === 'publicKey' && (
-              <Box ml={2} mb={4} pl={6}>
-                <FormHelperText mb={2} color="bc-component">
-                  Enter the public key for authentication.
-                </FormHelperText>
-                <Textarea
-                  isRequired
-                  height="64px"
-                  name="clientCertificate"
-                  variant="code"
-                  placeholder={publicKeyPlaceholder}
-                />
-              </Box>
-            )}
           </Box>
         )}
       </Fieldset>
