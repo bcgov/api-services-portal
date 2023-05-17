@@ -19,7 +19,7 @@ import {
 
 import CopyButton from '../copy-button/copy-button';
 import { useApiMutation } from '@/shared/services/api';
-import { controlsMutation } from './shared';
+import { controlsMutation, publicKeyPlaceholder } from './shared';
 import { useQueryClient } from 'react-query';
 
 interface PublicKeyDialogProps {
@@ -101,7 +101,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                     isRequired
                     isDisabled={mutate.isLoading}
                     height="64px"
-                    variant="bc-input"
+                    variant="code"
                     value={clientCertificate}
                   />
                   <CopyButton value={clientCertificate} />
@@ -114,7 +114,8 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                     isRequired
                     height="64px"
                     name="clientCertificate"
-                    variant="bc-input"
+                    variant="code"
+                    placeholder={publicKeyPlaceholder}
                   />
                 </Flex>
               </FormControl>

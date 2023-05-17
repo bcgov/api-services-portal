@@ -22,6 +22,7 @@ import { Environment } from '@/shared/types/query.types';
 
 import Fieldset from './access-request-fieldset';
 import ApplicationSelect from './application-select';
+import { publicKeyPlaceholder } from './shared';
 
 interface AccessRequestFormProps {
   id: string;
@@ -150,14 +151,15 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
             </RadioGroup>
             {authMethod === 'publicKey' && (
               <Box ml={2} mb={4} pl={6}>
-                <FormHelperText>
+                <FormHelperText mb={2} color="bc-component">
                   Enter the public key for authentication.
                 </FormHelperText>
                 <Textarea
                   isRequired
                   height="64px"
                   name="clientCertificate"
-                  variant="bc-input"
+                  variant="code"
+                  placeholder={publicKeyPlaceholder}
                 />
               </Box>
             )}
