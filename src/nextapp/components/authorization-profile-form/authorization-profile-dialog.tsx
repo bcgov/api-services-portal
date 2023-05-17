@@ -270,6 +270,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     },
     [data, handleCreateProfile, handleSaveProfile, id]
   );
+  const owner = id ? data?.owner : data?.owner ?? user;
 
   React.useEffect(() => {
     setName(data?.name);
@@ -305,7 +306,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                   </Tab>
                   <Box flex={1} />
                   <Box p="relative" mt={-10} mb={2}>
-                    <UserProfile data={user} />
+                    <UserProfile heading="Owner" data={owner} />
                   </Box>
                 </TabList>
               </Tabs>

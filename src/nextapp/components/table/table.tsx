@@ -22,6 +22,7 @@ interface Column extends TableColumnHeaderProps {
   name: React.ReactNode;
   key?: string;
   sortable?: boolean;
+  sortKey?: string;
 }
 
 interface ApsTableProps extends TableProps {
@@ -109,7 +110,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
                 }
                 onClick={
                   sort && tableProps.key
-                    ? handleSort(tableProps.key)
+                    ? handleSort(tableProps.sortKey ?? tableProps.key)
                     : undefined
                 }
                 _hover={{
