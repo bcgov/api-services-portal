@@ -57,17 +57,7 @@ describe('Regenerate Credential for API Key', () => {
       myAccessPage.regenerateCredential(product.environment, application.name)
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
-    })
-  })
-
-  it('Verify that new API key is set to the consumer', () => {
-    cy.visit(myAccessPage.path)
-    cy.get('@developer').then(({ product, application }: any) => {
-      myAccessPage.regenerateCredential(product.environment, application.name)
-      myAccessPage.clickOnGenerateSecretButton()
-      cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
+      myAccessPage.saveAPIKeyValue()
     })
   })
 

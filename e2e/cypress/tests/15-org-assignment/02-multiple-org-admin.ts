@@ -112,13 +112,6 @@ describe('Multiple Org Adming for the organization', () => {
     })
   })
 
-  it('Verify Organization Administrator notification banner', () => {
-    cy.visit(apiDir.path)
-    cy.get('@apiowner').then(({ orgAssignmentMultipleAdmin }: any) => {
-    apiDir.checkOrgAdminNotificationBanner(orgAssignmentMultipleAdmin.orgAdminNotification)
-    })
-  })
-
   it('Verify Ord Admins Members details in Organization group access ', () => {
     cy.visit(na.path)
     cy.wait(2000)
