@@ -114,16 +114,16 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
               'kong-api-key-only',
               'kong-api-key-acl',
               'client-credentials',
-            ].includes(data.productEnvironment.flow) ||
-              (data.productEnvironment?.credentialIssuer
-                ?.clientAuthenticator === 'client-secret' && (
+            ].includes(data.productEnvironment.flow) &&
+              data.productEnvironment?.credentialIssuer?.clientAuthenticator ===
+                'client-secret' && (
                 <MenuItem
                   data-testid="regenerate-credentials-btn"
                   onClick={onOpen}
                 >
                   Regenerate Credentials
                 </MenuItem>
-              ))}
+              )}
             {data.productEnvironment?.credentialIssuer?.clientAuthenticator ===
               'client-jwt-jwks-url' &&
               controls.jwksUrl && (
