@@ -1,0 +1,43 @@
+
+  query GetMyServiceAccesses {
+    myServiceAccesses(where: { productEnvironment_is_null: false }) {
+      id
+      name
+      active
+      credentialReference
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        flow
+        product {
+          id
+          name
+        }
+        credentialIssuer {
+          clientAuthenticator
+        }
+      }
+    }
+    myAccessRequests(
+      where: { productEnvironment_is_null: false, serviceAccess_is_null: true }
+    ) {
+      id
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+      isComplete
+      isApproved
+      isIssued
+    }
+  }

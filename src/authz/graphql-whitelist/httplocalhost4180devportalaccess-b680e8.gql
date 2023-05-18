@@ -1,0 +1,9 @@
+
+  mutation UpdateServiceAccessCredential(
+    $id: ID!
+    $controls: CredentialReferenceUpdateInput
+  ) {
+    updateServiceAccessCredential(id: $id, controls: $controls) {
+      credential
+    }
+  }
