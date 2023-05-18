@@ -157,6 +157,29 @@ asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdj
           isApproved: true,
           isIssued: true,
         },
+        {
+          id: '888',
+          name: 'ialdkfjasd0f',
+          active: true,
+          application: {
+            name: 'Shoppers Drug Mart 888',
+          },
+          productEnvironment: {
+            id: '175',
+            name: 'dev',
+            flow: 'client-credentials',
+            product: {
+              id: '166',
+              name: 'Demo App',
+            },
+            credentialIssuer: {
+              clientAuthenticator: 'client-secret',
+            },
+          },
+          isComplete: true,
+          isApproved: true,
+          isIssued: true,
+        },
       ],
     })
   );
