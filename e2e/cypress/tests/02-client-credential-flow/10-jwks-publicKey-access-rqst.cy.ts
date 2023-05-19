@@ -3,7 +3,9 @@ import ApplicationPage from '../../pageObjects/applications'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-describe('Developer creates an access request for JWT Generated Key Pair authenticator', () => {
+const jose = require('node-jose')
+
+describe('Generates public/private key and set public key to access request', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
@@ -21,6 +23,10 @@ describe('Developer creates an access request for JWT Generated Key Pair authent
     cy.visit(login.path)
   })
 
+  it('Generate the RS256 key pair', () => {
+    cy.generateKeyPair()
+  })
+
   it('Developer logs in', () => {
     cy.get('@developer').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
@@ -30,24 +36,23 @@ describe('Developer creates an access request for JWT Generated Key Pair authent
   it('Creates an application', () => {
     cy.visit(app.path)
     cy.get('@developer').then(({ clientCredentials }: any) => {
-      app.createApplication(clientCredentials.jwtKeyPair.application)
+      app.createApplication(clientCredentials.jwksPublicKey.application)
     })
   })
 
   it('Creates an access request', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
-      let jwtkp = clientCredentials.jwtKeyPair
+      let jwksPublicKey = clientCredentials.jwksPublicKey
 
-      apiDir.createAccessRequest(jwtkp.product, jwtkp.application, accessRequest)
+      apiDir.createAccessRequest(jwksPublicKey.product, jwksPublicKey.application, accessRequest)
       ma.clickOnGenerateSecretButton()
-      cy.wait(5000)
-      cy.contains('Client ID').should('be.visible')
-      cy.contains('Signing Private Key').should('be.visible')
-      cy.contains('Signing Public Certificate').should('be.visible')
-      // cy.contains('Token Endpoint').should('be.visible')
 
-      ma.saveJwtKeyPairCredentials()
+      cy.contains('Client ID').should('be.visible')
+      cy.contains('Issuer').should('be.visible')
+      cy.contains('Token Endpoint').should('be.visible')
+
+      ma.saveJwksUrlCredentials()
     })
   })
 

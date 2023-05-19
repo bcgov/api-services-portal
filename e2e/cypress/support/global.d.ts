@@ -81,6 +81,7 @@ declare namespace Cypress {
 
     getLastConsumerID(): Chainable<any>
 
+    generateKeyPair() : void
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }
