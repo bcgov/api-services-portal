@@ -376,6 +376,22 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
   })
 })
 
+Cypress.Commands.add('updateKongPluginForJSONRequest', (jsonBody: string, endPoint: string, verb = 'POST') => {
+  cy.fixture('state/store').then((creds: any) => {
+    debugger
+    let body = {}
+    let headers = {"content-type": "application/json", "accept": "application/json"}
+    body = jsonBody
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + endPoint,
+      method: verb,
+      body: body,
+      headers: headers,
+      failOnStatusCode: false
+    })
+  })
+})
+
 Cypress.Commands.add("generateKeystore", async () => {
   let keyStore = jose.JWK.createKeyStore()
   await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
@@ -549,6 +565,12 @@ Cypress.Commands.add("generateKeyPair", () => {
   cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub', publicKeyPem)
   
 })
+
+Cypress.Commands.add('forceVisit', (url:string) => {
+  cy.window().then(win => {
+      return win.open(url, '_self');
+  });
+}); 
 
 const formDataRequest = (
   options: formDataRequestOptions,

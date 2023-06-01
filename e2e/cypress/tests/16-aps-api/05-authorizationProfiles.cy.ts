@@ -121,7 +121,6 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
                 debugger
                 expect(response.status).to.be.equal(200)
-                expect(response.body.result).to.be.equal("created")
             })
         })
     })

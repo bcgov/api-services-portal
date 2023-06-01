@@ -31,6 +31,7 @@ describe('Access manager approves developer access request for JWT - Generated K
   it('Access Manager approves developer access request', () => {
     cy.get('@access-manager').then(() => {
       cy.visit(consumers.path)
+      cy.wait(5000)
       consumers.reviewThePendingRequest()
     })
   })

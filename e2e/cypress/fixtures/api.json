@@ -175,7 +175,7 @@
       "isShared": true
     },
     "shared_IDP_body": {
-      "name": "Sample Shared IdP",
+      "name": "Sample Shared IdP new",
       "description": "A Shared IdP for Teams to use",
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
@@ -201,7 +201,7 @@
       "name": "my-auth-client-secret-1",
       "description": "Auth connection to my IdP",
       "owner": "janis@testmail.com",
-      "inheritFrom": "Sample Shared IdP"
+      "inheritFrom": "Sample Shared IdP new"
     },
     "shared_IDP_inheritFrom_expectedResponse": {
       "name": "my-auth-client-secret-1",
