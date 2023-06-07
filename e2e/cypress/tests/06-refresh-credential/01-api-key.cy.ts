@@ -34,7 +34,6 @@ describe('Regenerate Credential for API Key', () => {
 
   it('Get the consumer id based on consumer number', () => {
     cy.get('@store').then(({clientid}: any) => {
-      debugger
       cy.makeKongGatewayRequest('consumers', '', 'GET').then((response) => {
         expect(response.status).to.be.equal(200)
         consumerid = Cypress._.get((Cypress._.filter(response.body.data, ["custom_id", clientid]))[0], 'id')
@@ -57,17 +56,7 @@ describe('Regenerate Credential for API Key', () => {
       myAccessPage.regenerateCredential(product.environment, application.name)
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
-    })
-  })
-
-  it('Verify that new API key is set to the consumer', () => {
-    cy.visit(myAccessPage.path)
-    cy.get('@developer').then(({ product, application }: any) => {
-      myAccessPage.regenerateCredential(product.environment, application.name)
-      myAccessPage.clickOnGenerateSecretButton()
-      cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
+      myAccessPage.saveAPIKeyValue()
     })
   })
 

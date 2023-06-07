@@ -3,6 +3,7 @@ class NamespaceAccessPage {
   userNameInput: string = '[data-testid="nsa-gua-email-field"]'
   grantUserAccessBtn: string = '[data-testid="nsa-grant-access-btn"]'
   saveUserAccessBtn: string = '[data-testid="nsa-gua-share-btn"]'
+  organizationGroupAccessTab: string = '[data-testid="nsa-tab-og"]'
 
   grantPermission(accessRqst: any) {
     cy.wait(2000)
@@ -64,8 +65,7 @@ class NamespaceAccessPage {
     cy.get('[data-testid$="-edit-btn"]').filter(':visible').first().click()
   }
 
-  clearAllPermission()
-  {
+  clearAllPermission() {
     cy.contains("Permissions").next().find('li').find('label').each(($el, index, $list) => {
       // cy.wrap($el).find('input').uncheck({ force: true });
       cy.wrap($el).find('input')
@@ -76,7 +76,7 @@ class NamespaceAccessPage {
             .get('@checkbox')
             .uncheck({ force: true });
         })
-      })
+    })
   }
 
   path: string = '/manager/namespace-access'
@@ -85,6 +85,30 @@ class NamespaceAccessPage {
     cy.wait(3000)
     cy.get('[data-testid="nsa-users-table-row-0-menu"]', { timeout: 5000 }).should('be.visible');
     cy.get(this.grantUserAccessBtn).first().click({ force: true })
+  }
+
+  checkMembersForGroupAccess(members: any) {
+    let flag = false
+    cy.get('[role="table"]').should('be.visible').then(() => {
+      let textAccessUserName: string
+      cy.wait(2000)
+      let orgAdmins: Array<string> = members
+      orgAdmins.forEach(function (orgAdmin) {
+        cy.get('[role="table"]').find('tr').find('td:nth-child(2)').find('li').filter(':visible').each(($el) => {
+          textAccessUserName = $el.text()
+          if (textAccessUserName == orgAdmin) {
+            flag = true
+          }
+        }).then(() => {
+          assert.isTrue(flag)
+        })
+
+      })
+    })
+  }
+
+  clickOnOrganizationGroupAccess(){
+    cy.get(this.organizationGroupAccessTab).click({ force: true })
   }
 }
 export default NamespaceAccessPage

@@ -14,10 +14,10 @@ export default defineConfig({
       './cypress/tests/01-*/*.ts',
       './cypress/tests/02-*/*.ts',
       './cypress/tests/06-*/*.ts',
+      './cypress/tests/07-*/*.ts',
       './cypress/tests/03-*/*.ts',
       './cypress/tests/04-*/*.ts',
       './cypress/tests/05-*/*.ts',
-      './cypress/tests/07-*/*.ts',
       './cypress/tests/08-*/*.ts',
       './cypress/tests/09-*/*.ts',
       './cypress/tests/10-*/*.ts',
@@ -57,6 +57,7 @@ export default defineConfig({
       KONG_CONFIG_URL: 'http://kong.localtest.me:8001',
       BASE_URL: 'http://oauth2proxy.localtest.me:4180',
       KEYCLOAK_URL: 'http://keycloak.localtest.me:9080',
+      WEBAPP_URL: 'http://html-sample-app.localtest.me:4242'
     },
     retries: {
       runMode: 2,

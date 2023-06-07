@@ -10,11 +10,15 @@ import { checkElementExists } from './e2e'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
+const fs = require('fs');
+
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
 const YAML = require('yamljs');
+
+const forge = require('node-forge');
 
 let headers: any
 
@@ -372,6 +376,21 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
   })
 })
 
+Cypress.Commands.add('updateKongPluginForJSONRequest', (jsonBody: string, endPoint: string, verb = 'POST') => {
+  cy.fixture('state/store').then((creds: any) => {
+    let body = {}
+    let headers = {"content-type": "application/json", "accept": "application/json"}
+    body = jsonBody
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + endPoint,
+      method: verb,
+      body: body,
+      headers: headers,
+      failOnStatusCode: false
+    })
+  })
+})
+
 Cypress.Commands.add("generateKeystore", async () => {
   let keyStore = jose.JWK.createKeyStore()
   await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
@@ -533,6 +552,24 @@ Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey
     form: true,
   })
 })
+
+Cypress.Commands.add("generateKeyPair", () => {
+  const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
+
+  // Convert the key pair to PEM format
+  const privateKeyPem = forge.pki.privateKeyToPem(keypair.privateKey);
+  const publicKeyPem = forge.pki.publicKeyToPem(keypair.publicKey);
+
+  cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey_new.pem', privateKeyPem)
+  cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub', publicKeyPem)
+  
+})
+
+Cypress.Commands.add('forceVisit', (url:string) => {
+  cy.window().then(win => {
+      return win.open(url, '_self');
+  });
+}); 
 
 const formDataRequest = (
   options: formDataRequestOptions,

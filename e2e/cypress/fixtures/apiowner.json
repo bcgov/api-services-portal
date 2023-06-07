@@ -307,6 +307,64 @@
       "child" : "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
     }
   },
+  "orgAssignmentMultipleAdmin": {
+    "namespace": "orgassignment1",
+    "serviceName": "a-service-for-orgassignment1",
+    "Mark": {
+      "userName": "mark",
+      "email":"mark@gmail.com",
+      "accessRole": ["Access.Manage"]
+    },
+    "GroupAccess": {
+      "members": ["benny@test.com", "wendy@test.com"]
+    },
+
+    "product": {
+      "name": "Org Assignment Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-orgassignment1"
+        }
+      }
+    },
+    "orgAdminNotification":{
+      "parent" : "Your Organization Administrator has been notified to enable API Publishing to the Directory for the orgassignment namespace.",
+      "child" : "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
+    }
+  },
+  "orgAssignmentOrgUnit": {
+    "namespace": "orgassign-unit",
+    "serviceName": "a-service-for-orgassign-unit",
+    "Mark": {
+      "userName": "mark",
+      "email":"mark@gmail.com",
+      "accessRole": ["Access.Manage"]
+    },
+    "GroupAccess": {
+      "members": ["benny@test.com"]
+    },
+
+    "product": {
+      "name": "Org Assignment Unit Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-orgassign-unit"
+        }
+      }
+    },
+    "orgAdminNotification":{
+      "parent" : "Your Organization Administrator has been notified to enable API Publishing to the Directory for the orgassignment namespace.",
+      "child" : "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
+    }
+  },
   "checkPermission": {
     "namespace": "permission",
     "serviceAccount": {

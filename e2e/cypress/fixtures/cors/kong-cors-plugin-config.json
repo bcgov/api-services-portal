@@ -1,0 +1,20 @@
+{
+  "createRoute": {
+    "paths": ["/"],
+    "service": {
+      "id": "57fae010-8435-4aad-8b86-8e2b9d37d2ef"
+    },
+    "methods": ["OPTIONS", "GET"]
+  },
+  "uploadCORSPlugin": {
+    "name": "cors",
+    "config": {
+      "origins": ["http://html-sample-app.localtest.me:4242"],
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "headers": ["Authorization", "Content-Type","Access-Control-Allow-Origin","Access-Control-Allow-Methods","Host"],
+      "exposed_headers": ["Authorization", "Content-Type","Access-Control-Allow-Origin","Access-Control-Allow-Methods","Host"],
+      "credentials": false,
+      "max_age": 3600
+    }
+  }
+}

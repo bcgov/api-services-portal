@@ -39,32 +39,32 @@ describe('Link Consumers to Namespace', () => {
   })
 
   it('Get the consumer ID from the list', () => {
-      // cy.getLastConsumerID().then((title)=>{
-      //   consumerID = title
-      // })
-      cy.wrap(consumers).its('inputValue').then(inputValue => {
-        consumerID = inputValue.text()
+      cy.getLastConsumerID().then((title)=>{
+        consumerID = title
       })
+      // cy.wrap(consumers).its('inputValue').then(inputValue => {
+      //   consumerID = inputValue.text()
+      // })
   })
 
   it('Delete the consumer ID from the list', () => {
     consumers.deleteConsumer(consumerID)
   })
 
-  // it('Click on "Link Consumers to Namespace" button', () => {
-  //   consumers.clickOnLinkConsumerToNamespaceBtn()
-  // })
+  it('Click on "Link Consumers to Namespace" button', () => {
+    consumers.clickOnLinkConsumerToNamespaceBtn()
+  })
 
-  // it('Link the delete consumer to the Namespace', () => {
-  //   consumers.linkTheConsumerToNamespace(consumerID)
-    
-  // })
+  it('Link the delete consumer to the Namespace', () => {
+    consumers.linkTheConsumerToNamespace(consumerID)
+    cy.wait(2000)
+  })
 
-  // it('Verify that the consumer is linked to the namespace', () => {
-  //   cy.getLastConsumerID().then((title)=>{
-  //     expect(title).to.equal(consumerID)
-  //   })
-  // })
+  it('Verify that the consumer is linked to the namespace', () => {
+    cy.getLastConsumerID().then((title)=>{
+      expect(title).to.equal(consumerID)
+    })
+  })
 
   after(() => {
     cy.logout()
