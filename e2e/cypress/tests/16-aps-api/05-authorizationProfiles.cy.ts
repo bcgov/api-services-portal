@@ -119,7 +119,6 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     it('Put the resource to create shared IDP profile and verify the success code in the response', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
-                debugger
                 expect(response.status).to.be.equal(200)
             })
         })
@@ -143,10 +142,8 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     })
 
     it('Get list of authorization profile and verify the success code in the response', () => {
-        debugger
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
             })
@@ -155,7 +152,6 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
 
     it('Compare the values in response against the values passed in the request', () => {
         cy.get('@api').then(({ authorizationProfiles }: any) => {
-            debugger
             actualResponse = response
             expectedResponse = authorizationProfiles.shared_IDP_inheritFrom_expectedResponse
             cy.compareJSONObjects(actualResponse, expectedResponse, true)

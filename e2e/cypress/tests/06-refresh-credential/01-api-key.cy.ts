@@ -34,7 +34,6 @@ describe('Regenerate Credential for API Key', () => {
 
   it('Get the consumer id based on consumer number', () => {
     cy.get('@store').then(({clientid}: any) => {
-      debugger
       cy.makeKongGatewayRequest('consumers', '', 'GET').then((response) => {
         expect(response.status).to.be.equal(200)
         consumerid = Cypress._.get((Cypress._.filter(response.body.data, ["custom_id", clientid]))[0], 'id')

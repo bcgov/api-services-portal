@@ -378,7 +378,6 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
 
 Cypress.Commands.add('updateKongPluginForJSONRequest', (jsonBody: string, endPoint: string, verb = 'POST') => {
   cy.fixture('state/store').then((creds: any) => {
-    debugger
     let body = {}
     let headers = {"content-type": "application/json", "accept": "application/json"}
     body = jsonBody

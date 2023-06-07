@@ -90,15 +90,11 @@ class NamespaceAccessPage {
   checkMembersForGroupAccess(members: any) {
     let flag = false
     cy.get('[role="table"]').should('be.visible').then(() => {
-      debugger
       let textAccessUserName: string
       cy.wait(2000)
       let orgAdmins: Array<string> = members
-      debugger
       orgAdmins.forEach(function (orgAdmin) {
-        debugger
         cy.get('[role="table"]').find('tr').find('td:nth-child(2)').find('li').filter(':visible').each(($el) => {
-          debugger
           textAccessUserName = $el.text()
           if (textAccessUserName == orgAdmin) {
             flag = true

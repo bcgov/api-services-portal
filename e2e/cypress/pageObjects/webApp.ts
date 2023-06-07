@@ -11,9 +11,7 @@ class WebAppPage {
     cy.get(this.corsButtonForHeader).click({force:true})
     cy.wait(8000)
     // Perform interactions or assertions on the page elements
-    debugger
     return cy.get(this.corsResponseTxtForHeader).invoke('text').then((text:any) => {
-      debugger
       return  text
     })
   }
@@ -23,9 +21,7 @@ class WebAppPage {
     cy.get(this.corsButton).click({force:true})
     cy.wait(8000)
     // Perform interactions or assertions on the page elements
-    debugger
     return cy.get(this.corsResponseTxt).invoke('text').then((text:any) => {
-      debugger
       return  text
     })
   }
