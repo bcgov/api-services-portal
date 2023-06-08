@@ -120,7 +120,19 @@
       },
       "product": {
         "name": "Client Credentials Test Product",
-        "environment": "sandbox"
+        "environment": "sandbox",
+        "authProfile" : "jwksUrl"
+      }
+    },
+    "jwksPublicKey": {
+      "application": {
+        "name": "JWKS Public Key App",
+        "description": "Application for JWKS Public Key flow."
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "sandbox",
+        "authProfile" : "jwksPublicKey"
       }
     }
   },

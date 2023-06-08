@@ -81,6 +81,13 @@ declare namespace Cypress {
 
     getLastConsumerID(): Chainable<any>
 
+    generateKeyPair() : void
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
+
+    updateJsonValue(jsonBody: any, jsonPath: string, newValue: string, index?: number): Chainable<any>
+
+    updateKongPluginForJSONRequest(jsonBody: string, endPoint: string, verb?: string): Chainable<Cypress.Response<any>>
+    
+    forceVisit (url:string): Chainable<any>
   }
 }

@@ -22,7 +22,7 @@ class ApiDirectoryPage {
   createAccessRequest(product: any, app: any, accessRqst: any, elevatedAccess?: boolean) {
     cy.contains('a', product.name, { timeout: 10000 }).should('be.visible');
     cy.contains(product.name).click()
-    if(elevatedAccess){
+    if (elevatedAccess) {
       cy.contains('For elevated access, please Request Access').should('be.visible');
     }
     cy.get(this.rqstAccessBtn).click()
@@ -36,10 +36,18 @@ class ApiDirectoryPage {
     })
 
     cy.get('body', { log: false }).then(($body) => {
-      if ($body.find(this.jwksUrlField).length > 0) {
+      if (product.authProfile != 'undefined' && product.authProfile == 'jwksUrl') {
+        cy.get('[data-testid="access-rqst-app-env-jwks-url"]').click()
         cy.get(this.jwksUrlField).click().type(Cypress.env('JWKS_URL'))
       }
+      else if (product.authProfile != 'undefined' && product.authProfile == 'jwksPublicKey') {
+        cy.readFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub').then((publicKeyKey) => {
+          cy.get('[data-testid="access-rqst-app-env-public-key"]').click()
+          cy.get('[name="clientCertificate"]').invoke('val',publicKeyKey)
+        })
+      }
     })
+
     // cy.document().then((doc) => {
     //   if (doc.querySelector(this.jwksUrlField)) {
     //     cy.get(this.jwksUrlField).click().type(Cypress.env('JWKS_URL'))
@@ -58,7 +66,7 @@ class ApiDirectoryPage {
       Cypress.on('uncaught:exception', (err, runnable) => {
         cy.get(ele).click()
         return false
-    })
+      })
       assert.equal(flag, expResult)
     })
   }
@@ -81,7 +89,7 @@ class ApiDirectoryPage {
       if (productName === productconfig.name) {
         cy.get(`[data-testid^=discovery-item-${index}]`).find('li').find('span').each(($el) => {
           let envName = $el.text()
-          if (envName === productconfig.environment.name ) {
+          if (envName === productconfig.environment.name) {
             assert.isTrue(flag, "Environment displays")
           }
         })
@@ -100,16 +108,16 @@ class ApiDirectoryPage {
   checkOrgAdminNotificationBanner(notification: any) {
     cy.get('[data-testid="org-assignment-notification-parent"]').invoke('text').then((text) => {
       text = this.getPlainText(text)
-      assert.equal(text, notification.parent )
-      cy.contains('button','Learn More').click()
+      assert.equal(text, notification.parent)
+      cy.contains('button', 'Learn More').click()
       cy.get('[data-testid="org-assignment-notification-child"]').invoke('text').then((text) => {
         text = this.getPlainText(text)
-        assert.equal(text, notification.child )
+        assert.equal(text, notification.child)
       })
     })
   }
 
-  getPlainText(text :string): string{ 
+  getPlainText(text: string): string {
     return text.replace(/[\r\n]/g, '').replace(/\s+/g, " ")
   }
 }
