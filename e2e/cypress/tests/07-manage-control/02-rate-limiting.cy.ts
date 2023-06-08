@@ -236,6 +236,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
 
     it('Verify that Rate limiting is set at global service level', () => {
         cy.get('@apiowner').then(({ product }: any) => {
+            cy.wait(5000)
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(18)
