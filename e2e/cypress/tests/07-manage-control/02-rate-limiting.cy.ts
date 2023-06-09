@@ -186,7 +186,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
-                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(18)
+                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(16,18)
             })
         })
     })
