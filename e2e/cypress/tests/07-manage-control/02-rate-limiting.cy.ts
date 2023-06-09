@@ -1,6 +1,8 @@
 import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
+import { slowCypressDown } from 'cypress-slow-down'
+slowCypressDown(100)
 
 describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Policy', () => {
     const login = new LoginPage()
