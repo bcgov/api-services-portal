@@ -1,4 +1,5 @@
 class keycloakGroupPage {
+
   path: string = '/'
 
   groupTab: string = '[data-ng-controller="GroupTabCtrl"]'
@@ -16,6 +17,10 @@ class keycloakGroupPage {
     cy.get(this.attributeValue).type(attValue)
     cy.get(this.addAttributeBtn).click()
     cy.contains('button','Save').click()
+  }
+
+  navigateToUserGroups() {
+    cy.contains('Groups').click()
   }
 }
 

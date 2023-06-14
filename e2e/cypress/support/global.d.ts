@@ -71,12 +71,23 @@ declare namespace Cypress {
 
     updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
 
-    updatePropertiesOfPluginFile(filename: string, propertyName: string, propertyValue: any):Chainable<Cypress.Response<any>>
+    updateElementsInPluginFile(filename: string, elementName: string, elementValue: string):Chainable<Cypress.Response<any>>
+
+    updatePropertiesOfPluginFile(filename: string, propertyName: any, propertyValue: any):Chainable<Cypress.Response<any>>
 
     keycloakLogin(username: string, password: string): Chainable<any>
 
     selectLoginOptions(username: string): Chainable<any>
 
+    getLastConsumerID(): Chainable<any>
+
+    generateKeyPair() : void
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
+
+    updateJsonValue(jsonBody: any, jsonPath: string, newValue: string, index?: number): Chainable<any>
+
+    updateKongPluginForJSONRequest(jsonBody: string, endPoint: string, verb?: string): Chainable<Cypress.Response<any>>
+    
+    forceVisit (url:string): Chainable<any>
   }
 }

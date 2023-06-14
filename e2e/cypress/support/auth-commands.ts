@@ -10,11 +10,15 @@ import { checkElementExists } from './e2e'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
+const fs = require('fs');
+
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
 const YAML = require('yamljs');
+
+const forge = require('node-forge');
 
 let headers: any
 
@@ -59,15 +63,6 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
     cy.get(login.loginSubmitButton).click()
   }
 
-  // log.end()
-  // cy.getLoginCallback().then(() => {
-  //   cy.get('@login1').should((response :any) => {
-  //     debugger
-  //     if (response.status == 403)
-  //       cy.wait(60000);
-  //       cy.log("Trigger the block")
-  //   })
-  // })
   if (!skipFlag) {
     cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
       expect($el).to.exist
@@ -85,6 +80,14 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+})
+
+Cypress.Commands.add('getLastConsumerID',()  =>{
+  let id : any
+  cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').then(($text)=>{
+    id = $text.text()
+    return id
+  })
 })
 
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
@@ -290,8 +293,12 @@ Cypress.Commands.add('deleteAllCookies', () => {
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   let authorization
   cy.fixture('state/regen').then((creds: any) => {
-    cy.wait(2000)
-    let token = key || creds.apikey
+    cy.wait(5000)
+    let token = key
+    if (key==undefined)
+    {
+      token = creds.apikey
+    }
     const service = serviceName
     cy.log("Token->" + token)
     return cy.request({
@@ -354,7 +361,7 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
     let endpoint
     if (pluginName == '')
       endpoint = 'plugins'
-    else
+    else if(id !== undefined)
       endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
     endpoint = (typeof endPoint !== 'undefined') ? endPoint : endpoint
     body = config[name]
@@ -364,6 +371,21 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
       method: verb,
       body: body,
       form: true,
+      failOnStatusCode: false
+    })
+  })
+})
+
+Cypress.Commands.add('updateKongPluginForJSONRequest', (jsonBody: string, endPoint: string, verb = 'POST') => {
+  cy.fixture('state/store').then((creds: any) => {
+    let body = {}
+    let headers = {"content-type": "application/json", "accept": "application/json"}
+    body = jsonBody
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + endPoint,
+      method: verb,
+      body: body,
+      headers: headers,
       failOnStatusCode: false
     })
   })
@@ -472,18 +494,25 @@ Cypress.Commands.add('updatePluginFile', (filename: string, serviceName: string,
   })
 })
 
-Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: string, propertyValue: any) => {
+
+
+Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: any, propertyValue: any) => {
   cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
     let obj = YAML.parse(content)
     const keys = Object.keys(obj);
-    Object.keys(obj.services).forEach(function (key, index) {
-      if (propertyName == "methods") {
-        obj.services[0].routes[0].methods = propertyValue
-      }
-      else {
-        obj.services[0].plugins[0].config[propertyName] = propertyValue
-      }
-    });
+    if (propertyName === "config.anonymous") {
+      obj.plugins[0].config.anonymous = propertyValue
+    }
+    else {
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (propertyName == "methods") {
+          obj.services[0].routes[0].methods = propertyValue
+        }
+        else {
+          obj.services[0].plugins[0].config[propertyName] = propertyValue
+        }
+      });
+    }
     const yamlString = YAML.stringify(obj, 'utf8');
     cy.writeFile('cypress/fixtures/' + filename, yamlString)
   })
@@ -523,6 +552,24 @@ Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey
     form: true,
   })
 })
+
+Cypress.Commands.add("generateKeyPair", () => {
+  const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
+
+  // Convert the key pair to PEM format
+  const privateKeyPem = forge.pki.privateKeyToPem(keypair.privateKey);
+  const publicKeyPem = forge.pki.publicKeyToPem(keypair.publicKey);
+
+  cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey_new.pem', privateKeyPem)
+  cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub', publicKeyPem)
+  
+})
+
+Cypress.Commands.add('forceVisit', (url:string) => {
+  cy.window().then(win => {
+      return win.open(url, '_self');
+  });
+}); 
 
 const formDataRequest = (
   options: formDataRequestOptions,

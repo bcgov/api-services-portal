@@ -1,4 +1,5 @@
 import 'cypress-v10-preserve-cookie'
+import jsonpath = require('jsonpath');
 const listOfCookies = [
   'AUTH_SESSION_ID_LEGACY',
   'KC_RESTART',
@@ -104,4 +105,12 @@ Cypress.Commands.add('resetState', () => {
     cy.writeFile('cypress/fixtures/state/store.json', currState)
   })
   cy.log('Test state was reset')
+})
+
+Cypress.Commands.add('updateJsonValue', (jsonBody: any, jsonPath: string, newValue: string, index?: any) => {
+  let updatedFileContent: any
+  const jsonContent = JSON.parse(jsonBody);
+  jsonpath.apply(jsonContent, jsonPath, () => newValue);
+  updatedFileContent = JSON.stringify(jsonContent, null, 2);
+  return updatedFileContent
 })

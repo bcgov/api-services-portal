@@ -4,6 +4,11 @@
     "config.hour": "20",
     "config.policy": "local"
   },
+  "rateLimiting902": {
+    "name": "rate-limiting_902",
+    "config.hour": "20",
+    "limit_by": "service"
+  },
   "rateLimitingConsumer": {
     "name": "rate-limiting",
     "config.hour": "100",
@@ -17,6 +22,6 @@
     "username": "consumer1"
   },
   "keyAuth": {
-    "config.anonymous": "09f98d53-4797-4ba9-a9e8-6417a1cee3b0"
+    "config.anonymous": "e60a4444-eeab-4d5b-8285-6e6a648d85ec"
   }
 }

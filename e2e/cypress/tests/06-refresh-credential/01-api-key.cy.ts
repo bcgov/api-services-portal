@@ -22,7 +22,7 @@ describe('Regenerate Credential for API Key', () => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
-    cy.fixture('state/regen').as('regen')
+    cy.fixture('state/store').as('store')
     cy.visit(login.path)
   })
 
@@ -33,22 +33,19 @@ describe('Regenerate Credential for API Key', () => {
   })
 
   it('Get the consumer id based on consumer number', () => {
-    cy.get('@regen').then((creds: any) => {
-      const consumerNumber = creds.consumernumber
+    cy.get('@store').then(({clientid}: any) => {
       cy.makeKongGatewayRequest('consumers', '', 'GET').then((response) => {
         expect(response.status).to.be.equal(200)
-        consumerid = Cypress._.get((Cypress._.filter(response.body.data, ["custom_id", consumerNumber]))[0], 'id')
+        consumerid = Cypress._.get((Cypress._.filter(response.body.data, ["custom_id", clientid]))[0], 'id')
       })
     })
   })
 
   it('Get current API Key', () => {
-    cy.get('@regen').then((creds: any) => {
-      cy.get('@developer').then(({ user }: any) => {
-        cy.makeKongGatewayRequest('consumers/' + consumerid + '/key-auth', '', 'GET').then((response: any) => {
-          expect(response.status).to.be.equal(200)
-          existingAPIKey = response.body.data[0].key
-        })
+    cy.get('@developer').then(({ user }: any) => {
+      cy.makeKongGatewayRequest('consumers/' + consumerid + '/key-auth', '', 'GET').then((response: any) => {
+        expect(response.status).to.be.equal(200)
+        existingAPIKey = response.body.data[0].key
       })
     })
   })
@@ -59,26 +56,14 @@ describe('Regenerate Credential for API Key', () => {
       myAccessPage.regenerateCredential(product.environment, application.name)
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
-    })
-  })
-
-  it('Verify that new API key is set to the consumer', () => {
-    cy.visit(myAccessPage.path)
-    cy.get('@developer').then(({ product, application }: any) => {
-      myAccessPage.regenerateCredential(product.environment, application.name)
-      myAccessPage.clickOnGenerateSecretButton()
-      cy.contains("API Key").should('be.visible')
-      myAccessPage.saveReGenAPIKeyValue()
+      myAccessPage.saveAPIKeyValue()
     })
   })
 
   it('Verify that only one API key(new key) is set to the consumer in Kong gateway', () => {
-    cy.get('@regen').then((creds: any) => {
       cy.makeKongGatewayRequest('consumers/' + consumerid + '/key-auth', '', 'GET').then((response: any) => {
         expect(response.status).to.be.equal(200)
         expect(response.body.data.length).to.be.equal(1)
-      })
     })
   })
 
