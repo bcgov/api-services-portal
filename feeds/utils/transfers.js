@@ -71,6 +71,33 @@ function transfers(workingPath, baseUrl, exceptions) {
         });
     },
 
+    copySearch: async function (_url, filename, index = 0) {
+      log.debug('[copySearch] %s%s', baseUrl, _url);
+      const out = workingPath + '/' + filename + '-' + index + '.json';
+      return fetch(baseUrl + _url)
+        .then(checkStatus)
+        .then((data) => data.json())
+        .then((json) => {
+          let packageList = [];
+          for (const item of json.result.results) {
+            packageList.push(item.name);
+          }
+          fs.writeFileSync(
+            out,
+            JSON.stringify({ result: packageList }, null, 4),
+            null
+          );
+        })
+        .catch((err) => {
+          log.error('[copySearch] %s, %s', filename, err);
+          exceptions.push({
+            relativeUrl: url,
+            filename: filename,
+            error: '' + err,
+          });
+        });
+    },
+
     read: function (filename) {
       const infile = workingPath + '/' + filename + '.json';
       return JSON.parse(fs.readFileSync(infile));
