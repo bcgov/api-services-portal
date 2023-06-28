@@ -73,20 +73,19 @@ function transfers(workingPath, baseUrl, exceptions) {
 
     copySearch: async function (_url, filename, index = 0) {
       log.debug('[copySearch] %s%s', baseUrl, _url);
-      const out = workingPath + '/' + filename + '-' + index + '.json';
       return fetch(baseUrl + _url)
         .then(checkStatus)
         .then((data) => data.json())
         .then((json) => {
-          let packageList = [];
           for (const item of json.result.results) {
-            packageList.push(item.name);
+            const out =
+              workingPath + '/' + filename + item.name + '-' + index + '.json';
+            fs.writeFileSync(
+              out,
+              JSON.stringify({ result: item }, null, 4),
+              null
+            );
           }
-          fs.writeFileSync(
-            out,
-            JSON.stringify({ result: packageList }, null, 4),
-            null
-          );
         })
         .catch((err) => {
           log.error('[copySearch] %s, %s', filename, err);
