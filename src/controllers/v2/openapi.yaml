@@ -188,6 +188,16 @@ components:
                     - tag2
                 organization: ministry-of-citizens-services
                 organizationUnit: databc
+        PublishResult:
+            properties:
+                message:
+                    type: string
+                results:
+                    type: string
+                error:
+                    type: string
+            type: object
+            additionalProperties: false
         GatewayServiceRefID:
             type: string
         GatewayRouteRefID:
@@ -277,9 +287,7 @@ components:
                 clientRegistration: managed
                 clientId: a-client-id
                 clientSecret: a-client-secret
-        CredentialIssuerRefID:
-            type: string
-        UserRefID:
+        undefinedRefID:
             type: string
         CredentialIssuer:
             properties:
@@ -338,9 +346,9 @@ components:
                         type: string
                     type: array
                 inheritFrom:
-                    $ref: '#/components/schemas/CredentialIssuerRefID'
+                    $ref: '#/components/schemas/undefinedRefID'
                 owner:
-                    $ref: '#/components/schemas/UserRefID'
+                    $ref: '#/components/schemas/undefinedRefID'
             type: object
             additionalProperties: false
             example:
@@ -350,7 +358,7 @@ components:
                 clientAuthenticator: client-secret
                 mode: auto
                 environmentDetails: []
-                owner: acope@idir
+                owner: janis@gov.bc.ca
         Maybe_Scalars-at-String_:
             type: string
             nullable: true
@@ -539,6 +547,8 @@ components:
             type: string
         LegalRefID:
             type: string
+        CredentialIssuerRefID:
+            type: string
         Environment:
             properties:
                 appId:
@@ -621,6 +631,10 @@ components:
             description: 'Authz Portal Login'
             scheme: bearer
             bearerFormat: JWT
+        openid:
+            type: openIdConnect
+            description: 'OIDC Login'
+            openIdConnectUrl: 'https://well_known_endpoint'
 info:
     title: 'APS Directory API'
     version: 1.1.0
@@ -961,6 +975,37 @@ paths:
                     schema:
                         type: string
     '/namespaces/{ns}/gateway':
+        put:
+            operationId: publish-gateway-config
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PublishResult'
+            tags:
+                - 'Gateway Services'
+            security:
+                -
+                    jwt:
+                        - Gateway.Config
+            parameters: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                dryRun:
+                                    type: string
+                                configFile:
+                                    type: string
+                                    format: binary
+                            required:
+                                - dryRun
+                                - configFile
         get:
             operationId: get-gateway-routes
             responses:

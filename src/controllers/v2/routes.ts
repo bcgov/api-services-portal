@@ -34,6 +34,8 @@ const promiseAny = require('promise.any');
 import { iocContainer } from './../ioc';
 import { IocContainer, IocContainerFactory } from '@tsoa/runtime';
 import * as express from 'express';
+const multer = require('multer');
+const upload = multer();
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
@@ -128,6 +130,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PublishResult": {
+        "dataType": "refObject",
+        "properties": {
+            "message": {"dataType":"string"},
+            "results": {"dataType":"string"},
+            "error": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "GatewayServiceRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -185,12 +197,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CredentialIssuerRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "UserRefID": {
+    "undefinedRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
@@ -215,8 +222,8 @@ const models: TsoaRoute.Models = {
             "resourceScopes": {"dataType":"array","array":{"dataType":"string"}},
             "clientRoles": {"dataType":"array","array":{"dataType":"string"}},
             "clientMappers": {"dataType":"array","array":{"dataType":"string"}},
-            "inheritFrom": {"ref":"CredentialIssuerRefID"},
-            "owner": {"ref":"UserRefID"},
+            "inheritFrom": {"ref":"undefinedRefID"},
+            "owner": {"ref":"undefinedRefID"},
         },
         "additionalProperties": false,
     },
@@ -351,6 +358,11 @@ const models: TsoaRoute.Models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LegalRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CredentialIssuerRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
@@ -774,6 +786,37 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.get.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v2/namespaces/:ns/gateway',
+            authenticateMiddleware([{"jwt":["Gateway.Config"]}]),
+            upload.single('configFile'),
+
+            async function GatewayController_put(request: any, response: any, next: any) {
+            const args = {
+                    dryRun: {"in":"formData","name":"dryRun","required":true,"dataType":"string"},
+                    configFile: {"in":"formData","name":"configFile","required":true,"dataType":"file"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GatewayController>(GatewayController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.put.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
