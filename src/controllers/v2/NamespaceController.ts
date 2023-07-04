@@ -147,10 +147,9 @@ export class NamespaceController extends Controller {
    */
   @Post()
   @OperationId('create-namespace')
-  @Security('jwt', [])
   public async create(
-    @Query() name: String,
-    @Request() request: any
+    @Request() request: any,
+    @Query() name?: String
   ): Promise<String> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
