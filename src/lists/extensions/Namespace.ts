@@ -7,7 +7,6 @@ import {
   ResourceSetInput,
 } from '../../services/uma2';
 import {
-  getOrganizationUnit,
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
   recordActivity,
@@ -18,7 +17,6 @@ import {
   getNamespaceResourceSets,
   isUserBasedResourceOwners,
   doClientLoginForCredentialIssuer,
-  EnvironmentContext,
   getOrgPoliciesForResource,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
@@ -32,18 +30,12 @@ import {
   DeleteNamespaceValidate,
 } from '../../services/workflow/delete-namespace';
 import { GWAService } from '../../services/gwaapi';
-import {
-  camelCaseAttributes,
-  regExprValidation,
-  transformSingleValueAttributes,
-} from '../../services/utils';
+import { regExprValidation } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
 import {
   GroupAccessService,
   NamespaceService,
 } from '../../services/org-groups';
-import { IssuerEnvironmentConfig } from '../../services/workflow/types';
-import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import { getGwaProductEnvironment } from '../../services/workflow';
 import { NotificationService } from '../../services/notification/notification.service';
@@ -55,7 +47,7 @@ import {
   getResource,
   transformOrgAndOrgUnit,
 } from '../../services/keycloak/namespace-details';
-import { newNamespaceID } from '@/services/identifiers';
+import { newNamespaceID } from '../../services/identifiers';
 
 const logger = Logger('ext.Namespace');
 
