@@ -41,12 +41,14 @@ export class KeystoneService {
   public createContext(request: any, skipAccessControl: boolean = false): any {
     const _scopes = scopes(request.user.scope);
 
+    const identityProvider = request.user.identity_provider;
+
     const identity = {
       id: null,
       name: resolveName(request.user),
       username: resolveUsername(request.user),
       namespace: request.params.ns,
-      roles: JSON.stringify(scopesToRoles(null, _scopes)),
+      roles: JSON.stringify(scopesToRoles(identityProvider, _scopes)),
       scopes: _scopes,
       userId: null,
     } as any;

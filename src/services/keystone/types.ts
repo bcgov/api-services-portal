@@ -5326,7 +5326,7 @@ export type MutationUpdateCurrentNamespaceArgs = {
 
 
 export type MutationCreateNamespaceArgs = {
-  namespace: Scalars['String'];
+  namespace?: Maybe<Scalars['String']>;
 };
 
 

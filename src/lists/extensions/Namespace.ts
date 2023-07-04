@@ -426,9 +426,11 @@ module.exports = {
             ) => {
               const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
 
+              const newNS = args.namespace ? args.namespace : newNamespaceID();
+
               regExprValidation(
                 namespaceValidationRule,
-                args.namespace ? args.namespace : newNamespaceID(),
+                newNS,
                 'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
               );
 
@@ -452,7 +454,7 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              await nsService.checkNamespaceAvailable(args.namespace);
+              await nsService.checkNamespaceAvailable(newNS);
 
               // This function gets all resources but also sets the accessToken in envCtx
               // which we need to create the resource set
@@ -472,7 +474,7 @@ module.exports = {
                 'CredentialIssuer.Admin',
               ];
               const res = <ResourceSetInput>{
-                name: args.namespace,
+                name: newNS,
                 type: 'namespace',
                 resource_scopes: scopes,
                 ownerManagedAccess: true,
@@ -501,27 +503,24 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientSecret
               );
 
-              await kcGroupService.createIfMissing('ns', args.namespace);
+              await kcGroupService.createIfMissing('ns', newNS);
 
               await recordActivity(
                 context.sudo(),
                 'create',
                 'Namespace',
-                args.namespace,
-                `Created ${args.namespace} namespace`,
+                newNS,
+                `Created ${newNS} namespace`,
                 'success',
                 JSON.stringify({
                   message: '{actor} created {ns} namespace',
                   params: {
                     actor: context.authedItem.name,
-                    ns: args.namespace,
+                    ns: newNS,
                   },
                 }),
-                args.namespace,
-                [
-                  `Namespace:${args.namespace}`,
-                  `actor:${context.authedItem.name}`,
-                ]
+                newNS,
+                [`Namespace:${newNS}`, `actor:${context.authedItem.name}`]
               );
 
               return rset;

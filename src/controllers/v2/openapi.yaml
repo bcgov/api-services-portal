@@ -1185,6 +1185,29 @@ paths:
                 -
                     jwt: []
             parameters: []
+        post:
+            operationId: create-namespace
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Namespace'
+            description: 'Create a namespace'
+            summary: 'Create Namespace'
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt: []
+            parameters:
+                -
+                    in: query
+                    name: namespace
+                    required: false
+                    schema:
+                        type: string
     '/namespaces/{ns}':
         get:
             operationId: namespace-profile

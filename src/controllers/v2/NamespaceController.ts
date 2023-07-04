@@ -147,14 +147,15 @@ export class NamespaceController extends Controller {
    */
   @Post()
   @OperationId('create-namespace')
+  @Security('jwt', [])
   public async create(
     @Request() request: any,
-    @Query() name?: String
-  ): Promise<String> {
+    @Query() namespace?: String
+  ): Promise<Namespace> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
-      variables: { name },
+      variables: { namespace },
     });
     logger.debug('Result %j', result);
     if (result.errors) {
@@ -164,7 +165,7 @@ export class NamespaceController extends Controller {
       });
       throw new ValidateError(errors, 'Unable to create namespace');
     }
-    return result.data.createNamespace.name;
+    return { name: result.data.createNamespace.name };
   }
 
   /**
@@ -267,8 +268,8 @@ const deleteNS = gql`
 `;
 
 const createNS = gql`
-  mutation CreateNamespace($name: String) {
-    createNamespace(name: $name) {
+  mutation CreateNamespace($namespace: String) {
+    createNamespace(namespace: $namespace) {
       name
     }
   }
