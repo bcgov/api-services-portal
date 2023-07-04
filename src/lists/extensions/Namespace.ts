@@ -34,6 +34,7 @@ import {
 import { GWAService } from '../../services/gwaapi';
 import {
   camelCaseAttributes,
+  regExprValidation,
   transformSingleValueAttributes,
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
@@ -54,6 +55,7 @@ import {
   getResource,
   transformOrgAndOrgUnit,
 } from '../../services/keycloak/namespace-details';
+import { newNamespaceID } from '@/services/identifiers';
 
 const logger = Logger('ext.Namespace');
 
@@ -422,7 +424,7 @@ module.exports = {
             },
           },
           {
-            schema: 'createNamespace(namespace: String!): Namespace',
+            schema: 'createNamespace(namespace: String): Namespace',
             resolver: async (
               item: any,
               args: any,
@@ -431,10 +433,10 @@ module.exports = {
               { query, access }: any
             ) => {
               const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
-              const re = new RegExp(namespaceValidationRule);
-              assert.strictEqual(
-                re.test(args.namespace),
-                true,
+
+              regExprValidation(
+                namespaceValidationRule,
+                args.namespace ? args.namespace : newNamespaceID(),
                 'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
               );
 

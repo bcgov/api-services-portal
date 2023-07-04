@@ -9,6 +9,7 @@ import {
   Tags,
   Delete,
   Query,
+  Post,
 } from 'tsoa';
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
@@ -137,6 +138,37 @@ export class NamespaceController extends Controller {
   }
 
   /**
+   * Create a namespace
+   *
+   * @summary Create Namespace
+   * @param ns
+   * @param request
+   * @returns
+   */
+  @Post()
+  @OperationId('create-namespace')
+  @Security('jwt', [])
+  public async create(
+    @Query() name: String,
+    @Request() request: any
+  ): Promise<String> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: createNS,
+      variables: { name },
+    });
+    logger.debug('Result %j', result);
+    if (result.errors) {
+      const errors: FieldErrors = {};
+      result.errors.forEach((err: any, ind: number) => {
+        errors[`d${ind}`] = { message: err.message };
+      });
+      throw new ValidateError(errors, 'Unable to create namespace');
+    }
+    return result.data.createNamespace.name;
+  }
+
+  /**
    * Delete the namespace
    * > `Required Scope:` Namespace.Manage
    *
@@ -232,5 +264,13 @@ const item = gql`
 const deleteNS = gql`
   mutation ForceDeleteNamespace($ns: String!, $force: Boolean!) {
     forceDeleteNamespace(namespace: $ns, force: $force)
+  }
+`;
+
+const createNS = gql`
+  mutation CreateNamespace($name: String) {
+    createNamespace(name: $name) {
+      name
+    }
   }
 `;
