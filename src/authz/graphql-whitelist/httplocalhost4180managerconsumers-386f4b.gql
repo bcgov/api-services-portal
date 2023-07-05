@@ -6,6 +6,7 @@
       environments {
         id
         name
+        active
         flow
         credentialIssuer {
           name

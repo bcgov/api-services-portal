@@ -181,7 +181,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
                   {product &&
                     data?.allProductsByNamespace
                       .find((p) => p.id === product)
-                      ?.environments.map((e) => (
+                      ?.environments.filter((e) => e.active).map((e) => (
                         <option key={e.id} value={e.id}>
                           {e.name}
                         </option>
@@ -272,6 +272,7 @@ const query = gql`
       environments {
         id
         name
+        active
         flow
         credentialIssuer {
           name
