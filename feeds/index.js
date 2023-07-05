@@ -172,7 +172,7 @@ if (process.env.SCHEDULE == 'true') {
   runTimedJob('prometheus', 24 * 60 + 5, { numDays: 5 });
   runTimedJob('kong', 1 * 60, {});
   runTimedJob('ckan', 24 * 60, {});
-  runTimedJob('ckan_org', 24 * 60, {});
+  runTimedJob('ckan_org', (24 * 60) + 30, {});
 }
 
 const server = app.listen(port, () => {
