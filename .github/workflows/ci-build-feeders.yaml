@@ -138,8 +138,6 @@ jobs:
               value: 'http://prometheus-server'
             DESTINATION_URL:
               value: 'http://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
-            SCHEDULE:
-              value: 'true'
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
