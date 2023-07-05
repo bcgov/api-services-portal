@@ -83,23 +83,15 @@ async function sync({ url, workingPath, destinationUrl }) {
   const xfer = transfers(workingPath, url, exceptions);
 
   await xfer.copy('/api/action/group_list?limit=100&offset=0', 'group-keys');
-  await xfer.copy(
-    '/api/action/package_list?limit=100&offset=0',
-    'package-keys'
+  await xfer.copySearch(
+    '/api/action/package_search?fq=groups:(bc-government-api-registry)',
+    'packages/'
   );
 
   await xfer.concurrentWork(
     getCkanDataProducer(xfer, 'group-keys', '/api/action/group_show', 'groups/')
   );
-  await xfer.concurrentWork(
-    getCkanDataProducer(
-      xfer,
-      'package-keys',
-      '/api/action/package_show',
-      'packages/'
-    ),
-    10
-  );
+
   console.log('Exceptions? ' + (exceptions.length == 0 ? 'NO' : 'YES!'));
   console.log(JSON.stringify(exceptions, null, 4));
 
