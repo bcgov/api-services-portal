@@ -5326,7 +5326,8 @@ export type MutationUpdateCurrentNamespaceArgs = {
 
 
 export type MutationCreateNamespaceArgs = {
-  namespace?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
 };
 
 
@@ -5415,6 +5416,7 @@ export type Namespace = {
   __typename?: 'Namespace';
   id?: Maybe<Scalars['String']>;
   name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   scopes?: Maybe<Array<Maybe<UmaScope>>>;
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;

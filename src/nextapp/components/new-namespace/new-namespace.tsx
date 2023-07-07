@@ -133,7 +133,7 @@ export default NewNamespace;
 
 const mutation = gql`
   mutation CreateNamespace($name: String!) {
-    createNamespace(namespace: $name) {
+    createNamespace(name: $name) {
       id
       name
     }

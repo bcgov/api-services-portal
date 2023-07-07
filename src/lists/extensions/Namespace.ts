@@ -63,7 +63,7 @@ const typeNamespace = `
 type Namespace {
     id: String
     name: String!,
-    description: String!,
+    description: String,
     scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
@@ -417,7 +417,8 @@ module.exports = {
             },
           },
           {
-            schema: 'createNamespace(name: String): Namespace',
+            schema:
+              'createNamespace(name: String, description: String): Namespace',
             resolver: async (
               item: any,
               args: any,

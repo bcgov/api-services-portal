@@ -270,7 +270,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Namespace": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"ref":"Maybe_Array_Maybe_UmaScope___"},"name":{"dataType":"string","required":true},"id":{"ref":"Maybe_Scalars-at-String_"},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"ref":"Maybe_Array_Maybe_UmaScope___"},"description":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"id":{"ref":"Maybe_Scalars-at-String_"},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ActivityDetail": {
@@ -1068,7 +1068,8 @@ export function RegisterRoutes(app: express.Router) {
             async function NamespaceController_create(request: any, response: any, next: any) {
             const args = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    namespace: {"in":"query","name":"namespace","dataType":"string"},
+                    name: {"in":"query","name":"name","dataType":"string"},
+                    description: {"in":"query","name":"description","dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
