@@ -63,6 +63,7 @@ const typeNamespace = `
 type Namespace {
     id: String
     name: String!,
+    description: String!,
     scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
@@ -416,7 +417,7 @@ module.exports = {
             },
           },
           {
-            schema: 'createNamespace(namespace: String): Namespace',
+            schema: 'createNamespace(name: String): Namespace',
             resolver: async (
               item: any,
               args: any,
@@ -424,14 +425,15 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+              const namespaceValidationRule =
+                '(([A-Za-z0-9][-A-Za-z0-9]*)?[A-Za-z0-9])?';
 
-              const newNS = args.namespace ? args.namespace : newNamespaceID();
+              const newNS = args.name ? args.name : newNamespaceID();
 
               regExprValidation(
                 namespaceValidationRule,
                 newNS,
-                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.'
               );
 
               const noauthContext = context.createContext({
@@ -504,6 +506,10 @@ module.exports = {
               );
 
               await kcGroupService.createIfMissing('ns', newNS);
+
+              if (args.description) {
+                await nsService.updateDescription(newNS, args.description);
+              }
 
               await recordActivity(
                 context.sudo(),

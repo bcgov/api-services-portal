@@ -68,6 +68,7 @@ export async function backfillGroupAttributes(
   const nsPermissions = await kcGroupService.getGroup('ns', ns);
 
   transformSingleValueAttributes(nsPermissions.attributes, [
+    'description',
     'perm-data-plane',
     'perm-protected-ns',
     'org',
