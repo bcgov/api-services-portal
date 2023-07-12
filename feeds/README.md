@@ -39,11 +39,14 @@
 ## Configuration
 
 ```
+export LOG_FEEDS=ON
 export DESTINATION_URL=https://aps-portal-feature-sprint13-poc.apps.silver.devops.gov.bc.ca
 export WORKING_PATH=`pwd`/_tmp
 export KONG_ADMIN_URL=https://adminapi-264e6f-dev.apps.silver.devops.gov.bc.ca
 export CKAN_URL=https://catalog.data.gov.bc.ca
 export PROM_URL=https://prom-264e6f-dev.apps.silver.devops.gov.bc.ca
+
+npm run start
 ```
 
 #### GatewayService
