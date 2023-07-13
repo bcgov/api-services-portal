@@ -183,7 +183,7 @@ export default ApiPage;
 
 const detailItems: DetailItem[] = [
   {
-    title: 'License',
+    title: 'Licence',
     key: 'license_title',
   },
   {
