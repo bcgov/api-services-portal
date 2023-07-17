@@ -242,6 +242,8 @@ const apps = [
   new ApiHealthApp(state),
   new ApiOpenapiApp(),
   new MaintenanceApp(),
+  new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
+  new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
   new ApiGraphqlWhitelistApp({
     apiPath,
     apollo: {
@@ -270,8 +272,6 @@ const apps = [
     pages: pages,
     enableDefaultRoute: false,
   }),
-  new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
-  new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
   new NextApp({ dir: 'nextapp' }),
 ];
 
