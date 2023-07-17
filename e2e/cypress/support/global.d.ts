@@ -61,7 +61,7 @@ declare namespace Cypress {
 
     compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
 
-    getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
+    getUserSessionTokenValue(namespace: string, isNamespaceSelected?:boolean): Chainable<Cypress.Response<any>>
 
     getUserSessionResponse(): Chainable<Cypress.Response<any>>
 
@@ -89,5 +89,7 @@ declare namespace Cypress {
     updateKongPluginForJSONRequest(jsonBody: string, endPoint: string, verb?: string): Chainable<Cypress.Response<any>>
     
     forceVisit (url:string): Chainable<any>
+
+    executeCliCommand (command: string) : Chainable<any>
   }
 }

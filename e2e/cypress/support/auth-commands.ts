@@ -112,7 +112,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   })
 })
 
-Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
+Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespaceSelected?:true) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -128,7 +128,9 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
       // home.useNamespace(apiTest.namespace)
-      home.useNamespace(namespace)
+      if(isNamespaceSelected){
+        home.useNamespace(namespace)
+      }
       cy.get('@login').then(function (xhr: any) {
         userSession = xhr.response.headers['x-auth-request-access-token']
         return userSession

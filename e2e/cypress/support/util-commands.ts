@@ -114,3 +114,9 @@ Cypress.Commands.add('updateJsonValue', (jsonBody: any, jsonPath: string, newVal
   updatedFileContent = JSON.stringify(jsonContent, null, 2);
   return updatedFileContent
 })
+
+Cypress.Commands.add('executeCliCommand', (command: string) => {
+  cy.exec(command, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    return response
+  });
+})
