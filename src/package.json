@@ -96,7 +96,7 @@
     "graphql": "^15.4.0",
     "graphql-request": "^3.4.0",
     "graphql-tools": "^7.0.2",
-    "http-proxy-middleware": "^1.1.2",
+    "http-proxy-middleware": "^2.0.6",
     "isomorphic-unfetch": "^3.1.0",
     "json-stable-stringify": "^1.0.2",
     "js-yaml": "^4.1.0",
