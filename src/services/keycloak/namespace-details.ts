@@ -162,6 +162,7 @@ export async function getResource(
     .map((ns: ResourceSet) => ({
       id: ns.id,
       name: ns.name,
+      displayName: ns.displayName,
       scopes: ns.resource_scopes,
     }))
     .pop();

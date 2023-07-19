@@ -422,8 +422,8 @@ components:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 scopes:
                     $ref: '#/components/schemas/Maybe_Array_Maybe_UmaScope___'
-                description:
-                    type: string
+                displayName:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 name:
                     type: string
                 id:
@@ -434,7 +434,6 @@ components:
                         - Namespace
                     nullable: false
             required:
-                - description
                 - name
             type: object
         ActivityDetail:
@@ -1213,7 +1212,7 @@ paths:
                         type: string
                 -
                     in: query
-                    name: description
+                    name: displayName
                     required: false
                     schema:
                         type: string

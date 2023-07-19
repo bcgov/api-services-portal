@@ -13,7 +13,7 @@ import { GWAService } from '../../gwaapi';
 export interface ReportOfNamespaces {
   resource_id: string;
   name: string;
-  description?: string;
+  displayName?: string;
   permProtectedNs?: string;
   permDomains?: string[];
   permDataPlane?: string;
@@ -50,7 +50,6 @@ export async function getNamespaces(
       const nsPermissions = await kcGroupService.getGroup('ns', ns.name);
 
       transformSingleValueAttributes(nsPermissions.attributes, [
-        'description',
         'perm-data-plane',
         'perm-protected-ns',
         'org',

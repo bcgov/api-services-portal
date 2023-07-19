@@ -198,7 +198,7 @@ const metadata = {
   Namespace: {
     query: 'allNamespaces',
     refKey: 'extRefId',
-    sync: ['name', 'description'],
+    sync: ['name', 'displayName'],
     transformations: {
       // members: {
       //   name: 'connectExclusiveList',

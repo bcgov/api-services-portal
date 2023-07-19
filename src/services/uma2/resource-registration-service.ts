@@ -14,6 +14,7 @@ export interface ResourceSetQuery {
   scope?: string;
   first?: number;
   max?: number;
+  deep?: boolean;
 }
 
 export interface ResourceScope {
@@ -27,6 +28,7 @@ export interface ResourceOwner {
 export interface ResourceSet {
   id: string;
   name: string;
+  displayName?: string;
   type: string;
   uris?: string[];
   icon_uri?: string;
@@ -37,6 +39,7 @@ export interface ResourceSet {
 
 export interface ResourceSetInput {
   name: string;
+  displayName?: string;
   type: string;
   uris?: string[];
   icon_uri?: string;

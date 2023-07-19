@@ -151,12 +151,12 @@ export class NamespaceController extends Controller {
   public async create(
     @Request() request: any,
     @Query() name?: String,
-    @Query() description?: String
+    @Query() displayName?: String
   ): Promise<Namespace> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
-      variables: { name, description },
+      variables: { name, displayName },
     });
     logger.debug('Result %j', result);
     if (result.errors) {
@@ -168,7 +168,7 @@ export class NamespaceController extends Controller {
     }
     return {
       name: result.data.createNamespace.name,
-      description: result.data.createNamespace.description,
+      displayName: result.data.createNamespace.displayName,
     };
   }
 
@@ -250,7 +250,7 @@ const item = gql`
   query Namespace($ns: String!) {
     namespace(ns: $ns) {
       name
-      description
+      displayName
       scopes {
         name
       }
@@ -273,10 +273,10 @@ const deleteNS = gql`
 `;
 
 const createNS = gql`
-  mutation CreateNamespace($name: String, $description: String) {
-    createNamespace(name: $name, description: $description) {
+  mutation CreateNamespace($name: String, $displayName: String) {
+    createNamespace(name: $name, displayName: $displayName) {
       name
-      description
+      displayName
     }
   }
 `;
