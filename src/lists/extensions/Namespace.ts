@@ -80,7 +80,8 @@ type Namespace {
 
 const typeNamespaceInput = `
 input NamespaceInput {
-    name: String!,
+    name: String,
+    displayName: String
 }
 `;
 

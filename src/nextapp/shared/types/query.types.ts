@@ -5431,7 +5431,8 @@ export type Namespace = {
 };
 
 export type NamespaceInput = {
-  name: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
+  displayName?: Maybe<Scalars['String']>;
 };
 
 /**  A keystone list  */

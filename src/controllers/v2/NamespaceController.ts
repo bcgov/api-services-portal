@@ -10,13 +10,14 @@ import {
   Delete,
   Query,
   Post,
+  Body,
 } from 'tsoa';
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
-import { Namespace } from '../../services/keystone/types';
+import { Namespace, NamespaceInput } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
 import {
@@ -34,6 +35,7 @@ import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
 import { ActivityDetail } from './types-extra';
+
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -150,13 +152,12 @@ export class NamespaceController extends Controller {
   @Security('jwt', [])
   public async create(
     @Request() request: any,
-    @Query() name?: String,
-    @Query() displayName?: String
+    @Body() vars: NamespaceInput
   ): Promise<Namespace> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
-      variables: { name, displayName },
+      variables: vars,
     });
     logger.debug('Result %j', result);
     if (result.errors) {

@@ -436,6 +436,13 @@ components:
             required:
                 - name
             type: object
+        NamespaceInput:
+            properties:
+                displayName:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                name:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+            type: object
         ActivityDetail:
             properties:
                 id:
@@ -1203,19 +1210,13 @@ paths:
             security:
                 -
                     jwt: []
-            parameters:
-                -
-                    in: query
-                    name: name
-                    required: false
-                    schema:
-                        type: string
-                -
-                    in: query
-                    name: displayName
-                    required: false
-                    schema:
-                        type: string
+            parameters: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/NamespaceInput'
     '/namespaces/{ns}':
         get:
             operationId: namespace-profile
