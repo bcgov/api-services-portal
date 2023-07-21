@@ -1,16 +1,6 @@
 const { EnforcementPoint } = require('../../authz/enforcement');
 import { lookupProviderUserByEmail } from '../../services/keystone/user';
-import { kebabCase } from 'lodash';
-import {
-  generateEnvDetails,
-  lookupSharedIssuers,
-} from '../../services/keystone';
-import {
-  CredentialIssuer,
-  CredentialIssuerWhereInput,
-  User,
-  UserWhereInput,
-} from '../../services/keystone/types';
+import { User, UserWhereInput } from '../../services/keystone/types';
 
 module.exports = {
   extensions: [
