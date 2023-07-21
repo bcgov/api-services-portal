@@ -28,7 +28,7 @@ const {
   addClientsToSharedIdP,
 } = require('../services/workflow');
 const { Logger } = require('../logger');
-const { kebabCase } = require('lodash');
+const kebabCase = require('just-kebab-case');
 const logger = Logger('lists.credentialissuer');
 
 module.exports = {
