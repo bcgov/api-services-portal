@@ -65,10 +65,12 @@ describe('Authernticate with old user to initiate migration', () => {
   })
 
   it('authenticates with old user', () => {
-    cy.get('@usermigration').then(({ oldUser, namespace }: any) => {
-      cy.login(oldUser.credentials.username, oldUser.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(namespace)
+    cy.get('@usermigration').then(({ oldUser }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(oldUser.credentials.username, oldUser.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(namespace)
+      })
     })
   })
 
@@ -99,10 +101,12 @@ describe('Verify that permission of old user is migrated to new user', () => {
   })
 
   it('authenticates with new user', () => {
-    cy.get('@usermigration').then(({ newUser, namespace }: any) => {
-      cy.login(newUser.credentials.username, newUser.credentials.password)
-      cy.log('Logged in!')
-      // home.useNamespace(namespace)
+    cy.get('@usermigration').then(({ newUser }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(newUser.credentials.username, newUser.credentials.password)
+        cy.log('Logged in!')
+        // home.useNamespace(namespace)
+      })
     })
   })
 
@@ -150,8 +154,8 @@ describe('Verify that old user is no longer able to sign in', () => {
   })
 
   it('authenticates with old user', () => {
-    cy.get('@usermigration').then(({ oldUser}: any) => {
-      cy.login(oldUser.credentials.username, oldUser.credentials.password,true)
+    cy.get('@usermigration').then(({ oldUser }: any) => {
+      cy.login(oldUser.credentials.username, oldUser.credentials.password, true)
     })
   })
 

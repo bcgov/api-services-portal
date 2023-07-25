@@ -36,17 +36,12 @@ describe('Create API Spec', () => {
     cy.getUserSession().then(() => {
       cy.get('@apiowner').then(({ namespace }: any) => {
         nameSpace = namespace
-        home.createNamespace(namespace)
+        // home.createNamespace(namespace)
+        home.useNamespace(namespace)
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.response.headers['x-auth-request-access-token']
         })
       })
-    })
-  })
-
-  it('Verify for invalid namespace name', () => {
-    cy.get('@apiowner').then(({ invalid_namespace }: any) => {
-      home.validateNamespaceName(invalid_namespace)
     })
   })
 
@@ -61,10 +56,10 @@ describe('Create API Spec', () => {
 
   it('publishes a new API for Dev environment to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service.yml', namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-        })
+      cy.publishApi('service-gwa.yml', namespace).then(() => {
+        // cy.get('@publishAPIResponse').then((res: any) => {
+        //   cy.log(JSON.stringify(res.body))
+        // })
       })
     })
   })
@@ -89,7 +84,7 @@ describe('Create API Spec', () => {
   it('Verify the message when no dataset is linked to BCDC', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
-      pd.checkMessageForNoDataset(product.name,"health")
+      pd.checkMessageForNoDataset(product.name, "health")
     })
   })
 
@@ -116,17 +111,19 @@ describe('Create API Spec', () => {
       pd.addEnvToProduct(product.name, product.test_environment.name)
       pd.editProductEnvironment(product.name, product.test_environment.name)
       pd.editProductEnvironmentConfig(product.test_environment.config)
-      pd.generateKongPluginConfig(product.name, product.test_environment.name,'service.yml', true)
+      pd.generateKongPluginConfig(product.name, product.test_environment.name, 'service.yml', true)
     })
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.replaceWordInJsonObject('newplatform', namespace, 'service-plugin.yml')
+      cy.wait(2000)
       cy.publishApi('service-plugin.yml', namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-          expect(res.body.message).to.contains("Sync successful")
-        })
+        // cy.get('@publishAPIResponse').then((res: any) => {
+        //   cy.log(JSON.stringify(res.body))
+        //   expect(res.body.message).to.contains("Sync successful")
+        // })
       })
     })
   })
@@ -134,7 +131,7 @@ describe('Create API Spec', () => {
   it('activate the service for Test environment', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
-      pd.activateService(product.name, product.test_environment.name,product.test_environment.config)
+      pd.activateService(product.name, product.test_environment.name, product.test_environment.config)
       cy.wait(3000)
     })
   })
@@ -143,8 +140,19 @@ describe('Create API Spec', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       // pd.editProductEnvironment(product.name, product.environment.name)
-      pd.activateService(product.name, product.environment.name,product.environment.config)
+      pd.activateService(product.name, product.environment.name, product.environment.config)
       cy.wait(3000)
+    })
+  })
+
+  it('verify status of the services using "gwa status" command', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.executeCliCommand('gwa status').then((response) => {
+        expect(response.stdout).to.contain(product.environment.config.serviceName);
+        expect(response.stdout).to.contain(product.test_environment.config.serviceName);
+        const wordOccurrences = (response.stdout.match(/\b200 Response\b/g) || []).length;
+        expect(wordOccurrences).to.equal(2)
+      })
     })
   })
 

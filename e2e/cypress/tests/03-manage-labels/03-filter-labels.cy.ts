@@ -12,8 +12,6 @@ describe('Filter Manage labels Spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.getServiceOrRouteID('services')
-    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {
@@ -27,9 +25,11 @@ describe('Filter Manage labels Spec', () => {
 
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace);
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(namespace);
+      })
     })
   })
 

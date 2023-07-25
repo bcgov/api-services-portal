@@ -6,7 +6,7 @@ describe('Manage Control-IP Restriction Spec', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
-    
+
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
@@ -21,9 +21,11 @@ describe('Manage Control-IP Restriction Spec', () => {
     })
 
     it('authenticates Mark (Access Manager)', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
-            cy.login(user.credentials.username, user.credentials.password).then(() => {
-                home.useNamespace(namespace);
+        cy.get('@access-manager').then(({ user }: any) => {
+            cy.get('@apiowner').then(({ namespace }: any) => {
+                cy.login(user.credentials.username, user.credentials.password).then(() => {
+                    home.useNamespace(namespace);
+                })
             })
         })
     })
@@ -44,7 +46,7 @@ describe('Manage Control-IP Restriction Spec', () => {
             consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid, 'Route')
         })
     })
-    
+
     it('verify IP Restriction error when the API calls other than the allowed IP', () => {
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
@@ -58,7 +60,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
                 consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
             })
         })
@@ -77,7 +79,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
                 consumers.setAllowedIPAddress(ipRestriction.ipRange_valid, "Route")
             })
         })
@@ -95,7 +97,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
                 consumers.setAllowedIPAddress(ipRestriction.ipRange_valid)
             })
         })
@@ -151,7 +153,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
         cy.get('@access-manager').then(({ user, namespace }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
                 consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
             })
         })
@@ -186,7 +188,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
             consumers.filterConsumerByTypeAndValue('Products', product.name)
         })
     })
-    
+
     it('set api ip-restriction to global service level', () => {
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
@@ -208,7 +210,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.get('@access-manager').then(({ user, namespace }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
                 consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
             })
         })

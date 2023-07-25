@@ -21,9 +21,11 @@ describe('Access manager approves developer access request for Client ID/Secret 
   })
 
   it('Access Manager logs in', () => {
-    cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(clientCredentials.namespace)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@access-manager').then(({ user }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(clientCredentials.namespace)
+      })
     })
   })
 
@@ -56,7 +58,7 @@ describe('Make an API request using Client ID, Secret, and Access Token', () => 
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
       let cc = JSON.parse(store_res.clientidsecret)
-      
+
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
         cy.get('@accessTokenResponse').then((token_res: any) => {
           let token = token_res.body.access_token

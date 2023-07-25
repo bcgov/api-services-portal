@@ -25,9 +25,11 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
   })
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace);
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@access-manager').then(({ user }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(namespace);
+      })
     })
   })
 
@@ -45,5 +47,5 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
-  
+
 })

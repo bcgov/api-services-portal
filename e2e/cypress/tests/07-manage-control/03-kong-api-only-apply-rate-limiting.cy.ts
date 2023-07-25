@@ -64,6 +64,8 @@ describe('Apply Kong API key only plugin', () => {
   })
 
   it('Set Consumer ID to key auth anonymous config', () => {
+    const arr_namespace = ['ns.' + nameSpace];
+    cy.updatePropertiesOfPluginFile('service-plugin-key-auth-only.yml', 'tags', arr_namespace)
     cy.updatePropertiesOfPluginFile('service-plugin-key-auth-only.yml', 'config.anonymous', consumerID)
   })
 
@@ -80,9 +82,9 @@ describe('Apply Kong API key only plugin', () => {
     cy.get('@apiowner').then(({ namespace, product }: any) => {
       cy.updatePluginFile('service-plugin.yml', product.environment.config.serviceName, 'service-plugin-key-auth-only.yml')
       cy.publishApi('service-plugin.yml', namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-        })
+        // cy.get('@publishAPIResponse').then((res: any) => {
+        //   cy.log(JSON.stringify(res.body))
+        // })
       })
     })
   })
@@ -97,7 +99,7 @@ describe('Apply Kong API key only plugin', () => {
   })
 
   it('Apply Rate limiting on free access', () => {
-    cy.updateKongPlugin('consumers', 'rateLimitingConsumer', 'consumers/'+consumerID+'/plugins').then((response) => {
+    cy.updateKongPlugin('consumers', 'rateLimitingConsumer', 'consumers/' + consumerID + '/plugins').then((response) => {
       expect(response.status).to.be.equal(201)
     })
   })
@@ -115,7 +117,7 @@ describe('Check the API key for free access', () => {
     cy.get('@apiowner').then(async ({ product }: any) => {
       cy.fixture('state/store').then((creds: any) => {
         const key = creds.consumerKey
-        cy.makeKongRequest(product.environment.config.serviceName, 'GET','').then((response) => {
+        cy.makeKongRequest(product.environment.config.serviceName, 'GET', '').then((response) => {
           expect(response.status).to.be.equal(200)
           expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(99)
         })
@@ -185,8 +187,6 @@ describe('Approve Pending Request Spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.getServiceOrRouteID('services')
-    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {
@@ -200,9 +200,11 @@ describe('Approve Pending Request Spec', () => {
   })
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace);
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(namespace);
+      })
     })
   })
 

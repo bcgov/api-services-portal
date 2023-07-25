@@ -1,9 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
-import request = require('request')
-import { method } from 'cypress/types/bluebird'
-import { url } from 'inspector'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
 import { checkElementExists } from './e2e'
@@ -82,9 +79,9 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.loginSubmitButton).click()
 })
 
-Cypress.Commands.add('getLastConsumerID',()  =>{
-  let id : any
-  cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').then(($text)=>{
+Cypress.Commands.add('getLastConsumerID', () => {
+  let id: any
+  cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').then(($text) => {
     id = $text.text()
     return id
   })
@@ -112,7 +109,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   })
 })
 
-Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespaceSelected?:true) => {
+Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespaceSelected?: true) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -128,7 +125,7 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespace
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
       // home.useNamespace(apiTest.namespace)
-      if(isNamespaceSelected){
+      if (isNamespaceSelected || undefined) {
         home.useNamespace(namespace)
       }
       cy.get('@login').then(function (xhr: any) {
@@ -236,7 +233,7 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
   cy.log('> Get Token')
 })
 
-Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
+Cypress.Commands.add('getServiceOrRouteID', (configType: string, host: string) => {
   const config = configType.toLowerCase()
   cy.request({
     method: 'GET',
@@ -244,10 +241,10 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   }).then((res) => {
     expect(res.status).to.eq(200)
     if (config === 'routes') {
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", ["a-service-for-newplatform.api.gov.bc.ca"]]))[0], 'id'))
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", [host+".api.gov.bc.ca"]]))[0], 'id'))
     }
     else {
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", "a-service-for-newplatform"]))[0], 'id'))
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", host]))[0], 'id'))
     }
   })
 })
@@ -262,17 +259,19 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: 
       () => {
         cy.wait(3000)
         cy.get('@accessTokenResponse').then((res: any) => {
-          const options = {
-            method: 'PUT',
-            url: Cypress.env('GWA_API_URL') + '/namespaces/' + namespace + '/gateway',
-          }
-          formDataRequest(options, res.body.access_token, fileName, requestName)
-          cy.wait(`@${requestName}`).then((res: any) => {
-            cy.wrap(res.response).as('publishAPIResponse')
+          cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
+            cy.executeCliCommand('gwa config set --token ' + res.body.access_token).then((response) => {
+              {
+                assert.equal(response.stdout, "Config settings saved")
+                cy.executeCliCommand('gwa pg ./cypress/fixtures/' + fileName).then((response) => {
+                  debugger
+                  expect(response.stdout).to.contain("Gateway config published")
+                })
+              }
+            })
           })
         })
-      }
-    )
+      })
   })
 })
 
@@ -297,8 +296,7 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   cy.fixture('state/regen').then((creds: any) => {
     cy.wait(5000)
     let token = key
-    if (key==undefined)
-    {
+    if (key == undefined) {
       token = creds.apikey
     }
     const service = serviceName
@@ -363,7 +361,7 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
     let endpoint
     if (pluginName == '')
       endpoint = 'plugins'
-    else if(id !== undefined)
+    else if (id !== undefined)
       endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
     endpoint = (typeof endPoint !== 'undefined') ? endPoint : endpoint
     body = config[name]
@@ -381,7 +379,7 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
 Cypress.Commands.add('updateKongPluginForJSONRequest', (jsonBody: string, endPoint: string, verb = 'POST') => {
   cy.fixture('state/store').then((creds: any) => {
     let body = {}
-    let headers = {"content-type": "application/json", "accept": "application/json"}
+    let headers = { "content-type": "application/json", "accept": "application/json" }
     body = jsonBody
     return cy.request({
       url: Cypress.env('KONG_CONFIG_URL') + '/' + endPoint,
@@ -506,14 +504,7 @@ Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, property
       obj.plugins[0].config.anonymous = propertyValue
     }
     else {
-      Object.keys(obj.services).forEach(function (key, index) {
-        if (propertyName == "methods") {
-          obj.services[0].routes[0].methods = propertyValue
-        }
-        else {
-          obj.services[0].plugins[0].config[propertyName] = propertyValue
-        }
-      });
+      obj.plugins[0][propertyName] = propertyValue
     }
     const yamlString = YAML.stringify(obj, 'utf8');
     cy.writeFile('cypress/fixtures/' + filename, yamlString)
@@ -564,14 +555,14 @@ Cypress.Commands.add("generateKeyPair", () => {
 
   cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey_new.pem', privateKeyPem)
   cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub', publicKeyPem)
-  
+
 })
 
-Cypress.Commands.add('forceVisit', (url:string) => {
+Cypress.Commands.add('forceVisit', (url: string) => {
   cy.window().then(win => {
-      return win.open(url, '_self');
+    return win.open(url, '_self');
   });
-}); 
+});
 
 const formDataRequest = (
   options: formDataRequestOptions,

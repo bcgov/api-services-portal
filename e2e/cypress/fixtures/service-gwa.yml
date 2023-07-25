@@ -1,0 +1,38 @@
+services:
+- name: a-service-for-newplatform
+  host: httpbin.org
+  tags: [ns.newplatform]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: a-service-for-newplatform-route
+    tags: [ns.newplatform]
+    hosts:
+      - a-service-for-newplatform.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+    
+- name: a-service-for-newplatform-test
+  host: httpbin.org
+  tags: [ns.newplatform]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: a-service-for-newplatform-test-route
+    tags: [ns.newplatform]
+    hosts:
+      - a-service-for-newplatform-test.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0

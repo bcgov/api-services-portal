@@ -127,6 +127,10 @@ describe('Regenerate Credential for Client Credentials- Client ID/Secret', () =>
   })
 
   after(() => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.getServiceOrRouteID('services', product.environment.config.serviceName)
+      cy.getServiceOrRouteID('routes', product.environment.config.serviceName)
+    })
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
