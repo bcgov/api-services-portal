@@ -110,7 +110,7 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
-    return result.data.allNamespaces.map((ns: Namespace) => ns.name);
+    return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
   }
 
   /**
