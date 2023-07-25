@@ -476,9 +476,12 @@ export const syncRecords = async function (
       }
       if (Object.keys(data).length === 0) {
         logger.debug('[%s] [%s] no update', entity, localRecord.id);
+        const firstChildResult = childResults
+          .filter((r) => r.result != 'no-change')
+          .pop();
         return {
           status: 200,
-          result: 'no-change',
+          result: firstChildResult ? firstChildResult.result : 'no-change',
           id: localRecord['id'],
           childResults,
           ownedBy:
