@@ -481,7 +481,9 @@ export const syncRecords = async function (
           .pop();
         return {
           status: 200,
-          result: firstChildResult ? firstChildResult.result : 'no-change',
+          result: firstChildResult
+            ? firstChildResult.result + '-child'
+            : 'no-change',
           id: localRecord['id'],
           childResults,
           ownedBy:
