@@ -7,10 +7,12 @@ export function toStringDefaultArray(
   inputData: any,
   key: string
 ) {
-  if (inputData[key] == null) {
+  // if new and not passed, then set an empty array as a default
+  if (inputData[key] == null && currentData == null) {
     return '[]';
   }
-  return currentData != null && currentData[key] === stringify(inputData[key])
+  return inputData[key] == null ||
+    (currentData != null && currentData[key] === stringify(inputData[key]))
     ? null
     : stringify(inputData[key]);
 }
