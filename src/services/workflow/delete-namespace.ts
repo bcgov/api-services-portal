@@ -130,8 +130,8 @@ export const DeleteNamespace = async (
 
   const activity = await DeleteNamespaceRecordActivity(context, ns);
 
-  //const gwaService = new GWAService(process.env.GWA_API_URL);
-  //await gwaService.deleteAllGatewayConfiguration(subjectToken, ns);
+  const gwaService = new GWAService(process.env.GWA_API_URL);
+  await gwaService.deleteAllGatewayConfiguration(subjectToken, ns);
 
   const envs = await lookupEnvironmentsByNS(context, ns);
   const ids = envs.map((e: Environment) => e.id);
