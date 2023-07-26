@@ -491,7 +491,7 @@ module.exports = {
                   envCtx.issuerEnvConfig.issuerUrl,
                   envCtx.accessToken
                 );
-                for (const scope in [
+                for (const scope of [
                   'Namespace.Manage',
                   'CredentialIssuer.Admin',
                   'GatewayConfig.Publish',
