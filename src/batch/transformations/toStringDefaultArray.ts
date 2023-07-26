@@ -7,8 +7,10 @@ export function toStringDefaultArray(
   inputData: any,
   key: string
 ) {
-  return inputData[key] == null ||
-    (currentData != null && currentData[key] === stringify(inputData[key]))
+  if (inputData[key] == null) {
+    return '[]';
+  }
+  return currentData != null && currentData[key] === stringify(inputData[key])
     ? null
     : stringify(inputData[key]);
 }

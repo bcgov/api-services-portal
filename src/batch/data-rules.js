@@ -474,7 +474,7 @@ const metadata = {
       resourceScopes: { name: 'toStringDefaultArray' },
       clientRoles: { name: 'toStringDefaultArray' },
       clientMappers: { name: 'toStringDefaultArray' },
-      environmentDetails: { name: 'toString' },
+      environmentDetails: { name: 'toStringDefaultArray' },
       inheritFrom: {
         name: 'connectOne',
         list: 'allSharedIdPs',

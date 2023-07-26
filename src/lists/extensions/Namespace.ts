@@ -491,12 +491,18 @@ module.exports = {
                   envCtx.issuerEnvConfig.issuerUrl,
                   envCtx.accessToken
                 );
-                await permissionApi.createPermission(
-                  rset.id,
-                  envCtx.subjectUuid,
-                  true,
-                  'Namespace.Manage'
-                );
+                for (const scope in [
+                  'Namespace.Manage',
+                  'CredentialIssuer.Admin',
+                  'GatewayConfig.Publish',
+                ]) {
+                  await permissionApi.createPermission(
+                    rset.id,
+                    envCtx.subjectUuid,
+                    true,
+                    scope
+                  );
+                }
               }
 
               const kcGroupService = new KeycloakGroupService(
