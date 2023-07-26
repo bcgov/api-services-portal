@@ -103,6 +103,11 @@ export class KeycloakClientService {
     return lkup[0];
   }
 
+  public async deleteClient(id: string): Promise<void> {
+    await this.kcAdminClient.clients.del({ id });
+    logger.debug('[deleteClient] CID=%s SUCCESS', id);
+  }
+
   public async regenerateSecret(id: string): Promise<string> {
     const cred = await this.kcAdminClient.clients.generateNewClientSecret({
       id,
