@@ -1,0 +1,7 @@
+
+  mutation CreateNamespace($name: String!) {
+    createNamespace(name: $name) {
+      id
+      name
+    }
+  }

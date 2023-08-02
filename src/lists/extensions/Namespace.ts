@@ -63,7 +63,7 @@ const typeNamespace = `
 type Namespace {
     id: String
     name: String!,
-    description: String,
+    displayName: String,
     scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
@@ -80,7 +80,8 @@ type Namespace {
 
 const typeNamespaceInput = `
 input NamespaceInput {
-    name: String!,
+    name: String,
+    displayName: String
 }
 `;
 
@@ -418,7 +419,7 @@ module.exports = {
           },
           {
             schema:
-              'createNamespace(name: String, description: String): Namespace',
+              'createNamespace(name: String, displayName: String): Namespace',
             resolver: async (
               item: any,
               args: any,
@@ -426,8 +427,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespaceValidationRule =
-                '(([A-Za-z0-9][-A-Za-z0-9]*)?[A-Za-z0-9])?';
+              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
 
               const newNS = args.name ? args.name : newNamespaceID();
 
@@ -478,6 +478,7 @@ module.exports = {
               ];
               const res = <ResourceSetInput>{
                 name: newNS,
+                displayName: args.displayName,
                 type: 'namespace',
                 resource_scopes: scopes,
                 ownerManagedAccess: true,
@@ -490,12 +491,18 @@ module.exports = {
                   envCtx.issuerEnvConfig.issuerUrl,
                   envCtx.accessToken
                 );
-                await permissionApi.createPermission(
-                  rset.id,
-                  envCtx.subjectUuid,
-                  true,
-                  'Namespace.Manage'
-                );
+                for (const scope of [
+                  'Namespace.Manage',
+                  'CredentialIssuer.Admin',
+                  'GatewayConfig.Publish',
+                ]) {
+                  await permissionApi.createPermission(
+                    rset.id,
+                    envCtx.subjectUuid,
+                    true,
+                    scope
+                  );
+                }
               }
 
               const kcGroupService = new KeycloakGroupService(
@@ -507,10 +514,6 @@ module.exports = {
               );
 
               await kcGroupService.createIfMissing('ns', newNS);
-
-              if (args.description) {
-                await nsService.updateDescription(newNS, args.description);
-              }
 
               await recordActivity(
                 context.sudo(),

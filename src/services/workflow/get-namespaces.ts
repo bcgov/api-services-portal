@@ -59,6 +59,7 @@ export async function getMyNamespaces(
   return namespaces.map((ns: ResourceSet) => ({
     id: ns.id,
     name: ns.name,
+    displayName: ns.displayName,
     scopes: ns.resource_scopes,
     prodEnvId: envCtx.prodEnv.id,
   }));
@@ -269,6 +270,7 @@ export interface ResourceServerContext {
 export interface NamespaceSummary {
   id: string;
   name: string;
+  displayName: string;
   scopes: ResourceScope[];
   prodEnvId: string;
 }

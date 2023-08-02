@@ -198,7 +198,7 @@ const metadata = {
   Namespace: {
     query: 'allNamespaces',
     refKey: 'extRefId',
-    sync: ['name', 'description'],
+    sync: ['name', 'displayName'],
     transformations: {
       // members: {
       //   name: 'connectExclusiveList',
@@ -474,7 +474,7 @@ const metadata = {
       resourceScopes: { name: 'toStringDefaultArray' },
       clientRoles: { name: 'toStringDefaultArray' },
       clientMappers: { name: 'toStringDefaultArray' },
-      environmentDetails: { name: 'toString' },
+      environmentDetails: { name: 'toStringDefaultArray' },
       inheritFrom: {
         name: 'connectOne',
         list: 'allSharedIdPs',

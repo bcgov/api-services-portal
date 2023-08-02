@@ -26,16 +26,6 @@ export class NamespaceService {
     await this.groupService.updateGroup(group);
   }
 
-  async updateDescription(ns: string, description: string): Promise<void> {
-    const group = await this.groupService.getGroup('ns', ns);
-
-    group.attributes['description'] = [description];
-
-    logger.debug('[updateDescription] %s - %s', ns, description);
-
-    await this.groupService.updateGroup(group);
-  }
-
   /*
     Update the Group attributes for org and org-unit
   */

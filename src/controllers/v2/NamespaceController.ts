@@ -10,13 +10,14 @@ import {
   Delete,
   Query,
   Post,
+  Body,
 } from 'tsoa';
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
-import { Namespace } from '../../services/keystone/types';
+import { Namespace, NamespaceInput } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
 import {
@@ -34,6 +35,7 @@ import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
 import { ActivityDetail } from './types-extra';
+
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -108,7 +110,7 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
-    return result.data.allNamespaces.map((ns: Namespace) => ns.name);
+    return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
   }
 
   /**
@@ -150,13 +152,12 @@ export class NamespaceController extends Controller {
   @Security('jwt', [])
   public async create(
     @Request() request: any,
-    @Query() name?: String,
-    @Query() description?: String
+    @Body() vars: NamespaceInput
   ): Promise<Namespace> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
-      variables: { name, description },
+      variables: vars,
     });
     logger.debug('Result %j', result);
     if (result.errors) {
@@ -168,7 +169,7 @@ export class NamespaceController extends Controller {
     }
     return {
       name: result.data.createNamespace.name,
-      description: result.data.createNamespace.description,
+      displayName: result.data.createNamespace.displayName,
     };
   }
 
@@ -250,7 +251,7 @@ const item = gql`
   query Namespace($ns: String!) {
     namespace(ns: $ns) {
       name
-      description
+      displayName
       scopes {
         name
       }
@@ -273,10 +274,10 @@ const deleteNS = gql`
 `;
 
 const createNS = gql`
-  mutation CreateNamespace($name: String, $description: String) {
-    createNamespace(name: $name, description: $description) {
+  mutation CreateNamespace($name: String, $displayName: String) {
+    createNamespace(name: $name, displayName: $displayName) {
       name
-      description
+      displayName
     }
   }
 `;

@@ -134,7 +134,7 @@ export interface Alert {
 export interface Namespace {
   extRefId?: string; // Primary Key
   name?: string;
-  description?: string;
+  displayName?: string;
 }
 
 
