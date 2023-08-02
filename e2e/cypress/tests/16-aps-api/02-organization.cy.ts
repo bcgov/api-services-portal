@@ -145,6 +145,7 @@ describe('Get the Namespace associated with the organization', () => {
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
+                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
                 nameSpace = response[0].name
@@ -156,6 +157,7 @@ describe('Get the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             expectedResponse = organization.expectedNamespace
             // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
+            debugger
             cy.compareJSONObjects(response, expectedResponse, true)
         })
     })

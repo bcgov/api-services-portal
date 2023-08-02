@@ -105,14 +105,14 @@ class ApiDirectoryPage {
     cy.get(this.addOrganizationBtn).click({ force: true })
   }
 
-  checkOrgAdminNotificationBanner(notification: any) {
+  checkOrgAdminNotificationBanner(notification: any, childMessage: string) {
     cy.get('[data-testid="org-assignment-notification-parent"]').invoke('text').then((text) => {
       text = this.getPlainText(text)
-      assert.equal(text, notification.parent)
+      assert.equal(text, notification)
       cy.contains('button', 'Learn More').click()
       cy.get('[data-testid="org-assignment-notification-child"]').invoke('text').then((text) => {
         text = this.getPlainText(text)
-        assert.equal(text, notification.child)
+        assert.equal(text, childMessage)
       })
     })
   }

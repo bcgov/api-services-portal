@@ -2,6 +2,8 @@ import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
 let userSession: any
 let testData = require("../../fixtures/test_data/authorizationProfile.json")
+let namespace: string
+let updatedAuthProfileEndPoint: string
 
 describe('Get the user session token', () => {
 
@@ -24,6 +26,7 @@ describe('Get the user session token', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
+                namespace = apiTest.namespace
             })
         })
     })
@@ -50,18 +53,19 @@ testData.forEach((testCase: any) => {
 
         it('Put the resource and verify the success code in the response', () => {
             cy.get('@api').then(({ authorizationProfiles }: any) => {
-                cy.makeAPIRequest(authorizationProfiles.endPoint, 'PUT').then((response) => {
-                    expect(response.status).to.be.equal(200)
+                cy.replaceWord(authorizationProfiles.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
+                    updatedAuthProfileEndPoint = updatedEndPoint
+                    cy.makeAPIRequest(updatedAuthProfileEndPoint, 'PUT').then((response) => {
+                        expect(response.status).to.be.equal(200)
+                    })
                 })
             })
         })
 
         it('Get the resource and verify the success code in the response', () => {
-            cy.get('@api').then(({ authorizationProfiles }: any) => {
-                cy.makeAPIRequest(authorizationProfiles.endPoint, 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body
-                })
+            cy.makeAPIRequest(updatedAuthProfileEndPoint, 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+                response = res.body
             })
         })
 
@@ -74,19 +78,16 @@ testData.forEach((testCase: any) => {
         })
 
         it('Delete the authorization profile', () => {
-            cy.get('@api').then(({ authorizationProfiles }: any) => {
-                cy.makeAPIRequest(authorizationProfiles.endPoint + '/' + testCase.body.name, 'DELETE').then((response) => {
-                    expect(response.status).to.be.equal(200)
-                })
+            cy.makeAPIRequest(updatedAuthProfileEndPoint + '/' + testCase.body.name, 'DELETE').then((response) => {
+                expect(response.status).to.be.equal(200)
             })
         })
 
+
         it('Verify that the authorization profile is deleted', () => {
-            cy.get('@api').then(({ authorizationProfiles }: any) => {
-                cy.makeAPIRequest(authorizationProfiles.endPoint, 'GET').then((response) => {
-                    expect(response.status).to.be.equal(200)
-                    expect(response.body.length).to.be.equal(0)
-                })
+            cy.makeAPIRequest(updatedAuthProfileEndPoint, 'GET').then((response) => {
+                expect(response.status).to.be.equal(200)
+                expect(response.body.length).to.be.equal(0)
             })
         })
     })
@@ -100,7 +101,7 @@ testData.forEach((testCase: any) => {
 describe('API Tests for Authorization Profiles created with inheritFrom attribute set to a valid shared Issuer', () => {
 
     let response: any
-    let actualResponse: any 
+    let actualResponse: any
     let expectedResponse: any
 
     beforeEach(() => {

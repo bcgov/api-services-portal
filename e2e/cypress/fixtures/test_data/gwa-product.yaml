@@ -1,0 +1,8 @@
+name: Auto Test Product
+appId: '000000000000'
+environments:
+  - name: dev
+    active: false
+    approval: false
+    flow: public
+    appId: '00000000'

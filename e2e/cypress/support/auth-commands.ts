@@ -503,8 +503,18 @@ Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, property
     if (propertyName === "config.anonymous") {
       obj.plugins[0].config.anonymous = propertyValue
     }
-    else {
+    else if (propertyName === "tags"){
       obj.plugins[0][propertyName] = propertyValue
+    }
+    else {
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (propertyName == "methods") {
+          obj.services[0].routes[0].methods = propertyValue
+        }
+        else {
+          obj.services[0].plugins[0].config[propertyName] = propertyValue
+        }
+      });
     }
     const yamlString = YAML.stringify(obj, 'utf8');
     cy.writeFile('cypress/fixtures/' + filename, yamlString)

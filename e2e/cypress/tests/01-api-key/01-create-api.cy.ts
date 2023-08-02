@@ -64,10 +64,9 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('creates as new product in the directory', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.createNewProduct(product.name, product.environment.name)
+  it('creates as new product in the directory through GWA Cli command', () => {
+    cy.gwaPublish('product','gwa-product.yaml').then((response:any) => {
+      expect(response.stdout).to.contain('Product successfully published');
     })
   })
 

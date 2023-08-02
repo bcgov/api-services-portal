@@ -4,51 +4,51 @@ import ConsumersPage from '../../pageObjects/consumers'
 
 const njwt = require('njwt')
 
-// describe('Access manager approves developer access request for JWT - Generated Key Pair authenticator', () => {
-//   const home = new HomePage()
-//   const login = new LoginPage()
-//   const consumers = new ConsumersPage()
+describe('Access manager approves developer access request for JWT - Generated Key Pair authenticator', () => {
+  const home = new HomePage()
+  const login = new LoginPage()
+  const consumers = new ConsumersPage()
 
-//   before(() => {
-//     cy.visit('/')
-//     cy.deleteAllCookies()
-//     cy.reload()
-//   })
+  before(() => {
+    cy.visit('/')
+    cy.deleteAllCookies()
+    cy.reload()
+  })
 
-//   beforeEach(() => {
-//     cy.preserveCookies()
-//     cy.fixture('access-manager').as('access-manager')
-//     cy.fixture('apiowner').as('apiowner')
-//     // cy.visit(login.path)
-//   })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    // cy.visit(login.path)
+  })
 
-//   it('Access Manager logs in', () => {
-//     cy.get('@access-manager').then(({ user }: any) => {
-//       cy.get('@apiowner').then(({ clientCredentials }: any) => {
-//         cy.login(user.credentials.username, user.credentials.password)
-//         home.useNamespace(clientCredentials.namespace)
-//       })
-//     })
-//   })
+  it('Access Manager logs in', () => {
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(clientCredentials.namespace)
+      })
+    })
+  })
 
-//   it('Access Manager approves developer access request', () => {
-//     cy.get('@access-manager').then(() => {
-//       cy.visit(consumers.path)
-//       cy.wait(5000)
-//       consumers.reviewThePendingRequest()
-//     })
-//   })
+  it('Access Manager approves developer access request', () => {
+    cy.get('@access-manager').then(() => {
+      cy.visit(consumers.path)
+      cy.wait(5000)
+      consumers.reviewThePendingRequest()
+    })
+  })
 
-//   it('approves an access request', () => {
-//     consumers.approvePendingRequest()
-//   })
+  it('approves an access request', () => {
+    consumers.approvePendingRequest()
+  })
 
-//   after(() => {
-//     cy.logout()
-//     cy.clearLocalStorage({ log: true })
-//     cy.deleteAllCookies()
-//   })
-// })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+})
 
 describe('Make an API request using JWT signed with private key', () => {
   it('Get access token using JWT key pair; make sure API calls successfully', () => {

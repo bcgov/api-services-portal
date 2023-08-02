@@ -154,3 +154,20 @@ Cypress.Commands.add('replaceWordInJsonObject', (targetWord: string, replacement
   })
 
 })
+
+Cypress.Commands.add('gwaPublish', (type: string, fileName: string) => {
+  cy.exec('gwa publish '+type+' --input ./cypress/fixtures/test_data/'+fileName, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    return response
+  });
+})
+
+Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: string, replacementWord: string)=> {
+  // Create a regular expression with the 'g' flag for global search
+  let replacedString : any
+  const regex = new RegExp(wordToReplace, 'g');
+
+  // Use the 'replace()' method to replace all occurrences of the word
+  replacedString = originalString.replace(regex, replacementWord);
+
+  return replacedString;
+})

@@ -10,10 +10,15 @@
       "title": "Planning and Innovation Division"
     },
     "orgName": "ministry-of-health",
-    "expectedScope": ["Dataset.Manage", "GroupAccess.Manage", "Namespace.Assign"],
+    "expectedScope": [
+      "Dataset.Manage",
+      "GroupAccess.Manage",
+      "Namespace.Assign"
+    ],
     "expectedNamespace": {
-      "name": "newplatform",
-      "orgUnit": "planning-and-innovation-division"
+      "name": "gw-6d884",
+      "orgUnit": "planning-and-innovation-division",
+      "enabled": true
     },
     "body": {
       "name": "ministry-of-health",
@@ -24,7 +29,9 @@
             "id": "janis@idir",
             "email": "janis@testmail.com"
           },
-          "roles": ["organization-admin"]
+          "roles": [
+            "organization-admin"
+          ]
         }
       ]
     }
@@ -44,7 +51,10 @@
       "order": 0,
       "isPublic": true,
       "isComplete": true,
-      "tags": ["tag1", "tag2"]
+      "tags": [
+        "tag1",
+        "tag2"
+      ]
     }
   },
   "apiDirectory": {
@@ -65,7 +75,10 @@
       "title": "Dataset for Test API",
       "isInCatalog": "false",
       "isDraft": "false",
-      "tags": ["gateway", "kong"],
+      "tags": [
+        "gateway",
+        "kong"
+      ],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
     },
@@ -76,7 +89,11 @@
       "license_title": "Access Only",
       "view_audience": "Government",
       "security_class": "LOW-PUBLIC",
-      "tags": ["gateway", "kong", "openapi"],
+      "tags": [
+        "gateway",
+        "kong",
+        "openapi"
+      ],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -105,7 +122,11 @@
       "license_title": "Access Only",
       "view_audience": "Government",
       "security_class": "LOW-PUBLIC",
-      "tags": ["gateway", "kong", "openapi"],
+      "tags": [
+        "gateway",
+        "kong",
+        "openapi"
+      ],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -194,8 +215,12 @@
     "shared_IDP_inheritFrom": {
       "environmentDetails": [],
       "mode": "auto",
-      "clientRoles": ["administrator"],
-      "clientMappers": ["test-audience"],
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
       "name": "my-auth-client-secret-1",
@@ -218,8 +243,12 @@
           "clientId": "ap-my-auth-client-secret-1-test"
         }
       ],
-      "clientRoles": ["administrator"],
-      "clientMappers": ["test-audience"],
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
       "isShared": false,
       "apiKeyName": "X-API-KEY",
       "inheritFrom": {
@@ -282,7 +311,9 @@
           "name": "CredentialIssuer.Admin"
         }
       ],
-      "permDomains": [".api.gov.bc.ca"],
+      "permDomains": [
+        ".api.gov.bc.ca"
+      ],
       "permDataPlane": "local.dataplane",
       "permProtectedNs": "deny",
       "org": "ministry-of-health",

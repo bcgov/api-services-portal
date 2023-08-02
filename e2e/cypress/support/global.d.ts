@@ -93,5 +93,9 @@ declare namespace Cypress {
     executeCliCommand(command: string): Chainable<any>
 
     replaceWordInJsonObject(targetWord: string, replacement: string, fileName: string): Chainable<Cypress.Response<any>>
+
+    gwaPublish(type: string, fileName: string): Chainable<Cypress.Response<any>>
+
+    replaceWord(originalString: string, wordToReplace: string, replacementWord: string): Chainable<any>
   }
 }

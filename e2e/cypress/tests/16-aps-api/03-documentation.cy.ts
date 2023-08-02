@@ -2,7 +2,8 @@ import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
 let userSession: any
 let slugValue: string
-
+let namespace: string
+let updatedDocumentEndPoint: string
 describe('Get the user session token', () => {
 
     const login = new LoginPage()
@@ -24,6 +25,7 @@ describe('Get the user session token', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
+                namespace = apiTest.namespace
             })
         })
     })
@@ -48,8 +50,11 @@ describe('API Tests for Updating documentation', () => {
 
     it('Put the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint, 'PUT').then((response) => {
-                expect(response.status).to.be.equal(200)
+            cy.replaceWord(documentation.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
+                updatedDocumentEndPoint = updatedEndPoint
+                cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response) => {
+                    expect(response.status).to.be.equal(200)
+                })
             })
         })
     })
@@ -74,12 +79,10 @@ describe('API Tests for Fetching documentation', () => {
     })
 
     it('Get the resource and verify the success code in the response', () => {
-        cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                slugValue = res.body[0].slug
-                response = res.body[0]
-            })
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((res) => {
+            expect(res.status).to.be.equal(200)
+            slugValue = res.body[0].slug
+            response = res.body[0]
         })
     })
 
@@ -109,19 +112,16 @@ describe('API Tests for Deleting documentation', () => {
     })
 
     it('Verify the status code and response message for invalid slugvalue', () => {
-        cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint + '/platform_test', 'DELETE').then((response) => {
-                expect(response.status).to.be.oneOf([404, 422])
-                expect(response.body.message).to.be.equal("Content not found")
-            })
+        cy.makeAPIRequest(updatedDocumentEndPoint + '/platform_test', 'DELETE').then((response) => {
+            expect(response.status).to.be.oneOf([404, 422])
+            expect(response.body.message).to.be.equal("Content not found")
         })
     })
 
+
     it('Delete the documentation', () => {
-        cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint + '/' + slugValue, 'DELETE').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
+        cy.makeAPIRequest(updatedDocumentEndPoint + '/' + slugValue, 'DELETE').then((response) => {
+            expect(response.status).to.be.equal(200)
         })
     })
 })
@@ -144,11 +144,9 @@ describe('API Tests to verify no value in Get call after deleting document conte
     })
 
     it('Delete the documentation', () => {
-        cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(response.body).to.be.empty
-            })
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((response) => {
+            expect(response.status).to.be.equal(200)
+            expect(response.body).to.be.empty
         })
     })
 })
@@ -180,10 +178,8 @@ describe('API Tests to verify Get documentation content', () => {
     })
 
     it('Put the resource and verify the success code in the response', () => {
-        cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint, 'PUT').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response) => {
+            expect(response.status).to.be.equal(200)
         })
     })
 

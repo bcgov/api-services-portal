@@ -61,6 +61,7 @@ describe('Authernticate with old user to initiate migration', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('usermigration').as('usermigration')
+    cy.fixture('apiowner').as('apiowner')
     // cy.visit(login.path)
   })
 
@@ -97,22 +98,25 @@ describe('Verify that permission of old user is migrated to new user', () => {
     cy.preserveCookies()
     cy.fixture('usermigration').as('usermigration')
     cy.fixture('apiowner').as('apiowner')
-    // cy.visit(login.path)
+    cy.visit(login.path)
   })
 
   it('authenticates with new user', () => {
     cy.get('@usermigration').then(({ newUser }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
-        cy.login(newUser.credentials.username, newUser.credentials.password)
-        cy.log('Logged in!')
-        // home.useNamespace(namespace)
-      })
+      cy.login(newUser.credentials.username, newUser.credentials.password)
+      cy.log('Logged in!')
     })
   })
 
+  // it('activates new namespace', () => {
+  //   cy.get('@apiowner').then(({ namespace }: any) => {
+  //     home.useNamespace(namespace)
+  //   })
+  // })
+
   it('Get the permission of the user', () => {
     cy.getUserSession().then(() => {
-      cy.get('@usermigration').then(({ namespace }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
         home.useNamespace(namespace)
         cy.get('@login').then(function (xhr: any) {
           userScopes = xhr.response.body.user.scopes

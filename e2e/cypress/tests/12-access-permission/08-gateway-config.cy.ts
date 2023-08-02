@@ -68,25 +68,25 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
+    cy.fixture('apiowner').as('apiowner')
   })
 
   it('Authenticates Wendy (Credential-Issuer)', () => {
-    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
-      cy.visit(login.path)
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
-      cy.visit(mp.path)
+    cy.get('@credential-issuer').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ checkPermission }: any) => {
+        cy.visit(login.path)
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(checkPermission.namespace)
+        cy.visit(mp.path)
+      })
     })
   })
 
   it('Verify that GWA API allows user to publish the API to Kong gateway', () => {
-    cy.get('@credential-issuer').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          expect(JSON.stringify(res.body.message)).to.be.contain('Sync successful.')
-          expect(res.statusCode).to.be.equal(200)
-        })
+    cy.get('@apiowner').then(({ checkPermission }: any) => {
+      cy.publishApi('service-permission.yml', checkPermission.namespace).then((response: any) => {
+        expect(response.stdout).to.contain('Sync successful');
       })
     })
   })

@@ -6,7 +6,7 @@
       "password": "awsummer"
     }
   },
-  "namespace": "gw-9be47",
+  "namespace": "gw-79851",
   "invalid_namespace": [
     "test_1234",
     "New_napespace",
@@ -20,7 +20,7 @@
     ]
   },
   "deleteResources": {
-    "namespace": "deleteplatform",
+    "namespace": "gw-99365",
     "product": {
       "name": "Delete-Auto Test Product",
       "environment": {
@@ -47,7 +47,7 @@
         "terms": "Terms of Use for API Gateway",
         "authorization": "Kong API Key with ACL Flow",
         "optionalInstructions": "This is a automation test",
-        "serviceName": "a-service-for-gw-9be47"
+        "serviceName": "a-service-for-gw-79851"
       }
     },
     "test_environment": {
@@ -56,12 +56,12 @@
         "terms": "Terms of Use for API Gateway",
         "authorization": "Kong API Key with ACL Flow",
         "optionalInstructions": "This is a automation test",
-        "serviceName": "a-service-for-gw-9be47-test"
+        "serviceName": "a-service-for-gw-79851-test"
       }
     }
   },
   "clientCredentials": {
-    "namespace": "gw-a2fe3",
+    "namespace": "gw-2d6e6",
     "serviceName": "cc-service-for-platform",
     "Mark": {
       "userName": "mark",
@@ -280,7 +280,7 @@
     }
   },
   "namespacePreview": {
-    "namespace": "previewmode",
+    "namespace": "gw-f04b0",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -301,7 +301,7 @@
     }
   },
   "orgAssignment": {
-    "namespace": "orgassignment",
+    "namespace": "gw-a9ee0",
     "serviceName": "a-service-for-orgassignment",
     "Mark": {
       "userName": "mark",
@@ -399,7 +399,7 @@
     }
   },
   "checkPermission": {
-    "namespace": "permission",
+    "namespace": "gw-f9d48",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -543,7 +543,7 @@
     }
   },
   "apiTest": {
-    "namespace": "apiplatform",
+    "namespace": "gw-6d884",
     "delete_namespace": "testplatform",
     "product": {
       "name": "API Auto Test Product",
