@@ -22,7 +22,9 @@ jobs:
         run: cargo install just
 
       - name: Build Executable Binary
-        run: just build
+        run: |
+          cd gwa-cli
+          just build
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
