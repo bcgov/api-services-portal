@@ -1,0 +1,32 @@
+name: Build Executable Binary
+
+on:
+  push:
+    branches: ['dev', 'cypress*']
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build GWA API Image
+        run: |
+          git clone https://github.com/bcgov/gwa-cli.git -b dev
+          cd gwa-cli
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v2
+
+      - name: Install 'just'
+        run: cargo install just
+
+      - name: Build Executable Binary
+        run: just build
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: gwa
+          path: /usr/local/bin # Replace with the path to your built binary
+        
+      - name: Check GWA help
+        run: gwa -h

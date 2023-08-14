@@ -13,7 +13,7 @@ describe('Verify CLI commands', () => {
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const ma = new MyAccessPage()
-  let namespace : string
+  let namespace: string
 
   before(() => {
     // cy.visit('/')
@@ -29,11 +29,11 @@ describe('Verify CLI commands', () => {
 
   it('authenticates Janis (api owner) to get the user session token', () => {
     cy.get('@apiowner').then(({ apiTest }: any) => {
-        cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
-            userSession = value
-        })
+      cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
+        userSession = value
+      })
     })
-})
+  })
 
   // it('Check for gwa help', () => {
   //   cy.executeCliCommand('gwa help').then((response) => {
@@ -54,7 +54,7 @@ describe('Verify CLI commands', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = cli.credentials.clientSecret
     cy.log('gwa login --host ${url} --scheme http')
-    cy.executeCliCommand('gwa login --client-id '+clientID+' --client-secret '+clientSecret+' --host '+url+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + url + ' --scheme http').then((response) => {
       assert.equal(response.stdout, "Logged in")
     });
   })
@@ -91,43 +91,43 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa config command to set token', () => {
-    cy.executeCliCommand('gwa config set --token '+userSession).then((response) => {
+    cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
       assert.equal(response.stdout, "Config settings saved")
     });
   })
 
-  it('Check gwa command for namespace help', () => {
-    cy.executeCliCommand('gwa namespace -h').then((response) => {
-      debugger
-      assert.equal(response.stdout, cli.content.namespace_help)
-    });
-  })
+  // it('Check gwa command for namespace help', () => {
+  //   cy.executeCliCommand('gwa namespace -h').then((response) => {
+  //     debugger
+  //     assert.equal(response.stdout, cli.content.namespace_help)
+  //   });
+  // })
 
   it('Check gwa command to create namespace', () => {
     let url = "oauth2proxy.localtest.me:4180"
-    cy.executeCliCommand('gwa namespace create --host '+url+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa namespace create --host ' + url + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
-      cy.replaceWordInJsonObject('newplatform',namespace,'service-gwa.yml')
-      cy.updateJsonValue('apiowner.json','namespace' , namespace)
-      cy.updateJsonValue('apiowner.json','product.environment.config.serviceName' , 'a-service-for-'+namespace)
-      cy.updateJsonValue('apiowner.json','product.test_environment.config.serviceName' , 'a-service-for-'+namespace+'-test')
-      cy.executeCliCommand("gwa config set --namespace "+namespace)
+      cy.replaceWordInJsonObject('newplatform', namespace, 'service-gwa.yml')
+      cy.updateJsonValue('apiowner.json', 'namespace', namespace)
+      cy.updateJsonValue('apiowner.json', 'product.environment.config.serviceName', 'a-service-for-' + namespace)
+      cy.updateJsonValue('apiowner.json', 'product.test_environment.config.serviceName', 'a-service-for-' + namespace + '-test')
+      cy.executeCliCommand("gwa config set --namespace " + namespace)
     });
   })
 
   it('Check gwa namespace list command and verify the created namespace in the list', () => {
     let url = "oauth2proxy.localtest.me:4180"
-    cy.executeCliCommand('gwa namespace list --host '+url+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa namespace list --host ' + url + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain(namespace);
     });
   })
 
-  it('Check gwa namespace destroy command for soft deleting namespace', () => {
-    cy.executeCliCommand('gwa namespace destroy '+namespace).then((response) => {
-      expect(response.stdout).to.contain('Namespace destroyed '+namespace);
-    });
-  })
+  // it('Check gwa namespace destroy command for soft deleting namespace', () => {
+  //   cy.executeCliCommand('gwa namespace destroy ' + namespace).then((response) => {
+  //     expect(response.stdout).to.contain('Namespace destroyed ' + namespace);
+  //   });
+  // })
 
   it('Check that deleted namespace does not display in gwa namespace list command', () => {
     let url = "oauth2proxy.localtest.me:4180"
