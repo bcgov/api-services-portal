@@ -6,7 +6,7 @@
       "password": "awsummer"
     }
   },
-  "namespace": "gw-79851",
+  "namespace": "newplatform",
   "invalid_namespace": [
     "test_1234",
     "New_napespace",
@@ -20,7 +20,7 @@
     ]
   },
   "deleteResources": {
-    "namespace": "gw-99365",
+    "namespace": "gw-4722b",
     "product": {
       "name": "Delete-Auto Test Product",
       "environment": {
@@ -38,7 +38,7 @@
     "CredentialIssuer.Admin"
   ],
   "product": {
-    "name": "Auto Test Product",
+    "name": "GWA Auto Test Product",
     "orgName": "Ministry of Health",
     "orgUnitName": "Planning and Innovation Division",
     "environment": {
@@ -47,7 +47,7 @@
         "terms": "Terms of Use for API Gateway",
         "authorization": "Kong API Key with ACL Flow",
         "optionalInstructions": "This is a automation test",
-        "serviceName": "a-service-for-gw-79851"
+        "serviceName": "a-service-for-newplatform"
       }
     },
     "test_environment": {
@@ -56,12 +56,12 @@
         "terms": "Terms of Use for API Gateway",
         "authorization": "Kong API Key with ACL Flow",
         "optionalInstructions": "This is a automation test",
-        "serviceName": "a-service-for-gw-79851-test"
+        "serviceName": "a-service-for-newplatform-test"
       }
     }
   },
   "clientCredentials": {
-    "namespace": "gw-2d6e6",
+    "namespace": "gw-6faa0",
     "serviceName": "cc-service-for-platform",
     "Mark": {
       "userName": "mark",
@@ -280,7 +280,7 @@
     }
   },
   "namespacePreview": {
-    "namespace": "gw-f04b0",
+    "namespace": "",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -301,7 +301,7 @@
     }
   },
   "orgAssignment": {
-    "namespace": "gw-a9ee0",
+    "namespace": "",
     "serviceName": "a-service-for-orgassignment",
     "Mark": {
       "userName": "mark",
@@ -399,7 +399,7 @@
     }
   },
   "checkPermission": {
-    "namespace": "gw-f9d48",
+    "namespace": "gw-25d58",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -543,7 +543,7 @@
     }
   },
   "apiTest": {
-    "namespace": "gw-6d884",
+    "namespace": "gw-fd05f",
     "delete_namespace": "testplatform",
     "product": {
       "name": "API Auto Test Product",

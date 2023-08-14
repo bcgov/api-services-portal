@@ -12,8 +12,6 @@ describe('Grant Access Spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.getServiceOrRouteID('services')
-    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {

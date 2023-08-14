@@ -10,7 +10,7 @@ describe('Create API Spec', () => {
   const sa = new ServiceAccountsPage()
   const pd = new Products()
   var nameSpace: string
-  let userSession: string
+  let userSession: any
 
   before(() => {
     cy.visit('/')
@@ -23,26 +23,42 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
-    // cy.visit(login.path)
+    cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
+  it('authenticates Janis (api owner) to get the user session token', () => {
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.getUserSessionTokenValue(namespace, false).then((value) => {
+        userSession = value
+      })
     })
   })
 
-  it('creates and activates new namespace', () => {
+  it('Check gwa config command to set environment', () => {
+    cy.executeCliCommand('gwa config set --host oauth2proxy.localtest.me:4180 --scheme http').then((response) => {
+      assert.equal(response.stdout, "Config settings saved")
+    });
+  })
+
+  it('Check gwa config command to set token', () => {
+    cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
+      assert.equal(response.stdout, "Config settings saved")
+    });
+  })
+
+  it('creates new namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@apiowner').then(({ namespace }: any) => {
         nameSpace = namespace
-        // home.createNamespace(namespace)
-        home.useNamespace(namespace)
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+        cy.executeCliCommand('gwa namespace create -n ' + namespace).then((response) => {
+          assert.equal(response.stdout, namespace)
         })
       })
     })
+  })
+
+  it('activates new namespace', () => {
+    home.useNamespace(nameSpace)
   })
 
   it('creates a new service account', () => {
@@ -56,17 +72,21 @@ describe('Create API Spec', () => {
 
   it('publishes a new API for Dev environment to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service-gwa.yml', namespace).then(() => {
-        // cy.get('@publishAPIResponse').then((res: any) => {
-        //   cy.log(JSON.stringify(res.body))
-        // })
+      cy.publishApi('service.yml', namespace).then((response: any) => {
+        expect(response.stdout).to.contain('Sync successful');
       })
     })
   })
 
   it('creates as new product in the directory through GWA Cli command', () => {
-    cy.gwaPublish('product','gwa-product.yaml').then((response:any) => {
+    cy.gwaPublish('product', 'gwa-product.yaml').then((response: any) => {
       expect(response.stdout).to.contain('Product successfully published');
+    })
+  })
+
+  it('Upload dataset using GWA Cli command', () => {
+    cy.gwaPublish('dataset', 'gwa-dataset.yaml').then((response: any) => {
+      expect(response.stdout).to.contain('Dataset successfully published');
     })
   })
 
@@ -116,13 +136,8 @@ describe('Create API Spec', () => {
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.replaceWordInJsonObject('newplatform', namespace, 'service-plugin.yml')
-      cy.wait(2000)
-      cy.publishApi('service-plugin.yml', namespace).then(() => {
-        // cy.get('@publishAPIResponse').then((res: any) => {
-        //   cy.log(JSON.stringify(res.body))
-        //   expect(res.body.message).to.contains("Sync successful")
-        // })
+      cy.publishApi('service-plugin.yml', namespace).then((response: any) => {
+        expect(response.stdout).to.contain('Sync successful');
       })
     })
   })

@@ -21,6 +21,7 @@ describe('Create API Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('api').as('api')
     cy.visit(login.path)
   })
 
@@ -52,6 +53,16 @@ describe('Create API Spec', () => {
 
   it('activates new namespace', () => {
     home.useNamespace(namespace)
+  })
+
+  it('Associate Namespace to the organization Unit', () => {
+    cy.get('@api').then(({ organization }: any) => {
+      cy.setHeaders(organization.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
   })
 
   after(() => {

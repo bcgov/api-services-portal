@@ -2,11 +2,11 @@ plugins:
     -
         name: key-auth
         tags:
-            - ns.gw-00479
+            - ns.newplatform
         protocols:
             - http
             - https
         config:
             key_names:
                 - x-api-key
-            anonymous: e3940e13-6231-48c5-a39a-a55dd80e8df7
+            anonymous: bb2c1e04-96ce-4b1d-baf4-a7e681a862a6

@@ -123,4 +123,17 @@ describe('Verify CLI commands', () => {
     });
   })
 
+  it('Check gwa namespace destroy command for soft deleting namespace', () => {
+    cy.executeCliCommand('gwa namespace destroy '+namespace).then((response) => {
+      expect(response.stdout).to.contain('Namespace destroyed '+namespace);
+    });
+  })
+
+  it('Check that deleted namespace does not display in gwa namespace list command', () => {
+    let url = "oauth2proxy.localtest.me:4180"
+    cy.executeCliCommand('gwa namespace list').then((response) => {
+      expect(response.stdout).not.to.contain(namespace);
+    });
+  })
+
 })

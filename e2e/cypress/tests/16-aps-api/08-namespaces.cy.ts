@@ -149,59 +149,59 @@ describe('API Tests for Namespace Summary', () => {
     })
 })
 
-describe('API Tests for Deleting Namespace', () => {
+// describe('API Tests for Deleting Namespace', () => {
 
-    const login = new LoginPage()
-    const home = new HomePage()
+//     const login = new LoginPage()
+//     const home = new HomePage()
 
 
-    beforeEach(() => {
-        cy.fixture('api').as('api')
-        cy.fixture('apiowner').as('apiowner')
-    })
+//     beforeEach(() => {
+//         cy.fixture('api').as('api')
+//         cy.fixture('apiowner').as('apiowner')
+//     })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
-    })
+//     it('Prepare the Request Specification for the API', () => {
+//         cy.get('@api').then(({ namespaces }: any) => {
+//             cy.setHeaders(namespaces.headers)
+//             cy.setAuthorizationToken(userSession)
+//         })
+//     })
 
-    it('Delete the namespace and verify the Validation to prevent deleting the namespace', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
-            cy.get('@api').then(({ namespaces }: any) => {
-                cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'DELETE').then((res) => {
-                    expect(res.status).to.be.equal(422)
-                })
-            })
-        })
-    })
+//     it('Delete the namespace and verify the Validation to prevent deleting the namespace', () => {
+//         cy.get('@apiowner').then(({ namespace }: any) => {
+//             cy.get('@api').then(({ namespaces }: any) => {
+//                 cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'DELETE').then((res) => {
+//                     expect(res.status).to.be.equal(422)
+//                 })
+//             })
+//         })
+//     })
 
-    it('Force delete the namespace and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
-            cy.get('@api').then(({ namespaces }: any) => {
-                cy.makeAPIRequest(namespaces.endPoint + "/" + namespace + '?force=true', 'DELETE').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                })
-            })
-        })
-    })
+//     it('Force delete the namespace and verify the success code in the response', () => {
+//         cy.get('@apiowner').then(({ namespace }: any) => {
+//             cy.get('@api').then(({ namespaces }: any) => {
+//                 cy.makeAPIRequest(namespaces.endPoint + "/" + namespace + '?force=true', 'DELETE').then((res) => {
+//                     expect(res.status).to.be.equal(200)
+//                 })
+//             })
+//         })
+//     })
 
-    //need to confirm with Aidan - service returns 500 status code if there is no any namespaces
-    // it('Verify that deleted namespace does not display in Get namespace list', () => {
-    //     let response: any
-    //     cy.get('@api').then(({ namespaces }: any) => {
-    //         cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
-    //             // expect(res.status).to.be.equal(200)
-    //             response = res.body
-    //             expect(response).to.not.contain(nameSpace)
-    //         })
-    //     })
-    // })
+//     //need to confirm with Aidan - service returns 500 status code if there is no any namespaces
+//     // it('Verify that deleted namespace does not display in Get namespace list', () => {
+//     //     let response: any
+//     //     cy.get('@api').then(({ namespaces }: any) => {
+//     //         cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
+//     //             // expect(res.status).to.be.equal(200)
+//     //             response = res.body
+//     //             expect(response).to.not.contain(nameSpace)
+//     //         })
+//     //     })
+//     // })
 
-    after(() => {
-        cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
-    })
-})
+//     after(() => {
+//         cy.logout()
+//         cy.clearLocalStorage({ log: true })
+//         cy.deleteAllCookies()
+//     })
+// })

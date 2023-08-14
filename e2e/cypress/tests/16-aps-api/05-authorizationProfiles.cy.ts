@@ -30,6 +30,12 @@ describe('Get the user session token', () => {
             })
         })
     })
+
+    it('Set token with gwa config command', () => {
+        cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+            assert.equal(response.stdout, "Config settings saved")
+        });
+    })
 })
 
 testData.forEach((testCase: any) => {
@@ -155,6 +161,42 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
         cy.get('@api').then(({ authorizationProfiles }: any) => {
             actualResponse = response
             expectedResponse = authorizationProfiles.shared_IDP_inheritFrom_expectedResponse
+            cy.compareJSONObjects(actualResponse, expectedResponse, true)
+        })
+    })
+
+})
+
+describe('Verify GWA command to publish issuer and apply generated config', () => {
+
+    let response: any
+    let actualResponse: any
+    let expectedResponse: any
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+        cy.fixture('apiowner').as('apiowner')
+    })
+
+    it('Create a credential issuer using gwa publish command', () => {
+        cy.gwaPublish('issuer', 'gwa-issuer.yaml').then((response: any) => {
+            expect(response.stdout).to.contain('Issuer successfully published');
+        })
+    })
+
+    it('Get list of authorization profile and verify the success code in the response', () => {
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+                response = res.body
+            })
+        })
+    })
+
+    it('Compare the values in response against the values passed through gwa command', () => {
+        cy.get('@api').then(({ authorizationProfiles }: any) => {
+            actualResponse = response
+            expectedResponse = authorizationProfiles.shared_gwa_publish
             cy.compareJSONObjects(actualResponse, expectedResponse, true)
         })
     })

@@ -16,7 +16,7 @@
       "Namespace.Assign"
     ],
     "expectedNamespace": {
-      "name": "gw-6d884",
+      "name": "gw-fd05f",
       "orgUnit": "planning-and-innovation-division",
       "enabled": true
     },
@@ -194,6 +194,29 @@
         }
       ],
       "isShared": true
+    },
+    "shared_gwa_publish": {
+      "name": "Gold Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "mode": "auto",
+      "clientAuthenticator": "client-secret",
+      "environmentDetails": [
+        {
+          "clientId": "gwa-api",
+          "clientRegistration": "managed",
+          "clientSecret": "****",
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "exists": true
+        }
+      ],
+      "clientRoles": [],
+      "clientMappers": [],
+      "availableScopes": [],
+      "resourceScopes": [],
+      "isShared": true,
+      "apiKeyName": "X-API-KEY"
     },
     "shared_IDP_body": {
       "name": "Sample Shared IdP new",
