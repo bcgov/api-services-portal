@@ -23,7 +23,7 @@ jobs:
 
       - name: Build Executable Binary
         run: |
-          cd gwa-cli
+          go mod tidy
           just build
 
       - name: Upload Binary
