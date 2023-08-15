@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Source Repository
         uses: actions/checkout@v2
         with:
-          repository: https://github.com/bcgov/gwa-cli.git 
+          repository: bcgov/https://github.com/bcgov/gwa-cli.git 
           ref: dev
 
       - name: Download Go
