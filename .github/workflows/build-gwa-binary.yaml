@@ -13,10 +13,16 @@ jobs:
           git clone https://github.com/bcgov/gwa-cli.git -b dev
           cd gwa-cli
 
-      - name: Set up Rust and Just  
-        uses: actions-rs/toolchain@v1
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          toolchain: stable
+          go-version: 1.16 # Replace with the desired Go version
+
+      - name: Install just
+        run: |
+          wget https://github.com/casey/just/releases/download/v0.10.1/just-v0.10.1-x86_64-unknown-linux-musl -O just
+          chmod +x just
+          sudo mv just /usr/local/bin/
 
       - name: Build Go Binary
         run: just build
