@@ -40,7 +40,7 @@ describe('Create API Spec', () => {
   })
 
   it('create namespace using gwa cli command', () => {
-    let url = "oauth2proxy.localtest.me:4180"
+    cleanedUrl
     cy.exec('gwa namespace create --host ' + url + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout

@@ -40,8 +40,8 @@ describe('Create API Spec', () => {
   })
 
   it('create namespace using gwa cli command', () => {
-    let url = "oauth2proxy.localtest.me:4180"
-    cy.exec('gwa namespace create --host ' + url + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.updateJsonValue('apiowner.json', 'apiTest.namespace', namespace)

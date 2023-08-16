@@ -35,7 +35,8 @@ describe('Create API Spec', () => {
   })
 
   it('Check gwa config command to set environment', () => {
-    cy.executeCliCommand('gwa config set --host oauth2proxy.localtest.me:4180 --scheme http').then((response) => {
+    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+    cy.executeCliCommand('gwa config set --host '+cleanedUrl+' --scheme http').then((response) => {
       assert.equal(response.stdout, "Config settings saved")
     });
   })

@@ -20,6 +20,27 @@
       "orgUnit": "planning-and-innovation-division",
       "enabled": true
     },
+    "expectedRoles":{
+      "organization-admin": {
+        "label": "Organization Administrator",
+        "permissions": [
+            {
+                "resourceType": "organization",
+                "scopes": [
+                    "GroupAccess.Manage",
+                    "Namespace.Assign",
+                    "Dataset.Manage"
+                ]
+            },
+            {
+                "resourceType": "namespace",
+                "scopes": [
+                    "Namespace.View"
+                ]
+            }
+        ]
+    }
+    },
     "body": {
       "name": "ministry-of-health",
       "parent": "/ca.bc.gov",

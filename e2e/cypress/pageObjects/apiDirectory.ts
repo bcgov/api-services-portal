@@ -17,6 +17,7 @@ class ApiDirectoryPage {
   orgDropDown: string = '[data-testid="orgDropDown"]'
   orgUnitDropDown: string = '[data-testid="orgUnitDropDown"]'
   addOrganizationBtn: string = '[data-testid="addOrganizationBtn"]'
+  jwksPublicKeyCheckBox: string = '[data-testid="access-rqst-app-env-public-key"]'
 
 
   createAccessRequest(product: any, app: any, accessRqst: any, elevatedAccess?: boolean) {
@@ -119,6 +120,24 @@ class ApiDirectoryPage {
 
   getPlainText(text: string): string {
     return text.replace(/[\r\n]/g, '').replace(/\s+/g, " ")
+  }
+
+  enterInvalidJWTKey(product: any, app: any, accessRqst: any) {
+    cy.contains(product.name).click()
+    cy.get(this.rqstAccessBtn).click()
+    cy.get(this.appSelect).select(app.name)
+    cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').click()
+    cy.get('body', { log: false }).then(($body) => {
+      if ($body.find(this.legatTermCheckBox).length > 0) {
+        cy.get(this.legatTermCheckBox).first().click()
+      }
+    })
+    cy.readFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub').then((publicKeyKey) => {
+      cy.get(this.jwksPublicKeyCheckBox).click()
+      cy.get('[name="clientCertificate"]').click().type(publicKeyKey + "End of File")
+    })
+    cy.get(this.additionalNotes).type(accessRqst.notes)
+    cy.get(this.submitBtn).click()
   }
 }
 
