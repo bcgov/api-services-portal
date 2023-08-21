@@ -40,6 +40,35 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
+
+      - name: Checkout Source Repository
+        run: |
+          git clone https://github.com/bcgov/gwa-cli.git -b dev
+          cd gwa-cli
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16 # Replace with the desired Go version
+
+      - name: Install just
+        run: |
+          wget https://github.com/casey/just/releases/download/v0.10.1/just-v0.10.1-x86_64-unknown-linux-musl -O just
+          chmod +x just
+          sudo mv just /usr/local/bin/
+
+      - name: Build Go Binary
+        run: just build
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: gwa
+          path: /usr/local/bin # Replace with the path to your built binary
+        
+      - name: Check GWA help
+        run: gwa -h
+        
       - name: Execute Tests & Clean Up
         run: |
           while true; do

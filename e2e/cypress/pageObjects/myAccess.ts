@@ -166,6 +166,7 @@ class myAccessPage {
       cy.saveState('clientID', $clientID)
     })
   }
+
 }
 
 export default myAccessPage
