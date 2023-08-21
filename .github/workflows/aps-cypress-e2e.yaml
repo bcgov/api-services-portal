@@ -23,11 +23,44 @@ jobs:
           git clone https://github.com/bcgov/gwa-api.git -b dev
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
+
+      - name: Checkout Source Repository
+        run: |
+          git clone https://github.com/bcgov/gwa-cli.git -b dev
+          cd gwa-cli
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20.5'
+
+      - name: create .env file
+        run: |
+          echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
+          echo "GWA_CLIENT_ID=gwa-cli" >> .env
+
+      - name: set up Just
+        uses: extractions/setup-just@v1
+        with:
+          just-version: 1.14.0
+
+      - name: Build
+        run: |
+          cd gwa-cli
+          just build
+
+      - name: Move file to /usr/local/bin
+        run: |
+          cd gwa-cli
+          sudo mv gwa /usr/local/bin/
+
       - name: Checkout Portal
         uses: actions/checkout@v2
+
       - name: Build Docker Images
         run: |
           docker-compose build
+          
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
@@ -40,34 +73,6 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
-
-      - name: Checkout Source Repository
-        run: |
-          git clone https://github.com/bcgov/gwa-cli.git -b dev
-          cd gwa-cli
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16 # Replace with the desired Go version
-
-      - name: Install just
-        run: |
-          wget https://github.com/casey/just/releases/download/v0.10.1/just-v0.10.1-x86_64-unknown-linux-musl -O just
-          chmod +x just
-          sudo mv just /usr/local/bin/
-
-      - name: Build Go Binary
-        run: just build
-
-      - name: Upload Binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: gwa
-          path: /usr/local/bin # Replace with the path to your built binary
-        
-      - name: Check GWA help
-        run: gwa -h
 
       - name: Execute Tests & Clean Up
         run: |
