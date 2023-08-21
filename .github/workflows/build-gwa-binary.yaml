@@ -2,11 +2,7 @@ name: Build GWA Binary
 
 on:
   push:
-    branches: ['dev', 'cypress*']
-
-on:
- repository_dispatch:
-    types: [build-gwa-binary]
+    branches: ['cypress/*']
 
 jobs:
   cypress-run:
