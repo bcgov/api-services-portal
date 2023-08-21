@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['test', 'cypress/*']
+    branches: ['test', 'cypress*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -68,7 +68,7 @@ jobs:
         
       - name: Check GWA help
         run: gwa -h
-        
+
       - name: Execute Tests & Clean Up
         run: |
           while true; do
