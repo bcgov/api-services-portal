@@ -16,30 +16,30 @@
       "Namespace.Assign"
     ],
     "expectedNamespace": {
-      "name": "gw-fd05f",
+      "name": "gw-65590",
       "orgUnit": "planning-and-innovation-division",
       "enabled": true
     },
-    "expectedRoles":{
+    "expectedRoles": {
       "organization-admin": {
         "label": "Organization Administrator",
         "permissions": [
-            {
-                "resourceType": "organization",
-                "scopes": [
-                    "GroupAccess.Manage",
-                    "Namespace.Assign",
-                    "Dataset.Manage"
-                ]
-            },
-            {
-                "resourceType": "namespace",
-                "scopes": [
-                    "Namespace.View"
-                ]
-            }
+          {
+            "resourceType": "organization",
+            "scopes": [
+              "GroupAccess.Manage",
+              "Namespace.Assign",
+              "Dataset.Manage"
+            ]
+          },
+          {
+            "resourceType": "namespace",
+            "scopes": [
+              "Namespace.View"
+            ]
+          }
         ]
-    }
+      }
     },
     "body": {
       "name": "ministry-of-health",

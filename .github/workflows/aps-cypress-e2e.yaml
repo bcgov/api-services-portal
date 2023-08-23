@@ -54,6 +54,9 @@ jobs:
           cd gwa-cli
           sudo mv gwa /usr/local/bin/
 
+      - name: Check GWA help
+        run: gwa -h
+
       - name: Checkout Portal
         uses: actions/checkout@v2
 

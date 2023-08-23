@@ -20,7 +20,7 @@
     ]
   },
   "deleteResources": {
-    "namespace": "gw-4722b",
+    "namespace": "gw-2a3ef",
     "product": {
       "name": "Delete-Auto Test Product",
       "environment": {
@@ -61,7 +61,7 @@
     }
   },
   "clientCredentials": {
-    "namespace": "gw-6faa0",
+    "namespace": "gw-e9cd4",
     "serviceName": "cc-service-for-platform",
     "Mark": {
       "userName": "mark",
@@ -222,7 +222,7 @@
     },
     "KongApiOnly": {
       "product": {
-        "name": "Auto Test Product",
+        "name": "GWA Auto Test Product",
         "orgName": "Ministry of Health",
         "orgUnitName": "Planning and Innovation Division",
         "environment": {
@@ -238,7 +238,7 @@
     },
     "clientIdSecret_KongKeyToCC": {
       "product": {
-        "name": "Auto Test Product",
+        "name": "GWA Auto Test Product",
         "orgName": "Ministry of Health",
         "orgUnitName": "Planning and Innovation Division",
         "environment": {
@@ -280,7 +280,7 @@
     }
   },
   "namespacePreview": {
-    "namespace": "",
+    "namespace": "gw-07034",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -301,7 +301,7 @@
     }
   },
   "orgAssignment": {
-    "namespace": "",
+    "namespace": "gw-57421",
     "serviceName": "a-service-for-orgassignment",
     "Mark": {
       "userName": "mark",
@@ -399,7 +399,7 @@
     }
   },
   "checkPermission": {
-    "namespace": "gw-25d58",
+    "namespace": "gw-e9cca",
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
@@ -543,7 +543,7 @@
     }
   },
   "apiTest": {
-    "namespace": "gw-fd05f",
+    "namespace": "gw-65590",
     "delete_namespace": "testplatform",
     "product": {
       "name": "API Auto Test Product",
@@ -568,7 +568,7 @@
         "entity": "access request",
         "accessRequest": "2",
         "environment": "dev",
-        "product": "Auto Test Product",
+        "product": "GWA Auto Test Product",
         "application": "Auto Test App to check labels",
         "consumer": "9C3EFC92-8F3DE9D3B74"
       },
@@ -584,7 +584,7 @@
         "note": "access pending approval",
         "accessRequest": "2",
         "environment": "dev",
-        "product": "Auto Test Product",
+        "product": "GWA Auto Test Product",
         "application": "Auto Test App to check labels",
         "consumer": "9C3EFC92-8F3DE9D3B73"
       },
