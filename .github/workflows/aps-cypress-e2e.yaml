@@ -49,16 +49,21 @@ jobs:
           cd gwa-cli
           just build
 
-      - name: Move file to /usr/local/bin
-        run: |
-          cd gwa-cli
-          sudo mv gwa /usr/local/bin/
+      # - name: Move file to /usr/local/bin
+      #   run: |
+      #     cd gwa-cli
+      #     sudo mv gwa /usr/local/bin/
 
-      - name: Check GWA help
-        run: gwa -h
+      # - name: Check GWA help
+      #   run: gwa -h
 
       - name: Checkout Portal
         uses: actions/checkout@v2
+
+      - name: Move file to e2e folder
+        run: |
+          cd gwa-cli
+          sudo mv gwa ${{ github.workspace }}/e2e
 
       - name: Build Docker Images
         run: |
