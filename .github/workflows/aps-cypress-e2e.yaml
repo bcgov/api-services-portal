@@ -47,13 +47,13 @@ jobs:
       - name: Build
         run: |
           cd gwa-cli
-          env GOOS=linux GOARCH=arm64 go build -o gwa
+          env GOOS=linux GOARCH=arm64 go build -o bin/gwa
 
 
       - name: Move file to /usr/local/bin
         run: |
           cd gwa-cli
-          sudo mv gwa /usr/local/bin/
+          sudo mv bin/gwa /usr/local/bin/
 
       # - name: Check GWA help
       #   run: gwa -h
