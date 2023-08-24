@@ -45,10 +45,16 @@ jobs:
       #     just-version: 1.14.0
 
       - name: Build
-        run: go mod tidy && env GOOS=linux GOARCH=arm64 go build -o bin/gwa
+        run: |
+          cd gwa-cli
+          go mod tidy
+          env GOOS=linux GOARCH=arm64 go build -o bin/gwa
+
 
       - name: Move file to /usr/local/bin
-        run: sudo mv bin/gwa /usr/local/bin/
+        run: |
+          cd gwa-cli
+          sudo mv bin/gwa /usr/local/bin/
 
       # - name: Check GWA help
       #   run: gwa -h
