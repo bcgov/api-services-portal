@@ -29,10 +29,10 @@ jobs:
           git clone https://github.com/bcgov/gwa-cli.git -b dev
           cd gwa-cli
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.20.5'
+          go-version: '1.16.x'
 
       - name: create .env file
         run: |
@@ -45,15 +45,10 @@ jobs:
       #     just-version: 1.14.0
 
       - name: Build
-        run: |
-          cd gwa-cli
-          env GOOS=linux GOARCH=arm64 go build -o bin/gwa
-
+        run: env GOOS=linux GOARCH=arm64 go build -o bin/gwa
 
       - name: Move file to /usr/local/bin
-        run: |
-          cd gwa-cli
-          sudo mv bin/gwa /usr/local/bin/
+        run: sudo mv bin/gwa /usr/local/bin/
 
       # - name: Check GWA help
       #   run: gwa -h
