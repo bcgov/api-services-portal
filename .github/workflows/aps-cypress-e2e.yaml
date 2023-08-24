@@ -45,7 +45,7 @@ jobs:
       #     just-version: 1.14.0
 
       - name: Build
-        run: env GOOS=linux GOARCH=arm64 go build -o bin/gwa
+        run: go mod tidy && env GOOS=linux GOARCH=arm64 go build -o bin/gwa
 
       - name: Move file to /usr/local/bin
         run: sudo mv bin/gwa /usr/local/bin/
