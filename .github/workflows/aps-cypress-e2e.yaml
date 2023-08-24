@@ -44,17 +44,11 @@ jobs:
         with:
           just-version: 1.14.0
 
-      # - name: Build
-      #   run: |
-      #     cd gwa-cli
-      #     just build
-      - name: Build GO binary file
-        uses: wangyoucao577/go-release-action@v1.16
-        with:
-          goos: linux
-          goarch: amd64
-          project_path: "gwa-cli"
-          binary_name: "gwa"
+      - name: Build
+        run: |
+          cd gwa-cli
+          env GOOS=linux GOARCH=arm64 go build -o gwa
+
 
       - name: Move file to /usr/local/bin
         run: |
