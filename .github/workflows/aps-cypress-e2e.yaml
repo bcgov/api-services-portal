@@ -29,6 +29,9 @@ jobs:
           git clone https://github.com/bcgov/gwa-cli.git -b dev
           cd gwa-cli
 
+      - name: Checkout Portal
+        uses: actions/checkout@v2
+
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
@@ -49,9 +52,6 @@ jobs:
         with:
           name: binary-artifact
           path: ${{ github.workspace }}/e2e
-
-      - name: Checkout Portal
-        uses: actions/checkout@v2
 
       - name: Build Docker Images
         run: |
