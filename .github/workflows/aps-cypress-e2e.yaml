@@ -32,39 +32,26 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.20'
+          go-version: '1.19.x'
 
       - name: create .env file
         run: |
           echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
           echo "GWA_CLIENT_ID=gwa-cli" >> .env
 
-      # - name: set up Just
-      #   uses: extractions/setup-just@v1
-      #   with:
-      #     just-version: 1.14.0
-
       - name: Build
         run: |
           cd gwa-cli
-          go mod tidy
-          env GOOS=linux GOARCH=arm64 go build -o bin/gwa
+          go clean
+          go build -o ${{ github.workspace }}/e2e/gwa
 
-
-      - name: Move file to /usr/local/bin
-        run: |
-          cd gwa-cli
-          sudo mv bin/gwa /usr/local/bin/
-
-      # - name: Check GWA help
-      #   run: gwa -h
+      - uses: actions/upload-artifact@v2
+        with:
+          name: binary-artifact
+          path: ${{ github.workspace }}/e2e
 
       - name: Checkout Portal
         uses: actions/checkout@v2
-
-      - name: Move file to e2e folder
-        run: |
-          sudo mv /usr/local/bin/gwa ${{ github.workspace }}/e2e
 
       - name: Build Docker Images
         run: |
@@ -115,15 +102,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # - name: Check for failed tests and create Issue
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
-      #     if [[ "$FAILURE_COUNT" -gt 0 ]]; then
-      #       FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==true) | .title')
-      #       STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats')
-      #       echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
-      #       export MSG=$(cat msg)
-      #       gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
-      #     fi
+      - name: Check for failed tests and create Issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
+          if [[ "$FAILURE_COUNT" -gt 0 ]]; then
+            FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==true) | .title')
+            STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats')
+            echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
+            export MSG=$(cat msg)
+            gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+          fi
