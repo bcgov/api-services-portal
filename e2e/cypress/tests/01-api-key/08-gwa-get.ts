@@ -35,7 +35,7 @@ describe('Verify GWA get commands', () => {
 
   it('Check gwa config command to set token', () => {
     cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 

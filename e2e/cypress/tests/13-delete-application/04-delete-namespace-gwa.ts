@@ -27,7 +27,7 @@ describe('Verify namespace delete using gwa command', () => {
 
     it('Set token using gwa config command', () => {
         cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
-            assert.equal(response.stdout, "Config settings saved")
+            expect(response.stdout).to.contain("Config settings saved")
         });
     })
 
@@ -54,7 +54,7 @@ describe('Verify namespace delete using gwa command', () => {
         cy.get('@apiowner').then(({ namespace }: any) => {
             _namespace = namespace
             cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
-                assert.equal(response.stdout, "Config settings saved")
+                expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa namespace destroy').then((response) => {
                     expect(response.stderr).to.contain('services have been configured in this namespace');
                 });

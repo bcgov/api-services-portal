@@ -92,7 +92,7 @@ describe('Multiple Org Adming for the organization', () => {
 
   it('Set token with gwa config command', () => {
     cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 

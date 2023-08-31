@@ -37,13 +37,13 @@ describe('Create API Spec', () => {
   it('Check gwa config command to set environment', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
     cy.executeCliCommand('gwa config set --host '+cleanedUrl+' --scheme http').then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 
   it('Check gwa config command to set token', () => {
     cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 

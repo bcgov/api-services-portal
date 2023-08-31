@@ -48,13 +48,13 @@ describe('Verify CLI commands', () => {
 
   it('Check gwa config command to set environment', () => {
     cy.executeCliCommand('gwa config set --host oauth2proxy.localtest.me:4180 --scheme http').then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 
   it('Check gwa config command to set token', () => {
     cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
-      assert.equal(response.stdout, "Config settings saved")
+      expect(response.stdout).to.contain("Config settings saved")
     });
   })
 

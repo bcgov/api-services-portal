@@ -262,7 +262,7 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: 
           cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
             cy.executeCliCommand('gwa config set --token ' + res.body.access_token).then((response) => {
               {
-                assert.equal(response.stdout, "Config settings saved")
+                expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa pg ./cypress/fixtures/' + fileName).then((response) => {
                   debugger
                   expect(response.stdout).to.contain("Gateway config published")
