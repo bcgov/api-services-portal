@@ -10,7 +10,7 @@ let cli = require("../../fixtures/test_data/gwa-cli.json")
 
 const jose = require('node-jose')
 
-describe('Verify CLI commands', () => {
+describe('Verify CLI commands for generate/apply config', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
@@ -39,31 +39,36 @@ describe('Verify CLI commands', () => {
     })
   })
 
-  // it('Check gwa config command to set token', () => {
-  //   cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
-  //       expect(response.stdout).to.contain("Config settings saved")
-  //   });
-  // })
+  it('Check gwa config command to set token', () => {
+    cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
 
-  // it('Check gwa command to generate config', () => {
-  //   cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
-  //     assert.equal(response.stdout, "File gw-config.yml created")
-  //   });
-  // })
+  it('Check gwa command to generate config for client credential template', () => {
+    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
+      assert.equal(response.stdout, "File gw-config.yml created")
+    });
+  })
 
-  // it('Check gwa command to apply generated config', () => {
-  //   cy.executeCliCommand('gwa apply').then((response) => {
-  //     let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
-  //     expect(wordOccurrences).to.equal(3)
-  //     wordOccurrences = (response.stdout.match(/\published\b/g) || []).length;
-  //     expect(wordOccurrences).to.equal(1)
-  //   });
-  // })
+  it('Check gwa command to apply generated config', () => {
+    cy.executeCliCommand('gwa apply').then((response) => {
+      debugger
+      let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
+      expect(wordOccurrences).to.equal(3)
+      namespace = response.stdout.split('\n')[0]
+      namespace = namespace.replace('-', '').trim()
+    });
+  })
+
+  it('Check gwa command to generate config for kong httpbin template', () => {
+    cy.executeCliCommand('gwa generate-config --template kong-httpbin --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
+      assert.equal(response.stdout, "File gw-config.yml created")
+    });
+  })
 
   it('activates new namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.useNamespace(namespace)
-    })
+    home.useNamespace(namespace)
   })
 
   it('Verify that the product created through gwa command is displayed in the portal', () => {
@@ -76,11 +81,11 @@ describe('Verify CLI commands', () => {
   })
 
   it('Verify the issuer details for the product', () => {
-    pd.verifyIssuer('gw-d4ed4 default (test)')
+    pd.verifyIssuer(namespace + ' default (test)')
   })
 
   it('Verify that the dataset created through GWA comand is assocuated with the product', () => {
     cy.visit(pd.path)
-    pd.verifyDataset('my-service','my-service API')
+    pd.verifyDataset('my-service', 'my-service API')
   })
 })

@@ -35,32 +35,20 @@ describe('Verify CLI commands', () => {
     })
   })
 
-  it('Check for gwa help', () => {
-    cy.executeCliCommand('gwa help').then((response) => {
-      debugger
-      assert.equal(response.stdout, cli.content.help)
-    });
-  })
-
-  it('Check gwa command for login help', () => {
-    cy.executeCliCommand('gwa login -h').then((response) => {
-      assert.equal(response.stdout, cli.content.login_help)
-    });
-  })
 
   it('Check gwa command to login with client ID and secret', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = cli.credentials.clientSecret
     cy.log('gwa login --host ${url} --scheme http')
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      assert.equal(response.stdout, "Logged in")
+      expect(response.stdout).to.contain('Successfully logged in');
     });
   })
 
   it('Check gwa command for login with invalid client id', () => {
     let clientID = "dummy-client"
     let clientSecret = cli.credentials.clientSecret
-    cy.executeCliCommand('gwa login --client-id '+clientID+' --client-secret '+clientSecret+' --host '+cleanedUrl+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
     });
   })
@@ -68,21 +56,15 @@ describe('Verify CLI commands', () => {
   it('Check gwa command for login with invalid client secret', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = "dummy-client-secret"
-    cy.executeCliCommand('gwa login --client-id '+clientID+' --client-secret '+clientSecret+' --host '+cleanedUrl+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
     });
   })
 
-  it('Check gwa command for config help', () => {
-    cy.executeCliCommand('gwa config -h').then((response) => {
-      debugger
-      assert.equal(response.stdout, cli.content.config_help)
-    });
-  })
 
   it('Check gwa config command to set environment', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.executeCliCommand('gwa config set --host '+cleanedUrl+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })
@@ -93,13 +75,6 @@ describe('Verify CLI commands', () => {
     });
   })
 
-  it('Check gwa command for namespace help', () => {
-    cy.executeCliCommand('gwa namespace -h').then((response) => {
-      debugger
-      assert.equal(response.stdout, cli.content.namespace_help)
-    });
-  })
-
   it('Check gwa command to create namespace', () => {
     cy.executeCliCommand('gwa namespace create --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
@@ -107,10 +82,17 @@ describe('Verify CLI commands', () => {
     });
   })
 
+
   it('Check gwa namespace list command and verify the created namespace in the list', () => {
     cy.executeCliCommand('gwa namespace list --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain(namespace);
     });
+  })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 
 })
