@@ -58,6 +58,14 @@ class ApiDirectoryPage {
     cy.get(this.submitBtn).click()
   }
 
+  checkInactiveEnvironmentAccessReqOption(product: any, app: any){
+    cy.contains('a', product.name, { timeout: 10000 }).should('be.visible');
+    cy.contains(product.name).click()
+    cy.get(this.rqstAccessBtn).click()
+    cy.get(this.appSelect).select(app.name)
+    cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').should('not.exist');
+  }
+
   isProductDisplay(productName: string, expResult: boolean) {
     cy.get("button").then(($btn) => {
       var flag = true

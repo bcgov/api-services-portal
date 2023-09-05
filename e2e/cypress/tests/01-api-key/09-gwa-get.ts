@@ -42,6 +42,7 @@ describe('Verify GWA get commands', () => {
   it('Verify "gwa get" for dataset', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.executeCliCommand('gwa get datasets').then((response) => {
+        debugger
         expect(response.stdout).not.to.contain(product);
       })
     })
@@ -70,6 +71,7 @@ describe('Verify GWA get commands', () => {
   it('Verify "gwa get" for products', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.executeCliCommand('gwa get products').then((response) => {
+        debugger
         expect(response.stdout).not.to.contain(product);
       })
     })

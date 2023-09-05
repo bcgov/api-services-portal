@@ -14,6 +14,7 @@ class myAccessPage {
   regenerateCredentialCloseBtn: string = '[data-testid=regenerate-credentials-done-button]'
   collectCredentialsBtn: string = '[data-testid="generate-credentials-button"]'
   clientIDValueTxt: string = '[data-testid="sa-new-creds-client-id"]'
+  cancelRequestAccessRequest: string = '[data-testid="access-request-cancel-button"]'
   path: string = '/devportal/access'
 
 
@@ -35,6 +36,11 @@ class myAccessPage {
   closeRequestAccessPopUp()
   {
     cy.get(this.closeRequestAccesss).click()
+  }
+
+  cancelRequestAccessPopUp()
+  {
+    cy.get(this.cancelRequestAccessRequest).click()
   }
 
   saveReGenAPIKeyValue(): void {

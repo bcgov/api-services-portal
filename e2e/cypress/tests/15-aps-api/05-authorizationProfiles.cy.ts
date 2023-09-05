@@ -1,4 +1,6 @@
+import AuthorizationProfile from "../../pageObjects/authProfile"
 import HomePage from "../../pageObjects/home"
+import login from "../../pageObjects/login"
 import LoginPage from "../../pageObjects/login"
 let userSession: any
 let testData = require("../../fixtures/test_data/authorizationProfile.json")
@@ -198,6 +200,98 @@ describe('Verify GWA command to publish issuer and apply generated config', () =
             actualResponse = response
             expectedResponse = authorizationProfiles.shared_gwa_publish
             cy.compareJSONObjects(actualResponse, expectedResponse, true)
+        })
+    })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({ log: true })
+        cy.deleteAllCookies()
+      })
+
+})
+
+describe('Deleted shared auth profile', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+    const authProfile = new AuthorizationProfile()
+
+    before(() => {
+        cy.visit('/')
+        cy.deleteAllCookies()
+        cy.reload()
+    })
+
+    beforeEach(() => {
+        cy.preserveCookies()
+        cy.fixture('apiowner').as('apiowner')
+        cy.fixture('api').as('api')
+    })
+
+    it('Authenticates Janis (api owner) to get the user session token', () => {
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+                userSession = value
+                namespace = apiTest.namespace
+                home.useNamespace(namespace);
+            })
+        })
+    })
+
+    it('Navigate to authorization profile page', () => {
+        cy.visit(authProfile.path)
+    })
+
+    it('Delete the authorizarion profile inherited from shared IDP', () => {
+        cy.get('@api').then(({ authorizationProfiles }: any) => {
+            authProfile.deleteAuthProfile(authorizationProfiles.shared_IDP_inheritFrom_expectedResponse.name)
+        })
+    })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({ log: true })
+        cy.deleteAllCookies()
+    })
+})
+
+describe('Verify that client ID of deleted shared auth profile in IDP', () => {
+
+    var nameSpace: string
+    const home = new HomePage()
+    const authProfile = new AuthorizationProfile()
+
+    before(() => {
+        cy.visit(Cypress.env('KEYCLOAK_URL'))
+        cy.deleteAllCookies()
+        cy.reload()
+    })
+
+    beforeEach(() => {
+        cy.preserveCookies()
+        cy.fixture('developer').as('developer')
+        cy.fixture('apiowner').as('apiowner')
+        cy.fixture('state/regen').as('regen')
+        cy.fixture('admin').as('admin')
+        cy.fixture('api').as('api')
+    })
+
+    it('Authenticates Admin owner', () => {
+        cy.get('@admin').then(({ user }: any) => {
+            cy.contains('Administration Console').click({ force: true })
+            cy.keycloakLogin(user.credentials.username, user.credentials.password)
+        })
+    })
+
+    it('Navigate to Clients', () => {
+        cy.contains('Clients').click()
+    })
+
+    it('Verify that the client id of deleted shared auth profile does not display', () => {
+        cy.get('@api').then(({ authorizationProfiles }: any) => {
+            debugger
+            cy.contains(authorizationProfiles.shared_IDP_inheritFrom_expectedResponse.name).should('not.exist')
         })
     })
 
