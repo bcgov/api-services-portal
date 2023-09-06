@@ -89,6 +89,10 @@ describe('Verify CLI commands for generate/apply config', () => {
     pd.verifyDataset('my-service', 'my-service API')
   })
 
+  it('Navigate to home path', () => {
+    cy.visit(login.path)
+  })
+
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
