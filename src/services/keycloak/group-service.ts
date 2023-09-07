@@ -175,7 +175,7 @@ export class KeycloakGroupService {
         (group: GroupRepresentation) => group.name == groupName
       ).length == 0
     ) {
-      logger.debug('[getGroup] MISSING %s', groupName);
+      logger.error('[getGroup] MISSING %s', groupName);
       return null;
     } else {
       logger.debug('[getGroup] FOUND   %s', groupName);

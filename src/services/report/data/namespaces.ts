@@ -13,6 +13,7 @@ import { GWAService } from '../../gwaapi';
 export interface ReportOfNamespaces {
   resource_id: string;
   name: string;
+  displayName?: string;
   permProtectedNs?: string;
   permDomains?: string[];
   permDataPlane?: string;

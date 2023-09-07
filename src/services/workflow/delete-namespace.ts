@@ -146,5 +146,9 @@ export const DeleteNamespace = async (
 
   await deleteRecords(context, 'Product', { namespace: ns }, true, ['id']);
 
+  await deleteRecords(context, 'CredentialIssuer', { namespace: ns }, true, [
+    'id',
+  ]);
+
   await updateActivity(context.sudo(), activity.id, 'success', undefined);
 };
