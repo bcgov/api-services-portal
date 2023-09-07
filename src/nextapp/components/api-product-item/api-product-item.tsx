@@ -63,15 +63,15 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isPublic && !isTiered && (
+        {!isTiered && (
           <>
             {isPublic && (
-              <Button
-                rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
-                data-testid="api-product-try-button"
-              >
-                Try this API
-              </Button>
+              <AccessRequestForm
+                disabled={false}
+                id={id}
+                name={data.name}
+                preview={preview}
+              />
             )}
             {!isPublic && (
               <AccessRequestForm
