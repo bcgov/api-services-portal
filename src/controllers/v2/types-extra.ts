@@ -10,3 +10,12 @@ export interface ActivityDetail {
   activityAt: Scalars['DateTime'];
   blob?: any;
 }
+
+/**
+ * @tsoaModel
+ */
+export interface PublishResult {
+  message?: string;
+  results?: string;
+  error?: string;
+}

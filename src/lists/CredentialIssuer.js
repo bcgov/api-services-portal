@@ -26,9 +26,10 @@ const {
 const {
   syncSharedIdp,
   addClientsToSharedIdP,
+  DeleteClientsFromSharedIdP,
 } = require('../services/workflow');
 const { Logger } = require('../logger');
-const { kebabCase } = require('lodash');
+const kebabCase = require('just-kebab-case');
 const logger = Logger('lists.credentialissuer');
 
 module.exports = {
@@ -249,6 +250,12 @@ module.exports = {
     },
 
     afterDelete: async function ({ existingItem, context }) {
+      await DeleteClientsFromSharedIdP(
+        context,
+        existingItem.clientId,
+        `${existingItem.inheritFrom}`
+      );
+
       await new StructuredActivityService(
         context,
         context.authedItem['namespace']

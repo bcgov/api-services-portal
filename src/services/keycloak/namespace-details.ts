@@ -12,6 +12,7 @@ import {
   getOrgPoliciesForResource,
 } from '../../lists/extensions/Common';
 import { GWAService } from '../gwaapi';
+import { strict as assert } from 'assert';
 
 const logger = Logger('kc.nsdetails');
 
@@ -35,16 +36,20 @@ export async function getAllNamespaces(envCtx: EnvironmentContext) {
   const client = new GWAService(process.env.GWA_API_URL);
   const defaultSettings = await client.getDefaultNamespaceSettings();
 
-  return await Promise.all(
-    nsList.map(async (nsdata: any) => {
-      return backfillGroupAttributes(
-        nsdata.name,
-        nsdata,
-        defaultSettings,
-        kcGroupService
-      );
+  return (
+    await Promise.all(
+      nsList.map(async (nsdata: any) => {
+        return backfillGroupAttributes(
+          nsdata.name,
+          nsdata,
+          defaultSettings,
+          kcGroupService
+        );
+      })
+    ).catch((err: any) => {
+      throw err;
     })
-  );
+  ).filter((x) => Boolean(x));
 }
 
 export async function getKeycloakGroupApi(
@@ -67,7 +72,10 @@ export async function backfillGroupAttributes(
 ): Promise<any> {
   const nsPermissions = await kcGroupService.getGroup('ns', ns);
 
+  assert.strictEqual(Boolean(nsPermissions), true, 'Invalid namespace');
+
   transformSingleValueAttributes(nsPermissions.attributes, [
+    'description',
     'perm-data-plane',
     'perm-protected-ns',
     'org',
@@ -161,6 +169,7 @@ export async function getResource(
     .map((ns: ResourceSet) => ({
       id: ns.id,
       name: ns.name,
+      displayName: ns.displayName,
       scopes: ns.resource_scopes,
     }))
     .pop();

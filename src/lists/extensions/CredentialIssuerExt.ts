@@ -1,5 +1,5 @@
 const { EnforcementPoint } = require('../../authz/enforcement');
-import { kebabCase } from 'lodash';
+import kebabCase from 'just-kebab-case';
 import {
   generateEnvDetails,
   lookupSharedIssuers,

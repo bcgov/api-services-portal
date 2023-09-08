@@ -57,7 +57,6 @@ export function regExprValidation(
   value: string,
   errorMessage: string
 ) {
-  const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
   const re = new RegExp(rule);
   assert.strictEqual(re.test(value), true, errorMessage);
 }

@@ -81,11 +81,13 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              context.skipAccessControl = true;
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
 
               const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG;
               const { newCredentials } = await CreateServiceAccount(
-                context,
+                noauthContext,
                 productEnvironmentSlug,
                 context.req.user.namespace,
                 args.resourceId,

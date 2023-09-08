@@ -23,13 +23,6 @@ class ApiOpenapiApp {
 
     RegisterRoutes(app);
 
-    // RFC 8631 service-desc link relation
-    // https://datatracker.ietf.org/doc/html/rfc8631
-    app.get('/ds/api', (req, res) => {
-      res.setHeader('Link', '</ds/api/openapi.yaml>; rel="service-desc"');
-      res.status(204).end();
-    });
-
     app.get('/ds/api/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
       res.send(spec);
@@ -54,14 +47,9 @@ class ApiOpenapiApp {
     */
     specObject.components.securitySchemes.jwt.flows.clientCredentials.tokenUrl = `${process.env.OIDC_ISSUER}/protocol/openid-connect/token`;
 
-    RegisterRoutes(app);
+    specObject.components.securitySchemes.openid.openIdConnectUrl = `${process.env.OIDC_ISSUER}/.well-known/openid-configuration`;
 
-    // RFC 8631 service-desc link relation
-    // https://datatracker.ietf.org/doc/html/rfc8631
-    app.get('/ds/api/v2', (req, res) => {
-      res.setHeader('Link', '</ds/api/openapi.yaml>; rel="service-desc"');
-      res.status(204).end();
-    });
+    RegisterRoutes(app);
 
     app.get('/ds/api/v2/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
@@ -85,6 +73,13 @@ class ApiOpenapiApp {
 
     this.prepareV2(app);
     this.prepareV1(app);
+
+    // RFC 8631 service-desc link relation
+    // https://datatracker.ietf.org/doc/html/rfc8631
+    app.get('/ds/api', (req, res) => {
+      res.setHeader('Link', '</ds/api/v2/openapi.yaml>; rel="service-desc"');
+      res.status(204).end();
+    });
 
     app.use(function errorHandler(err, req, res, next) {
       if (err instanceof UnauthorizedError) {

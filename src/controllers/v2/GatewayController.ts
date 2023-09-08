@@ -9,6 +9,8 @@ import {
   Security,
   Body,
   Tags,
+  FormField,
+  UploadedFile,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
@@ -20,6 +22,7 @@ import {
   removeKeys,
 } from '../../batch/feed-worker';
 import { GatewayRoute } from './types';
+import { PublishResult } from './types-extra';
 
 @injectable()
 @Route('/namespaces/{ns}/gateway')
@@ -29,6 +32,17 @@ export class GatewayController extends Controller {
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
+  }
+
+  @Put()
+  @OperationId('publish-gateway-config')
+  @Security('jwt', ['Gateway.Config'])
+  public async put(
+    @FormField() dryRun: boolean,
+    @UploadedFile() configFile: Express.Multer.File
+  ): Promise<PublishResult> {
+    // stub - gwa-api implements this
+    return { error: 'Stub - not implemented' };
   }
 
   /**
