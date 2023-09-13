@@ -1,7 +1,7 @@
 import 'cypress-v10-preserve-cookie'
-import jsonpath = require('jsonpath');
-const fs = require('fs');
 const YAML = require('yamljs');
+const path = require('path');
+
 
 const listOfCookies = [
   'AUTH_SESSION_ID_LEGACY',
@@ -160,6 +160,20 @@ Cypress.Commands.add('gwaPublish', (type: string, fileName: string) => {
     return response
   });
 })
+// cypress/support/commands.js
+
+Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
+  const currentDirectory = Cypress.config('fileServerFolder'); // Get the current working directory
+  const filePath = path.join(currentDirectory, fileName)
+  debugger
+  try {
+    cy.exec(`rm -f ${filePath}`);
+    cy.log(`File '${fileName}' has been deleted from the e2e folder.`);
+  } catch (error) {
+    cy.log(`Error deleting file '${fileName}' from the e2e folder`);
+  }
+});
+
 
 Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: string, replacementWord: string)=> {
   // Create a regular expression with the 'g' flag for global search

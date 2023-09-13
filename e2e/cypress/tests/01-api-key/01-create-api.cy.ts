@@ -36,7 +36,7 @@ describe('Create API Spec', () => {
 
   it('Check gwa config command to set environment', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.executeCliCommand('gwa config set --host '+cleanedUrl+' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })
@@ -79,15 +79,23 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('creates as new product in the directory through GWA Cli command', () => {
-    cy.gwaPublish('product', 'gwa-product.yaml').then((response: any) => {
-      expect(response.stdout).to.contain('Product successfully published');
-    })
-  })
+  // it('creates as new product in the directory through GWA Cli command', () => {
+  //   cy.gwaPublish('product', 'gwa-product.yaml').then((response: any) => {
+  //     expect(response.stdout).to.contain('Product successfully published');
+  //   })
+  // })
 
-  it('Upload dataset using GWA Cli command', () => {
-    cy.gwaPublish('dataset', 'gwa-dataset.yaml').then((response: any) => {
-      expect(response.stdout).to.contain('Dataset successfully published');
+  // it('Upload dataset using GWA Cli command', () => {
+  //   cy.gwaPublish('dataset', 'gwa-dataset.yaml').then((response: any) => {
+  //     expect(response.stdout).to.contain('Dataset successfully published');
+  //   })
+  // })
+
+  it('Upload dataset and Product using GWA Apply command', () => {
+    cy.executeCliCommand('gwa apply').then((response) => {
+      debugger
+      let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
+      expect(wordOccurrences).to.equal(2)
     })
   })
 

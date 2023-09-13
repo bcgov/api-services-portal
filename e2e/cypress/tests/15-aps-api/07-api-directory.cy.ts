@@ -146,7 +146,7 @@ describe('API Tests for Updating dataset', () => {
 
     it('Verify the expected directory details are display in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
-            // cy.compareJSONObjects(response, apiDirectory.directory, true)
+            cy.compareJSONObjects(response, apiDirectory.directory, true)
         })
     })
 
@@ -183,11 +183,11 @@ describe('API Tests for Updating dataset', () => {
         })
     })
 
-    // it('Verify the expected namespace directory details are display in the response', () => {
-    //     cy.get('@api').then(({ apiDirectory }: any) => {
-    //         cy.compareJSONObjects(response, apiDirectory.directory, true)
-    //     })
-    // })
+    it('Verify the expected namespace directory details are display in the response', () => {
+        cy.get('@api').then(({ apiDirectory }: any) => {
+                cy.compareJSONObjects(response, apiDirectory.directory, false)
+        })
+    })
 
     it('Get the namespace directory details by its ID (/namespaces/{ns}/directory/{id}) and verify the success code in the response', () => {
         cy.get('@apiowner').then(({ namespace }: any) => {
@@ -211,11 +211,9 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Delete the dataset (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
-            cy.get('@api').then(({ apiDirectory, organization }: any) => {
-                cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'DELETE').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                })
+        cy.get('@api').then(({ apiDirectory, organization }: any) => {
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'DELETE').then((res) => {
+                expect(res.status).to.be.equal(200)
             })
         })
     })

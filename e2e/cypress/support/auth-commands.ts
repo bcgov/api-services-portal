@@ -264,7 +264,6 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: 
               {
                 expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa pg ./cypress/fixtures/' + fileName).then((response) => {
-                  debugger
                   expect(response.stdout).to.contain("Gateway config published")
                 })
               }
@@ -572,6 +571,11 @@ Cypress.Commands.add('forceVisit', (url: string) => {
   cy.window().then(win => {
     return win.open(url, '_self');
   });
+});
+
+Cypress.Commands.add('updateJsonBoby', (json: any, key: string, newValue: string):any => {
+  json[key] = newValue
+  return json
 });
 
 const formDataRequest = (

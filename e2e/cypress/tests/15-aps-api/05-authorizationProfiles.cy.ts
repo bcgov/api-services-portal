@@ -169,7 +169,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
 
 })
 
-describe('Verify GWA command to publish issuer and apply generated config', () => {
+describe('Published a shared authorization profile', () => {
 
     let response: any
     let actualResponse: any
@@ -180,9 +180,20 @@ describe('Verify GWA command to publish issuer and apply generated config', () =
         cy.fixture('apiowner').as('apiowner')
     })
 
-    it('Create a credential issuer using gwa publish command', () => {
-        cy.gwaPublish('issuer', 'gwa-issuer.yaml').then((response: any) => {
-            expect(response.stdout).to.contain('Issuer successfully published');
+    it('Prepare the Request Specification to create a shared IDP profile', () => {
+        cy.get('@api').then(({ authorizationProfiles }: any) => {
+            cy.setHeaders(authorizationProfiles.headers)
+            cy.setAuthorizationToken(userSession)
+            cy.setRequestBody(authorizationProfiles.shared_gwa)
+        })
+    })
+
+    it('Create a shared credential issuer', () => {
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
+                expect(response.status).to.be.equal(200)
+                expect(response.body.result).to.be.equal("created")
+            })
         })
     })
 
@@ -192,14 +203,6 @@ describe('Verify GWA command to publish issuer and apply generated config', () =
                 expect(res.status).to.be.equal(200)
                 response = res.body
             })
-        })
-    })
-
-    it('Compare the values in response against the values passed through gwa command', () => {
-        cy.get('@api').then(({ authorizationProfiles }: any) => {
-            actualResponse = response
-            expectedResponse = authorizationProfiles.shared_gwa_publish
-            cy.compareJSONObjects(actualResponse, expectedResponse, true)
         })
     })
 
@@ -290,7 +293,6 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
 
     it('Verify that the client id of deleted shared auth profile does not display', () => {
         cy.get('@api').then(({ authorizationProfiles }: any) => {
-            debugger
             cy.contains(authorizationProfiles.shared_IDP_inheritFrom_expectedResponse.name).should('not.exist')
         })
     })

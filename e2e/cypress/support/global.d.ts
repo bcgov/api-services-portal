@@ -97,5 +97,9 @@ declare namespace Cypress {
     gwaPublish(type: string, fileName: string): Chainable<Cypress.Response<any>>
 
     replaceWord(originalString: string, wordToReplace: string, replacementWord: string): Chainable<any>
+
+    updateJsonBoby(json: any, key: string, newValue: string):Chainable<any>
+
+    deleteFileInE2EFolder(fileName: string):Chainable<any>
   }
 }

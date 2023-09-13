@@ -89,6 +89,10 @@ describe('Verify CLI commands', () => {
     });
   })
 
+  it('Delete Exsting config file', () => {
+    cy.deleteFileInE2EFolder('gw-config.yml')
+  })
+
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
