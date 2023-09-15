@@ -42,6 +42,7 @@ jobs:
           cd gwa-cli
           echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
           echo "GWA_CLIENT_ID=gwa-cli" >> .env
+          echo "GWA_VERSION=2.2" >> .env
 
       - name: Debug
         run: echo ${{ github.workspace }}
