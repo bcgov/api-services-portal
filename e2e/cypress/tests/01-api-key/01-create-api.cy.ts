@@ -79,21 +79,8 @@ describe('Create API Spec', () => {
     })
   })
 
-  // it('creates as new product in the directory through GWA Cli command', () => {
-  //   cy.gwaPublish('product', 'gwa-product.yaml').then((response: any) => {
-  //     expect(response.stdout).to.contain('Product successfully published');
-  //   })
-  // })
-
-  // it('Upload dataset using GWA Cli command', () => {
-  //   cy.gwaPublish('dataset', 'gwa-dataset.yaml').then((response: any) => {
-  //     expect(response.stdout).to.contain('Dataset successfully published');
-  //   })
-  // })
-
   it('Upload dataset and Product using GWA Apply command', () => {
     cy.executeCliCommand('gwa apply').then((response) => {
-      debugger
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })
