@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git -b dev
+          git clone https://github.com/bcgov/gwa-api.git
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
@@ -29,7 +29,7 @@ jobs:
         
       - name: Checkout Source Repository
         run: |
-          git clone https://github.com/bcgov/gwa-cli.git -b dev
+          git clone https://github.com/bcgov/gwa-cli.git
           cd gwa-cli
 
       - name: Setup Go
