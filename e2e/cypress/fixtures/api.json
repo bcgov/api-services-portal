@@ -129,14 +129,14 @@
           "name": "GWA Auto Test Product",
           "environments": [
             {
-              "name": "test",
-              "active": true,
-              "flow": "kong-api-key-acl"
-            },
-            {
               "name": "dev",
               "active": true,
-              "flow": "kong-api-key-acl"
+              "flow": "kong-api-key-only"
+            },
+            {
+              "name": "test",
+              "active": true,
+              "flow": "client-credentials"
             }
           ]
         }
@@ -226,20 +226,18 @@
       "name": "Gold Shared IdP",
       "description": "A Shared IdP for Teams to use",
       "flow": "client-credentials",
-      "mode": "auto",
       "clientAuthenticator": "client-secret",
+      "mode": "auto",
       "environmentDetails": [
         {
-          "clientId": "gwa-api",
-          "clientRegistration": "managed",
-          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742",
           "environment": "test",
           "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
-          "exists": true
+          "clientRegistration": "managed",
+          "clientId": "gwa-api",
+          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
         }
       ],
-      "isShared": true,
-      "apiKeyName": "X-API-KEY"
+      "isShared": true
     },
     "shared_gwa_publish": {
       "name": "Gold Shared IdP",
