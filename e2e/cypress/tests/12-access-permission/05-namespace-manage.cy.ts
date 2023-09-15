@@ -72,12 +72,14 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
   })
 
   it('Authenticates Wendy (Credential-Issuer)', () => {
-    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
-      cy.visit(login.path)
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
-      cy.visit(mp.path)
+    cy.get('@credential-issuer').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ checkPermission }: any) => {
+        cy.visit(login.path)
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(checkPermission.namespace)
+        cy.visit(mp.path)
+      })
     })
   })
 

@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['test', 'cypress/*']
+    branches: ['test', 'cypress*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -20,14 +20,47 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git -b master
+          git clone https://github.com/bcgov/gwa-api.git
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
+
       - name: Checkout Portal
         uses: actions/checkout@v2
+        
+      - name: Checkout Source Repository
+        run: |
+          git clone https://github.com/bcgov/gwa-cli.git
+          cd gwa-cli
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20.x'
+
+      - name: create .env file
+        run: |
+          cd gwa-cli
+          echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
+          echo "GWA_CLIENT_ID=gwa-cli" >> .env
+
+      - name: Debug
+        run: echo ${{ github.workspace }}
+
+      - name: Build
+        run: |
+          cd gwa-cli
+          go clean
+          go build -o ${{ github.workspace }}/e2e/gwa
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: binary-artifact
+          path: ${{ github.workspace }}/e2e
+          
       - name: Build Docker Images
         run: |
           docker-compose build
+          
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
@@ -40,6 +73,7 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
+
       - name: Execute Tests & Clean Up
         run: |
           while true; do

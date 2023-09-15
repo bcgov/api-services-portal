@@ -6,11 +6,8 @@ import MyAccessPage from '../../pageObjects/myAccess'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
 describe('Verify Gateway Service details', () => {
-  const login = new LoginPage()
-  const apiDir = new ApiDirectoryPage()
-  const myAccessPage = new MyAccessPage()
+
   const home = new HomePage()
-  const na = new NamespaceAccessPage()
   const gs = new GatewayServicePage()
 
   before(() => {
@@ -52,7 +49,7 @@ describe('Verify Gateway Service details', () => {
 
   it('Verify the routes details ', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      gs.verifyRouteName(product.environment.config.serviceName, 'https://a-service-for-newplatform.api.gov.bc.ca/')
+      gs.verifyRouteName(product.environment.config.serviceName, 'https://'+product.environment.config.serviceName+'.api.gov.bc.ca/')
     })
   })
 
@@ -61,7 +58,9 @@ describe('Verify Gateway Service details', () => {
   })
 
   it('Verify the Tags details ', () => {
-    gs.verifyTagsName('ns.newplatform')
+    cy.get('@apiowner').then(({ namespace }: any) => {
+    gs.verifyTagsName('ns.'+namespace)
+    })
   })
 
   after(() => {

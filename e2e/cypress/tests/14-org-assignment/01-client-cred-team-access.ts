@@ -8,6 +8,7 @@ import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import MyAccessPage from '../../pageObjects/myAccess'
 import ConsumersPage from '../../pageObjects/consumers'
+let namespace: string
 
 describe('Add Organization to publish API', () => {
   const login = new LoginPage()
@@ -16,6 +17,8 @@ describe('Add Organization to publish API', () => {
   const pd = new Products()
   const sa = new ServiceAccountsPage()
   const apiDir = new ApiDirectoryPage()
+  let userSession: any
+
 
   before(() => {
     cy.visit('/')
@@ -27,20 +30,36 @@ describe('Add Organization to publish API', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    // cy.visit(login.path)
+    cy.visit(login.path)
   })
 
-  it('Authenticates api owner', () => {
-    cy.get('@apiowner').then(({ user, orgAssignment }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      // home.useNamespace(orgAssignment.namespace)
+  it('authenticates Janis (api owner) to get the user session token', () => {
+    cy.get('@apiowner').then(({ apiTest }: any) => {
+      cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
+        userSession = value
+      })
     })
   })
 
-  it('Creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ orgAssignment }: any) => {
-      home.createNamespace(orgAssignment.namespace)
-    })
+  it('Set token with gwa config command', () => {
+    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('create namespace using gwa cli command', () => {
+    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      assert.isNotNaN(response.stdout)
+      namespace = response.stdout
+      cy.updateJsonValue('apiowner.json', 'orgAssignment.namespace', namespace)
+      // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
+      cy.executeCliCommand("gwa config set --namespace " + namespace)
+    });
+  })
+
+  it('activates new namespace', () => {
+    home.useNamespace(namespace)
   })
 
   it('creates a new service account', () => {
@@ -76,13 +95,9 @@ describe('Add Organization to publish API', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ orgAssignment }: any) => {
-      cy.publishApi('org-service-plugin.yml', orgAssignment.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-          expect(res.body.message).to.contains("Sync successful")
-        })
-      })
+    cy.replaceWordInJsonObject('ns.orgassignment', 'ns.' + namespace, 'org-service-plugin.yml')
+    cy.publishApi('org-service-plugin.yml', namespace).then((response: any) => {
+      expect(response.stdout).to.contain('Sync successful');
     })
   })
 
@@ -107,7 +122,9 @@ describe('Add Organization to publish API', () => {
   it('Verify Organization Administrator notification banner', () => {
     cy.visit(apiDir.path)
     cy.get('@apiowner').then(({ orgAssignment }: any) => {
-    apiDir.checkOrgAdminNotificationBanner(orgAssignment.orgAdminNotification)
+      cy.replaceWord(orgAssignment.orgAdminNotification.parent, 'orgassignment', namespace).then((updatedNotification: string) => {
+        apiDir.checkOrgAdminNotificationBanner(updatedNotification, orgAssignment.orgAdminNotification.child)
+      })
     })
   })
 
@@ -138,15 +155,13 @@ describe('Org Admin approves the request', () => {
   })
 
   it('Authenticates Product Owner', () => {
-    cy.get('@product-owner').then(({ user, namespace }: any) => {
+    cy.get('@product-owner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
   })
 
   it('Select the namespace', () => {
-    cy.get('@product-owner').then(({ namespace }: any) => {
-      home.useNamespace(namespace)
-    })
+    home.useNamespace(namespace)
   })
 
   it('Clik on Enable Publishing option from Namespace Page', () => {
@@ -188,9 +203,9 @@ describe('Activate the API to make it visible in API Directory', () => {
   })
 
   it('Authenticates api owner', () => {
-    cy.get('@apiowner').then(({ user, orgAssignment }: any) => {
+    cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(orgAssignment.namespace)
+      home.useNamespace(namespace)
     })
   })
 
@@ -217,7 +232,7 @@ describe('Activate the API to make it visible in API Directory', () => {
     cy.get('@apiowner').then(({ orgAssignment }: any) => {
       let product = orgAssignment.product.name
       // cy.contains('button').click()
-      apiDir.isProductDisplay(product,true)
+      apiDir.isProductDisplay(product, true)
     })
   })
 
@@ -299,11 +314,9 @@ describe('Access manager approves developer access request for Kong API ACL auth
   })
 
   it('Access Manager logs in', () => {
-    cy.get('@apiowner').then(({ orgAssignment }: any) => {
-      cy.get('@access-manager').then(({ user}: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(orgAssignment.namespace)
-      })
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      home.useNamespace(namespace)
     })
   })
 

@@ -24,9 +24,11 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
     })
 
     it('authenticates Mark (Access Manager)', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
-            cy.login(user.credentials.username, user.credentials.password).then(() => {
-                home.useNamespace(namespace);
+        cy.get('@access-manager').then(({ user }: any) => {
+            cy.get('@apiowner').then(({ namespace }: any) => {
+                cy.login(user.credentials.username, user.credentials.password).then(() => {
+                    home.useNamespace(namespace);
+                })
             })
         })
     })
@@ -79,6 +81,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
         cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
+            consumers.clearRateLimitControl()
             consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route")
         })
     })
@@ -188,7 +191,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
-                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(16,18)
+                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(16, 18)
             })
         })
     })

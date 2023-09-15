@@ -10,10 +10,36 @@
       "title": "Planning and Innovation Division"
     },
     "orgName": "ministry-of-health",
-    "expectedScope": ["Dataset.Manage", "GroupAccess.Manage", "Namespace.Assign"],
+    "expectedScope": [
+      "Dataset.Manage",
+      "GroupAccess.Manage",
+      "Namespace.Assign"
+    ],
     "expectedNamespace": {
-      "name": "newplatform",
-      "orgUnit": "planning-and-innovation-division"
+      "name": "gw-3a443",
+      "orgUnit": "planning-and-innovation-division",
+      "enabled": true
+    },
+    "expectedRoles": {
+      "organization-admin": {
+        "label": "Organization Administrator",
+        "permissions": [
+          {
+            "resourceType": "organization",
+            "scopes": [
+              "GroupAccess.Manage",
+              "Namespace.Assign",
+              "Dataset.Manage"
+            ]
+          },
+          {
+            "resourceType": "namespace",
+            "scopes": [
+              "Namespace.View"
+            ]
+          }
+        ]
+      }
     },
     "body": {
       "name": "ministry-of-health",
@@ -24,7 +50,9 @@
             "id": "janis@idir",
             "email": "janis@testmail.com"
           },
-          "roles": ["organization-admin"]
+          "roles": [
+            "organization-admin"
+          ]
         }
       ]
     }
@@ -44,7 +72,10 @@
       "order": 0,
       "isPublic": true,
       "isComplete": true,
-      "tags": ["tag1", "tag2"]
+      "tags": [
+        "tag1",
+        "tag2"
+      ]
     }
   },
   "apiDirectory": {
@@ -65,18 +96,25 @@
       "title": "Dataset for Test API",
       "isInCatalog": "false",
       "isDraft": "false",
-      "tags": ["gateway", "kong"],
+      "tags": [
+        "gateway",
+        "kong"
+      ],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
     },
     "directory": {
-      "name": "api-auto-test-product",
-      "title": "API Auto Test Product",
-      "notes": "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.",
-      "license_title": "Access Only",
-      "view_audience": "Government",
-      "security_class": "LOW-PUBLIC",
-      "tags": ["gateway", "kong", "openapi"],
+      "name": "gwa-auto-test-product",
+      "title": "GWA Auto Test Product",
+      "notes": "For Test Purpose",
+      "license_title": "Open Government Licence - British Columbia",
+      "view_audience": "Public",
+      "security_class": "PUBLIC",
+      "record_publish_date": "2017-09-05",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -87,12 +125,18 @@
       },
       "products": [
         {
-          "name": "API Auto Test Product",
+          "id": "2",
+          "name": "GWA Auto Test Product",
           "environments": [
             {
               "name": "dev",
               "active": true,
-              "flow": "kong-api-key-acl"
+              "flow": "kong-api-key-only"
+            },
+            {
+              "name": "test",
+              "active": true,
+              "flow": "client-credentials"
             }
           ]
         }
@@ -105,7 +149,11 @@
       "license_title": "Access Only",
       "view_audience": "Government",
       "security_class": "LOW-PUBLIC",
-      "tags": ["gateway", "kong", "openapi"],
+      "tags": [
+        "gateway",
+        "kong",
+        "openapi"
+      ],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -174,6 +222,46 @@
       ],
       "isShared": true
     },
+    "shared_gwa": {
+      "name": "Gold Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "gwa-api",
+          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+        }
+      ],
+      "isShared": true
+    },
+    "shared_gwa_publish": {
+      "name": "Gold Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "mode": "auto",
+      "clientAuthenticator": "client-secret",
+      "environmentDetails": [
+        {
+          "clientId": "gwa-api",
+          "clientRegistration": "managed",
+          "clientSecret": "****",
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "exists": true
+        }
+      ],
+      "clientRoles": [],
+      "clientMappers": [],
+      "availableScopes": [],
+      "resourceScopes": [],
+      "isShared": true,
+      "apiKeyName": "X-API-KEY"
+    },
     "shared_IDP_body": {
       "name": "Sample Shared IdP new",
       "description": "A Shared IdP for Teams to use",
@@ -194,8 +282,12 @@
     "shared_IDP_inheritFrom": {
       "environmentDetails": [],
       "mode": "auto",
-      "clientRoles": ["administrator"],
-      "clientMappers": ["test-audience"],
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
       "name": "my-auth-client-secret-1",
@@ -218,8 +310,12 @@
           "clientId": "ap-my-auth-client-secret-1-test"
         }
       ],
-      "clientRoles": ["administrator"],
-      "clientMappers": ["test-audience"],
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
       "isShared": false,
       "apiKeyName": "X-API-KEY",
       "inheritFrom": {
@@ -282,11 +378,21 @@
           "name": "CredentialIssuer.Admin"
         }
       ],
-      "permDomains": [".api.gov.bc.ca"],
+      "permDomains": [
+        ".api.gov.bc.ca"
+      ],
       "permDataPlane": "local.dataplane",
       "permProtectedNs": "deny",
       "org": "ministry-of-health",
       "orgUnit": "planning-and-innovation-division"
+    },
+    "userDefinedNamespace": {
+      "name": "gwanelatform",
+      "displayName": "Test for GWA test"
+    },
+    "inValidNamespace": {
+      "name": "gwa",
+      "displayName": "Test for GWA test"
     }
   }
 }

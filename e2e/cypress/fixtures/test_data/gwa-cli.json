@@ -1,0 +1,12 @@
+{
+  "content": {
+    "help": "You can login via device login or by using client credentials\n\nTo use device login, simply run the command like so:\n    $ gwa login\n\nTo use your credentials you must supply both a client-id and client-secret:\n    $ gwa login --client-id <YOUR_CLIENT_ID> --client-secret <YOUR_CLIENT_SECRET>\n\nUsage:\n  gwa login [flags]\n\nFlags:\n      --client-id string       Your gateway's client ID\n      --client-secret string   Your gateway's client secret\n  -h, --help                   help for login\n\nGlobal Flags:\n      --host string        Set the default host to use for the API\n      --namespace string   Assign the namespace you would like to use\n      --scheme string      Use to override default https",
+    "login_help": "Log in to your IDIR account\n\nUsage:\n  gwa login [flags]\n\nFlags:\n      --client-id string       Your gateway's client ID\n      --client-secret string   Your gateway's client secret\n  -h, --help                   help for login\n\nGlobal Flags:\n      --host string     Set the default host to use for the API\n      --scheme string   Use to override default https",
+    "namespace_help": "Longer explanation to come...\n\nUsage:\n  gwa namespace [command]\n\nAvailable Commands:\n  create      Create a new namespace\n  list        List all your managed namespaces\n\nFlags:\n  -h, --help   help for namespace\n\nGlobal Flags:\n      --host string        Set the default host to use for the API\n      --namespace string   Assign the namespace you would like to use\n      --scheme string      Use to override default https\n\nUse \"gwa namespace [command] --help\" for more information about a command.",
+    "config_help": "Configuration commands\n\nUsage:\n  gwa config [command]\n\nAvailable Commands:\n  set         Write a specific global setting\n\nFlags:\n  -h, --help   help for config\n\nGlobal Flags:\n      --host string        Set the default host to use for the API\n      --namespace string   Assign the namespace you would like to use\n      --scheme string      Use to override default https\n\nUse \"gwa config [command] --help\" for more information about a command."
+  },
+  "credentials": {
+    "clientID": "gwa-api",
+    "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+  }
+}

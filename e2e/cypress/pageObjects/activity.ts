@@ -31,12 +31,11 @@ class ActivityPage {
           responseText = responseText.replaceAll("{", "${filteredResponse[index].params.")
           const regexp = /\${([^{]+)}/g;
           if (!(record.result === 'failed')) {
-              result = responseText.replace(regexp, function (ignore: any, key: any) {
+            result = responseText.replace(regexp, function (ignore: any, key: any) {
               return eval(key);
             });
           }
-          else if(responseText.includes("Failed to Apply Workflow - IssuerMisconfigError"))
-          {
+          else if (responseText.includes("Failed to Apply Workflow - IssuerMisconfigError")) {
             result = 'Failed to Apply Workflow - IssuerMisconfigError: undefined'
           }
           if (result === activityText) {
@@ -61,12 +60,25 @@ class ActivityPage {
   }
 
   loadMoreRecords() {
+    // cy.get(this.loadButton) 
+    //   .then(($button) => {
+    //     cy.wrap($button).click()
+    //     cy.wait(2000)
+    //     debugger
+    //     if ($button.is(':visible')) {
+    //       // If the button is still visible, call the function again
+    //       debugger
+    //       this.loadMoreRecords();
+    //     }
+    //   });
     cy.get("body").then($body => {
       if ($body.find(this.loadButton).length > 0) {
         cy.get(this.loadButton).click({ force: true })
         cy.wait(2000)
+        this.loadMoreRecords()
       }
     })
   }
+
 }
 export default ActivityPage
