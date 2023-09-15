@@ -1,0 +1,15 @@
+name: gwa-auto-test-product
+license_title: Open Government Licence - British Columbia
+security_class: PUBLIC
+view_audience: Public
+download_audience: Public
+record_publish_date: '2017-09-05'
+notes: For Test Purpose
+title: GWA Auto Test Product
+tags:
+  - tag1
+  - tag2
+organization: ministry-of-health
+organizationUnit: planning-and-innovation-division
+isInCatalog: true
+isDraft: false

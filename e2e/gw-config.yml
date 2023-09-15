@@ -1,0 +1,36 @@
+kind: DraftDataset
+name: gwa-auto-test-product
+license_title: Open Government Licence - British Columbia
+security_class: PUBLIC
+view_audience: Public
+download_audience: Public
+record_publish_date: '2017-09-05'
+notes: For Test Purpose
+title: GWA Auto Test Product
+tags:
+  - tag1
+  - tag2
+organization: ministry-of-health
+organizationUnit: planning-and-innovation-division
+isInCatalog: true
+isDraft: false
+---
+kind: Product
+name: GWA Auto Test Product
+appId: 'KFH78YU956RE'
+environments:
+  - name: dev
+    active: false
+    approval: false
+    flow: public
+    appId: '406CB7CF'
+# ---
+# kind: ProductEnvironment
+# name: dev
+# product: my-service API
+# appId: '5F194B28'
+# active: false
+# approval: true
+# flow: client-credentials
+# credentialIssuer: gw-1977c default
+# services: [my-service-dev]

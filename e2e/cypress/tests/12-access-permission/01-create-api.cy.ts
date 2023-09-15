@@ -8,8 +8,8 @@ describe('Create API Spec', () => {
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
-  var nameSpace: string
-  let userSession: string
+  let userSession: any
+  let namespace: string
 
   before(() => {
     cy.visit('/')
@@ -25,22 +25,34 @@ describe('Create API Spec', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
+  it('authenticates Janis (api owner) to get the user session token', () => {
+    cy.get('@apiowner').then(({ apiTest }: any) => {
+      cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
+        userSession = value
+      })
     })
   })
 
-  it('creates and activates new namespace', () => {
-    cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ checkPermission }: any) => {
-        nameSpace = checkPermission.namespace
-        home.createNamespace(checkPermission.namespace)
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
-        })
-      })
-    })
+  it('Set token with gwa config command', () => {
+    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('create namespace using gwa cli command', () => {
+    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      assert.isNotNaN(response.stdout)
+      namespace = response.stdout
+      cy.replaceWordInJsonObject('ns.permission', 'ns.' + namespace, 'service-permission-gwa.yml')
+      cy.updateJsonValue('apiowner.json', 'checkPermission.namespace', namespace)
+      // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
+      cy.executeCliCommand("gwa config set --namespace " + namespace)
+    });
+  })
+
+  it('activates new namespace', () => {
+    home.useNamespace(namespace)
   })
 
   it('creates a new service account', () => {
@@ -52,12 +64,8 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-        })
-      })
+    cy.publishApi('service-permission-gwa.yml', namespace).then((response: any) => {
+      expect(response.stdout).to.contain('Sync successful');
     })
   })
 
@@ -72,7 +80,7 @@ describe('Create API Spec', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response) => {
         expect(response.status).to.be.equal(200)
       })
     })
@@ -84,28 +92,27 @@ describe('Create API Spec', () => {
       pd.updateDatasetNameToCatelogue(checkPermission.product.name, checkPermission.product.environment.name)
     })
   })
-  
+
   it('publish product to directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       pd.editProductEnvironment(checkPermission.product.name, checkPermission.product.environment.name)
       pd.editProductEnvironmentConfig(checkPermission.product.environment.config)
-      pd.generateKongPluginConfig(checkPermission.product.name, checkPermission.product.environment.name,'service-permission.yml')
+      pd.generateKongPluginConfig(checkPermission.product.name, checkPermission.product.environment.name, 'service-permission.yml')
     })
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-        })
-      })
+    cy.replaceWordInJsonObject('ns.permission', 'ns.' + namespace, 'service-permission-plugin.yml')
+    cy.replaceWordInJsonObject('ns.permission', 'ns.' + namespace, 'service-permission.yml')
+    cy.publishApi('service-permission-plugin.yml', namespace).then((res: any) => {
+      expect(res.stdout).to.contain('Sync successful');
     })
   })
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({log:true})
+    cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
 })

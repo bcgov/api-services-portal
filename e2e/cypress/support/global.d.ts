@@ -19,7 +19,7 @@ declare namespace Cypress {
 
     preserveCookies(): void
 
-    makeKongRequest(serviceName : string, methodType : string, key?: string): Chainable<any>
+    makeKongRequest(serviceName: string, methodType: string, key?: string): Chainable<any>
 
     makeKongGatewayRequestUsingClientIDSecret(hostURL: string, methodType?: string): Chainable<any>
 
@@ -36,44 +36,44 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
-    publishApi(fileName: string, namespace: string, flag?:boolean): Chainable<Cypress.Response<any>>
-    
-    getServiceOrRouteID(configType: string
+    publishApi(fileName: string, namespace: string, flag?: boolean): Chainable<Cypress.Response<any>>
+
+    getServiceOrRouteID(configType: string, host: string
     ): Chainable<Cypress.Response<any>>
 
-    updateKongPlugin(pluginName : string, name : string, endPoint?: string, verb?: string): Chainable<Cypress.Response<any>>
+    updateKongPlugin(pluginName: string, name: string, endPoint?: string, verb?: string): Chainable<Cypress.Response<any>>
 
-    makeKongGatewayRequest(endpoint: string, requestName:string, methodType: string): Chainable<Cypress.Response<any>>
+    makeKongGatewayRequest(endpoint: string, requestName: string, methodType: string): Chainable<Cypress.Response<any>>
 
     // generateKeystore() : Chainable<any>
 
-    generateKeystore() : void
+    generateKeystore(): void
 
-    setHeaders(headerValues : any) : void
+    setHeaders(headerValues: any): void
 
-    setRequestBody(requestBody : any) : void
+    setRequestBody(requestBody: any): void
 
-    setAuthorizationToken (token : string) : void
+    setAuthorizationToken(token: string): void
 
-    makeAPIRequest(endPoint: string,methodType: string): Chainable<Cypress.Response<any>>
+    makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     getUserSession(): Chainable<Cypress.Response<any>>
 
-    compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
+    compareJSONObjects(actualResponse: any, expectedResponse: any, indexFlag?: boolean): Chainable<Cypress.Response<any>>
 
-    getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
+    getUserSessionTokenValue(namespace: string, isNamespaceSelected?: boolean): Chainable<Cypress.Response<any>>
 
     getUserSessionResponse(): Chainable<Cypress.Response<any>>
 
-    getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
+    getTokenUsingJWKCredentials(credential: any, privateKey: any): Chainable<Cypress.Response<any>>
 
-    verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
+    verifyToastMessage(msg: string): Chainable<Cypress.Response<any>>
 
-    updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+    updatePluginFile(filename: string, serviceName: string, pluginFileName: string): Chainable<Cypress.Response<any>>
 
-    updateElementsInPluginFile(filename: string, elementName: string, elementValue: string):Chainable<Cypress.Response<any>>
+    updateElementsInPluginFile(filename: string, elementName: string, elementValue: string): Chainable<Cypress.Response<any>>
 
-    updatePropertiesOfPluginFile(filename: string, propertyName: any, propertyValue: any):Chainable<Cypress.Response<any>>
+    updatePropertiesOfPluginFile(filename: string, propertyName: any, propertyValue: any): Chainable<Cypress.Response<any>>
 
     keycloakLogin(username: string, password: string): Chainable<any>
 
@@ -81,13 +81,25 @@ declare namespace Cypress {
 
     getLastConsumerID(): Chainable<any>
 
-    generateKeyPair() : void
+    generateKeyPair(): void
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
 
-    updateJsonValue(jsonBody: any, jsonPath: string, newValue: string, index?: number): Chainable<any>
+    updateJsonValue(filePath: string, jsonPath: string, newValue: string, index?: any): Chainable<any>
 
     updateKongPluginForJSONRequest(jsonBody: string, endPoint: string, verb?: string): Chainable<Cypress.Response<any>>
-    
-    forceVisit (url:string): Chainable<any>
+
+    forceVisit(url: string): Chainable<any>
+
+    executeCliCommand(command: string): Chainable<any>
+
+    replaceWordInJsonObject(targetWord: string, replacement: string, fileName: string): Chainable<Cypress.Response<any>>
+
+    gwaPublish(type: string, fileName: string): Chainable<Cypress.Response<any>>
+
+    replaceWord(originalString: string, wordToReplace: string, replacementWord: string): Chainable<any>
+
+    updateJsonBoby(json: any, key: string, newValue: string):Chainable<any>
+
+    deleteFileInE2EFolder(fileName: string):Chainable<any>
   }
 }

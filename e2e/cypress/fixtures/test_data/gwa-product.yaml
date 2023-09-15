@@ -1,0 +1,8 @@
+name: GWA Auto Test Product
+appId: 'KFH78YU956RE'
+environments:
+  - name: dev
+    active: false
+    approval: false
+    flow: public
+    appId: '406CB7CF'

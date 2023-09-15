@@ -31,7 +31,7 @@ describe('Apply client roles to the Authorization Profile', () => {
   })
 
   it('Select the namespace created for client credential ', () => {
-    cy.get('@credential-issuer').then(({ clientCredentials }: any) => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
       home.useNamespace(clientCredentials.namespace)
     })
   })

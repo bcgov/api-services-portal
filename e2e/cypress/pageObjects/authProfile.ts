@@ -165,6 +165,21 @@ class AuthorizationProfile {
     cy.contains(issuerURL).should('exist')
     cy.visit(this.path)
   }
+
+  deleteAuthProfile(authProfileName: string) {
+    cy.wait(2000)
+    let authProfileText
+    cy.get(this.profileTable).find('tr').each(($e1, index, $list) => {
+      authProfileText = $e1.find('td:nth-child(1)').text();
+      if (authProfileText===authProfileName) {
+        cy.wrap($e1).find('button').eq(1).click()
+        cy.wait(2000)
+        cy.wrap($e1).find('button').last().click({force: true})
+        cy.verifyToastMessage(authProfileName +' deleted')
+        return false
+      }
+    })
+  }
 }
 
 export default AuthorizationProfile

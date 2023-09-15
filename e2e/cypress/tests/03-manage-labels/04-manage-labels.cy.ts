@@ -12,8 +12,6 @@ describe('Manage/Edit labels spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.getServiceOrRouteID('services')
-    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {
@@ -25,9 +23,11 @@ describe('Manage/Edit labels spec', () => {
   })
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace);
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(namespace);
+      })
     })
   })
 
@@ -57,5 +57,5 @@ describe('Manage/Edit labels spec', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-})
+  })
 })

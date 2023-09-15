@@ -26,13 +26,6 @@ describe('Request Access without colleting credential Spec', () => {
     })
   })
 
-  it('creates an application', () => {
-    cy.visit(app.path)
-    cy.get('@developer').then(({ application }: any) => {
-      app.createApplication(application)
-    })
-  })
-
   it('Collect the credentials', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ product, application,accessRequest }: any) => {

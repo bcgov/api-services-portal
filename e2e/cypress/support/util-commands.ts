@@ -1,5 +1,8 @@
 import 'cypress-v10-preserve-cookie'
-import jsonpath = require('jsonpath');
+const YAML = require('yamljs');
+const path = require('path');
+
+
 const listOfCookies = [
   'AUTH_SESSION_ID_LEGACY',
   'KC_RESTART',
@@ -107,10 +110,78 @@ Cypress.Commands.add('resetState', () => {
   cy.log('Test state was reset')
 })
 
-Cypress.Commands.add('updateJsonValue', (jsonBody: any, jsonPath: string, newValue: string, index?: any) => {
-  let updatedFileContent: any
-  const jsonContent = JSON.parse(jsonBody);
-  jsonpath.apply(jsonContent, jsonPath, () => newValue);
-  updatedFileContent = JSON.stringify(jsonContent, null, 2);
-  return updatedFileContent
+Cypress.Commands.add('updateJsonValue', (filePath: string, jsonPath: string, newValue: string, index?: any) => {
+  debugger
+  cy.readFile('cypress/fixtures/' + filePath).then(currState => {
+    debugger
+
+    const keys = jsonPath.split('.'); // Split the keyPath using dot notation
+    let currentObj = currState;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!currentObj.hasOwnProperty(key) || typeof currentObj[key] !== 'object') {
+        return; // If any intermediate key doesn't exist or is not an object, return without updating
+      }
+      currentObj = currentObj[key];
+    }
+
+    const lastKey = keys[keys.length - 1];
+    currentObj[lastKey] = newValue;
+
+    cy.writeFile('cypress/fixtures/' + filePath, currState)
+  })
+
+
+})
+
+Cypress.Commands.add('executeCliCommand', (command: string) => {
+  cy.exec(command, { timeout: 9000, failOnNonZeroExit: false }).then((response) => {
+    return response
+  });
+})
+
+Cypress.Commands.add('replaceWordInJsonObject', (targetWord: string, replacement: string, fileName: string) => {
+  debugger
+  cy.readFile('cypress/fixtures/' + fileName).then((content: any) => {
+    let regex = new RegExp(targetWord, 'g');
+    let modifiedString = content.replace(regex, replacement);
+
+    let obj = YAML.parse(modifiedString)
+
+    const yamlString = YAML.stringify(obj, 'utf8');
+    cy.writeFile('cypress/fixtures/' + fileName, yamlString)
+  })
+
+})
+
+Cypress.Commands.add('gwaPublish', (type: string, fileName: string) => {
+  cy.exec('gwa publish '+type+' --input ./cypress/fixtures/test_data/'+fileName, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    return response
+  });
+})
+// cypress/support/commands.js
+
+Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
+  const currentDirectory = Cypress.config('fileServerFolder'); // Get the current working directory
+  const filePath = path.join(currentDirectory, fileName)
+  debugger
+  try {
+    cy.exec(`rm -f ${filePath}`);
+    cy.log(`File '${fileName}' has been deleted from the e2e folder.`);
+  } catch (error) {
+    cy.log(`Error deleting file '${fileName}' from the e2e folder`);
+  }
+});
+
+
+Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: string, replacementWord: string)=> {
+  // Create a regular expression with the 'g' flag for global search
+  let replacedString : any
+  const regex = new RegExp(wordToReplace, 'g');
+
+  // Use the 'replace()' method to replace all occurrences of the word
+  replacedString = originalString.replace(regex, replacementWord);
+
+  return replacedString;
 })
