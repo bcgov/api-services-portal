@@ -26,37 +26,51 @@ jobs:
 
       - name: Checkout Portal
         uses: actions/checkout@v2
+
+
+      - name: Download Binar
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "bcgov/gwa-cli"
+          latest: true
+          fileName: "gwa_Linux_x86_64.tgz"
+          out-file-path: "${{ github.workspace }}/e2e"
+
+      - name: Unzip file
+        run: |
+          cd ${{ github.workspace }}/e2e
+          tar xvzf gwa_Linux_x86_64.tgz
         
-      - name: Checkout Source Repository
-        run: |
-          git clone https://github.com/bcgov/gwa-cli.git
-          cd gwa-cli
+      # - name: Checkout Source Repository
+      #   run: |
+      #     git clone https://github.com/bcgov/gwa-cli.git
+      #     cd gwa-cli
 
-      - name: Setup Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.20.x'
+      # - name: Setup Go
+      #   uses: actions/setup-go@v2
+      #   with:
+      #     go-version: '1.20.x'
 
-      - name: create .env file
-        run: |
-          cd gwa-cli
-          echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
-          echo "GWA_CLIENT_ID=gwa-cli" >> .env
-          echo "GWA_VERSION=2.2" >> .env
+      # - name: create .env file
+      #   run: |
+      #     cd gwa-cli
+      #     echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
+      #     echo "GWA_CLIENT_ID=gwa-cli" >> .env
+      #     echo "GWA_VERSION=2.2" >> .env
 
-      - name: Debug
-        run: echo ${{ github.workspace }}
+      # - name: Debug
+      #   run: echo ${{ github.workspace }}
 
-      - name: Build
-        run: |
-          cd gwa-cli
-          go clean
-          go build -o ${{ github.workspace }}/e2e/gwa
+      # - name: Build
+      #   run: |
+      #     cd gwa-cli
+      #     go clean
+      #     go build -o ${{ github.workspace }}/e2e/gwa
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: binary-artifact
-          path: ${{ github.workspace }}/e2e
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: binary-artifact
+      #     path: ${{ github.workspace }}/e2e
           
       - name: Build Docker Images
         run: |
