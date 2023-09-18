@@ -42,7 +42,7 @@ describe('Apply Shared IDP config at Keycloak user group', () => {
   })
 
   it('Edit the namespace from the tree view', () => {
-    cy.get('@admin').then(({ namespace }: any) => {
+    cy.get('@apiowner').then(({ namespace }: any) => {
       cy.contains(namespace).click()
       userGroups.clickOnEditButton()
     })

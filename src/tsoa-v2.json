@@ -24,6 +24,11 @@
         "description": "Authz Portal Login",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "openid": {
+        "type": "openIdConnect",
+        "description": "OIDC Login",
+        "openIdConnectUrl": "https://well_known_endpoint"
       }
     },
     "tags": [

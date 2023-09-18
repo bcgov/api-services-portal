@@ -134,6 +134,7 @@ export interface Alert {
 export interface Namespace {
   extRefId?: string; // Primary Key
   name?: string;
+  displayName?: string;
 }
 
 
@@ -315,7 +316,7 @@ export interface Environment {
  *   "clientAuthenticator": "client-secret",
  *   "mode": "auto",
  *   "environmentDetails": [],
- *   "owner": "acope@idir"
+ *   "owner": "janis@gov.bc.ca"
  * }
  */  
 export interface CredentialIssuer {
@@ -336,8 +337,8 @@ export interface CredentialIssuer {
   resourceScopes?: string[];
   clientRoles?: string[];
   clientMappers?: string[];
-  inheritFrom?: CredentialIssuerRefID;
-  owner?: UserRefID;
+  inheritFrom?: undefinedRefID;
+  owner?: undefinedRefID;
 }
 
 
@@ -477,6 +478,7 @@ export interface User {
   name?: string;
   email?: string;
   legalsAgreed?: UserLegalsAgreed[];
+  provider?: string;
 }
 
 
@@ -554,3 +556,8 @@ export type OrganizationUnitRefID = string
  * @tsoaModel
  */  
 export type UserRefID = string
+
+/**
+ * @tsoaModel
+ */  
+export type undefinedRefID = string

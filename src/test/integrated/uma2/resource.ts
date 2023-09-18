@@ -32,15 +32,18 @@ import {
     token
   );
 
-  if (false) {
+  if (true) {
     await svc.createResourceSet({
       name: 'sample2',
-      type: 'organization',
+      displayName: 'Sample Number 2',
+      type: 'integration_test',
       resource_scopes: ['Organization.Manage'],
       ownerManagedAccess: true,
     });
   }
-  console.log(await svc.listResources({ type: 'organization' }));
+  console.log(
+    await svc.listResources({ type: 'integration_test', deep: true })
+  );
 
-  console.log(await svc.findResourceByName('sample33'));
+  console.log(await svc.findResourceByName('sample2'));
 })();

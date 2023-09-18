@@ -54,7 +54,7 @@ describe('Verify /Organization/{Org} end point', () => {
 
     it('Verify the status code and response message for invalid organization name', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/health' , 'GET').then((response) => {        
+            cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response) => {
                 expect(response.status).to.be.oneOf([404, 422])
                 expect(response.body.message).to.be.equal("Organization not found.")
             })
@@ -123,6 +123,20 @@ describe('Get the Organization Role', () => {
         })
     })
 
+    it('Get the list of roles and verify the success code in the response', () => {
+        cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res) => {
+            expect(res.status).to.be.equal(200)
+            response = res.body
+        })
+    })
+
+    it('Compare the roles values in response against the expected values', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            expectedResponse = organization.expectedRoles
+            cy.compareJSONObjects(response, expectedResponse)
+        })
+    })
+
 })
 
 describe('Get the Namespace associated with the organization', () => {
@@ -156,6 +170,7 @@ describe('Get the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             expectedResponse = organization.expectedNamespace
             // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
+            debugger
             cy.compareJSONObjects(response, expectedResponse, true)
         })
     })
@@ -246,7 +261,7 @@ describe('Add and Get Organization Access', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })    
+    })
 })

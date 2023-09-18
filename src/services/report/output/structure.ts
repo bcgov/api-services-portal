@@ -19,6 +19,11 @@ export const reportStructure: any = {
         width: 32,
       },
       {
+        header: 'Display Name',
+        key: 'displayName',
+        width: 32,
+      },
+      {
         header: 'Privileged',
         key: 'permProtectedNs',
         width: 25,

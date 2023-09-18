@@ -319,6 +319,25 @@ class Products {
     cy.get(this.messageForNotDataset).should('be.visible');
 
   }
+
+  verifyAuthScope(expAuthValue: string){
+    cy.get(this.envCfgAuthzDropdown).find(':selected').invoke('text').then(($auth: any) => {
+      assert.equal($auth,expAuthValue )
+    })
+  }
+
+  verifyIssuer(expIssuerValue: string){
+    cy.get('[name="credentialIssuer"]').find(':selected').invoke('text').then(($issuer: any) => {
+      assert.equal($issuer,expIssuerValue )
+    })
+  }
+
+  verifyDataset(expDatasetValue: string, product: string){
+    this.editProduct(product)
+    cy.get(this.catelogueDropDown).invoke('val').then(($dataset: any) => {
+      assert.equal($dataset,expDatasetValue)
+    })
+  }
 }
 
 export default Products

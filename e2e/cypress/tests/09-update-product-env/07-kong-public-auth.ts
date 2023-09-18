@@ -70,11 +70,8 @@ describe('Verify for Kong Public Auth', () => {
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      cy.publishApi('cc-service.yml', clientCredentials.namespace,true).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-          expect(res.body.message).to.contains("Sync successful")
-        })
+      cy.publishApi('cc-service-gwa.yml', clientCredentials.namespace,true).then((response:any) => {
+        expect(response.stdout).to.contain('Sync successful');
       })
     })
   })

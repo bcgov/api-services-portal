@@ -96,10 +96,7 @@ async function addClientToSharedIdP(
 
   const environment = issuerEnvConfig.environment;
 
-  const clientId =
-    environment == 'prod'
-      ? `ap-${profileClientId}`
-      : `ap-${profileClientId}-${environment}`;
+  const clientId = genClientId(environment, profileClientId);
 
   // If there are any custom client Mappers, then include them
   const clientMappers: any[] = [];
@@ -135,6 +132,77 @@ async function addClientToSharedIdP(
     openid,
     client,
   };
+}
+
+/**
+ * When a CredentialIssuer is deleted where the inheritFrom is set
+ * then call this to delete the client ID on the shared IdP
+ *
+ * @param context
+ * @param credentialIssuerPK
+ */
+export async function DeleteClientsFromSharedIdP(
+  context: any,
+  profileClientId: string,
+  inheritFromIssuerPK: string
+) {
+  // Find the credential issuer and based on its type, go do the appropriate action
+  const inheritFromIssuer: CredentialIssuer = await lookupCredentialIssuerById(
+    context,
+    inheritFromIssuerPK
+  );
+
+  assert.strictEqual(
+    inheritFromIssuer.isShared,
+    true,
+    'Invalid IdP for Sharing'
+  );
+
+  const envConfigs = getAllIssuerEnvironmentConfigs(inheritFromIssuer);
+
+  for (const issuerEnvConfig of envConfigs) {
+    await deleteClientFromSharedIdP(profileClientId, issuerEnvConfig);
+  }
+}
+
+async function deleteClientFromSharedIdP(
+  profileClientId: string,
+  issuerEnvConfig: IssuerEnvironmentConfig
+): Promise<void> {
+  const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+
+  // token is NULL if 'iat'
+  // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
+  // issuer.initialAccessToken if 'iat'
+  const kctoksvc = new KeycloakTokenService(openid.token_endpoint);
+
+  const token =
+    issuerEnvConfig.clientRegistration == 'anonymous'
+      ? null
+      : issuerEnvConfig.clientRegistration == 'managed'
+      ? await kctoksvc.getKeycloakSession(
+          issuerEnvConfig.clientId,
+          issuerEnvConfig.clientSecret
+        )
+      : issuerEnvConfig.initialAccessToken;
+
+  const environment = issuerEnvConfig.environment;
+
+  const clientId = genClientId(environment, profileClientId);
+
+  // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
+
+  const cliApi = await new KeycloakClientService(issuerEnvConfig.issuerUrl);
+  await cliApi.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
+  const exists = await cliApi.isClient(clientId);
+
+  if (exists) {
+    const client = await cliApi.findByClientId(clientId);
+    assert.strictEqual(client.clientId, clientId);
+
+    await cliApi.deleteClient(client.id);
+  }
 }
 
 /**

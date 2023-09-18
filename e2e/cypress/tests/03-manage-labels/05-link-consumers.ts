@@ -13,8 +13,6 @@ describe('Link Consumers to Namespace', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.getServiceOrRouteID('services')
-    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {
@@ -27,9 +25,11 @@ describe('Link Consumers to Namespace', () => {
   })
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace);
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(namespace);
+      })
     })
   })
 
@@ -39,12 +39,9 @@ describe('Link Consumers to Namespace', () => {
   })
 
   it('Get the consumer ID from the list', () => {
-      cy.getLastConsumerID().then((title)=>{
-        consumerID = title
-      })
-      // cy.wrap(consumers).its('inputValue').then(inputValue => {
-      //   consumerID = inputValue.text()
-      // })
+    cy.getLastConsumerID().then((title) => {
+      consumerID = title
+    })
   })
 
   it('Delete the consumer ID from the list', () => {
@@ -61,7 +58,7 @@ describe('Link Consumers to Namespace', () => {
   })
 
   it('Verify that the consumer is linked to the namespace', () => {
-    cy.getLastConsumerID().then((title)=>{
+    cy.getLastConsumerID().then((title) => {
       expect(title).to.equal(consumerID)
     })
   })

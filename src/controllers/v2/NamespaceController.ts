@@ -9,13 +9,15 @@ import {
   Tags,
   Delete,
   Query,
+  Post,
+  Body,
 } from 'tsoa';
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
-import { Namespace } from '../../services/keystone/types';
+import { Namespace, NamespaceInput } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
 import {
@@ -33,6 +35,7 @@ import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
 import { ActivityDetail } from './types-extra';
+
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -107,7 +110,7 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
-    return result.data.allNamespaces.map((ns: Namespace) => ns.name);
+    return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
   }
 
   /**
@@ -134,6 +137,40 @@ export class NamespaceController extends Controller {
     logger.debug('Result %j', result);
     assert.strictEqual('errors' in result, false, 'Unable to process request');
     return result.data.namespace;
+  }
+
+  /**
+   * Create a namespace
+   *
+   * @summary Create Namespace
+   * @param ns
+   * @param request
+   * @returns
+   */
+  @Post()
+  @OperationId('create-namespace')
+  @Security('jwt', [])
+  public async create(
+    @Request() request: any,
+    @Body() vars: NamespaceInput
+  ): Promise<Namespace> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: createNS,
+      variables: vars,
+    });
+    logger.debug('Result %j', result);
+    if (result.errors) {
+      const errors: FieldErrors = {};
+      result.errors.forEach((err: any, ind: number) => {
+        errors[`d${ind}`] = { message: err.message };
+      });
+      throw new ValidateError(errors, 'Unable to create namespace');
+    }
+    return {
+      name: result.data.createNamespace.name,
+      displayName: result.data.createNamespace.displayName,
+    };
   }
 
   /**
@@ -214,6 +251,7 @@ const item = gql`
   query Namespace($ns: String!) {
     namespace(ns: $ns) {
       name
+      displayName
       scopes {
         name
       }
@@ -232,5 +270,14 @@ const item = gql`
 const deleteNS = gql`
   mutation ForceDeleteNamespace($ns: String!, $force: Boolean!) {
     forceDeleteNamespace(namespace: $ns, force: $force)
+  }
+`;
+
+const createNS = gql`
+  mutation CreateNamespace($name: String, $displayName: String) {
+    createNamespace(name: $name, displayName: $displayName) {
+      name
+      displayName
+    }
   }
 `;

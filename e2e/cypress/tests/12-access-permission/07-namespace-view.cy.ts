@@ -65,15 +65,18 @@ describe('Verify that Mark is unable to create service account', () => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
     cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
   })
 
   it('authenticates Mark', () => {
-    cy.get('@access-manager').then(({ user, checkPermission }: any) => {
-      cy.visit(login.path)
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
-      cy.visit(mp.path)
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ checkPermission }: any) => {
+        cy.visit(login.path)
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(checkPermission.namespace)
+        cy.visit(mp.path)
+      })
     })
   })
 

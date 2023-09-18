@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['test', 'cypress/*']
+    branches: ['test', 'cypress*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -20,14 +20,43 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git -b master
+          git clone https://github.com/bcgov/gwa-api.git
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
+
       - name: Checkout Portal
         uses: actions/checkout@v2
+
+
+      - name: Determine Download file name
+        id: set_variable
+        run: |
+          echo ${{ runner.arch }}
+          if [ "${{ runner.arch }}" == "X64" ]; then
+            echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
+          elif [ "${{ runner.arch }}" == "ARM64" ]; then
+            echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
+          else
+            echo "unsupported architecture"
+          fi
+          
+      - name: Download Binar
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "bcgov/gwa-cli"
+          latest: true
+          fileName: ${{ steps.set_variable.outputs.my_variable }}
+          out-file-path: "${{ github.workspace }}/e2e"
+
+      - name: Unzip file
+        run: |
+          cd ${{ github.workspace }}/e2e
+          tar xvzf ${{ steps.set_variable.outputs.my_variable }}
+          
       - name: Build Docker Images
         run: |
           docker-compose build
+          
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
@@ -40,6 +69,7 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
+
       - name: Execute Tests & Clean Up
         run: |
           while true; do

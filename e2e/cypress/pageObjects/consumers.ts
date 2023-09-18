@@ -156,8 +156,13 @@ export default class ConsumersPage {
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
   }
 
-  approvePendingRequest() {
-    cy.get(this.approveBtn).click({ force: true })
+  approvePendingRequest(flag?: boolean) {
+    if (flag) { 
+      cy.get(this.approveBtn).click({ force: true, multiple : true })
+    }
+    else {
+      cy.get(this.approveBtn).click({ force: true })
+    }
     cy.wait(1000)
     cy.verifyToastMessage("Access request approved")
   }
@@ -318,12 +323,20 @@ export default class ConsumersPage {
     cy.wait(1000)
   }
 
-  selectAuthorizationScope(scopes: any) {
+  selectAuthorizationScope(scopes: any, isChecked = true) {
     cy.contains("Authorization").click()
-    scopes.forEach(function (scope: string) {
-      cy.get('[data-testid="client-scope-' + scope + '"]').click()
-      cy.wait(1000)
-    })
+    if (isChecked) {
+      scopes.forEach(function (scope: string) {
+        cy.get('[data-testid="client-scope-' + scope + '"]').find('[type="checkbox"]').check({ force: true });
+        cy.wait(1000)
+      })
+    }
+    else {
+      scopes.forEach(function (scope: string) {
+        cy.get('[data-testid="client-scope-' + scope + '"]').find('[type="checkbox"]').uncheck({ force: true });
+        cy.wait(1000)
+      })
+    }
   }
 
   selectClientRole(roles: any) {
@@ -339,21 +352,26 @@ export default class ConsumersPage {
       cy.log($row.find('td:nth-child(1)').text())
       if ($row.find('td:nth-child(1)').text() == consumerID) {
         cy.wrap($row).find('button').first().click()
-        cy.get('[data-testid="consumer-delete-menuitem"]').last().click({force:true})
+        cy.get('[data-testid="consumer-delete-menuitem"]').last().click({ force: true })
       }
     })
   }
+  
+  saveAppliedConfig(){
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.wait(1000)
+  }
 
   clickOnLinkConsumerToNamespaceBtn() {
-    cy.get(this.linkConsumerToNamespaceBtn).click({force:true})
+    cy.get(this.linkConsumerToNamespaceBtn).click({ force: true })
   }
 
   linkTheConsumerToNamespace(consumerID: any) {
     cy.get(this.userNameTxt).type(consumerID)
-    cy.get(this.linkBtn).click({force:true})
+    cy.get(this.linkBtn).click({ force: true })
   }
 
-  getText(){
+  getText() {
     cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').as('inputValue')
   }
 }

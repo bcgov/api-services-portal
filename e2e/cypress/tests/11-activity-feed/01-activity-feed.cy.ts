@@ -106,26 +106,33 @@ describe('Verify the Activity filter for users', () => {
         // cy.visit(login.path)
     })
 
+    it('activates new namespace', () => {
+        cy.get('@apiowner').then(({ namespace }: any) => {
+            home.useNamespace(namespace)
+        })
+    })
+
+
     it('Navigate to activity page', () => {
         cy.visit(activity.path)
     })
 
     it('Verify Activity filter for "Janis Smith" user', () => {
-        activity.checkActivityFilter("User","Janis Smith", response)
+        activity.checkActivityFilter("User", "Janis Smith", response)
     })
 
     it('Verify Activity filter for "Harley Jones" user', () => {
-        activity.checkActivityFilter("User","Harley Jones", response)
+        activity.checkActivityFilter("User", "Harley Jones", response)
     })
 
     it('Verify Activity filter for "Mark F Mark L" user', () => {
-        activity.checkActivityFilter("User","Mark F Mark L", response)
+        activity.checkActivityFilter("User", "Mark F Mark L", response)
     })
 
     it('Verify Activities filter for consumer', () => {
         cy.readFile('cypress/fixtures/state/regen.json').then((store) => {
             let consumerID = store.consumernumber
-            activity.checkActivityFilter("Consumer",consumerID, response)
+            activity.checkActivityFilter("Consumer", consumerID, response)
         })
     })
 })

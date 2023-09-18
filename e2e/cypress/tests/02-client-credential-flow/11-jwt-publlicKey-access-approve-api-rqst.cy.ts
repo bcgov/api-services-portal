@@ -18,13 +18,16 @@ describe('Access manager approves developer access request for JWT - Generated K
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
-    cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(clientCredentials.namespace)
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(clientCredentials.namespace)
+      })
     })
   })
 

@@ -112,6 +112,10 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.visit(activity.path)
   })
 
+  it('Load all the records by click on "Load More" button', () => {
+    activity.loadMoreRecords()
+  })
+
   it('Verify Activity filter foe all the listed activities', () => {
     activity.checkActivityFilter("User", "", response)
   })

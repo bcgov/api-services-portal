@@ -7,7 +7,6 @@ import {
   ResourceSetInput,
 } from '../../services/uma2';
 import {
-  getOrganizationUnit,
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
   recordActivity,
@@ -18,7 +17,6 @@ import {
   getNamespaceResourceSets,
   isUserBasedResourceOwners,
   doClientLoginForCredentialIssuer,
-  EnvironmentContext,
   getOrgPoliciesForResource,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
@@ -32,17 +30,12 @@ import {
   DeleteNamespaceValidate,
 } from '../../services/workflow/delete-namespace';
 import { GWAService } from '../../services/gwaapi';
-import {
-  camelCaseAttributes,
-  transformSingleValueAttributes,
-} from '../../services/utils';
+import { regExprValidation } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
 import {
   GroupAccessService,
   NamespaceService,
 } from '../../services/org-groups';
-import { IssuerEnvironmentConfig } from '../../services/workflow/types';
-import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import { getGwaProductEnvironment } from '../../services/workflow';
 import { NotificationService } from '../../services/notification/notification.service';
@@ -54,6 +47,7 @@ import {
   getResource,
   transformOrgAndOrgUnit,
 } from '../../services/keycloak/namespace-details';
+import { newNamespaceID } from '../../services/identifiers';
 
 const logger = Logger('ext.Namespace');
 
@@ -69,6 +63,7 @@ const typeNamespace = `
 type Namespace {
     id: String
     name: String!,
+    displayName: String,
     scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
@@ -85,7 +80,8 @@ type Namespace {
 
 const typeNamespaceInput = `
 input NamespaceInput {
-    name: String!,
+    name: String,
+    displayName: String
 }
 `;
 
@@ -422,7 +418,8 @@ module.exports = {
             },
           },
           {
-            schema: 'createNamespace(namespace: String!): Namespace',
+            schema:
+              'createNamespace(name: String, displayName: String): Namespace',
             resolver: async (
               item: any,
               args: any,
@@ -431,11 +428,13 @@ module.exports = {
               { query, access }: any
             ) => {
               const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
-              const re = new RegExp(namespaceValidationRule);
-              assert.strictEqual(
-                re.test(args.namespace),
-                true,
-                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+
+              const newNS = args.name ? args.name : newNamespaceID();
+
+              regExprValidation(
+                namespaceValidationRule,
+                newNS,
+                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.'
               );
 
               const noauthContext = context.createContext({
@@ -458,7 +457,7 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              await nsService.checkNamespaceAvailable(args.namespace);
+              await nsService.checkNamespaceAvailable(newNS);
 
               // This function gets all resources but also sets the accessToken in envCtx
               // which we need to create the resource set
@@ -478,7 +477,8 @@ module.exports = {
                 'CredentialIssuer.Admin',
               ];
               const res = <ResourceSetInput>{
-                name: args.namespace,
+                name: newNS,
+                displayName: args.displayName,
                 type: 'namespace',
                 resource_scopes: scopes,
                 ownerManagedAccess: true,
@@ -491,12 +491,18 @@ module.exports = {
                   envCtx.issuerEnvConfig.issuerUrl,
                   envCtx.accessToken
                 );
-                await permissionApi.createPermission(
-                  rset.id,
-                  envCtx.subjectUuid,
-                  true,
-                  'Namespace.Manage'
-                );
+                for (const scope of [
+                  'Namespace.Manage',
+                  'CredentialIssuer.Admin',
+                  'GatewayConfig.Publish',
+                ]) {
+                  await permissionApi.createPermission(
+                    rset.id,
+                    envCtx.subjectUuid,
+                    true,
+                    scope
+                  );
+                }
               }
 
               const kcGroupService = new KeycloakGroupService(
@@ -507,27 +513,24 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientSecret
               );
 
-              await kcGroupService.createIfMissing('ns', args.namespace);
+              await kcGroupService.createIfMissing('ns', newNS);
 
               await recordActivity(
                 context.sudo(),
                 'create',
                 'Namespace',
-                args.namespace,
-                `Created ${args.namespace} namespace`,
+                newNS,
+                `Created ${newNS} namespace`,
                 'success',
                 JSON.stringify({
                   message: '{actor} created {ns} namespace',
                   params: {
                     actor: context.authedItem.name,
-                    ns: args.namespace,
+                    ns: newNS,
                   },
                 }),
-                args.namespace,
-                [
-                  `Namespace:${args.namespace}`,
-                  `actor:${context.authedItem.name}`,
-                ]
+                newNS,
+                [`Namespace:${newNS}`, `actor:${context.authedItem.name}`]
               );
 
               return rset;
