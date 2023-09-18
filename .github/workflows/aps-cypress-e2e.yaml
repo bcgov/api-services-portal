@@ -26,36 +26,32 @@ jobs:
 
       - name: Checkout Portal
         uses: actions/checkout@v2
-        
-      - name: Checkout Source Repository
-        run: |
-          git clone https://github.com/bcgov/gwa-cli.git
-          cd gwa-cli
 
-      - name: Setup Go
-        uses: actions/setup-go@v2
+
+      - name: Determine Download file name
+        id: set_variable
+        run: |
+          echo ${{ runner.arch }}
+          if [ "${{ runner.arch }}" == "X64" ]; then
+            echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
+          elif [ "${{ runner.arch }}" == "ARM64" ]; then
+            echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
+          else
+            echo "unsupported architecture"
+          fi
+          
+      - name: Download Binar
+        uses: robinraju/release-downloader@v1.8
         with:
-          go-version: '1.20.x'
+          repository: "bcgov/gwa-cli"
+          latest: true
+          fileName: ${{ steps.set_variable.outputs.my_variable }}
+          out-file-path: "${{ github.workspace }}/e2e"
 
-      - name: create .env file
+      - name: Unzip file
         run: |
-          cd gwa-cli
-          echo "GWA_API_HOST=api-services-portal-feature-gwa-cli-v2.apps.silver.devops.gov.bc.ca" >> .env
-          echo "GWA_CLIENT_ID=gwa-cli" >> .env
-
-      - name: Debug
-        run: echo ${{ github.workspace }}
-
-      - name: Build
-        run: |
-          cd gwa-cli
-          go clean
-          go build -o ${{ github.workspace }}/e2e/gwa
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: binary-artifact
-          path: ${{ github.workspace }}/e2e
+          cd ${{ github.workspace }}/e2e
+          tar xvzf ${{ steps.set_variable.outputs.my_variable }}
           
       - name: Build Docker Images
         run: |
