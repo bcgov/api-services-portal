@@ -34,7 +34,7 @@ jobs:
           echo ${{ runner.arch }}
           if [ "${{ runner.arch }}" == "X64" ]; then
             echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
-          else  if [ "${{ runner.arch }}" == "ARM64" ]; then
+          elif [ "${{ runner.arch }}" == "ARM64" ]; then
             echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
           else
             echo "unsupported architecture"
