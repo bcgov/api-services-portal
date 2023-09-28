@@ -168,7 +168,7 @@ const ConsumersPage: React.FC<
           title: 'Consumer delete failed',
           description: Array.isArray(err)
             ? err.map((e) => e.message).join(', ')
-            : '',
+            : err,
           status: 'error',
         });
       }
