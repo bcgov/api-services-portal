@@ -15,7 +15,10 @@ class ApiProxyApp {
       target: this._gwaApiUrl,
       changeOrigin: true,
       logLevel: 'debug',
-      pathRewrite: { '^/gw/api/': '/' },
+      pathRewrite: {
+        '^/gw/api/v2/': '/v2/',
+        '^/gw/api/v3/': '/v3/',
+      },
       onProxyReq: (proxyReq, req) => {
         //console.log(req.headers)
         // proxyReq.removeHeader("cookie");
