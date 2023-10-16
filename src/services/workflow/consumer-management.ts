@@ -744,7 +744,7 @@ export async function revokeAllConsumerAccess(
   assert.strictEqual(
     prodEnvAccess.length == 1 && prodEnvAccess[0].serviceAccessId != null,
     true,
-    'Not eligible for deletion'
+    'Not eligible for deletion: Revoke access to product environments before deletion'
   );
 
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
