@@ -179,7 +179,11 @@ export async function getFilteredNamespaceConsumers(
   );
 
   return accesses
-    .filter((acc) => acc.consumer)
+    .filter(
+      (acc, index, self) =>
+        acc.consumer &&
+        index === self.findIndex((t) => t.consumer.id === acc.consumer.id)
+    )
     .map((acc) => {
       return {
         id: acc.consumer.id,
