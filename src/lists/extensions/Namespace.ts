@@ -241,7 +241,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+              const namespaceValidationRule = '^[a-z][a-z0-9-]{3,13}[a-z0-9]$';
               const re = new RegExp(namespaceValidationRule);
               assert.strictEqual(
                 re.test(args.namespace),
@@ -427,7 +427,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+              const namespaceValidationRule = '^[a-z][a-z0-9-]{3,13}[a-z0-9]$';
 
               const newNS = args.name ? args.name : newNamespaceID();
 
