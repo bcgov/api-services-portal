@@ -101,7 +101,7 @@ describe('Create API Spec for Delete Resources', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ deleteResources }: any) => {
       pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
-      pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+      pd.editProductEnvironmentConfig(deleteResources.product.environment.config, false, false)
       pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name, 'service-clear-resources.yml')
     })
   })

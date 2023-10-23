@@ -14,7 +14,6 @@ describe('Delete created resources', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
     // cy.resetState()
   })
@@ -78,7 +77,6 @@ describe('Delete created resources', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
+    
   })
 })

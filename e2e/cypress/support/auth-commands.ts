@@ -241,7 +241,7 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string, host: string) =
   }).then((res) => {
     expect(res.status).to.eq(200)
     if (config === 'routes') {
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", [host+".api.gov.bc.ca"]]))[0], 'id'))
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", [host + ".api.gov.bc.ca"]]))[0], 'id'))
     }
     else {
       cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", host]))[0], 'id'))
@@ -249,9 +249,18 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string, host: string) =
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: boolean) => {
+Cypress.Commands.add('publishApi', (fileNames: any, namespace: string, flag?: boolean) => {
   let fixtureFile = flag ? "state/regen" : "state/store";
   cy.log('< Publish API')
+  let fileName = ''
+  if (fileNames instanceof Array) {
+    for (const filepath of fileNames) {
+      fileName = fileName + ' ./cypress/fixtures/' + filepath;
+    }
+  }
+  else {
+    fileName = ' ./cypress/fixtures/' + fileNames
+  }
   const requestName: string = 'publishAPI'
   cy.fixture(fixtureFile).then((creds: any) => {
     const serviceAcctCreds = JSON.parse(creds.credentials)
@@ -263,7 +272,7 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: 
             cy.executeCliCommand('gwa config set --token ' + res.body.access_token).then((response) => {
               {
                 expect(response.stdout).to.contain("Config settings saved")
-                cy.executeCliCommand('gwa pg ./cypress/fixtures/' + fileName).then((response) => {
+                cy.executeCliCommand('gwa pg ' + fileName).then((response) => {
                   expect(response.stdout).to.contain("Gateway config published")
                 })
               }
@@ -502,7 +511,7 @@ Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, property
     if (propertyName === "config.anonymous") {
       obj.plugins[0].config.anonymous = propertyValue
     }
-    else if (propertyName === "tags"){
+    else if (propertyName === "tags") {
       obj.plugins[0][propertyName] = propertyValue
     }
     else {
@@ -573,7 +582,7 @@ Cypress.Commands.add('forceVisit', (url: string) => {
   });
 });
 
-Cypress.Commands.add('updateJsonBoby', (json: any, key: string, newValue: string):any => {
+Cypress.Commands.add('updateJsonBoby', (json: any, key: string, newValue: string): any => {
   json[key] = newValue
   return json
 });

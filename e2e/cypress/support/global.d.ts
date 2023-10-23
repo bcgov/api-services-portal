@@ -36,7 +36,7 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
-    publishApi(fileName: string, namespace: string, flag?: boolean): Chainable<Cypress.Response<any>>
+    publishApi(fileNames: string[], namespace: string, flag?: boolean): Chainable<Cypress.Response<any>>
 
     getServiceOrRouteID(configType: string, host: string
     ): Chainable<Cypress.Response<any>>

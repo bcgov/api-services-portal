@@ -71,9 +71,18 @@ describe('Create API Spec', () => {
     sa.saveServiceAcctCreds()
   })
 
+it('Verify gwa gateway publish multiple config file', () => {
+   cy.get('@apiowner').then(({ namespace }: any) => {
+     debugger
+      cy.publishApi(['service-plugin_A.yml','service-plugin_B.yml'], namespace).then((response: any) => {
+        expect(response.stdout).to.contain('Gateway config published');
+      })
+    })
+})
+
   it('publishes a new API for Dev environment to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service.yml', namespace).then((response: any) => {
+      cy.publishApi(['service.yml'], namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })
     })
@@ -103,7 +112,7 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+  it('update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
