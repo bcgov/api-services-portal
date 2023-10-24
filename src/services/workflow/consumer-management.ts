@@ -148,8 +148,12 @@ export async function allScopesAndRoles(
   envs
     .filter((env) => env.credentialIssuer)
     .forEach((env) => {
-      result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
-      result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
+      result.scopes.push(
+        ...JSON.parse(env.credentialIssuer.availableScopes ?? '[]')
+      );
+      result.roles.push(
+        ...JSON.parse(env.credentialIssuer.clientRoles ?? '[]')
+      );
     });
 
   result.scopes = [...new Set(result.scopes)];
@@ -522,6 +526,12 @@ export async function revokeAccessFromConsumer(
   );
 
   const prodEnvAccessItem = prodEnvAccessFiltered[0];
+
+  assert.strictEqual(
+    prodEnvAccessItem.serviceAccessId == null,
+    true,
+    'Delete this consumer to revoke remaining access'
+  );
 
   assert.strictEqual(prodEnvAccessItem.revocable, true, 'Access not revocable');
 
