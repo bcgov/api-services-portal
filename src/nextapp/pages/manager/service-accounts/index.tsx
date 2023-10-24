@@ -100,10 +100,7 @@ const ServiceAccountsPage: React.FC<
           title="Service Accounts"
         >
           <Box maxW="45%" mb={8}>
-            <Text>
-              Service Accounts allow you to access BC Government APIs via the
-              Gateway API or the Gateway CLI
-            </Text>
+            <Text>Service Accounts allow you to administer your gateway</Text>
           </Box>
         </PageHeader>
         <Modal
