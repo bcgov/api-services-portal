@@ -39,7 +39,7 @@ export async function connectOne(
     logger.error(
       `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`
     );
-    throw Error('Failed to find ' + value + ' in ' + transformInfo['list']);
+    throw Error(`Record not found [${_fieldKey}] ${value}`);
   } else if (
     currentData != null &&
     currentData[_fieldKey] &&
