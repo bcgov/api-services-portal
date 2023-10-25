@@ -51,8 +51,8 @@
 
 import {
   getAccessRequestByNamespaceServiceAccess,
+  getOpenAccessRequestsByConsumer,
   lookupConsumerPlugins,
-  lookupCredentialReferenceByServiceAccess,
   lookupLabeledServiceAccessesForNamespace,
   lookupServiceAccessesByConsumer,
   lookupEnvironmentAndIssuerById,
@@ -80,12 +80,10 @@ import {
   GatewayConsumer,
   LabelCreateInput,
   LabelUpdateInput,
-  Product,
 } from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
   KeycloakClientService,
-  KeycloakUserService,
 } from '../keycloak';
 import {
   addConsumerLabel,
@@ -94,7 +92,6 @@ import {
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
 import { syncPlugins, trimPlugin } from './consumer-plugins';
-import { removeAllButKeys } from '../../batch/feed-worker';
 import { KeycloakClientRolesService } from '../keycloak/client-roles';
 import { genClientId } from './client-shared-idp';
 
@@ -860,6 +857,23 @@ export async function saveConsumerLabels(
   await Promise.all(editPromises);
 
   logger.debug('[saveConsumerLabels] Changes %j', changes);
+}
+
+export async function enforceCheckForNoPendingRequests(
+  context: any,
+  ns: string,
+  consumerId: string
+) {
+  const openRequests = await getOpenAccessRequestsByConsumer(
+    context,
+    ns,
+    consumerId
+  );
+  assert.strictEqual(
+    openRequests.length == 0,
+    true,
+    'Pending access requests exist for this consumer; requests must be approved or rejected first'
+  );
 }
 
 /**
