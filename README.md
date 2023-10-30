@@ -58,9 +58,9 @@ Once running, the `api services portal` application is reachable via `localhost:
 
 1. Create a `.env` from `.env.local` file
 2. Create a `.env` from `.env.local` file under `feeds` directory
-3. remove cypress from docker-compose file (L106-129 & L217-229)
-4. run build steps [here](https://github.com/bcgov/api-services-portal/tree/dev/e2e#build-gateway-api-image)
-5. run `docker-compose build`
+3. Remove cypress from docker-compose file (L106-129 & L217-229)
+4. Run build steps [here](https://github.com/bcgov/api-services-portal/tree/dev/e2e#build-gateway-api-image)
+5. Run `docker-compose build`
 5. Run `docker-compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal, Feeder and Kong Gateway)
 6. Go to: http://oauth2proxy.localtest.me:4180
 7. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`
