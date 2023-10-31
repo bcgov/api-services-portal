@@ -18,7 +18,6 @@ RUN git clone -b v${PLUGIN_OIDC_VERSION} https://github.com/revomatico/kong-oidc
 RUN (cd kong-oidc && luarocks make && luarocks pack kong-oidc ${PLUGIN_OIDC_VERSION})
 
 RUN git clone https://github.com/ikethecoder/kong-oidc-consumer.git
-RUN (cd kong-oidc-consumer && git checkout 6f15eaa)
 RUN (cd kong-oidc-consumer && luarocks make && luarocks pack kong-oidc-consumer ${PLUGIN_OIDC_CONSUMER_VERSION})
 
 RUN git clone https://github.com/ikethecoder/kong-plugin-jwt-keycloak.git
