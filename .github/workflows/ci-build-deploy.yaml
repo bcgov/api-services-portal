@@ -95,9 +95,9 @@ jobs:
 
           echo '
           image:
-            registry: docker.pkg.github.com
-            repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 5.0-7a639fba
+            registry: ghcr.io
+            repository: jtendeck/bitnami-mongodb/bitnami-ps
+            tag: 6.0-2e23f29d
             pullPolicy: IfNotPresent
             pullSecrets:
               - dev-github-read-packages-creds
