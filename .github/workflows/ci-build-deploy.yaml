@@ -229,7 +229,7 @@ jobs:
             KONG_URL:
               value: '${{ secrets.KONG_URL_DEV}}'
             MONGO_URL:
-              value: 'mongodb://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
+              value: 'mongodb://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db:27017'
             MONGO_USER:
               value: root
               secure: true
