@@ -38,7 +38,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   id,
   preview,
 }) => {
-  const isProtected = data.environments.some((e) => e.flow != 'public');
+  const isProtected = data.environments.some((e) => e.flow !== 'public');
   const isTiered = data.environments.some((e) => e.anonymous);
 
   return (
