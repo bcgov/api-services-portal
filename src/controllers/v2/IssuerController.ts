@@ -14,7 +14,7 @@ import {
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
+  syncRecordsThrowErrors,
   getRecords,
   removeEmpty,
   removeKeys,
@@ -51,7 +51,7 @@ export class IssuerController extends Controller {
     @Body() body: CredentialIssuer,
     @Request() request: any
   ): Promise<BatchResult> {
-    return await syncRecords(
+    return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'CredentialIssuer',
       body['name'],

@@ -9,6 +9,8 @@ import { NotificationConfig, EmailNotification, User } from './config';
 
 import { ConfigService } from '../config.service';
 
+const isEmpty = (str: string) => !str?.length;
+
 export class NotificationService {
   private notifyConfig: NotificationConfig;
   constructor(private readonly config: ConfigService) {
@@ -16,22 +18,23 @@ export class NotificationService {
   }
 
   private templateToContent(to: User, templateName: string) {
+    const { logger } = this;
+    const name = isEmpty(to.name) ? 'Portal User' : to.name;
+
+    logger.debug('Notification triggered [%s] %j', name, to);
     const template = fs.readFileSync(
       path.resolve(__dirname, `templates/${templateName}.html`),
       'utf8'
     );
-    return template.replace('{{name}}', to.name);
+    return template.replace('{{name}}', name);
   }
 
   public async notify(user: User, email: EmailNotification) {
     const { logger } = this;
-
     try {
       if (!this.notifyConfig.enabled) {
         return;
       }
-
-      logger.debug('Notification triggered', user);
 
       //we don't notify the active user at all as they made the change
       var emailContent = this.templateToContent(user, email.template);
@@ -78,7 +81,7 @@ export class NotificationService {
       //     this.logger.debug("Email sent: " + info.response);
       // })
     } catch (err) {
-      logger.error('Sending notification to %s failed - %s', user.email, err);
+      logger.error('[FAILED] Notification to %s failed - %s', user.email, err);
     }
   }
 

@@ -33,7 +33,8 @@ const logger = Logger('wf.DeleteNamespace');
 
 export const DeleteNamespaceValidate = async (
   context: any,
-  ns: string
+  ns: string,
+  force: boolean
 ): Promise<void> => {
   logger.debug('Validate Deleting Namespace ns=%s', ns);
 
@@ -44,11 +45,6 @@ export const DeleteNamespaceValidate = async (
   const ids = envs.map((e: Environment) => e.id);
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, ids);
-
-  const serviceAccountAccessList = await lookupServiceAccessesForNamespace(
-    context,
-    ns
-  );
 
   const messages = [];
   if (accessList.length > 0) {
@@ -65,21 +61,17 @@ export const DeleteNamespaceValidate = async (
       } been configured in this namespace.`
     );
   }
-  if (serviceAccountAccessList.length > 0) {
-    messages.push(
-      `${serviceAccountAccessList.length} ${
-        serviceAccountAccessList.length == 1
-          ? 'service account exists'
-          : 'service accounts exist'
-      } in this namespace.`
-    );
-  }
 
-  assert.strictEqual(
-    gwServices.length == 0 && accessList.length == 0,
-    true,
-    messages.join('  ')
-  );
+  // Even when force=true, if there are consumers then do not proceed
+  if (accessList.length != 0) {
+    const msg = `${accessList.length} ${
+      accessList.length == 1 ? 'consumer has' : 'consumers have'
+    } access to products in this namespace.`;
+    assert.strictEqual(accessList.length == 0, true, msg);
+  }
+  if (!force) {
+    assert.strictEqual(gwServices.length == 0, true, messages.join('  '));
+  }
 };
 
 export const DeleteNamespaceRecordActivity = async (

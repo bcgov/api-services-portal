@@ -575,18 +575,18 @@ module.exports = {
               );
               assert.strictEqual(nsResource.length, 1, 'Invalid Namespace');
 
-              if (args.force === false) {
-                await DeleteNamespaceValidate(
-                  context.createContext({ skipAccessControl: true }),
-                  args.namespace
-                );
-              }
+              await DeleteNamespaceValidate(
+                context.createContext({ skipAccessControl: true }),
+                args.namespace,
+                args.force
+              );
+
               await DeleteNamespace(
                 context.sudo(),
                 getSubjectToken(context.req),
                 args.namespace
               );
-              resourcesApi.deleteResourceSet(nsResource[0].id);
+              await resourcesApi.deleteResourceSet(nsResource[0].id);
 
               // Last thing to do is mark the Namespace group 'decommissioned'
               const nsService = new NamespaceService(

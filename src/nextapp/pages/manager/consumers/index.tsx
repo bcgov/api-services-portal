@@ -1,5 +1,6 @@
 import * as React from 'react';
 import ActionsMenu from '@/components/actions-menu';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
@@ -293,13 +294,20 @@ const ConsumersPage: React.FC<
                       >
                         Grant Access
                       </MenuItem>
-                      <MenuItem
-                        color="red"
-                        onClick={handleDelete(d.id)}
-                        data-testid="consumer-delete-menuitem"
+                      <ConfirmationDialog
+                        destructive
+                        body="This action cannot be undone"
+                        confirmButtonText="Yes, Delete"
+                        title={`Delete ${d.username} Consumer?`}
+                        onConfirm={(() => handleDelete(d.id))()}
                       >
-                        Delete Consumer
-                      </MenuItem>
+                        <MenuItem
+                          color="red"
+                          data-testid="consumer-delete-menuitem"
+                        >
+                          Delete Consumer...
+                        </MenuItem>
+                      </ConfirmationDialog>
                     </ActionsMenu>
                   </Flex>
                 </Td>

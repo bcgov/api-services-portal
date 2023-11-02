@@ -185,7 +185,7 @@ export async function restApi(
     const contentType = response.headers.get('Content-Type');
 
     if (!response.ok) {
-      throw response.statusText;
+      throw await prepareError(response);
     }
 
     if (contentType?.includes('application/json')) {
@@ -196,7 +196,7 @@ export async function restApi(
     const text = await response.text();
     return text;
   } catch (err) {
-    throw new Error(err);
+    throw err;
   }
 }
 
@@ -222,5 +222,26 @@ export const useRestMutationApi = <T>(
     queryOptions
   );
 };
+
+async function prepareError(response: any) {
+  const contentType = response.headers.get('Content-Type');
+  if (contentType?.includes('application/json')) {
+    const json = await response.json();
+    const hasErrors = Boolean(json?.errors) || Boolean(json?.details);
+    if (hasErrors) {
+      if (json.errors && json.errors[0]?.data?.messages) {
+        throw json.errors[0]?.data?.messages.join('\n');
+      } else if (json.details) {
+        const result = [];
+        Object.entries(json.details).forEach(([key, value]) => {
+          result.push(`${key}: ${(value as any).message}`);
+        });
+        throw result.join('\n');
+      }
+      throw json.errors?.map((e) => e.message).join('\n');
+    }
+  }
+  throw `${response.statusText}`;
+}
 
 export default api;
