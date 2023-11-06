@@ -1,16 +1,16 @@
 {
   "namespace": "newplatform",
   "deleteResources": {
-    "namespace": "gw-2ec27"
+    "namespace": "gw-a9232"
   },
   "clientCredentials": {
-    "namespace": "gw-ff397"
+    "namespace": "gw-d2c50"
   },
   "namespacePreview": {
-    "namespace": "gw-2ae5a"
+    "namespace": "gw-16a3a"
   },
   "orgAssignment": {
-    "namespace": "gw-198e3"
+    "namespace": "gw-f016e"
   },
   "orgAssignmentMultipleAdmin": {
     "namespace": "orgassignment1"
@@ -19,7 +19,7 @@
     "namespace": "orgassign-unit"
   },
   "checkPermission": {
-    "namespace": "gw-7c532",
+    "namespace": "gw-deedd",
     "grantPermission": {
       "Mark": {
         "userName": "Mark F Mark L",
@@ -76,7 +76,7 @@
     }
   },
   "apiTest": {
-    "namespace": "gw-cdd6b",
+    "namespace": "gw-c3f31",
     "delete_namespace": "testplatform"
   }
 }

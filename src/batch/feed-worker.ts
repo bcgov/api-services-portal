@@ -296,7 +296,7 @@ export const syncRecordsThrowErrors = async function (
   children = false
 ): Promise<BatchResult> {
   const result = await syncRecords(context, feedEntity, eid, json, children);
-  if (result.status != 200) {
+  if (result.status !== 200) {
     throw new BatchSyncException(result);
   }
   return result;

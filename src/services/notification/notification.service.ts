@@ -9,6 +9,8 @@ import { NotificationConfig, EmailNotification, User } from './config';
 
 import { ConfigService } from '../config.service';
 
+const isEmpty = (str: string) => !str?.length;
+
 export class NotificationService {
   private notifyConfig: NotificationConfig;
   constructor(private readonly config: ConfigService) {
@@ -17,7 +19,7 @@ export class NotificationService {
 
   private templateToContent(to: User, templateName: string) {
     const { logger } = this;
-    const name = (to.name == '' ? null : to.name) ?? 'Portal User';
+    const name = isEmpty(to.name) ? 'Portal User' : to.name;
 
     logger.debug('Notification triggered [%s] %j', name, to);
     const template = fs.readFileSync(
