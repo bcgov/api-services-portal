@@ -1,0 +1,82 @@
+{
+  "namespace": "newplatform",
+  "deleteResources": {
+    "namespace": "gw-2ec27"
+  },
+  "clientCredentials": {
+    "namespace": "gw-ff397"
+  },
+  "namespacePreview": {
+    "namespace": "gw-2ae5a"
+  },
+  "orgAssignment": {
+    "namespace": "gw-198e3"
+  },
+  "orgAssignmentMultipleAdmin": {
+    "namespace": "orgassignment1"
+  },
+  "orgAssignmentOrgUnit": {
+    "namespace": "orgassign-unit"
+  },
+  "checkPermission": {
+    "namespace": "gw-7c532",
+    "grantPermission": {
+      "Mark": {
+        "userName": "Mark F Mark L",
+        "email": "mark@gmail.com",
+        "accessRole": [
+          "Access.Manage"
+        ]
+      },
+      "Mark_NV": {
+        "userName": "Mark F Mark L",
+        "email": "mark@gmail.com",
+        "accessRole": [
+          "Namespace.View"
+        ]
+      },
+      "Wendy": {
+        "userName": "Wendy F Wendy L",
+        "email": "wendy@test.com",
+        "accessRole": [
+          "Namespace.Manage",
+          "CredentialIssuer.Admin"
+        ]
+      },
+      "Wendy_NM": {
+        "userName": "Wendy F Wendy L",
+        "email": "wendy@test.com",
+        "accessRole": [
+          "Namespace.Manage"
+        ]
+      },
+      "Wendy_CA": {
+        "userName": "Wendy F Wendy L",
+        "email": "wendy@test.com",
+        "accessRole": [
+          "CredentialIssuer.Admin"
+        ]
+      },
+      "Wendy_GC": {
+        "userName": "Wendy F Wendy L",
+        "email": "wendy@test.com",
+        "accessRole": [
+          "GatewayConfig.Publish",
+          "Namespace.View"
+        ]
+      },
+      "Janis": {
+        "userName": "Janis Smith",
+        "email": "janis@testmail.com",
+        "accessRole": [
+          "Namespace.Manage",
+          "CredentialIssuer.Admin"
+        ]
+      }
+    }
+  },
+  "apiTest": {
+    "namespace": "gw-cdd6b",
+    "delete_namespace": "testplatform"
+  }
+}

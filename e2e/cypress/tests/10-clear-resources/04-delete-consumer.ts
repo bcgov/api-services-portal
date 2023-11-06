@@ -23,12 +23,13 @@ describe('Delete created consumer', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.fixture('apiowner').as('apiowner')
   })
 
   it('authenticates Mark (access manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(deleteResources.namespace);
       })

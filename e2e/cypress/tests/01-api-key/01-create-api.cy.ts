@@ -23,11 +23,12 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.getUserSessionTokenValue(namespace, false).then((value) => {
         userSession = value
       })
@@ -49,7 +50,7 @@ describe('Create API Spec', () => {
 
   it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
         home.createNamespace(namespace)
         cy.get('@login').then(function (xhr: any) {
@@ -75,7 +76,7 @@ describe('Create API Spec', () => {
   })
 
 it('Verify gwa gateway publish multiple config file', () => {
-   cy.get('@apiowner').then(({ namespace }: any) => {
+   cy.get('@common-testdata').then(({ namespace }: any) => {
      debugger
       cy.publishApi(['service-plugin_A.yml','service-plugin_B.yml'], namespace).then((response: any) => {
         expect(response.stdout).to.contain('Gateway config published');
@@ -84,7 +85,7 @@ it('Verify gwa gateway publish multiple config file', () => {
 })
 
   it('publishes a new API for Dev environment to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.publishApi(['service.yml'], namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })
@@ -143,7 +144,7 @@ it('Verify gwa gateway publish multiple config file', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.publishApi('service-plugin.yml', namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })

@@ -95,17 +95,22 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   cy.visit('/')
   cy.reload()
   cy.fixture('apiowner').as('apiowner')
+  cy.fixture('common-testdata').as('common-testdata')
   cy.preserveCookies()
   cy.visit(login.path)
-  cy.get('@apiowner').then(({ user, checkPermission }: any) => {
-    cy.login(user.credentials.username, user.credentials.password)
-    cy.log('Logged in!')
-    home.useNamespace(checkPermission.namespace)
-    cy.visit(na.path)
-    na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
-    cy.wait(2000)
-    na.clickGrantUserAccessButton()
-    na.grantPermission(checkPermission.grantPermission[accessRole])
+  cy.get('@apiowner').then(({ user }: any) => {
+    debugger
+    cy.get('@common-testdata').then(({ checkPermission }: any) => {
+      debugger
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
+      home.useNamespace(checkPermission.namespace)
+      cy.visit(na.path)
+      na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
+      cy.wait(2000)
+      na.clickGrantUserAccessButton()
+      na.grantPermission(checkPermission.grantPermission[accessRole])
+    })
   })
 })
 

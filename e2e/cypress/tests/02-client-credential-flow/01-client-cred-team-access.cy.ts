@@ -19,6 +19,7 @@ describe('Grant appropriate permissions to team members for client credential fl
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -42,7 +43,7 @@ describe('Grant appropriate permissions to team members for client credential fl
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.replaceWordInJsonObject('ccplatform', namespace, 'cc-service-gwa.yml')
-      cy.updateJsonValue('apiowner.json', 'clientCredentials.namespace', namespace)
+      cy.updateJsonValue('common-testdata.json', 'clientCredentials.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --namespace " + namespace)
     });

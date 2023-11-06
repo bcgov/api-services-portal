@@ -20,14 +20,17 @@ describe('Grant Credential Issuer Role', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('Authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, checkPermission }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ checkPermission }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(checkPermission.namespace)
+      })
     })
   })
 
@@ -67,11 +70,12 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Wendy (Credential-Issuer)', () => {
     cy.get('@credential-issuer').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ checkPermission }: any) => {
+      cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')

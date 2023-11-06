@@ -28,6 +28,7 @@ describe('Apply Shared IDP config at Keycloak user group', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
     cy.fixture('admin').as('admin')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Admin owner', () => {
@@ -42,7 +43,7 @@ describe('Apply Shared IDP config at Keycloak user group', () => {
   })
 
   it('Edit the namespace from the tree view', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.contains(apiTest.namespace).click()
       userGroups.clickOnEditButton()
     })

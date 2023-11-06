@@ -22,10 +22,11 @@ describe('Verify GWA get commands', () => {
     cy.preserveCookies()
     cy.fixture('api').as('api')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.getUserSessionTokenValue(namespace, false).then((value) => {
         userSession = value
         _namespace = namespace

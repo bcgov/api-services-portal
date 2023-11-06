@@ -17,14 +17,17 @@ describe('Assign Access to existing user Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(namespace)
+      })
     })
   })
 
@@ -62,12 +65,13 @@ describe('Authernticate with old user to initiate migration', () => {
     cy.preserveCookies()
     cy.fixture('usermigration').as('usermigration')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates with old user', () => {
     cy.get('@usermigration').then(({ oldUser }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(oldUser.credentials.username, oldUser.credentials.password)
         cy.log('Logged in!')
         home.useNamespace(namespace)
@@ -98,6 +102,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
     cy.preserveCookies()
     cy.fixture('usermigration').as('usermigration')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -116,7 +121,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
 
   it('Get the permission of the user', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         home.useNamespace(namespace)
         cy.get('@login').then(function (xhr: any) {
           userScopes = xhr.response.body.user.scopes
@@ -154,6 +159,7 @@ describe('Verify that old user is no longer able to sign in', () => {
     cy.preserveCookies()
     cy.fixture('usermigration').as('usermigration')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 

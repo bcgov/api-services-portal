@@ -26,13 +26,16 @@ describe('Verify Products when namespace in Preview Mode', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, namespacePreview }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(namespacePreview.namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ namespacePreview }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(namespacePreview.namespace)
+      })
     })
   })
 
@@ -50,7 +53,7 @@ describe('Verify Products when namespace in Preview Mode', () => {
   })
 
   it('Navigate to Your Product tab in API Directory page', () => {
-      apiDir.navigateToYourProduct()
+    apiDir.navigateToYourProduct()
   })
 
   it('Verify that the banner for Preview mode is displayed', () => {

@@ -15,14 +15,17 @@ describe('Team Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, deleteResources }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(deleteResources.namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ deleteResources }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(deleteResources.namespace)
+      })
     })
   })
 
@@ -46,6 +49,6 @@ describe('Team Access Spec', () => {
 
   after(() => {
     cy.logout()
-    
+
   })
 })

@@ -21,17 +21,20 @@ describe('Get the user session token to check ', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
         cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                namespace = apiTest.namespace
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
+            cy.get('@apiowner').then(({ user }: any) => {
+                cy.get('@common-testdata').then(({ apiTest }: any) => {
+                    cy.login(user.credentials.username, user.credentials.password)
+                    home.useNamespace(apiTest.namespace)
+                    namespace = apiTest.namespace
+                    cy.get('@login').then(function (xhr: any) {
+                        userSession = xhr.response.headers['x-auth-request-access-token']
+                    })
                 })
             })
         })
@@ -103,11 +106,12 @@ describe('Verify that created Product is displayed in UI', () => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('api').as('api')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 home.useNamespace(apiTest.namespace)
                 userSession = value

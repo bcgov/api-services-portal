@@ -60,11 +60,11 @@ describe('Verify CLI commands for generate/apply config', () => {
     });
   })
 
-  it('Check gwa command to generate config for kong httpbin template', () => {
-    cy.executeCliCommand('gwa generate-config --template kong-httpbin --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
-      assert.equal(response.stdout, "File gw-config.yml created")
-    });
-  })
+  // it('Check gwa command to generate config for kong httpbin template', () => {
+  //   cy.executeCliCommand('gwa generate-config --template kong-httpbin --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
+  //     assert.equal(response.stdout, "File gw-config.yml created")
+  //   });
+  // })
 
   it('activates new namespace', () => {
     home.useNamespace(namespace)

@@ -21,12 +21,13 @@ describe('Access manager approves developer access request for Client ID/Secret 
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(clientCredentials.namespace)
       })
@@ -152,12 +153,13 @@ describe('Deselect the scope from authorization tab', () => {
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Mark (Access Manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password).then(() => {
           home.useNamespace(clientCredentials.namespace);
         })

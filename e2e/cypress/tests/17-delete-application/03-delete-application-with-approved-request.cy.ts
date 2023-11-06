@@ -72,12 +72,13 @@ describe('Approve Pending Request Spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace);
       })
@@ -117,6 +118,7 @@ describe('Delete application which has approved request spec', () => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('authenticates Harley (developer)', () => {

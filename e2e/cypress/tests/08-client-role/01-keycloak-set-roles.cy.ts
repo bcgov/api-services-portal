@@ -28,6 +28,7 @@ describe('Set roles in Keycloak auth client', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
     cy.fixture('admin').as('admin')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Admin owner', () => {

@@ -20,10 +20,11 @@ describe('Revoke product environment access for Kong API spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.get('@access-manager').then(({ user }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace);

@@ -30,6 +30,7 @@ describe('Reset Authorization profile to default (without any role)', () => {
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -40,7 +41,7 @@ describe('Reset Authorization profile to default (without any role)', () => {
   })
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
         home.useNamespace(clientCredentials.namespace)
       })
@@ -57,7 +58,7 @@ describe('Reset Authorization profile to default (without any role)', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.replaceWordInJsonObject('ccplatform', nameSpace, 'cc-service-plugin.yml')
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace,true).then(() => {
         // cy.get('@publishAPIResponse').then((res: any) => {
@@ -90,6 +91,7 @@ describe('Check service access without applying any roles', () => {
       cy.fixture('developer').as('developer')
       cy.fixture('apiowner').as('apiowner')
       cy.fixture('state/regen').as('regen')
+      cy.fixture('common-testdata').as('common-testdata')
       cy.visit(login.path)
     })
   

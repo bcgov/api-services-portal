@@ -75,12 +75,13 @@ describe('Access manager apply "Write" role and approves developer access reques
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(clientCredentials.namespace)
       })
@@ -114,6 +115,7 @@ describe('Access manager apply "Write" role and approves developer access reques
 describe('Update Kong plugin and verify that only only PUT and POST methods are allowed for Read role', () => {
   beforeEach(() => {
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Set allowed methods "PUT" and "POST" in kong plugin ', () => {
@@ -133,7 +135,7 @@ describe('Update Kong plugin and verify that only only PUT and POST methods are 
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace, true).then(() => {
         // cy.get('@publishAPIResponse').then((res: any) => {
         //   cy.log(JSON.stringify(res.body))

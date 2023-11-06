@@ -16,14 +16,17 @@ describe('Team Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
-      home.useNamespace(namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        home.useNamespace(namespace)
+      })
     })
   })
 

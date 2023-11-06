@@ -17,6 +17,7 @@ describe('Request Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 

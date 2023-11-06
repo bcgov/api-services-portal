@@ -14,11 +14,12 @@ describe('Verify namespace delete using gwa command', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('Authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
                 userSession = value
             })
@@ -51,7 +52,7 @@ describe('Verify namespace delete using gwa command', () => {
     })
 
     it('Check gwa namespace destroy command for the namespace associated with services', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             _namespace = namespace
             cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
                 expect(response.stdout).to.contain("Config settings saved")

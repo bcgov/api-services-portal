@@ -18,11 +18,12 @@ describe('Get the user session token to pass it as authorization token to make t
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
             })
@@ -123,6 +124,7 @@ describe('API Tests for Namespace Summary', () => {
     beforeEach(() => {
         cy.fixture('api').as('api')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -133,7 +135,7 @@ describe('API Tests for Namespace Summary', () => {
     })
 
     it('Get the resource for namespace summary and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ namespaces }: any) => {
                 cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
