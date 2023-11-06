@@ -210,7 +210,7 @@ describe('Published a shared authorization profile', () => {
         cy.logout()
         cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 
 })
 
@@ -250,6 +250,12 @@ describe('Deleted shared auth profile', () => {
         cy.get('@api').then(({ authorizationProfiles }: any) => {
             authProfile.deleteAuthProfile(authorizationProfiles.shared_IDP_inheritFrom_expectedResponse.name)
         })
+    })
+
+    it('Verify the confirmation message to delete the consumer', () => {
+        cy.wait(2000)
+        cy.contains('This action cannot be undone').should('exist')
+        cy.contains('Yes, Delete').click()
     })
 
     after(() => {

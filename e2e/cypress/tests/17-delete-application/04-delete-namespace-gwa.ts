@@ -56,21 +56,15 @@ describe('Verify namespace delete using gwa command', () => {
             cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
                 expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa namespace destroy').then((response) => {
-                    expect(response.stderr).to.contain('services have been configured in this namespace');
+                    expect(response.stderr).to.contain('Error: Validation Failed');
                 });
             })
         })
     })
 
-    it('Check gwa namespace destroy command for hard deleting namespace', () => {
+    it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
         cy.executeCliCommand('gwa namespace destroy --force').then((response) => {
-            expect(response.stdout).to.contain('Namespace destroyed: ' + _namespace);
-        });
-    })
-
-    it('Check that deleted namespace does not display in gwa namespace list command', () => {
-        cy.executeCliCommand('gwa namespace list').then((response) => {
-            expect(response.stdout).not.to.contain(_namespace);
+            expect(response.stderr).to.contain('Error: Validation Failed');
         });
     })
 

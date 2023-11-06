@@ -6,6 +6,7 @@ import {
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   grantAccessToConsumer,
+  enforceCheckForNoPendingRequests,
   revokeAllConsumerAccess,
   revokeAccessFromConsumer,
   saveConsumerLabels,
@@ -227,6 +228,11 @@ module.exports = {
               { query, access }: any
             ): Promise<boolean> => {
               const namespace = context.req.user.namespace;
+              await enforceCheckForNoPendingRequests(
+                context,
+                namespace,
+                consumerId
+              );
               try {
                 logger.debug(
                   '[grantAccessToConsumer] %s %s %j',
@@ -265,6 +271,11 @@ module.exports = {
               { query, access }: any
             ): Promise<boolean> => {
               const namespace = context.req.user.namespace;
+              await enforceCheckForNoPendingRequests(
+                context,
+                namespace,
+                consumerId
+              );
               try {
                 logger.debug(
                   '[revokeAccessFromConsumer] %s %s %j',
@@ -327,6 +338,11 @@ module.exports = {
               { query, access }: any
             ): Promise<boolean> => {
               const namespace = context.req.user.namespace;
+              await enforceCheckForNoPendingRequests(
+                context,
+                namespace,
+                consumerId
+              );
               try {
                 logger.debug(
                   '[updateConsumerAccess] %s %s %j',
@@ -365,6 +381,11 @@ module.exports = {
               { query, access }: any
             ): Promise<boolean> => {
               const namespace = context.req.user.namespace;
+              await enforceCheckForNoPendingRequests(
+                context,
+                namespace,
+                consumerId
+              );
               await saveConsumerLabels(context, namespace, consumerId, labels);
               return true;
             },

@@ -20,7 +20,7 @@ import {
   parseJsonString,
   removeEmpty,
   removeKeys,
-  syncRecords,
+  syncRecordsThrowErrors,
 } from '../../batch/feed-worker';
 import express from 'express';
 import multer from 'multer';
@@ -59,7 +59,7 @@ export class ContentController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     body['namespace'] = ns;
-    return await syncRecords(
+    return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'Content',
       body['externalLink'],

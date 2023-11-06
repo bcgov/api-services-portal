@@ -99,11 +99,11 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
                   description: `Automatic issuing of the credential means that this owner (${ownerName}) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.`,
                   value: 'auto',
                 },
-                {
-                  title: 'Manual',
-                  description: `Manual issuing of the credential means that this owner (${ownerName}) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means.`,
-                  value: 'manual',
-                },
+                // {
+                //   title: 'Manual',
+                //   description: `Manual issuing of the credential means that this owner (${ownerName}) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means.`,
+                //   value: 'manual',
+                // },
               ]}
             />
           </fieldset>

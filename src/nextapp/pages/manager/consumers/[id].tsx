@@ -110,7 +110,7 @@ const ConsumerPage: React.FC<
         status: 'error',
         description: Array.isArray(err)
           ? err.map((e) => e.message).join(', ')
-          : undefined,
+          : err,
       });
     }
   };

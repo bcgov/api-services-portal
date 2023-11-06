@@ -18,6 +18,7 @@ export {
   revokeAllConsumerAccess,
   revokeAccessFromConsumer,
   updateConsumerAccess,
+  enforceCheckForNoPendingRequests,
   saveConsumerLabels,
 } from './consumer-management';
 

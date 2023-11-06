@@ -12,8 +12,8 @@ import {
   Get,
   Tags,
 } from 'tsoa';
-import { strict as assert } from 'assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
+import { assertEqual } from '../ioc/assert';
 import { inject, injectable } from 'tsyringe';
 import {
   syncRecords,
@@ -70,9 +70,10 @@ export class OrganizationController extends Controller {
   public async listOrganizationUnits(@Path() org: string): Promise<any> {
     const orgs = await getOrganizations(this.keystone.sudo());
     const match = orgs.filter((o) => o.name === org).pop();
-    assert.strictEqual(
+    assertEqual(
       typeof match === 'undefined',
       false,
+      'org',
       'Organization not found.'
     );
 
@@ -128,9 +129,10 @@ export class OrganizationController extends Controller {
     @Body() body: GroupMembership
   ): Promise<void> {
     // must match either the 'name' or one of the parent nodes
-    assert.strictEqual(
+    assertEqual(
       org === body.name || isParent(body.parent, org),
       true,
+      'org',
       'Organization mismatch'
     );
 
@@ -172,9 +174,10 @@ export class OrganizationController extends Controller {
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
-    assert.strictEqual(
+    assertEqual(
       orgLookup != null && orgLookup.name === org,
       true,
+      'org',
       'Invalid Organization'
     );
 
@@ -204,9 +207,10 @@ export class OrganizationController extends Controller {
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
-    assert.strictEqual(
+    assertEqual(
       orgLookup != null && orgLookup.name === org,
       true,
+      'org',
       'Invalid Organization'
     );
 

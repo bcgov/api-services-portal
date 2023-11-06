@@ -56,7 +56,7 @@ describe('Verify /Organization/{Org} end point', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response) => {
                 expect(response.status).to.be.oneOf([404, 422])
-                expect(response.body.message).to.be.equal("Organization not found.")
+                expect(response.body.message).to.be.equal("Validation Failed")
             })
         })
     })

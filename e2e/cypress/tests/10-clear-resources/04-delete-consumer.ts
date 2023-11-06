@@ -49,6 +49,11 @@ describe('Delete created consumer', () => {
     consumers.deleteConsumer(consumerID)
   })
 
+  it('Verify the confirmation message to delete the consumer', () => {
+    cy.contains('This action cannot be undone').should('exist')
+    cy.contains('Yes, Delete').click()
+  })
+
   it('Verify toast message for consumer deletion', () => {
     cy.verifyToastMessage("Consumer deleted")
   })

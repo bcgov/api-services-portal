@@ -47,19 +47,22 @@ describe('Create API Spec', () => {
     });
   })
 
-  it('creates new namespace', () => {
+  it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@apiowner').then(({ namespace }: any) => {
         nameSpace = namespace
-        cy.executeCliCommand('gwa namespace create -n ' + namespace).then((response) => {
-          assert.equal(response.stdout, namespace)
+        home.createNamespace(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
         })
       })
     })
   })
 
-  it('activates new namespace', () => {
-    home.useNamespace(nameSpace)
+  it('Verify for invalid namespace name', () => {
+    cy.get('@apiowner').then(({ invalid_namespace }: any) => {
+      home.validateNamespaceName(invalid_namespace)
+    })
   })
 
   it('creates a new service account', () => {
@@ -89,7 +92,7 @@ it('Verify gwa gateway publish multiple config file', () => {
   })
 
   it('Upload dataset and Product using GWA Apply command', () => {
-    cy.executeCliCommand('gwa apply').then((response) => {
+    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })

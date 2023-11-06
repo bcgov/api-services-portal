@@ -13,7 +13,7 @@ import {
 } from './transformations';
 import { handleNameChange, handleUsernameChange } from './hooks';
 import YAML from 'js-yaml';
-import { BatchResult } from './types';
+import { BatchResult, BatchSyncException } from './types';
 import {
   BatchService,
   BatchWhereClause,
@@ -288,6 +288,20 @@ export const getRecord = async function (
   );
 };
 
+export const syncRecordsThrowErrors = async function (
+  context: any,
+  feedEntity: string,
+  eid: string,
+  json: any,
+  children = false
+): Promise<BatchResult> {
+  const result = await syncRecords(context, feedEntity, eid, json, children);
+  if (result.status != 200) {
+    throw new BatchSyncException(result);
+  }
+  return result;
+};
+
 export const syncRecords = async function (
   context: any,
   feedEntity: string,
@@ -399,7 +413,12 @@ export const syncRecords = async function (
       }
     } catch (ex) {
       logger.error('Caught exception %s', ex);
-      return { status: 400, result: 'create-failed', childResults };
+      return {
+        status: 400,
+        result: 'create-failed',
+        reason: ex.message,
+        childResults,
+      };
     }
   } else {
     try {
@@ -516,7 +535,12 @@ export const syncRecords = async function (
       }
     } catch (ex) {
       logger.error('Caught exception %s', ex);
-      return { status: 400, result: 'update-failed', childResults };
+      return {
+        status: 400,
+        result: 'update-failed',
+        reason: ex.message,
+        childResults,
+      };
     }
   }
 };
