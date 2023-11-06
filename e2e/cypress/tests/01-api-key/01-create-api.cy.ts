@@ -77,7 +77,6 @@ describe('Create API Spec', () => {
 
 it('Verify gwa gateway publish multiple config file', () => {
    cy.get('@common-testdata').then(({ namespace }: any) => {
-     debugger
       cy.publishApi(['service-plugin_A.yml','service-plugin_B.yml'], namespace).then((response: any) => {
         expect(response.stdout).to.contain('Gateway config published');
       })

@@ -99,9 +99,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   cy.preserveCookies()
   cy.visit(login.path)
   cy.get('@apiowner').then(({ user }: any) => {
-    debugger
     cy.get('@common-testdata').then(({ checkPermission }: any) => {
-      debugger
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
       home.useNamespace(checkPermission.namespace)

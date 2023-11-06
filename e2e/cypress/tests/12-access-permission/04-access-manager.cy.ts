@@ -75,7 +75,6 @@ describe('Verify that Mark is able to view the pending request', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        debugger
         home.useNamespace(checkPermission.namespace)
         cy.visit(mp.path)
       })

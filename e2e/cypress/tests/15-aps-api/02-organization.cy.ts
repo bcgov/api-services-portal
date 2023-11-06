@@ -171,7 +171,6 @@ describe('Get the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             expectedResponse = organization.expectedNamespace
             // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
-            debugger
             cy.compareJSONObjects(response, expectedResponse, true)
         })
     })

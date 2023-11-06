@@ -79,7 +79,6 @@ describe('API Tests for Updating Products', () => {
                 response = res.body[index]
                 productID = res.body[index].appId
                 envID = res.body[index].environments[0].appId
-                debugger
             })
         })
     })
