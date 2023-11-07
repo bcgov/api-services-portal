@@ -20,13 +20,14 @@ describe('Filter Manage labels Spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
 
   it('authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace);
       })

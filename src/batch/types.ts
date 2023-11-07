@@ -6,3 +6,11 @@ export interface BatchResult {
   ownedBy?: string;
   childResults?: BatchResult[];
 }
+
+export class BatchSyncException extends Error {
+  result: BatchResult;
+  constructor(result: BatchResult) {
+    super();
+    this.result = result;
+  }
+}

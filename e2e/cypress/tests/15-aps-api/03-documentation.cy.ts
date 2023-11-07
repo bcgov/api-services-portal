@@ -18,11 +18,12 @@ describe('Get the user session token', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace

@@ -17,11 +17,12 @@ describe('Get the user session token', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
             })
@@ -41,6 +42,7 @@ describe('API Tests for Updating dataset', () => {
     beforeEach(() => {
         cy.fixture('api').as('api')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -60,7 +62,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the resource (/organization/{org}/datasets/{name}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
@@ -77,7 +79,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Put the resource (/namespaces/{ns}/datasets/{name}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets', 'PUT').then((response) => {
                     expect(response.status).to.be.equal(200)
@@ -87,7 +89,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the resource (/namespaces/{ns}/datasets/{name}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
@@ -160,7 +162,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code and empty response for the namespace with no directory', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory', 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
@@ -171,7 +173,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory', 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
@@ -190,7 +192,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the namespace directory details by its ID (/namespaces/{ns}/directory/{id}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/' + directoryID, 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
@@ -201,7 +203,7 @@ describe('API Tests for Updating dataset', () => {
     })
 
     it('Get the namespace directory details (/namespaces/{ns}/directory/{id}) for non exist directory ID and verify the response code', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99', 'GET').then((res) => {
                     expect(res.status).to.be.oneOf([404, 422])

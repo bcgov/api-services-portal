@@ -17,7 +17,7 @@ import {
   parseJsonString,
   removeEmpty,
   removeKeys,
-  syncRecords,
+  syncRecordsThrowErrors,
   transformAllRefID,
 } from '../../batch/feed-worker';
 import { Dataset, DraftDataset } from './types';
@@ -56,7 +56,7 @@ export class DatasetController extends Controller {
     // - isInCatalog must be false (OrgDataset should only be updating this)
     removeKeys(body, ['isInDraft', 'isInCatalog']);
 
-    return await syncRecords(
+    return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'DraftDataset',
       request.body['name'],

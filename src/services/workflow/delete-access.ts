@@ -135,11 +135,11 @@ export const DeleteAccess = async (context: any, keys: any) => {
       svc.consumerType == 'client' &&
       svc.consumer.username != 'anonymous' &&
       svc.productEnvironment &&
-      deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, [
+      (await deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, [
         'id',
         'extForeignKey',
         'customId',
-      ]);
+      ]));
 
     if (
       svc.consumer != null &&
@@ -147,8 +147,8 @@ export const DeleteAccess = async (context: any, keys: any) => {
       svc.consumer.username != 'anonymous' &&
       svc.productEnvironment
     ) {
-      // Asynchronously do the deletion of the backend IdP and Kong
-      kongApi
+      // Synchronously do the deletion of the backend IdP and Kong
+      await kongApi
         .deleteConsumer(svc.consumer.extForeignKey)
         .then(async () => {
           if (flow == 'client-credentials') {

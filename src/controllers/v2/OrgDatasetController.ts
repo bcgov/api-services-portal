@@ -15,7 +15,7 @@ import { strict as assert } from 'assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
+  syncRecordsThrowErrors,
   getRecords,
   parseJsonString,
   removeEmpty,
@@ -95,7 +95,7 @@ export class OrgDatasetController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     assert.strictEqual(org, body['organization'], 'Organization Mismatch');
-    return await syncRecords(
+    return await syncRecordsThrowErrors(
       this.keystone.createContext(request, true),
       'DraftDataset',
       body['name'],

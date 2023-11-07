@@ -32,6 +32,7 @@ import { saveConsumerLabels } from './consumer-management';
 import { StructuredActivityService } from './namespace-activity';
 import { KeycloakClientRolesService } from '../keycloak/client-roles';
 import { genClientId } from './client-shared-idp';
+import { IssuerMisconfigError } from '../issuerMisconfigError';
 
 const logger = Logger('wf.Apply');
 
@@ -136,17 +137,30 @@ export const Apply = async (
           logger.error('Failed to rollback access request %s', err);
         }
       );
-      await recordActivity(
-        context,
-        operation,
-        'AccessRequest',
-        updatedItem.id,
-        'Failed to Apply Workflow - ' + err,
-        'failed',
-        '',
-        productNamespace
-      );
-      throw err;
+      if (err instanceof IssuerMisconfigError) {
+        await recordActivity(
+          context,
+          operation,
+          'AccessRequest',
+          updatedItem.id,
+          `Failed to Apply Workflow: ${err.text()}`,
+          'failed',
+          '',
+          productNamespace
+        );
+      } else {
+        await recordActivity(
+          context,
+          operation,
+          'AccessRequest',
+          updatedItem.id,
+          'Failed to Apply Workflow - ' + err,
+          'failed',
+          '',
+          productNamespace
+        );
+      }
+      throw new Error('Communication error with issuer');
     }
     return;
   }

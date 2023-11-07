@@ -22,11 +22,12 @@ describe('Create API Spec for Delete Resources', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
         userSession = value
       })
@@ -45,7 +46,7 @@ describe('Create API Spec for Delete Resources', () => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.replaceWordInJsonObject('ns.deleteplatform', 'ns.' + namespace, 'service-clear-resources-gwa.yml')
-      cy.updateJsonValue('apiowner.json', 'deleteResources.namespace', namespace)
+      cy.updateJsonValue('common-testdata.json', 'deleteResources.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --namespace " + namespace)
     });
@@ -64,7 +65,7 @@ describe('Create API Spec for Delete Resources', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
+    cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.publishApi('service-clear-resources-gwa.yml', namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })
@@ -101,7 +102,7 @@ describe('Create API Spec for Delete Resources', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ deleteResources }: any) => {
       pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
-      pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+      pd.editProductEnvironmentConfig(deleteResources.product.environment.config, false, false)
       pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name, 'service-clear-resources.yml')
     })
   })

@@ -121,6 +121,59 @@ export async function getAccessRequestByNamespaceServiceAccess(
     : result.data.allAccessRequests[0];
 }
 
+export async function getOpenAccessRequestsByConsumer(
+  context: any,
+  ns: string,
+  consumerId: string
+): Promise<AccessRequest[]> {
+  logger.debug(
+    '[getOpenAccessRequestsByConsumer] ns=%s consumer=%s',
+    ns,
+    consumerId
+  );
+  const query = gql`
+    query GetNamespaceOpenAccessRequestsByConsumer(
+      $ns: String!
+      $consumerId: String!
+    ) {
+      allAccessRequests(
+        where: {
+          serviceAccess: { consumer: { id: $consumerId } }
+          isComplete: false
+        }
+      ) {
+        id
+        name
+        isApproved
+        isIssued
+        isComplete
+        additionalDetails
+        serviceAccess {
+          id
+          consumer {
+            username
+          }
+        }
+        createdAt
+      }
+    }
+  `;
+
+  const result = await context.executeGraphQL({
+    query,
+    variables: { ns, consumerId },
+  });
+  logger.debug('[getOpenAccessRequestsByConsumer] result %j', result);
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    'Error retrieving access request record'
+  );
+
+  return result.data.allAccessRequests;
+}
+
 export async function lookupEnvironmentAndApplicationByAccessRequest(
   context: any,
   id: string

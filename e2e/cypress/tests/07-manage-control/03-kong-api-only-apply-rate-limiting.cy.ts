@@ -30,6 +30,7 @@ describe('Apply Kong API key only plugin', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates api owner', () => {
@@ -40,7 +41,7 @@ describe('Apply Kong API key only plugin', () => {
 
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
         home.useNamespace(namespace)
       })
@@ -79,12 +80,14 @@ describe('Apply Kong API key only plugin', () => {
   })
 
   it('Apply Key-auth only authorization plugin to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace, product }: any) => {
-      cy.updatePluginFile('service-plugin.yml', product.environment.config.serviceName, 'service-plugin-key-auth-only.yml')
-      cy.publishApi('service-plugin.yml', namespace).then(() => {
-        // cy.get('@publishAPIResponse').then((res: any) => {
-        //   cy.log(JSON.stringify(res.body))
-        // })
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.updatePluginFile('service-plugin.yml', product.environment.config.serviceName, 'service-plugin-key-auth-only.yml')
+        cy.publishApi('service-plugin.yml', namespace).then(() => {
+          // cy.get('@publishAPIResponse').then((res: any) => {
+          //   cy.log(JSON.stringify(res.body))
+          // })
+        })
       })
     })
   })
@@ -196,12 +199,13 @@ describe('Approve Pending Request Spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace);
       })

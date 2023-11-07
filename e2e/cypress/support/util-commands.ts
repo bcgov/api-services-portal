@@ -111,9 +111,7 @@ Cypress.Commands.add('resetState', () => {
 })
 
 Cypress.Commands.add('updateJsonValue', (filePath: string, jsonPath: string, newValue: string, index?: any) => {
-  debugger
   cy.readFile('cypress/fixtures/' + filePath).then(currState => {
-    debugger
 
     const keys = jsonPath.split('.'); // Split the keyPath using dot notation
     let currentObj = currState;
@@ -142,7 +140,6 @@ Cypress.Commands.add('executeCliCommand', (command: string) => {
 })
 
 Cypress.Commands.add('replaceWordInJsonObject', (targetWord: string, replacement: string, fileName: string) => {
-  debugger
   cy.readFile('cypress/fixtures/' + fileName).then((content: any) => {
     let regex = new RegExp(targetWord, 'g');
     let modifiedString = content.replace(regex, replacement);
@@ -165,7 +162,6 @@ Cypress.Commands.add('gwaPublish', (type: string, fileName: string) => {
 Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
   const currentDirectory = Cypress.config('fileServerFolder'); // Get the current working directory
   const filePath = path.join(currentDirectory, fileName)
-  debugger
   try {
     cy.exec(`rm -f ${filePath}`);
     cy.log(`File '${fileName}' has been deleted from the e2e folder.`);

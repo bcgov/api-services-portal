@@ -21,11 +21,12 @@ describe('Get the user session token', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace
@@ -115,6 +116,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     beforeEach(() => {
         cy.fixture('api').as('api')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Prepare the Request Specification to create a shared IDP profile', () => {
@@ -126,7 +128,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     })
 
     it('Put the resource to create shared IDP profile and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
                 expect(response.status).to.be.equal(200)
             })
@@ -142,7 +144,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     })
 
     it('Create an authorization profile using inheritFrom attribute and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body.result).to.be.equal("created")
@@ -151,7 +153,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     })
 
     it('Get list of authorization profile and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
                 response = res.body
@@ -178,6 +180,7 @@ describe('Published a shared authorization profile', () => {
     beforeEach(() => {
         cy.fixture('api').as('api')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Prepare the Request Specification to create a shared IDP profile', () => {
@@ -189,7 +192,7 @@ describe('Published a shared authorization profile', () => {
     })
 
     it('Create a shared credential issuer', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body.result).to.be.equal("created")
@@ -198,7 +201,7 @@ describe('Published a shared authorization profile', () => {
     })
 
     it('Get list of authorization profile and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
                 response = res.body
@@ -210,7 +213,7 @@ describe('Published a shared authorization profile', () => {
         cy.logout()
         cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 
 })
 
@@ -230,10 +233,11 @@ describe('Deleted shared auth profile', () => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('api').as('api')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace
@@ -250,6 +254,12 @@ describe('Deleted shared auth profile', () => {
         cy.get('@api').then(({ authorizationProfiles }: any) => {
             authProfile.deleteAuthProfile(authorizationProfiles.shared_IDP_inheritFrom_expectedResponse.name)
         })
+    })
+
+    it('Verify the confirmation message to delete the consumer', () => {
+        cy.wait(2000)
+        cy.contains('This action cannot be undone').should('exist')
+        cy.contains('Yes, Delete').click()
     })
 
     after(() => {

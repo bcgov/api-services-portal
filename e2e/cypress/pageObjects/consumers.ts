@@ -45,6 +45,7 @@ export default class ConsumersPage {
   linkConsumerToNamespaceBtn: string = '[data-testid="link-consumer-namespace"]'
   userNameTxt: string = '[data-testid="link-consumer-username"]'
   linkBtn: string = '[data-testid="link-consumer-link-btn"]'
+  productDetails: string = '[data-testid="product-list-table"]'
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
@@ -202,7 +203,7 @@ export default class ConsumersPage {
   }
 
   editConsumerDialog() {
-    cy.get('[data-testid="product-list-table"]').then($button => {
+    cy.get(this.productDetails).then($button => {
       if ($button.is(':visible')) {
         cy.contains('Edit').first().click()
       }
@@ -373,5 +374,13 @@ export default class ConsumersPage {
 
   getText() {
     cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').as('inputValue')
+  }
+
+  revokeProductEnvAccess(prodEnv: any) {
+    cy.get(this.productDetails).find('tr').each(($row) => {
+      if ($row.find('td:nth-child(1)').text() == prodEnv) {
+        cy.wrap($row).find('button').last().click({ force: true })
+      }
+    })
   }
 }

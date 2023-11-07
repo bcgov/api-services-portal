@@ -1,6 +1,7 @@
 import * as React from 'react';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import ActionsMenu from '@/components/actions-menu';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import AuthorizationProfileForm from '@/components/authorization-profile-form';
 import {
   Box,
@@ -220,9 +221,15 @@ const AuthorizationProfiles: React.FC<
                     </Button>
                   </AuthorizationProfileForm>
                   <ActionsMenu placement="bottom-end">
-                    <MenuItem onClick={handleDelete(c.id)} color="bc-error">
-                      Delete
-                    </MenuItem>
+                    <ConfirmationDialog
+                      destructive
+                      body="This action cannot be undone"
+                      confirmButtonText="Yes, Delete"
+                      title={`Delete ${c.name} Authorization Profile?`}
+                      onConfirm={(() => handleDelete(c.id))()}
+                    >
+                      <MenuItem color="bc-error">Delete Profile...</MenuItem>
+                    </ConfirmationDialog>
                   </ActionsMenu>
                 </Td>
               </Tr>

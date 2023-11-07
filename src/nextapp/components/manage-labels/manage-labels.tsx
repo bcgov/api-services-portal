@@ -133,7 +133,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
     } catch (err) {
       toast({
         title: 'Labels Update Failed',
-        description: err.message,
+        description: err,
         status: 'error',
       });
     }

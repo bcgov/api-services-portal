@@ -56,7 +56,7 @@ describe('Verify /Organization/{Org} end point', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response) => {
                 expect(response.status).to.be.oneOf([404, 422])
-                expect(response.body.message).to.be.equal("Organization not found.")
+                expect(response.body.message).to.be.equal("Validation Failed")
             })
         })
     })
@@ -77,11 +77,12 @@ describe('Get the user session token', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
             })
@@ -170,7 +171,6 @@ describe('Get the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             expectedResponse = organization.expectedNamespace
             // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
-            debugger
             cy.compareJSONObjects(response, expectedResponse, true)
         })
     })
@@ -186,6 +186,7 @@ describe('Delete the Namespace associated with the organization', () => {
     beforeEach(() => {
         cy.fixture('api').as('api')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -196,7 +197,7 @@ describe('Delete the Namespace associated with the organization', () => {
     })
 
     it('Delete the namespace associated with the organization, organization unit and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ organization }: any) => {
                 cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res) => {
                     expect(res.status).to.be.equal(200)

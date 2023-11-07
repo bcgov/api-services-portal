@@ -22,11 +22,12 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
         userSession = value
       })
@@ -44,7 +45,7 @@ describe('Create API Spec', () => {
     cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
-      cy.updateJsonValue('apiowner.json', 'namespacePreview.namespace', namespace)
+      cy.updateJsonValue('common-testdata.json', 'namespacePreview.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --namespace " + namespace)
     });

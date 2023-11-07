@@ -81,6 +81,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
   })
   it('Authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
@@ -89,7 +90,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
   it('Activates namespace for client credential flow tests', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
         home.useNamespace(clientCredentials.namespace)
         cy.get('@login').then(function (xhr: any) {
