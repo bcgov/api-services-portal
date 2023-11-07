@@ -20,6 +20,7 @@ describe('Apply client roles to the Authorization Profile', () => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Wendy (Credential-Issuer)', () => {
@@ -31,7 +32,7 @@ describe('Apply client roles to the Authorization Profile', () => {
   })
 
   it('Select the namespace created for client credential ', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       home.useNamespace(clientCredentials.namespace)
     })
   })

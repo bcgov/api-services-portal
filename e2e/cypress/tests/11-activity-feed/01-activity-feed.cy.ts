@@ -13,18 +13,19 @@ describe('Get the user session token to pass it as authorization token to make t
 
     before(() => {
         cy.visit('/')
-        // cy.deleteAllCookies()
+        cy.deleteAllCookies()
         cy.reload()
     })
 
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.getUserSessionTokenValue(namespace).then((value) => {
                 userSession = value
             })
@@ -103,11 +104,12 @@ describe('Verify the Activity filter for users', () => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('api').as('api')
+        cy.fixture('common-testdata').as('common-testdata')
         // cy.visit(login.path)
     })
 
     it('activates new namespace', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             home.useNamespace(namespace)
         })
     })

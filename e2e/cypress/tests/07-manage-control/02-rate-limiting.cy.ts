@@ -20,12 +20,13 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+        cy.fixture('common-testdata').as('common-testdata')
         // cy.visit(login.path)
     })
 
     it('authenticates Mark (Access Manager)', () => {
         cy.get('@access-manager').then(({ user }: any) => {
-            cy.get('@apiowner').then(({ namespace }: any) => {
+            cy.get('@common-testdata').then(({ namespace }: any) => {
                 cy.login(user.credentials.username, user.credentials.password).then(() => {
                     home.useNamespace(namespace);
                 })

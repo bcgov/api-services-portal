@@ -3,15 +3,15 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Grant Access Spec', () => {
+describe('Revoke product environment access for Kong API spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
+    cy.deleteAllCookies()
   })
 
   beforeEach(() => {
@@ -32,6 +32,26 @@ describe('Grant Access Spec', () => {
     })
   })
 
+  it('Navigate to Consumer page and filter the product', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.visit(consumers.path);
+      consumers.filterConsumerByTypeAndValue('Products', product.name)
+    })
+  })
+
+  it('Click on the first consumer', () => {
+    consumers.clickOnTheFirstConsumerID()
+  })
+
+  it('Revoke access for Test environment', () => {
+    cy.wait(1000)
+    consumers.revokeProductEnvAccess('Test')
+  })
+
+  it('Verify the confirmation message once the access is revoked', () => {
+    cy.verifyToastMessage("Product Revoked")
+  })
+  
   it('Navigate to Consumer page and filter the product', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.visit(consumers.path);

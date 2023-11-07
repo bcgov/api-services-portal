@@ -34,6 +34,7 @@ describe('Change Product environment from active to inactive', () => {
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -44,7 +45,7 @@ describe('Change Product environment from active to inactive', () => {
   })
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
         home.useNamespace(namespace)
       })

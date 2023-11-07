@@ -20,12 +20,13 @@ describe('Access manager approves developer access request for JWKS URL flow', (
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(clientCredentials.namespace)
       })

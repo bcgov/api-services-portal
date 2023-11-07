@@ -14,7 +14,6 @@ describe('Delete created resources', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
     // cy.resetState()
   })
@@ -22,13 +21,16 @@ describe('Delete created resources', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, deleteResources }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(deleteResources.namespace);
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ deleteResources }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(deleteResources.namespace);
+      })
     })
   })
 
@@ -56,7 +58,7 @@ describe('Delete created resources', () => {
   })
 
   it('Delete Namespace', () => {
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
+    cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.visit(ns.path)
       ns.deleteNamespace(deleteResources.namespace)
     })
@@ -66,7 +68,7 @@ describe('Delete created resources', () => {
     cy.on('fail', (err, runnable) => {
       flag = false
     })
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
+    cy.get('@common-testdata').then(({ deleteResources }: any) => {
       flag = true
       home.useNamespace(deleteResources.namespace)
     })
@@ -78,7 +80,6 @@ describe('Delete created resources', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
+
   })
 })

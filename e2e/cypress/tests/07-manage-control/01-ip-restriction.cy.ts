@@ -18,11 +18,12 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+        cy.fixture('common-testdata').as('common-testdata')
     })
 
     it('authenticates Mark (Access Manager)', () => {
         cy.get('@access-manager').then(({ user }: any) => {
-            cy.get('@apiowner').then(({ namespace }: any) => {
+            cy.get('@common-testdata').then(({ namespace }: any) => {
                 cy.login(user.credentials.username, user.credentials.password).then(() => {
                     home.useNamespace(namespace);
                 })
@@ -150,12 +151,10 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
     })
 
     it('set IP address that is not accessible in the network as allowed IP and set service as scope', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
-                consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
-            })
+        cy.visit(consumers.path);
+        consumers.clickOnTheFirstConsumerID()
+        cy.get('@manage-control-config-setting').then(({ ipRestriction }: any) => {
+            consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
         })
     })
 

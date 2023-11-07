@@ -18,15 +18,18 @@ describe('Grant Access Manager Role', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, checkPermission }: any) => {
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
       home.useNamespace(checkPermission.namespace)
     })
+  })
   })
 
   it('Grant "Access.Manager" access to Mark (access manager)', () => {
@@ -63,15 +66,15 @@ describe('Verify that Mark is able to view the pending request', () => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({checkPermission}: any) => {
+      cy.get('@common-testdata').then(({checkPermission}: any) => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        debugger
         home.useNamespace(checkPermission.namespace)
         cy.visit(mp.path)
       })

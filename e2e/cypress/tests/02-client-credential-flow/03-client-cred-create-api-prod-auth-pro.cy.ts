@@ -26,11 +26,12 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
         userSession = value
       })
@@ -39,7 +40,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
 
   it('Activates namespace for client credential flow tests', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
         home.useNamespace(clientCredentials.namespace)
         cy.get('@login').then(function (xhr: any) {
@@ -58,7 +59,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
 
   it('Publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-gwa.yml', clientCredentials.namespace, true).then(() => {
         // cy.get('@publishAPIResponse').then((res: any) => {
         //   // cy.log(JSON.stringify(res.body))
@@ -111,7 +112,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.replaceWordInJsonObject('ccplatform', clientCredentials.namespace, 'cc-service-plugin.yml')
       cy.wait(2000)
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace,true).then(() => {
@@ -153,7 +154,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
   
   it('Applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.replaceWordInJsonObject('ccplatform', clientCredentials.namespace, 'cc-service-plugin.yml')
       cy.wait(2000)
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace, true).then(() => {

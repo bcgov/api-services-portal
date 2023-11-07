@@ -6,7 +6,7 @@ import HomePage from '../../pageObjects/home'
 describe('Verify Content Publish Permission', () => {
   const login = new LoginPage()
   const home = new HomePage()
-  let token : any
+  let token: any
 
   before(() => {
     cy.visit('/')
@@ -18,13 +18,16 @@ describe('Verify Content Publish Permission', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, checkPermission }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(checkPermission.namespace)
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ checkPermission }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+        home.useNamespace(checkPermission.namespace)
+      })
     })
   })
 

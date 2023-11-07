@@ -23,11 +23,12 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.getUserSessionTokenValue(namespace, false).then((value) => {
         userSession = value
       })
@@ -47,19 +48,22 @@ describe('Create API Spec', () => {
     });
   })
 
-  it('creates new namespace', () => {
+  it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        cy.executeCliCommand('gwa namespace create -n ' + namespace).then((response) => {
-          assert.equal(response.stdout, namespace)
+        home.createNamespace(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
         })
       })
     })
   })
 
-  it('activates new namespace', () => {
-    home.useNamespace(nameSpace)
+  it('Verify for invalid namespace name', () => {
+    cy.get('@apiowner').then(({ invalid_namespace }: any) => {
+      home.validateNamespaceName(invalid_namespace)
+    })
   })
 
   it('creates a new service account', () => {
@@ -71,16 +75,24 @@ describe('Create API Spec', () => {
     sa.saveServiceAcctCreds()
   })
 
+it('Verify gwa gateway publish multiple config file', () => {
+   cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.publishApi(['service-plugin_A.yml','service-plugin_B.yml'], namespace).then((response: any) => {
+        expect(response.stdout).to.contain('Gateway config published');
+      })
+    })
+})
+
   it('publishes a new API for Dev environment to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service.yml', namespace).then((response: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.publishApi(['service.yml'], namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })
     })
   })
 
   it('Upload dataset and Product using GWA Apply command', () => {
-    cy.executeCliCommand('gwa apply').then((response) => {
+    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })
@@ -103,7 +115,7 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+  it('update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
@@ -131,7 +143,7 @@ describe('Create API Spec', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.publishApi('service-plugin.yml', namespace).then((response: any) => {
         expect(response.stdout).to.contain('Sync successful');
       })

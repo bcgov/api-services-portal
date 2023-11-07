@@ -1,0 +1,34 @@
+services:
+- name: a-service-for-newplatform
+  host: httpbin.org
+  tags: [ns.newplatform.test]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: a-service-for-newplatform-route
+    tags: [ns.newplatform.test]
+    hosts:
+      - a-service-for-newplatform.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: key-auth
+    tags: [ ns.newplatform.test ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+  - name: acl
+    tags: [ ns.newplatform.test ]
+    config:
+      hide_groups_header: true
+      allow: [ "406CB7CF" ]

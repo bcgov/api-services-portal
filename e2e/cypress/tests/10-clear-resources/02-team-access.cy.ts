@@ -9,7 +9,6 @@ describe('Team Access Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -22,10 +21,10 @@ describe('Team Access Spec', () => {
 
   it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user }: any) => {
-      cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        home.useNamespace(deleteResources.namespace)
       })
     })
   })
@@ -50,7 +49,6 @@ describe('Team Access Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
+
   })
 })

@@ -23,6 +23,7 @@ describe('Give a user org admin access at organization level', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
     cy.fixture('admin').as('admin')
+    cy.fixture('common-testdata').as('common-testdata')
   })
 
   it('Authenticates Admin owner', () => {
@@ -78,12 +79,13 @@ describe('Multiple Org Adming for the organization', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
         userSession = value
       })
@@ -101,7 +103,7 @@ describe('Multiple Org Adming for the organization', () => {
     cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
-      cy.updateJsonValue('apiowner.json', 'orgAssignment.namespace', namespace)
+      cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --namespace " + namespace)
     });
