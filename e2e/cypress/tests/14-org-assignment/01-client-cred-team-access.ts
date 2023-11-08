@@ -30,11 +30,12 @@ describe('Add Organization to publish API', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
       cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
         userSession = value
       })
@@ -52,7 +53,7 @@ describe('Add Organization to publish API', () => {
     cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
-      cy.updateJsonValue('apiowner.json', 'orgAssignment.namespace', namespace)
+      cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --namespace " + namespace)
     });
@@ -151,6 +152,7 @@ describe('Org Admin approves the request', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('product-owner').as('product-owner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
@@ -199,6 +201,7 @@ describe('Activate the API to make it visible in API Directory', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 

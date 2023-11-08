@@ -146,6 +146,16 @@
       "environment": "dev"
     }
   },
+  "deleteResources":{
+    "application": {
+      "name": "Delete-Auto Test App",
+      "description": "Test application for auto test"
+    },
+    "product": {
+      "name": "Delete-Auto Test Product",
+      "environment": "dev"
+    }
+  },
   "elevatedAccess":{
     "application": {
       "name": "Request for Elevated Acess",

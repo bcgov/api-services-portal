@@ -33,6 +33,7 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -43,7 +44,7 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
   })
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
         home.useNamespace(namespace)
       })
@@ -187,12 +188,13 @@ describe('Access manager approves developer access request for Client ID/Secret 
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace)
       })

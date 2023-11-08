@@ -30,6 +30,7 @@ describe('Verify for Kong Public Auth', () => {
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -40,7 +41,7 @@ describe('Verify for Kong Public Auth', () => {
   })
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
         home.useNamespace(clientCredentials.namespace)
         cy.get('@login').then(function (xhr: any) {
@@ -69,7 +70,7 @@ describe('Verify for Kong Public Auth', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-gwa.yml', clientCredentials.namespace,true).then((response:any) => {
         expect(response.stdout).to.contain('Sync successful');
       })

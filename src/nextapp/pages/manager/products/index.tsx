@@ -53,7 +53,7 @@ const ProductsPage: React.FC = () => {
     } catch (err) {
       toast({
         title: 'Publish settings change failed',
-        description: `${err}`,
+        description: err,
         status: 'error',
       });
     }
@@ -104,11 +104,12 @@ const ProductsPage: React.FC = () => {
                     size="sm"
                     lineHeight="24px"
                   >
-                    Publish APIs
+                    Grant permission to publish APIs
                   </Heading>
                   <Text>
-                    By enabling Publish APIs, consumers can find and request
-                    access to your APIs from the Directory.
+                    Allow providers to publish their products to the API
+                    directory so they can make their APIs discoverable to
+                    consumers.
                   </Text>
                 </GridItem>
               </Grid>

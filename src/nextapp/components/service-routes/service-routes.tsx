@@ -25,6 +25,9 @@ const ServiceRoutes: React.FC<ServiceRoutesProps> = ({ data }) => {
           : ['ALL'];
       const hosts: string[] = JSON.parse(route.hosts);
       const paths: string[] = JSON.parse(route.paths) ?? ['/'];
+      if (paths.length === 0) {
+        paths.push('/');
+      }
       const hostPaths = hosts
         .map((h: string) => paths.map((p) => `https://${h}${p}`))
         .flat();

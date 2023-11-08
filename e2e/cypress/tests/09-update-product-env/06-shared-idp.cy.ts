@@ -28,16 +28,19 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ user, namespace }: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace)
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+      cy.get('@apiowner').then(({ user }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
+          cy.login(user.credentials.username, user.credentials.password)
+          home.useNamespace(namespace)
+          cy.get('@login').then(function (xhr: any) {
+            userSession = xhr.response.headers['x-auth-request-access-token']
+          })
         })
       })
     })
@@ -52,8 +55,8 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
   })
 
   it('Publish the Shared IDP profile', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/'+namespace+'/issuers', 'PUT').then((response) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response) => {
         expect(response.status).to.be.equal(200)
         expect(response.body.result).to.be.contain('created')
       })
@@ -94,16 +97,19 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ user, namespace }: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace)
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+      cy.get('@apiowner').then(({ user }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
+          cy.login(user.credentials.username, user.credentials.password)
+          home.useNamespace(namespace)
+          cy.get('@login').then(function (xhr: any) {
+            userSession = xhr.response.headers['x-auth-request-access-token']
+          })
         })
       })
     })
@@ -118,8 +124,8 @@ describe('Update IDP issuer for shared IDP profile', () => {
   })
 
   it('Put the resource and verify the success code in the response', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/'+namespace+'/issuers', 'PUT').then((response) => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response) => {
         expect(response.status).to.be.equal(200)
       })
     })

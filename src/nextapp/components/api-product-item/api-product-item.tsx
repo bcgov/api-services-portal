@@ -38,7 +38,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   id,
   preview,
 }) => {
-  const isPublic = data.environments.some((e) => e.flow === 'public');
+  const isProtected = data.environments.some((e) => e.flow !== 'public');
   const isTiered = data.environments.some((e) => e.anonymous);
 
   return (
@@ -49,7 +49,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             <Flex align="center" mb={2}>
               <Flex align="center" width={8}>
                 <Icon
-                  as={isPublic || isTiered ? RiEarthFill : FaLock}
+                  as={!isProtected || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
                 />
@@ -63,25 +63,13 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isTiered && (
-          <>
-            {isPublic && (
-              <AccessRequestForm
-                disabled={false}
-                id={id}
-                name={data.name}
-                preview={preview}
-              />
-            )}
-            {!isPublic && (
-              <AccessRequestForm
-                disabled={false}
-                id={id}
-                name={data.name}
-                preview={preview}
-              />
-            )}
-          </>
+        {!isTiered && isProtected && (
+          <AccessRequestForm
+            disabled={false}
+            id={id}
+            name={data.name}
+            preview={preview}
+          />
         )}
       </Flex>
       {isTiered && (

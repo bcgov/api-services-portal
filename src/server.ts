@@ -281,6 +281,15 @@ const configureExpress = (app: any) => {
   const express = require('express');
   app.use(express.json());
 
+  app.use(function errorHandler(err: any, req: any, res: any, next: any) {
+    if (err instanceof SyntaxError) {
+      return res.status(422).json({
+        message: 'Syntax Error Parsing JSON',
+      });
+    }
+    next();
+  });
+
   // app.get('/', (req, res, next) => {
   //     console.log(req.path)
   //     req.path == "/" ? res.redirect('/home') : next()

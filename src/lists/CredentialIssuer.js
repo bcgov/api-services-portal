@@ -250,11 +250,13 @@ module.exports = {
     },
 
     afterDelete: async function ({ existingItem, context }) {
-      await DeleteClientsFromSharedIdP(
-        context,
-        existingItem.clientId,
-        `${existingItem.inheritFrom}`
-      );
+      if (Boolean(existingItem.inheritFrom)) {
+        await DeleteClientsFromSharedIdP(
+          context,
+          existingItem.clientId,
+          `${existingItem.inheritFrom}`
+        );
+      }
 
       await new StructuredActivityService(
         context,

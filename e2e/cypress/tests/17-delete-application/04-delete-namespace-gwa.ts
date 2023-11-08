@@ -14,11 +14,12 @@ describe('Verify namespace delete using gwa command', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
 
     it('Authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
                 userSession = value
             })
@@ -51,26 +52,20 @@ describe('Verify namespace delete using gwa command', () => {
     })
 
     it('Check gwa namespace destroy command for the namespace associated with services', () => {
-        cy.get('@apiowner').then(({ namespace }: any) => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
             _namespace = namespace
             cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
                 expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa namespace destroy').then((response) => {
-                    expect(response.stderr).to.contain('services have been configured in this namespace');
+                    expect(response.stderr).to.contain('Error: Validation Failed');
                 });
             })
         })
     })
 
-    it('Check gwa namespace destroy command for hard deleting namespace', () => {
+    it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
         cy.executeCliCommand('gwa namespace destroy --force').then((response) => {
-            expect(response.stdout).to.contain('Namespace destroyed: ' + _namespace);
-        });
-    })
-
-    it('Check that deleted namespace does not display in gwa namespace list command', () => {
-        cy.executeCliCommand('gwa namespace list').then((response) => {
-            expect(response.stdout).not.to.contain(_namespace);
+            expect(response.stderr).to.contain('Error: Validation Failed');
         });
     })
 

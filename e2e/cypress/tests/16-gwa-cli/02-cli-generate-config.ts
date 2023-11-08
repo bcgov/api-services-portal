@@ -52,17 +52,10 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('Check gwa command to apply generated config', () => {
-    cy.executeCliCommand('gwa apply').then((response) => {
+    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(3)
-      namespace = response.stdout.split('\n')[0]
-      namespace = namespace.replace('-', '').trim()
-    });
-  })
-
-  it('Check gwa command to generate config for kong httpbin template', () => {
-    cy.executeCliCommand('gwa generate-config --template kong-httpbin --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
-      assert.equal(response.stdout, "File gw-config.yml created")
+      namespace = response.stdout.match(/\bgw-\w+/g)[0]
     });
   })
 

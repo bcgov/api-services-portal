@@ -12,6 +12,7 @@ var options = {
 const { Register } = require('./controllers/ioc/registry');
 const { UnauthorizedError } = require('express-jwt');
 const { AssertionError } = require('assert');
+const { BatchSyncException } = require('./batch/types');
 
 class ApiOpenapiApp {
   constructor() {}
@@ -88,7 +89,7 @@ class ApiOpenapiApp {
           message: err.message,
         });
       } else if (err instanceof ValidateError) {
-        console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
+        logger.warn(`Caught Validation Error for ${req.path}:`, err.fields);
         return res.status(422).json({
           message: 'Validation Failed',
           details: err?.fields,
@@ -106,6 +107,16 @@ class ApiOpenapiApp {
           logger.warn('Failed to parse error message %s', e);
         }
         return res.status(422).json(response);
+      } else if (err instanceof SyntaxError) {
+        logger.error(err);
+        logger.error('Syntax Error PATH: %s', req.path);
+        return res.status(422).json({
+          message: 'Syntax Error Parsing JSON',
+        });
+      } else if (err instanceof BatchSyncException) {
+        logger.error(err);
+        logger.error('BatchSync PATH: %s', req.path);
+        return res.status(400).json(err.result);
       } else if (err instanceof Error) {
         logger.error(err);
         logger.error('Error PATH: %s', req.path);

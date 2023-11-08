@@ -30,6 +30,7 @@ describe('Change Authorization profile', () => {
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/regen').as('regen')
+    cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
 
@@ -40,7 +41,7 @@ describe('Change Authorization profile', () => {
   })
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
         home.useNamespace(clientCredentials.namespace)
         cy.get('@login').then(function (xhr: any) {
@@ -70,7 +71,7 @@ describe('Change Authorization profile', () => {
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace,true).then(() => {
         // cy.get('@publishAPIResponse').then((res: any) => {
         //   cy.log(JSON.stringify(res.body))
@@ -181,12 +182,13 @@ describe('Access manager approves developer access request for Kong API ACL auth
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
     // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
-      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(clientCredentials.namespace)
       })

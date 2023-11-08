@@ -157,6 +157,7 @@ const NamespacesPage: React.FC = () => {
       } catch (err) {
         toast({
           title: 'Delete namespace failed',
+          description: err,
           status: 'error',
           isClosable: true,
         });
