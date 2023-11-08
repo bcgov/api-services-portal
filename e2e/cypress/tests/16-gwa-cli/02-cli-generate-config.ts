@@ -55,16 +55,9 @@ describe('Verify CLI commands for generate/apply config', () => {
     cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(3)
-      namespace = response.stdout.split('\n')[0]
-      namespace = namespace.replace('-', '').trim()
+      namespace = response.stdout.match(/\bgw-\w+/g)[0]
     });
   })
-
-  // it('Check gwa command to generate config for kong httpbin template', () => {
-  //   cy.executeCliCommand('gwa generate-config --template kong-httpbin --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
-  //     assert.equal(response.stdout, "File gw-config.yml created")
-  //   });
-  // })
 
   it('activates new namespace', () => {
     home.useNamespace(namespace)
