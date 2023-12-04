@@ -7,12 +7,12 @@ ARG APP_REVISION
 ENV NEXT_PUBLIC_APP_REVISION=${APP_REVISION}
 
 RUN apk add curl jq
-RUN npm install -g npm@7.24.2
+RUN npm install -g npm
 
 WORKDIR /app
 
 COPY src/*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY src ./
 
