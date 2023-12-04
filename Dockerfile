@@ -7,19 +7,21 @@ ARG APP_REVISION
 ENV NEXT_PUBLIC_APP_REVISION=${APP_REVISION}
 
 RUN apk add curl jq
-RUN npm install -g npm@7.24.2
 
+USER node
 WORKDIR /app
 
-COPY src/*.json ./
-RUN npm install
+COPY --chown=node src/*.json ./
+RUN npm install --legacy-peer-deps
 
-COPY src ./
+COPY --chown=node src ./
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 
 RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+
+ENV HOME=/home/node
 
 ENTRYPOINT [ "npm", "run" ]
 CMD [ "start"]
