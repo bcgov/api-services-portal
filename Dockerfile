@@ -11,15 +11,17 @@ RUN apk add curl jq
 USER node
 WORKDIR /app
 
-COPY --chown=node src/*.json ./
+COPY src/*.json ./
 RUN npm install --legacy-peer-deps
 
-COPY --chown=node src ./
+COPY src ./
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 
 RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+
+ENV HOME=/home/node
 
 ENTRYPOINT [ "npm", "run" ]
 CMD [ "start"]
