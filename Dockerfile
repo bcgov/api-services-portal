@@ -9,12 +9,13 @@ ENV NEXT_PUBLIC_APP_REVISION=${APP_REVISION}
 RUN apk add curl jq
 RUN npm install -g npm
 
+USER node
 WORKDIR /app
 
-COPY src/*.json ./
+COPY --chown=node src/*.json ./
 RUN npm install --legacy-peer-deps
 
-COPY src ./
+COPY --chown=node src ./
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
