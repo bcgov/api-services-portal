@@ -7,7 +7,6 @@ ARG APP_REVISION
 ENV NEXT_PUBLIC_APP_REVISION=${APP_REVISION}
 
 RUN apk add curl jq
-RUN npm install -g npm
 
 USER node
 WORKDIR /app
