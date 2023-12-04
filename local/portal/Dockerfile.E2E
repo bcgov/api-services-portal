@@ -15,7 +15,7 @@ COPY --chown=node src/*.json ./
 
 COPY --chown=node src/nyc-config.js ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY --chown=node src ./
 
