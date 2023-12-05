@@ -1,5 +1,7 @@
 FROM node:lts-alpine3.17
 
+RUN apk add curl jq
+
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
 
