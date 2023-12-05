@@ -1,4 +1,4 @@
-FROM node:16.14.2-alpine3.15
+FROM node:lts-alpine3.17
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
@@ -7,24 +7,26 @@ ARG APP_REVISION
 ENV APP_REVISION=${APP_REVISION}
 
 RUN apk add curl jq
-RUN npm install -g npm@7.11.2
 
+USER node
 WORKDIR /app
 
-COPY src/*.json ./
+COPY --chown=node src/*.json ./
 
-COPY src/nyc-config.js ./
+COPY --chown=node src/nyc-config.js ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
-COPY src ./
+COPY --chown=node src ./
 
 RUN npx nyc instrument --compact=false nextapp --in-place
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 
-RUN npm run build
+RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+
+ENV HOME=/home/node
 
 ENTRYPOINT [ "npm", "run" ]
 CMD [ "start"]
