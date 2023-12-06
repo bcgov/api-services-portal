@@ -1,3 +1,7 @@
 src/node_modules
+src/.npm
+src/_tmp
+src/.cache
+src/.config
 **/.next
 _data
