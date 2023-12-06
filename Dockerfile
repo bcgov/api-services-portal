@@ -1,4 +1,5 @@
-FROM node:lts-alpine3.17
+#FROM node:lts-alpine3.17
+FROM node:16.14.2-alpine3.15
 
 ARG APP_VERSION
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}
@@ -19,7 +20,7 @@ COPY --chown=node src ./
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 
-RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+RUN npm run build
 
 ENV HOME=/home/node
 
