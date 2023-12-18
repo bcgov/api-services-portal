@@ -312,7 +312,7 @@ jobs:
               - 'state=\$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"\$state\" == \"ready\" ]; then exit 1; fi'
             timeoutSeconds: 3
             periodSeconds: 10
-        
+
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
@@ -361,6 +361,7 @@ jobs:
         if: github.ref == 'refs/heads/test'
         run: |
           oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+          oc rollout restart deployment/bcgov-aps-portal-batch-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
 
       - name: 'Create Pull Request for Release'
         if: github.ref == 'refs/heads/test'

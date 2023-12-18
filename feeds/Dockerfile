@@ -1,4 +1,5 @@
-FROM node:lts-alpine3.17
+#FROM node:lts-alpine3.17
+FROM node:16.14.2-alpine3.15
 
 RUN apk add curl jq
 
@@ -18,5 +19,4 @@ COPY --chown=node . ./
 
 ENV HOME=/home/node
 
-ENTRYPOINT [ "npm", "run" ]
-CMD [ "start"]
+CMD [ "node", "index.js" ]
