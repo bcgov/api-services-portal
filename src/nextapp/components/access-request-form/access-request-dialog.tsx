@@ -47,7 +47,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   name,
   preview,
   open,
-  variant = 'button',
+  variant,
 }) => {
   const client = useQueryClient();
   const auth = useAuth();
