@@ -82,23 +82,20 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                 </Flex>
                 <Heading size="xs">Limits</Heading>
               </Flex>
-              {data.description && (
-                <Text ml={8} fontSize="sm">
-                  Public access has a rate limit enforced.
-                </Text>
-              )}
               <Text ml={8} fontSize="sm">
-                For elevated access, please{' '}
-                <AccessRequestForm
-                  disabled={false}
-                  id={id}
-                  name={data.name}
-                  preview={preview}
-                  variant="inline"
-                />
+                Public access has a rate limit enforced.
+              </Text>
+              <Text ml={8} fontSize="sm">
+                For elevated access, please request access.
               </Text>
             </GridItem>
           </Grid>
+          <AccessRequestForm
+            disabled={false}
+            id={id}
+            name={data.name}
+            preview={preview}
+          />
         </Flex>
       )}
     </>
