@@ -57,6 +57,8 @@ declare namespace Cypress {
 
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
+    makeAPIRequestForScanResult(scanID: string): Chainable<Cypress.Response<any>>
+
     getUserSession(): Chainable<Cypress.Response<any>>
 
     compareJSONObjects(actualResponse: any, expectedResponse: any, indexFlag?: boolean): Chainable<Cypress.Response<any>>
@@ -101,5 +103,9 @@ declare namespace Cypress {
     updateJsonBoby(json: any, key: string, newValue: string):Chainable<any>
 
     deleteFileInE2EFolder(fileName: string):Chainable<any>
+
+    addToGlobalList(item: any):Chainable<any>
+    
+    checkAstraScanResultForVulnerability():Chainable<any>
   }
 }

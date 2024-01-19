@@ -52,7 +52,7 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('Check gwa command to apply generated config', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
+    cy.executeCliCommand('gwa sync -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(3)
       namespace = response.stdout.match(/\bgw-\w+/g)[0]

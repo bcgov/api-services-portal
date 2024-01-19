@@ -91,8 +91,8 @@ it('Verify gwa gateway publish multiple config file', () => {
     })
   })
 
-  it('Upload dataset and Product using GWA Apply command', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
+  it('Upload dataset and Product using GWA sync command', () => {
+    cy.executeCliCommand('gwa sync -i gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })
