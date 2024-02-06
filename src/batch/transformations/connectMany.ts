@@ -17,12 +17,21 @@ export async function connectMany(
   const batchService = new BatchService(keystone);
   if (idList != null) {
     for (const uniqueKey of idList) {
-      const lkup = await batchService.lookup(
-        transformInfo['list'],
-        transformInfo['refKey'],
-        uniqueKey,
-        []
-      );
+      const nsFilter = { namespace: inputData['_namespace'] } as any;
+      nsFilter[transformInfo['refKey']] = uniqueKey;
+      logger.error('T = %s -- %j %j', uniqueKey, inputData, currentData);
+      const lkup = transformInfo['filterByNamespace']
+        ? await batchService.lookupUsingCompositeKey(
+            transformInfo['list'],
+            nsFilter,
+            []
+          )
+        : await batchService.lookup(
+            transformInfo['list'],
+            transformInfo['refKey'],
+            uniqueKey,
+            []
+          );
       if (lkup == null) {
         logger.error(
           `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`

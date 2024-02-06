@@ -376,6 +376,7 @@ const metadata = {
   Product: {
     query: 'allProducts',
     refKey: 'appId',
+    compositeRefKey: ['name', 'namespace'],
     sync: ['name', 'namespace'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
@@ -410,12 +411,14 @@ const metadata = {
         name: 'connectMany',
         list: 'allGatewayServices',
         refKey: 'name',
+        filterByNamespace: true,
       },
       legal: { name: 'connectOne', list: 'allLegals', refKey: 'reference' },
       credentialIssuer: {
         name: 'connectOne',
         list: 'allCredentialIssuers',
         refKey: 'name',
+        filterByNamespace: true,
       },
     },
     validations: {

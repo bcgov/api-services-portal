@@ -96,6 +96,52 @@ export class BatchService {
     return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 
+  public async lookupUsingCompositeKey(
+    query: string,
+    compositeKeyValues: any,
+    fields: string[]
+  ) {
+    const where: string[] = [];
+    const params: string[] = [];
+    for (const [key, val] of Object.entries(compositeKeyValues)) {
+      assert.strictEqual(
+        typeof val != 'undefined' && val != null,
+        true,
+        `Invalid key ${key}`
+      );
+      where.push(`${key} : $${key}`);
+      params.push(`$${key}: String`);
+    }
+
+    logger.debug(
+      '[lookupUsingCompositeKey] : %s :: %j',
+      query,
+      compositeKeyValues
+    );
+
+    const queryString = `query(${params.join(', ')}) {
+      ${query}(where: { ${where.join(', ')} }) {
+        id, ${Object.keys(compositeKeyValues).join(', ')}, ${fields.join(',')}
+      }
+    }`;
+    logger.debug('[lookupUsingCompositeKey] %s', queryString);
+    const result = await this.context.executeGraphQL({
+      query: queryString,
+      variables: compositeKeyValues,
+    });
+    logger.debug(
+      '[lookupUsingCompositeKey] RESULT %j with vars %j',
+      result,
+      compositeKeyValues
+    );
+    if (result['data'][query] == null || result['data'][query].length > 1) {
+      throw Error(
+        'Expecting zero or one rows ' + query + ' ' + compositeKeyValues
+      );
+    }
+    return result['data'][query].length == 0 ? null : result['data'][query][0];
+  }
+
   public async lookup(
     query: string,
     refKey: string,

@@ -46,19 +46,19 @@ export const DeleteProductValidate = async (
   );
 };
 
-// export const DeleteProductEnvironments = async (
-//   context: any,
-//   ns: string,
-//   id: string
-// ) => {
-//   logger.debug('Deleting Product ns=%s, id=%s', ns, id);
+export const DeleteProductEnvironments = async (
+  context: any,
+  ns: string,
+  id: string
+) => {
+  logger.debug('Deleting environments for ns=%s, product=%s', ns, id);
 
-//   const product = await lookupProduct(context, ns, id);
-//   logger.error('Product %j', product);
+  const product = await lookupProduct(context, ns, id);
+  logger.info('Deleting product environments %j', product);
 
-//   const ids = product.environments.map((e: Environment) => e.id);
+  const ids = product.environments.map((e: Environment) => e.id);
 
-//   for (const envId of ids) {
-//     await deleteRecords(context, 'Environment', { id: envId }, false, ['id']);
-//   }
-// };
+  for (const envId of ids) {
+    await deleteRecords(context, 'Environment', { id: envId }, false, ['id']);
+  }
+};

@@ -98,12 +98,12 @@ module.exports = {
       );
     },
 
-    // beforeDelete: async function ({ existingItem, context }) {
-    //   await DeleteProductEnvironments(
-    //     context,
-    //     context.authedItem['namespace'],
-    //     existingItem.id
-    //   );
-    // },
+    beforeDelete: async function ({ existingItem, context }) {
+      await DeleteProductEnvironments(
+        context.createContext({ skipAccessControl: true }),
+        context.authedItem['namespace'],
+        existingItem.id
+      );
+    },
   },
 };

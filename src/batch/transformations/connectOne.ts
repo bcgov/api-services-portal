@@ -29,12 +29,21 @@ export async function connectOne(
     }
   }
 
-  const lkup = await batchService.lookup(
-    transformInfo['list'],
-    transformInfo['refKey'],
-    value,
-    []
-  );
+  const nsFilter = { namespace: inputData['_namespace'] } as any;
+  nsFilter[transformInfo['refKey']] = value;
+  const lkup = transformInfo['filterByNamespace']
+    ? await batchService.lookupUsingCompositeKey(
+        transformInfo['list'],
+        nsFilter,
+        []
+      )
+    : await batchService.lookup(
+        transformInfo['list'],
+        transformInfo['refKey'],
+        value,
+        []
+      );
+
   if (lkup == null) {
     logger.error(
       `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`
