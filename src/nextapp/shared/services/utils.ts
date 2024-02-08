@@ -39,6 +39,7 @@ export const getAuthToken = (method: string): IconType => {
 export const getFlowText = (key: string): string => {
   const dict = {
     public: 'Public',
+    'protected-externally': 'Protected Externally',
     'authorization-code': 'OAuth2 Authorization Code Flow',
     'client-credentials': 'OAuth2 Client Credentials Flow',
     'kong-acl-only': 'Kong ACL Only',
