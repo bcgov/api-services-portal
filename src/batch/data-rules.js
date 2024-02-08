@@ -429,6 +429,7 @@ const metadata = {
         type: 'enum',
         values: [
           'public',
+          'protected-externally',
           'authorization-code',
           'client-credentials',
           'kong-acl-only',
