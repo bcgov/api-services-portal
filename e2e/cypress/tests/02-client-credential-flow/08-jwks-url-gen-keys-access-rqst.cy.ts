@@ -39,7 +39,6 @@ describe('Developer creates an access request for JWKS URL', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -80,7 +79,5 @@ describe('Developer creates an access request for JWKS URL', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

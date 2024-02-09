@@ -9,7 +9,7 @@ COPY package.json /e2e
 COPY package-lock.json /e2e
 COPY *.yml /e2e
 COPY entrypoint.sh /tmp
-COPY gwa /usr/local/bin
+# COPY gwa /usr/local/bin
 ADD cypress /e2e/cypress
 
 RUN npm install

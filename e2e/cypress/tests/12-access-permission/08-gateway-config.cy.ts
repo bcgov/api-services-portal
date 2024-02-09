@@ -48,8 +48,6 @@ describe('Grant Gateway Config Role to Wendy', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -64,7 +62,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -97,11 +94,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
     cy.resetCredential('Wendy')
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

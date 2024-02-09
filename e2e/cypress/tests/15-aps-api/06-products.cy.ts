@@ -97,7 +97,6 @@ describe('Verify that created Product is displayed in UI', () => {
 
     before(() => {
         cy.visit('/')
-        cy.deleteAllCookies()
         cy.reload()
     })
 
@@ -107,15 +106,6 @@ describe('Verify that created Product is displayed in UI', () => {
         cy.fixture('api').as('api')
         cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
-    })
-
-    it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
-                home.useNamespace(apiTest.namespace)
-                userSession = value
-            })
-        })
     })
 
     it('Verify that the product is visible in Manage Product Page', () => {

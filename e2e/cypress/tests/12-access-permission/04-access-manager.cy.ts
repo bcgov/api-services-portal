@@ -42,8 +42,6 @@ describe('Grant Access Manager Role', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -58,7 +56,6 @@ describe('Verify that Mark is able to view the pending request', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -91,11 +88,7 @@ describe('Verify that Mark is able to view the pending request', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
     cy.resetCredential('Mark')
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

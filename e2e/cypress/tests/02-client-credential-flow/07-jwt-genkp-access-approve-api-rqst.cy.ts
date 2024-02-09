@@ -11,7 +11,6 @@ describe('Access manager approves developer access request for JWT - Generated K
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -45,8 +44,6 @@ describe('Access manager approves developer access request for JWT - Generated K
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 

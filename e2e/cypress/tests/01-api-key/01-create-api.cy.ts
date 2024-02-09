@@ -14,9 +14,9 @@ describe('Create API Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
     cy.resetState()
+    cy.deleteAllCookies()
   })
 
   beforeEach(() => {
@@ -180,7 +180,5 @@ it('Verify gwa gateway publish multiple config file', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
