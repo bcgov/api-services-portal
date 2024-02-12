@@ -10,66 +10,52 @@
 
 The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs. It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
 
-## Running the Project.
+## Running the Project
 
 ### Installation
 
-#### 1. Manual
+#### 1. Docker
 
-To run this project first run `npm install`.
+##### Steps
 
-This application requires to have an Authentication proxy in front of it. Go to [oauth2-proxy](oauth2-proxy) for instructions on starting the proxy locally.
+1. Run build steps [here](https://github.com/bcgov/api-services-portal/tree/dev/e2e#build-gateway-api-image)
+2. Run `docker compose --profile testsuite build`
+3. Run `docker compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal, Feeder and Kong Gateway)
+4. Go to: http://oauth2proxy.localtest.me:4180
+5. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`
+6. `docker compose down` : Removes all the hosted services
 
-You can then run `npm run dev` to start the application on port 3000. The proxy runs on port 4180.
+> To run the Cypress test automation suite, run `docker compose --profile testsuite up`
 
-```
-hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
+**Note:**
 
-export AUTH_STRATEGY=Oauth2Proxy
-export ADAPTER=knex
-export KNEX_HOST=$hostip
-export KNEX_DATABASE=keystonejs
-export KNEX_USER=""
-export KNEX_PASSWORD=""
-export MONGO_URL=mongodb://$hostip:17017/keystonedb3
-export MONGO_USER=""
-export MONGO_PASSWORD=""
+- Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
+- You may want to run `dockercompose build` if there are new changes that are not reflected in the last time you built the container images
 
-export FEEDER_URL=http://localhost:6000
+#### 2. Development using Docker backend
 
-export KONG_URL=""
-export OIDC_ISSUER=""
-export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs
+Use the following configuration to run the Portal locally against the components deployed with docker-compose.
 
-export NEXT_PUBLIC_API_ROOT=http://localhost:4180
-export SSR_API_ROOT=http://localhost:4180
-export EXTERNAL_URL="http://localhost:4180"
+To run this project first run `npm install`. Note: You may need to add `--legacy-peer-deps` to `npm install` if using Node version greater than `17`.
 
-export GWA_API_URL=http://localhost:2000
+To run the portal locally and leverage the `oauth2-proxy`:
+
+- turn off the docker compose Portal: `docker stop apsportal`
+- update the `oauth2-proxy/oauth2-proxy-local.cfg` `upstreams` to be `hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')`
+
+```sh
+cd src
+set -o allexport
+source ../.env.local
+LOG_LEVEL=debug
+KNEX_HOST=kong-db.localtest.me
+NEXT_PUBLIC_MOCKS=off
+set +o allexport
 
 npm run dev
 ```
 
-Once running, the `api services portal` application is reachable via `localhost:4180`.
-
-#### 2. Docker
-
-##### Steps
-
-1. Create a `.env` from `.env.local` file
-2. Create a `.env` from `.env.local` file under `feeds` directory
-3. Remove cypress from docker-compose file (L106-129 & L217-229)
-4. Run build steps [here](https://github.com/bcgov/api-services-portal/tree/dev/e2e#build-gateway-api-image)
-5. Run `docker-compose build`
-5. Run `docker-compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal, Feeder and Kong Gateway)
-6. Go to: http://oauth2proxy.localtest.me:4180
-7. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`
-8. `docker-compose down` : Removes all the hosted services
-
-##### Note:
-
-- Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
-- You may want to run `docker-compose build` if there are new changes that are not reflected in the last time you built the container images
+Go to: http://oauth2proxy.localtest.me:4180
 
 ## Design
 
@@ -255,4 +241,3 @@ select 'drop table "' || tablename || '" cascade;' from pg_tables where schemana
 ```
 
 In the mean time, it is possible to drop the tables and re-run the `init-aps-portal-keystonejs-batch-job`.
-

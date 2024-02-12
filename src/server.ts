@@ -91,14 +91,15 @@ const state = { connected: false };
 
 const keystone = new Keystone({
   onConnect(keystone: any) {
-    if (process.env.NODE_ENV === 'development') {
-      generateTypes();
-    }
     if (process.env.CREATE_TABLES !== 'true') {
       initialiseData(keystone);
     }
     console.log('CONNECTED!');
     state.connected = true;
+
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => generateTypes, 2000);
+    }
   },
   adapter:
     adapter == 'knex'

@@ -18,7 +18,7 @@ services:
       [
         '-b',
         '0.0.0.0',
-        '-Djboss.socket.binding.port-offset=1000',
+        '-Djboss.socket.binding.port-offset=1001',
         '-Dkeycloak.migration.action=import',
         '-Dkeycloak.migration.provider=singleFile',
         '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
@@ -26,7 +26,7 @@ services:
         '-Dkeycloak.profile.feature.upload_scripts=enabled',
       ]
     ports:
-      - 9080:9080/tcp
+      - 9081:9081/tcp
     environment:
       #KEYCLOAK_USER: local
       #KEYCLOAK_PASSWORD: local
@@ -103,30 +103,6 @@ services:
       - ./local/feeder-init:/tmp
     networks:
       - aps-net
-  cypress:
-    image: aps-cypress-e2e:latest
-    container_name: cypress-e2e
-    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-    environment:
-      - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
-      - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
-      - RUN_ENV=${CY_EXECUTION_ENV}
-      - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
-      - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
-      - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
-      - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
-      - COMMIT_INFO_REMOTE=${CY_REPO_URL}
-      - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
-    depends_on:
-      - feeder-seeding
-    build:
-      context: ./e2e
-      dockerfile: Dockerfile
-    volumes:
-      - ./e2e/coverage:/e2e/coverage
-      - ./e2e/results:/e2e/results
-    networks:
-      - aps-net
   kong-db:
     image: postgres:12.8
     container_name: kong-db
@@ -141,7 +117,9 @@ services:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
     networks:
-      - aps-net
+      aps-net:
+        aliases:
+          - kong-db.localtest.me
   kong-migrations:
     image: kong:kong-local
     command: kong migrations bootstrap
@@ -189,7 +167,7 @@ services:
     restart: on-failure:5
   redis:
     image: bitnami/redis:latest
-    container_name: redis
+    container_name: redis-master
     environment:
       - REDIS_PASSWORD=s3cr3t
     restart: on-failure
@@ -227,5 +205,31 @@ services:
       aps-net:
         aliases:
           - cypress-jwks-url.localtest.me
+  cypress:
+    image: aps-cypress-e2e:latest
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    environment:
+      - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
+      - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
+      - RUN_ENV=${CY_EXECUTION_ENV}
+      - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
+      - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
+      - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
+      - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
+      - COMMIT_INFO_REMOTE=${CY_REPO_URL}
+      - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
+    depends_on:
+      - feeder-seeding
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    volumes:
+      - ./e2e/coverage:/e2e/coverage
+      - ./e2e/results:/e2e/results
+    networks:
+      - aps-net
+    profiles:
+      - testsuite
 networks:
   aps-net: {}
