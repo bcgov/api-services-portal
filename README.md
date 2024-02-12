@@ -34,6 +34,12 @@ The `API Services Portal` is a frontend for API Providers to manage the lifecycl
 > `gwa config set scheme http`
 >
 > `gwa login`
+>
+> `gwa namespace create --name gw-12345`
+>
+> `gwa apply -i local/gwa-cli/gw-config.yml`
+>
+> `curl http://oauthproxy.localtest.me:8000/headers -H "Host: my-service.dev.api.gov.bc.ca"`
 
 **Note:**
 

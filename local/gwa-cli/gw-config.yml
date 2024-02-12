@@ -1,0 +1,99 @@
+kind: Namespace
+name: gw-12345
+displayName: gw-12345 Display Name
+---
+kind: GatewayService
+name: my-service-dev
+tags: [ns.gw-12345]
+host: httpbin.org
+port: 443
+protocol: https
+retries: 0
+routes:
+  - name: my-service-dev
+    tags: [ns.gw-12345]
+    hosts:
+      - my-service.dev.api.gov.bc.ca
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+    request_buffering: true
+    response_buffering: true
+plugins:
+  - name: jwt-keycloak
+    tags: [ns.gw-12345]
+    enabled: true
+    config:
+      allowed_iss:
+        - http://keycloak.localtest.me:9081/auth/realms/master
+      allowed_aud: ap-gw-12345-default-test
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+        - exp
+      uri_param_names:
+        - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+  - name: request-transformer
+    tags: [ns.gw-12345]
+    enabled: true
+    config:
+      http_method: null
+---
+kind: CredentialIssuer
+name: gw-12345 default
+description: Default Authorization Profile for gw-12345 Gateway
+flow: client-credentials
+mode: auto
+authPlugin: jwt-keycloak
+clientAuthenticator: client-secret
+clientRoles: []
+inheritFrom: Sample Shared IdP
+---
+kind: DraftDataset
+name: my-service-dataset
+title: my-service
+organization: ministry-of-health
+organizationUnit: planning-and-innovation-division
+notes: Some information about the my-service service
+tags: [my-service, openapi]
+license_title: Access Only
+view_audience: Government
+security_class: LOW-PUBLIC
+record_publish_date: '2021-05-27'
+---
+kind: Product
+appId: '242925AE01CF'
+name: my-service API
+dataset: my-service-dataset
+environments:
+  - name: test
+    appId: 'AF13BB19'
+    active: false
+    approval: false
+    flow: client-credentials
+    credentialIssuer: gw-12345 default
+    services: [my-service-dev]
+# ---
+# kind: ProductEnvironment
+# name: dev
+# product: my-service API
+# appId: 'A308A21A'
+# active: false
+# approval: true
+# flow: client-credentials
+# credentialIssuer: gw-12345 default
+# services: [my-service-dev]
