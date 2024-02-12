@@ -26,11 +26,19 @@ The `API Services Portal` is a frontend for API Providers to manage the lifecycl
 6. `docker compose down` : Removes all the hosted services
 
 > To run the Cypress test automation suite, run `docker compose --profile testsuite up`
+>
+> To use the `gwa` command line, configure it with:
+>
+> `gwa config set host oauth2proxy.localtest.me:4180`
+>
+> `gwa config set scheme http`
+>
+> `gwa login`
 
 **Note:**
 
 - Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
-- You may want to run `dockercompose build` if there are new changes that are not reflected in the last time you built the container images
+- You may want to run `docker compose build` if there are new changes that are not reflected in the last time you built the container images
 
 #### 2. Development using Docker backend
 

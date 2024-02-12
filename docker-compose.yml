@@ -9,7 +9,7 @@ x-common-variables: &common-variables
 
 services:
   keycloak:
-    image: jboss/keycloak:11.0.3
+    image: jboss/keycloak:15.1.1
     container_name: keycloak
     hostname: keycloak
     depends_on:
