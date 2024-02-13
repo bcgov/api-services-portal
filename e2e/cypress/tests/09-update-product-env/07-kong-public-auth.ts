@@ -60,7 +60,7 @@ describe('Verify for Kong Public Auth', () => {
     })
   })
 
-  it('Update the authorization scope from Kong ACL-API to Client Credential', () => {
+  it('Update the authorization scope from Kong ACL-API to Public', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let product = clientCredentials.clientIdSecret_publicProfile.product
