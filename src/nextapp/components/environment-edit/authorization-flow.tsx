@@ -49,7 +49,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
     if (flow === 'client-credentials' || flow === 'authorization-code') {
       return !credentialIssuer;
     }
-    return flow === 'public';
+    return flow === 'public' || flow === 'protected-externally';
   }, [flow, credentialIssuer]);
   const { data, isSuccess } = useCurrentNamespace();
 

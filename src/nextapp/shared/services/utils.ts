@@ -28,6 +28,8 @@ export const getAuthToken = (method: string): IconType => {
       return FaLock;
     case 'client-credentials':
       return FaLock;
+    case 'protected-externally':
+      return FaLock;
     // case 'private':
     //   return FaUserSecret;
     case 'public':
