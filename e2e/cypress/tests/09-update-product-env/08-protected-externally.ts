@@ -1,15 +1,11 @@
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
-import ApplicationPage from '../../pageObjects/applications'
 import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
-import MyAccessPage from '../../pageObjects/myAccess'
 import Products from '../../pageObjects/products'
 
 describe('Verify Protected Externally Auth', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
-  const app = new ApplicationPage()
-  const myAccessPage = new MyAccessPage()
   var nameSpace: string
   let userSession: string
   const home = new HomePage()
@@ -48,26 +44,26 @@ describe('Verify Protected Externally Auth', () => {
 
   it('Creates a new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+    cy.get('@apiowner').then(({ protectedExternally }: any) => {
       pd.createNewProduct(
-        clientCredentials.protectedExternally_initial.product.name,
-        clientCredentials.protectedExternally_initial.product.environment.name
+        protectedExternally.protectedExternally_initial.product.name,
+        protectedExternally.protectedExternally_initial.product.environment.name
       )
     })
   })
 
   it('Assign a dataset to the product', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let product = clientCredentials.protectedExternally_initial.product
+    cy.get('@apiowner').then(({ protectedExternally }: any) => {
+      let product = protectedExternally.protectedExternally_initial.product
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
 
   it('Update the authorization scope from Public to Protected Externally', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let product = clientCredentials.protectedExternally_external.product
+    cy.get('@apiowner').then(({ protectedExternally }: any) => {
+      let product = protectedExternally.protectedExternally_external.product
       pd.editProductEnvironment(product.name, product.environment.name)
       pd.editProductEnvironmentConfig(product.environment.config)
     })
@@ -75,8 +71,8 @@ describe('Verify Protected Externally Auth', () => {
   
   it('Verify that product is w/o a request button in API Directory', () => {
     cy.visit(apiDir.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let product = clientCredentials.protectedExternally_external.product
+    cy.get('@apiowner').then(({ protectedExternally }: any) => {
+      let product = protectedExternally.protectedExternally_external.product
       apiDir.selectProduct(product.name)
       cy.get(apiDir.rqstAccessBtn).should('not.exist')
     })
@@ -84,8 +80,8 @@ describe('Verify Protected Externally Auth', () => {
 
   it('Delete the Product', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      pd.deleteProduct(clientCredentials.protectedExternally_external.product.name)
+    cy.get('@apiowner').then(({ protectedExternally }: any) => {
+      pd.deleteProduct(protectedExternally.protectedExternally_external.product.name)
     })
   })
 
