@@ -52,10 +52,13 @@ Use the following configuration to run the Portal locally against the components
 
 To run this project first run `npm install`. Note: You may need to add `--legacy-peer-deps` to `npm install` if using Node version greater than `17`.
 
-To run the portal locally and leverage the `oauth2-proxy`:
+To run the portal locally and leverage the `oauth2-proxy` that is running in docker:
 
 - turn off the docker compose Portal: `docker stop apsportal`
 - update the `oauth2-proxy/oauth2-proxy-local.cfg` `upstreams` to be `hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')`
+- restart the oauth2-proxy `docker compose restart oauth2-proxy`
+
+Then run the following to start the Portal locally:
 
 ```sh
 cd src
