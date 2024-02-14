@@ -53,8 +53,6 @@ describe('Give a user org admin access at organization level', () => {
 
   after(() => {
     cy.keycloakLogout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -71,8 +69,6 @@ describe('Multiple Org Adming for the organization', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
     cy.resetState()
   })
 
@@ -100,7 +96,7 @@ describe('Multiple Org Adming for the organization', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
@@ -147,7 +143,5 @@ describe('Multiple Org Adming for the organization', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

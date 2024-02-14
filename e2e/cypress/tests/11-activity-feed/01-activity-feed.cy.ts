@@ -96,8 +96,6 @@ describe('Verify the Activity filter for users', () => {
 
     before(() => {
         cy.visit('/')
-        // cy.deleteAllCookies()
-        cy.reload()
     })
 
     beforeEach(() => {

@@ -20,8 +20,6 @@ describe('Make the access request for invalid profile', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -56,8 +54,6 @@ describe('Make the access request for invalid profile', () => {
   // })
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({log:true})
-    cy.deleteAllCookies()
   })
 })
 
@@ -73,8 +69,6 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -123,7 +117,5 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

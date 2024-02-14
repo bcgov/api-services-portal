@@ -77,7 +77,7 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa command to create namespace', () => {
-    cy.executeCliCommand('gwa namespace create --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
     });

@@ -12,7 +12,6 @@ describe('Access manager approves developer access request for JWKS URL flow', (
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -46,8 +45,6 @@ describe('Access manager approves developer access request for JWKS URL flow', (
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 

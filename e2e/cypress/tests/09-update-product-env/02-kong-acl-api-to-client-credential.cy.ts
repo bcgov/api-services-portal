@@ -112,8 +112,6 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -126,8 +124,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -168,8 +164,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -180,8 +174,6 @@ describe('Access manager approves developer access request for Client ID/Secret 
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -214,8 +206,6 @@ describe('Access manager approves developer access request for Client ID/Secret 
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 

@@ -81,7 +81,5 @@ describe('Generate Authorization Profiles', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

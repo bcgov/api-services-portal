@@ -48,8 +48,6 @@ describe('Delete application which has approved request spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -60,8 +58,6 @@ describe('Approve Pending Request Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
     // cy.getServiceOrRouteID('services')
     // cy.getServiceOrRouteID('routes')
   })
@@ -96,8 +92,6 @@ describe('Approve Pending Request Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -110,8 +104,6 @@ describe('Delete application which has approved request spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {

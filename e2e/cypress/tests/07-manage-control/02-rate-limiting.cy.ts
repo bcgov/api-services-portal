@@ -272,7 +272,5 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
     })
 })

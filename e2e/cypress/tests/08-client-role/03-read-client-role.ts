@@ -56,8 +56,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -68,8 +66,6 @@ describe('Access manager apply "Read" role and approves developer access request
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -108,8 +104,6 @@ describe('Access manager apply "Read" role and approves developer access request
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
