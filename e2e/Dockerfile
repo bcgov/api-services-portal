@@ -3,16 +3,20 @@ FROM cypress/included:12.17.4
 WORKDIR /e2e
 
 RUN apt-get -y update; apt-get -y install curl
-COPY cypress.config.ts /e2e
-COPY tsconfig.json /e2e
 COPY package.json /e2e
 COPY package-lock.json /e2e
+RUN npm install
+
+COPY cypress.config.ts /e2e
+COPY tsconfig.json /e2e
 COPY *.yml /e2e
 COPY entrypoint.sh /tmp
-COPY gwa /usr/local/bin
 ADD cypress /e2e/cypress
 
-RUN npm install
+RUN curl -v -L -O https://github.com/bcgov/gwa-cli/releases/download/v2.0.15/gwa_Linux_x86_64.tgz \
+ && tar -xzf gwa_Linux_x86_64.tgz \
+ && mv gwa /usr/local/bin/.
+
 
 
 ENTRYPOINT ["npm", "run", "cy:run:html"]
