@@ -49,7 +49,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
     if (flow === 'client-credentials' || flow === 'authorization-code') {
       return !credentialIssuer;
     }
-    return flow === 'public';
+    return flow === 'public' || flow === 'protected-externally';
   }, [flow, credentialIssuer]);
   const { data, isSuccess } = useCurrentNamespace();
 
@@ -182,4 +182,5 @@ const flowTypes: { value: string; label: string }[] = [
   { value: 'kong-acl-only', label: 'Kong ACL Only' },
   { value: 'kong-api-key-only', label: 'Kong API Key Only' },
   { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
+  { value: 'protected-externally', label: 'Protected Externally' },
 ];

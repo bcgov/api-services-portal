@@ -36,6 +36,7 @@ const EditEnvironment: React.FC<EditEnvironmentProps> = ({ data }) => {
     { value: 'kong-acl-only', label: 'Kong ACL Only' },
     { value: 'kong-api-key-only', label: 'Kong API Key Only' },
     { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
+    { value: 'protected-externally', label: 'Protected Externally' },
   ];
 
   return (

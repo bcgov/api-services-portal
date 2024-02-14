@@ -51,6 +51,7 @@ module.exports = {
       defaultValue: 'public',
       options: [
         { value: 'public', label: 'Public' },
+        { value: 'protected-externally', label: 'Protected Externally' },
         {
           value: 'authorization-code',
           label: 'Oauth2 Authorization Code Flow',

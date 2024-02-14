@@ -218,7 +218,7 @@ export const ValidateActiveEnvironment = async (
               '] missing or incomplete oidc plugin.'
           );
         }
-      } else if (flow == 'public') {
+      } else if (flow == 'public' || flow == 'protected-externally') {
       } else {
         addValidationError(
           'Unexpected error when trying to validate the environment.'

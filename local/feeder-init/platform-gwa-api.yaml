@@ -2,7 +2,7 @@ entity: Product
 record:
   appId: 748D98F1F56C
   name: Gateway Services API
-  namespace: newplatform
+  namespace: platform
   environments:
     - appId: E0000000
       name: prod
