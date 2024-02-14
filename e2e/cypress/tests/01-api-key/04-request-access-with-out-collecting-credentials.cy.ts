@@ -11,7 +11,6 @@ describe('Request Access without colleting credential Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -39,7 +38,5 @@ describe('Request Access without colleting credential Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

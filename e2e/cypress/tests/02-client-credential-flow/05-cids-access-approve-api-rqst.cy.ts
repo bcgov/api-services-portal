@@ -13,7 +13,6 @@ describe('Access manager approves developer access request for Client ID/Secret 
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -51,8 +50,6 @@ describe('Access manager approves developer access request for Client ID/Secret 
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -91,7 +88,6 @@ describe('Verify the selected client scoped is displayed in assigned default lis
 
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -131,8 +127,6 @@ describe('Verify the selected client scoped is displayed in assigned default lis
 
   after(() => {
     cy.keycloakLogout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -144,7 +138,6 @@ describe('Deselect the scope from authorization tab', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -182,6 +175,9 @@ describe('Deselect the scope from authorization tab', () => {
       consumers.saveAppliedConfig()
     })
   })
+  after(() => {
+    cy.logout()
+  })
 })
 
 describe('Verify the selected client scoped is not displayed in assigned default list', () => {
@@ -193,7 +189,6 @@ describe('Verify the selected client scoped is not displayed in assigned default
 
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -233,8 +228,6 @@ describe('Verify the selected client scoped is not displayed in assigned default
 
   after(() => {
     cy.keycloakLogout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })

@@ -24,7 +24,7 @@ class ApiDirectoryPage {
     cy.contains('a', product.name, { timeout: 10000 }).should('be.visible');
     cy.contains(product.name).click()
     if (elevatedAccess) {
-      cy.contains('For elevated access, please Request Access').should('be.visible');
+      cy.contains('For elevated access, please request acces').should('be.visible');
     }
     cy.get(this.rqstAccessBtn).click()
     cy.get(this.appSelect).select(app.name)

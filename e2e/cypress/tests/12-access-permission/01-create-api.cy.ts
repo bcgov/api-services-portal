@@ -42,7 +42,7 @@ describe('Create API Spec', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.replaceWordInJsonObject('ns.permission', 'ns.' + namespace, 'service-permission-gwa.yml')

@@ -20,7 +20,6 @@ describe('Apply Kong API key only plugin', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -58,6 +57,7 @@ describe('Apply Kong API key only plugin', () => {
 
   it('Create a new consumer and save the consumer Id', () => {
     cy.makeKongGatewayRequest('consumers', 'createConsumer', 'POST').then((response) => {
+      debugger
       expect(response.status).to.be.equal(201)
       consumerID = response.body.id
       cy.saveState("consumersid", consumerID)
@@ -106,6 +106,9 @@ describe('Apply Kong API key only plugin', () => {
       expect(response.status).to.be.equal(201)
     })
   })
+  after(() => {
+    cy.logout()
+  })
 })
 
 describe('Check the API key for free access', () => {
@@ -138,8 +141,6 @@ describe('Check the API key for Elevated access', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -176,8 +177,6 @@ describe('Check the API key for Elevated access', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -188,8 +187,6 @@ describe('Approve Pending Request Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -247,8 +244,6 @@ describe('Approve Pending Request Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })

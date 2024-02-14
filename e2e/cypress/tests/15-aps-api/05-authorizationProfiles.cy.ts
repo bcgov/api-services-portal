@@ -100,11 +100,6 @@ testData.forEach((testCase: any) => {
             })
         })
     })
-
-    after(() => {
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
-    })
 })
 
 describe('API Tests for Authorization Profiles created with inheritFrom attribute set to a valid shared Issuer', () => {
@@ -211,8 +206,6 @@ describe('Published a shared authorization profile', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
     })
 
 })
@@ -225,7 +218,6 @@ describe('Deleted shared auth profile', () => {
 
     before(() => {
         cy.visit('/')
-        cy.deleteAllCookies()
         cy.reload()
     })
 
@@ -264,8 +256,6 @@ describe('Deleted shared auth profile', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
     })
 })
 
@@ -277,7 +267,6 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
 
     before(() => {
         cy.visit(Cypress.env('KEYCLOAK_URL'))
-        cy.deleteAllCookies()
         cy.reload()
     })
 

@@ -39,7 +39,8 @@ describe('Grant appropriate permissions to team members for client credential fl
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 5000, failOnNonZeroExit: false }).then((response) => {
+      debugger
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.replaceWordInJsonObject('ccplatform', namespace, 'cc-service-gwa.yml')

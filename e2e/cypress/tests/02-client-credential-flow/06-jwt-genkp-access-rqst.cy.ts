@@ -11,7 +11,6 @@ describe('Developer creates an access request for JWT Generated Key Pair authent
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -53,7 +52,5 @@ describe('Developer creates an access request for JWT Generated Key Pair authent
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
