@@ -55,6 +55,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                   as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
+                  data-testid={`product-icon-${data.name}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>
