@@ -10,6 +10,7 @@ import {
   Icon,
   Text,
 } from '@chakra-ui/react';
+import kebabCase from 'lodash/kebabCase';
 import { FaLock } from 'react-icons/fa';
 import { HiChartBar } from 'react-icons/hi';
 import { RiEarthFill } from 'react-icons/ri';
@@ -55,6 +56,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                   as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
+                  data-testid={`product-icon-${kebabCase(data.name)}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>

@@ -106,6 +106,12 @@ class ApiDirectoryPage {
     })
   }
 
+  checkProductIcon(productName: string, expectedIcon: string) {
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    var ele: string = `[data-testid=product-icon-${pname}-${expectedIcon}]`
+    cy.get(ele).should('exist')
+  }
+
   addOrganizationAndOrgUnit(product: any) {
     cy.contains('button', 'Add Organization').click({ force: true })
     cy.get(this.orgDropDown).select(product.orgName)

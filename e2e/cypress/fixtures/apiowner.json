@@ -279,6 +279,38 @@
       }
     }
   },
+  "protectedExternally": {
+    "protectedExternally_initial": {
+      "product": {
+        "name": "New-Auto Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Public",
+            "optionalInstructions": "This is a automation test"
+          }
+        }
+      }
+    },
+    "protectedExternally_external": {
+      "product": {
+        "name": "New-Auto Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Protected Externally",
+            "optionalInstructions": "This is a automation test"
+          }
+        }
+      }
+    }
+  },
   "namespacePreview": {
     "namespace": "gw-07034",
     "serviceAccount": {
