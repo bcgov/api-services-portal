@@ -197,7 +197,7 @@
       "environmentDetails": [
         {
           "environment": "dev",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "clientRegistration": "managed",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
@@ -214,7 +214,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -231,7 +231,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -251,7 +251,7 @@
           "clientRegistration": "managed",
           "clientSecret": "****",
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "exists": true
         }
       ],
@@ -271,7 +271,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -305,7 +305,7 @@
         {
           "exists": true,
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
           "clientRegistration": "shared-idp",
           "clientId": "ap-my-auth-client-secret-1-test"
         }
