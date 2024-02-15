@@ -75,6 +75,7 @@ describe('Verify Protected Externally Auth', () => {
       let product = protectedExternally.protectedExternally_external.product
       apiDir.selectProduct(product.name)
       cy.get(apiDir.rqstAccessBtn).should('not.exist')
+      apiDir.checkProductIcon(product.name, 'FaLock')
     })
   })
 
