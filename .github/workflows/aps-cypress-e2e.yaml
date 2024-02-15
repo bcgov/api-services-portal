@@ -1,8 +1,9 @@
-name: Build and Deploy Cypress and Execute Tests
+name: Cypress and Execute Tests
 
 on:
+  workflow_dispatch: {}
   push:
-    branches: ['test', 'cypress*', 'local-dev']
+    branches: ['test', 'cypress*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
