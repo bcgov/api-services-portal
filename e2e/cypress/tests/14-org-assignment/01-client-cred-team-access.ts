@@ -23,7 +23,7 @@ describe('Add Organization to publish API', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
     cy.resetState()
   })
 

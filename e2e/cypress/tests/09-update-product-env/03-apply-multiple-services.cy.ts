@@ -27,7 +27,7 @@ describe('Apply multiple services to the product environment', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

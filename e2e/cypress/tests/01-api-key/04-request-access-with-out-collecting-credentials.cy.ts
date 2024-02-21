@@ -11,7 +11,7 @@ describe('Request Access without colleting credential Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

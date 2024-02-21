@@ -11,7 +11,7 @@ describe('Developer creates an access request for JWT Generated Key Pair authent
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

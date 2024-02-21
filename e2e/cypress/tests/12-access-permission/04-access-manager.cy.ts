@@ -12,7 +12,7 @@ describe('Grant Access Manager Role', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -56,7 +56,7 @@ describe('Verify that Mark is able to view the pending request', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

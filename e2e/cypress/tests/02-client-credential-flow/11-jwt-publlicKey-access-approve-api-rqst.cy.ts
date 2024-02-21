@@ -11,7 +11,7 @@ describe('Access manager approves developer access request for JWT - Generated K
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

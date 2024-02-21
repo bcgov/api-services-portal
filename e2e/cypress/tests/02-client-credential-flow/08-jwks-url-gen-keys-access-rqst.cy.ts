@@ -39,7 +39,7 @@ describe('Developer creates an access request for JWKS URL', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

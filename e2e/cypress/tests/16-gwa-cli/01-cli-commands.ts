@@ -18,7 +18,7 @@ describe('Verify CLI commands', () => {
   before(() => {
     // cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

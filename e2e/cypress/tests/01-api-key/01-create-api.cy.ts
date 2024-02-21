@@ -4,7 +4,7 @@ import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
 
-describe('Create API Spec', () => {
+describe('Create API Spec', () => { 
   const login = new LoginPage()
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
@@ -14,7 +14,7 @@ describe('Create API Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
     cy.resetState()
     cy.deleteAllCookies()
   })

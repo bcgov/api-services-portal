@@ -21,7 +21,7 @@ describe('Verify CLI commands for generate/apply config', () => {
 
   before(() => {
     // cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

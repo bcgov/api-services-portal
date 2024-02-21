@@ -13,7 +13,7 @@ describe('Grant Credential Issuer Role', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

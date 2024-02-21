@@ -12,7 +12,7 @@ describe('Generate Authorization Profiles', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

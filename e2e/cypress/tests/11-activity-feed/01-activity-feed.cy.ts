@@ -14,7 +14,7 @@ describe('Get the user session token to pass it as authorization token to make t
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {

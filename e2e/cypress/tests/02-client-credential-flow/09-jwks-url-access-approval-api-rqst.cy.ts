@@ -12,7 +12,7 @@ describe('Access manager approves developer access request for JWKS URL flow', (
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

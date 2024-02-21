@@ -14,7 +14,7 @@ describe('Give a user org admin access at organization level', () => {
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
