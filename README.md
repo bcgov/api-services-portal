@@ -63,9 +63,7 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Follow [local deployment instructions](#local-deployment) and run `docker compose up`.
 1. In `/src` run `npm install`.
-
-    > [!NOTE]
-    > You will need to run `npm install --legacy-peer-deps` if using Node version greater than `17`.
+    1. If using Node version > 17, run `npm install --legacy-peer-deps` 
 
 1. Turn off the docker compose Portal: `docker stop apsportal`
 1. Configure the `oauth2-proxy` that is running in Docker:
