@@ -52,7 +52,7 @@ describe('Create API Spec', () => {
             cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
                 cy.get('@accessTokenResponse').then((token_res: any) => {
                     expect(token_res.status).to.be.equal(400)
-                    expect(token_res.body.error).to.contains("unauthorized_client")
+                    expect(token_res.body.error).to.contains("invalid_client")
                 })
             })
         })

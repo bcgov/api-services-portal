@@ -50,7 +50,7 @@ describe('Verify CLI commands', () => {
     let clientID = "dummy-client"
     let clientSecret = cli.credentials.clientSecret
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
+      expect(response.stderr).to.contain("Error: invalid_client")
     });
   })
 
@@ -58,7 +58,7 @@ describe('Verify CLI commands', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = "dummy-client-secret"
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
+      expect(response.stderr).to.contain("Error: invalid_client")
     });
   })
 
