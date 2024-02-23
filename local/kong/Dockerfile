@@ -20,7 +20,7 @@ RUN (cd kong-oidc && luarocks make && luarocks pack kong-oidc ${PLUGIN_OIDC_VERS
 RUN git clone https://github.com/ikethecoder/kong-oidc-consumer.git
 RUN (cd kong-oidc-consumer && luarocks make && luarocks pack kong-oidc-consumer ${PLUGIN_OIDC_CONSUMER_VERSION})
 
-RUN git clone https://github.com/ikethecoder/kong-plugin-jwt-keycloak.git
+RUN git clone -b kong28 https://github.com/ikethecoder/kong-plugin-jwt-keycloak.git
 RUN (cd kong-plugin-jwt-keycloak && luarocks make && luarocks pack kong-plugin-jwt-keycloak ${PLUGIN_VERSION})
 
 RUN git clone -b feature/kong-2.0-upgrade https://github.com/bcgov/gwa-kong-endpoint.git

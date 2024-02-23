@@ -11,7 +11,7 @@ describe('Get the user session token', () => {
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
         // cy.getUserSessionTokenValue()
     })
 

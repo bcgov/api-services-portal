@@ -14,7 +14,7 @@ describe('Grant Namespace View Role to Mark', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe('Verify that Mark is unable to create service account', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

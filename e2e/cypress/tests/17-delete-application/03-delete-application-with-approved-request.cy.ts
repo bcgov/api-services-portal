@@ -15,7 +15,7 @@ describe('Delete application which has approved request spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

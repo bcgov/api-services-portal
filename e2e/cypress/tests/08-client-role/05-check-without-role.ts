@@ -22,7 +22,7 @@ describe('Reset Authorization profile to default (without any role)', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

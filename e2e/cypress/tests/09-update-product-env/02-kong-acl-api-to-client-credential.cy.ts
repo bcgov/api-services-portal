@@ -25,7 +25,7 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

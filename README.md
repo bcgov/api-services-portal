@@ -6,75 +6,91 @@
 ![GitHub](https://img.shields.io/github/license/bcgov/aps-portal?style=for-the-badge)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bcgov/aps-portal?label=release&style=for-the-badge)
 
+
 ## Introduction
+
 
 The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs. It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
 
-## Running the Project
 
-### Installation
+## Local Deployment
 
-#### 1. Docker
 
-##### Steps
+The repo is setup to create a local deployment of the Portal along with required support services (Postgres, Keycloak, OAuth2-proxy,  Feeder and Kong Gateway) using `docker compose`.
 
-1. Run build steps [here](https://github.com/bcgov/api-services-portal/tree/dev/e2e#build-gateway-api-image)
-2. Run `docker compose --profile testsuite build`
-3. Run `docker compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal, Feeder and Kong Gateway)
-4. Go to: http://oauth2proxy.localtest.me:4180
-5. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`
-6. `docker compose down` : Removes all the hosted services
+1. Clone and build the [Gateway Admin API](https://github.com/bcgov/gwa-api) (gwa-api)
 
-> To run the Cypress test automation suite, run `docker compose --profile testsuite up`
->
-> To use the `gwa` command line, configure it with:
->
-> `gwa config set host oauth2proxy.localtest.me:4180`
->
-> `gwa config set scheme http`
->
-> `gwa login`
->
-> `gwa namespace create --name gw-12345`
->
-> `gwa apply -i local/gwa-cli/gw-config.yml`
->
-> `curl http://oauthproxy.localtest.me:8000/headers -H "Host: my-service.dev.api.gov.bc.ca"`
+    ```
+    git clone https://github.com/bcgov/gwa-api
+    cd ./microservices/gatewayApi
+    docker build -t gwa-api:e2e .
+    ```
 
-**Note:**
+1. Build: Back in `api-services-portal`, run `docker compose --profile testsuite build`.
+1. Run: `docker compose up`. Wait for startup to complete - look for `Swagger UI registered`.
+1. The Portal is now live at http://oauth2proxy.localtest.me:4180
+    1. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`.
+1. If you have made any changes to the app code, update images by running `docker compose build` then `docker compose up`.
+1. Clean up: `docker compose down` removes all the hosted services
 
-- Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
-- You may want to run `docker compose build` if there are new changes that are not reflected in the last time you built the container images
+### Cypress testing
 
-#### 2. Development using Docker backend
+To run the Cypress test automation suite, run `docker compose --profile testsuite up`.
 
-Use the following configuration to run the Portal locally against the components deployed with docker-compose.
+### gwa CLI configuration
 
-To run this project first run `npm install`. Note: You may need to add `--legacy-peer-deps` to `npm install` if using Node version greater than `17`.
+To use the `gwa` command line interace, configure it with:
 
-To run the portal locally and leverage the `oauth2-proxy` that is running in docker:
-
-- turn off the docker compose Portal: `docker stop apsportal`
-- update the `oauth2-proxy/oauth2-proxy-local.cfg` `upstreams` to be `hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')`
-- restart the oauth2-proxy `docker compose restart oauth2-proxy`
-
-Then run the following to start the Portal locally:
-
-```sh
-cd src
-set -o allexport
-source ../.env.local
-LOG_LEVEL=debug
-KNEX_HOST=kong-db.localtest.me
-NEXT_PUBLIC_MOCKS=off
-set +o allexport
-
-npm run dev
+```
+gwa config set host oauth2proxy.localtest.me:4180
+gwa config set scheme http
 ```
 
-Go to: http://oauth2proxy.localtest.me:4180
+Run this command to test logging in and creating a namespace:
+
+```
+gwa login
+gwa namespace create --name gw-12345
+```
+
+### Keycloak configuration
+
+Keycloak is initialized with `master` realm. The realm configuration is saved in `local/keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
+
+### Development
+
+Use the following configuration to run the Portal locally (outside of Docker) against the support components deployed with `docker compose`. Changes to the Portal code will live update instead of requiring `docker build`.
+
+1. Follow [local deployment instructions](#local-deployment) and run `docker compose up`.
+1. In `/src` run `npm install`.
+    1. If using Node version > 17, run `npm install --legacy-peer-deps` 
+
+1. Turn off the docker compose Portal: `docker stop apsportal`
+1. Configure the `oauth2-proxy` that is running in Docker:
+    1. Update `upstreams` in `oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
+    <br>You can obtain the IP address using `hostname -I`.
+    
+    1. Restart the oauth2-proxy: `docker compose restart oauth2-proxy`
+
+1. Start the Portal locally:
+
+    ```sh
+    cd src
+    set -o allexport
+    source ../.env.local
+    LOG_LEVEL=debug
+    KNEX_HOST=kong-db.localtest.me
+    NEXT_PUBLIC_MOCKS=off
+    set +o allexport
+
+    npm run dev
+    ```
+
+1. The Portal is now live at http://oauth2proxy.localtest.me:4180 and should auto-update on code changes.
+
 
 ## Design
+
 
 The `API Services Portal` is a React application using the Chakra UI component library, and using two frameworks: KeystoneJS V5, and NextJS.
 
@@ -150,9 +166,11 @@ Currently support feeders:
 
 Source: `feeds`
 
+
 ## Development
 
-#### TypeScript
+
+### TypeScript
 
 The client-side Next.js application uses TypeScript, and because it plays nicely with GraphQL types, uses a codegen to generate the API types.
 In `development` mode once the API server has started the types are automatically generated, but will need to be regenerated if you make changes to the
@@ -179,7 +197,7 @@ const Component = () => {
 
 All Typescript paths alias `src/nextapp` to `@/`.
 
-#### Storybook
+### Storybook
 
 [Chakra UI](https://chakra-ui.com) was chosen for the UI framework due to its utility and flexibility. A theme has been created which follows the [BC Government Web Design System](https://developer.gov.bc.ca/Design-System) alongside custom components written for the portal.
 
@@ -199,7 +217,7 @@ import { Button } from 'chakra-ui/react';
 
 All the core components stories are located in `src/stories`. For custom components add the story in the component folder, ie `src/nextapp/components/card/card.stories.tsx`.
 
-#### Mock Server
+### Mock Server
 
 For convenience a mock server is available to fake data via the GraphQL api. Run by opening a new shell window after running `$ npm run dev` and run the following:
 
@@ -217,7 +235,7 @@ GWA_API_URL=http://localhost:4000
 
 It should be noted that a 1-to-1 replication of the production API is not the goal of the mock server. It's simply to replicate requests and confirm the content returned will behave in an expected way.
 
-###### Updating mock server schemas
+#### Updating mock server schemas
 
 When Keystone-level types are updated, there is a manual step required for the mock server in order to keep the mock data structure in sync with the production server. It is definitely manual at the moment, but fairly easy and quick to do.
 
@@ -225,7 +243,7 @@ When Keystone-level types are updated, there is a manual step required for the m
 2. The far right of the graphiql interface are 2 tabs, `DOCS` and `SCHEMAS`. You can either download and copy or copy the contents of the `SCHEMAS` tab and paste it in `src/test/mock-server/schemas.js` inside the string literal.
 3. Delete any instances of a `@deprecated(reason: "Use `path` instead")` string. These messages break the graphql-tools
 
-#### Coding Style
+### Coding Style
 
 There isn't a strict, repo-wide coding style per se, but we use Prettier and ESLint to maintain a consistent code style. Both libraries are included locally as part of the node_modules, so it is recommended to configure your editor to run off local versions instead of global so any API changes between versions don't collide.
 

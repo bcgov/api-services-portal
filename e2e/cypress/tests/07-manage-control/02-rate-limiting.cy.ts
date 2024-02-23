@@ -12,7 +12,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {

@@ -8,7 +8,7 @@ describe('Verify namespace delete using gwa command', () => {
     before(() => {
         // cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {

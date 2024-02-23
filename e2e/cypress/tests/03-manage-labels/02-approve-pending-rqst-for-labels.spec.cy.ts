@@ -11,7 +11,7 @@ describe('Approve Pending Request Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
