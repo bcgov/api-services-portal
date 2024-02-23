@@ -1,7 +1,10 @@
+import keycloakGroupPage from '../../pageObjects/keycloakGroup'
 import keycloakUsersPage from '../../pageObjects/keycloakUsers'
 
-describe('Give a user org admin access at organization level', () => {
+
+describe('Give a user org admin access at organization unit level', () => {
   const user = new keycloakUsersPage()
+  const groups = new keycloakGroupPage()
 
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
@@ -25,6 +28,17 @@ describe('Give a user org admin access at organization level', () => {
     })
   })
 
+  it('Navigate to User Groups', () => {
+    groups.navigateToUserGroups()
+  })
+
+  it('Add another org unit', () => {
+    cy.contains('ministry-of-health').click()
+    cy.get('[id="createGroup"]').click()
+    cy.get('[id="name"]').type('health-protection')
+    cy.contains('Save').click()
+  })
+
   it('Navigate to Users Page', () => {
     cy.contains('Users').click()
   })
@@ -39,11 +53,16 @@ describe('Give a user org admin access at organization level', () => {
     user.selectTab('Groups')
   })
 
-  it('Set the user to the Organization Unit', () => {
-    user.setUserToOrganization('ministry-of-health')
+  it('Reset any existing assoction', () => {
+    user.resetAssociation()
+  })
+
+  it('Set the user(Wendy) to the Organization Unit', () => {
+    user.setUserToOrganization('health-protection')
   })
 
   after(() => {
     cy.keycloakLogout()
   })
+
 })
