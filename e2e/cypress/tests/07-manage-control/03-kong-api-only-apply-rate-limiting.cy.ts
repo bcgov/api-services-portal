@@ -20,7 +20,7 @@ describe('Apply Kong API key only plugin', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

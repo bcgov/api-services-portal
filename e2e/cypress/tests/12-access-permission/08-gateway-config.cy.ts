@@ -17,7 +17,7 @@ describe('Grant Gateway Config Role to Wendy', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

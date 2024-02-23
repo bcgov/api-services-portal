@@ -14,7 +14,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

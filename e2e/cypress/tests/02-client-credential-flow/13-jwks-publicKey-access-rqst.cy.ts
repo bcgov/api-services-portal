@@ -13,7 +13,7 @@ describe('Generates public/private key and set public key to access request', ()
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

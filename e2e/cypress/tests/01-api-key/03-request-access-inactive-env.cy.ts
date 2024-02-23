@@ -15,7 +15,7 @@ describe('Change an Active environment to Inactive', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -114,7 +114,7 @@ describe('Change an the environment back to active', () => {
     cy.visit('/')
     // cy.deleteAllCookies()
     // cy.clearCookies()
-    // cy.reload()
+    // cy.reload(true)
   })
 
   beforeEach(() => {

@@ -14,7 +14,7 @@ describe('Create API Spec for Delete Resources', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
     // cy.resetState()
   })
 

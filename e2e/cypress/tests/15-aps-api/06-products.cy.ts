@@ -15,7 +15,7 @@ describe('Get the user session token to check ', () => {
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {
@@ -97,7 +97,7 @@ describe('Verify that created Product is displayed in UI', () => {
 
     before(() => {
         cy.visit('/')
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {

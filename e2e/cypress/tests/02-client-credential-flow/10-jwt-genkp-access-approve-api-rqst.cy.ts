@@ -11,7 +11,7 @@ describe('Access manager approves developer access request for JWT - Generated K
 
   before(() => {
     cy.visit('/')
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -34,7 +34,6 @@ describe('Access manager approves developer access request for JWT - Generated K
   it('Access Manager approves developer access request', () => {
     cy.get('@access-manager').then(() => {
       cy.visit(consumers.path)
-      cy.wait(5000)
       consumers.reviewThePendingRequest()
     })
   })
@@ -49,10 +48,10 @@ describe('Access manager approves developer access request for JWT - Generated K
 })
 
 describe('Make an API request using JWT signed with private key', () => {
-  it('Get access token using JWT key pair; make sure API calls successfully', () => {
+  it('Get access token using JWT key pair; make API request', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
-      cy.readFile('cypress/fixtures/state/jwtReGenPrivateKey_new.pem').then((privateKey) => {
-        let jwkCred = JSON.parse(store_res.jwksurlcredentials)
+      cy.readFile('cypress/fixtures/state/jwtGenPrivateKey.pem').then((privateKey) => {
+        let jwkCred = JSON.parse(store_res.jwtkeypaircredentials)
         let clientId = jwkCred.clientId
         let tokenEndpoint = jwkCred.tokenEndpoint
 
