@@ -58,7 +58,7 @@ describe('Verify CLI commands', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = "dummy-client-secret"
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      expect(response.stderr).to.contain("Error: invalid_client")
+      expect(response.stderr).to.contain("unauthorized_client")
     });
   })
 
