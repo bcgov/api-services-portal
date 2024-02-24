@@ -29,7 +29,7 @@ The repo is setup to create a local deployment of the Portal along with required
 1. Build: Back in `api-services-portal`, run `docker compose --profile testsuite build`.
 1. Run: `docker compose up`. Wait for startup to complete - look for `Swagger UI registered`.
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180
-    1. To login, use username `local` and password `local`, or username `janis@idir` and password `awsummer`.
+    1. To login, use username `janis@idir` and password `awsummer` (or username `local` and password `local`).
 1. If you have made any changes to the app code, update images by running `docker compose build` then `docker compose up`.
 1. Clean up: `docker compose down` removes all the hosted services
 
@@ -67,11 +67,16 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Turn off the docker compose Portal: `docker stop apsportal`
 1. Configure the `oauth2-proxy` that is running in Docker:
-    1. Update `upstreams` in `oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
+    1. Update `upstreams` in `local/oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
     <br>You can obtain the IP address using `hostname -I`.
     
     1. Restart the oauth2-proxy: `docker compose restart oauth2-proxy`
+    1. Update `DESTINATION_URL` in `local/feeds/.env.local` to include the IP address of your local machine
+    1. Restart the feeder: `docker compose restart feeder`
+    1. Update `PORTAL_ACTIVITY_URL` in `local/gwa-api/.env.local` to include the IP address of your local machine
+    1. Restart the feeder: `docker compose restart gwa-api`
 
+    
 1. Start the Portal locally:
 
     ```sh

@@ -2317,7 +2317,9 @@
           }
         }
       ],
-      "defaultClientScopes": [],
+      "defaultClientScopes": [
+        "profile"
+      ],
       "optionalClientScopes": []
     },
     {
