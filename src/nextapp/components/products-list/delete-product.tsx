@@ -42,9 +42,10 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({
       });
       onDeleted();
       client.invalidateQueries(queryKey);
-    } catch {
+    } catch(e) {
       toast({
         title: 'Product delete failed',
+        description: e,
         status: 'error',
         isClosable: true,
       });
