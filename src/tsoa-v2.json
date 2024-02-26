@@ -29,12 +29,21 @@
         "type": "openIdConnect",
         "description": "OIDC Login",
         "openIdConnectUrl": "https://well_known_endpoint"
+      },
+      "pat": {
+        "type": "apiKey",
+        "name": "pat",
+        "in": "header"
       }
     },
     "tags": [
       {
         "name": "API Directory",
         "description": "Discover all the great BC Government APIs"
+      },
+      {
+        "name": "Consumers",
+        "description": "Manage consumer applications and access"
       },
       {
         "name": "Organizations",
