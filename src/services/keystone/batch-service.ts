@@ -212,7 +212,10 @@ export class BatchService {
     return result['data'][query].length == 0 ? null : result['data'][query][0];
   }
 
-  public async create(entity: string, data: any) {
+  public async create(
+    entity: string,
+    data: any
+  ): Promise<{ id?: string; error?: string }> {
     logger.debug('[create] : (%s) %j', entity, data);
     const result = await this.context.executeGraphQL({
       query: `mutation ($data: ${entity}CreateInput) {
@@ -228,10 +231,16 @@ export class BatchService {
       logger.debug('[create] RESULT %j', result);
     }
 
-    return 'errors' in result ? null : result['data'][`create${entity}`].id;
+    return 'errors' in result
+      ? { error: result['errors'][0].message }
+      : { id: result['data'][`create${entity}`].id };
   }
 
-  public async update(entity: string, id: string, data: any): Promise<string> {
+  public async update(
+    entity: string,
+    id: string,
+    data: any
+  ): Promise<{ id?: string; error?: string }> {
     logger.debug('[update] : %s %s', entity, id);
     const result = await this.context.executeGraphQL({
       query: `mutation ($id: ID!, $data: ${entity}UpdateInput) {
@@ -246,7 +255,10 @@ export class BatchService {
     } else {
       logger.debug('[update] RESULT %j', result);
     }
-    return 'errors' in result ? null : result['data'][`update${entity}`].id;
+
+    return 'errors' in result
+      ? { error: result['errors'][0].message }
+      : { id: result['data'][`update${entity}`].id };
   }
 
   public async remove(entity: string, id: string): Promise<any> {

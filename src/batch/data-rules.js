@@ -377,7 +377,7 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'namespace'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       environments: {

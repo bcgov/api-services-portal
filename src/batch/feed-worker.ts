@@ -423,11 +423,16 @@ export const syncRecords = async function (
         data[md.refKey] = eid;
       }
       const nr = await batchService.create(entity, data);
-      if (nr == null) {
+      if (!nr.id) {
         logger.error('CREATE FAILED (%s) %j', nr, data);
-        return { status: 400, result: 'create-failed', childResults };
+        return {
+          status: 400,
+          result: 'create-failed',
+          reason: nr.error,
+          childResults,
+        };
       } else {
-        return { status: 200, result: 'created', id: nr, childResults };
+        return { status: 200, result: 'created', id: nr.id, childResults };
       }
     } catch (ex) {
       logger.error('Caught exception %s', ex);
@@ -440,6 +445,12 @@ export const syncRecords = async function (
     }
   } else {
     try {
+      if (
+        json.hasOwnProperty(md['refKey']) &&
+        json[md['refKey']] != localRecord[md['refKey']]
+      ) {
+        throw new Error('Unexpected ' + md['refKey']);
+      }
       const transformKeys =
         'transformations' in md ? Object.keys(md.transformations) : [];
       const data: any = {};
@@ -541,14 +552,19 @@ export const syncRecords = async function (
         Object.keys(data)
       );
       const nr = await batchService.update(entity, localRecord.id, data);
-      if (nr == null) {
+      if (!nr.id) {
         logger.error('UPDATE FAILED (%s) %j', nr, data);
-        return { status: 400, result: 'update-failed', childResults };
+        return {
+          status: 400,
+          result: 'update-failed',
+          reason: nr.error,
+          childResults,
+        };
       } else {
         return {
           status: 200,
           result: 'updated',
-          id: nr,
+          id: nr.id,
           childResults,
           ownedBy:
             md.ownedBy && localRecord[md.ownedBy]

@@ -12,6 +12,7 @@ const {
 } = require('../services/workflow/delete-product');
 const { strict: assert } = require('assert');
 const { StructuredActivityService } = require('../services/workflow');
+const { regExprValidation } = require('../services/utils');
 
 module.exports = {
   fields: {
@@ -59,7 +60,23 @@ module.exports = {
       logger.debug('[List.Product] Resolved %j', resolvedData);
       return resolvedData;
     },
-
+    validateInput: ({
+      operation,
+      existingItem,
+      originalInput,
+      resolvedData,
+      context,
+      addFieldValidationError, // Field hooks only
+      addValidationError, // List hooks only
+      listKey,
+      fieldPath, // Field hooks only
+    }) => {
+      regExprValidation(
+        '^[a-zA-Z0-9 ()&-]{3,100}$',
+        resolvedData['name'],
+        "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')"
+      );
+    },
     validateDelete: async function ({ existingItem, context }) {
       await DeleteProductValidate(
         context,

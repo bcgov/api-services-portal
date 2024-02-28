@@ -393,6 +393,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "appId": {"dataType":"string"},
             "name": {"dataType":"string"},
+            "description": {"dataType":"string"},
             "namespace": {"dataType":"string"},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
