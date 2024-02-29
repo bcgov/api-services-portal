@@ -1,34 +1,23 @@
-name: Add to Pull Request Description
+name: Add URL to Feature PRs
 
 on:
   pull_request:
     branches: 
       - dev
 
-env:
-  REGISTRY: ghcr.io
-  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-
 jobs:
   comment:
     runs-on: ubuntu-latest
     steps:
-      - name: Docker meta
-        id: docker_meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
-
-      - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+      - name: Set KEBAB_CASE_BRANCH
         run: |
-          echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
-          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
-          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
+          # Convert github.head_ref to kebab case
+          kebab_case=$(echo "${{ github.head_ref }}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-zA-Z0-9' '-')
+          echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
         id: set-deploy-id
 
-      - name: Get deploy ID
-        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+      - name: Check the KEBAB_CASE_BRANCH output
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.KEBAB_CASE_BRANCH }}"
 
       - name: PR Description
         if: startsWith(github.head_ref, 'feature/') == true
@@ -36,4 +25,4 @@ jobs:
         with:
           add_markdown: |
             ---
-            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
+            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-deploy-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
