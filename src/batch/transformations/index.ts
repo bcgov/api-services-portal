@@ -6,6 +6,8 @@ export { byKey } from './byKey';
 
 export { connectExclusiveList } from './connectExclusiveList';
 
+export { connectExclusiveListCreate } from './connectExclusiveListCreate';
+
 export { connectExclusiveOne } from './connectExclusiveOne';
 
 export { connectMany } from './connectMany';

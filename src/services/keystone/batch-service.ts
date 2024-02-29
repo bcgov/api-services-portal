@@ -108,6 +108,12 @@ export class BatchService {
     compositeKeyValues: CompositeKeyValue[],
     fields: string[]
   ) {
+    logger.debug(
+      '[lookupUsingCompositeKey] : %s :: IN = %j',
+      query,
+      compositeKeyValues
+    );
+
     const where: string[] = [];
     const params: string[] = [];
     const variables: any = {};
@@ -130,7 +136,11 @@ export class BatchService {
       variables[param] = val;
     }
 
-    logger.debug('[lookupUsingCompositeKey] : %s :: %j', query, variables);
+    logger.debug(
+      '[lookupUsingCompositeKey] : %s :: VARS = %j',
+      query,
+      variables
+    );
 
     const queryString = `query(${params.join(', ')}) {
       ${query}(where: { ${where.join(', ')} }) {

@@ -381,7 +381,7 @@ const metadata = {
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       environments: {
-        name: 'connectExclusiveList',
+        name: 'connectExclusiveListCreate',
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
@@ -404,6 +404,10 @@ const metadata = {
   Environment: {
     query: 'allEnvironments',
     refKey: 'appId',
+    compositeRefKey: [
+      'name',
+      { key: 'parent.id', whereClause: 'product: { id: $parent_id }' },
+    ],
     sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
     ownedBy: 'product',
     transformations: {

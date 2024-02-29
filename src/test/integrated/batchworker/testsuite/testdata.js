@@ -12,7 +12,7 @@ export default {
         payload: {
           status: 200,
           result: 'created',
-          childResults: [{ status: 200, result: 'created', childResults: [] }],
+          childResults: [],
         },
       },
     },
@@ -30,6 +30,30 @@ export default {
           result: 'no-change',
           childResults: [
             { status: 200, result: 'no-change', childResults: [] },
+          ],
+        },
+      },
+    },
+    {
+      name: 'update same product but with invalid appId',
+      entity: 'Product',
+      data: {
+        name: 'Refactor time test',
+        namespace: 'refactortime',
+        environments: [{ name: 'dev', appId: '22021EB0' }],
+      },
+      expected: {
+        payload: {
+          status: 400,
+          result: 'update-failed',
+          reason: 'Failed updating children',
+          childResults: [
+            {
+              status: 400,
+              result: 'update-failed',
+              reason: 'Unexpected appId',
+              childResults: [],
+            },
           ],
         },
       },
@@ -108,10 +132,8 @@ export default {
           status: 400,
           result: 'create-failed',
           reason:
-            'There are some child records that have exclusive ownership already!',
-          childResults: [
-            { status: 200, result: 'no-change', childResults: [] },
-          ],
+            'Unable to create and/or connect 1 Product.environments<Environment>',
+          childResults: [],
         },
       },
     },
@@ -153,8 +175,7 @@ export default {
       data: {
         namespace: 'refactortime',
       },
-      exception: 'Missing value for key name',
-      expected: {},
+      expected: { exception: 'Missing value for key name' },
     },
     {
       name: 'create a new product with lots of environments',
@@ -172,11 +193,7 @@ export default {
         payload: {
           status: 200,
           result: 'created',
-          childResults: [
-            { status: 200, result: 'created', childResults: [] },
-            { status: 200, result: 'created', childResults: [] },
-            { status: 200, result: 'created', childResults: [] },
-          ],
+          childResults: [],
         },
       },
     },
@@ -204,8 +221,9 @@ export default {
         },
       },
     },
+
     {
-      name: 'create a new product with missing appIds',
+      name: 'update product just created using no appIds',
       entity: 'Product',
       data: {
         name: 'All Env Product',
@@ -214,9 +232,28 @@ export default {
       },
       expected: {
         payload: {
-          status: 400,
-          result: 'update-failed',
-          reason: 'Invalid ID for Environment appId = blank',
+          status: 200,
+          result: 'no-change',
+          childResults: [
+            { status: 200, result: 'no-change', childResults: [] },
+            { status: 200, result: 'no-change', childResults: [] },
+            { status: 200, result: 'no-change', childResults: [] },
+          ],
+        },
+      },
+    },
+    {
+      name: 'create a new product with missing appIds',
+      entity: 'Product',
+      data: {
+        name: 'All Env Product New',
+        namespace: 'refactortime',
+        environments: [{ name: 'dev' }, { name: 'test' }, { name: 'prod' }],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
           childResults: [],
         },
       },
@@ -228,7 +265,6 @@ export default {
         name: '@#$&(#@&$*(#@&',
         namespace: 'refactortime',
       },
-      exception: 'Invalid key name',
       expected: {
         payload: {
           status: 400,
@@ -281,10 +317,27 @@ export default {
       },
       expected: {
         payload: {
-          status: 400,
-          result: 'create-failed',
-          reason: 'Invalid ID for Environment appId = blank',
+          status: 200,
+          result: 'created',
           childResults: [],
+        },
+      },
+    },
+    {
+      name: 'update a product with an environment with no appId',
+      entity: 'Product',
+      data: {
+        name: 'Prod with a dev env',
+        namespace: 'refactortime',
+        environments: [{ name: 'dev' }],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'no-change',
+          childResults: [
+            { status: 200, result: 'no-change', childResults: [] },
+          ],
         },
       },
     },

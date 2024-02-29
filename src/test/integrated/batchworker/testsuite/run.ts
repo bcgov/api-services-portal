@@ -75,7 +75,10 @@ async function cleanupDatabase() {
       equalPayload(removeKeys(res, ['id', 'ownedBy']), test.expected.payload);
     } catch (e) {
       logger.error(e.message);
-      if (!test.exception || test.exception != `${e.message}`) {
+      if (
+        !test.expected.exception ||
+        test.expected.exception != `${e.message}`
+      ) {
         throw e;
       }
     }

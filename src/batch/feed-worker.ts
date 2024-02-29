@@ -4,6 +4,7 @@ import {
   alwaysFalse,
   byKey,
   connectExclusiveList,
+  connectExclusiveListCreate,
   connectExclusiveOne,
   connectMany,
   connectOne,
@@ -46,6 +47,7 @@ const transformations = {
   byKey: byKey,
   mapNamespace: mapNamespace,
   connectExclusiveList: connectExclusiveList,
+  connectExclusiveListCreate: connectExclusiveListCreate,
   connectExclusiveOne: connectExclusiveOne,
   connectMany: connectMany,
   connectOne: connectOne,
@@ -207,9 +209,13 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
   const relationshipFields = Object.keys(
     md.transformations
   ).filter((tranField: any) =>
-    ['byKey', 'connectOne', 'connectExclusiveList', 'connectMany'].includes(
-      md.transformations[tranField].name
-    )
+    [
+      'byKey',
+      'connectOne',
+      'connectExclusiveList',
+      'connectExclusiveListCreate',
+      'connectMany',
+    ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
     .filter((s: string) => !relationshipFields.includes(s))
@@ -245,7 +251,10 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
     });
   } else {
     relationshipFields.forEach((field: string) => {
-      response.push(`${field} { id }`);
+      const refKey = md.transformations[field].refKey;
+      response.push(`${field} { id, ${refKey} }`);
+
+      // response.push(`${field} { id }`);
     });
   }
   if ('ownedBy' in md) {
@@ -385,28 +394,32 @@ export const syncRecords = async function (
         for (const transformKey of Object.keys(md.transformations)) {
           const transformInfo = md.transformations[transformKey];
           if (transformInfo.syncFirst) {
-            // handle these children independently first - return a list of IDs
-            const allIds = await syncListOfRecords(
-              context,
-              transformInfo,
-              json[transformKey],
-              json
-            );
-            logger.debug('CHILDREN [%s] %j', transformKey, allIds);
-            childResults.push(...allIds);
-
-            assert.strictEqual(
-              allIds.filter((record) => record.status != 200).length,
-              0,
-              'Failed updating children'
-            );
-            assert.strictEqual(
-              allIds.filter((record) => typeof record.ownedBy != 'undefined')
-                .length,
-              0,
-              'There are some child records that have exclusive ownership already!'
-            );
-            json[transformKey + '_ids'] = allIds.map((status) => status.id);
+            // since localRecord is null, this is related to creating
+            // and syncFirst is only used for `connectExclusiveList` or `connectExclusiveOne`
+            // so we want the transformer to return a "create" statement
+            if (transformInfo.name === 'connectExclusiveListCreate') {
+            } else {
+              const allIds = await syncListOfRecords(
+                context,
+                transformInfo,
+                json[transformKey],
+                json
+              );
+              logger.debug('CHILDREN [%s] %j', transformKey, allIds);
+              childResults.push(...allIds);
+              assert.strictEqual(
+                allIds.filter((record) => record.status != 200).length,
+                0,
+                'Failed updating children'
+              );
+              assert.strictEqual(
+                allIds.filter((record) => typeof record.ownedBy != 'undefined')
+                  .length,
+                0,
+                'There are some child records that have exclusive ownership already!'
+              );
+              json[transformKey + '_ids'] = allIds.map((status) => status.id);
+            }
           }
           if (transformInfo.filterByNamespace) {
             json['_namespace'] = parentRecord['namespace'];
@@ -494,7 +507,7 @@ export const syncRecords = async function (
               context,
               transformInfo,
               json[transformKey],
-              json
+              localRecord
             );
 
             logger.debug('CHILDREN [%s] %j', transformKey, allIds);
