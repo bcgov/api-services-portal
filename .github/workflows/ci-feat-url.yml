@@ -1,0 +1,44 @@
+name: Add to Pull Request Description
+
+on:
+  pull_request:
+    branches: 
+      - dev
+  push:
+    branches-ignore:
+      - dev
+      - test'
+      - 'cypress**'
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
+
+      - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+        run: |
+          echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
+          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
+        id: set-deploy-id
+
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
+      - name: PR Description
+        if: startsWith(github.ref, 'refs/heads/feature/')
+        uses: bcgov-nr/action-pr-description-add@v1.1.1
+        with:
+          add_markdown: |
+            ---
+            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
