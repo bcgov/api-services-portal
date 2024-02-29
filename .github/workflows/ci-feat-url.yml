@@ -4,11 +4,6 @@ on:
   pull_request:
     branches: 
       - dev
-  push:
-    branches-ignore:
-      - dev
-      - test'
-      - 'cypress**'
 
 env:
   REGISTRY: ghcr.io
@@ -36,7 +31,7 @@ jobs:
         run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
       - name: PR Description
-        if: startsWith(github.ref, 'refs/heads/feature/')
+        if: startsWith(github.head_ref, 'feature/') == true
         uses: bcgov-nr/action-pr-description-add@v1.1.1
         with:
           add_markdown: |
