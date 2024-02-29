@@ -12,7 +12,7 @@ jobs:
       - name: Set KEBAB_CASE_BRANCH
         run: |
           # Convert github.head_ref to kebab case
-          kebab_case=$(echo "${{ github.head_ref }}" | sed 's/_/-/g; s/\//-/g'
+          kebab_case=$(echo "${{ github.head_ref }}" | sed 's/_/-/g; s/\//-/g')
           echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
         id: set-branch-id
 
