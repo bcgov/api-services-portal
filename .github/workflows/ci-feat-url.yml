@@ -12,12 +12,12 @@ jobs:
       - name: Set KEBAB_CASE_BRANCH
         run: |
           # Convert github.head_ref to kebab case
-          kebab_case=$(echo "${{ github.head_ref }}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-zA-Z0-9' '-')
+          kebab_case=$(echo "${{ github.head_ref }}" | tr '[:upper:]' '[:lower:]' | tr -d -c '[:alnum:]' '-')
           echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
-        id: set-deploy-id
+        id: set-branch-id
 
       - name: Check the KEBAB_CASE_BRANCH output
-        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.KEBAB_CASE_BRANCH }}"
+        run: echo "The KEBAB_CASE_BRANCH is ${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}"
 
       - name: PR Description
         if: startsWith(github.head_ref, 'feature/') == true
@@ -25,4 +25,4 @@ jobs:
         with:
           add_markdown: |
             ---
-            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-deploy-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
+            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
