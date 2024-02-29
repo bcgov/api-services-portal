@@ -7,13 +7,18 @@ node dist/test/integrated/batchworker/testsuite/run.js
 */
 
 import InitKeystone from '../../keystonejs/init';
-import { removeKeys, syncRecords } from '../../../../batch/feed-worker';
+import {
+  removeKeys,
+  syncRecords,
+  getRecords,
+} from '../../../../batch/feed-worker';
 import yaml from 'js-yaml';
 import { strict as assert } from 'assert';
 
 import testdata from './testdata';
 import mongoose from 'mongoose';
 import { Logger } from '../../../../logger';
+import { BatchWhereClause } from '@/services/keystone/batch-service';
 
 const logger = Logger('testsuite');
 
@@ -68,11 +73,29 @@ async function cleanupDatabase() {
 
   let index = 1;
   for (const test of testdata.tests) {
-    const json = test.data;
+    const json: any = test.data;
     testHeading(index++, test.name);
     try {
-      const res = await syncRecords(ctx, test.entity, null, json);
-      equalPayload(removeKeys(res, ['id', 'ownedBy']), test.expected.payload);
+      if ((test.method || 'PUT') === 'PUT') {
+        const res = await syncRecords(
+          ctx,
+          test.entity,
+          json[test.refKey],
+          json
+        );
+        equalPayload(removeKeys(res, ['id', 'ownedBy']), test.expected.payload);
+      } else {
+        const where: BatchWhereClause = test.whereClause;
+        const records: any[] = await getRecords(
+          ctx,
+          test.entity,
+          null,
+          test.responseFields,
+          where
+        );
+        const payload = records.map((o) => removeKeys(o, ['id', 'appId']));
+        equalPayload(payload, test.expected.payload);
+      }
     } catch (e) {
       logger.error(e.message);
       if (

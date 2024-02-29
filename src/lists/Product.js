@@ -60,17 +60,7 @@ module.exports = {
       logger.debug('[List.Product] Resolved %j', resolvedData);
       return resolvedData;
     },
-    validateInput: ({
-      operation,
-      existingItem,
-      originalInput,
-      resolvedData,
-      context,
-      addFieldValidationError, // Field hooks only
-      addValidationError, // List hooks only
-      listKey,
-      fieldPath, // Field hooks only
-    }) => {
+    validateInput: ({ resolvedData }) => {
       regExprValidation(
         '^[a-zA-Z0-9 ()&-]{3,100}$',
         resolvedData['name'],

@@ -341,5 +341,110 @@ export default {
         },
       },
     },
+    {
+      name: 'get a product',
+      entity: 'Product',
+      method: 'GET',
+      whereClause: {
+        query: '$name: String',
+        clause: '{ name: $name }',
+        variables: {
+          name: 'Prod with a dev env',
+        },
+      },
+      responseFields: ['environments', 'datasets'],
+      expected: {
+        payload: [
+          {
+            name: 'Prod with a dev env',
+            description: null,
+            namespace: 'refactortime',
+            dataset: null,
+            environments: [
+              {
+                name: 'dev',
+                active: false,
+                approval: false,
+                flow: 'public',
+                additionalDetailsToRequest: null,
+                services: [],
+                legal: null,
+                credentialIssuer: null,
+                product: { namespace: 'refactortime' },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      name: 'create a dataset',
+      entity: 'DraftDataset',
+      refKey: 'name',
+      data: {
+        name: 'my-dataset',
+        title: 'My Dataset',
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'create a product with missing dataset',
+      entity: 'Product',
+      data: {
+        name: 'Prod with dataset',
+        dataset: 'missing-dataset',
+        namespace: 'refactortime',
+        environments: [{ name: 'dev' }],
+      },
+      expected: {
+        payload: {
+          status: 400,
+          result: 'create-failed',
+          reason: 'Record not found [dataset] missing-dataset',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'create a product with the dataset',
+      entity: 'Product',
+      data: {
+        name: 'Prod with dataset',
+        dataset: 'my-dataset',
+        namespace: 'refactortime',
+        environments: [{ name: 'dev' }],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'try create a dataset with invalid name',
+      entity: 'DraftDataset',
+      refKey: 'name',
+      data: {
+        name: 'my dataset',
+        title: 'My Dataset',
+      },
+      expected: {
+        payload: {
+          status: 400,
+          result: 'create-failed',
+          reason:
+            "Dataset name must be between 3 and 100 lowercase alpha-numeric characters (including special character '-')",
+          childResults: [],
+        },
+      },
+    },
   ],
 };
