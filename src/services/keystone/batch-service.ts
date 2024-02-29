@@ -1,7 +1,14 @@
+import { kebabCase, snakeCase } from 'lodash';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 
 const logger = Logger('ks.batch');
+
+export interface CompositeKeyValue {
+  key: string;
+  value: string;
+  whereClause?: string;
+}
 
 export interface BatchWhereClause {
   query: string; // '$org: String'
@@ -98,36 +105,42 @@ export class BatchService {
 
   public async lookupUsingCompositeKey(
     query: string,
-    compositeKeyValues: any,
+    compositeKeyValues: CompositeKeyValue[],
     fields: string[]
   ) {
     const where: string[] = [];
     const params: string[] = [];
-    for (const [key, val] of Object.entries(compositeKeyValues)) {
+    const variables: any = {};
+    for (const compositeKey of compositeKeyValues) {
+      const val = compositeKey.value;
+      const key = compositeKey.key;
+      const param = snakeCase(compositeKey.key);
       assert.strictEqual(
         typeof val != 'undefined' && val != null,
         true,
-        `Invalid key ${key}`
+        `Missing value for key ${key}`
       );
-      where.push(`${key} : $${key}`);
-      params.push(`$${key}: String`);
+      // product { name: $pid }
+      if (compositeKey.whereClause) {
+        where.push(compositeKey.whereClause);
+      } else {
+        where.push(`${key} : $${param}`);
+      }
+      params.push(`$${param}: String`);
+      variables[param] = val;
     }
 
-    logger.debug(
-      '[lookupUsingCompositeKey] : %s :: %j',
-      query,
-      compositeKeyValues
-    );
+    logger.debug('[lookupUsingCompositeKey] : %s :: %j', query, variables);
 
     const queryString = `query(${params.join(', ')}) {
       ${query}(where: { ${where.join(', ')} }) {
-        id, ${Object.keys(compositeKeyValues).join(', ')}, ${fields.join(',')}
+        id, ${Object.keys(variables).join(', ')}, ${fields.join(',')}
       }
     }`;
     logger.debug('[lookupUsingCompositeKey] %s', queryString);
     const result = await this.context.executeGraphQL({
       query: queryString,
-      variables: compositeKeyValues,
+      variables,
     });
     logger.debug(
       '[lookupUsingCompositeKey] RESULT %j with vars %j',
@@ -136,7 +149,7 @@ export class BatchService {
     );
     if (result['data'][query] == null || result['data'][query].length > 1) {
       throw Error(
-        'Expecting zero or one rows ' + query + ' ' + compositeKeyValues
+        'Expecting zero or one rows ' + query + ' ' + JSON.stringify(variables)
       );
     }
     return result['data'][query].length == 0 ? null : result['data'][query][0];

@@ -17,6 +17,7 @@ import { BatchResult, BatchSyncException } from './types';
 import {
   BatchService,
   BatchWhereClause,
+  CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
 
@@ -322,10 +323,21 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
-  const compositeKeyValues: any = {};
+  const compositeKeyValues: CompositeKeyValue[] = [];
   if (md.compositeRefKey) {
-    md.compositeRefKey.forEach((key: string) => {
-      compositeKeyValues[key] = json[key];
+    md.compositeRefKey.forEach((refKey: string | CompositeKeyValue) => {
+      if (typeof refKey === 'string') {
+        compositeKeyValues.push({ key: refKey, value: json[refKey] });
+      } else {
+        // if the value is missing, then ignore the composite value
+        // and include the 'refKey' value
+        const value = dot({ ...json, ...{ parent: parentRecord } }, refKey.key);
+        compositeKeyValues.push({
+          key: refKey.key,
+          value: value,
+          whereClause: refKey.whereClause,
+        });
+      }
     });
   } else {
     assert.strictEqual(
@@ -334,10 +346,8 @@ export const syncRecords = async function (
       `Invalid ID for ${feedEntity} ${md.refKey} = ${eid || 'blank'}`
     );
 
-    compositeKeyValues[md.refKey] = eid;
+    compositeKeyValues.push({ key: md.refKey, value: eid });
   }
-
-  const batchService = new BatchService(context);
 
   // pre-lookup hook that can be used to handle special cases,
   // such as for Kong, cleaning up records where the service or route has been renamed
@@ -354,6 +364,8 @@ export const syncRecords = async function (
   }
 
   let childResults: BatchResult[] = [];
+
+  const batchService = new BatchService(context);
 
   const localRecord = await batchService.lookupUsingCompositeKey(
     md.query,

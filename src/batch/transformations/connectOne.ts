@@ -1,4 +1,7 @@
-import { BatchService } from '../../services/keystone/batch-service';
+import {
+  BatchService,
+  CompositeKeyValue,
+} from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
 import { dot } from '../feed-worker';
 
@@ -29,20 +32,30 @@ export async function connectOne(
     }
   }
 
-  const nsFilter = { namespace: inputData['_namespace'] } as any;
-  nsFilter[transformInfo['refKey']] = value;
-  const lkup = transformInfo['filterByNamespace']
-    ? await batchService.lookupUsingCompositeKey(
-        transformInfo['list'],
-        nsFilter,
-        []
-      )
-    : await batchService.lookup(
-        transformInfo['list'],
-        transformInfo['refKey'],
-        value,
-        []
-      );
+  let lkup;
+  if (transformInfo['filterByNamespace']) {
+    const compositeKeyValues: CompositeKeyValue[] = [];
+    compositeKeyValues.push({
+      key: 'namespace',
+      value: inputData['_namespace'],
+    });
+    compositeKeyValues.push({
+      key: transformInfo['refKey'],
+      value: value,
+    });
+    lkup = await batchService.lookupUsingCompositeKey(
+      transformInfo['list'],
+      compositeKeyValues,
+      []
+    );
+  } else {
+    lkup = await batchService.lookup(
+      transformInfo['list'],
+      transformInfo['refKey'],
+      value,
+      []
+    );
+  }
 
   if (lkup == null) {
     logger.error(

@@ -1,7 +1,7 @@
 /*
 Wire up directly with Keycloak and use the Services
 To run:
-npm run ts-build
+npm run intg-build
 npm run ts-watch
 node dist/test/integrated/batchworker/testsuite/run.js
 */

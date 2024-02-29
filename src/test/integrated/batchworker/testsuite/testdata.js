@@ -153,7 +153,7 @@ export default {
       data: {
         namespace: 'refactortime',
       },
-      exception: 'Invalid key name',
+      exception: 'Missing value for key name',
       expected: {},
     },
     {
