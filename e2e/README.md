@@ -63,6 +63,11 @@ Install Cypress on your local machine by following [these instructions](https://
 
 ## 3. Cypress on Windows
 
+> [!NOTE]  
+> WSL2 now supports running Linux GUI apps. [Get setup here](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps) and follow the regular instructions above for setting up Cypress
+
+### Legacy Instructions:
+
 You will need a copy of the API Service Portal on both your local machine and within your WSL 2/Linux distribution. Instructions pertaining to either
 
 WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the following sections.

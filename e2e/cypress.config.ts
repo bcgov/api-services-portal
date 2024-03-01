@@ -49,15 +49,15 @@ export default defineConfig({
     env: {
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
-      OIDC_ISSUER: 'http://keycloak.localtest.me:9080',
+      OIDC_ISSUER: 'http://keycloak.localtest.me:9081',
       TOKEN_URL:
-        'http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token',
+        'http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token',
       GWA_API_URL: 'http://gwa-api.localtest.me:2000/v2',
       KONG_URL: 'http://kong.localtest.me:8000',
       JWKS_URL: 'http://cypress-jwks-url.localtest.me:3500',
       KONG_CONFIG_URL: 'http://kong.localtest.me:8001',
       BASE_URL: 'http://oauth2proxy.localtest.me:4180',
-      KEYCLOAK_URL: 'http://keycloak.localtest.me:9080',
+      KEYCLOAK_URL: 'http://keycloak.localtest.me:9081',
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242'
     },
     retries: {

@@ -1,6 +1,7 @@
-name: Build and Deploy Cypress and Execute Tests
+name: Cypress and Execute Tests
 
 on:
+  workflow_dispatch: {}
   push:
     branches: ['test', 'cypress*']
 
@@ -27,36 +28,35 @@ jobs:
       - name: Checkout Portal
         uses: actions/checkout@v2
 
+      # - name: Determine Download file name
+      #   id: set_variable
+      #   run: |
+      #     echo ${{ runner.arch }}
+      #     if [ "${{ runner.arch }}" == "X64" ]; then
+      #       echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
+      #     elif [ "${{ runner.arch }}" == "ARM64" ]; then
+      #       echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
+      #     else
+      #       echo "unsupported architecture"
+      #     fi
 
-      - name: Determine Download file name
-        id: set_variable
-        run: |
-          echo ${{ runner.arch }}
-          if [ "${{ runner.arch }}" == "X64" ]; then
-            echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
-          elif [ "${{ runner.arch }}" == "ARM64" ]; then
-            echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
-          else
-            echo "unsupported architecture"
-          fi
-          
-      - name: Download Binar
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "bcgov/gwa-cli"
-          latest: true
-          fileName: ${{ steps.set_variable.outputs.my_variable }}
-          out-file-path: "${{ github.workspace }}/e2e"
+      # - name: Download Binary
+      #   uses: robinraju/release-downloader@v1.8
+      #   with:
+      #     repository: "bcgov/gwa-cli"
+      #     latest: true
+      #     fileName: ${{ steps.set_variable.outputs.my_variable }}
+      #     out-file-path: "${{ github.workspace }}/e2e"
 
-      - name: Unzip file
-        run: |
-          cd ${{ github.workspace }}/e2e
-          tar xvzf ${{ steps.set_variable.outputs.my_variable }}
-          
+      # - name: Unzip file
+      #   run: |
+      #     cd ${{ github.workspace }}/e2e
+      #     tar xvzf ${{ steps.set_variable.outputs.my_variable }}
+
       - name: Build Docker Images
         run: |
-          docker-compose build
-          
+          docker compose --profile testsuite build
+
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
@@ -68,14 +68,14 @@ jobs:
           export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
-          docker-compose up -d
+          docker compose --profile testsuite up -d
 
       - name: Execute Tests & Clean Up
         run: |
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               # cleanup
-              docker-compose down
+              docker compose down
               break
             else
               echo  "Waiting for Cypress to Complete E2E Tests....."

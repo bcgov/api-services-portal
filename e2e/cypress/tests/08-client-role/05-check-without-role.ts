@@ -22,7 +22,7 @@ describe('Reset Authorization profile to default (without any role)', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -71,8 +71,6 @@ describe('Reset Authorization profile to default (without any role)', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -82,8 +80,6 @@ describe('Check service access without applying any roles', () => {
   
     before(() => {
       cy.visit('/')
-      cy.deleteAllCookies()
-      cy.reload()
     })
   
     beforeEach(() => {
@@ -132,7 +128,5 @@ describe('Check service access without applying any roles', () => {
   
     after(() => {
       cy.logout()
-      cy.clearLocalStorage({ log: true })
-      cy.deleteAllCookies()
     })
   })

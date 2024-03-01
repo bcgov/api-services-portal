@@ -15,7 +15,7 @@ describe('Change an Active environment to Inactive', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -48,8 +48,6 @@ describe('Change an Active environment to Inactive', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -60,13 +58,12 @@ describe('Verify enactive environment in rrequest access pop up', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
+    Cypress.session.clearAllSavedSessions()
     // cy.visit(login.path)
   })
 
@@ -96,8 +93,12 @@ describe('Verify enactive environment in rrequest access pop up', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
+    // cy.clearLocalStorage({ log: true })
+    // cy.deleteAllCookies()
+    // Cypress.session.clearAllSavedSessions()
+    // cy.clearCookie('_oauth2_proxy')
+    // cy.clearCookie('keystone.sid')
+    // debugger
   })
 })
 
@@ -108,9 +109,12 @@ describe('Change an the environment back to active', () => {
   const pd = new Products()
 
   before(() => {
+    debugger
+    // cy.clearAllSessionStorage({log: true})
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
+    // cy.deleteAllCookies()
+    // cy.clearCookies()
+    // cy.reload(true)
   })
 
   beforeEach(() => {
@@ -131,6 +135,7 @@ describe('Change an the environment back to active', () => {
   })
 
   it('Navigate to Products Page', () => {
+    debugger
     cy.visit(pd.path)
   })
 
@@ -143,7 +148,7 @@ describe('Change an the environment back to active', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
+    // cy.clearLocalStorage({ log: true })
+    // cy.deleteAllCookies()
   })
 })

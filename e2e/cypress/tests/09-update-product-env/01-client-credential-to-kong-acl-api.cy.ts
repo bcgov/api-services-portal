@@ -22,7 +22,7 @@ describe('Change Authorization profile', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -109,8 +109,6 @@ describe('Change Authorization profile', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -123,8 +121,6 @@ describe('Request service Access Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -162,8 +158,6 @@ describe('Request service Access Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -174,8 +168,6 @@ describe('Access manager approves developer access request for Kong API ACL auth
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -220,7 +212,5 @@ describe('Access manager approves developer access request for Kong API ACL auth
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

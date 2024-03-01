@@ -28,6 +28,8 @@ export const getAuthToken = (method: string): IconType => {
       return FaLock;
     case 'client-credentials':
       return FaLock;
+    case 'protected-externally':
+      return FaLock;
     // case 'private':
     //   return FaUserSecret;
     case 'public':
@@ -39,6 +41,7 @@ export const getAuthToken = (method: string): IconType => {
 export const getFlowText = (key: string): string => {
   const dict = {
     public: 'Public',
+    'protected-externally': 'Protected Externally',
     'authorization-code': 'OAuth2 Authorization Code Flow',
     'client-credentials': 'OAuth2 Client Credentials Flow',
     'kong-acl-only': 'Kong ACL Only',

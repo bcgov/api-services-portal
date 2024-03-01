@@ -10,6 +10,7 @@ import {
   Icon,
   Text,
 } from '@chakra-ui/react';
+import kebabCase from 'lodash/kebabCase';
 import { FaLock } from 'react-icons/fa';
 import { HiChartBar } from 'react-icons/hi';
 import { RiEarthFill } from 'react-icons/ri';
@@ -38,7 +39,10 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   id,
   preview,
 }) => {
-  const isProtected = data.environments.some((e) => e.flow !== 'public');
+  const isPublic = data.environments.some((e) => e.flow === 'public');
+  const isGatewayProtected = data.environments.some(
+    (e) => e.flow !== 'public' && e.flow !== 'protected-externally'
+  );
   const isTiered = data.environments.some((e) => e.anonymous);
 
   return (
@@ -49,9 +53,10 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             <Flex align="center" mb={2}>
               <Flex align="center" width={8}>
                 <Icon
-                  as={!isProtected || isTiered ? RiEarthFill : FaLock}
+                  as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
+                  data-testid={`product-icon-${kebabCase(data.name)}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>
@@ -63,7 +68,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isTiered && isProtected && (
+        {!isTiered && isGatewayProtected && (
           <AccessRequestForm
             disabled={false}
             id={id}
@@ -82,23 +87,20 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                 </Flex>
                 <Heading size="xs">Limits</Heading>
               </Flex>
-              {data.description && (
-                <Text ml={8} fontSize="sm">
-                  Public access has a rate limit enforced.
-                </Text>
-              )}
               <Text ml={8} fontSize="sm">
-                For elevated access, please{' '}
-                <AccessRequestForm
-                  disabled={false}
-                  id={id}
-                  name={data.name}
-                  preview={preview}
-                  variant="inline"
-                />
+                Public access has a rate limit enforced.
+              </Text>
+              <Text ml={8} fontSize="sm">
+                For elevated access, please request access.
               </Text>
             </GridItem>
           </Grid>
+          <AccessRequestForm
+            disabled={false}
+            id={id}
+            name={data.name}
+            preview={preview}
+          />
         </Flex>
       )}
     </>

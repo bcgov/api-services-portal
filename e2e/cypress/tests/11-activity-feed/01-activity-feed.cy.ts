@@ -14,7 +14,7 @@ describe('Get the user session token to pass it as authorization token to make t
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {
@@ -96,8 +96,6 @@ describe('Verify the Activity filter for users', () => {
 
     before(() => {
         cy.visit('/')
-        // cy.deleteAllCookies()
-        cy.reload()
     })
 
     beforeEach(() => {

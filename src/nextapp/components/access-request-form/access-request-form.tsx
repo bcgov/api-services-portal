@@ -100,7 +100,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
           <Stack direction="column">
             {dataset?.environments
               .filter((e) => e.active || preview)
-              .filter((e) => e.flow !== 'public')
+              .filter(
+                (e) => e.flow !== 'public' && e.flow !== 'protected-externally'
+              )
               .map((e) => (
                 <Radio
                   key={uid(e.id)}

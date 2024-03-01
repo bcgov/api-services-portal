@@ -28,7 +28,7 @@ const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Support Links</ModalHeader>
+        <ModalHeader>Contact Us</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <UnorderedList
@@ -49,8 +49,7 @@ const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Submit product and service requests using the Data Systems and
-                Services request system
+                Submit a support ticket
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </Link>
             </ListItem>
@@ -61,16 +60,6 @@ const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
                 rel="noopener noreferrer"
               >
                 Chat with us in Rocket.Chat
-                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link
-                href={data?.helpLinks.helpIssueUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Create an issue in GitHub
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </Link>
             </ListItem>
