@@ -2,6 +2,7 @@ import { BatchService } from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { connectExclusiveList } from './connectExclusiveList';
+import { applyTransformationsToNewCreation } from '../feed-worker';
 
 const logger = Logger('batch.connectExclusiveListCreate');
 
@@ -10,9 +11,17 @@ export async function connectExclusiveListCreate(
   transformInfo: any,
   currentData: any,
   inputData: any,
-  fieldKey: string
+  fieldKey: string,
+  parentRecord: any
 ) {
-  logger.debug('%s %j %j', fieldKey, currentData, inputData);
+  logger.debug('%s %j %j %j', fieldKey, currentData, inputData, parentRecord);
+
+  await applyTransformationsToNewCreation(
+    keystone,
+    transformInfo,
+    inputData[fieldKey],
+    inputData
+  );
 
   if (currentData != null) {
     return connectExclusiveList(

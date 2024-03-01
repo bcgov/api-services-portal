@@ -563,5 +563,97 @@ export default {
         },
       },
     },
+    {
+      name: 'create a new product with legal',
+      entity: 'Product',
+      data: {
+        name: 'Product with Legal',
+        namespace: 'refactortime',
+        environments: [
+          { name: 'dev', legal: 'terms-of-use-for-api-gateway-1' },
+        ],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'get the legal product',
+      entity: 'Product',
+      method: 'GET',
+      whereClause: {
+        query: '$name: String',
+        clause: '{ name: $name }',
+        variables: {
+          name: 'Product with Legal',
+        },
+      },
+      responseFields: ['environments', 'datasets'],
+      expected: {
+        payload: [
+          {
+            name: 'Product with Legal',
+            description: null,
+            namespace: 'refactortime',
+            dataset: null,
+            environments: [
+              {
+                name: 'dev',
+                active: false,
+                approval: false,
+                flow: 'public',
+                additionalDetailsToRequest: null,
+                services: [],
+                legal: { reference: 'terms-of-use-for-api-gateway-1' },
+                credentialIssuer: null,
+                product: { namespace: 'refactortime' },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      name: 'create issuer',
+      entity: 'CredentialIssuer',
+      refKey: 'name',
+      data: {
+        name: 'issuer',
+        namespace: 'refactortime',
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'create a new product with issuer',
+      entity: 'Product',
+      data: {
+        name: 'Product with Issuer',
+        namespace: 'refactortime',
+        environments: [
+          {
+            name: 'dev',
+            flow: 'client-credentials',
+            credentialIssuer: 'issuer',
+          },
+        ],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
   ],
 };

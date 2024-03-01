@@ -42,7 +42,13 @@ async function cleanupDatabase() {
     pass: process.env.MONGO_PASSWORD,
   });
 
-  for (const collection of ['products', 'environments', 'datasets', 'legals']) {
+  for (const collection of [
+    'products',
+    'environments',
+    'datasets',
+    'legals',
+    'credentialissuers',
+  ]) {
     await _mongoose.connection.collection(collection).deleteMany({});
   }
   await _mongoose.disconnect();

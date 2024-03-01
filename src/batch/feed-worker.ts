@@ -426,7 +426,8 @@ export const syncRecords = async function (
             transformInfo,
             null,
             json,
-            transformKey
+            transformKey,
+            parentRecord
           );
           if (transformMutation != null) {
             logger.debug(
@@ -536,7 +537,8 @@ export const syncRecords = async function (
             transformInfo,
             localRecord,
             json,
-            transformKey
+            transformKey,
+            parentRecord
           );
           if (transformMutation && transformMutation != null) {
             logger.debug(
@@ -602,6 +604,57 @@ export const syncRecords = async function (
         reason: ex.message,
         childResults,
       };
+    }
+  }
+};
+
+export const applyTransformationsToNewCreation = async (
+  keystone: any,
+  transformInfo: any,
+  inputData: any,
+  parentRecord: any
+) => {
+  if (!inputData) {
+    return;
+  }
+  const feedEntity = transformInfo['list'];
+
+  const md = (metadata as any)[feedEntity];
+  logger.debug('[applyTransformations] %j', md);
+  logger.debug('[applyTransformations] parent %j', parentRecord);
+  logger.debug('[applyTransformations] input  %j', inputData);
+
+  const transformKeys =
+    'transformations' in md ? Object.keys(md.transformations) : [];
+
+  for (const inputDataRecord of inputData) {
+    for (const transformKey of transformKeys) {
+      logger.debug(
+        ' -- (applyTransformations) changed trans? (%s)',
+        transformKey
+      );
+      const transformInfo = md.transformations[transformKey];
+
+      if (transformInfo.filterByNamespace && parentRecord) {
+        inputDataRecord['_namespace'] = parentRecord['namespace'];
+      }
+
+      const transformMutation = await transformations[transformInfo.name](
+        keystone,
+        transformInfo,
+        null,
+        inputDataRecord,
+        transformKey
+      );
+      delete inputDataRecord['_namespace'];
+      if (transformMutation && transformMutation != null) {
+        logger.debug(
+          ' -- (applyTransformations) trans (%s) %j',
+          transformKey,
+          transformMutation
+        );
+        inputDataRecord[transformKey] = transformMutation;
+      }
     }
   }
 };
