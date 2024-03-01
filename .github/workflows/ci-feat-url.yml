@@ -1,0 +1,28 @@
+name: Add URL to Feature PRs
+
+on:
+  pull_request:
+    branches: 
+      - dev
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set KEBAB_CASE_BRANCH
+        run: |
+          # Convert github.head_ref to kebab case
+          kebab_case=$(echo "${{ github.head_ref }}" | sed 's/_/-/g; s/\//-/g')
+          echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
+        id: set-branch-id
+
+      - name: Check the KEBAB_CASE_BRANCH output
+        run: echo "The KEBAB_CASE_BRANCH is ${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}"
+
+      - name: PR Description
+        if: startsWith(github.head_ref, 'feature/') == true
+        uses: bcgov-nr/action-pr-description-add@v1.1.1
+        with:
+          add_markdown: |
+            ---
+            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
