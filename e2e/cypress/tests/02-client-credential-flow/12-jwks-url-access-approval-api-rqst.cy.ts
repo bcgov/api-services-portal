@@ -3,16 +3,16 @@ import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
 
 const njwt = require('njwt')
+const jose = require('node-jose')
 
-describe('Access manager approves developer access request for JWT - Generated Key Pair authenticator', () => {
+describe('Access manager approves developer access request for JWKS URL flow', () => {
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -45,25 +45,32 @@ describe('Access manager approves developer access request for JWT - Generated K
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
-describe('Make an API request using JWT signed with private key', () => {
+describe('Make an API request using JWKS URL flow with JWT signed with generated private key', () => {
   it('Get access token using JWT key pair; make API request', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
-      cy.readFile('cypress/fixtures/state/jwtGenPrivateKey.pem').then((privateKey) => {
-        let jwkCred = JSON.parse(store_res.jwtkeypaircredentials)
-        let clientId = jwkCred.clientId
-        let tokenEndpoint = jwkCred.tokenEndpoint
+      let jwkCred = JSON.parse(store_res.jwksurlcredentials)
+      let ks = store_res.jwksurlkeys
 
+      cy.log(ks)
+
+      let tokenEndpoint = jwkCred.tokenEndpoint
+      let issuer = jwkCred.issuer
+
+      jose.JWK.asKeyStore(ks).then((keyStore: { all: (arg0: { use: string }) => [any] }) => {
+        cy.log(keyStore.toString())
+        const [key] = keyStore.all({ use: 'sig' })
+
+        const privateKey = key.toPEM(true)
+        let clientId = jwkCred.clientId
         let now = Math.floor(new Date().getTime() / 1000)
-        let plus5Minutes = new Date((now + 5 * 60) * 1000)
-        let alg = 'RS256'
+        const plus5Minutes = new Date((now + 5 * 60) * 1000)
+        const alg = 'RS256'
 
         let claims = {
-          aud: Cypress.env('OIDC_ISSUER') + '/auth/realms/master',
+          aud: issuer,
         }
 
         let jwt = njwt

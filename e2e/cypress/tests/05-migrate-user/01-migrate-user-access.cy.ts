@@ -10,8 +10,6 @@ describe('Assign Access to existing user Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -45,8 +43,6 @@ describe('Assign Access to existing user Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -57,8 +53,6 @@ describe('Authernticate with old user to initiate migration', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -81,8 +75,6 @@ describe('Authernticate with old user to initiate migration', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -94,8 +86,6 @@ describe('Verify that permission of old user is migrated to new user', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -138,8 +128,6 @@ describe('Verify that permission of old user is migrated to new user', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -151,8 +139,6 @@ describe('Verify that old user is no longer able to sign in', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -174,7 +160,5 @@ describe('Verify that old user is no longer able to sign in', () => {
   })
 
   after(() => {
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

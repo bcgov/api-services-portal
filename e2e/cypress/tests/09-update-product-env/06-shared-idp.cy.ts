@@ -19,7 +19,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -74,8 +74,6 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -89,8 +87,6 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {

@@ -91,7 +91,6 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
-  cy.deleteAllCookies()
   cy.visit('/')
   cy.reload()
   cy.fixture('apiowner').as('apiowner')
@@ -117,7 +116,6 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespace
   const home = new HomePage()
   const na = new NamespaceAccessPage()
   let userSession: string
-  cy.deleteAllCookies()
   cy.visit('/')
   cy.reload()
   cy.fixture('apiowner').as('apiowner')
@@ -201,8 +199,10 @@ Cypress.Commands.add('logout', () => {
   cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
+      cy.visit('/')
+      cy.wait(3000)
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
-      cy.contains('Logout').click()
+      cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
     })
   })
   cy.log('> Logging out')

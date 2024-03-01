@@ -68,17 +68,19 @@ const HomePage: React.FC = () => {
             )
             .map((action) => (
               <Card key={action.url}>
-                <Heading size="md" mb={2}>
-                  <NextLink passHref href={action.url}>
-                    <Link color="bc-link" display="flex" alignItems="center">
-                      <Icon as={action.icon} color="bc-yellow" mr={2} />
-                      {action.title}
-                    </Link>
-                  </NextLink>
-                </Heading>
-                <p>
-                  {action.description}
-                </p>
+                <Box p={4}>
+                  <Heading size="md" mb={2}>
+                    <NextLink passHref href={action.url}>
+                      <Link color="bc-link" display="flex" alignItems="center">
+                        <Icon as={action.icon} color="bc-yellow" mr={2} />
+                        {action.title}
+                      </Link>
+                    </NextLink>
+                  </Heading>
+                  <p>
+                    {action.description}
+                  </p>
+                </Box>
               </Card>
             ))}
         </GridLayout>

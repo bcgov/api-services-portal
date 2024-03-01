@@ -9,8 +9,6 @@ describe('Manage Control-IP Restriction Spec', () => {
 
     before(() => {
         cy.visit('/')
-        cy.deleteAllCookies()
-        cy.reload()
     })
 
     beforeEach(() => {
@@ -226,7 +224,5 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
     })
 })

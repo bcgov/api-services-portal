@@ -12,7 +12,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
     before(() => {
         cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {
@@ -272,7 +272,5 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({ log: true })
-        cy.deleteAllCookies()
     })
 })

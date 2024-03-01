@@ -8,7 +8,7 @@ describe('Verify namespace delete using gwa command', () => {
     before(() => {
         // cy.visit('/')
         cy.deleteAllCookies()
-        cy.reload()
+        cy.reload(true)
     })
 
     beforeEach(() => {
@@ -33,7 +33,8 @@ describe('Verify namespace delete using gwa command', () => {
     })
 
     it('Create namespace using gwa cli command', () => {
-        cy.executeCliCommand('gwa namespace create').then((response) => {
+        var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+        cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
             assert.isNotNaN(response.stdout)
             _namespace = response.stdout
         });
