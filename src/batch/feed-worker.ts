@@ -251,10 +251,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
     });
   } else {
     relationshipFields.forEach((field: string) => {
-      const refKey = md.transformations[field].refKey;
-      response.push(`${field} { id, ${refKey} }`);
-
-      // response.push(`${field} { id }`);
+      response.push(`${field} { id }`);
     });
   }
   if ('ownedBy' in md) {
@@ -355,7 +352,7 @@ export const syncRecords = async function (
       `Invalid ID for ${feedEntity} ${md.refKey} = ${eid || 'blank'}`
     );
 
-    compositeKeyValues.push({ key: md.refKey, value: eid });
+    compositeKeyValues.push({ key: md.refKey, return: md.refKey, value: eid });
   }
 
   // pre-lookup hook that can be used to handle special cases,

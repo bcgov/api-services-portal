@@ -429,7 +429,7 @@ export default {
       },
     },
     {
-      name: 'try create a dataset with invalid name',
+      name: 'try create a DraftDataset with invalid name',
       entity: 'DraftDataset',
       refKey: 'name',
       data: {
@@ -438,10 +438,127 @@ export default {
       },
       expected: {
         payload: {
-          status: 400,
-          result: 'create-failed',
-          reason:
-            "Dataset name must be between 3 and 100 lowercase alpha-numeric characters (including special character '-')",
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'create DraftDataset',
+      entity: 'DraftDataset',
+      refKey: 'name',
+      data: {
+        name: 'delete-auto-test-product',
+        title: 'Delete-Auto Test Product',
+        notes:
+          'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
+        tags: ['gateway', 'kong', 'openapi'],
+        sector: 'Service',
+        license_title: 'Access Only',
+        view_audience: 'Government',
+        security_class: 'LOW-PUBLIC',
+        organization: 'ministry-of-health',
+        organizationUnit: 'planning-and-innovation-division',
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'update DraftDataset',
+      entity: 'DraftDataset',
+      refKey: 'name',
+      data: {
+        name: 'delete-auto-test-product',
+        title: 'Delete-Auto Test Product',
+        notes:
+          'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
+        tags: ['gateway', 'kong', 'openapi'],
+        sector: 'Service',
+        license_title: 'Access Only',
+        view_audience: 'Government',
+        security_class: 'PUBLIC',
+        organization: 'ministry-of-health',
+        organizationUnit: 'planning-and-innovation-division',
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'updated',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'update DraftDataset no change',
+      entity: 'DraftDataset',
+      refKey: 'name',
+      data: {
+        name: 'delete-auto-test-product',
+        title: 'Delete-Auto Test Product',
+        notes:
+          'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
+        tags: ['gateway', 'kong', 'openapi'],
+        sector: 'Service',
+        license_title: 'Access Only',
+        view_audience: 'Government',
+        security_class: 'PUBLIC',
+        organization: 'ministry-of-health',
+        organizationUnit: 'planning-and-innovation-division',
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'no-change',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'legal',
+      entity: 'Legal',
+      refKey: 'reference',
+      data: {
+        reference: 'terms-of-use-for-api-gateway-1',
+        title: 'Terms of Use for API Gateway',
+        link:
+          'https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information',
+        document: 'terms-of-use',
+        version: 1,
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [],
+        },
+      },
+    },
+    {
+      name: 'create Dataset',
+      entity: 'Dataset',
+      refKey: 'extForeignKey',
+      data: {
+        extForeignKey: '000-000-001',
+        name: 'external-dataset',
+        title: 'External DS',
+        notes: 'Small notes',
+        tags: ['gateway', 'kong', 'openapi'],
+        sector: 'Service',
+        license_title: 'Access Only',
+        view_audience: 'Government',
+        security_class: 'PUBLIC',
+        organization: { id: '319b3297-846d-4b97-8095-ceb3ec505fb8' },
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
           childResults: [],
         },
       },

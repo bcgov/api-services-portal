@@ -7,6 +7,7 @@ const logger = Logger('ks.batch');
 export interface CompositeKeyValue {
   key: string;
   value: string;
+  return?: string; // 'org'
   whereClause?: string;
 }
 
@@ -116,6 +117,7 @@ export class BatchService {
 
     const where: string[] = [];
     const params: string[] = [];
+    const returnFields: string[] = [];
     const variables: any = {};
     for (const compositeKey of compositeKeyValues) {
       const val = compositeKey.value;
@@ -132,6 +134,9 @@ export class BatchService {
       } else {
         where.push(`${key} : $${param}`);
       }
+      if (compositeKey.return) {
+        returnFields.push(compositeKey.return);
+      }
       params.push(`$${param}: String`);
       variables[param] = val;
     }
@@ -144,7 +149,7 @@ export class BatchService {
 
     const queryString = `query(${params.join(', ')}) {
       ${query}(where: { ${where.join(', ')} }) {
-        id, ${Object.keys(variables).join(', ')}, ${fields.join(',')}
+        id, ${returnFields.join(', ')}, ${fields.join(',')}
       }
     }`;
     logger.debug('[lookupUsingCompositeKey] %s', queryString);

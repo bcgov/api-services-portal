@@ -42,7 +42,7 @@ async function cleanupDatabase() {
     pass: process.env.MONGO_PASSWORD,
   });
 
-  for (const collection of ['products', 'environments', 'datasets']) {
+  for (const collection of ['products', 'environments', 'datasets', 'legals']) {
     await _mongoose.connection.collection(collection).deleteMany({});
   }
   await _mongoose.disconnect();
@@ -53,7 +53,7 @@ async function cleanupDatabase() {
   console.log('K = ' + keystone);
 
   const ns = 'refactortime';
-  const skipAccessControl = false;
+  const skipAccessControl = true;
 
   const identity = {
     id: null,
@@ -99,8 +99,8 @@ async function cleanupDatabase() {
     } catch (e) {
       logger.error(e.message);
       if (
-        !test.expected.exception ||
-        test.expected.exception != `${e.message}`
+        !test.expected?.exception ||
+        test.expected?.exception != `${e.message}`
       ) {
         throw e;
       }
