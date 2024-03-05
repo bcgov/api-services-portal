@@ -2,7 +2,7 @@ name: Sonar Scanner
 
 on:
   push:
-    branches: [dev, feat/*]
+    branches: [dev, feature/*]
 
 env:
   REGISTRY: ghcr.io
@@ -25,7 +25,12 @@ jobs:
         run: |
           cd src
           npm i
+
+          docker compose up kong-db -d
+
           npm test
+
+          docker compose down
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master

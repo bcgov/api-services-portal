@@ -1,6 +1,52 @@
 export default {
   tests: [
     {
+      name: 'create an organization',
+      entity: 'Organization',
+      refKey: 'extForeignKey',
+      data: {
+        name: 'ministry-of-health',
+        title: 'Ministry of Health',
+        extForeignKey: '01',
+        extSource: 'ckan',
+        extRecordHash: '',
+        orgUnits: [
+          {
+            id: '319b3297-846d-4b97-8095-ceb3ec505fb8',
+            name: 'planning-and-innovation-division',
+            title: 'Planning and Innovation Division',
+            extSource: 'ckan',
+            extRecordHash: '',
+          },
+          {
+            id: '319b3297-846d-4b97-8095-ceb3ec505fb7',
+            name: 'public-health',
+            title: 'Public Health',
+            extSource: 'ckan',
+            extRecordHash: '',
+          },
+        ],
+      },
+      expected: {
+        payload: {
+          status: 200,
+          result: 'created',
+          childResults: [
+            {
+              status: 200,
+              result: 'created',
+              childResults: [],
+            },
+            {
+              status: 200,
+              result: 'created',
+              childResults: [],
+            },
+          ],
+        },
+      },
+    },
+    {
       name: 'create a new product',
       entity: 'Product',
       data: {
@@ -269,8 +315,9 @@ export default {
         payload: {
           status: 400,
           result: 'create-failed',
-          reason:
-            "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')",
+          reason: 'You attempted to perform an invalid mutation',
+          // reason:
+          //   "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')",
           childResults: [],
         },
       },
@@ -286,8 +333,9 @@ export default {
         payload: {
           status: 400,
           result: 'create-failed',
-          reason:
-            "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')",
+          reason: 'You attempted to perform an invalid mutation',
+          // reason:
+          //   "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')",
           childResults: [],
         },
       },
@@ -449,8 +497,8 @@ export default {
       entity: 'DraftDataset',
       refKey: 'name',
       data: {
-        name: 'delete-auto-test-product',
-        title: 'Delete-Auto Test Product',
+        name: 'my-draft-product',
+        title: 'My Draft Product',
         notes:
           'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
         tags: ['gateway', 'kong', 'openapi'],
@@ -470,12 +518,12 @@ export default {
       },
     },
     {
-      name: 'update DraftDataset',
+      name: 'update security class in existing DraftDataset',
       entity: 'DraftDataset',
       refKey: 'name',
       data: {
-        name: 'delete-auto-test-product',
-        title: 'Delete-Auto Test Product',
+        name: 'my-draft-product',
+        title: 'My Draft Product',
         notes:
           'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
         tags: ['gateway', 'kong', 'openapi'],
@@ -499,8 +547,8 @@ export default {
       entity: 'DraftDataset',
       refKey: 'name',
       data: {
-        name: 'delete-auto-test-product',
-        title: 'Delete-Auto Test Product',
+        name: 'my-draft-product',
+        title: 'My Draft Product',
         notes:
           'API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.',
         tags: ['gateway', 'kong', 'openapi'],

@@ -10,7 +10,7 @@ const {
   DeleteProductValidate,
   DeleteProductEnvironments,
 } = require('../services/workflow/delete-product');
-const { strict: assert } = require('assert');
+const { strict: assert, AssertionError } = require('assert');
 const { StructuredActivityService } = require('../services/workflow');
 const { regExprValidation } = require('../services/utils');
 
@@ -47,7 +47,11 @@ module.exports = {
   access: EnforcementPoint,
   hooks: {
     resolveInput: ({ context, operation, resolvedData }) => {
-      logger.debug('[List.Product] Auth %j', context['authedItem']);
+      logger.debug(
+        '[List.Product] Auth %s %j',
+        operation,
+        context['authedItem']
+      );
       if (operation == 'create') {
         if ('appId' in resolvedData && isProductID(resolvedData['appId'])) {
         } else {
@@ -60,12 +64,20 @@ module.exports = {
       logger.debug('[List.Product] Resolved %j', resolvedData);
       return resolvedData;
     },
-    validateInput: ({ resolvedData }) => {
-      regExprValidation(
-        '^[a-zA-Z0-9 ()&-]{3,100}$',
-        resolvedData['name'],
-        "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' {}&-')"
-      );
+    validateInput: ({ resolvedData, addValidationError }) => {
+      try {
+        regExprValidation(
+          '^[a-zA-Z0-9 ()&-]{3,100}$',
+          resolvedData['name'],
+          "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' ()&-')"
+        );
+      } catch (ex) {
+        if (ex instanceof AssertionError) {
+          addValidationError(ex.message);
+        } else {
+          throw ex;
+        }
+      }
     },
     validateDelete: async function ({ existingItem, context }) {
       await DeleteProductValidate(
