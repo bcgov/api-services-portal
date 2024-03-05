@@ -45,7 +45,7 @@
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
     "lint": "eslint ./nextapp --ext .ts,.tsx --quiet",
     "lint:ts": "tsc -p ./nextapp/tsconfig.json --noEmit",
-    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' jest --config ./jest.config.js --coverage --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--no-experimental-fetch --dns-result-order=ipv4first' jest --config ./jest.config.js --coverage --detectOpenHandles",
     "test:next": "jest --config ./nextapp/jest.config.js --coverage",
     "test:next-watch": "jest --watch --config ./nextapp/jest.config.js",
     "test:watch": "jest -w --coverage",
