@@ -36,73 +36,71 @@ function testHeading(index: number, name: string) {
 
 describe('Batch Tests', function () {
   it(`should pass all tests`, async function () {
-    await (async () => {
-      const keystone = await InitKeystone();
-      console.log('K = ' + keystone);
+    const keystone = await InitKeystone();
+    console.log('K = ' + keystone);
 
-      const ns = 'refactortime';
-      const skipAccessControl = true;
+    const ns = 'refactortime';
+    const skipAccessControl = true;
 
-      const identity = {
-        id: null,
-        username: 'sample_username',
-        namespace: ns,
-        roles: JSON.stringify(['api-owner']),
-        scopes: [],
-        userId: null,
-      } as any;
+    const identity = {
+      id: null,
+      username: 'sample_username',
+      namespace: ns,
+      roles: JSON.stringify(['api-owner']),
+      scopes: [],
+      userId: null,
+    } as any;
 
-      const ctx = keystone.createContext({
-        skipAccessControl,
-        authentication: { item: identity },
-      });
+    const ctx = keystone.createContext({
+      skipAccessControl,
+      authentication: { item: identity },
+    });
 
-      //await cleanupDatabase();
+    //await cleanupDatabase();
 
-      let index = 1;
-      for (const test of testdata.tests) {
-        const json: any = test.data;
-        testHeading(index++, test.name);
-        try {
-          if ((test.method || 'PUT') === 'PUT') {
-            const res = await syncRecords(
-              ctx,
-              test.entity,
-              json[test.refKey],
-              json
-            );
-            equalPayload(
-              removeKeys(res, ['id', 'ownedBy']),
-              test.expected.payload
-            );
-          } else {
-            const where: BatchWhereClause = test.whereClause;
-            const records: any[] = await getRecords(
-              ctx,
-              test.entity,
-              null,
-              test.responseFields,
-              where
-            );
-            const payload = records.map((o) => removeKeys(o, ['id', 'appId']));
-            equalPayload(payload, test.expected.payload);
-          }
-        } catch (e) {
-          logger.error(e.message);
-          if (
-            !test.expected?.exception ||
-            test.expected?.exception != `${e.message}`
-          ) {
-            await keystone.disconnect();
+    let index = 1;
+    for (const test of testdata.tests) {
+      const json: any = test.data;
+      testHeading(index++, test.name);
+      try {
+        if ((test.method || 'PUT') === 'PUT') {
+          const res = await syncRecords(
+            ctx,
+            test.entity,
+            json[test.refKey],
+            json
+          );
+          equalPayload(
+            removeKeys(res, ['id', 'ownedBy']),
+            test.expected.payload
+          );
+        } else {
+          const where: BatchWhereClause = test.whereClause;
+          const records: any[] = await getRecords(
+            ctx,
+            test.entity,
+            null,
+            test.responseFields,
+            where
+          );
+          const payload = records.map((o) => removeKeys(o, ['id', 'appId']));
+          equalPayload(payload, test.expected.payload);
+        }
+      } catch (e) {
+        logger.error(e.message);
+        if (
+          !test.expected?.exception ||
+          test.expected?.exception != `${e.message}`
+        ) {
+          await keystone.disconnect();
 
-            throw e;
-          }
+          throw e;
         }
       }
+    }
 
-      testHeading(index, 'DONE');
+    testHeading(index, 'DONE');
 
-      await keystone.disconnect();
-    })();
+    await keystone.disconnect();
   });
 });
