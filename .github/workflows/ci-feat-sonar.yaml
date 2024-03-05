@@ -23,13 +23,13 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd src
-          npm i
-
           docker compose up kong-db -d
 
+          cd src
+          npm i
           npm test
 
+          cd ..
           docker compose down
 
       - name: SonarCloud Scan
