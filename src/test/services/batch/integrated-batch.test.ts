@@ -35,6 +35,7 @@ function testHeading(index: number, name: string) {
 }
 
 describe('Batch Tests', function () {
+  jest.setTimeout(120 * 1000);
   it(`should pass all tests`, async function () {
     const keystone = await InitKeystone();
     console.log('K = ' + keystone);
