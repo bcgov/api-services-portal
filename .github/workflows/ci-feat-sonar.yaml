@@ -25,7 +25,15 @@ jobs:
         run: |
           docker compose up kong-db -d
 
+          set -o allexport
+          source ./.env.local
+          LOG_LEVEL=debug
+          KNEX_HOST=kong-db.localtest.me
+          NEXT_PUBLIC_MOCKS=off
+          set +o allexport
+
           cd src
+
           npm i
           npm run intg-build
           npm test
