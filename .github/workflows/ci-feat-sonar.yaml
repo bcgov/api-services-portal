@@ -27,6 +27,7 @@ jobs:
 
           cd src
           npm i
+          npm run intg-build
           npm test
 
           cd ..
