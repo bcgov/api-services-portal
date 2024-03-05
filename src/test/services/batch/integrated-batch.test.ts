@@ -29,9 +29,9 @@ function equalPayload(a: any, e: any) {
 }
 
 function testHeading(index: number, name: string) {
-  console.log('\x1b[33m --------------------------------------------- \x1b[0m');
-  console.log('\x1b[33m ' + index + ' ' + name + ' \x1b[0m');
-  console.log('\x1b[33m --------------------------------------------- \x1b[0m');
+  logger.info('\x1b[33m --------------------------------------------- \x1b[0m');
+  logger.info('\x1b[33m ' + index + ' ' + name + ' \x1b[0m');
+  logger.info('\x1b[33m --------------------------------------------- \x1b[0m');
 }
 
 describe('Batch Tests', function () {
