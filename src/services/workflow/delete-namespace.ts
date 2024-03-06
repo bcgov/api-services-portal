@@ -25,7 +25,7 @@ import { Environment } from '../keystone/types';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { FieldErrors } from 'tsoa';
 import { updateActivity } from '../keystone/activity';
-import { CascadeDeleteEnvironment } from './delete-environment';
+//import { CascadeDeleteEnvironment } from './delete-environment';
 import { GWAService } from '../gwaapi';
 import getSubjectToken from '../../auth/auth-token';
 
@@ -128,13 +128,17 @@ export const DeleteNamespace = async (
   const envs = await lookupEnvironmentsByNS(context, ns);
   const ids = envs.map((e: Environment) => e.id);
 
-  for (const envId of ids) {
-    await CascadeDeleteEnvironment(context, ns, envId);
-  }
+  // "DeleteNamespaceValidate" is called prior to this one, so
+  // it won't reach here if there are Service Access records
+  // but to be extra safe, lets keep this code
+  //
+  // for (const envId of ids) {
+  //   await CascadeDeleteEnvironment(context, ns, envId);
+  // }
 
-  await deleteRecords(context, 'ServiceAccess', { namespace: ns }, true, [
-    'id',
-  ]);
+  // await deleteRecords(context, 'ServiceAccess', { namespace: ns }, true, [
+  //   'id',
+  // ]);
 
   await deleteRecords(context, 'Product', { namespace: ns }, true, ['id']);
 

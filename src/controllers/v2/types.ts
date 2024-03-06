@@ -278,6 +278,7 @@ export interface Application {
 export interface Product {
   appId?: string; // Primary Key
   name?: string;
+  description?: string;
   namespace?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];

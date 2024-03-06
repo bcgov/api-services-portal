@@ -1,4 +1,7 @@
-import { BatchService } from '../../services/keystone/batch-service';
+import {
+  BatchService,
+  CompositeKeyValue,
+} from '../../services/keystone/batch-service';
 import { dot } from '../feed-worker';
 import { Logger } from '../../logger';
 
@@ -17,12 +20,31 @@ export async function connectMany(
   const batchService = new BatchService(keystone);
   if (idList != null) {
     for (const uniqueKey of idList) {
-      const lkup = await batchService.lookup(
-        transformInfo['list'],
-        transformInfo['refKey'],
-        uniqueKey,
-        []
-      );
+      logger.error('T = %s -- %j %j', uniqueKey, inputData, currentData);
+      let lkup;
+      if (transformInfo['filterByNamespace']) {
+        const compositeKeyValues: CompositeKeyValue[] = [];
+        compositeKeyValues.push({
+          key: 'namespace',
+          value: inputData['_namespace'],
+        });
+        compositeKeyValues.push({
+          key: transformInfo['refKey'],
+          value: uniqueKey,
+        });
+        lkup = await batchService.lookupUsingCompositeKey(
+          transformInfo['list'],
+          compositeKeyValues,
+          []
+        );
+      } else {
+        lkup = await batchService.lookup(
+          transformInfo['list'],
+          transformInfo['refKey'],
+          uniqueKey,
+          []
+        );
+      }
       if (lkup == null) {
         logger.error(
           `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`

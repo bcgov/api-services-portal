@@ -83,7 +83,7 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env.local
+      - ./local/feeds/.env.local
     restart: on-failure
     ports:
       - 6000:6000
@@ -117,15 +117,15 @@ services:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
     networks:
-      aps-net:
-        aliases:
-          - kong-db.localtest.me
+      - aps-net
   kong-migrations:
     image: kong:kong-local
     command: kong migrations bootstrap
     depends_on:
       - kong-db
-    environment: *common-variables
+    environment:
+      <<: *common-variables
+      KONG_DNS_ORDER: 'LAST,A'
     networks:
       - aps-net
     restart: on-failure
@@ -138,7 +138,9 @@ services:
     depends_on:
       - kong-db
       - kong-migrations
-    environment: *common-variables
+    environment:
+      <<: *common-variables
+      KONG_DNS_ORDER: 'LAST,A'
     networks:
       - aps-net
     restart: on-failure
@@ -150,6 +152,7 @@ services:
       - kong-migrations-up
     environment:
       <<: *common-variables
+      KONG_DEBUG_LEVEL: debug
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_CASSANDRA_CONTACT_POINTS: kong-db
@@ -157,6 +160,9 @@ services:
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_DNS_ORDER: 'LAST,A'
+      KONG_TRUSTED_IPS: '0.0.0.0/0,::/0'
+      KONG_REAL_IP_HEADER: X-Forwarded-For
     ports:
       - 8000:8000
       - 8001:8001
