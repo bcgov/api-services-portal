@@ -4,6 +4,7 @@ import {
   alwaysFalse,
   byKey,
   connectExclusiveList,
+  connectExclusiveListCreate,
   connectExclusiveOne,
   connectMany,
   connectOne,
@@ -17,6 +18,7 @@ import { BatchResult, BatchSyncException } from './types';
 import {
   BatchService,
   BatchWhereClause,
+  CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
 
@@ -45,6 +47,7 @@ const transformations = {
   byKey: byKey,
   mapNamespace: mapNamespace,
   connectExclusiveList: connectExclusiveList,
+  connectExclusiveListCreate: connectExclusiveListCreate,
   connectExclusiveOne: connectExclusiveOne,
   connectMany: connectMany,
   connectOne: connectOne,
@@ -55,6 +58,7 @@ const transformations = {
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
   assert.strictEqual(entity in metadata, true);
+  logger.info('putFeedWorker %s', entity);
 
   const md = metadata[entity];
   const refKey = md.refKey;
@@ -164,7 +168,8 @@ export const getFeedWorker = async (context: any, req: any, res: any) => {
 const syncListOfRecords = async function (
   keystone: any,
   transformInfo: any,
-  records: any
+  records: any,
+  parentRecord?: any
 ): Promise<BatchResult[]> {
   const result: BatchResult[] = [];
   if (records == null || typeof records == 'undefined') {
@@ -179,7 +184,8 @@ const syncListOfRecords = async function (
         transformInfo.list,
         record[recordKey],
         record,
-        true
+        true,
+        parentRecord
       )
     );
   }
@@ -203,9 +209,13 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
   const relationshipFields = Object.keys(
     md.transformations
   ).filter((tranField: any) =>
-    ['byKey', 'connectOne', 'connectExclusiveList', 'connectMany'].includes(
-      md.transformations[tranField].name
-    )
+    [
+      'byKey',
+      'connectOne',
+      'connectExclusiveList',
+      'connectExclusiveListCreate',
+      'connectMany',
+    ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
     .filter((s: string) => !relationshipFields.includes(s))
@@ -245,7 +255,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
     });
   }
   if ('ownedBy' in md) {
-    response.push(`${md.ownedBy} { id }`);
+    response.push(`${md.ownedBy} { id, namespace }`);
   }
 
   logger.debug('[buildQueryResponse] FINAL (%s) %j', md.query, response);
@@ -307,7 +317,8 @@ export const syncRecords = async function (
   feedEntity: string,
   eid: string,
   json: any,
-  children = false
+  children = false,
+  parentRecord: any = undefined
 ): Promise<BatchResult> {
   const md = (metadata as any)[feedEntity];
   const entity = 'entity' in md ? md['entity'] : feedEntity;
@@ -318,13 +329,31 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
-  assert.strictEqual(
-    typeof eid === 'string' && eid.length > 0,
-    true,
-    `Invalid ID for ${feedEntity} ${eid}`
-  );
+  const compositeKeyValues: CompositeKeyValue[] = [];
+  if (md.compositeRefKey) {
+    md.compositeRefKey.forEach((refKey: string | CompositeKeyValue) => {
+      if (typeof refKey === 'string') {
+        compositeKeyValues.push({ key: refKey, value: json[refKey] });
+      } else {
+        // if the value is missing, then ignore the composite value
+        // and include the 'refKey' value
+        const value = dot({ ...json, ...{ parent: parentRecord } }, refKey.key);
+        compositeKeyValues.push({
+          key: refKey.key,
+          value: value,
+          whereClause: refKey.whereClause,
+        });
+      }
+    });
+  } else {
+    assert.strictEqual(
+      typeof eid === 'string' && eid.length > 0,
+      true,
+      `Invalid ID for ${feedEntity} ${md.refKey} = ${eid || 'blank'}`
+    );
 
-  const batchService = new BatchService(context);
+    compositeKeyValues.push({ key: md.refKey, return: md.refKey, value: eid });
+  }
 
   // pre-lookup hook that can be used to handle special cases,
   // such as for Kong, cleaning up records where the service or route has been renamed
@@ -342,10 +371,11 @@ export const syncRecords = async function (
 
   let childResults: BatchResult[] = [];
 
-  const localRecord = await batchService.lookup(
+  const batchService = new BatchService(context);
+
+  const localRecord = await batchService.lookupUsingCompositeKey(
     md.query,
-    md.refKey,
-    eid,
+    compositeKeyValues,
     buildQueryResponse(md)
   );
   if (localRecord == null) {
@@ -361,34 +391,43 @@ export const syncRecords = async function (
         for (const transformKey of Object.keys(md.transformations)) {
           const transformInfo = md.transformations[transformKey];
           if (transformInfo.syncFirst) {
-            // handle these children independently first - return a list of IDs
-            const allIds = await syncListOfRecords(
-              context,
-              transformInfo,
-              json[transformKey]
-            );
-            logger.debug('CHILDREN [%s] %j', transformKey, allIds);
-            assert.strictEqual(
-              allIds.filter((record) => record.status != 200).length,
-              0,
-              'Failed updating children'
-            );
-            assert.strictEqual(
-              allIds.filter((record) => typeof record.ownedBy != 'undefined')
-                .length,
-              0,
-              'There are some child records that have exclusive ownership already!'
-            );
-            json[transformKey + '_ids'] = allIds.map((status) => status.id);
-
-            childResults.push(...allIds);
+            // since localRecord is null, this is related to creating
+            // and syncFirst is only used for `connectExclusiveList` or `connectExclusiveOne`
+            // so we want the transformer to return a "create" statement
+            if (transformInfo.name === 'connectExclusiveListCreate') {
+            } else {
+              const allIds = await syncListOfRecords(
+                context,
+                transformInfo,
+                json[transformKey],
+                json
+              );
+              logger.debug('CHILDREN [%s] %j', transformKey, allIds);
+              childResults.push(...allIds);
+              assert.strictEqual(
+                allIds.filter((record) => record.status != 200).length,
+                0,
+                'Failed updating children'
+              );
+              assert.strictEqual(
+                allIds.filter((record) => typeof record.ownedBy != 'undefined')
+                  .length,
+                0,
+                'There are some child records that have exclusive ownership already!'
+              );
+              json[transformKey + '_ids'] = allIds.map((status) => status.id);
+            }
+          }
+          if (transformInfo.filterByNamespace) {
+            json['_namespace'] = parentRecord['namespace'];
           }
           const transformMutation = await transformations[transformInfo.name](
             context,
             transformInfo,
             null,
             json,
-            transformKey
+            transformKey,
+            parentRecord
           );
           if (transformMutation != null) {
             logger.debug(
@@ -403,13 +442,20 @@ export const syncRecords = async function (
           }
         }
       }
-      data[md.refKey] = eid;
+      if (eid) {
+        data[md.refKey] = eid;
+      }
       const nr = await batchService.create(entity, data);
-      if (nr == null) {
+      if (!nr.id) {
         logger.error('CREATE FAILED (%s) %j', nr, data);
-        return { status: 400, result: 'create-failed', childResults };
+        return {
+          status: 400,
+          result: 'create-failed',
+          reason: nr.error,
+          childResults,
+        };
       } else {
-        return { status: 200, result: 'created', id: nr, childResults };
+        return { status: 200, result: 'created', id: nr.id, childResults };
       }
     } catch (ex) {
       logger.error('Caught exception %s', ex);
@@ -422,6 +468,12 @@ export const syncRecords = async function (
     }
   } else {
     try {
+      if (
+        json.hasOwnProperty(md['refKey']) &&
+        json[md['refKey']] != localRecord[md['refKey']]
+      ) {
+        throw new Error('Unexpected ' + md['refKey']);
+      }
       const transformKeys =
         'transformations' in md ? Object.keys(md.transformations) : [];
       const data: any = {};
@@ -452,9 +504,13 @@ export const syncRecords = async function (
             const allIds = await syncListOfRecords(
               context,
               transformInfo,
-              json[transformKey]
+              json[transformKey],
+              localRecord
             );
+
             logger.debug('CHILDREN [%s] %j', transformKey, allIds);
+            childResults.push(...allIds);
+
             assert.strictEqual(
               allIds.filter((record) => record.status != 200).length,
               0,
@@ -468,19 +524,21 @@ export const syncRecords = async function (
                   record.ownedBy != localRecord.id
               ).length,
               0,
-              'There are some child records that had ownership already (w/ local record)!'
+              'There are some child records that have ownership already (update not allowed)!'
             );
 
             json[transformKey + '_ids'] = allIds.map((status) => status.id);
-            childResults.push(...allIds);
           }
-
+          if (transformInfo.filterByNamespace) {
+            json['_namespace'] = parentRecord['namespace'];
+          }
           const transformMutation = await transformations[transformInfo.name](
             context,
             transformInfo,
             localRecord,
             json,
-            transformKey
+            transformKey,
+            parentRecord
           );
           if (transformMutation && transformMutation != null) {
             logger.debug(
@@ -518,14 +576,19 @@ export const syncRecords = async function (
         Object.keys(data)
       );
       const nr = await batchService.update(entity, localRecord.id, data);
-      if (nr == null) {
+      if (!nr.id) {
         logger.error('UPDATE FAILED (%s) %j', nr, data);
-        return { status: 400, result: 'update-failed', childResults };
+        return {
+          status: 400,
+          result: 'update-failed',
+          reason: nr.error,
+          childResults,
+        };
       } else {
         return {
           status: 200,
           result: 'updated',
-          id: nr,
+          id: nr.id,
           childResults,
           ownedBy:
             md.ownedBy && localRecord[md.ownedBy]
@@ -541,6 +604,57 @@ export const syncRecords = async function (
         reason: ex.message,
         childResults,
       };
+    }
+  }
+};
+
+export const applyTransformationsToNewCreation = async (
+  keystone: any,
+  transformInfo: any,
+  inputData: any,
+  parentRecord: any
+) => {
+  if (!inputData) {
+    return;
+  }
+  const feedEntity = transformInfo['list'];
+
+  const md = (metadata as any)[feedEntity];
+  logger.debug('[applyTransformations] %j', md);
+  logger.debug('[applyTransformations] parent %j', parentRecord);
+  logger.debug('[applyTransformations] input  %j', inputData);
+
+  const transformKeys =
+    'transformations' in md ? Object.keys(md.transformations) : [];
+
+  for (const inputDataRecord of inputData) {
+    for (const transformKey of transformKeys) {
+      logger.debug(
+        ' -- (applyTransformations) changed trans? (%s)',
+        transformKey
+      );
+      const transformInfo = md.transformations[transformKey];
+
+      if (transformInfo.filterByNamespace && parentRecord) {
+        inputDataRecord['_namespace'] = parentRecord['namespace'];
+      }
+
+      const transformMutation = await transformations[transformInfo.name](
+        keystone,
+        transformInfo,
+        null,
+        inputDataRecord,
+        transformKey
+      );
+      delete inputDataRecord['_namespace'];
+      if (transformMutation && transformMutation != null) {
+        logger.debug(
+          ' -- (applyTransformations) trans (%s) %j',
+          transformKey,
+          transformMutation
+        );
+        inputDataRecord[transformKey] = transformMutation;
+      }
     }
   }
 };

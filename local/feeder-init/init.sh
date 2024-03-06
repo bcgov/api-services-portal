@@ -32,6 +32,6 @@ while true; do
 
     else
         echo  "Waiting for Keycloak....."
-        sleep 1m
+        sleep 5
     fi
 done
