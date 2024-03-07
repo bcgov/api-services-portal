@@ -608,6 +608,8 @@ components:
                     type: string
                 name:
                     type: string
+                description:
+                    type: string
                 namespace:
                     type: string
                 dataset:

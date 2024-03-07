@@ -64,6 +64,7 @@ export class ProductController extends Controller {
     @Body() body: Product,
     @Request() request: any
   ): Promise<BatchResult> {
+    body['namespace'] = ns;
     return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'Product',

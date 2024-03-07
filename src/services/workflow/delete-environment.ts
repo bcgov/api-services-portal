@@ -71,6 +71,13 @@ export const DeleteEnvironment = async (
     prodEnvId
   );
 
+  // no longer doing a cascade delete of service access / consumer data
+  assert.strictEqual(
+    force,
+    false,
+    'Force delete environment no longer supported'
+  );
+
   const envDetail = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, [
@@ -78,7 +85,7 @@ export const DeleteEnvironment = async (
   ]);
 
   assert.strictEqual(
-    force == true || accessList.length == 0,
+    accessList.length == 0,
     true,
     `${accessList.length} ${
       accessList.length == 1 ? 'consumer has' : 'consumers have'
@@ -102,21 +109,21 @@ export const CascadeDeleteEnvironment = async (
   ns: string,
   prodEnvId: string
 ): Promise<void> => {
-  await deleteRecords(
-    context,
-    'ServiceAccess',
-    { productEnvironment: { id: prodEnvId } },
-    true,
-    ['id']
-  );
+  // await deleteRecords(
+  //   context,
+  //   'ServiceAccess',
+  //   { productEnvironment: { id: prodEnvId } },
+  //   true,
+  //   ['id']
+  // );
 
-  await deleteRecords(
-    context,
-    'AccessRequest',
-    { productEnvironment: { id: prodEnvId } },
-    true,
-    ['id']
-  );
+  // await deleteRecords(
+  //   context,
+  //   'AccessRequest',
+  //   { productEnvironment: { id: prodEnvId } },
+  //   true,
+  //   ['id']
+  // );
 
   await deleteRecords(context, 'Environment', { id: prodEnvId }, false, ['id']);
 };

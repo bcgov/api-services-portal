@@ -150,7 +150,7 @@ const ApiPage: React.FC<
             </Box>
             <Card heading="Products">
               <Box bg="gray.100">
-                {data?.products?.map((p) => (
+                {data?.products?.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)).map((p) => (
                   <ApiProductItem
                     key={uid(p)}
                     data={p}

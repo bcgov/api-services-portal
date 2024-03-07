@@ -1,4 +1,7 @@
-import { BatchService } from '../../services/keystone/batch-service';
+import {
+  BatchService,
+  CompositeKeyValue,
+} from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
 import { dot } from '../feed-worker';
 
@@ -16,6 +19,7 @@ export async function connectOne(
   // fieldKey: The field that has the new value in the input
   const fieldKey = 'key' in transformInfo ? transformInfo['key'] : _fieldKey;
 
+  logger.debug('[connectOne] %j %s', inputData, fieldKey);
   const value = dot(inputData, fieldKey);
 
   // undefined value is one that was never passed in (rather than explicitely passed in null)
@@ -29,12 +33,31 @@ export async function connectOne(
     }
   }
 
-  const lkup = await batchService.lookup(
-    transformInfo['list'],
-    transformInfo['refKey'],
-    value,
-    []
-  );
+  let lkup;
+  if (transformInfo['filterByNamespace']) {
+    const compositeKeyValues: CompositeKeyValue[] = [];
+    compositeKeyValues.push({
+      key: 'namespace',
+      value: inputData['_namespace'],
+    });
+    compositeKeyValues.push({
+      key: transformInfo['refKey'],
+      value: value,
+    });
+    lkup = await batchService.lookupUsingCompositeKey(
+      transformInfo['list'],
+      compositeKeyValues,
+      []
+    );
+  } else {
+    lkup = await batchService.lookup(
+      transformInfo['list'],
+      transformInfo['refKey'],
+      value,
+      []
+    );
+  }
+
   if (lkup == null) {
     logger.error(
       `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`
@@ -48,7 +71,7 @@ export async function connectOne(
   ) {
     return null;
   } else {
-    logger.debug('Adding: ' + JSON.stringify({ connect: { id: lkup['id'] } }));
+    logger.debug('Adding: %s = %j', fieldKey, { connect: { id: lkup['id'] } });
     return { connect: { id: lkup['id'] } };
   }
 }

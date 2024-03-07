@@ -264,9 +264,9 @@ jobs:
             NEXT_PUBLIC_HELP_API_DOCS_URL:
               value: '/ds/api/v2/console/'
             NEXT_PUBLIC_HELP_SUPPORT_URL:
-              value: 'https://mvp.developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/'
+              value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/'
             NEXT_PUBLIC_HELP_RELEASE_URL:
-              value: 'https://mvp.developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/releases/'
+              value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/releases/'
             NEXT_PUBLIC_HELP_STATUS_URL:
               value: 'https://uptime.com/s/bcgov-dss'
             NEXT_PUBLIC_DEVELOPER_IDS:

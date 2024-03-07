@@ -1,7 +1,15 @@
+import { kebabCase, snakeCase } from 'lodash';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 
 const logger = Logger('ks.batch');
+
+export interface CompositeKeyValue {
+  key: string;
+  value: string;
+  return?: string; // 'org'
+  whereClause?: string;
+}
 
 export interface BatchWhereClause {
   query: string; // '$org: String'
@@ -96,6 +104,72 @@ export class BatchService {
     return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 
+  public async lookupUsingCompositeKey(
+    query: string,
+    compositeKeyValues: CompositeKeyValue[],
+    fields: string[]
+  ) {
+    logger.debug(
+      '[lookupUsingCompositeKey] : %s :: IN = %j',
+      query,
+      compositeKeyValues
+    );
+
+    const where: string[] = [];
+    const params: string[] = [];
+    const returnFields: string[] = [];
+    const variables: any = {};
+    for (const compositeKey of compositeKeyValues) {
+      const val = compositeKey.value;
+      const key = compositeKey.key;
+      const param = snakeCase(compositeKey.key);
+      assert.strictEqual(
+        typeof val != 'undefined' && val != null,
+        true,
+        `Missing value for key ${key}`
+      );
+      // product { name: $pid }
+      if (compositeKey.whereClause) {
+        where.push(compositeKey.whereClause);
+      } else {
+        where.push(`${key} : $${param}`);
+      }
+      if (compositeKey.return) {
+        returnFields.push(compositeKey.return);
+      }
+      params.push(`$${param}: String`);
+      variables[param] = val;
+    }
+
+    logger.debug(
+      '[lookupUsingCompositeKey] : %s :: VARS = %j',
+      query,
+      variables
+    );
+
+    const queryString = `query(${params.join(', ')}) {
+      ${query}(where: { ${where.join(', ')} }) {
+        id, ${returnFields.join(', ')}, ${fields.join(',')}
+      }
+    }`;
+    logger.debug('[lookupUsingCompositeKey] %s', queryString);
+    const result = await this.context.executeGraphQL({
+      query: queryString,
+      variables,
+    });
+    logger.debug(
+      '[lookupUsingCompositeKey] RESULT %j with vars %j',
+      result,
+      compositeKeyValues
+    );
+    if (result['data'][query] == null || result['data'][query].length > 1) {
+      throw Error(
+        'Expecting zero or one rows ' + query + ' ' + JSON.stringify(variables)
+      );
+    }
+    return result['data'][query].length == 0 ? null : result['data'][query][0];
+  }
+
   public async lookup(
     query: string,
     refKey: string,
@@ -166,7 +240,10 @@ export class BatchService {
     return result['data'][query].length == 0 ? null : result['data'][query][0];
   }
 
-  public async create(entity: string, data: any) {
+  public async create(
+    entity: string,
+    data: any
+  ): Promise<{ id?: string; error?: string }> {
     logger.debug('[create] : (%s) %j', entity, data);
     const result = await this.context.executeGraphQL({
       query: `mutation ($data: ${entity}CreateInput) {
@@ -182,10 +259,16 @@ export class BatchService {
       logger.debug('[create] RESULT %j', result);
     }
 
-    return 'errors' in result ? null : result['data'][`create${entity}`].id;
+    return 'errors' in result
+      ? { error: result['errors'][0].message }
+      : { id: result['data'][`create${entity}`].id };
   }
 
-  public async update(entity: string, id: string, data: any): Promise<string> {
+  public async update(
+    entity: string,
+    id: string,
+    data: any
+  ): Promise<{ id?: string; error?: string }> {
     logger.debug('[update] : %s %s', entity, id);
     const result = await this.context.executeGraphQL({
       query: `mutation ($id: ID!, $data: ${entity}UpdateInput) {
@@ -200,7 +283,10 @@ export class BatchService {
     } else {
       logger.debug('[update] RESULT %j', result);
     }
-    return 'errors' in result ? null : result['data'][`update${entity}`].id;
+
+    return 'errors' in result
+      ? { error: result['errors'][0].message }
+      : { id: result['data'][`update${entity}`].id };
   }
 
   public async remove(entity: string, id: string): Promise<any> {

@@ -5,6 +5,7 @@ const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce');
 const { externallySourced } = require('../components/ExternalSource');
 
 const { EnforcementPoint } = require('../authz/enforcement');
+const { regExprValidation } = require('../services/utils');
 
 /*
 
@@ -102,4 +103,13 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [externallySourced({ isRequired: false })],
+  hooks: {
+    //   validateInput: ({ resolvedData }) => {
+    //     regExprValidation(
+    //       '^[a-z0-9-]{3,100}$',
+    //       resolvedData['name'],
+    //       "Dataset name must be between 3 and 100 lowercase alpha-numeric characters (including special character '-')"
+    //     );
+    //   },
+  },
 };
