@@ -79,16 +79,16 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
       </Flex>
       {isTiered && (
         <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
-          <Grid gap={4} flex={1} templateRows="auto" mr={12}>
+          <Grid gap={4} flex={1} templateRows="auto" ml={8} mr={12}>
             <GridItem>
               <Flex align="center" mb={2}>
                 <Flex align="center" width={8}>
                   <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
                 </Flex>
-                <Heading size="xs">Limits</Heading>
+                <Heading size="xs">Elevated Access</Heading>
               </Flex>
               <Text ml={8} fontSize="sm">
-                Public access has a rate limit enforced.
+                Public access does not require an API key.
               </Text>
               <Text ml={8} fontSize="sm">
                 For elevated access, please request access.
