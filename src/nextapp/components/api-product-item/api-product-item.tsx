@@ -56,7 +56,9 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                   as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
-                  data-testid={`product-icon-${kebabCase(data.name)}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
+                  data-testid={`product-icon-${kebabCase(data.name)}-${
+                    isPublic || isTiered ? 'RiEarthFill' : 'FaLock'
+                  }`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>
@@ -68,41 +70,43 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isTiered && isGatewayProtected && (
+        {(!isTiered && isGatewayProtected) ||
+        data.name === 'BC Address Geocoder (Public)' ? ( // LOC specific code
           <AccessRequestForm
             disabled={false}
             id={id}
             name={data.name}
             preview={preview}
           />
-        )}
+        ) : null}
       </Flex>
-      {isTiered && (
-        <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
-          <Grid gap={4} flex={1} templateRows="auto" mr={12}>
-            <GridItem>
-              <Flex align="center" mb={2}>
-                <Flex align="center" width={8}>
-                  <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
+      {isTiered &&
+        data.name !== 'BC Address Geocoder (Public)' && ( // LOC specific code
+          <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
+            <Grid gap={4} flex={1} templateRows="auto" mr={12}>
+              <GridItem>
+                <Flex align="center" mb={2}>
+                  <Flex align="center" width={8}>
+                    <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
+                  </Flex>
+                  <Heading size="xs">Limits</Heading>
                 </Flex>
-                <Heading size="xs">Limits</Heading>
-              </Flex>
-              <Text ml={8} fontSize="sm">
-                Public access has a rate limit enforced.
-              </Text>
-              <Text ml={8} fontSize="sm">
-                For elevated access, please request access.
-              </Text>
-            </GridItem>
-          </Grid>
-          <AccessRequestForm
-            disabled={false}
-            id={id}
-            name={data.name}
-            preview={preview}
-          />
-        </Flex>
-      )}
+                <Text ml={8} fontSize="sm">
+                  Public access has a rate limit enforced.
+                </Text>
+                <Text ml={8} fontSize="sm">
+                  For elevated access, please request access.
+                </Text>
+              </GridItem>
+            </Grid>
+            <AccessRequestForm
+              disabled={false}
+              id={id}
+              name={data.name}
+              preview={preview}
+            />
+          </Flex>
+        )}
     </>
   );
 };
