@@ -41,7 +41,8 @@ export class KongConsumerService {
 
   public async createOrGetConsumer(
     username: string,
-    customId: string
+    customId: string,
+    app: any
   ): Promise<CreateOrGetConsumerResult> {
     logger.debug('createOrGetConsumer');
     try {
@@ -51,16 +52,20 @@ export class KongConsumerService {
       return { created: false, consumer: result };
     } catch (err) {
       logger.debug('createOrGetConsumer - CATCH ERROR %s', err);
-      const result = await this.createKongConsumer(username, customId);
+      const result = await this.createKongConsumer(username, customId, app);
       logger.debug('createOrGetConsumer - CATCH RESULT %j', result);
       return { created: false, consumer: result };
     }
   }
 
-  public async createKongConsumer(username: string, customId: string) {
+  public async createKongConsumer(
+    username: string,
+    customId: string,
+    app: any
+  ) {
     let body: KongConsumer = {
       username: username,
-      tags: ['aps-portal'],
+      tags: ['aps-portal', `app:${app.name}`, `owner:${app.owner.name}`],
     };
     if (customId) {
       body['custom_id'] = customId;

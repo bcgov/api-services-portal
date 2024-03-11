@@ -14,11 +14,12 @@ import { KongConsumerService } from '../kong';
 export async function registerApiKey(
   context: any,
   newClientId: string,
-  nickname: string
+  nickname: string,
+  app: any
 ) {
   const kongApi = new KongConsumerService(process.env.KONG_URL);
 
-  const consumer = await kongApi.createKongConsumer(nickname, newClientId);
+  const consumer = await kongApi.createKongConsumer(nickname, newClientId, app);
 
   const apiKey = await kongApi.addKeyAuthToConsumer(consumer.id);
 
