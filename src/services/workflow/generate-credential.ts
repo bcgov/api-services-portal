@@ -53,7 +53,12 @@ export const generateCredential = async (
 
     const nickname = clientId;
 
-    const newApiKey = await registerApiKey(context, clientId, nickname, application);
+    const newApiKey = await registerApiKey(
+      context,
+      clientId,
+      nickname,
+      application
+    );
 
     logger.debug('new-api-key CREATED FOR %s', clientId);
 

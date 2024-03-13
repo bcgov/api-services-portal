@@ -1,5 +1,6 @@
 const { addKongConsumer } = require('../../services/keystone');
 
+import { Application } from '../keystone/types';
 import { KongConsumerService } from '../kong';
 
 /**
@@ -15,7 +16,7 @@ export async function registerApiKey(
   context: any,
   newClientId: string,
   nickname: string,
-  app: any
+  app: Application
 ) {
   const kongApi = new KongConsumerService(process.env.KONG_URL);
 

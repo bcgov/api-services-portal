@@ -10,6 +10,7 @@ import {
   KeyAuthResponse,
   KongConsumer,
 } from './types';
+import { Application } from '../keystone/types';
 
 const logger = Logger('kong.consumer');
 
@@ -42,7 +43,7 @@ export class KongConsumerService {
   public async createOrGetConsumer(
     username: string,
     customId: string,
-    app: any
+    app: Application
   ): Promise<CreateOrGetConsumerResult> {
     logger.debug('createOrGetConsumer');
     try {
@@ -54,21 +55,25 @@ export class KongConsumerService {
       logger.debug('createOrGetConsumer - CATCH ERROR %s', err);
       const result = await this.createKongConsumer(username, customId, app);
       logger.debug('createOrGetConsumer - CATCH RESULT %j', result);
-      return { created: false, consumer: result };
+      return { created: true, consumer: result };
     }
   }
 
   public async createKongConsumer(
     username: string,
     customId: string,
-    app: any
+    app: Application
   ) {
     let body: KongConsumer = {
       username: username,
-      tags: ['aps-portal', `app:${app.name}`, `owner:${app.owner.name}`],
+      tags: ['aps-portal'],
     };
     if (customId) {
       body['custom_id'] = customId;
+    }
+    if (app) {
+      body.tags.push(`app:${app.name}`);
+      body.tags.push(`owner:${app.owner.name}`);
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {
