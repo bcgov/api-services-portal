@@ -50,13 +50,15 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
       <Flex px={9} py={7} bg={'white'} mb={'0.5'}>
         <Grid gap={4} flex={1} templateRows="auto" mr={12}>
           <GridItem>
-            <Flex align="center" mb={2}>
+            <Flex align="center" mt={3}>
               <Flex align="center" width={8}>
                 <Icon
                   as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
-                  data-testid={`product-icon-${kebabCase(data.name)}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
+                  data-testid={`product-icon-${kebabCase(data.name)}-${
+                    isPublic || isTiered ? 'RiEarthFill' : 'FaLock'
+                  }`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>
@@ -68,31 +70,35 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isTiered && isGatewayProtected && (
+        {!isTiered && isGatewayProtected ? (
           <AccessRequestForm
             disabled={false}
             id={id}
             name={data.name}
             preview={preview}
           />
+        ) : (
+          <Button
+            disabled={true}
+            data-testid="no-api-key-button"
+            variant={'primary'}
+            fontWeight="600"
+            color="white"
+          >
+            No API Key Required
+          </Button>
         )}
       </Flex>
       {isTiered && (
-        <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
+        <Flex px={9} py={7} bg={'white'} my={-5} mb={'0.5'}>
           <Grid gap={4} flex={1} templateRows="auto" ml={8} mr={12}>
             <GridItem>
-              <Flex align="center" mb={2}>
+              <Flex align="center" mt={3}>
                 <Flex align="center" width={8}>
                   <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
                 </Flex>
                 <Heading size="xs">Elevated Access</Heading>
               </Flex>
-              <Text ml={8} fontSize="sm">
-                Public access does not require an API key.
-              </Text>
-              <Text ml={8} fontSize="sm">
-                For elevated access, please request access.
-              </Text>
             </GridItem>
           </Grid>
           <AccessRequestForm
