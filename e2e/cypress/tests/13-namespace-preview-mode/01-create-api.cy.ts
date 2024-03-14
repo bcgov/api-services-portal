@@ -14,7 +14,7 @@ describe('Create API Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
     cy.resetState()
   })
 
@@ -42,7 +42,7 @@ describe('Create API Spec', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.updateJsonValue('common-testdata.json', 'namespacePreview.namespace', namespace)

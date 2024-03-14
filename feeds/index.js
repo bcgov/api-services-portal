@@ -171,12 +171,12 @@ if (process.env.SCHEDULE == 'true') {
   runTimedJob('prometheus', 120, { numDays: 1 });
   runTimedJob('prometheus', 24 * 60 + 5, { numDays: 5 });
   runTimedJob('kong', 1 * 60, {});
-  runTimedJob('ckan', (24 * 60) + 30, {});
+  runTimedJob('ckan', 24 * 60 + 30, {});
   runTimedJob('ckan_org', 24 * 60, {});
 }
 
-const server = app.listen(port, () => {
+app.listen(port, () => {
   logger.info(`Listening at http://localhost:${port}`);
 });
 
-process.on('SIGINT', () => process.kill(process.pid, 'SIGTERM'));
+process.on('SIGINT', () => process.exit(0));

@@ -23,7 +23,7 @@ describe('Add Organization to publish API', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
     cy.resetState()
   })
 
@@ -50,7 +50,7 @@ describe('Add Organization to publish API', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
@@ -131,8 +131,6 @@ describe('Add Organization to publish API', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -144,9 +142,6 @@ describe('Org Admin approves the request', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
-    cy.resetState()
   })
 
   beforeEach(() => {
@@ -179,8 +174,6 @@ describe('Org Admin approves the request', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 
 })
@@ -193,9 +186,6 @@ describe('Activate the API to make it visible in API Directory', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
-    cy.resetState()
   })
 
   beforeEach(() => {
@@ -241,8 +231,6 @@ describe('Activate the API to make it visible in API Directory', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -254,8 +242,6 @@ describe('Request service Access Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -293,8 +279,6 @@ describe('Request service Access Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -305,8 +289,6 @@ describe('Access manager approves developer access request for Kong API ACL auth
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
   })
 
   beforeEach(() => {
@@ -348,7 +330,5 @@ describe('Access manager approves developer access request for Kong API ACL auth
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

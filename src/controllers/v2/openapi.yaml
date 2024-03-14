@@ -578,6 +578,7 @@ components:
                     type: string
                     enum:
                         - public
+                        - protected-externally
                         - authorization-code
                         - client-credentials
                         - kong-acl-only
@@ -606,6 +607,8 @@ components:
                 appId:
                     type: string
                 name:
+                    type: string
+                description:
                     type: string
                 namespace:
                     type: string

@@ -1,8 +1,6 @@
 /*
 node dist/test/integrated/keystonejs/test.js
 */
-import { syncRecords } from '../../../batch/feed-worker';
-
 import { loadRulesAndWatch } from '../../../authz/enforcement';
 
 loadRulesAndWatch(false);
@@ -17,6 +15,20 @@ export default async function InitKeystone(
   const session = require('express-session');
   //const MongoStore = require('connect-mongo')(session);
 
+  const { KnexAdapter } = require('@keystonejs/adapter-knex');
+  const knexAdapterConfig = {
+    knexOptions: {
+      debug: process.env.LOG_LEVEL === 'debug' ? false : false,
+      connection: {
+        host: process.env.KNEX_HOST,
+        port: process.env.KNEX_PORT,
+        user: process.env.KNEX_USER,
+        password: process.env.KNEX_PASSWORD,
+        database: process.env.KNEX_DATABASE,
+      },
+    },
+  };
+
   const { MongooseAdapter } = require('@keystonejs/adapter-mongoose');
   const mongooseAdapterConfig = {
     mongoUri: process.env.MONGO_URL,
@@ -24,8 +36,13 @@ export default async function InitKeystone(
     pass: process.env.MONGO_PASSWORD,
   };
 
+  const adapter = process.env.ADAPTER ? process.env.ADAPTER : 'mongoose';
+
   const keystone = new Keystone({
-    adapter: new MongooseAdapter(mongooseAdapterConfig),
+    adapter:
+      adapter == 'knex'
+        ? new KnexAdapter(knexAdapterConfig)
+        : new MongooseAdapter(mongooseAdapterConfig),
     cookieSecret: process.env.COOKIE_SECRET,
     cookie: {
       secure: process.env.COOKIE_SECURE === 'true', // Default to true in production

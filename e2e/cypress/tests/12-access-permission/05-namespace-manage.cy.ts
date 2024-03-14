@@ -14,8 +14,7 @@ describe('Grant Namespace Manage Role', () => {
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -48,8 +47,6 @@ describe('Grant Namespace Manage Role', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })
 
@@ -64,8 +61,7 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -94,11 +90,7 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
     cy.resetCredential('Wendy')
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

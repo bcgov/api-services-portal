@@ -14,7 +14,7 @@ describe('Create API Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
     cy.resetState()
   })
 
@@ -42,7 +42,7 @@ describe('Create API Spec', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.updateJsonValue('common-testdata.json', 'apiTest.namespace', namespace)
@@ -61,7 +61,9 @@ describe('Create API Spec', () => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
       cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response :any) => {
+        debugger
         expect(response.data2.status).to.be.equal(200)
+        cy.addToGlobalList(response.data1.body.status)
       })
     })
   })
@@ -69,6 +71,5 @@ describe('Create API Spec', () => {
   after(() => {
     cy.logout()
     cy.clearLocalStorage({log:true})
-    cy.deleteAllCookies()
   })
 })

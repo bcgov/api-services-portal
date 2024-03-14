@@ -13,8 +13,7 @@ describe('Generates public/private key and set public key to access request', ()
 
   before(() => {
     cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -71,7 +70,5 @@ describe('Generates public/private key and set public key to access request', ()
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({ log: true })
-    cy.deleteAllCookies()
   })
 })

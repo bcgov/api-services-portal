@@ -278,6 +278,7 @@ export interface Application {
 export interface Product {
   appId?: string; // Primary Key
   name?: string;
+  description?: string;
   namespace?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
@@ -299,7 +300,7 @@ export interface Environment {
   name?: "dev" | "test" | "prod" | "sandbox" | "other";
   active?: boolean;
   approval?: boolean;
-  flow?: "public" | "authorization-code" | "client-credentials" | "kong-acl-only" | "kong-api-key-only" | "kong-api-key-acl";
+  flow?: "public" | "protected-externally" | "authorization-code" | "client-credentials" | "kong-acl-only" | "kong-api-key-only" | "kong-api-key-acl";
   additionalDetailsToRequest?: string;
   services?: GatewayServiceRefID[];
   legal?: LegalRefID;

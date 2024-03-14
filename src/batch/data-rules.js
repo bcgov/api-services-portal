@@ -376,11 +376,12 @@ const metadata = {
   Product: {
     query: 'allProducts',
     refKey: 'appId',
-    sync: ['name', 'namespace'],
+    compositeRefKey: ['name', 'namespace'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       environments: {
-        name: 'connectExclusiveList',
+        name: 'connectExclusiveListCreate',
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
@@ -403,6 +404,10 @@ const metadata = {
   Environment: {
     query: 'allEnvironments',
     refKey: 'appId',
+    compositeRefKey: [
+      'name',
+      { key: 'parent.id', whereClause: 'product: { id: $parent_id }' },
+    ],
     sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
     ownedBy: 'product',
     transformations: {
@@ -410,12 +415,14 @@ const metadata = {
         name: 'connectMany',
         list: 'allGatewayServices',
         refKey: 'name',
+        filterByNamespace: true,
       },
       legal: { name: 'connectOne', list: 'allLegals', refKey: 'reference' },
       credentialIssuer: {
         name: 'connectOne',
         list: 'allCredentialIssuers',
         refKey: 'name',
+        filterByNamespace: true,
       },
     },
     validations: {
@@ -429,6 +436,7 @@ const metadata = {
         type: 'enum',
         values: [
           'public',
+          'protected-externally',
           'authorization-code',
           'client-credentials',
           'kong-acl-only',

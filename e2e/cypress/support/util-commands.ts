@@ -201,6 +201,7 @@ Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: stri
 Cypress.Commands.add('checkAstraScanResultForVulnerability', () => {
   let aggregatedData = {};
   let existingData: any = [];
+  let flag = false
   cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
     fileContent.items.forEach((item: string) => {
       // Perform an action based on each item in the array
@@ -215,10 +216,14 @@ Cypress.Commands.add('checkAstraScanResultForVulnerability', () => {
       var jsonObject = existingData[i];
       for (var j = 0; i < jsonObject.length; i++) {
         if (jsonObject[j].hasOwnProperty("impact") &&
-          ["High", "Medium"].includes(jsonObject[j]["impact"])) {
-          assert.fail("Some of the results have high or medium severity security vulnerabilities. Please check the result file for more details.");
+          ["High", "Low"].includes(jsonObject[j]["impact"])) {
+          flag = true;
         }
       }
     }
-  });
+  }).then(()=>{
+    if (flag){
+      assert.fail("Some of the results have high or medium severity security vulnerabilities. Please check the result file for more details.");
+    }
+  })
 })

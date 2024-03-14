@@ -264,9 +264,9 @@ jobs:
             NEXT_PUBLIC_HELP_API_DOCS_URL:
               value: '/ds/api/v2/console/'
             NEXT_PUBLIC_HELP_SUPPORT_URL:
-              value: 'https://bcgov.github.io/aps-infra-platform/'
+              value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/'
             NEXT_PUBLIC_HELP_RELEASE_URL:
-              value: 'https://bcgov.github.io/aps-infra-platform/releases/'
+              value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/releases/'
             NEXT_PUBLIC_HELP_STATUS_URL:
               value: 'https://uptime.com/s/bcgov-dss'
             NEXT_PUBLIC_DEVELOPER_IDS:
@@ -312,7 +312,7 @@ jobs:
               - 'state=\$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"\$state\" == \"ready\" ]; then exit 1; fi'
             timeoutSeconds: 3
             periodSeconds: 10
-        
+
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
@@ -361,6 +361,7 @@ jobs:
         if: github.ref == 'refs/heads/test'
         run: |
           oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+          oc rollout restart deployment/bcgov-aps-portal-batch-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
 
       - name: 'Create Pull Request for Release'
         if: github.ref == 'refs/heads/test'

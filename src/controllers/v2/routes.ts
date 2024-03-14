@@ -379,7 +379,7 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["sandbox"]},{"dataType":"enum","enums":["other"]}]},
             "active": {"dataType":"boolean"},
             "approval": {"dataType":"boolean"},
-            "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
+            "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
             "additionalDetailsToRequest": {"dataType":"string"},
             "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
             "legal": {"ref":"LegalRefID"},
@@ -393,6 +393,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "appId": {"dataType":"string"},
             "name": {"dataType":"string"},
+            "description": {"dataType":"string"},
             "namespace": {"dataType":"string"},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},

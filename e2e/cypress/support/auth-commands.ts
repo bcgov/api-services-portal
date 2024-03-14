@@ -91,7 +91,6 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
-  cy.deleteAllCookies()
   cy.visit('/')
   cy.reload()
   cy.fixture('apiowner').as('apiowner')
@@ -117,7 +116,6 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string, isNamespace
   const home = new HomePage()
   const na = new NamespaceAccessPage()
   let userSession: string
-  cy.deleteAllCookies()
   cy.visit('/')
   cy.reload()
   cy.fixture('apiowner').as('apiowner')
@@ -201,8 +199,10 @@ Cypress.Commands.add('logout', () => {
   cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
+      cy.visit('/')
+      cy.wait(3000)
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
-      cy.contains('Logout').click()
+      cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
     })
   })
   cy.log('> Logging out')
@@ -457,9 +457,50 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
       };
       // cy.addToGlobalList(response2.body.status)
       return responseData;
-    });
+    })
   });
 })
+
+// Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) => {
+//   let body = {};
+//   let requestData: any = {};
+
+//   if (methodType.toUpperCase() === 'PUT' || methodType.toUpperCase() === 'POST') {
+//     body = requestBody;
+//   }
+
+//   requestData['appname'] = "Test1";
+//   requestData['url'] = Cypress.env('BASE_URL') + '/' + endPoint;
+//   requestData['headers'] = headers;
+//   requestData['body'] = body;
+//   requestData['method'] = methodType;
+  
+//   return cy.request({
+//     url: 'http://astra.localtest.me:8094/scan/',
+//     method: 'POST',
+//     body: requestData,
+//     headers: headers,
+//     failOnStatusCode: false
+//   }).then((response1) => {
+//     // Second API request
+//     return cy.request({
+//       url: Cypress.env('BASE_URL') + '/' + endPoint,
+//       method: methodType,
+//       body: body,
+//       headers: headers,
+//       failOnStatusCode: false
+//     }).then((response2) => {
+//       // You can also return data or use it in further tests
+//       const responseData = {
+//         data1: response1,
+//         data2: response2,
+//       };
+//       cy.addToGlobalList(response2.body.status);
+//       // Return the response data within cy.then() to properly chain commands
+//       return responseData;
+//     });
+//   });
+// });
 
 Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
   return cy.request({

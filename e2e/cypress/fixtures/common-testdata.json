@@ -76,7 +76,7 @@
     }
   },
   "apiTest": {
-    "namespace": "gw-c3f31",
+    "namespace": "gw-1b004",
     "delete_namespace": "testplatform"
   }
 }

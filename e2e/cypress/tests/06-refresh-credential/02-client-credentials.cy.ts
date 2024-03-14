@@ -13,7 +13,7 @@ import MyAccessPage from '../../pageObjects/myAccess'
 //   before(() => {
 //     cy.visit('/')
 //     cy.deleteAllCookies()
-//     cy.reload()
+//     cy.reload(true)
 //   })
 
 //   beforeEach(() => {
@@ -69,7 +69,7 @@ describe('Regenerate Credential for Client Credentials- Client ID/Secret', () =>
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {

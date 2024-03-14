@@ -18,7 +18,7 @@ describe('Verify CLI commands', () => {
   before(() => {
     // cy.visit('/')
     cy.deleteAllCookies()
-    cy.reload()
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -50,7 +50,7 @@ describe('Verify CLI commands', () => {
     let clientID = "dummy-client"
     let clientSecret = cli.credentials.clientSecret
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
+      expect(response.stderr).to.contain("Error: invalid_client")
     });
   })
 
@@ -58,7 +58,7 @@ describe('Verify CLI commands', () => {
     let clientID = cli.credentials.clientID
     let clientSecret = "dummy-client-secret"
     cy.executeCliCommand('gwa login --client-id ' + clientID + ' --client-secret ' + clientSecret + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      assert.equal(response.stderr, "Error: unauthorized_client\nINVALID_CREDENTIALS: Invalid client credentials")
+      expect(response.stderr).to.contain("unauthorized_client")
     });
   })
 
@@ -77,7 +77,7 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa command to create namespace', () => {
-    cy.executeCliCommand('gwa namespace create --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
     });

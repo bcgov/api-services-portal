@@ -56,18 +56,7 @@ const HelpMenu: React.FC = () => {
               },
             }}
           >
-            <MenuGroup title="Documentation">
-              <MenuItem
-                as="a"
-                color="bc-blue"
-                href={data?.helpLinks.helpApiDocsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="help-menu-api-docs"
-              >
-                API Docs
-                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-              </MenuItem>
+            <MenuGroup>
               <MenuItem
                 as="a"
                 color="bc-blue"
@@ -76,7 +65,18 @@ const HelpMenu: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                APS Support
+                Support Docs
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+              </MenuItem>
+              <MenuItem
+                as="a"
+                color="bc-blue"
+                href={data?.helpLinks.helpApiDocsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="help-menu-api-docs"
+              >
+                API Console
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
               <MenuItem
@@ -92,17 +92,17 @@ const HelpMenu: React.FC = () => {
               </MenuItem>
             </MenuGroup>
             <MenuDivider />
-            <MenuGroup title="Contact Us">
+            <MenuGroup>
               <MenuItem
                 color="bc-blue"
                 data-testid="help-menu-support"
                 onClick={onOpen}
               >
-                Support Links
+                Contact Us
               </MenuItem>
             </MenuGroup>
             <MenuDivider />
-            <MenuGroup title="About">
+            <MenuGroup>
               <MenuItem
                 as="a"
                 color="bc-blue"

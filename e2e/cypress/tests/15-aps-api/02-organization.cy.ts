@@ -3,6 +3,34 @@ import LoginPage from "../../pageObjects/login"
 let userSession: any
 var nameSpace: string
 
+// describe('Get the user session token', () => {
+
+//     const login = new LoginPage()
+//     const home = new HomePage()
+
+//     before(() => {
+//         cy.visit('/')
+//         cy.deleteAllCookies()
+//         cy.reload(true)
+//         // cy.getUserSessionTokenValue()
+//     })
+
+//     beforeEach(() => {
+//         cy.preserveCookies()
+//         cy.fixture('apiowner').as('apiowner')
+//         cy.fixture('common-testdata').as('common-testdata')
+//         // cy.visit(login.path)
+//     })
+
+//     it('authenticates Janis (api owner) to get the user session token', () => {
+//         cy.get('@common-testdata').then(({ apiTest }: any) => {
+//             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+//                 userSession = value
+//             })
+//         })
+//     })
+// })
+
 // describe('API Tests to verify the Organization details in the response', () => {
 
 //     beforeEach(() => {
@@ -61,34 +89,6 @@ var nameSpace: string
 //             cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response:any) => {
 //                 expect(response.data2.status).to.be.oneOf([404, 422])
 //                 expect(response.data2.body.message).to.be.equal("Validation Failed")
-//             })
-//         })
-//     })
-// })
-
-// describe('Get the user session token', () => {
-
-//     const login = new LoginPage()
-//     const home = new HomePage()
-
-//     before(() => {
-//         cy.visit('/')
-//         cy.deleteAllCookies()
-//         cy.reload()
-//         // cy.getUserSessionTokenValue()
-//     })
-
-//     beforeEach(() => {
-//         cy.preserveCookies()
-//         cy.fixture('apiowner').as('apiowner')
-//         cy.fixture('common-testdata').as('common-testdata')
-//         cy.visit(login.path)
-//     })
-
-//     it('authenticates Janis (api owner) to get the user session token', () => {
-//         cy.get('@common-testdata').then(({ apiTest }: any) => {
-//             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
-//                 userSession = value
 //             })
 //         })
 //     })

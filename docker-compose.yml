@@ -9,7 +9,7 @@ x-common-variables: &common-variables
 
 services:
   keycloak:
-    image: jboss/keycloak:11.0.3
+    image: jboss/keycloak:15.1.1
     container_name: keycloak
     hostname: keycloak
     depends_on:
@@ -18,7 +18,7 @@ services:
       [
         '-b',
         '0.0.0.0',
-        '-Djboss.socket.binding.port-offset=1000',
+        '-Djboss.socket.binding.port-offset=1001',
         '-Dkeycloak.migration.action=import',
         '-Dkeycloak.migration.provider=singleFile',
         '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
@@ -26,7 +26,7 @@ services:
         '-Dkeycloak.profile.feature.upload_scripts=enabled',
       ]
     ports:
-      - 9080:9080/tcp
+      - 9081:9081/tcp
     environment:
       #KEYCLOAK_USER: local
       #KEYCLOAK_PASSWORD: local
@@ -83,7 +83,7 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env.local
+      - ./local/feeds/.env.local
     restart: on-failure
     ports:
       - 6000:6000
@@ -103,30 +103,6 @@ services:
       - ./local/feeder-init:/tmp
     networks:
       - aps-net
-  # cypress:
-  #   image: aps-cypress-e2e:latest
-  #   container_name: cypress-e2e
-  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-  #   environment:
-  #     - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
-  #     - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
-  #     - RUN_ENV=${CY_EXECUTION_ENV}
-  #     - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
-  #     - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
-  #     - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
-  #     - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
-  #     - COMMIT_INFO_REMOTE=${CY_REPO_URL}
-  #     - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
-  #   depends_on:
-  #     - feeder-seeding
-  #   build:
-  #     context: ./e2e
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./e2e/coverage:/e2e/coverage
-  #     - ./e2e/results:/e2e/results
-  #   networks:
-  #     - aps-net
   kong-db:
     image: postgres:12.8
     container_name: kong-db
@@ -147,7 +123,9 @@ services:
     command: kong migrations bootstrap
     depends_on:
       - kong-db
-    environment: *common-variables
+    environment:
+      <<: *common-variables
+      KONG_DNS_ORDER: 'LAST,A'
     networks:
       - aps-net
     restart: on-failure
@@ -160,7 +138,9 @@ services:
     depends_on:
       - kong-db
       - kong-migrations
-    environment: *common-variables
+    environment:
+      <<: *common-variables
+      KONG_DNS_ORDER: 'LAST,A'
     networks:
       - aps-net
     restart: on-failure
@@ -172,6 +152,7 @@ services:
       - kong-migrations-up
     environment:
       <<: *common-variables
+      KONG_DEBUG_LEVEL: debug
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_CASSANDRA_CONTACT_POINTS: kong-db
@@ -179,6 +160,9 @@ services:
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_DNS_ORDER: 'LAST,A'
+      KONG_TRUSTED_IPS: '0.0.0.0/0,::/0'
+      KONG_REAL_IP_HEADER: X-Forwarded-For
     ports:
       - 8000:8000
       - 8001:8001
@@ -189,7 +173,7 @@ services:
     restart: on-failure:5
   redis:
     image: bitnami/redis:latest
-    container_name: redis
+    container_name: redis-master
     environment:
       - REDIS_PASSWORD=s3cr3t
     restart: on-failure
@@ -227,6 +211,32 @@ services:
       aps-net:
         aliases:
           - cypress-jwks-url.localtest.me
+  cypress:
+    image: aps-cypress-e2e:latest
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    environment:
+      - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
+      - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
+      - RUN_ENV=${CY_EXECUTION_ENV}
+      - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
+      - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
+      - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
+      - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
+      - COMMIT_INFO_REMOTE=${CY_REPO_URL}
+      - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
+    depends_on:
+      - feeder-seeding
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    volumes:
+      - ./e2e/coverage:/e2e/coverage
+      - ./e2e/results:/e2e/results
+    networks:
+      - aps-net
+    profiles:
+      - testsuite
   astra-mongo:
     image: mongo:4.2.2
     container_name: astra-mongo
