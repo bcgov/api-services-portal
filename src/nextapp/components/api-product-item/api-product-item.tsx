@@ -81,16 +81,16 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
           <Button
             disabled={true}
             data-testid="no-api-key-button"
-            variant={'primary'}
+            variant={'secondary'}
             fontWeight="600"
-            color="white"
+            color="bc-blue"
           >
-            No API Key Required
+            No API key required
           </Button>
         )}
       </Flex>
       {isTiered && (
-        <Flex px={9} py={7} bg={'white'} my={-5} mb={'0.5'}>
+        <Flex px={9} py={7} bg={'white'} my={-8} mb={'0.5'}>
           <Grid gap={4} flex={1} templateRows="auto" ml={8} mr={12}>
             <GridItem>
               <Flex align="center" mt={3}>
