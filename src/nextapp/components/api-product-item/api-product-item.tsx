@@ -79,7 +79,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
           />
         ) : (
           <Button
-            disabled={true}
+            disabled={false}
             data-testid="no-api-key-button"
             variant={'secondary'}
             fontWeight="600"
