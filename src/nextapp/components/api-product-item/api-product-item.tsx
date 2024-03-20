@@ -47,7 +47,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
 
   const isTieredHidden = data.environments.some((e) =>
     e.services.some((s) =>
-      s.plugins.some((p) => p.tags.includes('two-tiered-hidden'))
+      s.plugins.some((p) => p.tags.includes('aps.two-tiered-hidden'))
     )
   );
 
