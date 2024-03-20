@@ -45,6 +45,12 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   );
   const isTiered = data.environments.some((e) => e.anonymous);
 
+  const isTieredHidden = data.environments.some((e) =>
+    e.services.some((s) =>
+      s.plugins.some((p) => p.tags.includes('two-tiered-hidden'))
+    )
+  );
+
   return (
     <>
       <Flex px={9} py={7} bg={'white'} mb={'0.5'}>
@@ -70,8 +76,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {(!isTiered && isGatewayProtected) ||
-        data.name === 'BC Address Geocoder (Public)' ? ( // LOC specific code
+        {(!isTiered && isGatewayProtected) || isTieredHidden ? (
           <AccessRequestForm
             disabled={false}
             id={id}
@@ -80,33 +85,32 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
           />
         ) : null}
       </Flex>
-      {isTiered &&
-        data.name !== 'BC Address Geocoder (Public)' && ( // LOC specific code
-          <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
-            <Grid gap={4} flex={1} templateRows="auto" mr={12}>
-              <GridItem>
-                <Flex align="center" mb={2}>
-                  <Flex align="center" width={8}>
-                    <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
-                  </Flex>
-                  <Heading size="xs">Limits</Heading>
+      {isTiered && !isTieredHidden && (
+        <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
+          <Grid gap={4} flex={1} templateRows="auto" mr={12}>
+            <GridItem>
+              <Flex align="center" mb={2}>
+                <Flex align="center" width={8}>
+                  <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
                 </Flex>
-                <Text ml={8} fontSize="sm">
-                  Public access has a rate limit enforced.
-                </Text>
-                <Text ml={8} fontSize="sm">
-                  For elevated access, please request access.
-                </Text>
-              </GridItem>
-            </Grid>
-            <AccessRequestForm
-              disabled={false}
-              id={id}
-              name={data.name}
-              preview={preview}
-            />
-          </Flex>
-        )}
+                <Heading size="xs">Limits</Heading>
+              </Flex>
+              <Text ml={8} fontSize="sm">
+                Public access has a rate limit enforced.
+              </Text>
+              <Text ml={8} fontSize="sm">
+                For elevated access, please request access.
+              </Text>
+            </GridItem>
+          </Grid>
+          <AccessRequestForm
+            disabled={false}
+            id={id}
+            name={data.name}
+            preview={preview}
+          />
+        </Flex>
+      )}
     </>
   );
 };
