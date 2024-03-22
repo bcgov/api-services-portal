@@ -1,6 +1,22 @@
 .markdown {
 }
 
+.markdown h1 {
+  margin-bottom: 1em;
+}
+
+.markdown h2 {
+  margin-bottom: 1em;
+}
+
+.markdown h3 {
+  margin-bottom: 1em;
+}
+
+.markdown h4 {
+  margin-bottom: 1em;
+}
+
 .markdown ul {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -29,8 +45,8 @@
 }
 
 .markdown table {
-  margin-top: 5px;
-  margin-bottom: 15px;
+  margin-top: 1em;
+  margin-bottom: 1em;
   width: 100%;
   border-collapse: collapse;
 }
@@ -47,8 +63,8 @@
 }
 
 .markdown blockquote {
-  margin-top: 5px;
-  margin-bottom: 15px;
+  margin-top: 1em;
+  margin-bottom: 1em;
   padding-top: 5px;
   padding-bottom: 5px;
   padding-left: 5px;
