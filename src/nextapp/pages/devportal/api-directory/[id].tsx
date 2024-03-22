@@ -26,6 +26,7 @@ import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
+import style from '@/shared/styles/markdown.module.css';
 
 const renderers = {
   link: InternalLink,
@@ -144,20 +145,28 @@ const ApiPage: React.FC<
               <Heading size="sm">About This Dataset</Heading>
             </Box>
             <Box mt={5} mb={9} sx={{ p: { marginBottom: 4 } }}>
-              <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
+              <ReactMarkdownWithHtml
+                renderers={renderers}
+                plugins={[gfm]}
+                className={style.markdown}
+              >
                 {data?.notes}
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
               <Box bg="gray.100">
-                {data?.products?.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)).map((p) => (
-                  <ApiProductItem
-                    key={uid(p)}
-                    data={p}
-                    id={p.id}
-                    preview={preview}
-                  />
-                ))}
+                {data?.products
+                  ?.sort((a, b) =>
+                    a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+                  )
+                  .map((p) => (
+                    <ApiProductItem
+                      key={uid(p)}
+                      data={p}
+                      id={p.id}
+                      preview={preview}
+                    />
+                  ))}
               </Box>
             </Card>
           </GridItem>
