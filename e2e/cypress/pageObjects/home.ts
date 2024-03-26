@@ -16,22 +16,18 @@ class HomePage {
     cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
     cy.get(this.nsCreateBtn).click()
     cy.verifyToastMessage("Namespace "+name+" created!")
-    cy.wait(5000) // wait for dropdown to have latest text
-    cy.get(this.nsDropdown).then(($el) => {
+    cy.get(this.nsDropdown).should(($el) => {
       expect($el).contain(name)
     })
   }
 
-  useNamespace(name: string): Boolean {
+  useNamespace(name: string): void {
     var flag = new Boolean(false);
     cy.get(this.nsDropdown).click()
     cy.get(this.getNamespaceTestId(name)).click()
-    cy.wait(5000) // wait for dropdown to have latest text
-    cy.get(this.nsDropdown).then(($el) => {
-      expect($el.text().trim()).to.eq(name)
-      flag = true
-    })
-    return flag
+    cy.get(this.nsDropdown).should(($el) => {
+      expect($el.text().trim()).to.eq(name);
+    });
   }
 
   getNamespaceTestId(name: string): string {
