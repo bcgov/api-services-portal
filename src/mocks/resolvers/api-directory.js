@@ -1,4 +1,77 @@
+import YAML from 'js-yaml';
+
+const markdown = YAML.load(`
+notes: |
+  Here is some markdown.
+  # Heading 1
+  ## Heading 2
+  ### Heading 3
+  #### Heading 4
+  Then I will do **bold**, _italics_ and ~~strikethrough~~.
+
+  #### Heading 4
+  
+  And some text.
+
+  How about a table?
+  | Col1 | Col2 |
+  | ---- | ---- |
+  | Val1 | Val2 |
+
+  How about a new line.
+
+  And another line.
+
+  Try a list:
+  - one
+  - two
+  - three
+
+  Or an ordered list:
+  1. one
+  1. two
+  1. three
+
+  Then there are images
+
+  ![image](http://localhost:3000/images/bc_logo_header.svg)
+
+  And links [my docs](https://github.com).
+
+  Here are some block quotes
+
+  > A block quote about something.
+
+  What about a bit of code - \`alert("hi")\`.
+
+  Code block?
+  \`\`\`
+  function (a) {
+    // comment
+  }
+  \`\`\`
+
+`);
+
 const directories = [
+  {
+    id: 'api1',
+    name: 'markdown-test',
+    title: 'Testing Markdown on Dataset',
+    notes: markdown.notes,
+    sector: 'Natural Resources',
+    license_title: 'Access Only',
+    view_audience: 'Named users',
+    security_class: 'LOW-PUBLIC',
+    record_publish_date: '2020-04-28',
+    tags: '["API","CDOGS","Document","Document Generation"]',
+    organization: {
+      title: 'Ministry of Environment and Climate Change Strategy',
+    },
+    organizationUnit: {
+      title: 'Information Innovation and Technology',
+    },
+  },
   {
     id: 'api1',
     name: 'common-service-api',
