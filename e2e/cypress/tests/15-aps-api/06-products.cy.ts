@@ -64,8 +64,9 @@ describe('API Tests for Updating Products', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.replaceWord(products.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
                 updatedProductEndPoint = updatedEndPoint
-                cy.makeAPIRequest(updatedProductEndPoint, 'PUT').then((response) => {
-                    expect(response.status).to.be.equal(200)
+                cy.makeAPIRequest(updatedProductEndPoint, 'PUT').then((response:any) => {
+                    expect(response.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(response.data1.body.status)
                 })
             })
         })
@@ -136,8 +137,9 @@ describe('API Tests for Delete Products', () => {
     it('Delete the product environment and verify the success code in the response', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.replaceWord(products.deleteEnvironmentEndPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
-                cy.makeAPIRequest(updatedEndPoint + '/' + envID, 'Delete').then((response) => {
-                    expect(response.status).to.be.equal(200)
+                cy.makeAPIRequest(updatedEndPoint + '/' + envID, 'Delete').then((response:any) => {
+                    expect(response.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(response.data1.body.status)
                 })
             })
         })
@@ -145,25 +147,28 @@ describe('API Tests for Delete Products', () => {
 
     it('Get the resource and verify that product environment is deleted', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                let index = res.body.findIndex((x: { name: string }) => x.name === products.body.name)
-                expect(res.body[index].environments).to.be.empty
+            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
+                let index = res.data2.body.findIndex((x: { name: string }) => x.name === products.body.name)
+                expect(res.data2.body[index].environments).to.be.empty
             })
         })
     })
 
     it('Delete the product and verify the success code in the response', () => {
-        cy.makeAPIRequest(updatedProductEndPoint + '/' + productID, 'Delete').then((response) => {
-            expect(response.status).to.be.equal(200)
+        cy.makeAPIRequest(updatedProductEndPoint + '/' + productID, 'Delete').then((response:any) => {
+            expect(response.data2.status).to.be.equal(200)
+            cy.addToGlobalList(response.data1.body.status)
         })
     })
 
     it('Get the resource and verify that product is deleted', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                response = res.data2.body
+                cy.addToGlobalList(res.data1.body.status)
                 assert.equal(response.findIndex((x: { name: string }) => x.name === products.body.name), -1)
             })
         })
