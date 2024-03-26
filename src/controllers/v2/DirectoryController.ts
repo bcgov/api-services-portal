@@ -147,6 +147,7 @@ const item = gql`
           host
           plugins {
             name
+            tags
             config
           }
           routes {

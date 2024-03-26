@@ -45,6 +45,12 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   );
   const isTiered = data.environments.some((e) => e.anonymous);
 
+  const isTieredHidden = data.environments.some((e) =>
+    e.services.some((s) =>
+      s.plugins.some((p) => p.tags.includes('aps.two-tiered-hidden'))
+    )
+  );
+
   return (
     <>
       <Flex px={9} py={7} bg={'white'} mb={'0.5'}>
@@ -56,7 +62,9 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                   as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
-                  data-testid={`product-icon-${kebabCase(data.name)}-${isPublic || isTiered ? 'RiEarthFill' : 'FaLock'}`}
+                  data-testid={`product-icon-${kebabCase(data.name)}-${
+                    isPublic || isTiered ? 'RiEarthFill' : 'FaLock'
+                  }`}
                 />
               </Flex>
               <Heading size="xs">{data.name}</Heading>
@@ -68,16 +76,16 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             )}
           </GridItem>
         </Grid>
-        {!isTiered && isGatewayProtected && (
+        {(!isTiered && isGatewayProtected) || isTieredHidden ? (
           <AccessRequestForm
             disabled={false}
             id={id}
             name={data.name}
             preview={preview}
           />
-        )}
+        ) : null}
       </Flex>
-      {isTiered && (
+      {isTiered && !isTieredHidden && (
         <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
           <Grid gap={4} flex={1} templateRows="auto" mr={12}>
             <GridItem>
