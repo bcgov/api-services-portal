@@ -74,12 +74,12 @@ describe('API Tests for Updating Products', () => {
 
     it('Get the resource and verify the success code and product name in the response', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                let index = res.body.findIndex((x: { name: string }) => x.name === products.body.name)
-                response = res.body[index]
-                productID = res.body[index].appId
-                envID = res.body[index].environments[0].appId
+            cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                let index = res.data2.body.findIndex((x: { name: string }) => x.name === products.body.name)
+                response = res.data2.body[index]
+                productID = res.data2.body[index].appId
+                envID = res.data2.body[index].environments[0].appId
             })
         })
     })

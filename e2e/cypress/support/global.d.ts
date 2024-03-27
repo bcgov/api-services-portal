@@ -101,5 +101,11 @@ declare namespace Cypress {
     updateJsonBoby(json: any, key: string, newValue: string):Chainable<any>
 
     deleteFileInE2EFolder(fileName: string):Chainable<any>
+
+    addToGlobalList(item: any):Chainable<any>
+    
+    checkAstraScanResultForVulnerability():Chainable<any>
+
+    makeAPIRequestForScanResult(scanID: string): Chainable<Cypress.Response<any>>
   }
 }

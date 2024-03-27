@@ -275,19 +275,3 @@ describe('Add and Get Organization Access', () => {
         cy.deleteAllCookies()
     })
 })
-
-describe('Iterate Items', () => {
-
-    it('Iterate Item', () => {
-        cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
-            // Perform assertions or other actions with the file content
-            cy.log('File Content:', fileContent);
-          });
-    })
-})
-
-describe('Iterate Items', () => {
-    it('Iterate Item', () => {
-        cy.checkAstraScanResultForVulnerability()
-    })
-})

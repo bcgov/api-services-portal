@@ -55,8 +55,9 @@ describe('API Tests for Updating dataset', () => {
 
     it('Put the resource (/organization/{org}/datasets) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
-            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets', 'PUT').then((response) => {
-                expect(response.status).to.be.equal(200)
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets', 'PUT').then((response:any) => {
+                expect(response.data2.status).to.be.equal(200)
+                cy.addToGlobalList(response.data1.body.status)
             })
         })
     })
@@ -64,9 +65,9 @@ describe('API Tests for Updating dataset', () => {
     it('Get the resource (/organization/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.equal(200)
+                    response = res.data2.body
                 })
             })
         })
@@ -81,8 +82,9 @@ describe('API Tests for Updating dataset', () => {
     it('Put the resource (/namespaces/{ns}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets', 'PUT').then((response) => {
-                    expect(response.status).to.be.equal(200)
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets', 'PUT').then((response:any) => {
+                    expect(response.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(response.data1.body.status)
                 })
             })
         })
@@ -91,9 +93,9 @@ describe('API Tests for Updating dataset', () => {
     it('Get the resource (/namespaces/{ns}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.equal(200)
+                    response = res.data2.body
                 })
             })
         })
@@ -107,9 +109,9 @@ describe('API Tests for Updating dataset', () => {
 
     it('Get the resource (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
-            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                response = res.data2.body
             })
         })
     })
@@ -122,9 +124,10 @@ describe('API Tests for Updating dataset', () => {
 
     it('Get the resource (/organizations/{org}/datasets) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
-            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
+                response = res.data2.body
             })
         })
     })
@@ -137,11 +140,12 @@ describe('API Tests for Updating dataset', () => {
 
     it('Get the directory details (/directory) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
-            cy.makeAPIRequest(apiDirectory.directoryEndPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
-                directoryID = res.body[0].id
-                directoryName = res.body[0].name
+            cy.makeAPIRequest(apiDirectory.directoryEndPoint, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
+                response = res.data2.body
+                directoryID = res.data2.body[0].id
+                directoryName = res.data2.body[0].name
             })
         })
     })
@@ -154,9 +158,10 @@ describe('API Tests for Updating dataset', () => {
 
     it('Get the directory details by its ID (/directory/{id}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
-            cy.makeAPIRequest(apiDirectory.directoryEndPoint + '/' + directoryID, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                expect(res.body.name).to.be.equal(directoryName)
+            cy.makeAPIRequest(apiDirectory.directoryEndPoint + '/' + directoryID, 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
+                expect(res.data2.body.name).to.be.equal(directoryName)
             })
         })
     })
@@ -164,9 +169,10 @@ describe('API Tests for Updating dataset', () => {
     it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code and empty response for the namespace with no directory', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory', 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    expect(res.body).to.be.empty
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory', 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(res.data1.body.status)
+                    expect(res.data2.body).to.be.empty
                 })
             })
         })
@@ -175,11 +181,11 @@ describe('API Tests for Updating dataset', () => {
     it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory', 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body[0]
-                    directoryID = res.body[0].id
-                    directoryName = res.body[0].name
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory', 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.equal(200)
+                    response = res.data2.body[0]
+                    directoryID = res.data2.body[0].id
+                    directoryName = res.data2.body[0].name
                 })
             })
         })
@@ -194,9 +200,10 @@ describe('API Tests for Updating dataset', () => {
     it('Get the namespace directory details by its ID (/namespaces/{ns}/directory/{id}) and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/' + directoryID, 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    expect(res.body.name).to.be.equal(directoryName)
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/' + directoryID, 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(res.data1.body.status)
+                    expect(res.data2.body.name).to.be.equal(directoryName)
                 })
             })
         })
@@ -205,8 +212,9 @@ describe('API Tests for Updating dataset', () => {
     it('Get the namespace directory details (/namespaces/{ns}/directory/{id}) for non exist directory ID and verify the response code', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99', 'GET').then((res) => {
-                    expect(res.status).to.be.oneOf([404, 422])
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99', 'GET').then((res:any) => {
+                    expect(res.data2.status).to.be.oneOf([404, 422])
+                    cy.addToGlobalList(res.data1.body.status)
                 })
             })
         })
@@ -214,17 +222,19 @@ describe('API Tests for Updating dataset', () => {
 
     it('Delete the dataset (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
-            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'DELETE').then((res) => {
-                expect(res.status).to.be.equal(200)
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'DELETE').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
             })
         })
     })
 
     it('Verify that deleted dataset does not display in Get dataset list', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
-            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res:any) => {
+                expect(res.data2.status).to.be.equal(200)
+                cy.addToGlobalList(res.data1.body.status)
+                response = res.data2.body
                 expect(response).to.not.contain(apiDirectory.body.name)
             })
         })

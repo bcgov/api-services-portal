@@ -170,6 +170,21 @@ Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
   }
 });
 
+Cypress.Commands.add('addToGlobalList', (item) => {
+  cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
+    // Initialize the list if it doesn't exist
+    const items = fileContent.items || [];
+
+    // Append the new item to the list
+    items.push(item);
+
+    // Create an object with the updated list
+    const updatedData = { items };
+
+    // Write the updated object back to the file
+    cy.writeFile('cypress/fixtures/state/scanID.json', updatedData);
+  });
+});
 
 Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: string, replacementWord: string)=> {
   // Create a regular expression with the 'g' flag for global search
@@ -180,4 +195,34 @@ Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: stri
   replacedString = originalString.replace(regex, replacementWord);
 
   return replacedString;
+})
+
+Cypress.Commands.add('checkAstraScanResultForVulnerability', () => {
+  let aggregatedData = {};
+  let existingData: any = [];
+  let flag = false
+  cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
+    fileContent.items.forEach((item: string) => {
+      // Perform an action based on each item in the array
+      cy.makeAPIRequestForScanResult(item).then((response) => {
+        const newResponse = JSON.parse(JSON.stringify(response.body));
+        existingData.push(newResponse);
+      });
+    });
+  }).then(() => {
+    cy.writeFile('cypress/fixtures/state/scanResult.json', JSON.stringify(existingData))
+    for (var i = 0; i < existingData.length; i++) {
+      var jsonObject = existingData[i];
+      for (var j = 0; i < jsonObject.length; i++) {
+        if (jsonObject[j].hasOwnProperty("impact") &&
+          ["High", "Medium"].includes(jsonObject[j]["impact"])) {
+          flag = true;
+        }
+      }
+    }
+  }).then(()=>{
+    if (flag){
+      assert.fail("Some of the results have high or medium severity security vulnerabilities. Please check the result file for more details.");
+    }
+  })
 })
