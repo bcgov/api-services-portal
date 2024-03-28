@@ -89,6 +89,12 @@ jobs:
           name: test-results
           path: ${{ github.workspace }}/e2e/results/report
 
+      - name: Upload E2E Code Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: ${{ github.workspace }}/e2e/coverage
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:

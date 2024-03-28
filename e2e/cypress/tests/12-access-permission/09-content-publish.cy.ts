@@ -52,9 +52,9 @@ describe('Verify Content Publish Permission', () => {
 
   it('Verify that the document is not published without "Content.Publish" permission', () => {
     cy.get('@api').then(({ documentation }: any) => {
-      cy.makeAPIRequest(documentation.endPoint, 'PUT').then((response) => {
-        expect(response.status).to.be.equal(401)
-        expect(response.body.message).contain('Missing authorization scope')
+      cy.makeAPIRequest(documentation.endPoint, 'PUT').then((response:any) => {
+        expect(response.data2.status).to.be.equal(401)
+        expect(response.data2.body.message).contain('Missing authorization scope')
       })
     })
   })

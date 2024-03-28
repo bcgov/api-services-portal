@@ -27,7 +27,8 @@ export default defineConfig({
       './cypress/tests/14-*/*.ts',
       './cypress/tests/15-*/*.ts',
       './cypress/tests/16-*/*.ts',
-      './cypress/tests/17-*/*.ts'
+      './cypress/tests/17-*/*.ts',
+      './cypress/tests/18-*/*.ts'
     ]
       return config
     },

@@ -53,8 +53,9 @@ describe('API Tests for Updating documentation', () => {
         cy.get('@api').then(({ documentation }: any) => {
             cy.replaceWord(documentation.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
                 updatedDocumentEndPoint = updatedEndPoint
-                cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response) => {
-                    expect(response.status).to.be.equal(200)
+                cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response:any) => {
+                    expect(response.data2.status).to.be.equal(200)
+                    cy.addToGlobalList(response.data1.body.status)
                 })
             })
         })
@@ -80,10 +81,11 @@ describe('API Tests for Fetching documentation', () => {
     })
 
     it('Get the resource and verify the success code in the response', () => {
-        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((res) => {
-            expect(res.status).to.be.equal(200)
-            slugValue = res.body[0].slug
-            response = res.body[0]
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((res:any) => {
+            expect(res.data2.status).to.be.equal(200)
+            cy.addToGlobalList(res.data1.body.status)
+            slugValue = res.data2.body[0].slug
+            response = res.data2.body[0]
         })
     })
 
@@ -113,16 +115,18 @@ describe('API Tests for Deleting documentation', () => {
     })
 
     it('Verify the status code and response message for invalid slugvalue', () => {
-        cy.makeAPIRequest(updatedDocumentEndPoint + '/platform_test', 'DELETE').then((response) => {
-            expect(response.status).to.be.oneOf([404, 422])
-            expect(response.body.message).to.be.equal("Content not found")
+        cy.makeAPIRequest(updatedDocumentEndPoint + '/platform_test', 'DELETE').then((response:any) => {
+            expect(response.data2.status).to.be.oneOf([404, 422])
+            expect(response.data2.body.message).to.be.equal("Content not found")
+            cy.addToGlobalList(response.data1.body.status)
         })
     })
 
 
     it('Delete the documentation', () => {
-        cy.makeAPIRequest(updatedDocumentEndPoint + '/' + slugValue, 'DELETE').then((response) => {
-            expect(response.status).to.be.equal(200)
+        cy.makeAPIRequest(updatedDocumentEndPoint + '/' + slugValue, 'DELETE').then((response:any) => {
+            expect(response.data2.status).to.be.equal(200)
+            cy.addToGlobalList(response.data1.body.status)
         })
     })
 })
@@ -145,9 +149,10 @@ describe('API Tests to verify no value in Get call after deleting document conte
     })
 
     it('Delete the documentation', () => {
-        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((response) => {
-            expect(response.status).to.be.equal(200)
-            expect(response.body).to.be.empty
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((response:any) => {
+            expect(response.data2.status).to.be.equal(200)
+            cy.addToGlobalList(response.data1.body.status)
+            expect(response.data2.body).to.be.empty
         })
     })
 })
@@ -179,8 +184,9 @@ describe('API Tests to verify Get documentation content', () => {
     })
 
     it('Put the resource and verify the success code in the response', () => {
-        cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response) => {
-            expect(response.status).to.be.equal(200)
+        cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response:any) => {
+            expect(response.data2.status).to.be.equal(200)
+            cy.addToGlobalList(response.data1.body.status)
         })
     })
 
@@ -193,30 +199,33 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Verify that document contant is displayed for GET /documentation', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(response.body[0].title).to.be.equal(documentation.body.title)
-                expect(response.body[0].description).to.be.equal(documentation.body.description)
-                slugID = response.body[0].slug
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint, 'GET').then((response:any) => {
+                expect(response.data2.status).to.be.equal(200)
+                cy.addToGlobalList(response.data1.body.status)
+                expect(response.data2.body[0].title).to.be.equal(documentation.body.title)
+                expect(response.data2.body[0].description).to.be.equal(documentation.body.description)
+                slugID = response.data2.body[0].slug
             })
         })
     })
 
     it('Verify the status code and response message for invalid slug id', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/998898', 'GET').then((response) => {
-                expect(response.status).to.be.oneOf([404, 422])
-                expect(response.body.message).to.be.contains("Not Found")
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/998898', 'GET').then((response:any) => {
+                expect(response.data2.status).to.be.oneOf([404, 422])
+                cy.addToGlobalList(response.data1.body.status)
+                expect(response.data2.body.message).to.be.contains("Not Found")
             })
         })
     })
 
     it('Verify that document contant is fetch by slug ID', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/' + slugID, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(response.body.slug).to.be.equal(slugID)
-                expect(response.body.title).to.be.equal(documentation.body.title)
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/' + slugID, 'GET').then((response:any) => {
+                expect(response.data2.status).to.be.equal(200)
+                cy.addToGlobalList(response.data1.body.status)
+                expect(response.data2.body.slug).to.be.equal(slugID)
+                expect(response.data2.body.title).to.be.equal(documentation.body.title)
             })
         })
     })
