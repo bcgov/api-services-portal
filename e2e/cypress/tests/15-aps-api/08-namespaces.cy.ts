@@ -79,7 +79,7 @@ describe('API Tests for Namespace List', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 response = res.data2.body
             })
         })
@@ -111,7 +111,7 @@ describe('API Tests for Namespace Activities', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
             })
         })
     })
@@ -141,7 +141,7 @@ describe('API Tests for Namespace Summary', () => {
             cy.get('@api').then(({ namespaces }: any) => {
                 cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'GET').then((res:any) => {
                     expect(res.data2.status).to.be.equal(200)
-                    cy.addToGlobalList(res.data1.body.status)
+                    cy.addToAstraScanIdList(res.data1.body.status)
                     response = res.data2.body.name
                 })
             })
@@ -177,7 +177,7 @@ describe('API Tests for Create Namespace', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 expect(res.data2.body.displayName).to.be.equal(null)
                 nameSpace = res.data2.body.name
             })
@@ -188,7 +188,7 @@ describe('API Tests for Create Namespace', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 expect(res.data2.body).to.be.contain(nameSpace)
             })
         })
@@ -199,7 +199,7 @@ describe('API Tests for Create Namespace', () => {
             cy.setRequestBody(namespaces.userDefinedNamespace)
             cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 expect(res.data2.body.displayName).to.be.equal(namespaces.userDefinedNamespace.displayName)
                 nameSpace = res.data2.body.name
             })
@@ -210,7 +210,7 @@ describe('API Tests for Create Namespace', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 expect(res.data2.body).to.be.contain(nameSpace)
             })
         })
@@ -236,7 +236,7 @@ describe('API Tests for invalid namespace name', () => {
                         cy.setRequestBody(updatedBody)
                         cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                             expect(res.data2.status).to.be.equal(422)
-                            cy.addToGlobalList(res.data1.body.status)
+                            cy.addToAstraScanIdList(res.data1.body.status)
                             expect(res.data2.body.message).to.be.equal('Validation Failed')
                         })
                     })

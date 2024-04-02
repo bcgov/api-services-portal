@@ -66,7 +66,7 @@ describe('API Tests for Updating Products', () => {
                 updatedProductEndPoint = updatedEndPoint
                 cy.makeAPIRequest(updatedProductEndPoint, 'PUT').then((response:any) => {
                     expect(response.data2.status).to.be.equal(200)
-                    cy.addToGlobalList(response.data1.body.status)
+                    cy.addToAstraScanIdList(response.data1.body.status)
                 })
             })
         })
@@ -139,7 +139,7 @@ describe('API Tests for Delete Products', () => {
             cy.replaceWord(products.deleteEnvironmentEndPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
                 cy.makeAPIRequest(updatedEndPoint + '/' + envID, 'Delete').then((response:any) => {
                     expect(response.data2.status).to.be.equal(200)
-                    cy.addToGlobalList(response.data1.body.status)
+                    cy.addToAstraScanIdList(response.data1.body.status)
                 })
             })
         })
@@ -149,7 +149,7 @@ describe('API Tests for Delete Products', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 let index = res.data2.body.findIndex((x: { name: string }) => x.name === products.body.name)
                 expect(res.data2.body[index].environments).to.be.empty
             })
@@ -159,7 +159,7 @@ describe('API Tests for Delete Products', () => {
     it('Delete the product and verify the success code in the response', () => {
         cy.makeAPIRequest(updatedProductEndPoint + '/' + productID, 'Delete').then((response:any) => {
             expect(response.data2.status).to.be.equal(200)
-            cy.addToGlobalList(response.data1.body.status)
+            cy.addToAstraScanIdList(response.data1.body.status)
         })
     })
 
@@ -168,7 +168,7 @@ describe('API Tests for Delete Products', () => {
             cy.makeAPIRequest(updatedProductEndPoint, 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
                 response = res.data2.body
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 assert.equal(response.findIndex((x: { name: string }) => x.name === products.body.name), -1)
             })
         })

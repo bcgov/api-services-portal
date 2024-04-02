@@ -52,7 +52,7 @@ describe('API Tests to verify the Organization details in the response', () => {
                 expect(response.data2.body[0].name).to.eq("ministry-of-health")
                 expect(response.data2.body[0].title).to.eq("Ministry of Health")
                 expect(response.data2.body[0]).has.property('title', 'Ministry of Health')
-                cy.addToGlobalList(response.data1.body.status)
+                cy.addToAstraScanIdList(response.data1.body.status)
             })
         })
     })
@@ -76,7 +76,7 @@ describe('Verify /Organization/{Org} end point', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response:any) => {
                 expect(response.data2.status).to.be.equal(200)
-                cy.addToGlobalList(response.data1.body.status)
+                cy.addToAstraScanIdList(response.data1.body.status)
                 assert.isTrue(Cypress._.isEqual(response.data2.body.orgUnits[0], organization.orgExpectedList))
             })
         })
@@ -113,7 +113,7 @@ describe('Get the Organization Role', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/roles', 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 response = res.data2.body
             })
         })
@@ -131,7 +131,7 @@ describe('Get the Organization Role', () => {
         cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res:any) => {
             expect(res.data2.status).to.be.equal(200)
             response = res.data2.body
-            cy.addToGlobalList(res.data1.body.status)
+            cy.addToAstraScanIdList(res.data1.body.status)
         })
     })
 
@@ -165,7 +165,7 @@ describe('Get the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 response = res.data2.body
                 nameSpace = response[0].name
             })
@@ -206,7 +206,7 @@ describe('Delete the Namespace associated with the organization', () => {
             cy.get('@api').then(({ organization }: any) => {
                 cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res:any) => {
                     expect(res.data2.status).to.be.equal(200)
-                    cy.addToGlobalList(res.data1.body.status)
+                    cy.addToAstraScanIdList(res.data1.body.status)
                     response = res.data2.body
                 })
             })
@@ -217,7 +217,7 @@ describe('Delete the Namespace associated with the organization', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 response = res.data2.body
                 assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace), -1)
             })
@@ -248,7 +248,7 @@ describe('Add and Get Organization Access', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'PUT').then((res:any) => {
                 expect(res.data2.status).to.be.equal(204)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
             })
         })
     })
@@ -257,7 +257,7 @@ describe('Add and Get Organization Access', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'GET').then((res:any) => {
                 expect(res.data2.status).to.be.equal(200)
-                cy.addToGlobalList(res.data1.body.status)
+                cy.addToAstraScanIdList(res.data1.body.status)
                 response = res.data2.body
             })
         })

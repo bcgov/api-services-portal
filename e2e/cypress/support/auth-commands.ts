@@ -455,7 +455,7 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
         data1: response1,
         data2: response2,
       };
-      // cy.addToGlobalList(response2.body.status)
+      // cy.addToAstraScanIdList(response2.body.status)
       return responseData;
     })
   });

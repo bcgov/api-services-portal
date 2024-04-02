@@ -102,7 +102,7 @@ declare namespace Cypress {
 
     deleteFileInE2EFolder(fileName: string):Chainable<any>
 
-    addToGlobalList(item: any):Chainable<any>
+    addToAstraScanIdList(item: any):Chainable<any>
     
     checkAstraScanResultForVulnerability():Chainable<any>
 

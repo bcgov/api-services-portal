@@ -170,7 +170,7 @@ Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
   }
 });
 
-Cypress.Commands.add('addToGlobalList', (item) => {
+Cypress.Commands.add('addToAstraScanIdList', (item) => {
   cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
     // Initialize the list if it doesn't exist
     const items = fileContent.items || [];
