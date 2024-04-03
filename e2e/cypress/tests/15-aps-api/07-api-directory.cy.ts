@@ -56,8 +56,8 @@ describe('API Tests for Updating dataset', () => {
     it('Put the resource (/organization/{org}/datasets) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets', 'PUT').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
             })
         })
     })
@@ -66,8 +66,8 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.equal(200)
-                    response = res.data2.body
+                    expect(res.apiRes.status).to.be.equal(200)
+                    response = res.apiRes.body
                 })
             })
         })
@@ -83,8 +83,8 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets', 'PUT').then((response:any) => {
-                    expect(response.data2.status).to.be.equal(200)
-                    cy.addToAstraScanIdList(response.data1.body.status)
+                    expect(response.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(response.astraRes.body.status)
                 })
             })
         })
@@ -94,8 +94,8 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.equal(200)
-                    response = res.data2.body
+                    expect(res.apiRes.status).to.be.equal(200)
+                    response = res.apiRes.body
                 })
             })
         })
@@ -110,8 +110,8 @@ describe('API Tests for Updating dataset', () => {
     it('Get the resource (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                response = res.apiRes.body
             })
         })
     })
@@ -125,9 +125,9 @@ describe('API Tests for Updating dataset', () => {
     it('Get the resource (/organizations/{org}/datasets) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
@@ -141,11 +141,11 @@ describe('API Tests for Updating dataset', () => {
     it('Get the directory details (/directory) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
             cy.makeAPIRequest(apiDirectory.directoryEndPoint, 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
-                directoryID = res.data2.body[0].id
-                directoryName = res.data2.body[0].name
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
+                directoryID = res.apiRes.body[0].id
+                directoryName = res.apiRes.body[0].name
             })
         })
     })
@@ -159,9 +159,9 @@ describe('API Tests for Updating dataset', () => {
     it('Get the directory details by its ID (/directory/{id}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
             cy.makeAPIRequest(apiDirectory.directoryEndPoint + '/' + directoryID, 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                expect(res.data2.body.name).to.be.equal(directoryName)
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                expect(res.apiRes.body.name).to.be.equal(directoryName)
             })
         })
     })
@@ -170,9 +170,9 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory', 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.equal(200)
-                    cy.addToAstraScanIdList(res.data1.body.status)
-                    expect(res.data2.body).to.be.empty
+                    expect(res.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(res.astraRes.body.status)
+                    expect(res.apiRes.body).to.be.empty
                 })
             })
         })
@@ -182,10 +182,10 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory', 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.equal(200)
-                    response = res.data2.body[0]
-                    directoryID = res.data2.body[0].id
-                    directoryName = res.data2.body[0].name
+                    expect(res.apiRes.status).to.be.equal(200)
+                    response = res.apiRes.body[0]
+                    directoryID = res.apiRes.body[0].id
+                    directoryName = res.apiRes.body[0].name
                 })
             })
         })
@@ -201,9 +201,9 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/' + directoryID, 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.equal(200)
-                    cy.addToAstraScanIdList(res.data1.body.status)
-                    expect(res.data2.body.name).to.be.equal(directoryName)
+                    expect(res.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(res.astraRes.body.status)
+                    expect(res.apiRes.body.name).to.be.equal(directoryName)
                 })
             })
         })
@@ -213,8 +213,8 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99', 'GET').then((res:any) => {
-                    expect(res.data2.status).to.be.oneOf([404, 422])
-                    cy.addToAstraScanIdList(res.data1.body.status)
+                    expect(res.apiRes.status).to.be.oneOf([404, 422])
+                    cy.addToAstraScanIdList(res.astraRes.body.status)
                 })
             })
         })
@@ -223,8 +223,8 @@ describe('API Tests for Updating dataset', () => {
     it('Delete the dataset (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/' + apiDirectory.body.name, 'DELETE').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
             })
         })
     })
@@ -232,9 +232,9 @@ describe('API Tests for Updating dataset', () => {
     it('Verify that deleted dataset does not display in Get dataset list', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
                 expect(response).to.not.contain(apiDirectory.body.name)
             })
         })

@@ -54,7 +54,7 @@ describe('Verify GWA get commands', () => {
         cy.setHeaders(apiDirectory.headers)
         cy.setAuthorizationToken(userSession)
         cy.makeAPIRequest(apiDirectory.endPoint + '/' + _namespace + '/directory', 'GET').then((res:any) => {
-          resObj = res.data2.body[0]
+          resObj = res.apiRes.body[0]
           Cypress._.isEqual(resObj, JSON.parse(response.stdout)[0])
         })
       })

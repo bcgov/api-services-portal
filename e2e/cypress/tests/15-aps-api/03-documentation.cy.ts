@@ -54,8 +54,8 @@ describe('API Tests for Updating documentation', () => {
             cy.replaceWord(documentation.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
                 updatedDocumentEndPoint = updatedEndPoint
                 cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response:any) => {
-                    expect(response.data2.status).to.be.equal(200)
-                    cy.addToAstraScanIdList(response.data1.body.status)
+                    expect(response.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(response.astraRes.body.status)
                 })
             })
         })
@@ -82,10 +82,10 @@ describe('API Tests for Fetching documentation', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((res:any) => {
-            expect(res.data2.status).to.be.equal(200)
-            cy.addToAstraScanIdList(res.data1.body.status)
-            slugValue = res.data2.body[0].slug
-            response = res.data2.body[0]
+            expect(res.apiRes.status).to.be.equal(200)
+            cy.addToAstraScanIdList(res.astraRes.body.status)
+            slugValue = res.apiRes.body[0].slug
+            response = res.apiRes.body[0]
         })
     })
 
@@ -116,17 +116,17 @@ describe('API Tests for Deleting documentation', () => {
 
     it('Verify the status code and response message for invalid slugvalue', () => {
         cy.makeAPIRequest(updatedDocumentEndPoint + '/platform_test', 'DELETE').then((response:any) => {
-            expect(response.data2.status).to.be.oneOf([404, 422])
-            expect(response.data2.body.message).to.be.equal("Content not found")
-            cy.addToAstraScanIdList(response.data1.body.status)
+            expect(response.apiRes.status).to.be.oneOf([404, 422])
+            expect(response.apiRes.body.message).to.be.equal("Content not found")
+            cy.addToAstraScanIdList(response.astraRes.body.status)
         })
     })
 
 
     it('Delete the documentation', () => {
         cy.makeAPIRequest(updatedDocumentEndPoint + '/' + slugValue, 'DELETE').then((response:any) => {
-            expect(response.data2.status).to.be.equal(200)
-            cy.addToAstraScanIdList(response.data1.body.status)
+            expect(response.apiRes.status).to.be.equal(200)
+            cy.addToAstraScanIdList(response.astraRes.body.status)
         })
     })
 })
@@ -150,9 +150,9 @@ describe('API Tests to verify no value in Get call after deleting document conte
 
     it('Delete the documentation', () => {
         cy.makeAPIRequest(updatedDocumentEndPoint, 'GET').then((response:any) => {
-            expect(response.data2.status).to.be.equal(200)
-            cy.addToAstraScanIdList(response.data1.body.status)
-            expect(response.data2.body).to.be.empty
+            expect(response.apiRes.status).to.be.equal(200)
+            cy.addToAstraScanIdList(response.astraRes.body.status)
+            expect(response.apiRes.body).to.be.empty
         })
     })
 })
@@ -185,8 +185,8 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Put the resource and verify the success code in the response', () => {
         cy.makeAPIRequest(updatedDocumentEndPoint, 'PUT').then((response:any) => {
-            expect(response.data2.status).to.be.equal(200)
-            cy.addToAstraScanIdList(response.data1.body.status)
+            expect(response.apiRes.status).to.be.equal(200)
+            cy.addToAstraScanIdList(response.astraRes.body.status)
         })
     })
 
@@ -200,11 +200,11 @@ describe('API Tests to verify Get documentation content', () => {
     it('Verify that document contant is displayed for GET /documentation', () => {
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.getDocumentation_endPoint, 'GET').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body[0].title).to.be.equal(documentation.body.title)
-                expect(response.data2.body[0].description).to.be.equal(documentation.body.description)
-                slugID = response.data2.body[0].slug
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body[0].title).to.be.equal(documentation.body.title)
+                expect(response.apiRes.body[0].description).to.be.equal(documentation.body.description)
+                slugID = response.apiRes.body[0].slug
             })
         })
     })
@@ -212,9 +212,9 @@ describe('API Tests to verify Get documentation content', () => {
     it('Verify the status code and response message for invalid slug id', () => {
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/998898', 'GET').then((response:any) => {
-                expect(response.data2.status).to.be.oneOf([404, 422])
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body.message).to.be.contains("Not Found")
+                expect(response.apiRes.status).to.be.oneOf([404, 422])
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body.message).to.be.contains("Not Found")
             })
         })
     })
@@ -222,10 +222,10 @@ describe('API Tests to verify Get documentation content', () => {
     it('Verify that document contant is fetch by slug ID', () => {
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/' + slugID, 'GET').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body.slug).to.be.equal(slugID)
-                expect(response.data2.body.title).to.be.equal(documentation.body.title)
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body.slug).to.be.equal(slugID)
+                expect(response.apiRes.body.title).to.be.equal(documentation.body.title)
             })
         })
     })

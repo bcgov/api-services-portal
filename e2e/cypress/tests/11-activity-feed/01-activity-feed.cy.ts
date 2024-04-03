@@ -54,8 +54,8 @@ describe('API Tests for Activity report', () => {
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                response = res.apiRes.body
             })
         })
     })
@@ -81,8 +81,8 @@ describe('Generate activity response from APS V2 API', () => {
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                response = res.apiRes.body
             })
         })
     })

@@ -103,7 +103,7 @@ it('Verify gwa gateway publish multiple config file', () => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
       cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response:any) => {
-        expect(response.data2.status).to.be.equal(200)
+        expect(response.apiRes.status).to.be.equal(200)
       })
     })
   })

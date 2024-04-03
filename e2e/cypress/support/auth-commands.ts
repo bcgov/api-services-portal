@@ -435,25 +435,26 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
   requestData['body'] = ""
   requestData['method'] = methodType
   
+  // Scan request with Astra
   cy.request({
     url: 'http://astra.localtest.me:8094/scan/',
     method: 'POST',
     body: requestData,
     headers: headers,
     failOnStatusCode: false
-  }).then((response1) => {
-    // Second API request
+  }).then((astraResponse) => {
+    // Actual API request
     cy.request({
       url: Cypress.env('BASE_URL') + '/' + endPoint,
       method: methodType,
       body: body,
       headers: headers,
       failOnStatusCode: false
-    }).then((response2) => {
+    }).then((apiResponse) => {
       // You can also return data or use it in further tests
       const responseData = {
-        data1: response1,
-        data2: response2,
+        astraRes: astraResponse,
+        apiRes: apiResponse,
       };
       // cy.addToAstraScanIdList(response2.body.status)
       return responseData;

@@ -65,8 +65,8 @@ testData.forEach((testCase: any) => {
                 cy.replaceWord(authorizationProfiles.endPoint, 'apiplatform', namespace).then((updatedEndPoint: string) => {
                     updatedAuthProfileEndPoint = updatedEndPoint
                     cy.makeAPIRequest(updatedAuthProfileEndPoint, 'PUT').then((response:any) => {
-                        expect(response.data2.status).to.be.equal(200)
-                        cy.addToAstraScanIdList(response.data1.body.status)
+                        expect(response.apiRes.status).to.be.equal(200)
+                        cy.addToAstraScanIdList(response.astraRes.body.status)
                     })
                 })
             })
@@ -74,9 +74,9 @@ testData.forEach((testCase: any) => {
 
         it('Get the resource and verify the success code in the response', () => {
             cy.makeAPIRequest(updatedAuthProfileEndPoint, 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
 
@@ -90,17 +90,17 @@ testData.forEach((testCase: any) => {
 
         it('Delete the authorization profile', () => {
             cy.makeAPIRequest(updatedAuthProfileEndPoint + '/' + testCase.body.name, 'DELETE').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
             })
         })
 
 
         it('Verify that the authorization profile is deleted', () => {
             cy.makeAPIRequest(updatedAuthProfileEndPoint, 'GET').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body.length).to.be.equal(0)
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body.length).to.be.equal(0)
             })
         })
     })
@@ -129,8 +129,8 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     it('Put the resource to create shared IDP profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
             })
         })
     })
@@ -146,9 +146,9 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     it('Create an authorization profile using inheritFrom attribute and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body.result).to.be.equal("created")
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body.result).to.be.equal("created")
             })
         })
     })
@@ -156,9 +156,9 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     it('Get list of authorization profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
@@ -196,9 +196,9 @@ describe('Published a shared authorization profile', () => {
     it('Create a shared credential issuer', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
-                expect(response.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(response.data1.body.status)
-                expect(response.data2.body.result).to.be.equal("created")
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                expect(response.apiRes.body.result).to.be.equal("created")
             })
         })
     })
@@ -206,9 +206,9 @@ describe('Published a shared authorization profile', () => {
     it('Get list of authorization profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
             cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
-                expect(res.data2.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.data1.body.status)
-                response = res.data2.body
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
