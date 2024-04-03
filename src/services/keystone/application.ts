@@ -12,6 +12,8 @@ export async function lookupApplication(
                     allApplications(where: {id: $id}) {
                         id
                         appId
+                        name
+                        owner
                     }
                 }`,
     variables: { id },
