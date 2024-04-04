@@ -72,8 +72,16 @@ export class KongConsumerService {
       body['custom_id'] = customId;
     }
     if (app) {
-      body.tags.push(`app:${app.name}`);
-      body.tags.push(`owner:${app.owner.name}`);
+      body.tags.push(
+        `app:${app.name
+          .replace(/[^A-Za-z0-9:-]/gim, '')
+          .replace(/[:]/gim, '-')}`
+      );
+      body.tags.push(
+        `owner:${app.owner.name
+          .replace(/[^A-Za-z0-9:-]/gim, '')
+          .replace(/[:]/gim, '-')}`
+      );
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {

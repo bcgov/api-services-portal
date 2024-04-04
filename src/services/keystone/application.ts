@@ -13,7 +13,9 @@ export async function lookupApplication(
                         id
                         appId
                         name
-                        owner
+                        owner {
+                          name
+                        }
                     }
                 }`,
     variables: { id },
