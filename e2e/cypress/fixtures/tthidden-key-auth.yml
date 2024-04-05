@@ -1,0 +1,61 @@
+kind: Namespace
+name: two-tier-hidden
+displayName: two-tier-hidden Display Name
+---
+kind: GatewayService
+name: two-tier-service-dev
+tags: [ns.two-tier-hidden]
+host: httpbin.org
+port: 443
+protocol: https
+retries: 0
+routes:
+  - name: two-tier-service-dev
+    tags: [ns.two-tier-hidden]
+    hosts:
+      - two-tier-service.dev.api.gov.bc.ca
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+    request_buffering: true
+    response_buffering: true
+plugins:
+  - name: key-auth
+    tags: [ ns.two-tier-hidden, aps.two-tiered-hidden ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+      anonymous: ce26955a-cf08-4907-9427-12d01c8bd94c
+  - name: acl
+    tags: [ ns.two-tier-hidden ]
+    config:
+      hide_groups_header: true
+      allow: [ "406CB7CF" ]
+---
+kind: DraftDataset
+name: two-tier-service-dataset
+title: Two-tier-service
+organization: ministry-of-health
+organizationUnit: public-health
+notes: Some information about the two-tier-service service
+tags: [two-tier-service, openapi]
+license_title: Access Only
+view_audience: Government
+security_class: LOW-PUBLIC
+record_publish_date: '2021-05-27'
+---
+kind: Product
+name: Two Tiered Hidden Product
+appId: 'KFH78YU956RE'
+environments:
+  - name: dev
+    active: true
+    approval: false
+    flow: kong-api-key-acl
+    appId: '406CB7CF'
+    services: [two-tier-service-dev]

@@ -112,6 +112,12 @@ class ApiDirectoryPage {
     cy.get(ele).should('exist')
   }
 
+  checkTwoTieredIcon(productName: string) {
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    var ele: string = `[data-testid=two-tiered-icon-${pname}]`
+    cy.get(ele).should('not.exist')
+  }
+
   addOrganizationAndOrgUnit(product: any) {
     cy.contains('button', 'Add Organization').click({ force: true })
     cy.get(this.orgDropDown).select(product.orgName)

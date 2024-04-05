@@ -91,7 +91,12 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             <GridItem>
               <Flex align="center" mb={2}>
                 <Flex align="center" width={8}>
-                  <Icon as={HiChartBar} color="bc-blue" boxSize="5" />
+                  <Icon
+                    as={HiChartBar}
+                    color="bc-blue"
+                    boxSize="5"
+                    data-testid={`two-tiered-icon-${kebabCase(data.name)}`}
+                  />
                 </Flex>
                 <Heading size="xs">Limits</Heading>
               </Flex>

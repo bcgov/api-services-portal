@@ -782,5 +782,14 @@
       },
       "activityAt": "2022-09-20T20:37:30.570Z"
     }
-  ]
+  ],
+  "twoTieredHidden": {
+    "product": {
+      "name": "Two Tiered Hidden Product",
+      "serviceName": "two-tier-service",
+      "environment": {
+        "name": "dev"
+      }
+    }
+  }
 }

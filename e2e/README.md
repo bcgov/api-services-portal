@@ -39,7 +39,7 @@ Install Cypress on your local machine by following [these instructions](https://
 
 - `./e2e/cypress.json` contains the web app config. Update the file to use local or dev version of the portal for executing the tests
 
-- Recommendation is to use local version of portal. Use `docker-compose` to create local development environment
+- Recommendation is to use local version of portal. Use `docker compose` to create local development environment
 
 #### Cypress Test Runner
 
@@ -52,8 +52,8 @@ Install Cypress on your local machine by following [these instructions](https://
 
 ### Docker Compose
 
-- Run `docker-compose up` to spin up a local development environment, which includes Cypress as one of the services and it executes all the tests and generates the HTML report
-- Run `docker-compose down` to tear down the environment
+- Run `docker compose up` to spin up a local development environment, which includes Cypress as one of the services and it executes all the tests and generates the HTML report
+- Run `docker compose down` to tear down the environment
 
 #### GitHub Actions
 
@@ -85,7 +85,7 @@ WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the
 
 ### `WSL`: Build and Run Dev Environment
 
-- Inside the `api-services-portal` directory, build and run the application by running `docker-compose up` at the project root.
+- Inside the `api-services-portal` directory, build and run the application by running `docker compose up` at the project root.
 
 ### `LM`: Install E2E Testing Dependencies
 
