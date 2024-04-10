@@ -1,0 +1,331 @@
+[
+    [
+        {
+            "Description": " ",
+            "impact": "High",
+            "name": "CSP Header Missing",
+            "remediation": "Implement proper CSP header.",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": [
+                {
+                    "description": "The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.",
+                    "name": "ministry-of-health",
+                    "title": "Ministry of Health"
+                }
+            ],
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "250",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:31:04 GMT",
+                "Etag": "W/\"fa-9gdEQNaTPgo1yVcLA3eKckfKWf4\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations"
+        },
+        {
+            "Description": "The HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome and Safari that stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.",
+            "impact": "Medium",
+            "name": "X-XSS-Protection Header Missing",
+            "remediation": "Implement X-XSS-Protection: 1; mode=block.",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": [
+                {
+                    "description": "The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.",
+                    "name": "ministry-of-health",
+                    "title": "Ministry of Health"
+                }
+            ],
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "250",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:31:04 GMT",
+                "Etag": "W/\"fa-9gdEQNaTPgo1yVcLA3eKckfKWf4\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations"
+        },
+        {
+            "Description": "The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a &lt;frame&gt;, &lt;iframe&gt; or &lt;object&gt;",
+            "impact": "Low",
+            "name": "X-Frame-Options Header Missing",
+            "remediation": "Set X-Frame-Options header to deny, sameorigin or allow-from <domain>",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": [
+                {
+                    "description": "The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.",
+                    "name": "ministry-of-health",
+                    "title": "Ministry of Health"
+                }
+            ],
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "250",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:31:04 GMT",
+                "Etag": "W/\"fa-9gdEQNaTPgo1yVcLA3eKckfKWf4\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations"
+        },
+        {
+            "Description": "The X-Content-Type-Options response HTTP header is a marker used by the server to indicate that the MIME types advertised in the Content-Type headers should not be changed and be followed.",
+            "impact": "Low",
+            "name": "X-Content-Type-Options Header Missing",
+            "remediation": "Implement X-Content-Type-Options: nosniff",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": [
+                {
+                    "description": "The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.",
+                    "name": "ministry-of-health",
+                    "title": "Ministry of Health"
+                }
+            ],
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "250",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:31:04 GMT",
+                "Etag": "W/\"fa-9gdEQNaTPgo1yVcLA3eKckfKWf4\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations"
+        },
+        {
+            "Description": "The X-Content-Type-Options response HTTP header is a marker used by the server to indicate that the MIME types advertised in the Content-Type headers should not be changed and be followed.",
+            "impact": "Low",
+            "name": "Strict-Transport-Security Header Missing",
+            "remediation": "Implement X-Content-Type-Options: nosniff",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": [
+                {
+                    "description": "The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.",
+                    "name": "ministry-of-health",
+                    "title": "Ministry of Health"
+                }
+            ],
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "250",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:31:04 GMT",
+                "Etag": "W/\"fa-9gdEQNaTPgo1yVcLA3eKckfKWf4\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations"
+        }
+    ],
+    [
+        {
+            "Description": " ",
+            "impact": "Low",
+            "name": "CSP Header Missing",
+            "remediation": "Implement proper CSP header.",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": {
+                "orgUnits": [
+                    {
+                        "name": "planning-and-innovation-division",
+                        "title": "Planning and Innovation Division"
+                    },
+                    {
+                        "name": "public-health",
+                        "title": "Public Health"
+                    }
+                ]
+            },
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "150",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:30:56 GMT",
+                "Etag": "W/\"96-ZTcosD8+LyytvkODPsYL8nhdzjI\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations/ministry-of-health"
+        },
+        {
+            "Description": "The HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome and Safari that stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.",
+            "impact": "Low",
+            "name": "X-XSS-Protection Header Missing",
+            "remediation": "Implement X-XSS-Protection: 1; mode=block.",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": {
+                "orgUnits": [
+                    {
+                        "name": "planning-and-innovation-division",
+                        "title": "Planning and Innovation Division"
+                    },
+                    {
+                        "name": "public-health",
+                        "title": "Public Health"
+                    }
+                ]
+            },
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "150",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:30:56 GMT",
+                "Etag": "W/\"96-ZTcosD8+LyytvkODPsYL8nhdzjI\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations/ministry-of-health"
+        },
+        {
+            "Description": "The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a &lt;frame&gt;, &lt;iframe&gt; or &lt;object&gt;",
+            "impact": "Low",
+            "name": "X-Frame-Options Header Missing",
+            "remediation": "Set X-Frame-Options header to deny, sameorigin or allow-from <domain>",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": {
+                "orgUnits": [
+                    {
+                        "name": "planning-and-innovation-division",
+                        "title": "Planning and Innovation Division"
+                    },
+                    {
+                        "name": "public-health",
+                        "title": "Public Health"
+                    }
+                ]
+            },
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "150",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:30:56 GMT",
+                "Etag": "W/\"96-ZTcosD8+LyytvkODPsYL8nhdzjI\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations/ministry-of-health"
+        },
+        {
+            "Description": "The X-Content-Type-Options response HTTP header is a marker used by the server to indicate that the MIME types advertised in the Content-Type headers should not be changed and be followed.",
+            "impact": "Low",
+            "name": "X-Content-Type-Options Header Missing",
+            "remediation": "Implement X-Content-Type-Options: nosniff",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": {
+                "orgUnits": [
+                    {
+                        "name": "planning-and-innovation-division",
+                        "title": "Planning and Innovation Division"
+                    },
+                    {
+                        "name": "public-health",
+                        "title": "Public Health"
+                    }
+                ]
+            },
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "150",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:30:56 GMT",
+                "Etag": "W/\"96-ZTcosD8+LyytvkODPsYL8nhdzjI\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations/ministry-of-health"
+        },
+        {
+            "Description": "The X-Content-Type-Options response HTTP header is a marker used by the server to indicate that the MIME types advertised in the Content-Type headers should not be changed and be followed.",
+            "impact": "Low",
+            "name": "Strict-Transport-Security Header Missing",
+            "remediation": "Implement X-Content-Type-Options: nosniff",
+            "req_body": "",
+            "req_headers": {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            },
+            "res_body": {
+                "orgUnits": [
+                    {
+                        "name": "planning-and-innovation-division",
+                        "title": "Planning and Innovation Division"
+                    },
+                    {
+                        "name": "public-health",
+                        "title": "Public Health"
+                    }
+                ]
+            },
+            "res_headers": {
+                "Access-Control-Allow-Credentials": "true",
+                "Content-Length": "150",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Tue, 26 Mar 2024 21:30:56 GMT",
+                "Etag": "W/\"96-ZTcosD8+LyytvkODPsYL8nhdzjI\"",
+                "Vary": "Origin",
+                "X-Keystone-App-Version": "1.0.0",
+                "X-Powered-By": "Express"
+            },
+            "url": "http://oauth2proxy.localtest.me:4180/ds/api/v2/organizations/ministry-of-health"
+        }
+    ]
+]

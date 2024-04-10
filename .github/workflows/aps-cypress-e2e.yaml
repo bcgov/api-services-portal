@@ -95,3 +95,19 @@ jobs:
             export MSG=$(cat msg)
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
           fi
+      
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      - name: Check Astra results and create Jira issue if necessary
+        run: python .github/astra-jira.py
+        env:
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_KEY: ${{ secrets.JIRA_API_KEY }}
+          ASTRA_SCAN_RESULTS: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResultTest.json
