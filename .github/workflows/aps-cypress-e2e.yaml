@@ -94,6 +94,7 @@ jobs:
             echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
             export MSG=$(cat msg)
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+            exit 1
           fi
       
       - name: Set up Python 3.9
