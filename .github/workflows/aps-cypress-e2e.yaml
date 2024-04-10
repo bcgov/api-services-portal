@@ -98,20 +98,20 @@ jobs:
           fi
       
       - name: Set up Python 3.9
-        if: success() || failure()
+        if: failure()
         uses: actions/setup-python@v2
         with:
           python-version: "3.9"
           architecture: "x64"
 
       - name: Install Python dependencies
-        if: success() || failure()
+        if: failure()
         run: |
           python -m pip install --upgrade pip
           pip install requests
 
       - name: Check Astra results and create Jira issue if necessary
-        if: success() || failure()
+        if: failure()
         run: python .github/astra-jira.py
         env:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
