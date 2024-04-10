@@ -110,4 +110,4 @@ jobs:
         env:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_KEY: ${{ secrets.JIRA_API_KEY }}
-          ASTRA_SCAN_RESULTS: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResultTest.json
+          ASTRA_SCAN_RESULTS: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
