@@ -28,31 +28,6 @@ jobs:
       - name: Checkout Portal
         uses: actions/checkout@v2
 
-      # - name: Determine Download file name
-      #   id: set_variable
-      #   run: |
-      #     echo ${{ runner.arch }}
-      #     if [ "${{ runner.arch }}" == "X64" ]; then
-      #       echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
-      #     elif [ "${{ runner.arch }}" == "ARM64" ]; then
-      #       echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
-      #     else
-      #       echo "unsupported architecture"
-      #     fi
-
-      # - name: Download Binary
-      #   uses: robinraju/release-downloader@v1.8
-      #   with:
-      #     repository: "bcgov/gwa-cli"
-      #     latest: true
-      #     fileName: ${{ steps.set_variable.outputs.my_variable }}
-      #     out-file-path: "${{ github.workspace }}/e2e"
-
-      # - name: Unzip file
-      #   run: |
-      #     cd ${{ github.workspace }}/e2e
-      #     tar xvzf ${{ steps.set_variable.outputs.my_variable }}
-
       - name: Build Docker Images
         run: |
           docker compose --profile testsuite build
