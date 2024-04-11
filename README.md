@@ -26,7 +26,7 @@ The repo is setup to create a local deployment of the Portal along with required
     docker build -t gwa-api:e2e .
     ```
 
-1. Build: Back in `api-services-portal`, run `docker compose --profile testsuite build`.
+1. Build: Back in `api-services-portal`, run `docker compose build`.
 1. Run: `docker compose up`. Wait for startup to complete - look for `Swagger UI registered`.
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180
     1. To login, use username `janis@idir` and password `awsummer` (or username `local` and password `local`).
@@ -35,7 +35,12 @@ The repo is setup to create a local deployment of the Portal along with required
 
 ### Cypress testing
 
-To run the Cypress test automation suite, run `docker compose --profile testsuite up`.
+To run the Cypress test automation suite, run
+
+```sh
+docker compose --profile testsuite build
+docker compose --profile testsuite up
+```
 
 ### gwa CLI configuration
 

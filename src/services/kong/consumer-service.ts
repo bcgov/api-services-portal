@@ -73,12 +73,8 @@ export class KongConsumerService {
       body['custom_id'] = customId;
     }
     if (app) {
-      body.tags.push(
-        `app:${alphanumericNoSpaces(app.name)}`
-      );
-      body.tags.push(
-        `owner:${alphanumericNoSpaces(app.owner.name)}`
-      );
+      body.tags.push(`app:${alphanumericNoSpaces(app.name)}`);
+      body.tags.push(`owner:${alphanumericNoSpaces(app.owner.name)}`);
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {
