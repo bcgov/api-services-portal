@@ -77,7 +77,7 @@ describe('Verify Two Tiered Hidden', () => {
     })
   })
 
-  it('update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
+  it('set the Dataset for the Product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       pd.updateDatasetNameToCatelogue(twoTieredHidden.product.name, twoTieredHidden.product.environment.name)
