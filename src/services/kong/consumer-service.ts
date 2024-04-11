@@ -11,6 +11,7 @@ import {
   KongConsumer,
 } from './types';
 import { Application } from '../keystone/types';
+import { alphanumericNoSpaces } from '../utils';
 
 const logger = Logger('kong.consumer');
 
@@ -66,14 +67,14 @@ export class KongConsumerService {
   ) {
     let body: KongConsumer = {
       username: username,
-      tags: ['aps-portal'],
+      tags: [],
     };
     if (customId) {
       body['custom_id'] = customId;
     }
     if (app) {
-      body.tags.push(`app:${app.name}`);
-      body.tags.push(`owner:${app.owner.name}`);
+      body.tags.push(`app:${alphanumericNoSpaces(app.name)}`);
+      body.tags.push(`owner:${alphanumericNoSpaces(app.owner.name)}`);
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {
