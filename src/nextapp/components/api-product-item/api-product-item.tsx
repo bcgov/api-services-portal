@@ -82,6 +82,11 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             id={id}
             name={data.name}
             preview={preview}
+            dataTestId={
+              isTieredHidden
+                ? 'request-access-button-two-tiered-hidden'
+                : 'request-access-button'
+            }
           />
         ) : null}
       </Flex>

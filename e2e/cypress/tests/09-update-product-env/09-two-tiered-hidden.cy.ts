@@ -77,21 +77,13 @@ describe('Verify Two Tiered Hidden', () => {
     })
   })
 
-  it('set the Dataset for the Product', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
-      pd.updateDatasetNameToCatelogue(twoTieredHidden.product.name, twoTieredHidden.product.environment.name)
-    })
-  })
-
   it('Verify that product is formatted correctly in public directory', () => {
     cy.visit(apiDir.path)
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      cy.get(apiDir.rqstAccessBtn).should('exist')
       apiDir.checkProductIcon(product.name, 'RiEarthFill')
-      apiDir.checkTwoTieredIcon(product.name)
+      apiDir.checkTwoTieredHiddenButton()
     })
   })
 
@@ -101,9 +93,8 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      cy.get(apiDir.rqstAccessBtn).should('exist')
       apiDir.checkProductIcon(product.name, 'RiEarthFill')
-      apiDir.checkTwoTieredIcon(product.name)
+      apiDir.checkTwoTieredHiddenButton()
     })
   })
 
@@ -118,9 +109,8 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      cy.get(apiDir.rqstAccessBtn).should('exist')
       apiDir.checkProductIcon(product.name, 'RiEarthFill')
-      apiDir.checkTwoTieredIcon(product.name)
+      apiDir.checkTwoTieredHiddenButton()
     })
   })
 
@@ -130,9 +120,8 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      cy.get(apiDir.rqstAccessBtn).should('exist')
       apiDir.checkProductIcon(product.name, 'RiEarthFill')
-      apiDir.checkTwoTieredIcon(product.name)
+      apiDir.checkTwoTieredHiddenButton()
     })
   })
 

@@ -51,11 +51,12 @@ record_publish_date: '2021-05-27'
 ---
 kind: Product
 name: Two Tiered Hidden Product
-appId: 'KFH78YU956RE'
+appId: 'LFH78YU956RE'
+dataset: two-tier-service-dataset
 environments:
   - name: dev
     active: true
     approval: false
     flow: kong-api-key-acl
-    appId: '406CB7CF'
+    appId: '506CB7CF'
     services: [two-tier-service-dev]

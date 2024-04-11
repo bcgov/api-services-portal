@@ -115,7 +115,12 @@ class ApiDirectoryPage {
   checkTwoTieredIcon(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     var ele: string = `[data-testid=two-tiered-icon-${pname}]`
-    cy.get(ele).should('not.exist')
+    cy.get(ele).should('exist')
+  }
+
+  checkTwoTieredHiddenButton() {
+    var ele: string = '[data-testid=request-access-button-two-tiered-hidden]'
+    cy.get(ele).should('exist')
   }
 
   addOrganizationAndOrgUnit(product: any) {

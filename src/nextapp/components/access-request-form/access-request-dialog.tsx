@@ -38,6 +38,7 @@ interface AccessRequestDialogProps {
   preview: boolean;
   open?: boolean;
   variant?: 'inline' | 'button';
+  dataTestId?: string;
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
@@ -48,6 +49,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   preview,
   open,
   variant,
+  dataTestId,
 }) => {
   const client = useQueryClient();
   const auth = useAuth();
@@ -165,7 +167,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         <Button
           disabled={disabled}
           onClick={onOpen}
-          data-testid="request-access-button"
+          data-testid={dataTestId ? dataTestId : "request-access-button"}
           variant={isInline ? 'link' : 'primary'}
           fontWeight="600"
           color="white"
