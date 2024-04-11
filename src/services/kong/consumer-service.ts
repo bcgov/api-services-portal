@@ -10,6 +10,8 @@ import {
   KeyAuthResponse,
   KongConsumer,
 } from './types';
+import { Application } from '../keystone/types';
+import { alphanumericNoSpaces } from '../utils';
 
 const logger = Logger('kong.consumer');
 
@@ -41,7 +43,8 @@ export class KongConsumerService {
 
   public async createOrGetConsumer(
     username: string,
-    customId: string
+    customId: string,
+    app: Application
   ): Promise<CreateOrGetConsumerResult> {
     logger.debug('createOrGetConsumer');
     try {
@@ -51,19 +54,27 @@ export class KongConsumerService {
       return { created: false, consumer: result };
     } catch (err) {
       logger.debug('createOrGetConsumer - CATCH ERROR %s', err);
-      const result = await this.createKongConsumer(username, customId);
+      const result = await this.createKongConsumer(username, customId, app);
       logger.debug('createOrGetConsumer - CATCH RESULT %j', result);
-      return { created: false, consumer: result };
+      return { created: true, consumer: result };
     }
   }
 
-  public async createKongConsumer(username: string, customId: string) {
+  public async createKongConsumer(
+    username: string,
+    customId: string,
+    app: Application
+  ) {
     let body: KongConsumer = {
       username: username,
-      tags: ['aps-portal'],
+      tags: [],
     };
     if (customId) {
       body['custom_id'] = customId;
+    }
+    if (app) {
+      body.tags.push(`app:${alphanumericNoSpaces(app.name)}`);
+      body.tags.push(`owner:${alphanumericNoSpaces(app.owner.name)}`);
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {

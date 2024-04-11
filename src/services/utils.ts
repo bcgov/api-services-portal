@@ -75,3 +75,7 @@ export async function fetchWithTimeout(resource: string, options: any = {}) {
 
   return response;
 }
+
+export function alphanumericNoSpaces(str: string) {
+  return str.replace(/[^A-Za-z0-9:-]/gim, '').replace(/[:]/gim, '-');
+}

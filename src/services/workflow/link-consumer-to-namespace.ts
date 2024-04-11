@@ -30,6 +30,7 @@ export const LinkConsumerToNamespace = async (
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   const consumerResult = await kongApi.createOrGetConsumer(
     consumerUsername,
+    null,
     null
   );
   const consumerPK: any = { id: null };

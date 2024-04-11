@@ -33,6 +33,7 @@
     "copy-keystone-admin-assets": "ts-node tools/copyKeystoneAdminAssets",
     "x-prestart": "npm run build",
     "x-dev": "nodemon",
+    "nextapp-dev": "cross-env NEXT_PUBLIC_MOCKS=on NODE_ENV=development NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' next dev ./nextapp",
     "batch": "cross-env NODE_ENV=development node dist/server-batch.js",
     "intg-build": "cross-env NODE_ENV=development npm-run-all delete-assets copy-assets ts-build",
     "dev": "cross-env NODE_ENV=development NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' npm-run-all delete-assets copy-assets tsoa-gen-types tsoa-build-v1 tsoa-build-v2 ts-build ks-dev",
