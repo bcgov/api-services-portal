@@ -53,7 +53,12 @@ export const generateCredential = async (
 
     const nickname = clientId;
 
-    const newApiKey = await registerApiKey(context, clientId, nickname);
+    const newApiKey = await registerApiKey(
+      context,
+      clientId,
+      nickname,
+      application
+    );
 
     logger.debug('new-api-key CREATED FOR %s', clientId);
 
@@ -138,7 +143,11 @@ export const generateCredential = async (
     logger.debug('new-client %j', newClient);
 
     const kongApi = new KongConsumerService(process.env.KONG_URL);
-    const consumer = await kongApi.createKongConsumer(nickname, clientId);
+    const consumer = await kongApi.createKongConsumer(
+      nickname,
+      clientId,
+      application
+    );
     const consumerPK = await AddClientConsumer(
       context,
       nickname,
