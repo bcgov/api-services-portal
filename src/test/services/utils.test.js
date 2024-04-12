@@ -1,15 +1,15 @@
 import { alphanumericNoSpaces } from '../../services/utils';
 
 describe('alphanumericNoSpaces tests', () => {
-  it('should remove spaces from the string', () => {
+  it('should replace space with dash in the string', () => {
     const input = 'hello world';
-    const expectedOutput = 'helloworld';
+    const expectedOutput = 'hello-world';
     expect(alphanumericNoSpaces(input)).toEqual(expectedOutput);
   });
 
   it('should remove special characters', () => {
     const input = 'hello@world!how%^&*are you?';
-    const expectedOutput = 'helloworldhowareyou';
+    const expectedOutput = 'helloworldhoware-you';
     expect(alphanumericNoSpaces(input)).toEqual(expectedOutput);
   });
 
@@ -45,7 +45,7 @@ describe('alphanumericNoSpaces tests', () => {
 
   it('should handle string with mixed characters', () => {
     const input = 'hello!-world, how:are?you';
-    const expectedOutput = 'hello-worldhow-areyou';
+    const expectedOutput = 'hello-world-how-areyou';
     expect(alphanumericNoSpaces(input)).toEqual(expectedOutput);
   });
 });
