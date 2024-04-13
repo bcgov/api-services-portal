@@ -57,11 +57,11 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
+                cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
+                    expect(response.status).to.be.equal(429)
+                    expect(response.body.message).to.be.contain('API rate limit exceeded')
+                })
+            })                
         })
     })
 })
