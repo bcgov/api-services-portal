@@ -37,7 +37,7 @@ Install Cypress on your local machine by following [these instructions](https://
 
 ### Test data dependencies
 
-Many tests are cannot be run independently because they depend on state established by other tests. These dependencies are [documented](test-data-dependencies.md) to assist in running tests selectively.
+Many tests cannot be run independently because they depend on state established by other tests. These dependencies are [documented](test-data-dependencies.md) to assist in running tests selectively.
 
 ### Running Cypress Locally
 
