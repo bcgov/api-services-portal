@@ -38,6 +38,7 @@ interface AccessRequestDialogProps {
   preview: boolean;
   open?: boolean;
   variant?: 'inline' | 'button';
+  isTieredHidden?: boolean;
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
@@ -48,6 +49,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   preview,
   open,
   variant,
+  isTieredHidden,
 }) => {
   const client = useQueryClient();
   const auth = useAuth();
@@ -165,7 +167,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         <Button
           disabled={disabled}
           onClick={onOpen}
-          data-testid="request-access-button"
+          data-testid={
+            isTieredHidden
+              ? 'request-access-button-two-tiered-hidden'
+              : 'request-access-button'
+          }
           variant={isInline ? 'link' : 'primary'}
           fontWeight="600"
           color="white"

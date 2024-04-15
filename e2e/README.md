@@ -56,8 +56,8 @@ Many tests cannot be run independently because they depend on state established 
 
 ### Docker Compose
 
-- Run `docker-compose up` to spin up a local development environment, which includes Cypress as one of the services and it executes all the tests and generates the HTML report
-- Run `docker-compose down` to tear down the environment
+- Run `docker compose up` to spin up a local development environment, which includes Cypress as one of the services and it executes all the tests and generates the HTML report
+- Run `docker compose down` to tear down the environment
 
 #### GitHub Actions
 
@@ -89,7 +89,7 @@ WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the
 
 ### `WSL`: Build and Run Dev Environment
 
-- Inside the `api-services-portal` directory, build and run the application by running `docker-compose up` at the project root.
+- Inside the `api-services-portal` directory, build and run the application by running `docker compose up` at the project root.
 
 ### `LM`: Install E2E Testing Dependencies
 
