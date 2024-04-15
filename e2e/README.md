@@ -35,11 +35,15 @@ Install Cypress on your local machine by following [these instructions](https://
 - Clone the API Service Portal repository
 - Run `./e2e $ npm i` to install all the dependencies
 
+### Test data dependencies
+
+Many tests cannot be run independently because they depend on state established by other tests. These dependencies are [documented](test-data-dependencies.md) to assist in running tests selectively.
+
 ### Running Cypress Locally
 
-- `./e2e/cypress.json` contains the web app config. Update the file to use local or dev version of the portal for executing the tests
+- `./e2e/cypress.config.ts` contains the web app config. Update the file to use local or dev version of the portal for executing the tests
 
-- Recommendation is to use local version of portal. Use `docker-compose` to create local development environment
+- Recommendation is to use local version of portal. Use `docker compose` to create local development environment
 
 #### Cypress Test Runner
 
@@ -57,9 +61,9 @@ Install Cypress on your local machine by following [these instructions](https://
 
 #### GitHub Actions
 
-- Any new commit pushed to `util/*automation*` branch triggers job (`.github/workflows/aps-cypress-e2e.yaml`) and it spawns all the services including cypress to execute the test suite
+- Any new commit pushed to a `cypress*` branch or `test`, triggers the job (`.github/workflows/aps-cypress-e2e.yaml`) and it spawns all the services including Cypress to execute the test suite
 
-- The test results would be uploaded to `https://www.cypress.io/dashboard/`
+- The test results would be uploaded to `https://www.cypress.io/dashboard/`, as well as attached as an artifact on the GitHub Action run.
 
 ## 3. Cypress on Windows
 
@@ -97,13 +101,13 @@ WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the
 
 ## 4. Creating Tests
 
-After you run `npm run cy:open`, the Cypress console will open. Before continuing, ensure the `Electron` browser is selected from the drop-down list of available browsers (top-right corner of the Cypress test runner).
+After you run `npm run cy:open`, the Cypress console will open. Before continuing, ensure the `Edge` browser is selected from the drop-down list of available browsers (top-right corner of the Cypress test runner).
 
 Each test file defined in the `./e2e/cypress/tests` directory will be visible. Click on a test in order to run all test cases in that file. A new browser window will open and you will see your tests executed sequentially.
 
 ### Test File Naming Convention and Location
 
-- Test files follow this naming convention: `<num>-<test-name>.spec.ts`. (e.g., `01-create-api.spec.ts`)
+- Test files follow this naming convention: `<num>-<test-name>.cy.ts`. (e.g., `01-create-api.cy.ts`)
 - Store the test files in the `./e2e/cypress/tests` directory.
 
 ### Test File Structure
