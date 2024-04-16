@@ -78,5 +78,8 @@
   "apiTest": {
     "namespace": "gw-c3f31",
     "delete_namespace": "testplatform"
+  },
+  "twoTieredHidden": {
+    "namespace": "two-tier-hidden"
   }
 }
