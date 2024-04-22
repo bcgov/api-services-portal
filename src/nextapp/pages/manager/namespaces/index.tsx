@@ -31,11 +31,14 @@ import { useAuth } from '@/shared/services/auth';
 import {
   FaBuilding,
   FaChartBar,
+  FaChartLine,
   FaCheckCircle,
   FaChevronRight,
   FaClock,
   FaExternalLinkAlt,
   FaInfoCircle,
+  FaLock,
+  FaSearch,
   FaShieldAlt,
   FaTrash,
   FaUserAlt,
@@ -48,6 +51,7 @@ import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
+import Card from '@/components/card'
 import EmptyPane from '@/components/empty-pane';
 import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
 import NewNamespace from '@/components/new-namespace';
@@ -246,25 +250,81 @@ const NamespacesPage: React.FC = () => {
       <Container maxW="6xl">
         <PageHeader title={hasNamespace ? title : ''} />
         {!hasNamespace && (
-          <EmptyPane
-            message="To get started select a Namespace from the dropdown below or create a new Namespace"
-            title="No Namespace selected yet"
-            boxProps={{ borderRadius: 0, mx: 0 }}
-            my={0}
-          >
-            <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              <NamespaceMenu
-                user={user}
-                variant="ns-selector"
-                buttonMessage="Select a Namespace"
-              />
-              <Text>or</Text>
-              <Button variant="primary" onClick={onOpen}>
-                Create New Namespace
-              </Button>
-            </Flex>
-            <NewNamespace isOpen={isOpen} onClose={onClose} />
-          </EmptyPane>
+          <>
+            <Card mb={8} px={12} py={8}>
+              <VStack align="center" justifyContent="center" gridGap={2} pb={6}>
+                <img
+                  src="/images/empty_folder.png"
+                  width={85}
+                  height={85}
+                  title="Empty folder"
+                  alt="Empty folder"
+                />
+                <Heading size="md">No gateways created yet</Heading>
+              </VStack>
+              <Heading size="lg">What is a gateway?</Heading>
+              <Text pt={6} pb={8}>
+                Gateways act as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
+              </Text>            
+              <Text pt={0} pb={8}>
+                After your first gateway is created, in this section you can do things like:
+              </Text>
+              <Grid templateColumns="repeat(3, 1fr)" gap={7}>
+                <Box>
+                  <Flex alignItems="center">
+                    <Icon as={FaSearch} width={5} height={5} />
+                    <Heading size="sm" ml={2.5}>
+                      Make your products discoverable
+                    </Heading>
+                  </Flex>
+                  <Text pt={4}>
+                    Allow citizens to find your APIs on the BC Government API Directory.
+                  </Text>
+                </Box>
+                <Box>
+                  <Flex alignItems="center">
+                    <Icon as={FaLock} width={5} height={5} />
+                    <Heading size="sm" ml={2.5}>
+                      Control access to your products
+                    </Heading>
+                  </Flex>
+                  <Text pt={4}>
+                    Decide who can use the data and how they access it.
+                  </Text>
+                </Box>
+                <Box>
+                  <Flex alignItems="center">
+                    <Icon as={FaChartLine} width={5} height={5} />
+                    <Heading size="sm" ml={2.5}>
+                      View usage metrics
+                    </Heading>
+                  </Flex>
+                  <Text pt={4}>
+                    Get a fast overview of how much and how often the services you've set up are being used.
+                  </Text>
+                </Box>
+              </Grid>
+            </Card>
+            <EmptyPane
+              message="To get started select a Namespace from the dropdown below or create a new Namespace"
+              title="No Namespace selected yet"
+              boxProps={{ borderRadius: 0, mx: 0 }}
+              my={0}
+            >
+              <Flex justifyContent="center" alignItems="center" gridGap={4}>
+                <NamespaceMenu
+                  user={user}
+                  variant="ns-selector"
+                  buttonMessage="Select a Namespace"
+                />
+                <Text>or</Text>
+                <Button variant="primary" onClick={onOpen}>
+                  Create New Namespace
+                </Button>
+              </Flex> 
+              <NewNamespace isOpen={isOpen} onClose={onClose} />
+            </EmptyPane>
+          </>
         )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
