@@ -9,19 +9,20 @@ import {
   Text,
   Grid,
   GridItem,
+  HStack,
   Icon,
   Link,
   useToast,
-  VStack,
   useDisclosure,
   PopoverTrigger,
   Popover,
   PopoverContent,
   PopoverArrow,
   PopoverBody,
-  IconButton,
   Skeleton,
   Tooltip,
+  VStack,
+  Stack
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -52,6 +53,7 @@ import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import Card from '@/components/card'
+import CliCommand from '@/components/cli-command'
 import EmptyPane from '@/components/empty-pane';
 import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
 import NewNamespace from '@/components/new-namespace';
@@ -305,6 +307,241 @@ const NamespacesPage: React.FC = () => {
                 </Box>
               </Grid>
             </Card>
+            <Card mb={8} px={12} py={8}>
+              <Box>
+                <Heading size="lg">Steps to create and configure your first gateway</Heading>
+                <Text pt={6} pb={10}>
+                  Follow these steps to create and configure your first gateway in a test/training instance. For full documentation on how to set up an API, consult our{' '}
+                  <Link
+                      href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
+                      target="_blank"
+                      color="bc-link"
+                      textDecor="underline"
+                    >'API Provider Quick Start'</Link>
+                  {' '}guide.
+                </Text>
+              </Box>
+              <Grid templateColumns="repeat(3, 1fr)" gap={7}>
+                <Box>
+                  <VStack alignItems="flex-start">
+                    <Box
+                      bg="purple.50"
+                      borderRadius="full"
+                      width={100}
+                      height={100}
+                      position="relative"
+                    >
+                      <Box
+                        bg="purple.100"
+                        borderRadius="full"
+                        width={85}
+                        height={85}
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      />
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      >
+                        <img
+                          src="/images/glossary_search.png"
+                          alt="Glossary search"
+                          title="Glossary search"
+                          width="100%"
+                          height="auto"
+                        />
+                      </Box>
+                    </Box>
+                  <Heading size="sm" pt={4}>
+                      Download our Command Line Interface (CLI)
+                  </Heading>
+                  <Text pt={2}>
+                    Our CLI is a convenient way to configure your gateways.{' '}                   
+                    <Link
+                      href={"https://github.com/bcgov/gwa-cli/releases"}
+                      // TODO replace with env defined URL
+                      // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                      target="_blank"
+                      color="bc-link"
+                      textDecor="underline"
+                    >Download it here.</Link>
+                  </Text>
+                  </VStack>
+                </Box>
+                <Box>
+                  <VStack alignItems="flex-start">
+                    <Box
+                      bg="orange.50"
+                      borderRadius="full"
+                      width={100}
+                      height={100}
+                      position="relative"
+                    >
+                      <Box
+                        bg="orange.100"
+                        borderRadius="full"
+                        width={85}
+                        height={85}
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      />
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      >
+                        <img
+                          src="/images/glossary_search.png"
+                          alt="Glossary search"
+                          title="Glossary search"
+                          width="100%"
+                          height="auto"
+                        />
+                      </Box>
+                    </Box>
+                  <Heading size="sm" pt={4}>
+                    Prepare the configuration
+                  </Heading>
+                  <Text pt={2}>
+                    Use our template Yaml file to create a gateway and set up its configuration: services, routes and plugins.
+                    <Link
+                      href={"https://github.com/bcgov/gwa-cli/releases"}
+                      // TODO replace with env defined URL
+                      // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                      target="_blank"
+                      color="bc-link"
+                      textDecor="underline"
+                    >Download it here.</Link>
+                  </Text>
+                  </VStack>
+                </Box>
+                <Box>
+                  <VStack alignItems="flex-start">
+                    <Box
+                      bg="blue.50"
+                      borderRadius="full"
+                      width={100}
+                      height={100}
+                      position="relative"
+                    >
+                      <Box
+                        bg="blue.100"
+                        borderRadius="full"
+                        width={85}
+                        height={85}
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      />
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                      >
+                        <img
+                          src="/images/glossary_search.png"
+                          alt="Glossary search"
+                          title="Glossary search"
+                          width="100%"
+                          height="auto"
+                        />
+                      </Box>
+                    </Box>
+                  <Heading size="sm" pt={4}>
+                    Apply configuration to your gateway
+                  </Heading>
+                  <Text pt={2}>
+                  Run the sync command in the CLI to apply your configuration to your gateway.
+                    <Link
+                      href={"https://github.com/bcgov/gwa-cli/releases"}
+                      // TODO replace with env defined URL
+                      // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                      target="_blank"
+                      color="bc-link"
+                      textDecor="underline"
+                    >Download it here.</Link>
+                  </Text>
+                  </VStack>
+                </Box>
+              </Grid>
+              <HStack alignItems="center" justifyContent="center" mt={10} bg="#f4fbff" p={2}>
+                <img
+                  src="/images/glossary_search.png"
+                  width={38}
+                  height={38}
+                  title="Glossary search"
+                  alt="Glossary search"
+                />
+                <Heading size="sm" ml={2.5}>
+                  New terminology? 
+                </Heading>
+                <Text>
+                  <Link
+                    href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                    target="_blank"
+                    color="bc-link"
+                    textDecor="underline"
+                  >
+                    Explore our glossary
+                  </Link>
+                  {' '}for easy-to-understand definitions
+                </Text>
+              </HStack>
+              <Box pt={20}>
+                <Heading size="md">GWA CLI commands</Heading>
+                <Text pt={6} pb={10}>
+                  These useful commands will save you time and help you manage your gateway resources in a more efficient way. For more details visit our {' '}
+                  <Link
+                      href={global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'}
+                      target="_blank"
+                      color="bc-link"
+                      textDecor="underline"
+                    >GWA CLI commands</Link>
+                  {' '}section.
+                </Text>
+              </Box>
+              <Box pt={20}>
+                <Heading size="md" fontSize="18px" pb={6}>Prepare the configuration</Heading>
+                <Box
+                  border="1px solid"
+                  borderColor="bc-outline"
+                  p={10}
+                  borderRadius={6}
+                  w="100%"
+                  mb={4}
+                >
+                  <Heading size="sm">Log in</Heading>
+                  <Text pb={4}>Login via device with your IDIR.</Text>
+                  <CliCommand value='gwa login' />
+                </Box>
+                <Box
+                  border="1px solid"
+                  borderColor="bc-outline"
+                  p={10}
+                  borderRadius={6}
+                  w="100%"
+                  mb={4}
+                >
+                  <Heading size="sm">Create gateway</Heading>
+                  <Text>Generate a new gateway with this command. The new gateway will hav assigned an automatic alphanumeric ID
+                    and a generic display name that can be modified to easily idenityf and distinguish this gateway from others.
+                  </Text>
+                  <Box>
+
+                  </Box>
+                </Box>
+              </Box>
+            </Card>
+            
             <EmptyPane
               message="To get started select a Namespace from the dropdown below or create a new Namespace"
               title="No Namespace selected yet"
