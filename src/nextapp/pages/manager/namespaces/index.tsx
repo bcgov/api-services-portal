@@ -349,9 +349,9 @@ const NamespacesPage: React.FC = () => {
                         transform="translate(-50%, -50%)"
                       >
                         <img
-                          src="/images/glossary_search.png"
-                          alt="Glossary search"
-                          title="Glossary search"
+                          src="/images/download.png"
+                          alt="Download"
+                          title="Download"
                           width="100%"
                           height="auto"
                         />
@@ -399,9 +399,9 @@ const NamespacesPage: React.FC = () => {
                         transform="translate(-50%, -50%)"
                       >
                         <img
-                          src="/images/glossary_search.png"
-                          alt="Glossary search"
-                          title="Glossary search"
+                          src="/images/config.png"
+                          alt="Configuration"
+                          title="Configuration"
                           width="100%"
                           height="auto"
                         />
@@ -411,15 +411,19 @@ const NamespacesPage: React.FC = () => {
                     Prepare the configuration
                   </Heading>
                   <Text pt={2}>
-                    Use our template Yaml file to create a gateway and set up its configuration: services, routes and plugins.
+                    Use our{' '} 
                     <Link
-                      href={"https://github.com/bcgov/gwa-cli/releases"}
-                      // TODO replace with env defined URL
-                      // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
-                      target="_blank"
+                      href={"#generate-config"}
                       color="bc-link"
                       textDecor="underline"
-                    >Download it here.</Link>
+                      >template Yaml file</Link>
+                    {' '}to{' '}
+                    <Link
+                      href={"#create-gateway"}
+                      color="bc-link"
+                      textDecor="underline"
+                      >create a gateway</Link> 
+                    {' '}and set up its configuration: services, routes and plugins.
                   </Text>
                   </VStack>
                 </Box>
@@ -449,9 +453,9 @@ const NamespacesPage: React.FC = () => {
                         transform="translate(-50%, -50%)"
                       >
                         <img
-                          src="/images/glossary_search.png"
-                          alt="Glossary search"
-                          title="Glossary search"
+                          src="/images/api_apply.png"
+                          alt="Apply configuration"
+                          title="Apply configuration"
                           width="100%"
                           height="auto"
                         />
@@ -461,15 +465,13 @@ const NamespacesPage: React.FC = () => {
                     Apply configuration to your gateway
                   </Heading>
                   <Text pt={2}>
-                  Run the sync command in the CLI to apply your configuration to your gateway.
-                    <Link
-                      href={"https://github.com/bcgov/gwa-cli/releases"}
-                      // TODO replace with env defined URL
-                      // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
-                      target="_blank"
-                      color="bc-link"
-                      textDecor="underline"
-                    >Download it here.</Link>
+                    Run the{' '}
+                      <Link
+                        href={"#apply-config"}
+                        color="bc-link"
+                        textDecor="underline"
+                        >apply command</Link>
+                    {' '}in the CLI to apply your configuration to your gateway.
                   </Text>
                   </VStack>
                 </Box>
@@ -499,7 +501,7 @@ const NamespacesPage: React.FC = () => {
               </HStack>
               <Box pt={20}>
                 <Heading size="md">GWA CLI commands</Heading>
-                <Text pt={6} pb={10}>
+                <Text pt={6}>
                   These useful commands will save you time and help you manage your gateway resources in a more efficient way. For more details visit our {' '}
                   <Link
                       href={global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'}
@@ -510,36 +512,61 @@ const NamespacesPage: React.FC = () => {
                   {' '}section.
                 </Text>
               </Box>
-              <Box pt={20}>
-                <Heading size="md" fontSize="18px" pb={6}>Prepare the configuration</Heading>
-                <Box
-                  border="1px solid"
-                  borderColor="bc-outline"
-                  p={10}
-                  borderRadius={6}
-                  w="100%"
-                  mb={4}
-                >
-                  <Heading size="sm">Log in</Heading>
-                  <Text pb={4}>Login via device with your IDIR.</Text>
-                  <CliCommand value='gwa login' />
-                </Box>
-                <Box
-                  border="1px solid"
-                  borderColor="bc-outline"
-                  p={10}
-                  borderRadius={6}
-                  w="100%"
-                  mb={4}
-                >
-                  <Heading size="sm">Create gateway</Heading>
-                  <Text>Generate a new gateway with this command. The new gateway will hav assigned an automatic alphanumeric ID
-                    and a generic display name that can be modified to easily idenityf and distinguish this gateway from others.
-                  </Text>
-                  <Box>
+              <Box>
+                <Heading size="md" fontSize="18px" pt={16} pb={6}>Prepare the configuration</Heading>
+                <CliCommand 
+                  title='Log in'
+                  description='Login via device with your IDIR.'
+                  command='gwa login' 
+                />
+                <CliCommand 
+                  id='create-gateway'
+                  title='Create gateway'
+                  description='Generate a new gateway with this command. The new gateway will hav assigned an automatic alphanumeric ID
+                    and a generic display name that can be modified to easily idenityf and distinguish this gateway from others.'
+                  command='gwa gateway create' 
+                />
 
-                  </Box>
-                </Box>
+                <Heading size="md" fontSize="18px" pt={16} pb={6}>Apply configuration to your gateway</Heading>
+                <CliCommand 
+                  id='generate-config'
+                  title='Generate Yaml configuration file'
+                  description='Run this command to generate a sample gateway configuration Yaml file'
+                  command='gwa generate-config' 
+                />
+                <CliCommand 
+                  id='apply-config'
+                  title='Apply the changes'
+                  description='With this command you can apply your configuration to your recently created gateway. 
+                    If you need to make updates or republish, simply run this command again.'
+                  command='gwa apply --input <gw-config.yaml>' 
+                />
+
+                <Heading size="md" fontSize="18px" pt={16} pb={6}>Help</Heading>
+                <CliCommand 
+                  title='Help'
+                  description="If you are not sure about how to use a specific command, you can type --help after the
+                    command's name to learn more about its usage and syntax."
+                  command='gwa <command> --help' 
+                />
+
+                <Heading size="md" fontSize="18px" pt={16} pb={6}>Other utility functions</Heading>
+                <CliCommand 
+                  title='Get'
+                  description="With get you can obtain gateway resources and retrieve a table of datasets, issuers,
+                    organizations, or products."
+                  command='gwa get <type>' 
+                />
+                <CliCommand 
+                  title='Status'
+                  description="PROVIDE TEXT"
+                  command='gwa status' 
+                />
+                <CliCommand 
+                  title='Config'
+                  description="PROVIDE TEXT"
+                  command='gwa config' 
+                />
               </Box>
             </Card>
             

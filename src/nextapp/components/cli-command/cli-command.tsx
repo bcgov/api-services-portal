@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Flex,
+  Heading,
   Icon,
   IconButton,
   Input,
@@ -11,12 +12,16 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { IoCopy } from 'react-icons/io5';
+import { description } from 'casual-browserify';
 
 interface CliCommandProps {
-  value: string;
+  id?: string;
+  title: string;
+  description: string; 
+  command: string;
 }
 
-const CliCommand: React.FC<CliCommandProps> = ({ value }) => {
+const CliCommand: React.FC<CliCommandProps> = ({ id, title, description, command }) => {
   const toast = useToast();
   const handleClipboard = React.useCallback(
     (text: string) => async () => {
@@ -30,29 +35,41 @@ const CliCommand: React.FC<CliCommandProps> = ({ value }) => {
   );
 
   return (
-    <Box
+    <Box id={id}
       border="1px solid"
       borderColor="bc-outline"
-      backgroundColor="#FAFAFA"
       p={10}
       borderRadius={6}
       w="100%"
       mb={4}
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
     >
-      <Text fontFamily="mono">$ {value}</Text>
-      <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
-        <IconButton 
-          aria-label="Copy to clipboard" 
-          variant="ghost"
-          icon={<IoCopy />}
-          fontSize='20px'
-          onClick={handleClipboard(value)}
-        />
-      </Tooltip>
+      <Heading size="sm">{title}</Heading>
+      <Text pb={4}>{description}</Text>
+      <Box
+        border="1px solid"
+        borderColor="bc-outline"
+        backgroundColor="#FAFAFA"
+        p={10}
+        borderRadius={6}
+        w="100%"
+        mb={4}
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Text fontFamily="mono">$ {command}</Text>
+        <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
+          <IconButton 
+            aria-label="Copy to clipboard" 
+            variant="ghost"
+            icon={<IoCopy />}
+            fontSize='20px'
+            onClick={handleClipboard(command)}
+          />
+        </Tooltip>
+      </Box>
     </Box>
+    
   );
 };
 
