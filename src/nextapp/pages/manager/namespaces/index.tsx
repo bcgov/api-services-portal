@@ -240,6 +240,13 @@ const NamespacesPage: React.FC = () => {
     </>
   );
 
+  const handleSmoothScroll = (targetId) => {
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -416,6 +423,7 @@ const NamespacesPage: React.FC = () => {
                       href={"#generate-config"}
                       color="bc-link"
                       textDecor="underline"
+                      onClick={() => handleSmoothScroll('generate-config')}
                       >template Yaml file</Link>
                     {' '}to{' '}
                     <Link
