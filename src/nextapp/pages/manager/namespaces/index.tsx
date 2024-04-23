@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import ApproveBanner from '@/components/approve-banner';
 import {
   Button,
@@ -117,6 +117,58 @@ const secondaryActions = [
       'Manage service accounts for performing functions on the namespace',
   },
 ];
+
+// function SmoothScrollLink({ href, children }) {
+//   useEffect(() => {
+//     const handleClick = (event) => {
+//       event.preventDefault();
+//       const targetId = href.substring(1); // Remove the # from href to get the target id
+//       const target = document.getElementById(targetId);
+//       if (target) {
+//         const yOffset = -50; // You may adjust this value to offset the scroll position if needed
+//         const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+//         window.scrollTo({ top: y, behavior: "smooth" });
+//       }
+//     };
+
+//     const anchorLinks = document.querySelectorAll('a[href^="#"]');
+//     anchorLinks.forEach((link) => {
+//       link.addEventListener("click", handleClick);
+//     });
+
+//     return () => {
+//       anchorLinks.forEach((link) => {
+//         link.removeEventListener("click", handleClick);
+//       });
+//     };
+//   }, [href]);
+
+//   return <Link href={href}>{children}</Link>;
+// }
+
+function SmoothScrollLink({ href, children }) {
+  const handleClick = (event) => {
+    event.preventDefault();
+    const targetId = href.substring(1); // Remove the # from href to get the target id
+    const target = document.getElementById(targetId);
+    if (target) {
+      const yOffset = -120; // You may adjust this value to offset the scroll position if needed
+      const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <Link 
+      href={href}
+      color="bc-link"
+      textDecor="underline"
+      onClick={handleClick}
+    >
+      {children}
+    </Link>
+  )
+}
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
@@ -258,7 +310,7 @@ const NamespacesPage: React.FC = () => {
       <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={hasNamespace ? title : ''} />
+        <PageHeader title={hasNamespace ? title : 'My Gateways'} />
         {!hasNamespace && (
           <>
             <Card mb={8} px={12} py={8}>
@@ -419,18 +471,13 @@ const NamespacesPage: React.FC = () => {
                   </Heading>
                   <Text pt={2}>
                     Use our{' '} 
-                    <Link
+                    <SmoothScrollLink
                       href={"#generate-config"}
-                      color="bc-link"
-                      textDecor="underline"
-                      onClick={() => handleSmoothScroll('generate-config')}
-                      >template Yaml file</Link>
+                      >template Yaml file</SmoothScrollLink>
                     {' '}to{' '}
-                    <Link
+                    <SmoothScrollLink
                       href={"#create-gateway"}
-                      color="bc-link"
-                      textDecor="underline"
-                      >create a gateway</Link> 
+                      >create a gateway</SmoothScrollLink> 
                     {' '}and set up its configuration: services, routes and plugins.
                   </Text>
                   </VStack>
@@ -474,11 +521,9 @@ const NamespacesPage: React.FC = () => {
                   </Heading>
                   <Text pt={2}>
                     Run the{' '}
-                      <Link
-                        href={"#apply-config"}
-                        color="bc-link"
-                        textDecor="underline"
-                        >apply command</Link>
+                    <SmoothScrollLink
+                      href={"#apply-config"}
+                      >apply command</SmoothScrollLink>
                     {' '}in the CLI to apply your configuration to your gateway.
                   </Text>
                   </VStack>
@@ -578,6 +623,7 @@ const NamespacesPage: React.FC = () => {
               </Box>
             </Card>
             
+            {/* this element needs to get moved once logic is revised */}
             <EmptyPane
               message="To get started select a Namespace from the dropdown below or create a new Namespace"
               title="No Namespace selected yet"

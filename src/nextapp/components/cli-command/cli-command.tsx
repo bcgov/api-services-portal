@@ -1,18 +1,13 @@
 import * as React from 'react';
 import {
   Box,
-  Button,
-  Flex,
   Heading,
-  Icon,
   IconButton,
-  Input,
   Text,
   Tooltip,
   useToast,
 } from '@chakra-ui/react';
 import { IoCopy } from 'react-icons/io5';
-import { description } from 'casual-browserify';
 
 interface CliCommandProps {
   id?: string;
@@ -68,8 +63,7 @@ const CliCommand: React.FC<CliCommandProps> = ({ id, title, description, command
           />
         </Tooltip>
       </Box>
-    </Box>
-    
+    </Box>  
   );
 };
 
