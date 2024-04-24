@@ -28,31 +28,6 @@ jobs:
       - name: Checkout Portal
         uses: actions/checkout@v2
 
-      # - name: Determine Download file name
-      #   id: set_variable
-      #   run: |
-      #     echo ${{ runner.arch }}
-      #     if [ "${{ runner.arch }}" == "X64" ]; then
-      #       echo "::set-output name=my_variable::gwa_Linux_x86_64.tgz"
-      #     elif [ "${{ runner.arch }}" == "ARM64" ]; then
-      #       echo "::set-output name=my_variable::gwa_Linux_arm64.tgz"
-      #     else
-      #       echo "unsupported architecture"
-      #     fi
-
-      # - name: Download Binary
-      #   uses: robinraju/release-downloader@v1.8
-      #   with:
-      #     repository: "bcgov/gwa-cli"
-      #     latest: true
-      #     fileName: ${{ steps.set_variable.outputs.my_variable }}
-      #     out-file-path: "${{ github.workspace }}/e2e"
-
-      # - name: Unzip file
-      #   run: |
-      #     cd ${{ github.workspace }}/e2e
-      #     tar xvzf ${{ steps.set_variable.outputs.my_variable }}
-
       - name: Build Docker Images
         run: |
           docker compose --profile testsuite build
@@ -89,6 +64,12 @@ jobs:
           name: test-results
           path: ${{ github.workspace }}/e2e/results/report
 
+      - name: Upload E2E Code Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: ${{ github.workspace }}/e2e/coverage
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
@@ -113,4 +94,26 @@ jobs:
             echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
             export MSG=$(cat msg)
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+            exit 1
           fi
+      
+      - name: Set up Python 3.9
+        if: failure()
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+
+      - name: Install Python dependencies
+        if: failure()
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Check Astra results and create Jira issue if necessary
+        if: failure()
+        run: python .github/astra-jira.py
+        env:
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_KEY: ${{ secrets.JIRA_API_KEY }}
+          ASTRA_SCAN_RESULTS: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
