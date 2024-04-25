@@ -48,7 +48,7 @@ import {
   FaUserShield,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation } from '@/shared/services/api';
+import { restApi, useApiMutation, useApi } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
@@ -128,6 +128,12 @@ const NamespacesPage: React.FC = () => {
   const namespace = useCurrentNamespace();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const global = useGlobal();
+  const { data, isLoading, isSuccess, isError } = useApi(
+    'allNamespaces',
+    { query },
+    { suspense: false }
+  );
+  console.log(data)
   const currentOrg = React.useMemo(() => {
     if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
       return {
@@ -252,10 +258,16 @@ const NamespacesPage: React.FC = () => {
       <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader title={hasNamespace ? title : 'My Gateways'} />
+        <>
+          {isError && (
+            <Heading>Gateways Failed to Load</Heading>
+          )}
+          {isSuccess && data.allNamespaces.length == 0 && (
+            <GatewayGetStarted />
+          )}
+        </>
         {!hasNamespace && (
           <>
-            <GatewayGetStarted />
-
             {/* this element needs to get moved or removed once logic is revised */}
             <EmptyPane
               message="To get started select a Namespace from the dropdown below or create a new Namespace"
@@ -432,5 +444,13 @@ export default NamespacesPage;
 const mutation = gql`
   mutation DeleteNamespace($name: String!) {
     forceDeleteNamespace(namespace: $name, force: false)
+  }
+`;
+
+const query = gql`
+  query GetNamespaces {
+    allNamespaces {
+      name
+    }
   }
 `;
