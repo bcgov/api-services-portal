@@ -12,7 +12,7 @@ import { IoCopy } from 'react-icons/io5';
 interface CliCommandProps {
   id?: string;
   title: string;
-  description: string; 
+  description: React.ReactNode; 
   command: string;
 }
 
@@ -52,7 +52,7 @@ const CliCommand: React.FC<CliCommandProps> = ({ id, title, description, command
         alignItems="center"
         justifyContent="space-between"
       >
-        <Text fontFamily="mono">$ {command}</Text>
+        <Text fontFamily="mono" fontSize="sm">$ {command}</Text>
         <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
           <IconButton 
             aria-label="Copy to clipboard" 

@@ -1,0 +1,390 @@
+import Card from '@/components/card';
+import CliCommand from '@/components/cli-command';
+import {
+  Box,
+  Code,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
+  Icon,
+  Link, 
+  Text,
+  VStack
+} from '@chakra-ui/react';
+import React from 'react';
+import {
+  FaChartLine,
+  FaLock,
+  FaSearch
+} from 'react-icons/fa';
+import { useGlobal } from '@/shared/services/global';
+
+function SmoothScrollLink({ href, children }) {
+  const handleClick = (event) => {
+    event.preventDefault();
+    const targetId = href.substring(1); // Remove the # from href to get the target id
+    const target = document.getElementById(targetId);
+    if (target) {
+      const yOffset = -120; // You may adjust this value to offset the scroll position if needed
+      const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <Link 
+      href={href}
+      color="bc-link"
+      textDecor="underline"
+      onClick={handleClick}
+    >
+      {children}
+    </Link>
+  )
+}
+
+const GatewayGetStarted: React.FC = () => {
+  const global = useGlobal();
+
+  return (
+    <>
+      <Card mb={8} px={12} py={8}>
+        <VStack align="center" justifyContent="center" gridGap={2} pb={6}>
+          <img
+            src="/images/empty_folder.png"
+            width={85}
+            height={85}
+            title="Empty folder"
+            alt="Empty folder"
+          />
+          <Heading size="md">No gateways created yet</Heading>
+        </VStack>
+        <Heading size="lg">What is a gateway?</Heading>
+        <Text pt={6} pb={8}>
+          Gateways act as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
+        </Text>            
+        <Text pt={0} pb={8}>
+          After your first gateway is created, in this section you can do things like:
+        </Text>
+        <Grid templateColumns="repeat(3, 1fr)" gap={7}>
+          <Box>
+            <Flex alignItems="center">
+              <Icon as={FaSearch} width={5} height={5} />
+              <Heading size="sm" ml={2.5}>
+                Make your products discoverable
+              </Heading>
+            </Flex>
+            <Text pt={4}>
+              Allow citizens to find your APIs on the BC Government API Directory.
+            </Text>
+          </Box>
+          <Box>
+            <Flex alignItems="center">
+              <Icon as={FaLock} width={5} height={5} />
+              <Heading size="sm" ml={2.5}>
+                Control access to your products
+              </Heading>
+            </Flex>
+            <Text pt={4}>
+              Decide who can use the data and how they access it.
+            </Text>
+          </Box>
+          <Box>
+            <Flex alignItems="center">
+              <Icon as={FaChartLine} width={5} height={5} />
+              <Heading size="sm" ml={2.5}>
+                View usage metrics
+              </Heading>
+            </Flex>
+            <Text pt={4}>
+              Get a fast overview of how much and how often the services you've set up are being used.
+            </Text>
+          </Box>
+        </Grid>
+      </Card>
+      <Card mb={8} px={12} py={8}>
+        <Box>
+          <Heading size="lg">Steps to create and configure your first gateway</Heading>
+          <Text pt={6} pb={10}>
+            Follow these steps to create and configure your first gateway in a test/training instance. For a more detailed version of this tutorial, consult our{' '}
+            <Link
+                href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >'API Provider Quick Start'</Link>
+            {' '}tutorial.
+          </Text>
+        </Box>
+        <Grid templateColumns="repeat(3, 1fr)" gap={7}>
+          <Box>
+            <VStack alignItems="flex-start">
+              <Box
+                bg="purple.50"
+                borderRadius="full"
+                width={100}
+                height={100}
+                position="relative"
+              >
+                <Box
+                  bg="purple.100"
+                  borderRadius="full"
+                  width={85}
+                  height={85}
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                />
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                >
+                  <img
+                    src="/images/download.png"
+                    alt="Download"
+                    title="Download"
+                    width="100%"
+                    height="auto"
+                  />
+                </Box>
+              </Box>
+            <Heading size="sm" pt={4}>
+                Download our Command Line Interface (CLI)
+            </Heading>
+            <Text pt={2}>
+              Our CLI is a convenient way to configure your gateways.{' '}                   
+              <Link
+                href={"https://github.com/bcgov/gwa-cli/releases"}
+                // TODO replace with env defined URL
+                // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >Download it here.</Link>
+            </Text>
+            </VStack>
+          </Box>
+          <Box>
+            <VStack alignItems="flex-start">
+              <Box
+                bg="orange.50"
+                borderRadius="full"
+                width={100}
+                height={100}
+                position="relative"
+              >
+                <Box
+                  bg="orange.100"
+                  borderRadius="full"
+                  width={85}
+                  height={85}
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                />
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                >
+                  <img
+                    src="/images/config.png"
+                    alt="Configuration"
+                    title="Configuration"
+                    width="100%"
+                    height="auto"
+                  />
+                </Box>
+              </Box>
+            <Heading size="sm" pt={4}>
+              Prepare your configuration
+            </Heading>
+            <Text pt={2}>
+              Use our{' '} 
+              <SmoothScrollLink
+                href={"#generate-config"}
+                >template Yaml file</SmoothScrollLink>
+              {' '}to{' '}
+              <SmoothScrollLink
+                href={"#create-gateway"}
+                >create a gateway</SmoothScrollLink> 
+              {' '}and set up its configuration: services, routes and plugins.
+            </Text>
+            </VStack>
+          </Box>
+          <Box>
+            <VStack alignItems="flex-start">
+              <Box
+                bg="blue.50"
+                borderRadius="full"
+                width={100}
+                height={100}
+                position="relative"
+              >
+                <Box
+                  bg="blue.100"
+                  borderRadius="full"
+                  width={85}
+                  height={85}
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                />
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  transform="translate(-50%, -50%)"
+                >
+                  <img
+                    src="/images/api_apply.png"
+                    alt="Apply configuration"
+                    title="Apply configuration"
+                    width="100%"
+                    height="auto"
+                  />
+                </Box>
+              </Box>
+            <Heading size="sm" pt={4}>
+              Apply configuration to your gateway
+            </Heading>
+            <Text pt={2}>
+              Run the{' '}
+              <SmoothScrollLink
+                href={"#apply-config"}
+                >apply command</SmoothScrollLink>
+              {' '}in the CLI to apply your configuration to your gateway.
+            </Text>
+            </VStack>
+          </Box>
+        </Grid>
+        <HStack alignItems="center" justifyContent="center" mt={10} bg="#f4fbff" p={2}>
+          <img
+            src="/images/glossary_search.png"
+            width={38}
+            height={38}
+            title="Glossary search"
+            alt="Glossary search"
+          />
+          <Heading size="sm" ml={2.5}>
+            New terminology? 
+          </Heading>
+          <Text>
+            <Link
+              href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+              target="_blank"
+              color="bc-link"
+              textDecor="underline"
+            >
+              Explore our glossary
+            </Link>
+            {' '}for easy-to-understand definitions
+          </Text>
+        </HStack>
+        <Box pt={20}>
+          <Heading size="md">GWA CLI commands</Heading>
+          <Text pt={6}>
+            These useful commands will save you time and help you manage your gateway resources in a more efficient way. For more details visit our {' '}
+            <Link
+                href={global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >GWA CLI commands</Link>
+            {' '}section.
+          </Text>
+        </Box>
+        <Box>
+          <Heading size="md" fontSize="18px" pt={10} pb={6}>Prepare your configuration</Heading>
+          <CliCommand 
+            title='Log in'
+            description='Log in via device with your IDIR.'
+            command='gwa login' 
+          />
+          <CliCommand 
+            id='create-gateway'
+            title='Create gateway'
+            description='Generate a new gateway with this command. The new gateway will be assigned an automatic alphanumeric ID
+              and a generic display name that can be modified to easily identify and distinguish this gateway from others.'
+            command='gwa gateway create -g' 
+          />
+          <CliCommand 
+            id='generate-config'
+            title='Generate Yaml configuration file'
+            description='Run this command to generate a sample gateway configuration Yaml file'
+            command='gwa generate-config --template client-credentials-shared-idp' 
+          />
+
+          <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your gateway</Heading>
+          <CliCommand 
+            id='apply-config'
+            title='Apply your configuration'
+            description='With this command you can apply your configuration to your recently created gateway. 
+              If you need to make updates or republish, simply run this command again.'
+            command='gwa apply --input <gw-config.yaml>' 
+          />
+          <CliCommand 
+            title='Test your gateway'
+            description='Get the route for your newly published gateway service using this command. It will return a link to
+              the route to access your API through the gateway and a link to the Your Products page to request credentials.
+                '
+            command='gwa status -links' 
+          />
+          {/* TODO: add anchor link to end of tutorial */}
+          <Box>
+            <Text pt={6}><Text as="span" fontWeight="bold">Congratulations!</Text> You've set up X, Y, and Z.</Text>
+            <Text pt={6}>For more information on accessing your gateway and next steps, visit the{' '}
+              <Link
+                  href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
+                  target="_blank"
+                  color="bc-link"
+                  textDecor="underline"
+                >tutorial</Link>.
+            </Text>
+          </Box>
+
+          {/* TODO: the following requires revision */}
+
+          <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
+          <CliCommand 
+            title='Help'
+            description={
+              <>
+                If you are not sure about how to use a specific command, you can type <Code>--help</Code> after the
+                command's name to learn more about its usage and syntax.
+              </>
+            }
+            command='gwa <command> --help' 
+          />
+
+          <Heading size="md" fontSize="18px" pt={10} pb={6}>Other utility functions</Heading>
+          <CliCommand 
+            title='Get'
+            description="With get you can obtain gateway resources and retrieve a table of datasets, issuers,
+              organizations, or products."
+            command='gwa get <type>' 
+          />
+          <CliCommand 
+            title='Status'
+            description="PROVIDE TEXT"
+            command='gwa status' 
+          />
+          <CliCommand 
+            title='Config'
+            description="PROVIDE TEXT"
+            command='gwa config' 
+          />
+        </Box>
+      </Card>
+    </>
+  );
+};
+
+export default GatewayGetStarted;
