@@ -47,6 +47,21 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     { suspense: false }
   );
   const today = new Date();
+  const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
+
+  const recentNamespaces = data?.allNamespaces
+    .filter((namespace: Namespace) => {
+      const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
+      return recentNamespace && recentNamespace.providerUserGuid === user.providerUserGuid && namespace.name !== user.namespace;
+    })
+    .sort((a, b) => {
+      const aRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === a.name);
+      const bRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === b.name);
+      return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
+    })
+    .slice(0, 5);
+
+  console.log(recentNamespaces)
 
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
@@ -57,6 +72,17 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
+        const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.providerUserGuid === user.providerUserGuid && entry.namespace === user.namespace);
+        if (existingEntryIndex !== -1) {
+          namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
+        } else {
+          namespacesRecentlyViewed.push({
+            providerUserGuid: user.providerUserGuid,
+            namespace: user.namespace,
+            updatedAt: user.updatedAt
+          });
+        }
+        localStorage.setItem('namespacesRecentlyViewed', JSON.stringify(namespacesRecentlyViewed));
         toast.closeAll();
         client.invalidateQueries();
         toast({
@@ -73,7 +99,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         });
       }
     },
-    [client, toast]
+    [client, toast, user]
   );
 
   const isNamespaceSelector = variant === 'ns-selector';
@@ -134,7 +160,33 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 </Box>                
                 <MenuOptionGroup
                   ml={6}
-                  title={'Switch Namespace'}
+                  title={'Recently viewed'}
+                >
+                  {/* {data.allNamespaces
+                    .filter((n) => n.name !== user.namespace)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((n) => ( */}
+                  {recentNamespaces.map((n) => (
+                    <MenuItem
+                      key={n.id}
+                      onClick={handleNamespaceChange(n)}
+                      data-testid={`ns-dropdown-item-${n.name}`}
+                      flexDir="column"
+                      alignItems="flex-start"
+                      pos="relative"
+                      p={6}
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Icon as={FaServer} />
+                        <Text ml={2}>{n.name}</Text>
+                      </Box>
+                    </MenuItem>
+                    ))}
+                </MenuOptionGroup>
+                {/* This next set of menus options is necessary to test switching to a newly created gw when there is no My Gateways page yet */}
+                {/* <MenuOptionGroup
+                  ml={6}
+                  title={'All gateways (for dev)'}
                 >
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
@@ -149,27 +201,18 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         pos="relative"
                         p={6}
                       >
-                        {/* {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
-                          5 && (
-                          <Text color="bc-error" pos="absolute" right={4}>
-                            New
-                          </Text>
-                        )} */}
                         <Box display="flex" alignItems="center">
                           <Icon as={FaServer} />
                           <Text ml={2}>{n.name}</Text>
                         </Box>
-                        {/* {
-                          // @ts-ignore
-                          !n.orgEnabled && (
-                            <Text fontSize="xs" color="bc-component">
-                              API Publishing Disabled
-                            </Text>
-                          )
-                        } */}
                       </MenuItem>
                     ))}
-                </MenuOptionGroup>
+                </MenuOptionGroup> */}
+                <Flex justifyContent='center'>
+                  <Text p={6} fontWeight='bold'>
+                    You have {data.allNamespaces.length} Gateways in total.
+                  </Text>
+                </Flex>
               </Box>
             )}
           </>
