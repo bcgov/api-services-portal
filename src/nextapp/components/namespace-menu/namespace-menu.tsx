@@ -1,6 +1,7 @@
 import { UserData } from '@/types';
 import {
   Box,
+  Flex,
   Icon,
   Menu,
   MenuButton,
@@ -13,9 +14,10 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
+import SearchInput from '@/components/search-input';
 import { restApi, useApi } from '@/shared/services/api';
 import { differenceInDays } from 'date-fns';
 import { Namespace } from '@/shared/types/query.types';
@@ -36,6 +38,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
 }) => {
   const client = useQueryClient();
   const toast = useToast();
+  const [search, setSearch] = React.useState('');
   const newNamespaceDisclosure = useDisclosure();
   const managerDisclosure = useDisclosure();
   const { data, isLoading, isSuccess, isError } = useApi(
@@ -80,21 +83,32 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       <Menu placement="bottom-end">
         <MenuButton
           data-testid="ns-dropdown-btn"
-          px={isNamespaceSelector ? 5 : 2}
-          py={isNamespaceSelector ? 2 : 1}
+          px={4}
+          py={1}
+          w={72}
           transition="all 0.2s"
           borderRadius={4}
-          border={isNamespaceSelector ? '2px solid black' : ''}
-          borderColor={isNamespaceSelector ? 'bc-component' : ''}
-          _hover={isNamespaceSelector ? { boxShadow: 'md' } : { bg: 'bc-link' }}
-          _expanded={isNamespaceSelector ? {} : { bg: 'blue.400' }}
+          border={'2px solid #606060'}
+          backgroundColor={'white'}
+          _hover={{ boxShadow: 'md' }}
+          _expanded={{}}
           _focus={{ boxShadow: 'outline' }}
+          textAlign='left'
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
         >
-          {user?.namespace ?? buttonMessage ?? 'No Active Namespace'}{' '}
-          <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
+          <Flex alignItems="center">
+            <Box flex="1">{user?.namespace ?? buttonMessage ?? 'No Active Namespace'}</Box>
+            <Icon as={FaChevronDown} aria-label="chevron down icon" />
+          </Flex>
         </MenuButton>
         <MenuList
           color="gray.600"
+          box-shadow='0px 5px 15px 0px #38598A59'
+          borderRadius={'10px'}
+          mt={-1}
+          pt={6}
           sx={{
             '.chakra-menu__group__title': {
               fontWeight: 'normal',
@@ -109,9 +123,18 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <Box maxHeight="calc(100vh / 2)" overflowY="auto">
+              <Box w={'403px'} maxHeight="calc(100vh / 2)" overflowY="auto">
+                <Box ml={6} w={'338px'}>
+                  <SearchInput
+                    placeholder="Find a Gateway by alias or ID"
+                    value={search}
+                    onChange={setSearch}
+                    data-testid="gw-search"
+                  />
+                </Box>                
                 <MenuOptionGroup
-                  title={isNamespaceSelector ? '' : 'Switch Namespace'}
+                  ml={6}
+                  title={'Switch Namespace'}
                 >
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
@@ -124,22 +147,26 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         flexDir="column"
                         alignItems="flex-start"
                         pos="relative"
+                        p={6}
                       >
-                        {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
+                        {/* {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
                           5 && (
                           <Text color="bc-error" pos="absolute" right={4}>
                             New
                           </Text>
-                        )}
-                        <Text>{n.name}</Text>
-                        {
-                          /* @ts-ignore */
+                        )} */}
+                        <Box display="flex" alignItems="center">
+                          <Icon as={FaServer} />
+                          <Text ml={2}>{n.name}</Text>
+                        </Box>
+                        {/* {
+                          // @ts-ignore
                           !n.orgEnabled && (
                             <Text fontSize="xs" color="bc-component">
                               API Publishing Disabled
                             </Text>
                           )
-                        }
+                        } */}
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>

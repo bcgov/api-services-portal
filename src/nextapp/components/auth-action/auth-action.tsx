@@ -24,7 +24,6 @@ import {
   makeRedirectUrl,
   useAuth,
 } from '@/shared/services/auth';
-import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
 import NextLink from 'next/link';
 import { useGlobal } from '@/shared/services/global';
@@ -67,7 +66,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
-        <Divider orientation="vertical" color="white" height="32px" />
         <Menu placement="bottom-end">
           <MenuButton
             px={2}
@@ -120,12 +118,8 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   return (
     <HStack
-      divider={
-        <StackDivider borderColor="white" height="24px" alignSelf="center" />
-      }
       spacing={4}
     >
-      {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <HelpMenu />
       <Box
         as="span"

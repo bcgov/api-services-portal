@@ -49,7 +49,6 @@ import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import EmptyPane from '@/components/empty-pane';
-import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
 import NewNamespace from '@/components/new-namespace';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
@@ -253,11 +252,7 @@ const NamespacesPage: React.FC = () => {
             my={0}
           >
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              <NamespaceMenu
-                user={user}
-                variant="ns-selector"
-                buttonMessage="Select a Namespace"
-              />
+              CAN'T SELECT NAMESPACE HERE ANYMORE!
               <Text>or</Text>
               <Button variant="primary" onClick={onOpen}>
                 Create New Namespace
