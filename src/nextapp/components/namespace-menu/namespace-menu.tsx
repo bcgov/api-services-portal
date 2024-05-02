@@ -61,8 +61,18 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     })
     .slice(0, 5);
 
-  console.log(recentNamespaces)
-
+  const gwSearchResults = React.useMemo(() => {
+    const result =
+      data?.allNamespaces ?? [];
+    if (search.trim()) {
+      const regex = new RegExp(
+        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+      );
+      return result.filter((s) => s.name.search(regex) >= 0);
+    }
+    return result;
+  }, [data, search]);
+  
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
@@ -160,13 +170,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 </Box>                
                 <MenuOptionGroup
                   ml={6}
-                  title={'Recently viewed'}
+                  title={(search !== '' ? `${gwSearchResults.length} results`: 'Recently viewed')}
                 >
-                  {/* {data.allNamespaces
-                    .filter((n) => n.name !== user.namespace)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((n) => ( */}
-                  {recentNamespaces.map((n) => (
+                 {(search !== '' ? gwSearchResults : recentNamespaces).map((n) => (
                     <MenuItem
                       key={n.id}
                       onClick={handleNamespaceChange(n)}
