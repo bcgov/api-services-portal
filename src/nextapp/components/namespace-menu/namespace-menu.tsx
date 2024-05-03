@@ -52,7 +52,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
-      return recentNamespace && recentNamespace.providerUserGuid === user.providerUserGuid && namespace.name !== user.namespace;
+      return recentNamespace && recentNamespace.providerUserGuid === user.userId && namespace.name !== user.namespace;
     })
     .sort((a, b) => {
       const aRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === a.name);
@@ -61,7 +61,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     })
     .slice(0, 5);
 
-  const gwSearchResults = React.useMemo(() => {
+  const namespaceSearchResults = React.useMemo(() => {
     const result =
       data?.allNamespaces ?? [];
     if (search.trim()) {
@@ -170,9 +170,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 </Box>                
                 <MenuOptionGroup
                   ml={6}
-                  title={(search !== '' ? `${gwSearchResults.length} results`: 'Recently viewed')}
+                  title={(search !== '' ? `${namespaceSearchResults.length} results`: 'Recently viewed')}
                 >
-                 {(search !== '' ? gwSearchResults : recentNamespaces).map((n) => (
+                 {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
                     <MenuItem
                       key={n.id}
                       onClick={handleNamespaceChange(n)}
