@@ -139,7 +139,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           justifyContent="space-between"
         >
           <Flex alignItems="center">
-            <Box flex="1">{user?.namespace ?? buttonMessage ?? 'No Active Namespace'}</Box>
+            <Box flex="1">{user?.namespace ?? buttonMessage ?? 'No Active Gateway'}</Box>
             <Icon as={FaChevronDown} aria-label="chevron down icon" />
           </Flex>
         </MenuButton>
