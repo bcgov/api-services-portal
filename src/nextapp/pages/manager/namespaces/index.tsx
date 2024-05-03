@@ -133,7 +133,6 @@ const NamespacesPage: React.FC = () => {
     { query },
     { suspense: false }
   );
-  console.log(data)
   const currentOrg = React.useMemo(() => {
     if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
       return {
@@ -266,30 +265,6 @@ const NamespacesPage: React.FC = () => {
             <GatewayGetStarted />
           )}
         </>
-        {!hasNamespace && (
-          <>
-            {/* this element needs to get moved or removed once logic is revised */}
-            <EmptyPane
-              message="To get started select a Namespace from the dropdown below or create a new Namespace"
-              title="No Namespace selected yet"
-              boxProps={{ borderRadius: 0, mx: 0 }}
-              my={0}
-            >
-              <Flex justifyContent="center" alignItems="center" gridGap={4}>
-                <NamespaceMenu
-                  user={user}
-                  variant="ns-selector"
-                  buttonMessage="Select a Namespace"
-                />
-                <Text>or</Text>
-                <Button variant="primary" onClick={onOpen}>
-                  Create New Namespace
-                </Button>
-              </Flex> 
-              <NewNamespace isOpen={isOpen} onClose={onClose} />
-            </EmptyPane>
-          </>
-        )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
             <GridItem>
