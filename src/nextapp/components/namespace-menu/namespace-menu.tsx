@@ -48,7 +48,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const today = new Date();
   const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
 
-  const recentNamespaces = data?.allNamespaces
+  const currentNamespace = data?.allNamespaces.find(namespace => namespace.name === user.namespace);
+
+  let recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
       return recentNamespace && recentNamespace.userId === user.userId && namespace.name !== user.namespace;
@@ -58,8 +60,13 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       const bRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === b.name);
       return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
     })
-    .slice(0, 5);
+    .slice(0, 4); // Limit to 4, as we'll add the current namespace separately
   
+  // Add the current namespace to the beginning of the array
+  if (currentNamespace) {
+    recentNamespaces.unshift(currentNamespace);
+  }  
+
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
@@ -85,9 +92,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
-        console.log(namespacesRecentlyViewed)
         const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.userId === user.userId && entry.namespace === user.namespace);
-        console.log(existingEntryIndex)
         if (existingEntryIndex !== -1) {
           namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
         } else {
@@ -157,10 +162,10 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             },
           }}
         >
-          <Box w={'403px'} maxHeight="calc(100vh / 2)" overflowY="auto">
+          <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto">
             <Box ml={6} w={'338px'}>
               <SearchInput
-                placeholder="Find a Gateway by alias or ID"
+                placeholder="Find a Gateway by name or ID"
                 onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
                 value={search}
@@ -173,47 +178,50 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
-                <MenuOptionGroup
-                  pt={8}
-                  m={0}
-                  ml={5}
-                  // @ts-ignore - need bold font in title
-                  title={
-                    search !== ''
-                      ? (
-                          <Text fontWeight="bold">
-                            {namespaceSearchResults.length} result{namespaceSearchResults.length !== 1 ? 's' : ''} for "{search}"
-                          </Text>
-                        )
-                      : (
-                          <Text fontWeight="bold">
-                            Recently viewed
-                          </Text>
-                        )
-                  }
-                >
-                 {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
-                    <MenuItem
-                      key={n.id}
-                      onClick={handleNamespaceChange(n)}
-                      data-testid={`ns-dropdown-item-${n.name}`}
-                      flexDir="column"
-                      alignItems="flex-start"
-                      pos="relative"
-                      pl={6}
-                      pt={4}
-                      pb={0}
-                    >
-                      <Box display="flex" alignItems="center">
-                        <Icon as={FaServer} />
-                        <Text ml={2}>{n.displayName ? n.displayName : 'Display name here'}</Text>
-                      </Box>
-                      <Text ml={6} color='text'>{n.name}</Text>
-                    </MenuItem>
-                    ))}
-                </MenuOptionGroup>
+                <Box maxHeight="calc(100vh / 2 - 80px)" overflowY="auto">
+                  <MenuOptionGroup
+                    pt={8}
+                    pb={2}
+                    m={0}
+                    ml={5}
+                    // @ts-ignore - need bold font in title
+                    title={
+                      search !== ''
+                        ? (
+                            <Text fontWeight="bold">
+                              {namespaceSearchResults.length} result{namespaceSearchResults.length !== 1 ? 's' : ''} for "{search}"
+                            </Text>
+                          )
+                        : (
+                            <Text fontWeight="bold">
+                              Recently viewed
+                            </Text>
+                          )
+                    }
+                  >
+                  {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
+                      <MenuItem
+                        key={n.id}
+                        onClick={handleNamespaceChange(n)}
+                        data-testid={`ns-dropdown-item-${n.name}`}
+                        flexDir="column"
+                        alignItems="flex-start"
+                        pos="relative"
+                        pl={6}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Box display="flex" alignItems="center">
+                          <Icon as={FaServer} />
+                          <Text ml={2}>{n.displayName ? n.displayName : 'Display name here'}</Text>
+                        </Box>
+                        <Text ml={6} color='text'>{n.name}</Text>
+                      </MenuItem>
+                      ))}
+                  </MenuOptionGroup>
+                </Box>
                 <Flex justifyContent='center' flexDirection='column' alignItems='center'>
-                  <Text pt={10} fontSize='sm' fontWeight='bold'>
+                  <Text pt={8} fontSize='sm' fontWeight='bold'>
                     {`You have ${data.allNamespaces.length} Gateway${
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
@@ -226,7 +234,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             )}
           </Box>
             {/* TODO: Remove. This is here for convenience for creating NS's during prelim testing. */}
-            <> 
+            {/* <> 
               <MenuDivider />
               <MenuOptionGroup>
                 <MenuItem
@@ -237,7 +245,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   Create New Namespace
                 </MenuItem>
               </MenuOptionGroup>
-            </>
+            </> */}
         </MenuList>
       </Menu>
       <NewNamespace
@@ -262,6 +270,7 @@ const query = gql`
     allNamespaces {
       id
       name
+      displayName
       orgEnabled
       orgUpdatedAt
     }
