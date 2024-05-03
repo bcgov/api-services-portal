@@ -3,6 +3,7 @@ import {
   Box,
   Flex,
   Icon,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -27,13 +28,11 @@ import NewNamespace from '../new-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
-  variant?: string;
   buttonMessage?: string;
 }
 
 const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   user,
-  variant,
   buttonMessage,
 }) => {
   const client = useQueryClient();
@@ -52,7 +51,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
-      return recentNamespace && recentNamespace.providerUserGuid === user.userId && namespace.name !== user.namespace;
+      return recentNamespace && recentNamespace.userId === user.userId && namespace.name !== user.namespace;
     })
     .sort((a, b) => {
       const aRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === a.name);
@@ -60,7 +59,11 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
     })
     .slice(0, 5);
-
+  
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  
   const namespaceSearchResults = React.useMemo(() => {
     const result =
       data?.allNamespaces ?? [];
@@ -72,7 +75,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     }
     return result;
   }, [data, search]);
-  
+
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
@@ -82,17 +85,20 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
-        const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.providerUserGuid === user.providerUserGuid && entry.namespace === user.namespace);
+        console.log(namespacesRecentlyViewed)
+        const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.userId === user.userId && entry.namespace === user.namespace);
+        console.log(existingEntryIndex)
         if (existingEntryIndex !== -1) {
           namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
         } else {
           namespacesRecentlyViewed.push({
-            providerUserGuid: user.providerUserGuid,
+            userId: user.userId,
             namespace: user.namespace,
             updatedAt: user.updatedAt
           });
         }
         localStorage.setItem('namespacesRecentlyViewed', JSON.stringify(namespacesRecentlyViewed));
+        handleSearchChange('');
         toast.closeAll();
         client.invalidateQueries();
         toast({
@@ -111,8 +117,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     },
     [client, toast, user]
   );
-
-  const isNamespaceSelector = variant === 'ns-selector';
 
   return (
     <>
@@ -153,24 +157,40 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             },
           }}
         >
-          <>
+          <Box w={'403px'} maxHeight="calc(100vh / 2)" overflowY="auto">
+            <Box ml={6} w={'338px'}>
+              <SearchInput
+                placeholder="Find a Gateway by alias or ID"
+                onBlur={(event) => event.currentTarget.focus()}
+                onChange={handleSearchChange}
+                value={search}
+                data-testid="namespace-search-input"
+              />
+            </Box>                
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
             {isError && (
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <Box w={'403px'} maxHeight="calc(100vh / 2)" overflowY="auto">
-                <Box ml={6} w={'338px'}>
-                  <SearchInput
-                    placeholder="Find a Gateway by alias or ID"
-                    value={search}
-                    onChange={setSearch}
-                    data-testid="gw-search"
-                  />
-                </Box>                
+              <>
                 <MenuOptionGroup
-                  ml={6}
-                  title={(search !== '' ? `${namespaceSearchResults.length} results`: 'Recently viewed')}
+                  pt={8}
+                  m={0}
+                  ml={5}
+                  // @ts-ignore - need bold font in title
+                  title={
+                    search !== ''
+                      ? (
+                          <Text fontWeight="bold">
+                            {namespaceSearchResults.length} result{namespaceSearchResults.length !== 1 ? 's' : ''} for "{search}"
+                          </Text>
+                        )
+                      : (
+                          <Text fontWeight="bold">
+                            Recently viewed
+                          </Text>
+                        )
+                  }
                 >
                  {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
                     <MenuItem
@@ -180,52 +200,35 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       flexDir="column"
                       alignItems="flex-start"
                       pos="relative"
-                      p={6}
+                      pl={6}
+                      pt={4}
+                      pb={0}
                     >
                       <Box display="flex" alignItems="center">
                         <Icon as={FaServer} />
-                        <Text ml={2}>{n.name}</Text>
+                        <Text ml={2}>{n.displayName ? n.displayName : 'Display name here'}</Text>
                       </Box>
+                      <Text ml={6} color='text'>{n.name}</Text>
                     </MenuItem>
                     ))}
                 </MenuOptionGroup>
-                {/* This next set of menus options is necessary to test switching to a newly created gw when there is no My Gateways page yet */}
-                {/* <MenuOptionGroup
-                  ml={6}
-                  title={'All gateways (for dev)'}
-                >
-                  {data.allNamespaces
-                    .filter((n) => n.name !== user.namespace)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((n) => (
-                      <MenuItem
-                        key={n.id}
-                        onClick={handleNamespaceChange(n)}
-                        data-testid={`ns-dropdown-item-${n.name}`}
-                        flexDir="column"
-                        alignItems="flex-start"
-                        pos="relative"
-                        p={6}
-                      >
-                        <Box display="flex" alignItems="center">
-                          <Icon as={FaServer} />
-                          <Text ml={2}>{n.name}</Text>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                </MenuOptionGroup> */}
-                <Flex justifyContent='center'>
-                  <Text p={6} fontWeight='bold'>
-                    You have {data.allNamespaces.length} Gateways in total.
+                <Flex justifyContent='center' flexDirection='column' alignItems='center'>
+                  <Text pt={10} fontSize='sm' fontWeight='bold'>
+                    {`You have ${data.allNamespaces.length} Gateway${
+                          data.allNamespaces.length !== 1 ? 's' : ''
+                        } in total`}
+                  </Text>
+                  <Text fontSize='sm'>
+                    Go to the <Link textDecoration="underline" color="bc-link" href={''}>full Gateways list</Link>
                   </Text>
                 </Flex>
-              </Box>
+              </>
             )}
-          </>
-          {!isNamespaceSelector && (
-            <>
+          </Box>
+            {/* TODO: Remove. This is here for convenience for creating NS's during prelim testing. */}
+            <> 
               <MenuDivider />
-              <MenuOptionGroup title="Namespace Actions">
+              <MenuOptionGroup>
                 <MenuItem
                   onClick={newNamespaceDisclosure.onOpen}
                   color="bc-blue-alt"
@@ -233,17 +236,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 >
                   Create New Namespace
                 </MenuItem>
-                <MenuItem
-                  isDisabled={!data}
-                  color="bc-blue-alt"
-                  onClick={managerDisclosure.onOpen}
-                  data-testid="ns-dropdown-manage-btn"
-                >
-                  Export Namespace Report
-                </MenuItem>
               </MenuOptionGroup>
             </>
-          )}
         </MenuList>
       </Menu>
       <NewNamespace
