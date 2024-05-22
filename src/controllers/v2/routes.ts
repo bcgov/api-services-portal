@@ -362,32 +362,6 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"string","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CredentialIssuerRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Environment": {
-        "dataType": "refObject",
-        "properties": {
-            "appId": {"dataType":"string"},
-            "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["sandbox"]},{"dataType":"enum","enums":["other"]}]},
-            "active": {"dataType":"boolean"},
-            "approval": {"dataType":"boolean"},
-            "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
-            "additionalDetailsToRequest": {"dataType":"string"},
-            "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
-            "legal": {"ref":"LegalRefID"},
-            "credentialIssuer": {"ref":"CredentialIssuerRefID"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Product": {
         "dataType": "refObject",
         "properties": {
@@ -396,7 +370,6 @@ const models: TsoaRoute.Models = {
             "description": {"dataType":"string"},
             "namespace": {"dataType":"string"},
             "dataset": {"ref":"DraftDatasetRefID"},
-            "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
         },
         "additionalProperties": false,
     },

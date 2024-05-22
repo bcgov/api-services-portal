@@ -13,13 +13,9 @@
 
 require('dotenv').config()
 
-module.exports = (on: any, config:any) => {
-  on('task', require('@cypress/code-coverage/task'))
-}
-// AFTER
-module.exports = (on:any, config:any) => {
+module.exports = (on, config) => {
   require('@cypress/code-coverage/task')(on, config)
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
+  //Used to instrument code ran like unit tests
+  //on('file:preprocessor', require('@cypress/code-coverage/use-babelrc'))
   return config
 }

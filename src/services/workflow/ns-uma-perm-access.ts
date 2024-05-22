@@ -34,7 +34,7 @@ export async function updatePermissions(
   const displayName =
     userApi.getOneAttributeValue(user, 'display_name') || user.email;
 
-  const result = [];
+  const result = [] as any[];
   const permissionApi = new KeycloakPermissionTicketService(
     envCtx.openid.issuer,
     envCtx.accessToken
@@ -116,8 +116,8 @@ export async function revokePermissions(
     returnNames: true,
   });
 
-  const requesterIds = [];
-  const deletedScopes = [];
+  const requesterIds = [] as any[];
+  const deletedScopes = [] as any[];
   for (const permId of ids) {
     const foundPerms = perms.filter((perm) => perm.id === permId);
     assert.strictEqual(foundPerms.length, 1, 'Invalid Permission');
@@ -173,7 +173,7 @@ async function revokeUserPermissions(
   permissionApi: KeycloakPermissionTicketService,
   perms: PermissionTicket[]
 ): Promise<string[]> {
-  const deletedScopes = [];
+  const deletedScopes = [] as any[];
   // delete any scopes that are not in the desiredScopes list
   for (const perm of perms) {
     deletedScopes.push(perm.scopeName);

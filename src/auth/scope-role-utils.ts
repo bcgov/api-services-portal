@@ -2,8 +2,11 @@ export function scopes(scopeString: string) {
   return scopeString.split(' ');
 }
 
-export function scopesToRoles(identityProvider: string, scopes: string[]): string[] {
-  const _roles = [];
+export function scopesToRoles(
+  identityProvider: string,
+  scopes: string[]
+): string[] {
+  const _roles = [] as string[];
   if (scopes.includes('Namespace.Manage')) {
     _roles.push('api-owner');
   }
@@ -23,5 +26,5 @@ export function scopesToRoles(identityProvider: string, scopes: string[]): strin
 }
 
 export function deriveRoleFromIdP(identityProvider: string) {
-  return identityProvider ? `${identityProvider}-user`: 'developer';
+  return identityProvider ? `${identityProvider}-user` : 'developer';
 }

@@ -16,7 +16,7 @@ export async function connectMany(
 ) {
   const fieldKey = 'key' in transformInfo ? transformInfo['key'] : _fieldKey;
   const idList = dot(inputData, fieldKey);
-  const refIds = [];
+  const refIds = [] as any[];
   const batchService = new BatchService(keystone);
   if (idList != null) {
     for (const uniqueKey of idList) {

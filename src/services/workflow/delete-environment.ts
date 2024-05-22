@@ -23,7 +23,7 @@ export const DeleteEnvironmentValidate = async (
     prodEnvId,
   ]);
 
-  const messages = [];
+  const messages = [] as any[];
   if (accessList.length > 0) {
     messages.push(
       `${accessList.length} ${

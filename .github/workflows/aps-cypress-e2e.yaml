@@ -43,7 +43,7 @@ jobs:
           export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
-          docker compose --profile testsuite up -d
+          docker compose --profile testsuite --profile astra up -d
 
       - name: Execute Tests & Clean Up
         run: |
@@ -96,13 +96,13 @@ jobs:
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
             exit 1
           fi
-      
+
       - name: Set up Python 3.9
         if: failure()
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
-          architecture: "x64"
+          python-version: '3.9'
+          architecture: 'x64'
 
       - name: Install Python dependencies
         if: failure()

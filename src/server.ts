@@ -280,6 +280,15 @@ const dev = process.env.NODE_ENV !== 'production';
 
 const configureExpress = (app: any) => {
   const express = require('express');
+
+  // if there is code coverage information
+  // then expose an endpoint that returns it
+  if (process.env.TEST_COVERAGE) {
+    console.log('have code coverage, will add middleware for express');
+    console.log(`to fetch: GET /__coverage__`);
+    require('@cypress/code-coverage/middleware/express')(app);
+  }
+
   app.use(express.json());
 
   app.use(function errorHandler(err: any, req: any, res: any, next: any) {

@@ -1,38 +1,49 @@
 import cypress, { defineConfig } from 'cypress'
+//import plugins from './cypress/plugins/index.js'
+
+const baseUrl = 'http://oauth2proxy.localtest.me:4180'
 
 export default defineConfig({
+  env: {
+    codeCoverage: {
+      url: `${baseUrl}/__coverage__`,
+      exclude: 'e2e/**/*.*',
+    },
+  },
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
+      require('./cypress/plugins/index.js')(on, config)
       // require('@cypress/code-coverage/task')(on, config)
       // // include any other plugin code...
+      //plugins(on, config)
 
       // // It's IMPORTANT to return the config object
       // // with any changed environment variables
-      config.specPattern=[
-      './cypress/tests/01-*/*.ts',
-      './cypress/tests/02-*/*.ts',
-      './cypress/tests/06-*/*.ts',
-      './cypress/tests/07-*/*.ts',
-      './cypress/tests/03-*/*.ts',
-      './cypress/tests/04-*/*.ts',
-      './cypress/tests/05-*/*.ts',
-      './cypress/tests/08-*/*.ts',
-      './cypress/tests/09-*/*.ts',
-      './cypress/tests/10-*/*.ts',
-      './cypress/tests/11-*/*.ts',
-      './cypress/tests/12-*/*.ts',
-      './cypress/tests/13-*/*.ts',
-      './cypress/tests/14-*/*.ts',
-      './cypress/tests/15-*/*.ts',
-      './cypress/tests/16-*/*.ts',
-      './cypress/tests/17-*/*.ts',
-      './cypress/tests/18-*/*.ts'
-    ]
+      config.specPattern = [
+        './cypress/tests/01-*/*.ts',
+        './cypress/tests/02-*/*.ts',
+        './cypress/tests/06-*/*.ts',
+        './cypress/tests/07-*/*.ts',
+        './cypress/tests/03-*/*.ts',
+        './cypress/tests/04-*/*.ts',
+        './cypress/tests/05-*/*.ts',
+        './cypress/tests/08-*/*.ts',
+        './cypress/tests/09-*/*.ts',
+        './cypress/tests/10-*/*.ts',
+        './cypress/tests/11-*/*.ts',
+        './cypress/tests/12-*/*.ts',
+        './cypress/tests/13-*/*.ts',
+        './cypress/tests/14-*/*.ts',
+        './cypress/tests/15-*/*.ts',
+        './cypress/tests/16-*/*.ts',
+        './cypress/tests/17-*/*.ts',
+        './cypress/tests/18-*/*.ts',
+      ]
       return config
     },
-    baseUrl: 'http://oauth2proxy.localtest.me:4180',
+    baseUrl,
     specPattern: 'cypress/tests/**/*.cy.ts',
     screenshotOnRunFailure: true,
     screenshotsFolder: 'results/report/assets',
@@ -59,11 +70,11 @@ export default defineConfig({
       KONG_CONFIG_URL: 'http://kong.localtest.me:8001',
       BASE_URL: 'http://oauth2proxy.localtest.me:4180',
       KEYCLOAK_URL: 'http://keycloak.localtest.me:9081',
-      WEBAPP_URL: 'http://html-sample-app.localtest.me:4242'
+      WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
     },
     retries: {
       runMode: 2,
       openMode: 0,
-    }
+    },
   },
 })

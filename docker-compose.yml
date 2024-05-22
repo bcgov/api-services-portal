@@ -237,6 +237,7 @@ services:
       - aps-net
     profiles:
       - testsuite
+
   astra-mongo:
     image: mongo:4.2.2
     container_name: astra-mongo
@@ -246,6 +247,9 @@ services:
       aps-net:
         aliases:
           - mongo.localtest.me
+    profiles:
+      - astra
+
   astra-gui:
     build:
       context: local/astra
@@ -263,5 +267,8 @@ services:
       - astra-mongo:mongo
     ports:
       - '8094:8094'
+    profiles:
+      - astra
+
 networks:
   aps-net: {}

@@ -32,7 +32,7 @@ import {
     token
   );
 
-  if (true) {
+  if (false) {
     await svc.createResourceSet({
       name: 'sample2',
       displayName: 'Sample Number 2',
@@ -41,9 +41,34 @@ import {
       ownerManagedAccess: true,
     });
   }
+  // exactName=true&name=
   console.log(
-    await svc.listResources({ type: 'integration_test', deep: true })
+    JSON.stringify(
+      await svc.listResources({ name: 'sample2', exactName: true } as any),
+      null,
+      2
+    )
   );
 
-  console.log(await svc.findResourceByName('sample2'));
+  console.log(
+    JSON.stringify(
+      await svc.listResources({ name: 'SAMPLE2', exactName: true } as any),
+      null,
+      2
+    )
+  );
+
+  console.log(
+    JSON.stringify(
+      await svc.listResources({
+        name: 'SAMPLE2',
+        exactName: true,
+        deep: true,
+      } as any),
+      null,
+      2
+    )
+  );
+
+  //console.log(await svc.findResourceByName('sample2'));
 })();
