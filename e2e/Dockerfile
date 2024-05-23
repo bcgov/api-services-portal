@@ -4,6 +4,10 @@ FROM cypress/included:12.17.4
 WORKDIR /app
 COPY src/. ./
 
+RUN npm install --legacy-peer-deps
+
+RUN npx nyc instrument --compact=false . --in-place
+
 # Cypress E2E
 WORKDIR /e2e
 
