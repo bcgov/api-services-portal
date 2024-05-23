@@ -215,13 +215,13 @@
       ".tsx"
     ],
     "include": [
-      "nextapp/**",
       "auth/**",
       "authz/**",
       "batch/**",
       "components/**",
       "controllers/**",
       "lists/**",
+      "pages/**",
       "services/**"
     ],
     "exclude": [

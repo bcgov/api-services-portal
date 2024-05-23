@@ -14,10 +14,8 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      require('./cypress/plugins/index.js')(on, config)
-      // require('@cypress/code-coverage/task')(on, config)
-      // // include any other plugin code...
-      //plugins(on, config)
+      require('dotenv').config()
+      require('@cypress/code-coverage/task')(on, config)
 
       // // It's IMPORTANT to return the config object
       // // with any changed environment variables
