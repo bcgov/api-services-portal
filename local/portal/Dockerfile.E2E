@@ -20,13 +20,13 @@ RUN npm install --legacy-peer-deps
 
 COPY --chown=node src ./
 
+RUN npx nyc instrument --compact=false . --in-place
+
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 ENV TEST_COVERAGE=on
 
 RUN npm run build
-
-RUN (cd dist && npx nyc instrument --compact=false . --in-place)
 
 ENV HOME=/home/node
 
