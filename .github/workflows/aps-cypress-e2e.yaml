@@ -73,7 +73,7 @@ jobs:
       - name: Instrument the code for coverage analysis
         run: |
           # Rewrite the paths as the coverage starts with '../app'!
-          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > ${{ github.workspace }}/lcov.info
+          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
 
           cd src
           npm install --legacy-peer-deps
