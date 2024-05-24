@@ -56,9 +56,9 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
 
   it('Publish the Shared IDP profile', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response) => {
-        expect(response.status).to.be.equal(200)
-        expect(response.body.result).to.be.contain('created')
+      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response:any) => {
+        expect(response.apiRes.status).to.be.equal(200)
+        expect(response.apiRes.body.result).to.be.contain('created')
       })
     })
   })
@@ -121,8 +121,8 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   it('Put the resource and verify the success code in the response', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response) => {
-        expect(response.status).to.be.equal(200)
+      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response:any) => {
+        expect(response.apiRes.status).to.be.equal(200)
       })
     })
   })

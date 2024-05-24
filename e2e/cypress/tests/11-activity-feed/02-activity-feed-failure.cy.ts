@@ -96,9 +96,9 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
 
   it('Get the resource and verify the success code in the response', () => {
     cy.get('@api').then(({ namespaces }: any) => {
-      cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res) => {
-        expect(res.status).to.be.equal(200)
-        response = res.body
+      cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res:any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        response = res.apiRes.body
       })
     })
   })

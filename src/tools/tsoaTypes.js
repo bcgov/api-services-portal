@@ -19,9 +19,12 @@ Object.keys(metadata).forEach(function (m) {
   const relationshipFields = Object.keys(
     md.transformations
   ).filter((tranField) =>
-    ['connectOne', 'connectExclusiveList', 'connectMany'].includes(
-      md.transformations[tranField].name
-    )
+    [
+      'connectOne',
+      'connectExclusiveList',
+      'connectExclusiveListCreate',
+      'connectMany',
+    ].includes(md.transformations[tranField].name)
   );
 
   const objectFields = Object.keys(md.transformations).filter(
@@ -88,7 +91,10 @@ Object.keys(metadata).forEach(function (m) {
       if (md.transformations[field].name === 'connectOne') {
         refIdList[mdRelField] = true;
         return `  ${field}?: ${mdRelField}RefID;`;
-      } else if (md.transformations[field].name === 'connectExclusiveList') {
+      } else if (
+        md.transformations[field].name === 'connectExclusiveList' ||
+        md.transformations[field].name === 'connectExclusiveListCreate'
+      ) {
         return `  ${field}?: ${mdRelField}[];`;
       } else {
         refIdList[mdRelField] = true;

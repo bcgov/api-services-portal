@@ -269,7 +269,7 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
   allPlugins
     .filter((p) => p.name == 'acl')
     .map((p) => {
-      return p.config.allow.map((a) => {
+      p.config.allow?.forEach((a) => {
         items.push({ namespace: toNamespace(p.tags), name: a });
       });
     });

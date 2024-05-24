@@ -19,7 +19,7 @@ export async function doFiltering(
   ns: string,
   filter: ConsumerQueryFilter
 ): Promise<string[]> {
-  const promises = [];
+  const promises = [] as any[];
   if (filter.products?.length > 0 || filter.environments?.length > 0) {
     promises.push(
       filterByProductAndEnvironment(
