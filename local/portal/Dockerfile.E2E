@@ -26,7 +26,7 @@ ENV TEST_COVERAGE=on
 
 RUN npm run build
 
-RUN npx nyc instrument --compact=false dist --in-place
+RUN (cd dist && npx nyc instrument --compact=false . --in-place)
 
 ENV HOME=/home/node
 
