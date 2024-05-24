@@ -76,6 +76,9 @@ jobs:
           npm install --legacy-peer-deps
           npx nyc instrument --compact=false . --in-place
 
+          # Rewrite the paths as the coverage starts with '../app'!
+          sed -i '' -e 's/..\/app/./g' ./e2e/coverage/lcov.info
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
