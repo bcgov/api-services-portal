@@ -83,7 +83,8 @@ jobs:
             -Dsonar.organization=bcgov-oss
             -Dsonar.projectKey=aps-portal-e2e
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.sources=src
+            -Dsonar.projectBaseDir=src
+            -Dsonar.sources=.
             -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
