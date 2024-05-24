@@ -92,7 +92,7 @@ it('Verify gwa gateway publish multiple config file', () => {
   })
 
   it('Upload dataset and Product using GWA Apply command', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
+    cy.executeCliCommand('gwa apply -i cypress/fixtures/gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })

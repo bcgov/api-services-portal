@@ -184,7 +184,7 @@ export function EnforcementPoint(params: any) {
         continue;
       }
       const result: any = ((ruleConditionState) => {
-        const matches = [];
+        const matches = [] as any[];
         for (const key of Object.keys(rule)) {
           const value: any = (rule as any)[key];
           if (
@@ -215,7 +215,7 @@ export function EnforcementPoint(params: any) {
         }
         if (ruleConditionState && rule.result === RuleResult.Allow) {
           if (rule.filters != null) {
-            const filters = [];
+            const filters = [] as any[];
             for (const filterId of rule.filters) {
               if (!(filterId in actions)) {
                 logger.debug('--> DENY');

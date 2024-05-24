@@ -3,7 +3,7 @@ name: Cypress and Execute Tests
 on:
   workflow_dispatch: {}
   push:
-    branches: ['test', 'cypress*']
+    branches: ['test', 'cypress/*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -70,6 +70,15 @@ jobs:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
 
+      - name: Instrument the code for coverage analysis
+        run: |
+          # Rewrite the paths as the coverage starts with '../app'!
+          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
+
+          #cd src
+          #npm install --legacy-peer-deps
+          #npx nyc instrument --compact=false . --in-place
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
@@ -77,8 +86,10 @@ jobs:
             -Dsonar.organization=bcgov-oss
             -Dsonar.projectKey=aps-portal-e2e
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.sources=src/nextapp
-            -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
+            -Dsonar.projectBaseDir=src
+            -Dsonar.sources=.
+            -Dsonar.exclusions=nextapp/**,mocks/**,test/**,tools/**,*.json,*.js
+            -Dsonar.javascript.lcov.reportPaths=/github/workspace/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -96,13 +107,13 @@ jobs:
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
             exit 1
           fi
-      
+
       - name: Set up Python 3.9
         if: failure()
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
-          architecture: "x64"
+          python-version: '3.9'
+          architecture: 'x64'
 
       - name: Install Python dependencies
         if: failure()

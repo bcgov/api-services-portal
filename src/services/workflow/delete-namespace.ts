@@ -1,33 +1,18 @@
 import { strict as assert } from 'assert';
 
+import { Logger } from '../../logger';
 import {
-  deleteRecord,
   deleteRecords,
-  lookupCredentialReferenceByServiceAccess,
-  lookupCredentialIssuerById,
   lookupServiceAccessesByEnvironment,
   lookupServiceAccessesForNamespace,
-  lookupProduct,
   lookupServicesByNamespace,
   recordActivityWithBlob,
 } from '../keystone';
-import {
-  KeycloakClientRegistrationService,
-  KeycloakTokenService,
-  getOpenidFromIssuer,
-  getUma2FromIssuer,
-} from '../keycloak';
-import { KongConsumerService } from '../kong';
-import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
-import { Logger } from '../../logger';
-import { UMAPolicyService } from '../uma2';
-import { Environment } from '../keystone/types';
-import { lookupEnvironmentsByNS } from '../keystone/product-environment';
-import { FieldErrors } from 'tsoa';
 import { updateActivity } from '../keystone/activity';
+import { lookupEnvironmentsByNS } from '../keystone/product-environment';
+import { Environment } from '../keystone/types';
 //import { CascadeDeleteEnvironment } from './delete-environment';
 import { GWAService } from '../gwaapi';
-import getSubjectToken from '../../auth/auth-token';
 
 const logger = Logger('wf.DeleteNamespace');
 
@@ -46,7 +31,7 @@ export const DeleteNamespaceValidate = async (
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, ids);
 
-  const messages = [];
+  const messages = [] as any[];
   if (accessList.length > 0) {
     messages.push(
       `${accessList.length} ${
