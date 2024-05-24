@@ -693,7 +693,7 @@ export async function updateConsumerAccess(
     if (changeList.length > 0) {
       logger.info('[%s] %j', consumer.username, changeList);
 
-      const accessUpdates = [];
+      const accessUpdates = [] as any[];
       defaultClientScopes &&
         accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
       roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);

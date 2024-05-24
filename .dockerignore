@@ -3,5 +3,7 @@ src/.npm
 src/_tmp
 src/.cache
 src/.config
+src/.nyc_output
+src/dist
 **/.next
 _data

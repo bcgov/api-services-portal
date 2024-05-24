@@ -116,6 +116,10 @@ kc.js
 
 # vs code settings
 .vscode
+
 e2e/cypress/fixtures/*-plugin.yml
 e2e/cypress/fixtures/state/*.pub
 e2e/cypress/fixtures/state/*.pem
+e2e/cypress/fixtures/state/scanResult.json
+e2e/cypress/fixtures/state/scanID.json
+e2e/cypress/downloads/

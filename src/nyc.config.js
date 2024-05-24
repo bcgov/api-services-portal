@@ -1,6 +1,6 @@
 'use strict';
 const { parserPlugins } = require('@istanbuljs/schema').defaults.nyc;
 module.exports = {
-  cache: false,
+  extends: '@istanbuljs/nyc-config-typescript',
   parserPlugins: parserPlugins.concat('typescript', 'jsx'),
 };

@@ -143,14 +143,14 @@ export const getMyServiceAccessHandlers = (_, res, ctx) => {
             id: 'asldf-asdf-asdf',
             clientId: 'CLIENT_ID_123',
             clientCertificate: `-----BEGIN PUBLIC KEY-----
-asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdjf0asdjy/aosdf0oaisdfj0a9sdfj+0a9sdf0a9jfoasdjf0asdjf+a0osdifja-sdfj+)9uasdfjlaojksdjfoasdfj+oajsd0fiajsd0f/laksdjflasdkfj 2Q1AGNYP8cZOQ9NzNnIYsGTsHw8GvDn6l/b1N+aklsjdfoasdjf0oaisdjf0asidfj/asodfj0asidfj.asdf0jasdf/asodifjas0d-pfj/asddofijas0dfj/asdopija0opsdjB
+asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdjf0asdjy/aosdf0oaisdfj0a9sdfj+0a9sdf0a9jfoasdjf0asdjf+a0osdifja-sdfj+)9uasdfjlaojksdjfoasdfj+oajsd0fiajsd0f/laksdjflasdkfj2Q1AGNYP8cZOQ9NzNnIYsGTsHw8GvDn6l/b1N+aklsjdfoasdjf0oaisdjf0asidfj/asodfj0asidfj.asdf0jasdf/asodifjas0d-pfj/asddofijas0dfj/asdopija0opsdjB
 -----END PUBLIC KEY-----`,
             jwksUrl: null,
           }),
           controls: JSON.stringify({
             clientGenCertificate: true,
             publicKey: `-----BEGIN PUBLIC KEY-----
-asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdjf0asdjy/aosdf0oaisdfj0a9sdfj+0a9sdf0a9jfoasdjf0asdjf+a0osdifja-sdfj+)9uasdfjlaojksdjfoasdfj+oajsd0fiajsd0f/laksdjflasdkfj 2Q1AGNYP8cZOQ9NzNnIYsGTsHw8GvDn6l/b1N+aklsjdfoasdjf0oaisdjf0asidfj/asodfj0asidfj.asdf0jasdf/asodifjas0d-pfj/asddofijas0dfj/asdopija0opsdjB
+asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdjf0asdjy/aosdf0oaisdfj0a9sdfj+0a9sdf0a9jfoasdjf0asdjf+a0osdifja-sdfj+)9uasdfjlaojksdjfoasdfj+oajsd0fiajsd0f/laksdjflasdkfj2Q1AGNYP8cZOQ9NzNnIYsGTsHw8GvDn6l/b1N+aklsjdfoasdjf0oaisdjf0asidfj/asodfj0asidfj.asdf0jasdf/asodifjas0d-pfj/asddofijas0dfj/asdopija0opsdjB
 -----END PUBLIC KEY-----`,
           }),
           isComplete: true,

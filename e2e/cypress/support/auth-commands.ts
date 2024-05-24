@@ -422,16 +422,50 @@ Cypress.Commands.add('setAuthorizationToken', (token: string) => {
 })
 
 Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) => {
+  
   let body = {}
-
+  let requestData: any = {}
   if (methodType.toUpperCase() === 'PUT' || methodType.toUpperCase() === 'POST') {
     body = requestBody
   }
-  return cy.request({
-    url: Cypress.env('BASE_URL') + '/' + endPoint,
-    method: methodType,
-    body: body,
+
+  requestData['appname'] = "Test1"
+  requestData['url'] = Cypress.env('BASE_URL') + '/' + endPoint
+  requestData['headers'] = headers
+  requestData['body'] = ""
+  requestData['method'] = methodType
+  
+  // Scan request with Astra
+  cy.request({
+    url: 'http://astra.localtest.me:8094/scan/',
+    method: 'POST',
+    body: requestData,
     headers: headers,
+    failOnStatusCode: false
+  }).then((astraResponse) => {
+    // Actual API request
+    cy.request({
+      url: Cypress.env('BASE_URL') + '/' + endPoint,
+      method: methodType,
+      body: body,
+      headers: headers,
+      failOnStatusCode: false
+    }).then((apiResponse) => {
+      // You can also return data or use it in further tests
+      const responseData = {
+        astraRes: astraResponse,
+        apiRes: apiResponse,
+      };
+      // cy.addToAstraScanIdList(response2.body.status)
+      return responseData;
+    })
+  });
+})
+
+Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
+  return cy.request({
+    url:  'http://astra.localtest.me:8094/alerts/' + scanID,
+    method: 'GET',
     failOnStatusCode: false
   })
 })
