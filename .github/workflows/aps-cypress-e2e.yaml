@@ -31,9 +31,7 @@ jobs:
       - name: Instrument the code for coverage analysis
         run: |
           cd src
-          npm install --legacy-peer-deps
           npx nyc instrument --compact=false . --in-place
-          exit -1
 
       - name: Build Docker Images
         run: |
