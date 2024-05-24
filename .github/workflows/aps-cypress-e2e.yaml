@@ -76,8 +76,8 @@ jobs:
           sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
 
           cd src
-          npm install --legacy-peer-deps
-          npx nyc instrument --compact=false . --in-place
+          #npm install --legacy-peer-deps
+          #npx nyc instrument --compact=false . --in-place
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
