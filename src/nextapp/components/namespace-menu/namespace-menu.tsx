@@ -48,9 +48,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const today = new Date();
   const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
 
-  const currentNamespace = data?.allNamespaces.find(namespace => namespace.name === user.namespace);
-
-  let recentNamespaces = data?.allNamespaces
+  const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
       return recentNamespace && recentNamespace.userId === user.userId && namespace.name !== user.namespace;
@@ -60,13 +58,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       const bRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === b.name);
       return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
     })
-    .slice(0, 4); // Limit to 4, as we'll add the current namespace separately
+    .slice(0, 5);
   
-  // Add the current namespace to the beginning of the array
-  if (currentNamespace) {
-    recentNamespaces.unshift(currentNamespace);
-  }  
-
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
@@ -152,8 +145,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           color="gray.600"
           box-shadow='0px 5px 15px 0px #38598A59'
           borderRadius={'10px'}
-          mt={-1}
-          pt={6}
+          mt={'-2px'}
+          py={6}
           sx={{
             '.chakra-menu__group__title': {
               fontWeight: 'normal',
