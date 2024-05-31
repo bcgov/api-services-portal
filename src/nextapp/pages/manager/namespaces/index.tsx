@@ -46,12 +46,14 @@ import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import EmptyPane from '@/components/empty-pane';
+import { Namespace, Query } from '@/shared/types/query.types';
 import NewNamespace from '@/components/new-namespace';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
+import EditNamespaceDisplayName from '@/components/edit-display-name';
 
 const actions = [
   {
@@ -118,6 +120,7 @@ const NamespacesPage: React.FC = () => {
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const namespace = useCurrentNamespace();
+  const queryKey: QueryKey = ['allNamespaces'];
   const { isOpen, onClose, onOpen } = useDisclosure();
   const global = useGlobal();
   const currentOrg = React.useMemo(() => {
@@ -167,6 +170,7 @@ const NamespacesPage: React.FC = () => {
     <>
       <Flex align="center" gridGap={4}>
         {user.namespace}
+        <EditNamespaceDisplayName data={namespace.data?.currentNamespace} queryKey={queryKey} />
         {namespace.data?.currentNamespace?.orgEnabled && (
           <Tooltip
             hasArrow
