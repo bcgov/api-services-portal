@@ -49,7 +49,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (charCount <= charLimit) {
-      // updateNamespaceDisplayName();
+      updateNamespaceDisplayName();
       submitTheForm();
     }
   };
@@ -58,7 +58,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
       title: 'Submitted it!',
       status: 'success',
       isClosable: true,
-    })
+    });
   };
   const updateNamespaceDisplayName = async () => {
     if (form.current) {
@@ -70,7 +70,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
           const displayName = formData.get('displayName') as string;
           await mutate.mutateAsync({
             // id: data?.id,
-            data: { name, displayName },
+            displayName,
           });
           toast({
             title: 'Display name successfully edited',
@@ -112,11 +112,12 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
             <form ref={form} onSubmit={handleSubmit}>
               <FormControl isRequired>
                 <FormLabel></FormLabel>
-                <FormHelperText pb={4} fontSize={"16px"}>
-                  A meaningful display name makes it easy for anyone to identify and distinguish this Gateway from others.
+                <FormHelperText pb={4} fontSize={'16px'}>
+                  A meaningful display name makes it easy for anyone to identify
+                  and distinguish this Gateway from others.
                 </FormHelperText>
                 <Text
-                  fontSize={"12px"}
+                  fontSize={'12px'}
                   color={charCount > charLimit ? 'bc-error' : 'gray.500'}
                   mt={2}
                   textAlign="right"
@@ -170,9 +171,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
 export default EditNamespaceDisplayName;
 
 const mutation = gql`
-  mutation UpdateNamespaceDisplayName($id: ID!, $data: NamespaceInput) {
-    updateNamespace(id: $id, data: $data) {
-      id
-    }
+  mutation UpdateNamespaceDisplayName($displayName: String) {
+    updateCurrentNamespaceDisplayName(displayName: $displayName)
   }
 `;

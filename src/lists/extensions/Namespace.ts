@@ -346,7 +346,7 @@ module.exports = {
               'updateCurrentNamespaceDisplayName(displayName: String): String',
             resolver: async (
               item: any,
-              { org, orgUnit }: any,
+              { displayName }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -362,12 +362,14 @@ module.exports = {
 
               const prodEnv = await getGwaProductEnvironment(context, true);
 
+              await getNamespaceResourceSets(prodEnv); // sets accessToken
+
               const resourcesApi = new UMAResourceRegistrationService(
                 prodEnv.uma2.resource_registration_endpoint,
                 prodEnv.accessToken
               );
 
-              await resourcesApi.updateDisplayName(ns, query.displayName);
+              await resourcesApi.updateDisplayName(ns, displayName);
               return true;
             },
             access: EnforcementPoint,
