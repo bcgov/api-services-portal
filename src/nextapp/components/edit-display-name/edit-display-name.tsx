@@ -35,10 +35,9 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const queryClient = useQueryClient();
-  const mutate = useApiMutation<NamespaceInput>(mutation);
-  // console.log(data)
-  const [inputValue, setInputValue] = React.useState(data?.name || '');
-  const [charCount, setCharCount] = React.useState(data?.name?.length || 0);
+  const mutate = useApiMutation(mutation);
+  const [inputValue, setInputValue] = React.useState(data.displayName || '');
+  const [charCount, setCharCount] = React.useState(data.displayName?.length || 0);
   const charLimit = 30;
   const handleInputChange = (event) => {
     const { value } = event.target;
@@ -63,22 +62,17 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const updateNamespaceDisplayName = async () => {
     if (form.current) {
       try {
-        const formData = new FormData(form.current);
-
         if (form.current.checkValidity()) {
-          const name = formData.get('name') as string;
-          const displayName = formData.get('displayName') as string;
-          await mutate.mutateAsync({
-            // id: data?.id,
-            displayName,
-          });
+          const formData = new FormData(form.current);
+          const entries = Object.fromEntries(formData);
+          await mutate.mutateAsync(entries);
+          queryClient.invalidateQueries(queryKey);
+          onClose();
           toast({
             title: 'Display name successfully edited',
             status: 'success',
             isClosable: true,
           });
-          queryClient.invalidateQueries(queryKey);
-          onClose();
         }
       } catch (err) {
         toast({
@@ -96,6 +90,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   return (
     <>
       <Button
+        p="0"
         leftIcon={<Icon as={FaPen} />}
         variant="ghost"
         size="sm"
@@ -126,8 +121,6 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                 </Text>
                 <Input
                   value={inputValue}
-                  // defaultValue={data?.displayName}
-                  // defaultValue={data?.name}
                   onChange={handleInputChange}
                   name="displayName"
                   variant="bc-input"
