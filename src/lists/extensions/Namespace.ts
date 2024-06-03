@@ -370,6 +370,7 @@ module.exports = {
               await resourcesApi.updateDisplayName(ns, query.displayName);
               return true;
             },
+            access: EnforcementPoint,
           },
           {
             schema:
@@ -446,6 +447,7 @@ module.exports = {
                 });
               }
             },
+            access: EnforcementPoint,
           },
           {
             schema:
