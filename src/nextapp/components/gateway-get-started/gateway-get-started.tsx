@@ -62,7 +62,7 @@ const GatewayGetStarted: React.FC = () => {
         </VStack>
         <Heading size="lg">What is a gateway?</Heading>
         <Text pt={6} pb={8}>
-          Gateways act as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
+          A gateway acts as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
         </Text>            
         <Text pt={0} pb={8}>
           After your first gateway is created, in this section you can do things like:
@@ -107,14 +107,14 @@ const GatewayGetStarted: React.FC = () => {
         <Box>
           <Heading size="lg">Steps to create and configure your first gateway</Heading>
           <Text pt={6} pb={10}>
-            Follow these steps to create and configure your first gateway in a test/training instance. For a more detailed version of this tutorial, consult our{' '}
+            Follow these steps to create and configure your first gateway. For more details on how to set up an API, consult our API provider{' '}
             <Link
                 href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-              >'API Provider Quick Start'</Link>
-            {' '}tutorial.
+              >Quick Start tutorial</Link>
+            .
           </Text>
         </Box>
         <Grid templateColumns="repeat(3, 1fr)" gap={7}>
@@ -158,9 +158,7 @@ const GatewayGetStarted: React.FC = () => {
             <Text pt={2}>
               Our CLI is a convenient way to configure your gateways.{' '}                   
               <Link
-                href={"https://github.com/bcgov/gwa-cli/releases"}
-                // TODO replace with env defined URL
-                // href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+                href={global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
@@ -206,15 +204,14 @@ const GatewayGetStarted: React.FC = () => {
               Prepare your configuration
             </Heading>
             <Text pt={2}>
-              Use our{' '} 
-              <SmoothScrollLink
-                href={"#generate-config"}
-                >template Yaml file</SmoothScrollLink>
-              {' '}to{' '}
               <SmoothScrollLink
                 href={"#create-gateway"}
-                >create a gateway</SmoothScrollLink> 
-              {' '}and set up its configuration: services, routes and plugins.
+                >Create a gateway</SmoothScrollLink> 
+              {' '} and use our{' '} 
+              <SmoothScrollLink
+                href={"#generate-config"}
+                >template</SmoothScrollLink>
+              {' '}to set up its configuration: services, routes and plugins.
             </Text>
             </VStack>
           </Box>
@@ -291,18 +288,23 @@ const GatewayGetStarted: React.FC = () => {
         <Box pt={20}>
           <Heading size="md">GWA CLI commands</Heading>
           <Text pt={6}>
-            These useful commands will save you time and help you manage your gateway resources in a more efficient way. For more details visit our {' '}
+            These useful commands help you manage your gateway resources. For more details visit our {' '}
             <Link
                 href={global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
               >GWA CLI commands</Link>
-            {' '}section.
+            {' '}documentation.
           </Text>
         </Box>
         <Box>
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Prepare your configuration</Heading>
+          <CliCommand 
+            title='Use the test environment'
+            description='Configure the CLI to run against a test environment while you are getting familiarized with the API Services Portal.'
+            command='gwa config set host http://api-gov-bc-ca.test.api.gov.bc.ca/' 
+          />
           <CliCommand 
             title='Log in'
             description='Log in via device with your IDIR.'
@@ -317,9 +319,9 @@ const GatewayGetStarted: React.FC = () => {
           />
           <CliCommand 
             id='generate-config'
-            title='Generate Yaml configuration file'
-            description='Run this command to generate a sample gateway configuration Yaml file'
-            command='gwa generate-config --template client-credentials-shared-idp' 
+            title='Generate gateway configuration file'
+            description='Run this command to generate a basic gateway configuration YAML file.'
+            command='gwa generate-config --template quick-start' 
           />
 
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your gateway</Heading>
@@ -337,20 +339,6 @@ const GatewayGetStarted: React.FC = () => {
                 '
             command='gwa status -links' 
           />
-          {/* TODO: add anchor link to end of tutorial */}
-          <Box>
-            <Text pt={6}><Text as="span" fontWeight="bold">Congratulations!</Text> You've set up X, Y, and Z.</Text>
-            <Text pt={6}>For more information on accessing your gateway and next steps, visit the{' '}
-              <Link
-                  href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
-                  target="_blank"
-                  color="bc-link"
-                  textDecor="underline"
-                >tutorial</Link>.
-            </Text>
-          </Box>
-
-          {/* TODO: the following requires revision */}
 
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
           <CliCommand 
@@ -362,24 +350,6 @@ const GatewayGetStarted: React.FC = () => {
               </>
             }
             command='gwa <command> --help' 
-          />
-
-          <Heading size="md" fontSize="18px" pt={10} pb={6}>Other utility functions</Heading>
-          <CliCommand 
-            title='Get'
-            description="With get you can obtain gateway resources and retrieve a table of datasets, issuers,
-              organizations, or products."
-            command='gwa get <type>' 
-          />
-          <CliCommand 
-            title='Status'
-            description="PROVIDE TEXT"
-            command='gwa status' 
-          />
-          <CliCommand 
-            title='Config'
-            description="PROVIDE TEXT"
-            command='gwa config' 
           />
         </Box>
       </Card>
