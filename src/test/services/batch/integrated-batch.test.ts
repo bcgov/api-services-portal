@@ -57,7 +57,7 @@ describe('Batch Tests', function () {
       authentication: { item: identity },
     });
 
-    //await cleanupDatabase();
+    // await cleanupDatabase();
 
     let index = 1;
     for (const test of testdata.tests) {

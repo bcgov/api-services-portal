@@ -23,7 +23,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          docker compose up kong-db -d
+          docker compose up keycloak -d
 
           set -o allexport
           source ./.env.local
