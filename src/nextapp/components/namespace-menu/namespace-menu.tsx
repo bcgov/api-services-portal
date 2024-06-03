@@ -51,7 +51,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
-      return recentNamespace && recentNamespace.userId === user.userId && namespace.name !== user.namespace;
+      return recentNamespace && namespace.name !== user.namespace;
     })
     .sort((a, b) => {
       const aRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === a.name);
@@ -59,11 +59,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
     })
     .slice(0, 5);
-  
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
-  
   const namespaceSearchResults = React.useMemo(() => {
     const result =
       data?.allNamespaces ?? [];
@@ -155,7 +153,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             },
           }}
         >
-          <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto">
+          <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto" >
             <Box ml={6} w={'338px'}>
               <SearchInput
                 placeholder="Find a Gateway by name or ID"
@@ -192,6 +190,17 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                           )
                     }
                   >
+                  {(search !== '' && namespaceSearchResults.length === 0) && (
+                    <Box display="flex" alignItems="center" justifyContent="center" py={2}>
+                      <img
+                        src="/images/no_results_folder.png"
+                        width={85}
+                        height={85}
+                        title="Empty folder"
+                        alt="Empty folder"
+                      />
+                    </Box>
+                  )}
                   {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
                       <MenuItem
                         key={n.id}
