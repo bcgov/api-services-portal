@@ -343,6 +343,36 @@ module.exports = {
           },
           {
             schema:
+              'updateCurrentNamespaceDisplayName(displayName: String): String',
+            resolver: async (
+              item: any,
+              { org, orgUnit }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              const ns = context.req.user?.namespace;
+
+              const prodEnv = await getGwaProductEnvironment(context, true);
+
+              const resourcesApi = new UMAResourceRegistrationService(
+                prodEnv.uma2.resource_registration_endpoint,
+                prodEnv.accessToken
+              );
+
+              await resourcesApi.updateDisplayName(ns, query.displayName);
+              return true;
+            },
+          },
+          {
+            schema:
               'updateCurrentNamespace(org: String, orgUnit: String): String',
             resolver: async (
               item: any,

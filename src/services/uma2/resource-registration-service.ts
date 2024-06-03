@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { Logger } from '../../logger';
 import querystring from 'querystring';
 import { headers } from '../keycloak/keycloak-api';
+import { regExprValidation } from '../utils';
 
 const logger = Logger('uma2-resource');
 
@@ -97,6 +98,14 @@ export class UMAResourceRegistrationService {
   }
 
   public async updateDisplayName(name: string, displayName: string) {
+    const displayNameValidationRule = '^[A-Za-z0-9-()_ ]{0,50}$';
+
+    regExprValidation(
+      displayNameValidationRule,
+      displayName,
+      'Display name can not be longer than 50 characters.'
+    );
+
     const before = await this.findResourceByName(name);
 
     await this.updateResourceSet({
