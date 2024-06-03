@@ -215,7 +215,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       >
                         <Box display="flex" alignItems="center">
                           <Icon as={FaServer} />
-                          <Text ml={2}>{n.displayName ? n.displayName : 'Display name here'}</Text>
+                          <Text ml={2}>{n.displayName ? n.displayName : `Gateway ${n.name}`}</Text>
                         </Box>
                         <Text ml={6} color='text'>{n.name}</Text>
                       </MenuItem>
