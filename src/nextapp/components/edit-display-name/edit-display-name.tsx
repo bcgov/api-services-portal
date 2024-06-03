@@ -153,7 +153,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
               </Button>
               <Button
                 type="submit"
-                onClick={handleSubmit}
+                onClick={handleSaveClick}
                 data-testid="edit-display-name-submit-btn"
                 isDisabled={charCount > charLimit}
               >
