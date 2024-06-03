@@ -281,6 +281,7 @@ export interface Product {
   description?: string;
   namespace?: string;
   dataset?: DraftDatasetRefID;
+  environments?: Environment[];
 }
 
 

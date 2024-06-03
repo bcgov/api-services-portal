@@ -554,6 +554,54 @@ components:
             additionalProperties: false
         DraftDatasetRefID:
             type: string
+        LegalRefID:
+            type: string
+        CredentialIssuerRefID:
+            type: string
+        Environment:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                    enum:
+                        - dev
+                        - test
+                        - prod
+                        - sandbox
+                        - other
+                active:
+                    type: boolean
+                approval:
+                    type: boolean
+                flow:
+                    type: string
+                    enum:
+                        - public
+                        - protected-externally
+                        - authorization-code
+                        - client-credentials
+                        - kong-acl-only
+                        - kong-api-key-only
+                        - kong-api-key-acl
+                additionalDetailsToRequest:
+                    type: string
+                services:
+                    items:
+                        $ref: '#/components/schemas/GatewayServiceRefID'
+                    type: array
+                legal:
+                    $ref: '#/components/schemas/LegalRefID'
+                credentialIssuer:
+                    $ref: '#/components/schemas/CredentialIssuerRefID'
+            type: object
+            additionalProperties: false
+            example:
+                name: dev
+                active: false
+                approval: false
+                flow: public
+                appId: '00000000'
         Product:
             properties:
                 appId:
@@ -566,6 +614,10 @@ components:
                     type: string
                 dataset:
                     $ref: '#/components/schemas/DraftDatasetRefID'
+                environments:
+                    items:
+                        $ref: '#/components/schemas/Environment'
+                    type: array
             type: object
             additionalProperties: false
             example:
