@@ -144,6 +144,7 @@ module.exports = {
                 const resource: any = await getResource(selectedNS, envCtx);
                 merged['id'] = resource['id'];
                 merged['scopes'] = resource['scopes'];
+                merged['displayName'] = resource['displayName'];
               }
 
               if (merged.org) {
