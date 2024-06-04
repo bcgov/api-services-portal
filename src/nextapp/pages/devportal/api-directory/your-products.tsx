@@ -9,6 +9,7 @@ import { useQuery } from 'react-query';
 import { Dataset, Product } from '@/shared/types/query.types';
 import PreviewBanner from '@/components/preview-banner';
 import DiscoveryList from '@/components/discovery-list';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useAuth } from '@/shared/services/auth';
 import NextLink from 'next/link';
 
@@ -23,6 +24,7 @@ const ApiDiscoveryPage: React.FC = () => {
       `/ds/api/v2/namespaces/${user?.namespace}/directory`
     )
   );
+  const namespace = useCurrentNamespace();
 
   return (
     <>
@@ -33,7 +35,7 @@ const ApiDiscoveryPage: React.FC = () => {
       <Container maxW="6xl">
         <ApiDirectoryNav />
         <PageHeader
-          title={user ? `${user?.namespace} Products` : 'Draft Products'}
+          title={namespace.data.currentNamespace?.displayName ? `${namespace.data.currentNamespace?.displayName} Products` : 'Draft Products'}
         >
           <Text>
             {user &&
