@@ -50,7 +50,6 @@ import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import EmptyPane from '@/components/empty-pane';
 import { Namespace, Query } from '@/shared/types/query.types';
-import NewNamespace from '@/components/new-namespace';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
 import EditNamespaceDisplayName from '@/components/edit-display-name';
@@ -270,13 +269,8 @@ const NamespacesPage: React.FC = () => {
             my={0}
           >
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              CAN'T SELECT NAMESPACE HERE ANYMORE!
-              <Text>or</Text>
-              <Button variant="primary" onClick={onOpen}>
-                Create New Namespace
-              </Button>
+              This page will be replaced.
             </Flex>
-            <NewNamespace isOpen={isOpen} onClose={onClose} />
           </EmptyPane>
         )}
         {hasNamespace && (
