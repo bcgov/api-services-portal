@@ -20,11 +20,7 @@ import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import SearchInput from '@/components/search-input';
 import { restApi, useApi } from '@/shared/services/api';
-import { differenceInDays } from 'date-fns';
 import { Namespace } from '@/shared/types/query.types';
-
-import NamespaceManager from '../namespace-manager';
-import NewNamespace from '../new-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
@@ -38,16 +34,27 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const client = useQueryClient();
   const toast = useToast();
   const [search, setSearch] = React.useState('');
-  const newNamespaceDisclosure = useDisclosure();
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const managerDisclosure = useDisclosure();
-  const { data, isLoading, isSuccess, isError } = useApi(
+  const { data, isLoading, isSuccess, isError, refetch } = useApi(
     'allNamespaces',
     { query },
     { suspense: false }
-  );
-  const today = new Date();
+    );
+  const handleRefresh = () => {
+    refetch();
+  };
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    handleRefresh();
+  };
+  // useEffect(() => {
+  //   if (isOpen.isOpen && searchInputRef.current) {
+  //     searchInputRef.current.focus();
+  //   }
+  // }, [isOpen.isOpen, searchInputRef]);
+  
   const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
-
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
       const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
@@ -59,9 +66,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
     })
     .slice(0, 5);
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-  };
   const namespaceSearchResults = React.useMemo(() => {
     const result =
       data?.allNamespaces ?? [];
@@ -235,32 +239,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
               </>
             )}
           </Box>
-            {/* TODO: Remove. This is here for convenience for creating NS's during prelim testing. */}
-            {/* <> 
-              <MenuDivider />
-              <MenuOptionGroup>
-                <MenuItem
-                  onClick={newNamespaceDisclosure.onOpen}
-                  color="bc-blue-alt"
-                  data-testid="ns-dropdown-create-btn"
-                >
-                  Create New Namespace
-                </MenuItem>
-              </MenuOptionGroup>
-            </> */}
         </MenuList>
       </Menu>
-      <NewNamespace
-        isOpen={newNamespaceDisclosure.isOpen}
-        onClose={newNamespaceDisclosure.onClose}
-      />
-      {data && (
-        <NamespaceManager
-          data={data.allNamespaces}
-          isOpen={managerDisclosure.isOpen}
-          onClose={managerDisclosure.onClose}
-        />
-      )}
     </>
   );
 };

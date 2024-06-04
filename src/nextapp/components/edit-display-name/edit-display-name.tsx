@@ -51,15 +51,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
     event.preventDefault();
     if (charCount <= charLimit) {
       updateNamespaceDisplayName();
-      submitTheForm();
     }
-  };
-  const submitTheForm = async () => {
-    toast({
-      title: 'Submitted it!',
-      status: 'success',
-      isClosable: true,
-    });
   };
   const updateNamespaceDisplayName = async () => {
     if (form.current) {
