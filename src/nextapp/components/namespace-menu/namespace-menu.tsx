@@ -34,8 +34,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const client = useQueryClient();
   const toast = useToast();
   const [search, setSearch] = React.useState('');
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
-  const managerDisclosure = useDisclosure();
   const { data, isLoading, isSuccess, isError, refetch } = useApi(
     'allNamespaces',
     { query },
@@ -48,12 +46,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     setSearch(value);
     handleRefresh();
   };
-  // useEffect(() => {
-  //   if (isOpen.isOpen && searchInputRef.current) {
-  //     searchInputRef.current.focus();
-  //   }
-  // }, [isOpen.isOpen, searchInputRef]);
-  
+
   const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
@@ -148,7 +141,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           box-shadow='0px 5px 15px 0px #38598A59'
           borderRadius={'10px'}
           mt={'-2px'}
-          py={6}
+          pt={6}
+          pb={4}
           sx={{
             '.chakra-menu__group__title': {
               fontWeight: 'normal',
@@ -232,9 +226,23 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
                   </Text>
-                  <Text fontSize='sm'>
-                    Go to the <Link textDecoration="underline" color="bc-link" href={''}>full Gateways list</Link>
-                  </Text>
+                  <MenuItem
+                    as="a"
+                    href={'https://www.google.com'}
+                    fontSize='sm'
+                    justifyContent='center'
+                    alignItems='center'
+                    display='flex'
+                    textAlign='center'
+                    py={2}
+                    px={0}
+                    paddingInline={0}
+                  >
+                    Go to the{' '}
+                    <Text as="span" pl={1} textDecoration="underline" color="bc-link">
+                      full Gateways list
+                    </Text>
+                  </MenuItem>
                 </Flex>
               </>
             )}
