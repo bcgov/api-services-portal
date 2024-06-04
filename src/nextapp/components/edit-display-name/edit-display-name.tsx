@@ -37,7 +37,9 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const queryClient = useQueryClient();
   const mutate = useApiMutation(mutation);
   const [inputValue, setInputValue] = React.useState(data.displayName || '');
-  const [charCount, setCharCount] = React.useState(data.displayName?.length || 0);
+  const [charCount, setCharCount] = React.useState(
+    data.displayName?.length || 0
+  );
   const charLimit = 30;
   const handleInputChange = (event) => {
     const { value } = event.target;
@@ -49,7 +51,15 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
     event.preventDefault();
     if (charCount <= charLimit) {
       updateNamespaceDisplayName();
+      submitTheForm();
     }
+  };
+  const submitTheForm = async () => {
+    toast({
+      title: 'Submitted it!',
+      status: 'success',
+      isClosable: true,
+    });
   };
   const updateNamespaceDisplayName = async () => {
     if (form.current) {
@@ -99,11 +109,12 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
             <form ref={form} onSubmit={handleSubmit}>
               <FormControl isRequired>
                 <FormLabel></FormLabel>
-                <FormHelperText pb={4} fontSize={"16px"}>
-                  A meaningful display name makes it easy for anyone to identify and distinguish this Gateway from others.
+                <FormHelperText pb={4} fontSize={'16px'}>
+                  A meaningful display name makes it easy for anyone to identify
+                  and distinguish this Gateway from others.
                 </FormHelperText>
                 <Text
-                  fontSize={"12px"}
+                  fontSize={'12px'}
                   color={charCount > charLimit ? 'bc-error' : 'gray.500'}
                   mt={2}
                   textAlign="right"
@@ -155,7 +166,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
 export default EditNamespaceDisplayName;
 
 const mutation = gql`
-  mutation UpdateCurrentNamespace($displayName: String!) {
-    updateCurrentNamespace(displayName: $displayName)
+  mutation UpdateNamespaceDisplayName($displayName: String!) {
+    updateCurrentNamespaceDisplayName(displayName: $displayName)
   }
 `;
