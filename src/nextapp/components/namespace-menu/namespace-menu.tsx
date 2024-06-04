@@ -182,10 +182,13 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                             </Text>
                           )
                         : (
-                            <Text fontWeight="bold">
-                              Recently viewed
-                            </Text>
-                          )
+                            recentNamespaces.length > 0 ?
+                              (
+                                <Text fontWeight="bold">
+                                  Recently viewed
+                                </Text>
+                              ) : null
+                      )
                     }
                   >
                   {(search !== '' && namespaceSearchResults.length === 0) && (
