@@ -207,6 +207,18 @@ const metadata = {
       // },
     },
   },
+  Gateway: {
+    query: 'allNamespaces',
+    refKey: 'gatewayId',
+    sync: ['displayName'],
+    transformations: {
+      // members: {
+      //   name: 'connectExclusiveList',
+      //   list: 'MemberRole',
+      //   syncFirst: true,
+      // },
+    },
+  },
   MemberRole: {
     query: 'allMemberRoles',
     refKey: 'extRefId',

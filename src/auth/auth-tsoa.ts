@@ -55,6 +55,8 @@ export function expressAuthentication(
           resource = `org/${request.params.orgUnit}`;
         } else if ('org' in request.params) {
           resource = `org/${request.params.org}`;
+        } else if ('gatewayId' in request.params) {
+          resource = request.params.gatewayId;
         } else {
           // assume it is namespace-based protection
           resource = request.params.ns;

@@ -1,0 +1,73 @@
+{
+  "entryFile": "server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["controllers/v3/*Controller.ts"],
+  "spec": {
+    "name": "APS Directory API",
+    "version": "3.0.0",
+    "description": "",
+    "outputDirectory": "controllers/v3",
+    "specVersion": 3,
+    "basePath": "/ds/api/v3",
+    "specFileBaseName": "openapi",
+    "yaml": true,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "oauth2",
+        "description": "Authz Client Credential",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "flow": "application",
+        "tokenUrl": "https://token_endpoint"
+      },
+      "portal": {
+        "type": "http",
+        "description": "Authz Portal Login",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "openid": {
+        "type": "openIdConnect",
+        "description": "OIDC Login",
+        "openIdConnectUrl": "https://well_known_endpoint"
+      }
+    },
+    "tags": [
+      {
+        "name": "API Directory",
+        "description": "Discover all the great BC Government APIs"
+      },
+      {
+        "name": "Organizations",
+        "description": "Manage organizational access control"
+      },
+      {
+        "name": "Gateways",
+        "description": "Get aggregated information about gateways"
+      },
+      {
+        "name": "Gateway Services",
+        "description": "View your Gateway Service details"
+      },
+      {
+        "name": "Products",
+        "description": "Manage your Products and Environments for publishing to the API Directory"
+      },
+      {
+        "name": "Authorization Profiles",
+        "description": "Configure the integration to external Identity Providers"
+      },
+      {
+        "name": "Documentation",
+        "description": "View public documentation and publish documentation for your APIs"
+      }
+    ]
+  },
+  "routes": {
+    "routesDir": "controllers/v3",
+    "basePath": "/ds/api/v3",
+    "iocModule": "controllers/ioc",
+    "authenticationModule": "./auth/auth-tsoa"
+  },
+  "ignore": ["**/node_modules/**"]
+}
