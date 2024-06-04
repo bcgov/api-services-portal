@@ -103,7 +103,7 @@ export class UMAResourceRegistrationService {
     regExprValidation(
       displayNameValidationRule,
       displayName,
-      'Display name can not be longer than 50 characters.'
+      'Display name can not be longer than 50 characters and can only use special characters "-()_ ".'
     );
 
     const before = await this.findResourceByName(name);
@@ -120,8 +120,8 @@ export class UMAResourceRegistrationService {
       ownerManagedAccess: before.ownerManagedAccess,
     });
 
-    // need to small pause here, otherwise keycloak
-    // gives a 'reason: socket hang up'
+    // need a small pause here, otherwise keycloak
+    // gives a 'reason: socket hang up' on next call to it
     await new Promise((resolve) => {
       setTimeout(resolve, 100);
     });

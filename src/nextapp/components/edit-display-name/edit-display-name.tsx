@@ -37,7 +37,9 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const queryClient = useQueryClient();
   const mutate = useApiMutation(mutation);
   const [inputValue, setInputValue] = React.useState(data.displayName || '');
-  const [charCount, setCharCount] = React.useState(data.displayName?.length || 0);
+  const [charCount, setCharCount] = React.useState(
+    data.displayName?.length || 0
+  );
   const charLimit = 30;
   const handleInputChange = (event) => {
     const { value } = event.target;
@@ -164,7 +166,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
 export default EditNamespaceDisplayName;
 
 const mutation = gql`
-  mutation UpdateNamespaceDisplayName($displayName: String) {
+  mutation UpdateNamespaceDisplayName($displayName: String!) {
     updateCurrentNamespaceDisplayName(displayName: $displayName)
   }
 `;
