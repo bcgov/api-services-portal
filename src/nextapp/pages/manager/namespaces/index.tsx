@@ -168,7 +168,6 @@ const NamespacesPage: React.FC = () => {
   }, [client, mutate, router, toast, user]);
   const title = (
     <>
-
       {(namespace.isFetching || namespace.isLoading) && (
         <Skeleton width="400px" height="20px" mt={4} />
       )}
@@ -176,19 +175,28 @@ const NamespacesPage: React.FC = () => {
         <>
           <Flex align="center" gridGap={4}>
             {namespace.data?.currentNamespace?.displayName}
-            <EditNamespaceDisplayName data={namespace.data?.currentNamespace} queryKey={queryKey} />
+            <EditNamespaceDisplayName
+              data={namespace.data?.currentNamespace}
+              queryKey={queryKey}
+            />
             {namespace.data?.currentNamespace?.orgEnabled && (
               <Tooltip
                 hasArrow
                 label={`${user.namespace} is enabled to publish APIs to the directory`}
               >
                 <Box display="flex">
-                  <Icon as={FaCheckCircle} color="bc-success" boxSize="0.65em" />
+                  <Icon
+                    as={FaCheckCircle}
+                    color="bc-success"
+                    boxSize="0.65em"
+                  />
                 </Box>
               </Tooltip>
             )}
           </Flex>
-          <Text fontSize="xl" pt={1}>{namespace?.data.currentNamespace.name}</Text>
+          <Text fontSize="xl" pt={1}>
+            {namespace?.data.currentNamespace?.name}
+          </Text>
           <Flex align="center" mt={4}>
             <Text
               color={currentOrg.color}
@@ -245,7 +253,9 @@ const NamespacesPage: React.FC = () => {
       <Head>
         <title>
           API Program Services | Namespaces
-          {hasNamespace ? ` | ${namespace.data?.currentNamespace?.displayName}` : ''}
+          {hasNamespace
+            ? ` | ${namespace.data?.currentNamespace?.displayName}`
+            : ''}
         </title>
       </Head>
       <ApproveBanner />
