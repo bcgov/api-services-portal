@@ -113,7 +113,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
 
   return (
     <>
-      <Menu placement="bottom-end">
+      <Menu placement="bottom-end" onOpen={handleRefresh}>
         <MenuButton
           data-testid="ns-dropdown-btn"
           px={4}
