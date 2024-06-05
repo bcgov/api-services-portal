@@ -38,6 +38,7 @@ export default defineConfig({
         './cypress/tests/16-*/*.ts',
         './cypress/tests/17-*/*.ts',
         './cypress/tests/18-*/*.ts',
+        './cypress/tests/19-*/*.ts',
       ]
       return config
     },
@@ -59,7 +60,7 @@ export default defineConfig({
     env: {
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
-      OIDC_ISSUER: 'http://keycloak.localtest.me:9081',
+      OIDC_ISSUER: 'http://keycloak.localtest.me:9081/auth/realms/master',
       TOKEN_URL:
         'http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token',
       GWA_API_URL: 'http://gwa-api.localtest.me:2000/v2',
@@ -69,6 +70,8 @@ export default defineConfig({
       BASE_URL: 'http://oauth2proxy.localtest.me:4180',
       KEYCLOAK_URL: 'http://keycloak.localtest.me:9081',
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
+      DEV_USERNAME: 'janis@idir',
+      DEV_PASSWORD: 'awsummer',
     },
     retries: {
       runMode: 2,

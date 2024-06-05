@@ -36,7 +36,7 @@ import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
 import { ActivityDetail } from './types-extra';
 
-const logger = Logger('controllers.Namespace');
+const logger = Logger('controllers.Gateway');
 
 /**
  * @param binary Buffer
@@ -152,8 +152,9 @@ export class NamespaceController extends Controller {
   @Security('jwt', [])
   public async create(
     @Request() request: any,
-    @Body() vars: NamespaceInput
+    @Body() vars: Gateway
   ): Promise<Gateway> {
+    logger.debug('Input %j', vars);
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
@@ -165,6 +166,7 @@ export class NamespaceController extends Controller {
       result.errors.forEach((err: any, ind: number) => {
         errors[`d${ind}`] = { message: err.message };
       });
+      logger.error('%j', result);
       throw new ValidateError(errors, 'Unable to create namespace');
     }
     return {
@@ -202,6 +204,7 @@ export class NamespaceController extends Controller {
       result.errors.forEach((err: any, ind: number) => {
         errors[`d${ind}`] = { message: err.message };
       });
+      logger.error('%j', result);
       throw new ValidateError(errors, 'Unable to delete gateway');
     }
     return result.data.forceDeleteNamespace;
@@ -249,8 +252,8 @@ const list = gql`
 `;
 
 const item = gql`
-  query Namespace($gatewayId: String!) {
-    namespace(gatewayId: $ns) {
+  query Namespace($ns: String!) {
+    namespace(ns: $ns) {
       name
       displayName
       scopes {
@@ -269,7 +272,7 @@ const item = gql`
 `;
 
 const deleteNS = gql`
-  mutation ForceDeleteNamespace($gatewayId: String!, $force: Boolean!) {
+  mutation ForceDeleteNamespace($ns: String!, $force: Boolean!) {
     forceDeleteNamespace(namespace: $ns, force: $force)
   }
 `;

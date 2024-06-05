@@ -11,9 +11,9 @@ import {
   Body,
   Get,
   Tags,
+  Post,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
-import { assertEqual } from '../ioc/assert';
 import { inject, injectable } from 'tsyringe';
 import {
   syncRecords,
@@ -22,6 +22,7 @@ import {
   removeEmpty,
   removeKeys,
   transformAllRefID,
+  syncRecordsThrowErrors,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
@@ -39,10 +40,12 @@ import {
 } from '../../services/org-groups/types';
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity } from './types';
+import { Activity, Organization } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
 import { ActivitySummary } from '../../services/keystone/types';
 import { ActivityDetail } from './types-extra';
+import { BatchResult } from '../../batch/types';
+import { assertEqual } from '../ioc/assert';
 
 @injectable()
 @Route('/organizations')
@@ -63,6 +66,37 @@ export class OrganizationController extends Controller {
       title: o.title,
       description: o.description,
     }));
+  }
+
+  /**
+   * Create Organization
+   * > `Required Scope:` GroupAccess.Manage
+   *
+   * @summary Create Organizations
+   * @param ns
+   * @param body
+   * @param request
+   */
+  @Put('{org}')
+  @OperationId('put-organization')
+  @Security('jwt', ['GroupAccess.Manage'])
+  public async post(
+    @Path() org: string,
+    @Body() body: Organization,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    assertEqual(
+      org == 'ca.bc.gov',
+      true,
+      'org',
+      'Only root level is allowed to do this operation'
+    );
+    return await syncRecordsThrowErrors(
+      this.keystone.createContext(request, true),
+      'Organization',
+      body['name'],
+      body
+    );
   }
 
   @Get('{org}')

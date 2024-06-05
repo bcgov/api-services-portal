@@ -80,7 +80,12 @@ export function expressAuthentication(
           request,
           {
             status: (s: number) => {
-              logger.error('invalid_token (%d) for %j', s, request.oauth_user);
+              logger.error(
+                'invalid_token (%d) [%j] for %j',
+                s,
+                permissions,
+                request.oauth_user
+              );
               reject(
                 new UnauthorizedError('invalid_token', {
                   message: `Missing authorization scope. (${s})`,

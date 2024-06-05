@@ -139,8 +139,8 @@ export class NamespaceService {
   }
 
   async checkNamespaceAvailable(ns: string): Promise<void> {
-    const group = await this.groupService.getGroup('ns', ns);
-    assert.strictEqual(group === null, true, 'Namespace already exists');
+    const groupExists: boolean = await this.groupService.hasGroup('ns', ns);
+    assert.strictEqual(groupExists, false, 'Namespace already exists');
   }
 
   async listAssignedNamespacesByOrg(org: string): Promise<OrgNamespace[]> {

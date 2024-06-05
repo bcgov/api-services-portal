@@ -15,7 +15,7 @@ const metadata = {
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       orgUnits: {
-        name: 'connectExclusiveList',
+        name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
       },

@@ -25,6 +25,7 @@ import {
   deleteRecord,
   getRecord,
   transformArrayKeyToString,
+  replaceKey,
 } from '../../batch/feed-worker';
 import { Product } from './types';
 import { BatchResult } from '../../batch/types';
@@ -69,7 +70,7 @@ export class ProductController extends Controller {
       this.keystone.createContext(request),
       'Product',
       body['appId'],
-      body
+      replaceKey(body, 'gatewayId', 'namespace')
     );
   }
 
@@ -204,6 +205,7 @@ export class ProductController extends Controller {
       result.errors.forEach((err: any, ind: number) => {
         errors[`d${ind}`] = { message: err.message };
       });
+      logger.error('%j', result);
       throw new ValidateError(errors, 'Unable to delete product environment');
     }
     return result.data.forceDeleteEnvironment;

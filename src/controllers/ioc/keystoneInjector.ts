@@ -47,7 +47,7 @@ export class KeystoneService {
       id: null,
       name: resolveName(request.user),
       username: resolveUsername(request.user),
-      namespace: request.params.ns,
+      namespace: request.params.ns || request.params.gatewayId,
       roles: JSON.stringify(scopesToRoles(identityProvider, _scopes)),
       scopes: _scopes,
       userId: null,

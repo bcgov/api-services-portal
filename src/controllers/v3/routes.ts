@@ -115,16 +115,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Maybe_Scalars-at-String_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "NamespaceInput": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"displayName":{"ref":"Maybe_Scalars-at-String_"},"name":{"ref":"Maybe_Scalars-at-String_"}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ActivityDetail": {
         "dataType": "refObject",
         "properties": {
@@ -231,6 +221,37 @@ const models: TsoaRoute.Models = {
             "clientMappers": {"dataType":"array","array":{"dataType":"string"}},
             "inheritFrom": {"ref":"undefinedRefID"},
             "owner": {"ref":"undefinedRefID"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrganizationUnit": {
+        "dataType": "refObject",
+        "properties": {
+            "extForeignKey": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "sector": {"dataType":"string"},
+            "title": {"dataType":"string"},
+            "description": {"dataType":"string"},
+            "extSource": {"dataType":"string"},
+            "extRecordHash": {"dataType":"string"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Organization": {
+        "dataType": "refObject",
+        "properties": {
+            "extForeignKey": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "sector": {"dataType":"string"},
+            "title": {"dataType":"string"},
+            "description": {"dataType":"string"},
+            "extSource": {"dataType":"string"},
+            "extRecordHash": {"dataType":"string"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "orgUnits": {"dataType":"array","array":{"dataType":"refObject","ref":"OrganizationUnit"}},
         },
         "additionalProperties": false,
     },
@@ -691,7 +712,7 @@ export function RegisterRoutes(app: express.Router) {
             async function NamespaceController_create(request: any, response: any, next: any) {
             const args = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    vars: {"in":"body","name":"vars","required":true,"ref":"NamespaceInput"},
+                    vars: {"in":"body","name":"vars","required":true,"ref":"Gateway"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -903,7 +924,7 @@ export function RegisterRoutes(app: express.Router) {
 
             async function IdentifiersController_getNewID(request: any, response: any, next: any) {
             const args = {
-                    type: {"in":"path","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["environment"]},{"dataType":"enum","enums":["product"]},{"dataType":"enum","enums":["application"]}]},
+                    type: {"in":"path","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["environment"]},{"dataType":"enum","enums":["product"]},{"dataType":"enum","enums":["application"]},{"dataType":"enum","enums":["gateway"]}]},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1040,6 +1061,37 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.listOrganizations.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v3/organizations/:org',
+            authenticateMiddleware([{"jwt":["GroupAccess.Manage"]}]),
+
+            async function OrganizationController_post(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"Organization"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrganizationController>(OrganizationController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.post.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

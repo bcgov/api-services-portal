@@ -56,10 +56,6 @@
       {
         "name": "Authorization Profiles",
         "description": "Configure the integration to external Identity Providers"
-      },
-      {
-        "name": "Documentation",
-        "description": "View public documentation and publish documentation for your APIs"
       }
     ]
   },

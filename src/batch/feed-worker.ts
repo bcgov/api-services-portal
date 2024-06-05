@@ -677,6 +677,17 @@ export const removeKeys = (obj: object, keys: string[]) => {
   return obj;
 };
 
+export const replaceKey = (obj: object, oldKey: string, newKey: string) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (oldKey == key &&
+        delete (obj as any)[key] &&
+        ((obj as any)[newKey] = val)) ||
+      (val && typeof val === 'object' && replaceKey(val, oldKey, newKey))
+  );
+  return obj;
+};
+
 export const removeAllButKeys = (obj: object, keys: string[]) => {
   Object.entries(obj).forEach(
     ([key, val]) =>

@@ -163,6 +163,24 @@ export class KeycloakGroupService {
     return this.kcAdminClient.groups.findOne({ id });
   }
 
+  public async hasGroup(parentGroupName: string, groupName: string) {
+    const listOfGroups = this.allGroups
+      ? this.allGroups
+      : await this.kcAdminClient.groups.find();
+    const groups = listOfGroups.filter(
+      (group: GroupRepresentation) => group.name == parentGroupName
+    );
+    if (
+      groups[0].subGroups.filter(
+        (group: GroupRepresentation) => group.name == groupName
+      ).length == 0
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   public async getGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups

@@ -152,16 +152,6 @@ components:
                     type: string
             type: object
             additionalProperties: false
-        Maybe_Scalars-at-String_:
-            type: string
-            nullable: true
-        NamespaceInput:
-            properties:
-                displayName:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                name:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-            type: object
         ActivityDetail:
             properties:
                 id:
@@ -352,6 +342,54 @@ components:
                 mode: auto
                 environmentDetails: []
                 owner: janis@gov.bc.ca
+        OrganizationUnit:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                sector:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+            type: object
+            additionalProperties: false
+        Organization:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                sector:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                orgUnits:
+                    items:
+                        $ref: '#/components/schemas/OrganizationUnit'
+                    type: array
+            type: object
+            additionalProperties: false
         GroupPermission:
             properties:
                 resource:
@@ -822,7 +860,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/NamespaceInput'
+                            $ref: '#/components/schemas/Gateway'
     '/gateways/{gatewayId}':
         get:
             operationId: namespace-profile
@@ -1056,6 +1094,7 @@ paths:
                             - environment
                             - product
                             - application
+                            - gateway
     '/gateways/{gatewayId}/issuers':
         put:
             operationId: put-issuer
@@ -1160,6 +1199,36 @@ paths:
             security: []
             parameters: []
     '/organizations/{org}':
+        put:
+            operationId: put-organization
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Create Organization\n> `Required Scope:` GroupAccess.Manage"
+            summary: 'Create Organizations'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Organization'
         get:
             operationId: organization-units
             responses:
@@ -1557,6 +1626,3 @@ tags:
     -
         name: 'Authorization Profiles'
         description: 'Configure the integration to external Identity Providers'
-    -
-        name: Documentation
-        description: 'View public documentation and publish documentation for your APIs'
