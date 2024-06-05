@@ -8,7 +8,6 @@ const { v4: uuidv4 } = require('uuid')
 function buildGatewayDatasetAndProduct() {
   const datasetId = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 4)
 
-  cy.fixture('api-v3').as('api-v3')
   return cy.loginByAuthAPI('', '').then(() => {
     return cy.get('@loginByAuthApiResponse').then((token_res: any) => {
       cy.setHeaders({ 'Content-Type': 'application/json' })
@@ -400,7 +399,6 @@ describe('API Directory (Gateway Management)', () => {
 
 describe('Organization', () => {
   before(() => {
-    cy.fixture('api-v3').as('api-v3')
     cy.loginByAuthAPI('', '').then(() => {
       cy.get('@loginByAuthApiResponse').then((token_res: any) => {
         cy.setHeaders({ 'Content-Type': 'application/json' })
@@ -588,7 +586,6 @@ describe('Gateways', () => {
   let LOCAL: { myGateway?: any } = {}
 
   before(() => {
-    cy.fixture('api-v3').as('api-v3')
     cy.loginByAuthAPI('', '').then(() => {
       cy.get('@loginByAuthApiResponse').then((token_res: any) => {
         cy.setHeaders({ 'Content-Type': 'application/json' })
@@ -646,7 +643,6 @@ describe('Products', () => {
   let LOCAL: { myGateway?: any } = {}
 
   before(() => {
-    cy.fixture('api-v3').as('api-v3')
     cy.loginByAuthAPI('', '').then(() => {
       cy.get('@loginByAuthApiResponse').then((token_res: any) => {
         cy.setHeaders({ 'Content-Type': 'application/json' })
@@ -699,7 +695,6 @@ describe('Authorization Profiles', () => {
   let LOCAL: { myGateway?: any } = {}
 
   before(() => {
-    cy.fixture('api-v3').as('api-v3')
     cy.loginByAuthAPI('', '').then(() => {
       cy.get('@loginByAuthApiResponse').then((token_res: any) => {
         cy.setHeaders({ 'Content-Type': 'application/json' })
