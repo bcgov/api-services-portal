@@ -60,13 +60,12 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     })
     .slice(0, 5);
   const namespaceSearchResults = React.useMemo(() => {
-    const result =
-      data?.allNamespaces ?? [];
+    const result = data?.allNamespaces ?? [];
     if (search.trim()) {
       const regex = new RegExp(
-        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i'
       );
-      return result.filter((s) => s.name.search(regex) >= 0);
+      return result.filter((s) => regex.test(s.name) || regex.test(s.displayName));
     }
     return result;
   }, [data, search]);
