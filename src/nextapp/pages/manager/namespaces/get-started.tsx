@@ -29,7 +29,9 @@ const NamespacesPage: React.FC = () => {
           {isError && (
             <Heading>Gateways Failed to Load</Heading>
           )}
-          {isSuccess && data.allNamespaces.length == 0 && (
+          {/* TODO: add data.allNamespaces.length == 0 to the router logic in order to show this page */}
+          {/* {isSuccess && data.allNamespaces.length == 0 && ( */}
+          {isSuccess && (
             <GatewayGetStarted />
           )}
         </>
