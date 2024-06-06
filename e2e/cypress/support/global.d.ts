@@ -171,5 +171,7 @@ declare namespace Cypress {
     checkAstraScanResultForVulnerability(): Chainable<any>
 
     makeAPIRequestForScanResult(scanID: string): Chainable<Cypress.Response<any>>
+
+    buildOrgGatewayDatasetAndProduct(): Chainable<Cypress.Response<any>>
   }
 }

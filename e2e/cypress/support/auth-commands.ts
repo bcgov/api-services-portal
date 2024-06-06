@@ -119,7 +119,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
 
 Cypress.Commands.add(
   'getUserSessionTokenValue',
-  (namespace: string, isNamespaceSelected?: true) => {
+  (namespace: string, isNamespaceSelected?: boolean) => {
     const login = new LoginPage()
     const home = new HomePage()
     const na = new NamespaceAccessPage()
@@ -170,37 +170,39 @@ Cypress.Commands.add('getSession', () => {
   cy.log('> Get Session')
 })
 
-Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
+Cypress.Commands.add('loginByAuthAPI', (username: string, password: string): any => {
   const log = Cypress.log({
     displayName: 'AUTH0 LOGIN',
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
   log.snapshot('before')
-  cy.request({
-    method: 'POST',
-    url: Cypress.env('OIDC_ISSUER') + '/protocol/openid-connect/token',
-    body: {
-      grant_type: 'password',
-      username: Cypress.env('DEV_USERNAME'),
-      password: Cypress.env('DEV_PASSWORD'),
-      Scope: 'openid',
-      client_id: Cypress.env('CLIENT_ID'),
-      client_secret: Cypress.env('CLIENT_SECRET'),
-    },
-    form: true,
-  }).then(({ body }: any) => {
-    const user: any = jwt.decode(body.id_token)
-    const userItem = {
-      token: body.access_token,
-      user: {
-        ...user,
+  return cy
+    .request({
+      method: 'POST',
+      url: Cypress.env('OIDC_ISSUER') + '/protocol/openid-connect/token',
+      body: {
+        grant_type: 'password',
+        username: Cypress.env('DEV_USERNAME'),
+        password: Cypress.env('DEV_PASSWORD'),
+        Scope: 'openid',
+        client_id: Cypress.env('CLIENT_ID'),
+        client_secret: Cypress.env('CLIENT_SECRET'),
       },
-    }
-    cy.wrap(userItem).as('loginByAuthApiResponse')
-  })
-  log.snapshot('after')
-  log.end()
+      form: true,
+    })
+    .then(({ body }: any) => {
+      const user: any = jwt.decode(body.id_token)
+      const userItem = {
+        token: body.access_token,
+        user: {
+          ...user,
+        },
+      }
+      log.snapshot('after')
+      log.end()
+      return userItem
+    })
 })
 
 Cypress.Commands.add('logout', () => {
