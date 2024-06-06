@@ -164,11 +164,21 @@ const MyGatewaysPage: React.FC = () => {
               <option value="option3">Publishing enabled</option>
             </Select>
             <InputGroup>
-              <Input variant='outline' placeholder="Search by display name or ID" />
-              <InputRightElement children={<Icon as={FaSearch} color="#737373" />} />
+              <Input
+                variant="outline"
+                placeholder="Search by display name or ID"
+              />
+              <InputRightElement
+                children={<Icon as={FaSearch} color="#737373" />}
+              />
             </InputGroup>
           </Flex>
-          {data && <Text mb={4}>{data.allNamespaces.length} gateways </Text>}
+          {data &&
+            (data.allNamespaces.length === 1 ? (
+              <Text mb={4}>{data.allNamespaces.length} gateway</Text>
+            ) : (
+              <Text mb={4}>{data.allNamespaces.length} gateways</Text>
+            ))}
           {data &&
             data.allNamespaces.map((namespace) => (
               <Flex
@@ -194,7 +204,9 @@ const MyGatewaysPage: React.FC = () => {
                     color="bc-blue"
                     onClick={handleNamespaceChange(namespace)}
                   >
-                    {namespace.displayName ? namespace.displayName : namespace.name}
+                    {namespace.displayName
+                      ? namespace.displayName
+                      : namespace.name}
                   </Link>
                   <Text fontSize="md" pl={8}>
                     {namespace.name}
