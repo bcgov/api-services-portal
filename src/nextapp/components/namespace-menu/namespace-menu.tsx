@@ -1,7 +1,9 @@
 import { UserData } from '@/types';
 import {
   Box,
+  Flex,
   Icon,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -13,9 +15,10 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
+import SearchInput from '@/components/search-input';
 import { restApi, useApi } from '@/shared/services/api';
 import { differenceInDays } from 'date-fns';
 import { Namespace } from '@/shared/types/query.types';
@@ -25,17 +28,16 @@ import NewNamespace from '../new-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
-  variant?: string;
   buttonMessage?: string;
 }
 
 const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   user,
-  variant,
   buttonMessage,
 }) => {
   const client = useQueryClient();
   const toast = useToast();
+  const [search, setSearch] = React.useState('');
   const newNamespaceDisclosure = useDisclosure();
   const managerDisclosure = useDisclosure();
   const { data, isLoading, isSuccess, isError } = useApi(
@@ -44,6 +46,33 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     { suspense: false }
   );
   const today = new Date();
+  const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
+
+  const recentNamespaces = data?.allNamespaces
+    .filter((namespace: Namespace) => {
+      const recentNamespace = namespacesRecentlyViewed.find((ns: any) => ns.namespace === namespace.name);
+      return recentNamespace && namespace.name !== user.namespace;
+    })
+    .sort((a, b) => {
+      const aRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === a.name);
+      const bRecent = namespacesRecentlyViewed.find((ns: any) => ns.namespace === b.name);
+      return new Date(bRecent.updatedAt).getTime() - new Date(aRecent.updatedAt).getTime();
+    })
+    .slice(0, 5);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  const namespaceSearchResults = React.useMemo(() => {
+    const result =
+      data?.allNamespaces ?? [];
+    if (search.trim()) {
+      const regex = new RegExp(
+        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+      );
+      return result.filter((s) => s.name.search(regex) >= 0);
+    }
+    return result;
+  }, [data, search]);
 
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
@@ -54,6 +83,18 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
+        const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.userId === user.userId && entry.namespace === user.namespace);
+        if (existingEntryIndex !== -1) {
+          namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
+        } else {
+          namespacesRecentlyViewed.push({
+            userId: user.userId,
+            namespace: user.namespace,
+            updatedAt: user.updatedAt
+          });
+        }
+        localStorage.setItem('namespacesRecentlyViewed', JSON.stringify(namespacesRecentlyViewed));
+        handleSearchChange('');
         toast.closeAll();
         client.invalidateQueries();
         toast({
@@ -70,31 +111,40 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         });
       }
     },
-    [client, toast]
+    [client, toast, user]
   );
-
-  const isNamespaceSelector = variant === 'ns-selector';
 
   return (
     <>
       <Menu placement="bottom-end">
         <MenuButton
           data-testid="ns-dropdown-btn"
-          px={isNamespaceSelector ? 5 : 2}
-          py={isNamespaceSelector ? 2 : 1}
+          px={4}
+          py={1}
+          w={72}
           transition="all 0.2s"
           borderRadius={4}
-          border={isNamespaceSelector ? '2px solid black' : ''}
-          borderColor={isNamespaceSelector ? 'bc-component' : ''}
-          _hover={isNamespaceSelector ? { boxShadow: 'md' } : { bg: 'bc-link' }}
-          _expanded={isNamespaceSelector ? {} : { bg: 'blue.400' }}
+          border={'2px solid #606060'}
+          backgroundColor={'white'}
+          _hover={{ boxShadow: 'md' }}
+          _expanded={{}}
           _focus={{ boxShadow: 'outline' }}
+          textAlign='left'
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
         >
-          {user?.namespace ?? buttonMessage ?? 'No Active Namespace'}{' '}
-          <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
+          <Flex alignItems="center">
+            <Box flex="1">{user?.namespace ?? buttonMessage ?? 'No Active Gateway'}</Box>
+            <Icon as={FaChevronDown} aria-label="chevron down icon" />
+          </Flex>
         </MenuButton>
         <MenuList
           color="gray.600"
+          box-shadow='0px 5px 15px 0px #38598A59'
+          borderRadius={'10px'}
+          mt={'-2px'}
+          py={6}
           sx={{
             '.chakra-menu__group__title': {
               fontWeight: 'normal',
@@ -103,20 +153,55 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             },
           }}
         >
-          <>
+          <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto" >
+            <Box ml={6} w={'338px'}>
+              <SearchInput
+                placeholder="Find a Gateway by name or ID"
+                onBlur={(event) => event.currentTarget.focus()}
+                onChange={handleSearchChange}
+                value={search}
+                data-testid="namespace-search-input"
+              />
+            </Box>                
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
             {isError && (
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <Box maxHeight="calc(100vh / 2)" overflowY="auto">
-                <MenuOptionGroup
-                  title={isNamespaceSelector ? '' : 'Switch Namespace'}
-                >
-                  {data.allNamespaces
-                    .filter((n) => n.name !== user.namespace)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((n) => (
+              <>
+                <Box maxHeight="calc(100vh / 2 - 80px)" overflowY="auto">
+                  <MenuOptionGroup
+                    pt={8}
+                    pb={2}
+                    m={0}
+                    ml={5}
+                    // @ts-ignore - need bold font in title
+                    title={
+                      search !== ''
+                        ? (
+                            <Text fontWeight="bold">
+                              {namespaceSearchResults.length} result{namespaceSearchResults.length !== 1 ? 's' : ''} for "{search}"
+                            </Text>
+                          )
+                        : (
+                            <Text fontWeight="bold">
+                              Recently viewed
+                            </Text>
+                          )
+                    }
+                  >
+                  {(search !== '' && namespaceSearchResults.length === 0) && (
+                    <Box display="flex" alignItems="center" justifyContent="center" py={2}>
+                      <img
+                        src="/images/no_results_folder.png"
+                        width={85}
+                        height={85}
+                        title="Empty folder"
+                        alt="Empty folder"
+                      />
+                    </Box>
+                  )}
+                  {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
                       <MenuItem
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
@@ -124,32 +209,36 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         flexDir="column"
                         alignItems="flex-start"
                         pos="relative"
+                        pl={6}
+                        pt={2}
+                        pb={2}
                       >
-                        {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
-                          5 && (
-                          <Text color="bc-error" pos="absolute" right={4}>
-                            New
-                          </Text>
-                        )}
-                        <Text>{n.name}</Text>
-                        {
-                          /* @ts-ignore */
-                          !n.orgEnabled && (
-                            <Text fontSize="xs" color="bc-component">
-                              API Publishing Disabled
-                            </Text>
-                          )
-                        }
+                        <Box display="flex" alignItems="center">
+                          <Icon as={FaServer} />
+                          <Text ml={2}>{n.displayName ? n.displayName : `Gateway ${n.name}`}</Text>
+                        </Box>
+                        <Text ml={6} color='text'>{n.name}</Text>
                       </MenuItem>
-                    ))}
-                </MenuOptionGroup>
-              </Box>
+                      ))}
+                  </MenuOptionGroup>
+                </Box>
+                <Flex justifyContent='center' flexDirection='column' alignItems='center'>
+                  <Text pt={8} fontSize='sm' fontWeight='bold'>
+                    {`You have ${data.allNamespaces.length} Gateway${
+                          data.allNamespaces.length !== 1 ? 's' : ''
+                        } in total`}
+                  </Text>
+                  <Text fontSize='sm'>
+                    Go to the <Link textDecoration="underline" color="bc-link" href={''}>full Gateways list</Link>
+                  </Text>
+                </Flex>
+              </>
             )}
-          </>
-          {!isNamespaceSelector && (
-            <>
+          </Box>
+            {/* TODO: Remove. This is here for convenience for creating NS's during prelim testing. */}
+            {/* <> 
               <MenuDivider />
-              <MenuOptionGroup title="Namespace Actions">
+              <MenuOptionGroup>
                 <MenuItem
                   onClick={newNamespaceDisclosure.onOpen}
                   color="bc-blue-alt"
@@ -157,17 +246,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 >
                   Create New Namespace
                 </MenuItem>
-                <MenuItem
-                  isDisabled={!data}
-                  color="bc-blue-alt"
-                  onClick={managerDisclosure.onOpen}
-                  data-testid="ns-dropdown-manage-btn"
-                >
-                  Export Namespace Report
-                </MenuItem>
               </MenuOptionGroup>
-            </>
-          )}
+            </> */}
         </MenuList>
       </Menu>
       <NewNamespace
@@ -192,6 +272,7 @@ const query = gql`
     allNamespaces {
       id
       name
+      displayName
       orgEnabled
       orgUpdatedAt
     }
