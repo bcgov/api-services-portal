@@ -43,20 +43,26 @@ export class EndpointsController extends Controller {
       matchHostList = this.getMatchHostList(
         counter == 1 ? serviceName : `${serviceName}-${counter}`
       );
-    } while (this.isTaken(records, matchHostList));
+    } while (this.isTaken(records, matchHostList.hosts));
 
     return {
       available: counter == 1,
-      suggestion: matchHostList[0],
+      name: matchHostList.serviceName,
+      host: matchHostList.hosts[0],
     };
   }
 
-  private getMatchHostList(serviceName: string): string[] {
-    return [
-      `${serviceName}.api.gov.bc.ca`,
-      `${serviceName}-api-gov-bc-ca.dev.api.gov.bc.ca`,
-      `${serviceName}-api-gov-bc-ca.test.api.gov.bc.ca`,
-    ];
+  private getMatchHostList(
+    serviceName: string
+  ): { serviceName: string; hosts: string[] } {
+    return {
+      serviceName,
+      hosts: [
+        `${serviceName}.api.gov.bc.ca`,
+        `${serviceName}-api-gov-bc-ca.dev.api.gov.bc.ca`,
+        `${serviceName}-api-gov-bc-ca.test.api.gov.bc.ca`,
+      ],
+    };
   }
 
   private isTaken(records: any[], matchHosts: string[]): boolean {
