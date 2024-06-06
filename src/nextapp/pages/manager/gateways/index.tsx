@@ -194,7 +194,7 @@ const MyGatewaysPage: React.FC = () => {
                     color="bc-blue"
                     onClick={handleNamespaceChange(namespace)}
                   >
-                    Display Name
+                    {namespace.displayName ? namespace.displayName : namespace.name}
                   </Link>
                   <Text fontSize="md" pl={8}>
                     {namespace.name}
@@ -257,6 +257,7 @@ const query = gql`
     allNamespaces {
       id
       name
+      displayName
       orgEnabled
       orgUpdatedAt
     }
