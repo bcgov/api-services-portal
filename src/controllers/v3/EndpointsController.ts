@@ -46,7 +46,7 @@ export class EndpointsController extends Controller {
     } while (this.isTaken(records, matchHostList));
 
     return {
-      available: counter == 1 ? 'yes' : 'no',
+      available: counter == 1,
       suggestion: matchHostList[0],
     };
   }
