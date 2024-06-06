@@ -797,6 +797,25 @@ paths:
                     required: true
                     schema:
                         type: string
+    /routes/availability:
+        get:
+            operationId: check-availability
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - 'Service Routes'
+            security: []
+            parameters:
+                -
+                    in: query
+                    name: serviceName
+                    required: true
+                    schema:
+                        type: string
     /gateways/report:
         get:
             operationId: report
