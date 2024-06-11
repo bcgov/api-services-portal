@@ -15,6 +15,7 @@ import {
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
+import { replaceKey } from '../../batch/feed-worker';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
 import { Namespace, NamespaceInput } from '../../services/keystone/types';
@@ -155,10 +156,11 @@ export class NamespaceController extends Controller {
     @Body() vars: Gateway
   ): Promise<Gateway> {
     logger.debug('Input %j', vars);
+    const modifiedVars = replaceKey(vars, 'gatewayId', 'name');
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createNS,
-      variables: vars,
+      variables: modifiedVars,
     });
     logger.debug('Result %j', result);
     if (result.errors) {
