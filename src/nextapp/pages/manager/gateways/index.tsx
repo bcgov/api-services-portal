@@ -10,21 +10,12 @@ import {
   Button,
   Flex,
   Spacer,
-  Center,
   useToast,
   Select,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { gql } from 'graphql-request';
-import {
-  FaPlus,
-  FaLaptopCode,
-  FaRocket,
-  FaServer,
-  FaClock,
-  FaMinusCircle,
-  FaCheckCircle,
-} from 'react-icons/fa';
+import { FaPlus, FaLaptopCode, FaRocket, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 
 import PageHeader from '@/components/page-header';
@@ -34,6 +25,7 @@ import { restApi, useApi } from '@/shared/services/api';
 import NamespaceManager from '@/components/namespace-manager/namespace-manager';
 import { Namespace } from '@/shared/types/query.types';
 import SearchInput from '@/components/search-input';
+import PublishingPopover from '@/components/publishing-popover';
 
 type GatewayActions = {
   title: string;
@@ -275,39 +267,15 @@ const MyGatewaysPage: React.FC = () => {
                     </Text>
                   </Box>
                   <Spacer />
-                  {namespace.orgEnabled === false && !namespace.orgUpdatedAt && (
-                    <Center>
-                      <Icon
-                        as={FaMinusCircle}
-                        color="#B0B0B0"
-                        mr={4}
-                        boxSize={4}
-                      />
-                      <Text fontSize="sm" w={40}>
-                        Publishing disabled
-                      </Text>
-                    </Center>
-                  )}
+                  {namespace.orgEnabled === false &&
+                    !namespace.orgUpdatedAt && (
+                      <PublishingPopover status="disabled" />
+                    )}
                   {namespace.orgEnabled === false && namespace.orgUpdatedAt && (
-                    <Center>
-                      <Icon as={FaClock} color="#EE9B1F" mr={4} boxSize={4} />
-                      <Text fontSize="sm" w={40}>
-                        Pending publishing permission
-                      </Text>
-                    </Center>
+                    <PublishingPopover status="pending" />
                   )}
                   {namespace.orgEnabled === true && (
-                    <Center>
-                      <Icon
-                        as={FaCheckCircle}
-                        color="#2E8540"
-                        mr={4}
-                        boxSize={4}
-                      />
-                      <Text fontSize="sm" w={40}>
-                        Publishing enabled
-                      </Text>
-                    </Center>
+                    <PublishingPopover status="enabled" />
                   )}
                 </Flex>
               ))}
