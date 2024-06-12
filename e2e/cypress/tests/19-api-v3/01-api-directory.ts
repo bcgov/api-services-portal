@@ -89,6 +89,12 @@ describe('API Directory', () => {
               },
             }
             expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
+            expect(JSON.stringify(body.contacts)).to.be.equal(
+              JSON.stringify(match.contacts)
+            )
+            expect(JSON.stringify(body.resources)).to.be.equal(
+              JSON.stringify(match.resources)
+            )
           })
         }
       )
