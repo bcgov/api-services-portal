@@ -12,10 +12,8 @@ import {
   Spacer,
   Center,
   useToast,
+  FormControl,
   Select,
-  Input,
-  InputGroup,
-  InputRightElement,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { gql } from 'graphql-request';
@@ -27,7 +25,6 @@ import {
   FaClock,
   FaMinusCircle,
   FaCheckCircle,
-  FaSearch,
 } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 
@@ -37,6 +34,7 @@ import Card from '@/components/card';
 import { restApi, useApi } from '@/shared/services/api';
 import NamespaceManager from '@/components/namespace-manager/namespace-manager';
 import { Namespace } from '@/shared/types/query.types';
+import SearchInput from '@/components/search-input';
 
 type GatewayActions = {
   title: string;
@@ -79,8 +77,13 @@ const actions: GatewayActions[] = [
 
 const MyGatewaysPage: React.FC = () => {
   const managerDisclosure = useDisclosure();
-  const { data } = useApi('allNamespaces', { query }, { suspense: false });
+  const { data, isLoading, isSuccess, isError } = useApi(
+    'allNamespaces',
+    { query },
+    { suspense: false }
+  );
 
+  // Namespace change
   const client = useQueryClient();
   const toast = useToast();
   const handleNamespaceChange = React.useCallback(
@@ -110,6 +113,46 @@ const MyGatewaysPage: React.FC = () => {
     },
     [client, toast]
   );
+
+  // Filtering
+  const [filter, setFilter] = React.useState('');
+  const handleFilterChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setFilter(event.target.value);
+    },
+    []
+  );
+
+  // Search
+  const [search, setSearch] = React.useState('');
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  // Filter and search results
+  const namespaceSearchResults = React.useMemo(() => {
+    const result = data?.allNamespaces ?? [];
+
+    if (search.trim()) {
+      const regex = new RegExp(
+        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+        'i'
+      );
+      return result.filter(
+        (s) => regex.test(s.name) || regex.test(s.displayName)
+      );
+    } else {
+      if (filter === 'disabled') {
+        return result.filter((s) => s.orgEnabled === false && !s.orgUpdatedAt);
+      } else if (filter === 'pending') {
+        return result.filter((s) => s.orgEnabled === false && s.orgUpdatedAt);
+      } else if (filter === 'enabled') {
+        return result.filter((s) => s.orgEnabled === true);
+      } else {
+        return result;
+      }
+    }
+  }, [data, search, filter]);
 
   return (
     <>
@@ -158,97 +201,105 @@ const MyGatewaysPage: React.FC = () => {
         </GridLayout>
         <Box bgColor="white" mb={4} px={12} py={8}>
           <Flex mb={4}>
-            <Select placeholder="Filter by: All" w="60%" mr={4}>
-              <option value="option1">Publishing disabled</option>
-              <option value="option2">Pending publishing permission</option>
-              <option value="option3">Publishing enabled</option>
+            <Select
+              w="60%"
+              mr={4}
+              placeholder="Filter by: All"
+              onChange={handleFilterChange}
+            >
+              <option value="disabled">Publishing disabled</option>
+              <option value="pending">Pending publishing permission</option>
+              <option value="enabled">Publishing enabled</option>
             </Select>
-            <InputGroup>
-              <Input
-                variant="outline"
-                placeholder="Search by display name or ID"
-              />
-              <InputRightElement
-                children={<Icon as={FaSearch} color="#737373" />}
-              />
-            </InputGroup>
+            <SearchInput
+              placeholder="Search by display name or ID"
+              onBlur={(event) => event.currentTarget.focus()}
+              onChange={handleSearchChange}
+              value={search}
+              data-testid="namespace-search-input"
+            />
           </Flex>
-          {data &&
-            (data.allNamespaces.length === 1 ? (
-              <Text mb={4}>{data.allNamespaces.length} gateway</Text>
+          {isSuccess &&
+            (namespaceSearchResults.length === 1 ? (
+              <Text mb={4}>{namespaceSearchResults.length} gateway</Text>
             ) : (
-              <Text mb={4}>{data.allNamespaces.length} gateways</Text>
+              <Text mb={4}>{namespaceSearchResults.length} gateways</Text>
             ))}
-          {data &&
-            data.allNamespaces.map((namespace) => (
-              <Flex
-                borderRadius={10}
-                border="1px solid"
-                borderColor="#E1E1E5"
-                minH={16}
-                px={4}
-                py={2}
-                mb={4}
-              >
-                <Box>
-                  <Icon
-                    as={FaServer}
-                    color="bc-blue"
-                    mb={0.5}
-                    mr={4}
-                    boxSize={4}
-                  />
-                  <Link
-                    fontSize="md"
-                    as="b"
-                    color="bc-blue"
-                    onClick={handleNamespaceChange(namespace)}
-                  >
-                    {namespace.displayName
-                      ? namespace.displayName
-                      : namespace.name}
-                  </Link>
-                  <Text fontSize="md" pl={8}>
-                    {namespace.name}
-                  </Text>
-                </Box>
-                <Spacer />
-                {namespace.orgEnabled === false && !namespace.orgUpdatedAt && (
-                  <Center>
+          {isLoading && <Text mb={4}>Loading gateways...</Text>}
+          {isError && <Text mb={4}>Gateways Failed to Load</Text>}
+          {isSuccess && (
+            <>
+              {namespaceSearchResults.map((namespace) => (
+                <Flex
+                  borderRadius={10}
+                  border="1px solid"
+                  borderColor="#E1E1E5"
+                  minH={16}
+                  px={4}
+                  py={2}
+                  mb={4}
+                >
+                  <Box>
                     <Icon
-                      as={FaMinusCircle}
-                      color="#B0B0B0"
+                      as={FaServer}
+                      color="bc-blue"
+                      mb={0.5}
                       mr={4}
                       boxSize={4}
                     />
-                    <Text fontSize="sm" w={40}>
-                      Publishing disabled
+                    <Link
+                      fontSize="md"
+                      as="b"
+                      color="bc-blue"
+                      onClick={handleNamespaceChange(namespace)}
+                    >
+                      {namespace.displayName
+                        ? namespace.displayName
+                        : namespace.name}
+                    </Link>
+                    <Text fontSize="md" pl={8}>
+                      {namespace.name}
                     </Text>
-                  </Center>
-                )}
-                {namespace.orgEnabled === false && namespace.orgUpdatedAt && (
-                  <Center>
-                    <Icon as={FaClock} color="#EE9B1F" mr={4} boxSize={4} />
-                    <Text fontSize="sm" w={40}>
-                      Pending publishing permission
-                    </Text>
-                  </Center>
-                )}
-                {namespace.orgEnabled === true && (
-                  <Center>
-                    <Icon
-                      as={FaCheckCircle}
-                      color="#2E8540"
-                      mr={4}
-                      boxSize={4}
-                    />
-                    <Text fontSize="sm" w={40}>
-                      Publishing enabled
-                    </Text>
-                  </Center>
-                )}
-              </Flex>
-            ))}
+                  </Box>
+                  <Spacer />
+                  {namespace.orgEnabled === false && !namespace.orgUpdatedAt && (
+                    <Center>
+                      <Icon
+                        as={FaMinusCircle}
+                        color="#B0B0B0"
+                        mr={4}
+                        boxSize={4}
+                      />
+                      <Text fontSize="sm" w={40}>
+                        Publishing disabled
+                      </Text>
+                    </Center>
+                  )}
+                  {namespace.orgEnabled === false && namespace.orgUpdatedAt && (
+                    <Center>
+                      <Icon as={FaClock} color="#EE9B1F" mr={4} boxSize={4} />
+                      <Text fontSize="sm" w={40}>
+                        Pending publishing permission
+                      </Text>
+                    </Center>
+                  )}
+                  {namespace.orgEnabled === true && (
+                    <Center>
+                      <Icon
+                        as={FaCheckCircle}
+                        color="#2E8540"
+                        mr={4}
+                        boxSize={4}
+                      />
+                      <Text fontSize="sm" w={40}>
+                        Publishing enabled
+                      </Text>
+                    </Center>
+                  )}
+                </Flex>
+              ))}
+            </>
+          )}
         </Box>
       </Container>
       {data && (
