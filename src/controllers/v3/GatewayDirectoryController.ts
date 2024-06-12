@@ -17,8 +17,8 @@ import { strict as assert } from 'assert';
 @injectable()
 @Route('/gateways/{gatewayId}/directory')
 @Security('jwt', ['Namespace.Manage'])
-@Tags('API Directory')
-export class NamespaceDirectoryController extends Controller {
+@Tags('API Directory (Administration)')
+export class GatewayDirectoryController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();

@@ -124,6 +124,8 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
                   title: 'A title about my dataset',
                   isInCatalog: false,
                   isDraft: true,
+                  contacts: [],
+                  resources: [],
                   tags: ['tag1', 'tag2'],
                   organization: {
                     name: org.name,

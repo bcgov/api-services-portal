@@ -38,6 +38,10 @@
         "description": "Discover all the great BC Government APIs"
       },
       {
+        "name": "API Directory (Administration)",
+        "description": "Administer datasets on the API Directory"
+      },
+      {
         "name": "Organizations",
         "description": "Manage organizational access control"
       },

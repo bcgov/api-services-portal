@@ -45,6 +45,7 @@ import {
   getAllNamespaces,
   getKeycloakGroupApi,
   getResource,
+  generateDisplayName,
   transformOrgAndOrgUnit,
 } from '../../services/keycloak/namespace-details';
 import { newNamespaceID } from '../../services/identifiers';
@@ -478,7 +479,8 @@ module.exports = {
               ];
               const res = <ResourceSetInput>{
                 name: newNS,
-                displayName: args.displayName,
+                displayName:
+                  args.displayName || generateDisplayName(context, newNS),
                 type: 'namespace',
                 resource_scopes: scopes,
                 ownerManagedAccess: true,

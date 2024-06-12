@@ -266,7 +266,7 @@ export class OrganizationController extends Controller {
   /**
    * > `Required Scope:` Namespace.Assign
    *
-   * @summary Get Namespace Activity for gateways associated with this Organization Unit
+   * @summary Get administration activity for gateways associated with this Organization Unit
    * @param orgUnit
    * @param first
    * @param skip

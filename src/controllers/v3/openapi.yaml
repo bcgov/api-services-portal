@@ -5,6 +5,34 @@ components:
     requestBodies: {}
     responses: {}
     schemas:
+        DatasetContact:
+            properties:
+                name:
+                    type: string
+                email:
+                    type: string
+                role:
+                    type: string
+                    enum:
+                        - pointOfContact
+                    nullable: false
+            type: object
+            additionalProperties: false
+        DatasetResource:
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                format:
+                    type: string
+                    enum:
+                        - openapi-json
+                        - json
+                url:
+                    type: string
+            type: object
+            additionalProperties: false
         OrganizationRefID:
             type: string
         OrganizationUnitRefID:
@@ -34,7 +62,13 @@ components:
                 isDraft:
                     type: string
                 contacts:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetContact'
+                    type: array
+                resources:
+                    items:
+                        $ref: '#/components/schemas/DatasetResource'
+                    type: array
                 extSource:
                     type: string
                 extRecordHash:
@@ -43,7 +77,6 @@ components:
                     items:
                         type: string
                     type: array
-                resources: {}
                 organization:
                     $ref: '#/components/schemas/OrganizationRefID'
                 organizationUnit:
@@ -117,9 +150,13 @@ components:
                 isDraft:
                     type: boolean
                 contacts:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetContact'
+                    type: array
                 resources:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetResource'
+                    type: array
                 tags:
                     items:
                         type: string
@@ -600,7 +637,7 @@ paths:
             description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Get Organization Datasets'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -624,7 +661,7 @@ paths:
             description: "Manage metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Manage Organization Datasets'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -655,7 +692,7 @@ paths:
             description: "Delete a Dataset\n> `Required Scope:` Dataset.Manage"
             summary: 'Delete a dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -685,7 +722,7 @@ paths:
             description: "Get metadata about a Dataset that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Get Organization Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -748,7 +785,7 @@ paths:
             description: "Update metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
             summary: 'Update Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -779,7 +816,7 @@ paths:
             description: "Get metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
             summary: 'Get Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -979,6 +1016,35 @@ paths:
                         default: 0
                         format: double
                         type: number
+    '/gateways/{gatewayId}/links':
+        get:
+            operationId: get-gateway-links
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    properties: {host: {type: string}}
+                                    required: [host]
+                                    type: object
+                                type: array
+            description: "Get a summary of your endpoints\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get endpoints'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
     '/gateways/{gatewayId}/directory/{id}':
         get:
             operationId: get-ns-directory-dataset
@@ -990,7 +1056,7 @@ paths:
                             schema: {}
             description: "Used primarily for \"Preview Mode\"\nGet a particular Dataset"
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -1019,7 +1085,7 @@ paths:
                             schema: {}
             description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -1464,7 +1530,7 @@ paths:
                                     $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.Assign'
-            summary: 'Get Namespace Activity for gateways associated with this Organization Unit'
+            summary: 'Get administration activity for gateways associated with this Organization Unit'
             tags:
                 - Organizations
             security:
@@ -1630,6 +1696,9 @@ tags:
     -
         name: 'API Directory'
         description: 'Discover all the great BC Government APIs'
+    -
+        name: 'API Directory (Administration)'
+        description: 'Administer datasets on the API Directory'
     -
         name: Organizations
         description: 'Manage organizational access control'

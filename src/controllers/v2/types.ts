@@ -56,11 +56,11 @@ export interface Dataset {
   title?: string;
   isInCatalog?: string;
   isDraft?: string;
-  contacts?: string;
+  contacts?: DatasetContact[];
+  resources?: DatasetResource[];
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];
-  resources?: any; // toString
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }
@@ -96,8 +96,8 @@ export interface DraftDataset {
   title?: string;
   isInCatalog?: boolean;
   isDraft?: boolean;
-  contacts?: string;
-  resources?: string;
+  contacts?: DatasetContact[];
+  resources?: DatasetResource[];
   tags?: string[];
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
@@ -511,6 +511,29 @@ export interface Blob {
   ref?: string; // Primary Key
   type?: string;
   blob?: string;
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface DatasetContact {
+  name?: string; // Primary Key
+  email?: string;
+  role?: "pointOfContact";
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface DatasetResource {
+  id?: string; // Primary Key
+  name?: string;
+  format?: "openapi-json" | "json";
+  url?: string;
 }
 
 /**

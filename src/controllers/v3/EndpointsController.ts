@@ -6,10 +6,12 @@ import {
   Tags,
   Query,
   Request,
+  Security,
+  Path,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { getRecords } from '../../batch/feed-worker';
+import { getRecords, removeEmpty } from '../../batch/feed-worker';
 import { GatewayRoute } from './types';
 
 @injectable()

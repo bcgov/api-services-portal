@@ -57,6 +57,8 @@ export function expressAuthentication(
           resource = `org/${request.params.org}`;
         } else if ('gatewayId' in request.params) {
           resource = request.params.gatewayId;
+        } else if ('gatewayId' in request.query) {
+          resource = request.query.gatewayId;
         } else {
           // assume it is namespace-based protection
           resource = request.params.ns;

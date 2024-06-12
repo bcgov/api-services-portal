@@ -15,7 +15,7 @@ import {
 import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { replaceKey } from '../../batch/feed-worker';
+import { getRecords, replaceKey } from '../../batch/feed-worker';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
 import { Namespace, NamespaceInput } from '../../services/keystone/types';
@@ -32,7 +32,7 @@ import {
 import { strict as assert } from 'assert';
 
 import { Logger } from '../../logger';
-import { Activity, Gateway } from './types';
+import { Activity, Gateway, GatewayRoute } from './types';
 import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
 import { ActivityDetail } from './types-extra';
@@ -242,6 +242,38 @@ export class NamespaceController extends Controller {
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
+  }
+
+  /**
+   * Get a summary of your endpoints
+   * > `Required Scope:` Namespace.Manage
+   *
+   * @summary Get endpoints
+   */
+  @Get('/{gatewayId}/links')
+  @OperationId('get-gateway-links')
+  @Security('jwt', ['Namespace.Manage'])
+  public async get(
+    @Path() gatewayId: string,
+    @Request() request: any
+  ): Promise<{ host: string }[]> {
+    const ctx = this.keystone.createContext(request);
+    const records = await getRecords(
+      ctx,
+      'GatewayRoute',
+      'allGatewayRoutesByNamespace',
+      []
+    );
+
+    const endpoints: string[] = [];
+    records.forEach((r: GatewayRoute) =>
+      r.hosts.forEach((h: string) => endpoints.push(h))
+    );
+
+    return [...new Set(endpoints)].map((host) => ({
+      type: 'route-host',
+      host: `https://${host}`,
+    }));
   }
 }
 

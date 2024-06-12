@@ -28,7 +28,7 @@ import { Dataset, DraftDataset } from './types';
 
 @injectable()
 @Route('/organizations')
-@Tags('API Directory')
+@Tags('API Directory (Administration)')
 export class OrgDatasetController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {

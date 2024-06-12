@@ -30,7 +30,7 @@ import { Product } from '@/services/keystone/types';
 @injectable()
 @Route('/gateways/{gatewayId}/datasets')
 @Security('jwt', ['Namespace.Manage'])
-@Tags('API Directory')
+@Tags('API Directory (Administration)')
 export class DatasetController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {

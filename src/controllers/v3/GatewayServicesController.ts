@@ -54,7 +54,7 @@ export class GatewayController extends Controller {
   @Get()
   @OperationId('get-gateway-routes')
   @Security('jwt', ['Namespace.Manage'])
-  public async get(
+  public async getServices(
     @Path() gatewayId: string,
     @Request() request: any
   ): Promise<GatewayRoute[]> {

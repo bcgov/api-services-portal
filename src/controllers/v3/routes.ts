@@ -13,7 +13,7 @@ import { EndpointsController } from './EndpointsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { NamespaceController } from './GatewayController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { NamespaceDirectoryController } from './GatewayDirectoryController';
+import { GatewayDirectoryController } from './GatewayDirectoryController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GatewayController } from './GatewayServicesController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -38,6 +38,27 @@ const upload = multer();
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "DatasetContact": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "email": {"dataType":"string"},
+            "role": {"dataType":"enum","enums":["pointOfContact"]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DatasetResource": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "format": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["openapi-json"]},{"dataType":"enum","enums":["json"]}]},
+            "url": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "OrganizationRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -62,11 +83,11 @@ const models: TsoaRoute.Models = {
             "title": {"dataType":"string"},
             "isInCatalog": {"dataType":"string"},
             "isDraft": {"dataType":"string"},
-            "contacts": {"dataType":"string"},
+            "contacts": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetContact"}},
+            "resources": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetResource"}},
             "extSource": {"dataType":"string"},
             "extRecordHash": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
-            "resources": {"dataType":"any"},
             "organization": {"ref":"OrganizationRefID"},
             "organizationUnit": {"ref":"OrganizationUnitRefID"},
         },
@@ -99,8 +120,8 @@ const models: TsoaRoute.Models = {
             "title": {"dataType":"string"},
             "isInCatalog": {"dataType":"boolean"},
             "isDraft": {"dataType":"boolean"},
-            "contacts": {"dataType":"string"},
-            "resources": {"dataType":"string"},
+            "contacts": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetContact"}},
+            "resources": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetResource"}},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
             "organization": {"ref":"OrganizationRefID"},
             "organizationUnit": {"ref":"OrganizationUnitRefID"},
@@ -829,10 +850,40 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v3/gateways/:gatewayId/links',
+            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+
+            async function NamespaceController_get(request: any, response: any, next: any) {
+            const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<NamespaceController>(NamespaceController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.get.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v3/gateways/:gatewayId/directory/:id',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
 
-            async function NamespaceDirectoryController_getDataset(request: any, response: any, next: any) {
+            async function GatewayDirectoryController_getDataset(request: any, response: any, next: any) {
             const args = {
                     gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
@@ -847,7 +898,7 @@ export function RegisterRoutes(app: express.Router) {
 
                 const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
 
-                const controller: any = await container.get<NamespaceDirectoryController>(NamespaceDirectoryController);
+                const controller: any = await container.get<GatewayDirectoryController>(GatewayDirectoryController);
                 if (typeof controller['setStatus'] === 'function') {
                 controller.setStatus(undefined);
                 }
@@ -863,7 +914,7 @@ export function RegisterRoutes(app: express.Router) {
         app.get('/ds/api/v3/gateways/:gatewayId/directory',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
 
-            async function NamespaceDirectoryController_getDatasets(request: any, response: any, next: any) {
+            async function GatewayDirectoryController_getDatasets(request: any, response: any, next: any) {
             const args = {
                     gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -877,7 +928,7 @@ export function RegisterRoutes(app: express.Router) {
 
                 const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
 
-                const controller: any = await container.get<NamespaceDirectoryController>(NamespaceDirectoryController);
+                const controller: any = await container.get<GatewayDirectoryController>(GatewayDirectoryController);
                 if (typeof controller['setStatus'] === 'function') {
                 controller.setStatus(undefined);
                 }
@@ -924,7 +975,7 @@ export function RegisterRoutes(app: express.Router) {
         app.get('/ds/api/v3/gateways/:gatewayId/services',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
 
-            async function GatewayController_get(request: any, response: any, next: any) {
+            async function GatewayController_getServices(request: any, response: any, next: any) {
             const args = {
                     gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -944,7 +995,7 @@ export function RegisterRoutes(app: express.Router) {
                 }
 
 
-              const promise = controller.get.apply(controller, validatedArgs as any);
+              const promise = controller.getServices.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
