@@ -46,6 +46,7 @@ export class BatchService {
       }`;
     }
     logger.debug('[listAll] %s', queryString);
+    logger.debug('[listAll] Variables %j', where ? where.variables : {});
 
     const result = await this.context.executeGraphQL({
       query: queryString,

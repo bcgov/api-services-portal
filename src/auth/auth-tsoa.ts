@@ -39,6 +39,23 @@ export function expressAuthentication(
   securityName: string,
   scopes?: string[]
 ): Promise<any> {
+  if (securityName === 'pat') {
+    return new Promise((resolve: any, reject: any) => {
+      logger.info('Headers %j', Object.keys(request.headers));
+      if (request.headers && request.get('X-Consumer-Username')) {
+        resolve({
+          preferred_username: request.get('X-Consumer-Username'),
+          scope: '',
+        });
+      } else {
+        reject(
+          new UnauthorizedError('invalid_token', {
+            message: 'Denied access to resource',
+          })
+        );
+      }
+    });
+  }
   return new Promise((resolve: any, reject: any) => {
     verifyJWT(request, null, (err: any) => {
       if (err) {

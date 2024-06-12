@@ -5,6 +5,52 @@ components:
     requestBodies: {}
     responses: {}
     schemas:
+        ApplicationRefID:
+            type: string
+        GatewayConsumerRefID:
+            type: string
+        EnvironmentRefID:
+            type: string
+        ServiceAccess:
+            properties:
+                name:
+                    type: string
+                active:
+                    type: string
+                aclEnabled:
+                    type: string
+                consumerType:
+                    type: string
+                application:
+                    $ref: '#/components/schemas/ApplicationRefID'
+                consumer:
+                    $ref: '#/components/schemas/GatewayConsumerRefID'
+                productEnvironment:
+                    $ref: '#/components/schemas/EnvironmentRefID'
+            type: object
+            additionalProperties: false
+        UserRefID:
+            type: string
+        OrganizationRefID:
+            type: string
+        OrganizationUnitRefID:
+            type: string
+        Application:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                owner:
+                    $ref: '#/components/schemas/UserRefID'
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
+            type: object
+            additionalProperties: false
         BatchResult:
             properties:
                 status:
@@ -71,10 +117,6 @@ components:
                 tags:
                     - tag1
                     - tag2
-        OrganizationRefID:
-            type: string
-        OrganizationUnitRefID:
-            type: string
         Dataset:
             properties:
                 extForeignKey:
@@ -647,6 +689,10 @@ components:
             type: openIdConnect
             description: 'OIDC Login'
             openIdConnectUrl: 'https://well_known_endpoint'
+        pat:
+            type: apiKey
+            name: pat
+            in: header
 info:
     title: 'APS Directory API'
     version: 1.1.0
@@ -657,6 +703,104 @@ info:
         name: 'BC Gov APS'
 openapi: 3.0.0
 paths:
+    /access:
+        get:
+            operationId: get-application-access
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/ServiceAccess'
+                                type: array
+            description: 'Get a list of application Access'
+            summary: 'List of Access'
+            tags:
+                - Consumers
+            security:
+                -
+                    jwt: []
+                -
+                    pat: []
+            parameters: []
+    '/applications/{app}':
+        put:
+            operationId: put-application
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Update metadata about a Application\n> `Required Scope:` Application.Manage"
+            summary: 'Update Application'
+            tags:
+                - Consumers
+            security:
+                -
+                    jwt: []
+                -
+                    pat: []
+            parameters:
+                -
+                    in: path
+                    name: app
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Application'
+    /applications:
+        get:
+            operationId: get-applications
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Application'
+                                type: array
+            description: 'Get a list of your Applications'
+            summary: 'List of Applications'
+            tags:
+                - Consumers
+            security:
+                -
+                    jwt: []
+                -
+                    pat: []
+            parameters: []
+    /personalaccesstokens:
+        post:
+            operationId: create-pat
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: 'Create PAT'
+            summary: Token
+            tags:
+                - Consumers
+            security:
+                -
+                    jwt: []
+            parameters: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Application'
     '/namespaces/{ns}/contents':
         put:
             operationId: put-content
@@ -1775,6 +1919,9 @@ tags:
     -
         name: 'API Directory'
         description: 'Discover all the great BC Government APIs'
+    -
+        name: Consumers
+        description: 'Manage consumer applications and access'
     -
         name: Organizations
         description: 'Manage organizational access control'
