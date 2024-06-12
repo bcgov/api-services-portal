@@ -12,7 +12,6 @@ import {
   Spacer,
   Center,
   useToast,
-  FormControl,
   Select,
 } from '@chakra-ui/react';
 import Head from 'next/head';
@@ -130,17 +129,31 @@ const MyGatewaysPage: React.FC = () => {
   };
 
   // Filter and search results
+  const filterBySearch = (result) => {
+    const regex = new RegExp(
+      search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i'
+    );
+    return result.filter(
+      (s) => regex.test(s.name) || regex.test(s.displayName)
+    );
+  };
   const namespaceSearchResults = React.useMemo(() => {
     const result = data?.allNamespaces ?? [];
-
     if (search.trim()) {
-      const regex = new RegExp(
-        search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
-        'i'
-      );
-      return result.filter(
-        (s) => regex.test(s.name) || regex.test(s.displayName)
-      );
+      if (filter === 'disabled') {
+        return filterBySearch(result).filter(
+          (s) => s.orgEnabled === false && !s.orgUpdatedAt
+        );
+      } else if (filter === 'pending') {
+        return filterBySearch(result).filter(
+          (s) => s.orgEnabled === false && s.orgUpdatedAt
+        );
+      } else if (filter === 'enabled') {
+        return filterBySearch(result).filter((s) => s.orgEnabled === true);
+      } else {
+        return filterBySearch(result);
+      }
     } else {
       if (filter === 'disabled') {
         return result.filter((s) => s.orgEnabled === false && !s.orgUpdatedAt);
@@ -226,7 +239,7 @@ const MyGatewaysPage: React.FC = () => {
               <Text mb={4}>{namespaceSearchResults.length} gateways</Text>
             ))}
           {isLoading && <Text mb={4}>Loading gateways...</Text>}
-          {isError && <Text mb={4}>Gateways Failed to Load</Text>}
+          {isError && <Text mb={4}>Gateways failed to load</Text>}
           {isSuccess && (
             <>
               {namespaceSearchResults.map((namespace) => (
@@ -298,6 +311,33 @@ const MyGatewaysPage: React.FC = () => {
                   )}
                 </Flex>
               ))}
+              {namespaceSearchResults.length === 0 && (
+                <>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <img
+                      src="/images/no_results_folder.png"
+                      width={85}
+                      height={85}
+                      title="Empty folder"
+                      alt="Empty folder"
+                    />
+                  </Box>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    py={2}
+                  >
+                    <Text fontSize="lg" as="b">
+                      No results found
+                    </Text>
+                  </Box>
+                </>
+              )}
             </>
           )}
         </Box>
