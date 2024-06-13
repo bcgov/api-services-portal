@@ -35,10 +35,10 @@ describe('Organization', () => {
         {
           name: 'organization-admin',
           permissions: [
-            // {
-            //   resource: 'org/ministry-of-health',
-            //   scopes: ['Dataset.Manage', 'GroupAccess.Manage', 'Namespace.Assign'],
-            // },
+            {
+              resource: 'org/ministry-of-health',
+              scopes: ['Dataset.Manage', 'GroupAccess.Manage', 'Namespace.Assign'],
+            },
           ],
         },
       ],

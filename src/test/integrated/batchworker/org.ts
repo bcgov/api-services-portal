@@ -3,7 +3,7 @@ Wire up directly with Keycloak and use the Services
 To run:
 npm run ts-build
 npm run ts-watch
-node dist/test/integrated/batchworker/product.js
+node dist/test/integrated/batchworker/org.js
 */
 
 import InitKeystone from '../keystonejs/init';
@@ -23,7 +23,7 @@ import { BatchService } from '../../../services/keystone/batch-service';
   console.log('K = ' + keystone);
 
   const ns = 'platform';
-  const skipAccessControl = false;
+  const skipAccessControl = true;
 
   const identity = {
     id: null,
@@ -39,39 +39,32 @@ import { BatchService } from '../../../services/keystone/batch-service';
     authentication: { item: identity },
   });
 
-  if (false) {
-    const json = {
-      name: 'Refactor Time Test2',
-      namespace: ns,
-      environments: [
-        {
-          name: 'stage',
-          appId: '0A021EB0',
-          //services: [] as any,
-          //services: ['a-service-for-refactortime'],
-          // services: ['a-service-for-refactortime', 'a-service-for-aps-moh-proto'],
-        },
-      ] as any,
-    };
-    const res = await syncRecords(ctx, 'Product', null, json);
-    o(res);
-  }
   if (true) {
     const json = {
-      name: 'Refactor Time Test 4',
-      appid: '348D98F1F56C',
-      namespace: ns,
-      environments: [
+      id: '7a66db63-26f4-4052-9cd5-3272b63910f8',
+      type: 'organization',
+      name: 'ministry-of-health-7',
+      title: 'Ministry of Health',
+      extSource: '',
+      extRecordHash: '',
+      orgUnits: [
         {
-          name: 'stage',
-          appId: '3A021EB0',
-          legal: 'terms-of-use-for-api-gateway-1',
-          services: [] as any,
-          credentialIssuer: 'Gateway Services Resource Server',
+          id: '719b3297-846d-4b97-8095-ceb3ec505fb8',
+          name: 'planning-and-innovation-division-7',
+          title: 'Planning and Innovation',
+          extSource: '',
+          extRecordHash: '',
+        },
+        {
+          id: '700b3297-846d-4b97-8095-ceb3ec505fb8',
+          name: 'health-dev-7',
+          title: 'Planning and Innovation',
+          extSource: '',
+          extRecordHash: '',
         },
       ],
     };
-    const res = await syncRecords(ctx, 'Product', null, json);
+    const res = await syncRecords(ctx, 'Organization', json.id, json);
     o(res);
   }
   await keystone.disconnect();
