@@ -262,7 +262,7 @@ jobs:
             NEXT_PUBLIC_HELP_ISSUE_URL:
               value: 'https://github.com/bcgov/api-services-portal/issues'
             NEXT_PUBLIC_HELP_API_DOCS_URL:
-              value: '/ds/api/v2/console/'
+              value: '/ds/api/v3/console/'
             NEXT_PUBLIC_HELP_SUPPORT_URL:
               value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/'
             NEXT_PUBLIC_HELP_RELEASE_URL:

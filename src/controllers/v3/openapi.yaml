@@ -5,72 +5,6 @@ components:
     requestBodies: {}
     responses: {}
     schemas:
-        BatchResult:
-            properties:
-                status:
-                    type: number
-                    format: double
-                result:
-                    type: string
-                reason:
-                    type: string
-                id:
-                    type: string
-                ownedBy:
-                    type: string
-                childResults:
-                    items:
-                        $ref: '#/components/schemas/BatchResult'
-                    type: array
-            required:
-                - status
-                - result
-            type: object
-            additionalProperties: false
-        Content:
-            properties:
-                externalLink:
-                    type: string
-                title:
-                    type: string
-                description:
-                    type: string
-                content:
-                    type: string
-                githubRepository:
-                    type: string
-                readme:
-                    type: string
-                order:
-                    type: number
-                    format: double
-                isPublic:
-                    type: boolean
-                isComplete:
-                    type: boolean
-                namespace:
-                    type: string
-                publishDate:
-                    type: string
-                slug:
-                    type: string
-                tags:
-                    items:
-                        type: string
-                    type: array
-            type: object
-            additionalProperties: false
-            example:
-                externalLink: 'https://externalsite/my_content'
-                title: my_content
-                description: 'Summary of what my content is'
-                content: 'Markdown content'
-                order: 0
-                isPublic: true
-                isComplete: true
-                tags:
-                    - tag1
-                    - tag2
         DatasetContact:
             properties:
                 name:
@@ -149,6 +83,28 @@ components:
                     $ref: '#/components/schemas/OrganizationUnitRefID'
             type: object
             additionalProperties: false
+        BatchResult:
+            properties:
+                status:
+                    type: number
+                    format: double
+                result:
+                    type: string
+                reason:
+                    type: string
+                id:
+                    type: string
+                ownedBy:
+                    type: string
+                childResults:
+                    items:
+                        $ref: '#/components/schemas/BatchResult'
+                    type: array
+            required:
+                - status
+                - result
+            type: object
+            additionalProperties: false
         DraftDataset:
             properties:
                 name:
@@ -225,6 +181,33 @@ components:
                     - tag2
                 organization: ministry-of-citizens-services
                 organizationUnit: databc
+        Gateway:
+            properties:
+                gatewayId:
+                    type: string
+                displayName:
+                    type: string
+            type: object
+            additionalProperties: false
+        ActivityDetail:
+            properties:
+                id:
+                    type: string
+                message:
+                    type: string
+                params:
+                    properties: {}
+                    additionalProperties:
+                        type: string
+                    type: object
+                activityAt: {}
+                blob: {}
+            required:
+                - message
+                - params
+                - activityAt
+            type: object
+            additionalProperties: false
         PublishResult:
             properties:
                 message:
@@ -266,7 +249,7 @@ components:
                     type: string
                 name:
                     type: string
-                namespace:
+                gatewayId:
                     type: string
                 extSource:
                     type: string
@@ -330,7 +313,7 @@ components:
             properties:
                 name:
                     type: string
-                namespace:
+                gatewayId:
                     type: string
                 description:
                     type: string
@@ -396,107 +379,52 @@ components:
                 mode: auto
                 environmentDetails: []
                 owner: janis@gov.bc.ca
-        Maybe_Scalars-at-String_:
-            type: string
-            nullable: true
-        UmaScope:
+        OrganizationUnit:
             properties:
+                extForeignKey:
+                    type: string
                 name:
                     type: string
-                __typename:
+                sector:
                     type: string
-                    enum:
-                        - UMAScope
-                    nullable: false
-            required:
-                - name
-            type: object
-        Maybe_UmaScope_:
-            allOf:
-                -
-                    $ref: '#/components/schemas/UmaScope'
-            nullable: true
-        Maybe_Array_Maybe_UmaScope___:
-            items:
-                $ref: '#/components/schemas/Maybe_UmaScope_'
-            type: array
-            nullable: true
-        Maybe_Array_Maybe_Scalars-at-String___:
-            items:
-                $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-            type: array
-            nullable: true
-        Maybe_Scalars-at-JSON_:
-            nullable: true
-        Maybe_Scalars-at-Float_:
-            type: number
-            format: double
-            nullable: true
-        Maybe_Scalars-at-Boolean_:
-            type: boolean
-            nullable: true
-        Namespace:
-            properties:
-                orgAdmins:
-                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
-                orgNoticeViewed:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
-                orgEnabled:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
-                orgUpdatedAt:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-Float_'
-                orgUnit:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
-                org:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
-                permProtectedNs:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                permDataPlane:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                permDomains:
-                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
-                prodEnvId:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                scopes:
-                    $ref: '#/components/schemas/Maybe_Array_Maybe_UmaScope___'
-                displayName:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                name:
+                title:
                     type: string
-                id:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                __typename:
+                description:
                     type: string
-                    enum:
-                        - Namespace
-                    nullable: false
-            required:
-                - name
-            type: object
-        NamespaceInput:
-            properties:
-                displayName:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                name:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-            type: object
-        ActivityDetail:
-            properties:
-                id:
+                extSource:
                     type: string
-                message:
+                extRecordHash:
                     type: string
-                params:
-                    properties: {}
-                    additionalProperties:
+                tags:
+                    items:
                         type: string
-                    type: object
-                activityAt: {}
-                blob: {}
-            required:
-                - message
-                - params
-                - activityAt
+                    type: array
+            type: object
+            additionalProperties: false
+        Organization:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                sector:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                orgUnits:
+                    items:
+                        $ref: '#/components/schemas/OrganizationUnit'
+                    type: array
             type: object
             additionalProperties: false
         GroupPermission:
@@ -647,7 +575,7 @@ components:
                     type: string
                 description:
                     type: string
-                namespace:
+                gatewayId:
                     type: string
                 dataset:
                     $ref: '#/components/schemas/DraftDatasetRefID'
@@ -686,7 +614,7 @@ components:
             openIdConnectUrl: 'https://well_known_endpoint'
 info:
     title: 'APS Directory API'
-    version: 1.1.0
+    version: 3.0.0
     description: 'API Services Portal by BC Gov API Programme Services'
     license:
         name: MIT
@@ -694,91 +622,6 @@ info:
         name: 'BC Gov APS'
 openapi: 3.0.0
 paths:
-    '/namespaces/{ns}/contents':
-        put:
-            operationId: put-content
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchResult'
-            description: "Get documentation for the namespace\n> `Required Scope:` Content.Publish"
-            summary: 'Update Documentation'
-            tags:
-                - Documentation
-            security:
-                -
-                    jwt:
-                        - Content.Publish
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Content'
-        get:
-            operationId: get-contents
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                items: {}
-                                type: array
-            tags:
-                - Documentation
-            security:
-                -
-                    jwt:
-                        - Namespace.View
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-    '/namespaces/{ns}/contents/{slug}':
-        delete:
-            operationId: delete-content
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchResult'
-            description: "Delete Documention that was created for this namespace\n> `Required Scope:` Content.Publish"
-            summary: 'Delete Documentation'
-            tags:
-                - Documentation
-            security:
-                -
-                    jwt:
-                        - Content.Publish
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
-                    name: slug
-                    required: true
-                    schema:
-                        type: string
     '/organizations/{org}/datasets':
         get:
             operationId: organization-datasets
@@ -794,7 +637,7 @@ paths:
             description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Get Organization Datasets'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -818,7 +661,7 @@ paths:
             description: "Manage metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Manage Organization Datasets'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -849,7 +692,7 @@ paths:
             description: "Delete a Dataset\n> `Required Scope:` Dataset.Manage"
             summary: 'Delete a dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -879,7 +722,7 @@ paths:
             description: "Get metadata about a Dataset that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
             summary: 'Get Organization Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -929,7 +772,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/datasets':
+    '/gateways/{gatewayId}/datasets':
         put:
             operationId: put-dataset
             responses:
@@ -942,7 +785,7 @@ paths:
             description: "Update metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
             summary: 'Update Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -950,7 +793,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -960,7 +803,7 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/DraftDataset'
-    '/namespaces/{ns}/datasets/{name}':
+    '/gateways/{gatewayId}/datasets/{name}':
         get:
             operationId: get-dataset
             responses:
@@ -973,7 +816,7 @@ paths:
             description: "Get metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
             summary: 'Get Dataset'
             tags:
-                - 'API Directory'
+                - 'API Directory (Administration)'
             security:
                 -
                     jwt:
@@ -981,7 +824,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -991,9 +834,9 @@ paths:
                     required: true
                     schema:
                         type: string
-    /documentation:
+    /routes/availability:
         get:
-            operationId: document-list
+            operationId: check-availability
             responses:
                 '200':
                     description: Ok
@@ -1001,29 +844,260 @@ paths:
                         application/json:
                             schema: {}
             tags:
-                - Documentation
-            security: []
-            parameters: []
-    '/documentation/{slug}':
-        get:
-            operationId: document-item
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            tags:
-                - Documentation
+                - 'Service Routes'
             security: []
             parameters:
                 -
-                    in: path
-                    name: slug
+                    in: query
+                    name: serviceName
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/gateway':
+    /gateways/report:
+        get:
+            operationId: report
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt: []
+            parameters:
+                -
+                    in: query
+                    name: ids
+                    required: false
+                    schema:
+                        default: '[]'
+                        type: string
+    /gateways:
+        get:
+            operationId: gateway-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    type: string
+                                type: array
+            summary: 'List of Gateway IDs'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt: []
+            parameters: []
+        post:
+            operationId: create-gateway
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Gateway'
+            description: 'Create a gateway'
+            summary: 'Create Gateway'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt: []
+            parameters: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Gateway'
+    '/gateways/{gatewayId}':
+        get:
+            operationId: namespace-profile
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Gateway'
+            description: "Get details about the gateway, such as permissions for what the gateway is setup with.\n> `Required Scope:` Namespace.Manage"
+            summary: 'Gateway Summary'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+        delete:
+            operationId: delete-namespace
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Gateway'
+            description: "Delete the gateway\n> `Required Scope:` Namespace.Manage"
+            summary: 'Delete Gateway'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: force
+                    required: false
+                    schema:
+                        default: false
+                        type: boolean
+    '/gateways/{gatewayId}/activity':
+        get:
+            operationId: gateway-admin-activity
+            responses:
+                '200':
+                    description: 'Activity[]'
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/ActivityDetail'
+                                type: array
+            description: '> `Required Scope:` Namespace.View'
+            summary: 'Get administration activity for this gateway'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt:
+                        - Namespace.View
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: first
+                    required: false
+                    schema:
+                        default: 20
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: skip
+                    required: false
+                    schema:
+                        default: 0
+                        format: double
+                        type: number
+    '/gateways/{gatewayId}/links':
+        get:
+            operationId: get-gateway-links
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    properties: {host: {type: string}}
+                                    required: [host]
+                                    type: object
+                                type: array
+            description: "Get a summary of your endpoints\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get endpoints'
+            tags:
+                - Gateways
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+    '/gateways/{gatewayId}/directory/{id}':
+        get:
+            operationId: get-ns-directory-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Used primarily for \"Preview Mode\"\nGet a particular Dataset"
+            tags:
+                - 'API Directory (Administration)'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    '/gateways/{gatewayId}/directory':
+        get:
+            operationId: get-ns-directory
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
+            tags:
+                - 'API Directory (Administration)'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+    '/gateways/{gatewayId}/services':
         put:
             operationId: publish-gateway-config
             responses:
@@ -1077,7 +1151,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1105,7 +1179,8 @@ paths:
                             - environment
                             - product
                             - application
-    '/namespaces/{ns}/issuers':
+                            - gateway
+    '/gateways/{gatewayId}/issuers':
         put:
             operationId: put-issuer
             responses:
@@ -1126,7 +1201,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1158,11 +1233,11 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/issuers/{name}':
+    '/gateways/{gatewayId}/issuers/{name}':
         delete:
             operationId: delete-issuer
             responses:
@@ -1183,228 +1258,13 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
                 -
                     in: path
                     name: name
-                    required: true
-                    schema:
-                        type: string
-    /namespaces/report:
-        get:
-            operationId: report
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt: []
-            parameters:
-                -
-                    in: query
-                    name: ids
-                    required: false
-                    schema:
-                        default: '[]'
-                        type: string
-    /namespaces:
-        get:
-            operationId: namespace-list
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                items:
-                                    type: string
-                                type: array
-            summary: 'List of Namespace names'
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt: []
-            parameters: []
-        post:
-            operationId: create-namespace
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Namespace'
-            description: 'Create a namespace'
-            summary: 'Create Namespace'
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt: []
-            parameters: []
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/NamespaceInput'
-    '/namespaces/{ns}':
-        get:
-            operationId: namespace-profile
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Namespace'
-            description: "Get details about the namespace, such as permissions for what the namespace can do.\n> `Required Scope:` Namespace.Manage"
-            summary: 'Namespace Summary'
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt:
-                        - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-        delete:
-            operationId: delete-namespace
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Namespace'
-            description: "Delete the namespace\n> `Required Scope:` Namespace.Manage"
-            summary: 'Delete Namespace'
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt:
-                        - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: query
-                    name: force
-                    required: false
-                    schema:
-                        default: false
-                        type: boolean
-    '/namespaces/{ns}/activity':
-        get:
-            operationId: namespace-activity
-            responses:
-                '200':
-                    description: 'Activity[]'
-                    content:
-                        application/json:
-                            schema:
-                                items:
-                                    $ref: '#/components/schemas/ActivityDetail'
-                                type: array
-            description: '> `Required Scope:` Namespace.View'
-            summary: 'Get Namespace Activity for this namespace'
-            tags:
-                - Namespaces
-            security:
-                -
-                    jwt:
-                        - Namespace.View
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: query
-                    name: first
-                    required: false
-                    schema:
-                        default: 20
-                        format: double
-                        type: number
-                -
-                    in: query
-                    name: skip
-                    required: false
-                    schema:
-                        default: 0
-                        format: double
-                        type: number
-    '/namespaces/{ns}/directory/{id}':
-        get:
-            operationId: get-ns-directory-dataset
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            description: "Used primarily for \"Preview Mode\"\nGet a particular Dataset"
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
-                    name: id
-                    required: true
-                    schema:
-                        type: string
-    '/namespaces/{ns}/directory':
-        get:
-            operationId: get-ns-directory
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
                     required: true
                     schema:
                         type: string
@@ -1424,6 +1284,36 @@ paths:
             security: []
             parameters: []
     '/organizations/{org}':
+        put:
+            operationId: put-organization
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Create Organization\n> `Required Scope:` GroupAccess.Manage"
+            summary: 'Create Organizations'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Organization'
         get:
             operationId: organization-units
             responses:
@@ -1515,9 +1405,9 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/GroupMembership'
-    '/organizations/{org}/namespaces':
+    '/organizations/{org}/gateways':
         get:
-            operationId: organization-namespaces
+            operationId: organization-gateways
             responses:
                 '200':
                     description: Ok
@@ -1541,7 +1431,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{org}/{orgUnit}/namespaces/{ns}':
+    '/organizations/{org}/{orgUnit}/gateways/{gatewayId}':
         put:
             operationId: assign-namespace-to-organization
             responses:
@@ -1577,7 +1467,7 @@ paths:
                         type: string
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1623,7 +1513,7 @@ paths:
                         type: string
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1640,7 +1530,7 @@ paths:
                                     $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.Assign'
-            summary: 'Get Namespace Activity for namespaces associated with this Organization Unit'
+            summary: 'Get administration activity for gateways associated with this Organization Unit'
             tags:
                 - Organizations
             security:
@@ -1683,7 +1573,7 @@ paths:
                 - Organizations
             security: []
             parameters: []
-    '/namespaces/{ns}/products':
+    '/gateways/{gatewayId}/products':
         put:
             operationId: put-product
             responses:
@@ -1704,7 +1594,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1733,14 +1623,8 @@ paths:
                 -
                     jwt:
                         - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
-    '/namespaces/{ns}/products/{appId}':
+            parameters: []
+    '/gateways/{gatewayId}/products/{appId}':
         delete:
             operationId: delete-product
             responses:
@@ -1761,7 +1645,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1771,7 +1655,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/environments/{appId}':
+    '/gateways/{gatewayId}/environments/{appId}':
         delete:
             operationId: delete-product-environment
             responses:
@@ -1788,7 +1672,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: ns
+                    name: gatewayId
                     required: true
                     schema:
                         type: string
@@ -1807,17 +1691,20 @@ paths:
                         type: boolean
 servers:
     -
-        url: /ds/api/v2
+        url: /ds/api/v3
 tags:
     -
         name: 'API Directory'
         description: 'Discover all the great BC Government APIs'
     -
+        name: 'API Directory (Administration)'
+        description: 'Administer datasets on the API Directory'
+    -
         name: Organizations
         description: 'Manage organizational access control'
     -
-        name: Namespaces
-        description: 'Get aggregated information about namespaces'
+        name: Gateways
+        description: 'Get aggregated information about gateways'
     -
         name: 'Gateway Services'
         description: 'View your Gateway Service details'
@@ -1827,6 +1714,3 @@ tags:
     -
         name: 'Authorization Profiles'
         description: 'Configure the integration to external Identity Providers'
-    -
-        name: Documentation
-        description: 'View public documentation and publish documentation for your APIs'

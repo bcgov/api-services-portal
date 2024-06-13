@@ -175,3 +175,12 @@ export async function getResource(
     }))
     .pop();
 }
+
+export function generateDisplayName(context: any, gatewayId: string): string {
+  logger.debug('[generateDisplayName] %j', context.req?.user);
+  if (context.req?.user?.provider_username) {
+    return `${context.req?.user?.provider_username}'s Gateway`;
+  } else {
+    return null;
+  }
+}

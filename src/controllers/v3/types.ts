@@ -166,7 +166,7 @@ export interface MemberRole {
 export interface GatewayService {
   extForeignKey?: string; // Primary Key
   name?: string;
-  namespace?: string;
+  gatewayId?: string;
   host?: string;
   extSource?: string;
   extRecordHash?: string;
@@ -182,7 +182,7 @@ export interface GatewayService {
 export interface GatewayGroup {
   extForeignKey?: string; // Primary Key
   name?: string;
-  namespace?: string;
+  gatewayId?: string;
   extSource?: string;
   extRecordHash?: string;
 }
@@ -195,7 +195,7 @@ export interface GatewayGroup {
 export interface GatewayRoute {
   extForeignKey?: string; // Primary Key
   name?: string;
-  namespace?: string;
+  gatewayId?: string;
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];
@@ -231,7 +231,7 @@ export interface GatewayConsumer {
   extForeignKey?: string; // Primary Key
   username?: string;
   customId?: string;
-  namespace?: string;
+  gatewayId?: string;
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];
@@ -289,7 +289,7 @@ export interface Product {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
-  namespace?: string;
+  gatewayId?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
 }
@@ -332,7 +332,7 @@ export interface Environment {
  */  
 export interface CredentialIssuer {
   name?: string; // Primary Key
-  namespace?: string;
+  gatewayId?: string;
   description?: string;
   flow?: "client-credentials";
   mode?: "auto";
@@ -400,7 +400,7 @@ export interface Content {
   order?: number;
   isPublic?: boolean;
   isComplete?: boolean;
-  namespace?: string;
+  gatewayId?: string;
   publishDate?: string;
   slug?: string;
   tags?: string[];
@@ -422,7 +422,7 @@ export interface ContentBySlug {
   order?: string;
   isPublic?: string;
   isComplete?: string;
-  namespace?: string;
+  gatewayId?: string;
   publishDate?: string;
   tags?: string[];
 }
@@ -467,7 +467,7 @@ export interface Activity {
   result?: "" | "received" | "failed" | "completed" | "success";
   message?: string;
   refId?: string;
-  namespace?: string;
+  gatewayId?: string;
   blob?: string;
   filterKey1?: string;
   filterKey2?: string;
