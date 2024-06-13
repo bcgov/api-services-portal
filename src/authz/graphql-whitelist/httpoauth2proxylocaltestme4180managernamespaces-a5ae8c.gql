@@ -1,0 +1,4 @@
+
+  mutation UpdateNamespaceDisplayName($displayName: String!) {
+    updateCurrentNamespaceDisplayName(displayName: $displayName)
+  }

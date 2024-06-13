@@ -144,6 +144,7 @@ module.exports = {
                 const resource: any = await getResource(selectedNS, envCtx);
                 merged['id'] = resource['id'];
                 merged['scopes'] = resource['scopes'];
+                merged['displayName'] = resource['displayName'];
               }
 
               if (merged.org) {
@@ -343,6 +344,39 @@ module.exports = {
           },
           {
             schema:
+              'updateCurrentNamespaceDisplayName(displayName: String): String',
+            resolver: async (
+              item: any,
+              { displayName }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              const ns = context.req.user?.namespace;
+
+              const prodEnv = await getGwaProductEnvironment(context, true);
+
+              await getNamespaceResourceSets(prodEnv); // sets accessToken
+
+              const resourcesApi = new UMAResourceRegistrationService(
+                prodEnv.uma2.resource_registration_endpoint,
+                prodEnv.accessToken
+              );
+
+              await resourcesApi.updateDisplayName(ns, displayName);
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
               'updateCurrentNamespace(org: String, orgUnit: String): String',
             resolver: async (
               item: any,
@@ -416,6 +450,7 @@ module.exports = {
                 });
               }
             },
+            access: EnforcementPoint,
           },
           {
             schema:

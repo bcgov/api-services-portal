@@ -1,7 +1,9 @@
 
   query GetCurrentNamespace {
     currentNamespace {
+      id
       name
+      displayName
       org
       orgUnit
       orgUpdatedAt

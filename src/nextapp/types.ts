@@ -3,4 +3,5 @@ export interface UserData {
   roles: string[];
   namespace: string;
   userId: string;
+  updatedAt: string | null;
 }

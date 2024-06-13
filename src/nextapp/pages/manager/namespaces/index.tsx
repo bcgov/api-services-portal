@@ -46,13 +46,13 @@ import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import EmptyPane from '@/components/empty-pane';
-import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
-import NewNamespace from '@/components/new-namespace';
+import { Namespace, Query } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
+import EditNamespaceDisplayName from '@/components/edit-display-name';
 
 const actions = [
   {
@@ -119,6 +119,7 @@ const NamespacesPage: React.FC = () => {
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const namespace = useCurrentNamespace();
+  const queryKey: QueryKey = ['currentNamespace'];
   const { isOpen, onClose, onOpen } = useDisclosure();
   const global = useGlobal();
   const currentOrg = React.useMemo(() => {
@@ -166,69 +167,82 @@ const NamespacesPage: React.FC = () => {
   }, [client, mutate, router, toast, user]);
   const title = (
     <>
-      <Flex align="center" gridGap={4}>
-        {user.namespace}
-        {namespace.data?.currentNamespace?.orgEnabled && (
-          <Tooltip
-            hasArrow
-            label={`${user.namespace} is enabled to publish APIs to the directory`}
-          >
-            <Box display="flex">
-              <Icon as={FaCheckCircle} color="bc-success" boxSize="0.65em" />
-            </Box>
-          </Tooltip>
-        )}
-      </Flex>
       {(namespace.isFetching || namespace.isLoading) && (
         <Skeleton width="400px" height="20px" mt={4} />
       )}
       {namespace.isSuccess && !namespace.isFetching && (
-        <Flex align="center" mt={4}>
-          <Text
-            color={currentOrg.color}
-            fontSize="sm"
-            fontWeight="normal"
-            fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
-            d="flex"
-            gridGap={2}
-            alignItems="center"
-          >
-            <Icon as={FaBuilding} color={currentOrg.iconColor} />
-            {currentOrg.text}
-          </Text>
-          {currentOrg.assigned && (
-            <Popover trigger="hover">
-              <PopoverTrigger>
-                <IconButton aria-label="more info" variant="ghost">
-                  <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
-                </IconButton>
-              </PopoverTrigger>
-              <PopoverContent
-                fontSize="sm"
-                fontWeight="normal"
-                color="white"
-                bgColor="#373d3f"
-                borderRadius={0}
-                mt="-15px"
+        <>
+          <Flex align="center" gridGap={4}>
+            {namespace.data?.currentNamespace?.displayName}
+            <EditNamespaceDisplayName
+              data={namespace.data?.currentNamespace}
+              queryKey={queryKey}
+            />
+            {namespace.data?.currentNamespace?.orgEnabled && (
+              <Tooltip
+                hasArrow
+                label={`${user.namespace} is enabled to publish APIs to the directory`}
               >
-                <PopoverArrow bgColor="#373d3f" />
-                <PopoverBody>
-                  If you need to change the Organization or Business Unit for
-                  your Namespace, submit a request through the{' '}
-                  <Link
-                    href={global.helpLinks.helpChangeOrgUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    textDecor="underline"
-                  >
-                    Data Systems and Services request system
-                    <Icon as={FaExternalLinkAlt} ml={1} />
-                  </Link>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
-          )}
-        </Flex>
+                <Box display="flex">
+                  <Icon
+                    as={FaCheckCircle}
+                    color="bc-success"
+                    boxSize="0.65em"
+                  />
+                </Box>
+              </Tooltip>
+            )}
+          </Flex>
+          <Text fontSize="xl" pt={1}>
+            {namespace?.data.currentNamespace?.name}
+          </Text>
+          <Flex align="center" mt={4}>
+            <Text
+              color={currentOrg.color}
+              fontSize="sm"
+              fontWeight="normal"
+              fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
+              d="flex"
+              gridGap={2}
+              alignItems="center"
+            >
+              <Icon as={FaBuilding} color={currentOrg.iconColor} />
+              {currentOrg.text}
+            </Text>
+            {currentOrg.assigned && (
+              <Popover trigger="hover">
+                <PopoverTrigger>
+                  <IconButton aria-label="more info" variant="ghost">
+                    <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
+                  </IconButton>
+                </PopoverTrigger>
+                <PopoverContent
+                  fontSize="sm"
+                  fontWeight="normal"
+                  color="white"
+                  bgColor="#373d3f"
+                  borderRadius={0}
+                  mt="-15px"
+                >
+                  <PopoverArrow bgColor="#373d3f" />
+                  <PopoverBody>
+                    If you need to change the Organization or Business Unit for
+                    your Namespace, submit a request through the{' '}
+                    <Link
+                      href={global.helpLinks.helpChangeOrgUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      textDecor="underline"
+                    >
+                      Data Systems and Services request system
+                      <Icon as={FaExternalLinkAlt} ml={1} />
+                    </Link>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+          </Flex>
+        </>
       )}
     </>
   );
@@ -238,7 +252,9 @@ const NamespacesPage: React.FC = () => {
       <Head>
         <title>
           API Program Services | Namespaces
-          {hasNamespace ? ` | ${user.namespace}` : ''}
+          {hasNamespace
+            ? ` | ${namespace.data?.currentNamespace?.displayName}`
+            : ''}
         </title>
       </Head>
       <ApproveBanner />
@@ -253,17 +269,8 @@ const NamespacesPage: React.FC = () => {
             my={0}
           >
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              <NamespaceMenu
-                user={user}
-                variant="ns-selector"
-                buttonMessage="Select a Namespace"
-              />
-              <Text>or</Text>
-              <Button variant="primary" onClick={onOpen}>
-                Create New Namespace
-              </Button>
+              This page will be replaced.
             </Flex>
-            <NewNamespace isOpen={isOpen} onClose={onClose} />
           </EmptyPane>
         )}
         {hasNamespace && (
