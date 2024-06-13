@@ -12,11 +12,13 @@ import {
   Spacer,
   useToast,
   Select,
+  Center,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { gql } from 'graphql-request';
 import { FaPlus, FaLaptopCode, FaRocket, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
+import { differenceInDays } from 'date-fns';
 
 import PageHeader from '@/components/page-header';
 import GridLayout from '@/layouts/grid';
@@ -73,6 +75,7 @@ const MyGatewaysPage: React.FC = () => {
     { query },
     { suspense: false }
   );
+  const today = new Date();
 
   // Namespace change
   const client = useQueryClient();
@@ -240,29 +243,43 @@ const MyGatewaysPage: React.FC = () => {
                   border="1px solid"
                   borderColor="#E1E1E5"
                   minH={16}
-                  px={4}
+                  px={5}
                   py={2}
                   mb={4}
                 >
                   <Box>
-                    <Icon
-                      as={FaServer}
-                      color="bc-blue"
-                      mb={0.5}
-                      mr={4}
-                      boxSize={4}
-                    />
-                    <Link
-                      fontSize="md"
-                      as="b"
-                      color="bc-blue"
-                      onClick={handleNamespaceChange(namespace)}
-                    >
-                      {namespace.displayName
-                        ? namespace.displayName
-                        : namespace.name}
-                    </Link>
-                    <Text fontSize="md" pl={8}>
+                    <Flex alignItems="center">
+                      <Icon as={FaServer} color="bc-blue" mr={4} boxSize={4} />
+                      <Link
+                        fontSize="md"
+                        as="b"
+                        color="bc-blue"
+                        mr={2}
+                        onClick={handleNamespaceChange(namespace)}
+                      >
+                        {namespace.displayName
+                          ? namespace.displayName
+                          : namespace.name}
+                      </Link>
+                      {differenceInDays(
+                        today,
+                        new Date(namespace.orgUpdatedAt)
+                      ) <= 5 && (
+                        <Center
+                          w={12}
+                          h={6}
+                          bg="#E9F0F8"
+                          borderRadius="md"
+                          border="1px solid"
+                          borderColor="#8E8E8E59"
+                        >
+                          <Text fontSize="sm" color="#333333">
+                            New
+                          </Text>
+                        </Center>
+                      )}
+                    </Flex>
+                    <Text fontSize="md" pl="33px">
                       {namespace.name}
                     </Text>
                   </Box>

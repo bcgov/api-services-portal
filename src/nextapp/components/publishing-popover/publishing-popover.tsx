@@ -23,9 +23,9 @@ const PublishingPopover: React.FC<PublishingPopoverProps> = ({ status }) => {
       {status === 'disabled' && (
         <Popover trigger="hover">
           <PopoverTrigger>
-            <Center>
+            <Center p={1}>
               <Icon as={FaMinusCircle} color="#B0B0B0" mr={2} boxSize={4} />
-              <Text fontSize="sm" w={40}>
+              <Text fontSize="sm" w={36}>
                 Publishing disabled
               </Text>
             </Center>
@@ -60,9 +60,9 @@ const PublishingPopover: React.FC<PublishingPopoverProps> = ({ status }) => {
       {status === 'pending' && (
         <Popover trigger="hover">
           <PopoverTrigger>
-            <Center>
+            <Center p={1}>
               <Icon as={FaClock} color="#EE9B1F" mr={2} boxSize={4} />
-              <Text fontSize="sm" w={40}>
+              <Text fontSize="sm" w={36}>
                 Pending publishing permission
               </Text>
             </Center>
@@ -88,9 +88,9 @@ const PublishingPopover: React.FC<PublishingPopoverProps> = ({ status }) => {
       {status === 'enabled' && (
         <Popover trigger="hover">
           <PopoverTrigger>
-            <Center>
+            <Center p={1}>
               <Icon as={FaCheckCircle} color="#2E8540" mr={2} boxSize={4} />
-              <Text fontSize="sm" w={40}>
+              <Text fontSize="sm" w={36}>
                 Publishing enabled
               </Text>
             </Center>
