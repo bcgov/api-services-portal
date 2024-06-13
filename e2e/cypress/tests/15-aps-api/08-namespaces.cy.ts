@@ -77,9 +77,10 @@ describe('API Tests for Namespace List', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
@@ -108,8 +109,9 @@ describe('API Tests for Namespace Activities', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
+            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
             })
         })
     })
@@ -137,9 +139,10 @@ describe('API Tests for Namespace Summary', () => {
     it('Get the resource for namespace summary and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ namespaces }: any) => {
-                cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'GET').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body.name
+                cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'GET').then((res:any) => {
+                    expect(res.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(res.astraRes.body.status)
+                    response = res.apiRes.body.name
                 })
             })
         })
@@ -172,19 +175,21 @@ describe('API Tests for Create Namespace', () => {
 
     it('Create system generated namespace when user does not specify namespace name', () => {
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res) => {
-                expect(res.status).to.be.equal(200)
-                expect(res.body.displayName).to.be.equal(null)
-                nameSpace = res.body.name
+            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                expect(res.apiRes.body.displayName).to.be.equal(null)
+                nameSpace = res.apiRes.body.name
             })
         })
     })
 
     it('Verify that the generated namespace is displayed in the namespace list', () => {
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                expect(res.body).to.be.contain(nameSpace)
+            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                expect(res.apiRes.body).to.be.contain(nameSpace)
             })
         })
     })
@@ -192,19 +197,21 @@ describe('API Tests for Create Namespace', () => {
     it('Create users own namespace with its description', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.setRequestBody(namespaces.userDefinedNamespace)
-            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res) => {
-                expect(res.status).to.be.equal(200)
-                expect(res.body.displayName).to.be.equal(namespaces.userDefinedNamespace.displayName)
-                nameSpace = res.body.name
+            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                expect(res.apiRes.body.displayName).to.be.equal(namespaces.userDefinedNamespace.displayName)
+                nameSpace = res.apiRes.body.name
             })
         })
     })
 
     it('Verify that the generated namespace is displayed in the namespace list', () => {
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                expect(res.body).to.be.contain(nameSpace)
+            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                expect(res.apiRes.body).to.be.contain(nameSpace)
             })
         })
     })
@@ -227,9 +234,10 @@ describe('API Tests for invalid namespace name', () => {
                     // cy.setRequestBody('{"name": "' + name + '","displayName": "Test for GWA test"}')
                     cy.updateJsonBoby(namespaces.inValidNamespace, 'name', name).then((updatedBody) => {
                         cy.setRequestBody(updatedBody)
-                        cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res) => {
-                            expect(res.status).to.be.equal(422)
-                            expect(res.body.message).to.be.equal('Validation Failed')
+                        cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
+                            expect(res.apiRes.status).to.be.equal(422)
+                            cy.addToAstraScanIdList(res.astraRes.body.status)
+                            expect(res.apiRes.body.message).to.be.equal('Validation Failed')
                         })
                     })
                 })

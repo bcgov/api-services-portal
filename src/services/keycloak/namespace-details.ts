@@ -27,6 +27,7 @@ export async function getAllNamespaces(envCtx: EnvironmentContext) {
   const nsList = namespaces.map((ns: ResourceSet) => ({
     id: ns.id,
     name: ns.name,
+    displayName: ns.displayName,
     scopes: ns.resource_scopes,
     prodEnvId: envCtx.prodEnv.id,
   }));
@@ -173,4 +174,13 @@ export async function getResource(
       scopes: ns.resource_scopes,
     }))
     .pop();
+}
+
+export function generateDisplayName(context: any, gatewayId: string): string {
+  logger.debug('[generateDisplayName] %j', context.req?.user);
+  if (context.req?.user?.provider_username) {
+    return `${context.req?.user?.provider_username}'s Gateway`;
+  } else {
+    return null;
+  }
 }

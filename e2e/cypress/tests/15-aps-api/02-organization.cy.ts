@@ -31,7 +31,6 @@ describe('Get the user session token', () => {
     })
 })
 
-
 describe('API Tests to verify the Organization details in the response', () => {
 
     beforeEach(() => {
@@ -48,11 +47,12 @@ describe('API Tests to verify the Organization details in the response', () => {
 
     it('Get the resource and verify the Organization details in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(response.body[0].name).to.eq("ministry-of-health")
-                expect(response.body[0].title).to.eq("Ministry of Health")
-                expect(response.body[0]).has.property('title', 'Ministry of Health')
+            cy.makeAPIRequest(organization.endPoint, 'GET').then((response:any) => {
+                expect(response.apiRes.status).to.be.equal(200)
+                expect(response.apiRes.body[0].name).to.eq("ministry-of-health")
+                expect(response.apiRes.body[0].title).to.eq("Ministry of Health")
+                expect(response.apiRes.body[0]).has.property('title', 'Ministry of Health')
+                cy.addToAstraScanIdList(response.astraRes.body.status)
             })
         })
     })
@@ -74,23 +74,23 @@ describe('Verify /Organization/{Org} end point', () => {
 
     it('Get the resource and verify the org Names in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                assert.isTrue(Cypress._.isEqual(response.body.orgUnits[0], organization.orgExpectedList))
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response:any) => {
+                expect(response.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(response.astraRes.body.status)
+                assert.isTrue(Cypress._.isEqual(response.apiRes.body.orgUnits[0], organization.orgExpectedList))
             })
         })
     })
 
     it('Verify the status code and response message for invalid organization name', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response) => {
-                expect(response.status).to.be.oneOf([404, 422])
-                expect(response.body.message).to.be.equal("Validation Failed")
+            cy.makeAPIRequest(organization.endPoint + '/health', 'GET').then((response:any) => {
+                expect(response.apiRes.status).to.be.oneOf([404, 422])
+                expect(response.apiRes.body.message).to.be.equal("Validation Failed")
             })
         })
     })
 })
-
 
 describe('Get the Organization Role', () => {
 
@@ -111,9 +111,10 @@ describe('Get the Organization Role', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/roles', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/roles', 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
@@ -127,9 +128,10 @@ describe('Get the Organization Role', () => {
     })
 
     it('Get the list of roles and verify the success code in the response', () => {
-        cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res) => {
-            expect(res.status).to.be.equal(200)
-            response = res.body
+        cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res:any) => {
+            expect(res.apiRes.status).to.be.equal(200)
+            response = res.apiRes.body
+            cy.addToAstraScanIdList(res.astraRes.body.status)
         })
     })
 
@@ -161,9 +163,10 @@ describe('Get the Namespace associated with the organization', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
                 nameSpace = response[0].name
             })
         })
@@ -201,9 +204,10 @@ describe('Delete the Namespace associated with the organization', () => {
     it('Delete the namespace associated with the organization, organization unit and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ organization }: any) => {
-                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res) => {
-                    expect(res.status).to.be.equal(200)
-                    response = res.body
+                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res:any) => {
+                    expect(res.apiRes.status).to.be.equal(200)
+                    cy.addToAstraScanIdList(res.astraRes.body.status)
+                    response = res.apiRes.body
                 })
             })
         })
@@ -211,9 +215,10 @@ describe('Delete the Namespace associated with the organization', () => {
 
     it('Verify that the deleted Namespace is not displayed in Get Call', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
                 assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace), -1)
             })
         })
@@ -241,17 +246,19 @@ describe('Add and Get Organization Access', () => {
 
     it('Add the access of the organization to the specific user and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'PUT').then((res) => {
-                expect(res.status).to.be.equal(204)
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'PUT').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(204)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
             })
         })
     })
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'GET').then((res) => {
-                expect(res.status).to.be.equal(200)
-                response = res.body
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'GET').then((res:any) => {
+                expect(res.apiRes.status).to.be.equal(200)
+                cy.addToAstraScanIdList(res.astraRes.body.status)
+                response = res.apiRes.body
             })
         })
     })
@@ -264,5 +271,7 @@ describe('Add and Get Organization Access', () => {
 
     after(() => {
         cy.logout()
+        cy.clearLocalStorage({ log: true })
+        cy.deleteAllCookies()
     })
 })

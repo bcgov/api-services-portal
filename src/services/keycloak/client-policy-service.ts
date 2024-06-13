@@ -134,7 +134,7 @@ export class KeycloakClientPolicyService {
     policyName: string
   ): Promise<PolicyRepresentation[]> {
     logger.debug('[findPermissionByName] r=%s p=%s', roleName, policyName);
-    const result = [];
+    const result = [] as any[];
     // first find permissions that have 'roleName' in the name
     const lkup: PolicyRepresentation[] = await this.kcAdminClient.clients
       .findPermissions({ id, name: roleName })

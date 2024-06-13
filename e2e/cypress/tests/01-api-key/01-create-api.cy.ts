@@ -92,7 +92,7 @@ it('Verify gwa gateway publish multiple config file', () => {
   })
 
   it('Upload dataset and Product using GWA Apply command', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
+    cy.executeCliCommand('gwa apply -i cypress/fixtures/gw-config.yml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
     })
@@ -102,8 +102,8 @@ it('Verify gwa gateway publish multiple config file', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
-        expect(response.status).to.be.equal(200)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response:any) => {
+        expect(response.apiRes.status).to.be.equal(200)
       })
     })
   })

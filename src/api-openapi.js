@@ -31,7 +31,7 @@ class ApiOpenapiApp {
   }
 
   prepareV2(app) {
-    const { RegisterRoutes } = require('./controllers/v2/routes');
+    const { RegisterRoutes: V2Register } = require('./controllers/v2/routes');
     const specFile = fs.realpathSync('controllers/v2/openapi.yaml');
     const specObject = YAML.load(fs.readFileSync(specFile));
 
@@ -50,7 +50,7 @@ class ApiOpenapiApp {
 
     specObject.components.securitySchemes.openid.openIdConnectUrl = `${process.env.OIDC_ISSUER}/.well-known/openid-configuration`;
 
-    RegisterRoutes(app);
+    V2Register(app);
 
     app.get('/ds/api/v2/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
@@ -59,8 +59,31 @@ class ApiOpenapiApp {
 
     app.use(
       '/ds/api/v2/console',
-      swaggerUi.serve,
-      swaggerUi.setup(specObject, options)
+      swaggerUi.serveFiles(specObject, options),
+      swaggerUi.setup(specObject)
+    );
+  }
+
+  prepareV3(app) {
+    const { RegisterRoutes: V3Register } = require('./controllers/v3/routes');
+    const specFile = fs.realpathSync('controllers/v3/openapi.yaml');
+    const specObject = YAML.load(fs.readFileSync(specFile));
+
+    specObject.components.securitySchemes.jwt.flows.clientCredentials.tokenUrl = `${process.env.OIDC_ISSUER}/protocol/openid-connect/token`;
+
+    specObject.components.securitySchemes.openid.openIdConnectUrl = `${process.env.OIDC_ISSUER}/.well-known/openid-configuration`;
+
+    V3Register(app);
+
+    app.get('/ds/api/v3/openapi.yaml', (req, res) => {
+      res.setHeader('Content-Type', 'application/yaml');
+      res.send(YAML.dump(specObject));
+    });
+
+    app.use(
+      '/ds/api/v3/console',
+      swaggerUi.serveFiles(specObject, options),
+      swaggerUi.setup(specObject)
     );
   }
 
@@ -72,13 +95,14 @@ class ApiOpenapiApp {
 
     Register(keystone);
 
+    this.prepareV3(app);
     this.prepareV2(app);
     this.prepareV1(app);
 
     // RFC 8631 service-desc link relation
     // https://datatracker.ietf.org/doc/html/rfc8631
     app.get('/ds/api', (req, res) => {
-      res.setHeader('Link', '</ds/api/v2/openapi.yaml>; rel="service-desc"');
+      res.setHeader('Link', '</ds/api/v3/openapi.yaml>; rel="service-desc"');
       res.status(204).end();
     });
 
@@ -89,7 +113,12 @@ class ApiOpenapiApp {
           message: err.message,
         });
       } else if (err instanceof ValidateError) {
-        logger.warn(`Caught Validation Error for ${req.path}:`, err.fields);
+        logger.warn(
+          `Caught Validation Error for ${req.path}:`,
+          err.message,
+          err.fields
+        );
+        logger.error('Validation Error', err);
         return res.status(422).json({
           message: 'Validation Failed',
           details: err?.fields,

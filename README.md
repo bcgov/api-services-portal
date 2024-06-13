@@ -2,34 +2,30 @@
 
 [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00?style=for-the-badge)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/bcgov/api-services-portal/ci-build-deploy.yaml?branch=dev&style=for-the-badge)](https://github.com/bcgov/api-services-portal/actions/workflows/ci-build-deploy.yaml)
-[![Coverage](https://img.shields.io/sonar/coverage/aps-portal/dev?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)](https://sonarcloud.io/summary/new_code?id=aps-portal)
+[![Coverage](https://img.shields.io/sonar/coverage/aps-portal-e2e/dev?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)](https://sonarcloud.io/summary/overall?id=aps-portal-e2e)
 ![GitHub](https://img.shields.io/github/license/bcgov/aps-portal?style=for-the-badge)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bcgov/aps-portal?label=release&style=for-the-badge)
 
-
 ## Introduction
-
 
 The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs. It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
 
-
 ## Local Deployment
 
-
-The repo is setup to create a local deployment of the Portal along with required support services (Postgres, Keycloak, OAuth2-proxy,  Feeder and Kong Gateway) using `docker compose`.
+The repo is setup to create a local deployment of the Portal along with required support services (Postgres, Keycloak, OAuth2-proxy, Feeder and Kong Gateway) using `docker compose`.
 
 1. Clone and build the [Gateway Admin API](https://github.com/bcgov/gwa-api) (gwa-api)
 
-    ```
-    git clone https://github.com/bcgov/gwa-api
-    cd ./microservices/gatewayApi
-    docker build -t gwa-api:e2e .
-    ```
+   ```
+   git clone https://github.com/bcgov/gwa-api
+   cd ./microservices/gatewayApi
+   docker build -t gwa-api:e2e .
+   ```
 
 1. Build: Back in `api-services-portal`, run `docker compose build`.
 1. Run: `docker compose up`. Wait for startup to complete - look for `Swagger UI registered`.
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180
-    1. To login, use username `janis@idir` and password `awsummer` (or username `local` and password `local`).
+   1. To login, use username `janis@idir` and password `awsummer` (or username `local` and password `local`).
 1. If you have made any changes to the app code, update images by running `docker compose build` then `docker compose up`.
 1. Clean up: `docker compose down` removes all the hosted services
 
@@ -68,39 +64,38 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Follow [local deployment instructions](#local-deployment) and run `docker compose up`.
 1. In `/src` run `npm install`.
-    1. If using Node version > 17, run `npm install --legacy-peer-deps` 
+
+   1. If using Node version > 17, run `npm install --legacy-peer-deps`
 
 1. Turn off the docker compose Portal: `docker stop apsportal`
 1. Configure the `oauth2-proxy` that is running in Docker:
-    1. Update `upstreams` in `local/oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
-    <br>You can obtain the IP address using `hostname -I`.
-    
-    1. Restart the oauth2-proxy: `docker compose restart oauth2-proxy`
-    1. Update `DESTINATION_URL` in `local/feeds/.env.local` to include the IP address of your local machine
-    1. Restart the feeder: `docker compose restart feeder`
-    1. Update `PORTAL_ACTIVITY_URL` in `local/gwa-api/.env.local` to include the IP address of your local machine
-    1. Restart the feeder: `docker compose restart gwa-api`
 
-    
+   1. Update `upstreams` in `local/oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
+      <br>You can obtain the IP address using `hostname -I`.
+
+   1. Restart the oauth2-proxy: `docker compose restart oauth2-proxy`
+   1. Update `DESTINATION_URL` in `local/feeds/.env.local` to include the IP address of your local machine
+   1. Restart the feeder: `docker compose restart feeder`
+   1. Update `PORTAL_ACTIVITY_URL` in `local/gwa-api/.env.local` to include the IP address of your local machine
+   1. Restart the feeder: `docker compose restart gwa-api`
+
 1. Start the Portal locally:
 
-    ```sh
-    cd src
-    set -o allexport
-    source ../.env.local
-    LOG_LEVEL=debug
-    KNEX_HOST=kong-db.localtest.me
-    NEXT_PUBLIC_MOCKS=off
-    set +o allexport
+   ```sh
+   cd src
+   set -o allexport
+   source ../.env.local
+   LOG_LEVEL=debug
+   KNEX_HOST=kong-db.localtest.me
+   NEXT_PUBLIC_MOCKS=off
+   set +o allexport
 
-    npm run dev
-    ```
+   npm run dev
+   ```
 
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180 and should auto-update on code changes.
 
-
 ## Design
-
 
 The `API Services Portal` is a React application using the Chakra UI component library, and using two frameworks: KeystoneJS V5, and NextJS.
 
@@ -176,9 +171,7 @@ Currently support feeders:
 
 Source: `feeds`
 
-
 ## Development
-
 
 ### TypeScript
 

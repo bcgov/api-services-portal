@@ -10,6 +10,7 @@ export interface UserData {
   email: string;
   groups: string | null;
   userId: string;
+  updatedAt: string | null;
 }
 
 export interface NamespaceData {

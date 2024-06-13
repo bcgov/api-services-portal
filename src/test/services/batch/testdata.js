@@ -31,18 +31,7 @@ export default {
         payload: {
           status: 200,
           result: 'created',
-          childResults: [
-            {
-              status: 200,
-              result: 'created',
-              childResults: [],
-            },
-            {
-              status: 200,
-              result: 'created',
-              childResults: [],
-            },
-          ],
+          childResults: [],
         },
       },
     },
