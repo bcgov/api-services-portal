@@ -54,6 +54,12 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
+    name: 'Gateways Get Started',
+    url: '/manager/namespaces/get-started',
+    access: ['portal-user'],
+    sites: ['devportal'],
+  },
+  {
     name: 'Namespaces',
     altUrls: [
       '/manager/services',

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import ApproveBanner from '@/components/approve-banner';
 import {
   Button,
@@ -9,19 +9,21 @@ import {
   Text,
   Grid,
   GridItem,
+  HStack,
   Icon,
+  IconButton,
   Link,
   useToast,
-  VStack,
   useDisclosure,
   PopoverTrigger,
   Popover,
   PopoverContent,
   PopoverArrow,
   PopoverBody,
-  IconButton,
   Skeleton,
   Tooltip,
+  VStack,
+  Stack
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -31,11 +33,14 @@ import { useAuth } from '@/shared/services/auth';
 import {
   FaBuilding,
   FaChartBar,
+  FaChartLine,
   FaCheckCircle,
   FaChevronRight,
   FaClock,
   FaExternalLinkAlt,
   FaInfoCircle,
+  FaLock,
+  FaSearch,
   FaShieldAlt,
   FaTrash,
   FaUserAlt,
@@ -43,11 +48,13 @@ import {
   FaUserShield,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation } from '@/shared/services/api';
+import { restApi, useApiMutation, useApi } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
+import Card from '@/components/card'
+import GatewayGetStarted from '@/components/gateway-get-started'
 import EmptyPane from '@/components/empty-pane';
 import { Namespace, Query } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
@@ -122,6 +129,11 @@ const NamespacesPage: React.FC = () => {
   const queryKey: QueryKey = ['currentNamespace'];
   const { isOpen, onClose, onOpen } = useDisclosure();
   const global = useGlobal();
+  const { data, isLoading, isSuccess, isError } = useApi(
+    'allNamespaces',
+    { query },
+    { suspense: false }
+  );
   const currentOrg = React.useMemo(() => {
     if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
       return {
@@ -260,19 +272,15 @@ const NamespacesPage: React.FC = () => {
       <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={hasNamespace ? title : ''} />
-        {!hasNamespace && (
-          <EmptyPane
-            message="To get started select a Namespace from the dropdown below or create a new Namespace"
-            title="No Namespace selected yet"
-            boxProps={{ borderRadius: 0, mx: 0 }}
-            my={0}
-          >
-            <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              This page will be replaced.
-            </Flex>
-          </EmptyPane>
-        )}
+        <PageHeader title={hasNamespace ? title : 'My Gateways'} />
+        <>
+          {isError && (
+            <Heading>Gateways Failed to Load</Heading>
+          )}
+          {isSuccess && data.allNamespaces.length == 0 && (
+            <GatewayGetStarted />
+          )}
+        </>
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
             <GridItem>
@@ -427,5 +435,13 @@ export default NamespacesPage;
 const mutation = gql`
   mutation DeleteNamespace($name: String!) {
     forceDeleteNamespace(namespace: $name, force: false)
+  }
+`;
+
+const query = gql`
+  query GetNamespaces {
+    allNamespaces {
+      name
+    }
   }
 `;
