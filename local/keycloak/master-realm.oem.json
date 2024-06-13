@@ -1702,7 +1702,48 @@
         "phone",
         "offline_access",
         "microprofile-jwt"
-      ]
+      ],
+      "authorizationSettings": {
+        "allowRemoteResourceManagement": true,
+        "policyEnforcementMode": "ENFORCING",
+        "resources": [
+          {
+            "name": "Default Resource",
+            "type": "urn:cypress-auth-profile:resources:default",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "_id": "8543a438-ee7e-44b7-aa28-aef951b65f2f",
+            "uris": ["/*"]
+          }
+        ],
+        "policies": [
+          {
+            "id": "34e0a630-d6fa-499c-b7b7-bca8b6ef70f6",
+            "name": "Default Policy",
+            "description": "A policy that grants access only for users within this realm",
+            "type": "js",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+            }
+          },
+          {
+            "id": "a1bbc96c-4248-4f32-8bec-59569165bcb8",
+            "name": "Default Permission",
+            "description": "A permission that applies to the default resource type",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "urn:cypress-auth-profile:resources:default",
+              "applyPolicies": "[\"Default Policy\"]"
+            }
+          }
+        ],
+        "scopes": [],
+        "decisionStrategy": "UNANIMOUS"
+      }
     },
     {
       "id": "c002b2b1-0ca8-4fd6-896e-6d2e3395a345",
@@ -1958,6 +1999,17 @@
         ],
         "policies": [
           {
+            "id": "35dcd837-d215-4036-84fe-452605b0a065",
+            "name": "Default Policy",
+            "description": "A policy that grants access only for users within this realm",
+            "type": "js",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+            }
+          },
+          {
             "id": "ca06ef6c-d7f8-42c9-b0d6-0c9be85c1cc1",
             "name": "janis",
             "type": "user",
@@ -1998,6 +2050,18 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "groups": "[{\"path\":\"/organization-admin/ca.bc.gov/ministry-of-health/planning-and-innovation-division\",\"extendChildren\":false},{\"path\":\"/organization-admin\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov/ministry-of-health\",\"extendChildren\":false}]"
+            }
+          },
+          {
+            "id": "31be7436-e9d8-42a3-b42e-69a1869a7eea",
+            "name": "Default Permission",
+            "description": "A permission that applies to the default resource type",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "urn:gwa-api:resources:default",
+              "applyPolicies": "[\"Default Policy\"]"
             }
           },
           {

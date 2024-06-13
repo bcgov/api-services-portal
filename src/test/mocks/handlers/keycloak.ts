@@ -9,7 +9,7 @@ import { strict as assert } from 'assert';
 
 const logger = Logger('mocks.kc');
 
-const def = YAML.load(
+const def: any = YAML.load(
   fs.readFileSync(
     path.resolve('test/mocks/handlers/data/keycloak.yaml'),
     'utf8'

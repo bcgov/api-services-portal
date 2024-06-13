@@ -10,11 +10,7 @@
       "title": "Planning and Innovation Division"
     },
     "orgName": "ministry-of-health",
-    "expectedScope": [
-      "Dataset.Manage",
-      "GroupAccess.Manage",
-      "Namespace.Assign"
-    ],
+    "expectedScope": ["Dataset.Manage", "GroupAccess.Manage", "Namespace.Assign"],
     "expectedNamespace": {
       "name": "gw-3a443",
       "orgUnit": "planning-and-innovation-division",
@@ -26,17 +22,11 @@
         "permissions": [
           {
             "resourceType": "organization",
-            "scopes": [
-              "GroupAccess.Manage",
-              "Namespace.Assign",
-              "Dataset.Manage"
-            ]
+            "scopes": ["GroupAccess.Manage", "Namespace.Assign", "Dataset.Manage"]
           },
           {
             "resourceType": "namespace",
-            "scopes": [
-              "Namespace.View"
-            ]
+            "scopes": ["Namespace.View"]
           }
         ]
       }
@@ -50,9 +40,7 @@
             "id": "janis@idir",
             "email": "janis@testmail.com"
           },
-          "roles": [
-            "organization-admin"
-          ]
+          "roles": ["organization-admin"]
         }
       ]
     }
@@ -72,10 +60,7 @@
       "order": 0,
       "isPublic": true,
       "isComplete": true,
-      "tags": [
-        "tag1",
-        "tag2"
-      ]
+      "tags": ["tag1", "tag2"]
     }
   },
   "apiDirectory": {
@@ -96,10 +81,7 @@
       "title": "Dataset for Test API",
       "isInCatalog": "false",
       "isDraft": "false",
-      "tags": [
-        "gateway",
-        "kong"
-      ],
+      "tags": ["gateway", "kong"],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
     },
@@ -111,10 +93,7 @@
       "view_audience": "Public",
       "security_class": "PUBLIC",
       "record_publish_date": "2017-09-05",
-      "tags": [
-        "tag1",
-        "tag2"
-      ],
+      "tags": ["tag1", "tag2"],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -149,11 +128,7 @@
       "license_title": "Access Only",
       "view_audience": "Government",
       "security_class": "LOW-PUBLIC",
-      "tags": [
-        "gateway",
-        "kong",
-        "openapi"
-      ],
+      "tags": ["gateway", "kong", "openapi"],
       "organization": {
         "name": "ministry-of-health",
         "title": "Ministry of Health"
@@ -197,7 +172,7 @@
       "environmentDetails": [
         {
           "environment": "dev",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientRegistration": "managed",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
@@ -214,7 +189,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -231,7 +206,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -251,7 +226,7 @@
           "clientRegistration": "managed",
           "clientSecret": "****",
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "exists": true
         }
       ],
@@ -271,7 +246,7 @@
       "environmentDetails": [
         {
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientRegistration": "managed",
           "clientId": "gwa-api",
           "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -282,12 +257,8 @@
     "shared_IDP_inheritFrom": {
       "environmentDetails": [],
       "mode": "auto",
-      "clientRoles": [
-        "administrator"
-      ],
-      "clientMappers": [
-        "test-audience"
-      ],
+      "clientRoles": ["administrator"],
+      "clientMappers": ["test-audience"],
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
       "name": "my-auth-client-secret-1",
@@ -305,17 +276,13 @@
         {
           "exists": true,
           "environment": "test",
-          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "issuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientRegistration": "shared-idp",
           "clientId": "ap-my-auth-client-secret-1-test"
         }
       ],
-      "clientRoles": [
-        "administrator"
-      ],
-      "clientMappers": [
-        "test-audience"
-      ],
+      "clientRoles": ["administrator"],
+      "clientMappers": ["test-audience"],
       "isShared": false,
       "apiKeyName": "X-API-KEY",
       "inheritFrom": {
@@ -378,9 +345,7 @@
           "name": "CredentialIssuer.Admin"
         }
       ],
-      "permDomains": [
-        ".api.gov.bc.ca"
-      ],
+      "permDomains": [".api.gov.bc.ca"],
       "permDataPlane": "local.dataplane",
       "permProtectedNs": "deny",
       "org": "ministry-of-health",

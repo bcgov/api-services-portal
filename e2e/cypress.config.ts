@@ -61,7 +61,7 @@ export default defineConfig({
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
       OIDC_ISSUER: 'http://keycloak.localtest.me:9081',
       TOKEN_URL:
-        'http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token',
+        'http://keycloak.localtest.me:9081/realms/master/protocol/openid-connect/token',
       GWA_API_URL: 'http://gwa-api.localtest.me:2000/v2',
       KONG_URL: 'http://kong.localtest.me:8000',
       JWKS_URL: 'http://cypress-jwks-url.localtest.me:3500',

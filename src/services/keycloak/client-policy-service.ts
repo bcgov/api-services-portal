@@ -63,7 +63,7 @@ export class KeycloakClientPolicyService {
       .catch((e: any) => {
         logger.error('Err %s', JSON.stringify(e, null, 3));
         throw e;
-      });
+      }) as Promise<PolicyRepresentation[]>;
   }
 
   public async listPermissionsByResource(

@@ -176,6 +176,7 @@ export class KeycloakGroupService {
       ).length == 0
     ) {
       logger.error('[getGroup] MISSING %s', groupName);
+      logger.error('[getGroup] FROM %j', groups);
       return null;
     } else {
       logger.debug('[getGroup] FOUND   %s', groupName);

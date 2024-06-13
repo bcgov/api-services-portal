@@ -7,17 +7,9 @@
     }
   },
   "namespace": "newplatform",
-  "invalid_namespace": [
-    "test_1234",
-    "New_napespace",
-    "Government"
-  ],
+  "invalid_namespace": ["test_1234", "New_napespace", "Government"],
   "serviceAccount": {
-    "scopes": [
-      "GatewayConfig.Publish",
-      "Namespace.Manage",
-      "Content.Publish"
-    ]
+    "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
   "deleteResources": {
     "namespace": "gw-2a3ef",
@@ -34,9 +26,7 @@
       }
     }
   },
-  "namespaceAccessPermissions": [
-    "CredentialIssuer.Admin"
-  ],
+  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
   "product": {
     "name": "GWA Auto Test Product",
     "orgName": "Ministry of Health",
@@ -66,16 +56,12 @@
     "Mark": {
       "userName": "mark",
       "email": "mark@gmail.com",
-      "accessRole": [
-        "Access.Manage"
-      ]
+      "accessRole": ["Access.Manage"]
     },
     "Wendy": {
       "userName": "wendy",
       "email": "wendy@test.com",
-      "accessRole": [
-        "CredentialIssuer.Admin"
-      ]
+      "accessRole": ["CredentialIssuer.Admin"]
     },
     "jwtKeyPair": {
       "authProfile": {
@@ -86,7 +72,7 @@
         "environmentConfig": {
           "environment": "Development",
           "clientRegistration": "Managed",
-          "idpIssuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
@@ -112,7 +98,7 @@
         "environmentConfig": {
           "environment": "Sandbox",
           "clientRegistration": "Managed",
-          "idpIssuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
@@ -151,7 +137,7 @@
         "environmentConfig": {
           "environment": "Other",
           "clientRegistration": "Managed",
-          "idpIssuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientId": "invalid-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-1234"
         }
@@ -175,14 +161,12 @@
         "name": "cy-client-id-secret-auth",
         "flow": "Client Credential Flow",
         "element": "cc-id-secret",
-        "scopes": [
-          "System.Write"
-        ],
+        "scopes": ["System.Write"],
         "clientAuthenticator": "Client ID and Secret",
         "environmentConfig": {
           "environment": "Test",
           "clientRegistration": "Managed",
-          "idpIssuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
@@ -254,14 +238,12 @@
         "name": "cy-client-id-secret-auth-updated",
         "flow": "Client Credential Flow",
         "element": "cc-id-secret",
-        "scopes": [
-          "System.Write"
-        ],
+        "scopes": ["System.Write"],
         "clientAuthenticator": "Client ID and Secret",
         "environmentConfig": {
           "environment": "Test",
           "clientRegistration": "Managed",
-          "idpIssuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9081/realms/master",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
@@ -314,10 +296,7 @@
   "namespacePreview": {
     "namespace": "gw-07034",
     "serviceAccount": {
-      "scopes": [
-        "GatewayConfig.Publish",
-        "Namespace.Manage"
-      ]
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
     },
     "product": {
       "name": "Namespace Preview Test Product",
@@ -338,15 +317,10 @@
     "Mark": {
       "userName": "mark",
       "email": "mark@gmail.com",
-      "accessRole": [
-        "Access.Manage"
-      ]
+      "accessRole": ["Access.Manage"]
     },
     "serviceAccount": {
-      "scopes": [
-        "GatewayConfig.Publish",
-        "Namespace.Manage"
-      ]
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
     },
     "product": {
       "name": "Org Assignment Product",
@@ -371,15 +345,10 @@
     "Mark": {
       "userName": "mark",
       "email": "mark@gmail.com",
-      "accessRole": [
-        "Access.Manage"
-      ]
+      "accessRole": ["Access.Manage"]
     },
     "GroupAccess": {
-      "members": [
-        "benny@test.com",
-        "wendy@test.com"
-      ]
+      "members": ["benny@test.com", "wendy@test.com"]
     },
     "product": {
       "name": "Org Assignment Product",
@@ -404,14 +373,10 @@
     "Mark": {
       "userName": "mark",
       "email": "mark@gmail.com",
-      "accessRole": [
-        "Access.Manage"
-      ]
+      "accessRole": ["Access.Manage"]
     },
     "GroupAccess": {
-      "members": [
-        "benny@test.com"
-      ]
+      "members": ["benny@test.com"]
     },
     "product": {
       "name": "Org Assignment Unit Product",
@@ -433,10 +398,7 @@
   "checkPermission": {
     "namespace": "gw-e9cca",
     "serviceAccount": {
-      "scopes": [
-        "GatewayConfig.Publish",
-        "Namespace.Manage"
-      ]
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
     },
     "product": {
       "name": "New-Auto Test Product",
@@ -454,87 +416,58 @@
       "Mark": {
         "userName": "Mark F Mark L",
         "email": "mark@gmail.com",
-        "accessRole": [
-          "Access.Manage"
-        ]
+        "accessRole": ["Access.Manage"]
       },
       "Mark_NV": {
         "userName": "Mark F Mark L",
         "email": "mark@gmail.com",
-        "accessRole": [
-          "Namespace.View"
-        ]
+        "accessRole": ["Namespace.View"]
       },
       "Wendy": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
-        "accessRole": [
-          "Namespace.Manage",
-          "CredentialIssuer.Admin"
-        ]
+        "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       },
       "Wendy_NM": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
-        "accessRole": [
-          "Namespace.Manage"
-        ]
+        "accessRole": ["Namespace.Manage"]
       },
       "Wendy_CA": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
-        "accessRole": [
-          "CredentialIssuer.Admin"
-        ]
+        "accessRole": ["CredentialIssuer.Admin"]
       },
       "Wendy_GC": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
-        "accessRole": [
-          "GatewayConfig.Publish",
-          "Namespace.View"
-        ]
+        "accessRole": ["GatewayConfig.Publish", "Namespace.View"]
       },
       "Janis": {
         "userName": "Janis Smith",
         "email": "janis@testmail.com",
-        "accessRole": [
-          "Namespace.Manage",
-          "CredentialIssuer.Admin"
-        ]
+        "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       }
     },
     "revokePermission": {
       "Mark": {
         "userName": "mark",
-        "accessRole": [
-          "Namespace.View",
-          "Access.Manage"
-        ]
+        "accessRole": ["Namespace.View", "Access.Manage"]
       },
       "Mark_AM": {
         "userName": "mark",
-        "accessRole": [
-          "Access.Manage"
-        ]
+        "accessRole": ["Access.Manage"]
       },
       "Wendy": {
         "userName": "wendy",
-        "accessRole": [
-          "Namespace.Manage"
-        ]
+        "accessRole": ["Namespace.Manage"]
       },
       "Wendy_ci": {
         "userName": "wendy",
-        "accessRole": [
-          "CredentialIssuer.Admin"
-        ]
+        "accessRole": ["CredentialIssuer.Admin"]
       },
       "serviceAccount": {
-        "scopes": [
-          "Namespace.Manage",
-          "Content.Publish"
-        ]
+        "scopes": ["Namespace.Manage", "Content.Publish"]
       }
     }
   },
@@ -542,36 +475,23 @@
     "Mark": {
       "userName": "mark",
       "email": "mark@gmail.com",
-      "accessRole": [
-        "Access.Manage",
-        "Namespace.View"
-      ]
+      "accessRole": ["Access.Manage", "Namespace.View"]
     },
     "Janis": {
       "userName": "Janis Smith",
       "email": "janis@testmail.com",
-      "accessRole": [
-        "CredentialIssuer.Admin",
-        "Namespace.Manage"
-      ]
+      "accessRole": ["CredentialIssuer.Admin", "Namespace.Manage"]
     },
     "OldUser": {
       "userName": "olduser@idir",
       "email": "olduser@testmail.com",
-      "accessRole": [
-        "Access.Manage",
-        "Namespace.View",
-        "Namespace.Manage"
-      ]
+      "accessRole": ["Access.Manage", "Namespace.View", "Namespace.Manage"]
     }
   },
   "permission": {
     "Mark": {
       "userName": "mark",
-      "accessRole": [
-        "Access.Manage",
-        "Namespace.View"
-      ]
+      "accessRole": ["Access.Manage", "Namespace.View"]
     }
   },
   "apiTest": {

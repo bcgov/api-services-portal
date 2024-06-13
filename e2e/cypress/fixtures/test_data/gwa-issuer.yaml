@@ -5,7 +5,7 @@ clientAuthenticator: client-secret
 mode: auto
 environmentDetails:
   - environment: test
-    issuerUrl: http://keycloak.localtest.me:9081/auth/realms/master
+    issuerUrl: http://keycloak.localtest.me:9081/realms/master
     clientRegistration: managed
     clientId: gwa-api
     clientSecret: 18900468-3db1-43f7-a8af-e75f079eb742

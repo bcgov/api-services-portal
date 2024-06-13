@@ -27,16 +27,16 @@ plugins:
     enabled: true
     config:
       allowed_iss:
-      - https://dev.loginproxy.gov.bc.ca/auth/realms/apigw
+        - https://dev.loginproxy.gov.bc.ca/realms/apigw
       allowed_aud: ap-two-tier-hidden-default-dev
       run_on_preflight: true
       iss_key_grace_period: 10
       maximum_expiration: 0
       algorithm: RS256
       claims_to_verify:
-      - exp
+        - exp
       uri_param_names:
-      - jwt
+        - jwt
       cookie_names: []
       scope: null
       roles: null
@@ -76,4 +76,3 @@ environments:
     flow: kong-api-key-acl
     appId: '506CB7CF'
     services: [two-tier-service-dev]
-
