@@ -48,19 +48,19 @@ const links: NavLink[] = [
     sites: ['platform'],
   },
   {
-    name: 'Namespaces',
-    url: '/manager/namespaces',
+    name: 'Gateways',
+    url: '/manager/gateways',
     access: ['portal-user'],
     sites: ['devportal'],
   },
   {
     name: 'Gateways Get Started',
-    url: '/manager/namespaces/get-started',
+    url: '/manager/gateways/get-started',
     access: ['portal-user'],
     sites: ['devportal'],
   },
   {
-    name: 'Namespaces',
+    name: 'Gateways',
     altUrls: [
       '/manager/services',
       '/manager/services/[id]',
