@@ -46,6 +46,10 @@ function SmoothScrollLink({ href, children }) {
 
 const GatewayGetStarted: React.FC = () => {
   const global = useGlobal();
+  const GlossaryUrl = global?.helpLinks.helpSupportUrl + 'reference/glossary'
+  const QuickStartUrl = global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'
+  const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
+  const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'
 
   return (
     <>
@@ -109,7 +113,7 @@ const GatewayGetStarted: React.FC = () => {
           <Text pt={6} pb={10}>
             Follow these steps to create and configure your first gateway. For more details on how to set up an API, consult our API provider{' '}
             <Link
-                href={global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'}
+                href={QuickStartUrl}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
@@ -158,7 +162,7 @@ const GatewayGetStarted: React.FC = () => {
             <Text pt={2}>
               Our CLI is a convenient way to configure your gateways.{' '}                   
               <Link
-                href={global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'}
+                href={GwaInstallUrl}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
@@ -275,7 +279,7 @@ const GatewayGetStarted: React.FC = () => {
           </Heading>
           <Text>
             <Link
-              href={global?.helpLinks.helpSupportUrl + 'reference/glossary'}
+              href={GlossaryUrl}
               target="_blank"
               color="bc-link"
               textDecor="underline"
@@ -290,7 +294,7 @@ const GatewayGetStarted: React.FC = () => {
           <Text pt={6}>
             These useful commands help you manage your gateway resources. For more details visit our {' '}
             <Link
-                href={global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'}
+                href={GwaCommandsUrl}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
@@ -303,7 +307,7 @@ const GatewayGetStarted: React.FC = () => {
           <CliCommand 
             title='Use the test environment'
             description='Configure the CLI to run against a test environment while you are getting familiarized with the API Services Portal.'
-            command='gwa config set host http://api-gov-bc-ca.test.api.gov.bc.ca/' 
+            command='gwa config set host api-gov-bc-ca.test.api.gov.bc.ca' 
           />
           <CliCommand 
             title='Log in'
@@ -313,9 +317,9 @@ const GatewayGetStarted: React.FC = () => {
           <CliCommand 
             id='create-gateway'
             title='Create gateway'
-            description='Generate a new gateway with this command. The new gateway will be assigned an automatic alphanumeric ID
-              and a generic display name that can be modified to easily identify and distinguish this gateway from others.'
-            command='gwa gateway create -g' 
+            description='Generate a new gateway with this command. The new gateway will be automatically assigned an ID
+              and you can set a display name to easily identify this gateway.'
+            command='gwa gateway create' 
           />
           <CliCommand 
             id='generate-config'
