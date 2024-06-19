@@ -645,6 +645,7 @@ export function RegisterRoutes(app: express.Router) {
             async function EndpointsController_check(request: any, response: any, next: any) {
             const args = {
                     serviceName: {"in":"query","name":"serviceName","required":true,"dataType":"string"},
+                    gatewayId: {"in":"query","name":"gatewayId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

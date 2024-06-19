@@ -12,7 +12,13 @@ import {
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { getRecords, removeEmpty } from '../../batch/feed-worker';
-import { GatewayRoute } from './types';
+import { GatewayRoute, GatewayService } from './types';
+
+interface MatchList {
+  serviceName: string;
+  names: string[];
+  hosts: string[];
+}
 
 @injectable()
 @Route('/routes')
@@ -28,50 +34,57 @@ export class EndpointsController extends Controller {
   @OperationId('check-availability')
   public async check(
     @Query() serviceName: string,
+    @Query() gatewayId: string,
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.sudo();
-    const records = await getRecords(
-      ctx,
-      'GatewayRoute',
-      'allGatewayRoutes',
-      []
-    );
+    const records = await getRecords(ctx, 'GatewayRoute', 'allGatewayRoutes', [
+      'service',
+    ]);
 
     let counter = 0;
-    let matchHostList;
+    let matchHostList: MatchList;
     do {
       counter++;
       matchHostList = this.getMatchHostList(
-        counter == 1 ? serviceName : `${serviceName}-${counter}`
+        counter == 1
+          ? serviceName
+          : counter == 2
+          ? `${gatewayId}-${serviceName}`
+          : `${gatewayId}-${counter}-${serviceName}`
       );
-    } while (this.isTaken(records, matchHostList.hosts));
+    } while (this.isTaken(records, matchHostList));
 
     return {
       available: counter == 1,
-      name: matchHostList.serviceName,
-      host: matchHostList.hosts[0],
+      suggestion: matchHostList,
     };
   }
 
-  private getMatchHostList(
-    serviceName: string
-  ): { serviceName: string; hosts: string[] } {
+  private getMatchHostList(serviceName: string): MatchList {
     return {
       serviceName,
+      names: [`${serviceName}`, `${serviceName}-dev`, `${serviceName}-test`],
       hosts: [
         `${serviceName}.api.gov.bc.ca`,
+        `${serviceName}.api.dev.gov.bc.ca`,
+        `${serviceName}.api.test.gov.bc.ca`,
         `${serviceName}-api-gov-bc-ca.dev.api.gov.bc.ca`,
         `${serviceName}-api-gov-bc-ca.test.api.gov.bc.ca`,
       ],
     };
   }
 
-  private isTaken(records: any[], matchHosts: string[]): boolean {
+  private isTaken(records: any[], matchList: MatchList): boolean {
     return (
       records.filter(
         (r: GatewayRoute) =>
-          r.hosts.filter((h: string) => matchHosts.indexOf(h) >= 0).length > 0
+          r.hosts.filter((h: string) => matchList.hosts.indexOf(h) >= 0)
+            .length > 0 ||
+          matchList.names.filter((n: string) => n == r.name).length > 0 ||
+          matchList.names.filter(
+            (n: string) => n == (r.service as GatewayService).name
+          ).length > 0
       ).length > 0
     );
   }
