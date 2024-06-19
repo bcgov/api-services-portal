@@ -42,13 +42,50 @@ describe('Gateways', () => {
       )
     })
 
+    it('POST /gateways (with no payload)', () => {
+      const { v4: uuidv4 } = require('uuid')
+      const payload = {}
+      cy.log(JSON.stringify(payload))
+      cy.setRequestBody(payload)
+      cy.callAPI('ds/api/v3/gateways', 'POST').then(
+        ({ apiRes: { body, status } }: any) => {
+          const match = {
+            gatewayId: body.gatewayId,
+            displayName: "janis's Gateway",
+          }
+          expect(status).to.be.equal(200)
+          expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
+        }
+      )
+    })
+
     it('POST /gateways (with gatewayId)', () => {
       const { v4: uuidv4 } = require('uuid')
       const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
 
       const payload = {
         gatewayId: `custom-${customId}-gw`,
-        displayName: 'My ABC Gateway',
+        displayName: 'ABC GW',
+      }
+      cy.log(JSON.stringify(payload))
+      cy.setRequestBody(payload)
+      cy.callAPI('ds/api/v3/gateways', 'POST').then(
+        ({ apiRes: { body, status } }: any) => {
+          cy.log(body)
+          expect(status).to.be.equal(200)
+          expect(body.gatewayId).to.be.equal(payload.gatewayId)
+          expect(body.displayName).to.be.equal(payload.displayName)
+        }
+      )
+    })
+
+    it('POST /gateways (with all valid chars)', () => {
+      const { v4: uuidv4 } = require('uuid')
+      const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
+
+      const payload = {
+        gatewayId: `custom-${customId}-gw`,
+        displayName: 'ABC GW with ( ) - _ / . chars',
       }
       cy.log(JSON.stringify(payload))
       cy.setRequestBody(payload)
@@ -132,6 +169,50 @@ describe('Gateways', () => {
               d0: {
                 message:
                   'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.',
+              },
+            },
+          }
+          expect(status).to.be.equal(422)
+          expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
+        }
+      )
+    })
+    it('POST /gateways (display name too long)', () => {
+      const payload = {
+        displayName: 'this display name is more than 30 characters',
+      }
+      cy.log(JSON.stringify(payload))
+      cy.setRequestBody(payload)
+      cy.callAPI('ds/api/v3/gateways', 'POST').then(
+        ({ apiRes: { body, status } }: any) => {
+          const match = {
+            message: 'Validation Failed',
+            details: {
+              d0: {
+                message:
+                  'Display name can not be longer than 30 characters and can only use special characters "-()_ .\'/".',
+              },
+            },
+          }
+          expect(status).to.be.equal(422)
+          expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
+        }
+      )
+    })
+    it('POST /gateways (display name invalid characters)', () => {
+      const payload = {
+        displayName: 'this display name has invalid # char',
+      }
+      cy.log(JSON.stringify(payload))
+      cy.setRequestBody(payload)
+      cy.callAPI('ds/api/v3/gateways', 'POST').then(
+        ({ apiRes: { body, status } }: any) => {
+          const match = {
+            message: 'Validation Failed',
+            details: {
+              d0: {
+                message:
+                  'Display name can not be longer than 30 characters and can only use special characters "-()_ .\'/".',
               },
             },
           }
