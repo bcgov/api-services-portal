@@ -70,7 +70,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   }, [router]);
 
   // Temp solution for handing spacing around new gateways dropdown menu
-  const gatewaysMenu = (router?.pathname.startsWith('/manager/') || router?.pathname === '/devportal/api-directory/your-products')
+  const gatewaysMenu = ((router?.pathname.startsWith('/manager/') && router?.pathname !== '/manager/gateways/get-started') || router?.pathname === '/devportal/api-directory/your-products')
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
