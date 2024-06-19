@@ -494,6 +494,7 @@ module.exports = {
                 for (const scope of [
                   'Namespace.Manage',
                   'CredentialIssuer.Admin',
+                  'Access.Manage',
                   'GatewayConfig.Publish',
                 ]) {
                   await permissionApi.createPermission(
