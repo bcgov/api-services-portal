@@ -1,4 +1,4 @@
-import { useAuth } from '@/shared/services/auth';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 type Breadcrumb = {
   href?: string;
@@ -8,14 +8,28 @@ type Breadcrumb = {
 const useNamespaceBreadcrumbs = (
   appendedBreadcrumbs: Breadcrumb[] = []
 ): Breadcrumb[] => {
-  const { user } = useAuth();
+  const namespace = useCurrentNamespace();
 
-  if (user) {
-    return [
-      { href: '/manager/gateways', text: 'My Gateways' },
-      { href: '/manager/namespaces', text: `Gateway (${user.namespace})` },
-      ...appendedBreadcrumbs,
-    ];
+  if (namespace.isSuccess && !namespace.isFetching) {
+    if (namespace.data?.currentNamespace?.displayName) {
+      return [
+        { href: '/manager/gateways', text: 'My Gateways' },
+        {
+          href: '/manager/namespaces',
+          text: `${namespace.data?.currentNamespace?.displayName}`,
+        },
+        ...appendedBreadcrumbs,
+      ];
+    } else {
+      return [
+        { href: '/manager/gateways', text: 'My Gateways' },
+        {
+          href: '/manager/namespaces',
+          text: `${namespace.data?.currentNamespace?.name}`,
+        },
+        ...appendedBreadcrumbs,
+      ];
+    }
   }
 
   return appendedBreadcrumbs;
