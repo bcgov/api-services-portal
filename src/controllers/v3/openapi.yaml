@@ -853,6 +853,12 @@ paths:
                     required: true
                     schema:
                         type: string
+                -
+                    in: query
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
     /gateways/report:
         get:
             operationId: report
