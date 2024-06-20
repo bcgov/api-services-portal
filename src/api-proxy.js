@@ -17,7 +17,7 @@ class ApiProxyApp {
       logLevel: 'debug',
       pathRewrite: {
         '^/gw/api/v2/': '/v2/',
-        '^/gw/api/v3/': '/v2/',
+        '^/gw/api/v3/gateways/': '/v2/namespaces/'
       },
       onProxyReq: (proxyReq, req) => {
         //console.log(req.headers)
