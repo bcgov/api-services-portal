@@ -28,6 +28,7 @@ import NamespaceManager from '@/components/namespace-manager/namespace-manager';
 import { Namespace } from '@/shared/types/query.types';
 import SearchInput from '@/components/search-input';
 import PublishingPopover from '@/components/publishing-popover';
+import { useRouter } from 'next/router';
 
 type GatewayActions = {
   title: string;
@@ -76,6 +77,14 @@ const MyGatewaysPage: React.FC = () => {
     { suspense: false }
   );
   const today = new Date();
+
+  // Redirect to Get Started page if no gateways
+  const router = useRouter();
+  React.useEffect(() => {
+    if (isSuccess && data.allNamespaces.length == 0) {
+      router.push('/manager/gateways/get-started');
+    }
+  }, [data]);
 
   // Namespace change
   const client = useQueryClient();

@@ -29,11 +29,10 @@ const NamespacesPage: React.FC = () => {
           {isError && (
             <Heading>Gateways Failed to Load</Heading>
           )}
-          {/* TODO: add data.allNamespaces.length == 0 to the router logic in order to show this page */}
-          {/* {isSuccess && data.allNamespaces.length == 0 && ( */}
-          {isSuccess && (
-            <GatewayGetStarted />
-          )}
+          {(isSuccess && data.allNamespaces.length != 0) && (
+            <Heading>Gateways Found!</Heading>
+            )}
+          <GatewayGetStarted />
         </>
       </Container>
     </>
@@ -45,7 +44,6 @@ export default NamespacesPage;
 const query = gql`
   query GetNamespaces {
     allNamespaces {
-      id
       name
     }
   }
