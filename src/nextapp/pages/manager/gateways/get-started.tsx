@@ -45,6 +45,7 @@ export default NamespacesPage;
 const query = gql`
   query GetNamespaces {
     allNamespaces {
+      id
       name
     }
   }
