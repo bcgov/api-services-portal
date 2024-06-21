@@ -46,7 +46,12 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     setSearch(value);
     handleRefresh();
   };
-
+  
+  const allNamespaces = (data?.allNamespaces || []).sort((a, b) => {
+    if (a.displayName < b.displayName) return -1;
+    if (a.displayName > b.displayName) return 1;
+    return 0;
+  });
   const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
   const recentNamespaces = data?.allNamespaces
     .filter((namespace: Namespace) => {
@@ -181,10 +186,10 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                             </Text>
                           )
                         : (
-                            recentNamespaces.length > 0 ?
+                            allNamespaces.length > 0 ?
                               (
                                 <Text fontWeight="bold">
-                                  Recently viewed
+                                  {recentNamespaces.length > 0 ? "Recently viewed" : "Gateways"}
                                 </Text>
                               ) : null
                       )
@@ -201,7 +206,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       />
                     </Box>
                   )}
-                  {(search !== '' ? namespaceSearchResults : recentNamespaces).map((n) => (
+                  {(search !== '' ? namespaceSearchResults : (recentNamespaces.length === 0 ? allNamespaces : recentNamespaces)).map((n) => (
                       <MenuItem
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
