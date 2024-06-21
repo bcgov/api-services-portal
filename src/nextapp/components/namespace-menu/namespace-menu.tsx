@@ -21,15 +21,14 @@ import { gql } from 'graphql-request';
 import SearchInput from '@/components/search-input';
 import { restApi, useApi } from '@/shared/services/api';
 import { Namespace } from '@/shared/types/query.types';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
-  buttonMessage?: string;
 }
 
 const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   user,
-  buttonMessage,
 }) => {
   const client = useQueryClient();
   const toast = useToast();
@@ -47,6 +46,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     handleRefresh();
   };
   
+  const currentNamespace = useCurrentNamespace();
   const allNamespaces = (data?.allNamespaces || []).sort((a, b) => {
     if (a.displayName < b.displayName) return -1;
     if (a.displayName > b.displayName) return 1;
@@ -136,7 +136,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           justifyContent="space-between"
         >
           <Flex alignItems="center">
-            <Box flex="1">{user?.namespace ?? buttonMessage ?? 'No Active Gateway'}</Box>
+            <Box flex="1">{currentNamespace.data?.currentNamespace.displayName ?? 'No Active Gateway'}</Box>
             <Icon as={FaChevronDown} aria-label="chevron down icon" />
           </Flex>
         </MenuButton>
