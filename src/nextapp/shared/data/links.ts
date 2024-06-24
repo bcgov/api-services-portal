@@ -57,7 +57,7 @@ const links: NavLink[] = [
     name: 'Gateways Get Started',
     url: '/manager/gateways/get-started',
     access: ['portal-user'],
-    sites: ['devportal'],
+    sites: ['manager'],
   },
   {
     name: 'Gateways',
