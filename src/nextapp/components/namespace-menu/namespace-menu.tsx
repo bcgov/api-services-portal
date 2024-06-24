@@ -43,7 +43,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   };
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    handleRefresh();
   };
   
   const currentNamespace = useCurrentNamespace();
