@@ -235,7 +235,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   </Text>
                   <MenuItem
                     as="a"
-                    href={'https://www.google.com'}
+                    href='/manager/gateways'
                     fontSize='sm'
                     justifyContent='center'
                     alignItems='center'
