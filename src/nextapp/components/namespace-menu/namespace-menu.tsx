@@ -41,6 +41,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleRefresh = () => {
     refetch();
   };
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const menuItemsRef = React.useRef<HTMLDivElement>(null);
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
@@ -113,10 +115,40 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     },
     [client, toast, user]
   );
+  
+  const [tabOutOfSearch, setTabOutOfSearch] = React.useState(false);
+  const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Tab') {
+      setTabOutOfSearch(true);
+    } else {
+      // Prevent Chakra UI default behavior of moving focus on any key press other than Tab
+      event.stopPropagation();
+    }
+  }, []);
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    if (tabOutOfSearch) {
+      if (menuItemsRef.current) {
+        const firstMenuItem = menuItemsRef.current.querySelector('[role="menuitem"]') as HTMLElement;
+        firstMenuItem?.focus();
+      }
+      return; // Allow the blur if Tab was pressed
+    }
+    // Keep the focus on the search input if blur occurs and Tab was not pressed
+    event.currentTarget.focus();
+  };
+  const handleFocus = () => {
+    setTabOutOfSearch(false); // Reset the state when focus is back to the search input
+  };
 
   return (
     <>
-      <Menu placement="bottom-end" onOpen={handleRefresh}>
+      <Menu 
+        placement="bottom-end" 
+        onOpen={() => {
+          handleRefresh();
+          setTimeout(() => searchInputRef.current?.focus(), 300);          
+        }}
+      >
         <MenuButton
           data-testid="ns-dropdown-btn"
           px={4}
@@ -135,7 +167,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           justifyContent="space-between"
         >
           <Flex alignItems="center">
-            <Box flex="1">{currentNamespace.data?.currentNamespace?.displayName ?? 'No Active Gateway'}</Box>
+            <Box flex="1">Tab is {tabOutOfSearch ? 'true' : 'false'}</Box>
+            {/* <Box flex="1">{currentNamespace.data?.currentNamespace?.displayName ?? 'No Active Gateway'}</Box> */}
             <Icon as={FaChevronDown} aria-label="chevron down icon" />
           </Flex>
         </MenuButton>
@@ -158,10 +191,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             <Box ml={6} w={'338px'}>
               <SearchInput
                 placeholder="Find a Gateway by name or ID"
-                onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
+                // onBlur={(event) => {
+                //   event.currentTarget.focus();
+                // }}
+                onBlur={handleBlur}
+                onFocus={handleFocus}
+                onKeyDown={handleKeyDown}
                 value={search}
                 data-testid="namespace-search-input"
+                ref={searchInputRef}
               />
             </Box>                
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
@@ -170,7 +209,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
-                <Box maxHeight="calc(100vh / 2 - 80px)" overflowY="auto">
+                <Box ref={menuItemsRef} maxHeight="calc(100vh / 2 - 80px)" overflowY="auto">
                   <MenuOptionGroup
                     pt={8}
                     pb={2}

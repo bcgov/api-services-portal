@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { forwardRef } from 'react';
 import {
   Input,
   InputGroup,
@@ -15,13 +16,10 @@ interface SearchInputProps extends Omit<InputProps, 'onChange'> {
   value: string;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({
-  onChange,
-  placeholder = 'Search',
-  value,
-  ...props
-}) => {
-  const ref = React.useRef<HTMLInputElement>(null);
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
+  ({ onChange, placeholder = 'Search', value, ...props }, forwardedRef) => {
+  const innerRef = React.useRef<HTMLInputElement>(null);
+  const ref = forwardedRef || innerRef;
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(event.target.value);
@@ -33,9 +31,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
       event.stopPropagation();
       event.preventDefault();
       onChange('');
-      ref.current.focus();
+      if (ref && 'current' in ref && ref.current) {
+        ref.current.focus();
+      }
     },
-    [onChange]
+    [onChange, ref]
   );
 
   return (
@@ -76,6 +76,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
       </InputRightElement>
     </InputGroup>
   );
-};
+}
+);
+
+SearchInput.displayName = 'SearchInput';
 
 export default SearchInput;
