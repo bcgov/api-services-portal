@@ -2,13 +2,13 @@ import GatewayGetStarted from '@/components/gateway-get-started';
 import PageHeader from '@/components/page-header';
 import { useApi } from '@/shared/services/api';
 import {
-    Box,
-    Container,
-    Flex,
-    Icon,
-    Heading,
-    Link,
-    Text
+  Box,
+  Container,
+  Flex,
+  Icon,
+  Heading,
+  Link,
+  Text,
 } from '@chakra-ui/react';
 import { FaInfoCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
@@ -29,14 +29,10 @@ const NamespacesPage: React.FC = () => {
   return (
     <>
       <Head>
-        <title>
-          API Program Services | My Gateways
-        </title>
+        <title>API Program Services | My Gateways</title>
       </Head>
-      {isError && (
-        <Heading>Gateways Failed to Load</Heading>
-      )}
-      {(isSuccess && data.allNamespaces.length != 0) && (
+      {isError && <Heading>Gateways Failed to Load</Heading>}
+      {isSuccess && data.allNamespaces.length != 0 && (
         <Box width="100%" bgColor="#DAE7F0" color="bc-blue" boxShadow="md">
           <Container maxW="6xl" py={6}>
             <Flex align="center" justify="space-between" gridGap={8}>
@@ -45,12 +41,14 @@ const NamespacesPage: React.FC = () => {
                 <Text fontSize="sm" fontWeight="bold">
                   You have gateways. Visit the{' '}
                   <Link
-                    href={'/manager/gateways'}
+                    href={'/manager/gateways/list'}
                     target="_blank"
                     color="bc-link"
                     textDecor="underline"
-                  >My Gateways page</Link>
-                  {' '}to manage them.
+                  >
+                    My Gateways page
+                  </Link>{' '}
+                  to manage them.
                 </Text>
               </Flex>
             </Flex>

@@ -13,9 +13,9 @@ const useNamespaceBreadcrumbs = (
   if (appendedBreadcrumbs) {
     if (namespace.isSuccess && !namespace.isFetching) {
       return [
-        { href: '/manager/gateways', text: 'My Gateways' },
+        { href: '/manager/gateways/list', text: 'My Gateways' },
         {
-          href: '/manager/namespaces',
+          href: '/manager/gateways/detail',
           text: `${namespace.data?.currentNamespace?.displayName}`,
         },
         ...appendedBreadcrumbs,
@@ -26,11 +26,11 @@ const useNamespaceBreadcrumbs = (
   } else {
     if (namespace.isSuccess && !namespace.isFetching) {
       return [
-        { href: '/manager/gateways', text: 'My Gateways' },
+        { href: '/manager/gateways/list', text: 'My Gateways' },
         { text: `${namespace.data?.currentNamespace?.displayName}` },
       ];
     } else {
-      return [{ href: '/manager/gateways', text: 'My Gateways' }];
+      return [{ href: '/manager/gateways/list', text: 'My Gateways' }];
     }
   }
 };

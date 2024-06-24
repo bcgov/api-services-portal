@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Container, Flex, Link, Text} from '@chakra-ui/react';
+import { Box, Container, Flex, Link, Text } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import type { NavLink } from '@/shared/data/links';
 import NamespaceMenu from '../namespace-menu';
@@ -47,7 +47,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
 
     return '';
   }, [pathname]);
-  
+
   return (
     <Flex>
       <Box
@@ -100,28 +100,27 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
           ))}
         </Container>
       </Box>
-      {((pathname.startsWith('/manager/') && pathname !== '/manager/gateways/get-started') || pathname === '/devportal/api-directory/your-products') && (
-      <Box
-        as="nav"
-        role="banner"
-        bg="#C1D1EA"
-        pos="fixed"
-        w="100%"
-        zIndex={{ base: 1000, sm: 5 }}
-        top={{ sm: "115px", base: "256px" }}
-      >
-        <Container
-          mx={{ base: 0, sm: 8 }}
-          px={{ base: 0, sm: 4 }}
+      {((pathname.startsWith('/manager/') &&
+        pathname !== '/manager/gateways/get-started' &&
+        pathname !== '/manager/gateways') ||
+        pathname === '/devportal/api-directory/your-products') && (
+        <Box
+          as="nav"
+          role="banner"
+          bg="#C1D1EA"
+          pos="fixed"
+          w="100%"
+          zIndex={{ base: 1000, sm: 5 }}
+          top={{ sm: '115px', base: '256px' }}
         >
-          <Flex alignItems="center" h={12} gridGap={2}>
-            <Text fontWeight='bold'>Gateway selected:</Text>
-            <NamespaceMenu user={user} />
-          </Flex>
-        </Container>
-      </Box>
+          <Container mx={{ base: 0, sm: 8 }} px={{ base: 0, sm: 4 }}>
+            <Flex alignItems="center" h={12} gridGap={2}>
+              <Text fontWeight="bold">Gateway selected:</Text>
+              <NamespaceMenu user={user} />
+            </Flex>
+          </Container>
+        </Box>
       )}
-
     </Flex>
   );
 };
