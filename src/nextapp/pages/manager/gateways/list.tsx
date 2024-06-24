@@ -29,6 +29,8 @@ import { Namespace } from '@/shared/types/query.types';
 import SearchInput from '@/components/search-input';
 import PublishingPopover from '@/components/publishing-popover';
 import { useRouter } from 'next/router';
+import { updateRecentlyViewedNamespaces } from '@/shared/services/utils';
+import { useAuth } from '@/shared/services/auth';
 
 type GatewayActions = {
   title: string;
@@ -70,6 +72,7 @@ const actions: GatewayActions[] = [
 ];
 
 const MyGatewaysPage: React.FC = () => {
+  const { user } = useAuth();
   const managerDisclosure = useDisclosure();
   const { data, isLoading, isSuccess, isError } = useApi(
     'allNamespaces',
@@ -89,6 +92,7 @@ const MyGatewaysPage: React.FC = () => {
   // Namespace change
   const client = useQueryClient();
   const toast = useToast();
+  const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
@@ -98,6 +102,7 @@ const MyGatewaysPage: React.FC = () => {
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
+        updateRecentlyViewedNamespaces(namespacesRecentlyViewed, user);
         toast.closeAll();
         client.invalidateQueries();
         toast({

@@ -22,6 +22,7 @@ import SearchInput from '@/components/search-input';
 import { restApi, useApi } from '@/shared/services/api';
 import { Namespace } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
+import { updateRecentlyViewedNamespaces } from '@/shared/services/utils';
 
 interface NamespaceMenuProps {
   user: UserData;
@@ -83,17 +84,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
-        const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.userId === user.userId && entry.namespace === user.namespace);
-        if (existingEntryIndex !== -1) {
-          namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
-        } else {
-          namespacesRecentlyViewed.push({
-            userId: user.userId,
-            namespace: user.namespace,
-            updatedAt: user.updatedAt
-          });
-        }
-        localStorage.setItem('namespacesRecentlyViewed', JSON.stringify(namespacesRecentlyViewed));
+        updateRecentlyViewedNamespaces(namespacesRecentlyViewed, user);
         handleSearchChange('');
         toast.closeAll();
         client.invalidateQueries();
