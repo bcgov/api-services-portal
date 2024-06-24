@@ -10,8 +10,8 @@ const useNamespaceBreadcrumbs = (
 ): Breadcrumb[] => {
   const namespace = useCurrentNamespace();
 
-  if (namespace.isSuccess && !namespace.isFetching) {
-    if (namespace.data?.currentNamespace?.displayName) {
+  if (appendedBreadcrumbs) {
+    if (namespace.isSuccess && !namespace.isFetching) {
       return [
         { href: '/manager/gateways', text: 'My Gateways' },
         {
@@ -21,18 +21,18 @@ const useNamespaceBreadcrumbs = (
         ...appendedBreadcrumbs,
       ];
     } else {
+      return appendedBreadcrumbs;
+    }
+  } else {
+    if (namespace.isSuccess && !namespace.isFetching) {
       return [
         { href: '/manager/gateways', text: 'My Gateways' },
-        {
-          href: '/manager/namespaces',
-          text: `${namespace.data?.currentNamespace?.name}`,
-        },
-        ...appendedBreadcrumbs,
+        { text: `${namespace.data?.currentNamespace?.displayName}` },
       ];
+    } else {
+      return [{ href: '/manager/gateways', text: 'My Gateways' }];
     }
   }
-
-  return appendedBreadcrumbs;
 };
 
 export default useNamespaceBreadcrumbs;

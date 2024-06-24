@@ -60,7 +60,7 @@ import { Namespace, Query } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
 import EditNamespaceDisplayName from '@/components/edit-display-name';
-import { useNamespaceRootBreadcrumbs } from '@/shared/hooks';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
 const actions = [
   {
@@ -121,7 +121,7 @@ const secondaryActions = [
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
-  const breadcrumbs = useNamespaceRootBreadcrumbs();
+  const breadcrumbs = useNamespaceBreadcrumbs();
   const hasNamespace = !!user?.namespace;
   const router = useRouter();
   const toast = useToast();
