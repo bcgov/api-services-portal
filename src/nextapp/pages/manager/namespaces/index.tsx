@@ -23,7 +23,7 @@ import {
   Skeleton,
   Tooltip,
   VStack,
-  Stack
+  Stack,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -53,13 +53,14 @@ import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
-import Card from '@/components/card'
-import GatewayGetStarted from '@/components/gateway-get-started'
+import Card from '@/components/card';
+import GatewayGetStarted from '@/components/gateway-get-started';
 import EmptyPane from '@/components/empty-pane';
 import { Namespace, Query } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
 import EditNamespaceDisplayName from '@/components/edit-display-name';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
 const actions = [
   {
@@ -120,6 +121,7 @@ const secondaryActions = [
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
+  const breadcrumbs = useNamespaceBreadcrumbs();
   const hasNamespace = !!user?.namespace;
   const router = useRouter();
   const toast = useToast();
@@ -271,15 +273,14 @@ const NamespacesPage: React.FC = () => {
       </Head>
       <ApproveBanner />
       <PreviewBanner />
-      <Container maxW="6xl">
-        <PageHeader title={hasNamespace ? title : 'My Gateways'} />
+      <Container maxW="6xl" mt={4}>
+        <PageHeader
+          title={hasNamespace ? title : 'My Gateways'}
+          breadcrumb={breadcrumbs}
+        />
         <>
-          {isError && (
-            <Heading>Gateways Failed to Load</Heading>
-          )}
-          {isSuccess && data.allNamespaces.length == 0 && (
-            <GatewayGetStarted />
-          )}
+          {isError && <Heading>Gateways Failed to Load</Heading>}
+          {isSuccess && data.allNamespaces.length == 0 && <GatewayGetStarted />}
         </>
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
