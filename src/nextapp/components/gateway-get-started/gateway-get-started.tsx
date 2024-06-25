@@ -334,14 +334,24 @@ const GatewayGetStarted: React.FC = () => {
             title='Apply your configuration'
             description='With this command you can apply your configuration to your recently created gateway. 
               If you need to make updates or republish, simply run this command again.'
-            command='gwa apply --input <gw-config.yaml>' 
+            command='gwa apply --input gw-config.yaml' 
           />
           <CliCommand 
             title='Test your gateway'
-            description='Get the route for your newly published gateway service using this command. It will return a link to
-              the route to access your API through the gateway and a link to the Your Products page to request credentials.
-                '
-            command='gwa status -links' 
+            description={
+              <>
+                Visit the{' '}             
+                <Link
+                href={QuickStartUrl}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+                >Your Products page</Link> to request credentials.
+                Then, get the URL for your newly published gateway service <Code>...api.gov.bc.ca</Code> using this command.
+                Pass the client ID and secret in a POST request to this URL to get a JWT token to access your API.  
+              </>
+            }
+            command='gwa status -hosts' 
           />
 
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
