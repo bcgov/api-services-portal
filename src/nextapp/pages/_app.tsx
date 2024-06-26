@@ -70,7 +70,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   }, [router]);
 
   // Temp solution for handing spacing around new gateways dropdown menu
-  const gatewaysMenu = ((router?.pathname.startsWith('/manager/') && router?.pathname !== '/manager/gateways/get-started' && router?.pathname !== '/manager/gateways/list') || router?.pathname === '/devportal/api-directory/your-products')
+  const gatewaysMenu =
+    (router?.pathname.startsWith('/manager/') &&
+      router?.pathname !== '/manager/gateways' &&
+      router?.pathname !== '/manager/gateways/get-started' &&
+      router?.pathname !== '/manager/gateways/list') ||
+    router?.pathname === '/devportal/api-directory/your-products';
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -108,7 +113,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AuthAction site={site} />
               </Header>
               <NavBar links={links} site={site} pathname={router?.pathname} />
-              <Box as="main" flex={1} mt={{ base: gatewaysMenu ? '303px' : '65px', sm: gatewaysMenu ? '163px' : '115px' }}>
+              <Box
+                as="main"
+                flex={1}
+                mt={{
+                  base: gatewaysMenu ? '303px' : '65px',
+                  sm: gatewaysMenu ? '163px' : '115px',
+                }}
+              >
                 <AppWrapper router={router}>
                   <Component {...pageProps} />
                 </AppWrapper>

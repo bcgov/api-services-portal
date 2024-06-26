@@ -79,7 +79,6 @@ const MyGatewaysPage: React.FC = () => {
     { query },
     { suspense: false }
   );
-  const today = new Date();
 
   // Redirect to Get Started page if no gateways
   const router = useRouter();
@@ -92,7 +91,9 @@ const MyGatewaysPage: React.FC = () => {
   // Namespace change
   const client = useQueryClient();
   const toast = useToast();
-  const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
+  const namespacesRecentlyViewed = JSON.parse(
+    localStorage.getItem('namespacesRecentlyViewed') || '[]'
+  );
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
@@ -183,26 +184,28 @@ const MyGatewaysPage: React.FC = () => {
         <title>API Program Services | My Gateways</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader
-          actions={
-            <Button
-              isDisabled={!data}
-              onClick={managerDisclosure.onOpen}
-              variant="primary"
-              data-testid="ns-report-btn"
-            >
-              Export Gateway Report
-            </Button>
-          }
-          title="My Gateways"
-        ></PageHeader>
+        <Box mb={-4}>
+          <PageHeader
+            actions={
+              <Button
+                isDisabled={!data}
+                onClick={managerDisclosure.onOpen}
+                variant="primary"
+                data-testid="ns-report-btn"
+              >
+                Export Gateway Report
+              </Button>
+            }
+            title="My Gateways"
+          ></PageHeader>
+        </Box>
         <GridLayout>
           {actions.map((action) => (
             <Card>
               <Box p={4}>
                 <Heading size="sm" mb={2}>
                   <Flex alignItems="center">
-                    <Icon as={action.icon} mb={0.5} mr={4} boxSize={6} />
+                    <Icon as={action.icon} mr={4} boxSize={6} />
                     {action.title}
                   </Flex>
                 </Heading>
@@ -276,23 +279,6 @@ const MyGatewaysPage: React.FC = () => {
                           ? namespace.displayName
                           : namespace.name}
                       </Link>
-                      {differenceInDays(
-                        today,
-                        new Date(namespace.orgUpdatedAt)
-                      ) <= 5 && (
-                        <Center
-                          w={12}
-                          h={6}
-                          bg="#E9F0F8"
-                          borderRadius="md"
-                          border="1px solid"
-                          borderColor="#8E8E8E59"
-                        >
-                          <Text fontSize="sm" color="#333333">
-                            New
-                          </Text>
-                        </Center>
-                      )}
                     </Flex>
                     <Text fontSize="md" pl="33px">
                       {namespace.name}

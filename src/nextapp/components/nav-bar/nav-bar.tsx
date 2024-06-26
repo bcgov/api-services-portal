@@ -101,6 +101,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
         </Container>
       </Box>
       {((pathname.startsWith('/manager/') &&
+        pathname !== '/manager/gateways' &&
         pathname !== '/manager/gateways/get-started' &&
         pathname !== '/manager/gateways/list') ||
         pathname === '/devportal/api-directory/your-products') && (

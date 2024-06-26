@@ -156,6 +156,13 @@ const NamespacesPage: React.FC = () => {
     };
   }, [namespace]);
 
+  // Redirect to My Gateways page if no gateway selected
+  React.useEffect(() => {
+    if (!hasNamespace) {
+      router.push('/manager/gateways/list');
+    }
+  }, [hasNamespace]);
+
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
       try {
@@ -274,10 +281,12 @@ const NamespacesPage: React.FC = () => {
       <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl" mt={4}>
-        <PageHeader
-          title={hasNamespace ? title : 'My Gateways'}
-          breadcrumb={breadcrumbs}
-        />
+        {hasNamespace && (
+          <PageHeader
+            title={hasNamespace ? title : 'My Gateways'}
+            breadcrumb={breadcrumbs}
+          />
+        )}
         <>
           {isError && <Heading>Gateways Failed to Load</Heading>}
           {isSuccess && data.allNamespaces.length == 0 && <GatewayGetStarted />}
