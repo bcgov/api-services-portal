@@ -78,7 +78,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to  ${namespace.name} gateway`,
+        title: `Switching to gateway: ${namespace.displayName}`,
         status: 'info',
         isClosable: true,
       });
@@ -89,7 +89,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to  ${namespace.name} gateway`,
+          title: `Switched to gateway: ${namespace.displayName}`,
           status: 'success',
           isClosable: true,
         });
@@ -210,7 +210,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       >
                         <Box display="flex" alignItems="center">
                           <Icon as={FaServer} />
-                          <Text ml={2}>{n.displayName ? n.displayName : `Gateway ${n.name}`}</Text>
+                          <Text ml={2}>{n.displayName}</Text>
                         </Box>
                         <Text ml={6} color='text'>{n.name}</Text>
                       </MenuItem>
