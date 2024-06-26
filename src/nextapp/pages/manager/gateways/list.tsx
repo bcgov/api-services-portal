@@ -79,7 +79,6 @@ const MyGatewaysPage: React.FC = () => {
     { query },
     { suspense: false }
   );
-  const today = new Date();
 
   // Redirect to Get Started page if no gateways
   const router = useRouter();
@@ -280,23 +279,6 @@ const MyGatewaysPage: React.FC = () => {
                           ? namespace.displayName
                           : namespace.name}
                       </Link>
-                      {differenceInDays(
-                        today,
-                        new Date(namespace.orgUpdatedAt)
-                      ) <= 5 && (
-                        <Center
-                          w={12}
-                          h={6}
-                          bg="#E9F0F8"
-                          borderRadius="md"
-                          border="1px solid"
-                          borderColor="#8E8E8E59"
-                        >
-                          <Text fontSize="sm" color="#333333">
-                            New
-                          </Text>
-                        </Center>
-                      )}
                     </Flex>
                     <Text fontSize="md" pl="33px">
                       {namespace.name}
