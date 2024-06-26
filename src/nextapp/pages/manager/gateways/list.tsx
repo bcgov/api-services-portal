@@ -92,7 +92,9 @@ const MyGatewaysPage: React.FC = () => {
   // Namespace change
   const client = useQueryClient();
   const toast = useToast();
-  const namespacesRecentlyViewed = JSON.parse(localStorage.getItem('namespacesRecentlyViewed') || '[]');
+  const namespacesRecentlyViewed = JSON.parse(
+    localStorage.getItem('namespacesRecentlyViewed') || '[]'
+  );
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
@@ -183,26 +185,28 @@ const MyGatewaysPage: React.FC = () => {
         <title>API Program Services | My Gateways</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader
-          actions={
-            <Button
-              isDisabled={!data}
-              onClick={managerDisclosure.onOpen}
-              variant="primary"
-              data-testid="ns-report-btn"
-            >
-              Export Gateway Report
-            </Button>
-          }
-          title="My Gateways"
-        ></PageHeader>
+        <Box mb={-4}>
+          <PageHeader
+            actions={
+              <Button
+                isDisabled={!data}
+                onClick={managerDisclosure.onOpen}
+                variant="primary"
+                data-testid="ns-report-btn"
+              >
+                Export Gateway Report
+              </Button>
+            }
+            title="My Gateways"
+          ></PageHeader>
+        </Box>
         <GridLayout>
           {actions.map((action) => (
             <Card>
               <Box p={4}>
                 <Heading size="sm" mb={2}>
                   <Flex alignItems="center">
-                    <Icon as={action.icon} mb={0.5} mr={4} boxSize={6} />
+                    <Icon as={action.icon} mr={4} boxSize={6} />
                     {action.title}
                   </Flex>
                 </Heading>
