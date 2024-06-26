@@ -255,48 +255,60 @@ const MyGatewaysPage: React.FC = () => {
           {isError && <Text mb={4}>Gateways failed to load</Text>}
           {isSuccess && (
             <>
-              {namespaceSearchResults.map((namespace) => (
-                <Flex
-                  borderRadius={10}
-                  border="1px solid"
-                  borderColor="#E1E1E5"
-                  minH={16}
-                  px={5}
-                  py={2}
-                  mb={4}
-                >
-                  <Box>
-                    <Flex alignItems="center">
-                      <Icon as={FaServer} color="bc-blue" mr={4} boxSize={4} />
-                      <Link
-                        fontSize="md"
-                        as="b"
-                        color="bc-blue"
-                        mr={2}
-                        onClick={handleNamespaceChange(namespace)}
-                      >
-                        {namespace.displayName
-                          ? namespace.displayName
-                          : namespace.name}
-                      </Link>
-                    </Flex>
-                    <Text fontSize="md" pl="33px">
-                      {namespace.name}
-                    </Text>
-                  </Box>
-                  <Spacer />
-                  {namespace.orgEnabled === false &&
-                    !namespace.orgUpdatedAt && (
-                      <PublishingPopover status="disabled" />
+              {namespaceSearchResults
+                .sort(
+                  (a, b) =>
+                    a.displayName.localeCompare(b.displayName) ||
+                    a.name.localeCompare(b.name)
+                )
+                .map((namespace) => (
+                  <Flex
+                    borderRadius={10}
+                    border="1px solid"
+                    borderColor="#E1E1E5"
+                    minH={16}
+                    px={5}
+                    py={2}
+                    mb={4}
+                  >
+                    <Box>
+                      <Flex alignItems="center">
+                        <Icon
+                          as={FaServer}
+                          color="bc-blue"
+                          mr={4}
+                          boxSize={4}
+                        />
+                        <Link
+                          fontSize="md"
+                          as="b"
+                          color="bc-blue"
+                          mr={2}
+                          onClick={handleNamespaceChange(namespace)}
+                        >
+                          {namespace.displayName
+                            ? namespace.displayName
+                            : namespace.name}
+                        </Link>
+                      </Flex>
+                      <Text fontSize="md" pl="33px">
+                        {namespace.name}
+                      </Text>
+                    </Box>
+                    <Spacer />
+                    {namespace.orgEnabled === false &&
+                      !namespace.orgUpdatedAt && (
+                        <PublishingPopover status="disabled" />
+                      )}
+                    {namespace.orgEnabled === false &&
+                      namespace.orgUpdatedAt && (
+                        <PublishingPopover status="pending" />
+                      )}
+                    {namespace.orgEnabled === true && (
+                      <PublishingPopover status="enabled" />
                     )}
-                  {namespace.orgEnabled === false && namespace.orgUpdatedAt && (
-                    <PublishingPopover status="pending" />
-                  )}
-                  {namespace.orgEnabled === true && (
-                    <PublishingPopover status="enabled" />
-                  )}
-                </Flex>
-              ))}
+                  </Flex>
+                ))}
               {namespaceSearchResults.length === 0 && (
                 <>
                   <Box
