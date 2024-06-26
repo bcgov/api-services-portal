@@ -258,8 +258,8 @@ const MyGatewaysPage: React.FC = () => {
               {namespaceSearchResults
                 .sort(
                   (a, b) =>
-                    a.displayName.localeCompare(b.displayName) ||
-                    a.name.localeCompare(b.name)
+                    a.displayName?.localeCompare(b.displayName) ||
+                    a.name?.localeCompare(b.name)
                 )
                 .map((namespace) => (
                   <Flex
