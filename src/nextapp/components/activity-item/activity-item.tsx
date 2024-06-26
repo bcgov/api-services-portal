@@ -173,5 +173,5 @@ function template(string: string, data: TemplateMap): string {
     }
 
     return result || '';
-  });
+  }).replace(/namespace/g, 'gateway'); 
 }

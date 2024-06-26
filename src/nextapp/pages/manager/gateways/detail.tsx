@@ -287,7 +287,7 @@ const NamespacesPage: React.FC = () => {
             <GridItem>
               <Flex as="header" align="center" mb={4}>
                 <Heading size="sm" fontWeight="normal">
-                  Manage Namespace
+                  Manage Gateway
                 </Heading>
               </Flex>
               <VStack spacing={5} align="stretch">

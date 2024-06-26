@@ -61,7 +61,7 @@ const AccessRedirectPage: React.FC = () => {
       </Head>
       <Container maxW="6xl">
         <PageHeader breadcrumb={breadcrumbs} title="Administration Access">
-          <Text>'Manage gateway administration access by users and service accounts.</Text>
+          <Text>Manage gateway administration access by users and service accounts.</Text>
         </PageHeader>
         <Tabs>
           <TabList>
