@@ -286,9 +286,7 @@ const MyGatewaysPage: React.FC = () => {
                           mr={2}
                           onClick={handleNamespaceChange(namespace)}
                         >
-                          {namespace.displayName
-                            ? namespace.displayName
-                            : namespace.name}
+                          {namespace.displayName}
                         </Link>
                       </Flex>
                       <Text fontSize="md" pl="33px">
