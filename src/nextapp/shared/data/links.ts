@@ -51,17 +51,10 @@ const links: NavLink[] = [
     name: 'Gateways',
     url: '/manager/gateways',
     access: ['portal-user'],
-    sites: ['devportal'],
-  },
-  {
-    name: 'Gateways Get Started',
-    url: '/manager/gateways/get-started',
-    access: ['portal-user'],
-    sites: ['manager'],
-  },
-  {
-    name: 'Gateways',
     altUrls: [
+      '/manager/gateways/get-started',
+      '/manager/gateways/detail',
+      '/manager/gateways/list',
       '/manager/services',
       '/manager/services/[id]',
       '/manager/products',
@@ -75,12 +68,6 @@ const links: NavLink[] = [
       '/manager/namespace-access',
       '/manager/service-accounts',
       '/manager/poc/activity',
-    ],
-    access: [
-      'api-owner',
-      'provider-user',
-      'credential-admin',
-      'access-manager',
     ],
     sites: ['devportal'],
   },

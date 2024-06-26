@@ -46,7 +46,7 @@ const NamespacesPage: React.FC = () => {
                     color="bc-link"
                     textDecor="underline"
                   >
-                    My Gateways page
+                    My Gateways list
                   </Link>{' '}
                   to manage them.
                 </Text>
