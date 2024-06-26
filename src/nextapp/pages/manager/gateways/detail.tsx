@@ -195,7 +195,7 @@ const NamespacesPage: React.FC = () => {
             {namespace.data?.currentNamespace?.orgEnabled && (
               <Tooltip
                 hasArrow
-                label={`${user.namespace} is enabled to publish APIs to the directory`}
+                label={`${namespace.data?.currentNamespace?.displayName} is enabled to publish APIs to the directory`}
               >
                 <Box display="flex">
                   <Icon
@@ -396,7 +396,7 @@ const NamespacesPage: React.FC = () => {
                     destructive
                     body="This action cannot be undone"
                     confirmButtonText="Yes, Delete"
-                    title={`Delete ${user.namespace} Gateway?`}
+                    title={`Delete Gateway: ${namespace.data?.currentNamespace?.displayName} (${user.namespace})?`}  
                     onConfirm={handleDelete}
                   >
                     <Flex

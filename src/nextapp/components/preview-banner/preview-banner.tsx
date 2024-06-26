@@ -82,7 +82,7 @@ const PreviewBanner: React.FC = () => {
               <Icon as={FaClock} color="bc-yellow"/>
               <Text fontSize="sm" fontWeight="bold" data-testid="org-assignment-notification-parent">
                 {`Your Organization Administrator has been notified to enable API
-                Publishing to the Directory for the ${user.namespace} gateway.`}
+                Publishing to the Directory for the gateway ${data?.currentNamespace?.displayName}.`}
               </Text>
             </Flex>
             <Button
@@ -153,7 +153,7 @@ const PreviewBanner: React.FC = () => {
             <Flex align="center" gridGap={4}>
               <Icon as={FaCheckCircle} />
               <Text fontSize="sm" fontWeight="bold">
-                {`${user.namespace} gateway has been enabled to publish APIs to the Directory.`}
+                {`${data?.currentNamespace?.displayName} has been enabled to publish APIs to the Directory.`}
               </Text>
             </Flex>
             <IconButton
