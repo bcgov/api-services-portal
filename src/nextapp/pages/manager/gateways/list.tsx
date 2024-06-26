@@ -97,7 +97,7 @@ const MyGatewaysPage: React.FC = () => {
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to  ${namespace.name} namespace`,
+        title: `Switching to  ${namespace.name} gateway`,
         status: 'info',
         isClosable: true,
       });
@@ -107,7 +107,7 @@ const MyGatewaysPage: React.FC = () => {
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to  ${namespace.name} namespace`,
+          title: `Switched to  ${namespace.name} gateway`,
           status: 'success',
           isClosable: true,
         });
@@ -115,7 +115,7 @@ const MyGatewaysPage: React.FC = () => {
       } catch (err) {
         toast.closeAll();
         toast({
-          title: 'Unable to switch namespaces',
+          title: 'Unable to switch gateways',
           status: 'error',
           isClosable: true,
         });
