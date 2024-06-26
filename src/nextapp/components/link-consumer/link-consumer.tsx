@@ -38,7 +38,7 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
   const client = useQueryClient();
   const link = useApiMutation(mutation);
   const toast = useToast();
-  const title = 'Link Consumer to Namespace';
+  const title = 'Link Consumer to Gateway';
   const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const handleLink = async () => {

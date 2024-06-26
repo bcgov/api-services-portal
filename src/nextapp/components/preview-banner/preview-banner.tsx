@@ -82,7 +82,7 @@ const PreviewBanner: React.FC = () => {
               <Icon as={FaClock} color="bc-yellow"/>
               <Text fontSize="sm" fontWeight="bold" data-testid="org-assignment-notification-parent">
                 {`Your Organization Administrator has been notified to enable API
-                Publishing to the Directory for the ${user.namespace} namespace.`}
+                Publishing to the Directory for the ${user.namespace} gateway.`}
               </Text>
             </Flex>
             <Button
@@ -99,7 +99,7 @@ const PreviewBanner: React.FC = () => {
           {isOpen && (
             <Box mt={4} maxW="80%">
               <Text fontSize="sm" data-testid="org-assignment-notification-child">
-                New namespaces must be reviewed by your Organization
+                New gateways must be reviewed by your Organization
                 Administrator before you can publish APIs to the Directory. Your
                 APIs are still in preview mode. For status inquiries, contact
                 your Organization Administrator{' '}
@@ -153,7 +153,7 @@ const PreviewBanner: React.FC = () => {
             <Flex align="center" gridGap={4}>
               <Icon as={FaCheckCircle} />
               <Text fontSize="sm" fontWeight="bold">
-                {`${user.namespace} namespace has been enabled to publish APIs to the Directory.`}
+                {`${user.namespace} gateway has been enabled to publish APIs to the Directory.`}
               </Text>
             </Flex>
             <IconButton
@@ -217,7 +217,7 @@ const PreviewBanner: React.FC = () => {
               Preview mode allows you to test and preview your APIs to the
               Directory prior to publishing. Publishing APIs to the Directory
               makes them available so consumers find and request access. Add
-              your Organization to the namespace when you are ready to publish
+              your Organization to the gateway when you are ready to publish
               your APIs.
             </Text>
           </Box>

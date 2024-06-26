@@ -45,7 +45,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       }
 
       toast({
-        title: ' Namespace deleted',
+        title: ' Gateway deleted',
         status: 'success',
         isClosable: true,
       });
@@ -53,7 +53,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       onClose();
     } catch (err) {
       toast({
-        title: 'Namespace delete failed',
+        title: 'Gateway delete failed',
         description: err,
         status: 'error',
         isClosable: true,
@@ -76,10 +76,10 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       >
         <AlertDialogOverlay />
         <AlertDialogContent>
-          <AlertDialogHeader>{`Delete ${name} Namespace`}</AlertDialogHeader>
+          <AlertDialogHeader>{`Delete ${name} Gateway`}</AlertDialogHeader>
           <AlertDialogCloseButton />
           <AlertDialogBody>
-            {`Are you sure you want to delete the ${name} namespace? It cannot be undone.`}
+            {`Are you sure you want to delete the ${name} gateway? It cannot be undone.`}
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button ref={cancelRef} onClick={handleCancel}>

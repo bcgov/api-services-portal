@@ -78,7 +78,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to  ${namespace.name} namespace`,
+        title: `Switching to  ${namespace.name} gateway`,
         status: 'info',
         isClosable: true,
       });
@@ -89,14 +89,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to  ${namespace.name} namespace`,
+          title: `Switched to  ${namespace.name} gateway`,
           status: 'success',
           isClosable: true,
         });
       } catch (err) {
         toast.closeAll();
         toast({
-          title: 'Unable to switch namespaces',
+          title: 'Unable to switch gateways',
           status: 'error',
           isClosable: true,
         });
@@ -155,9 +155,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 data-testid="namespace-search-input"
               />
             </Box>                
-            {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
+            {isLoading && <MenuItem isDisabled>Loading gateways...</MenuItem>}
             {isError && (
-              <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
+              <MenuItem isDisabled>Gateways Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>

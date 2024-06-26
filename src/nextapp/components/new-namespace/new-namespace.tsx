@@ -48,7 +48,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           });
 
           toast({
-            title: `Namespace ${json.createNamespace.name} created!`,
+            title: `Gateway ${json.createNamespace.name} created!`,
             status: 'success',
             isClosable: true,
           });
@@ -57,7 +57,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           });
           queryClient.invalidateQueries();
           toast({
-            title: `Switched to ${json.createNamespace.name} namespace`,
+            title: `Switched to ${json.createNamespace.name} gateway`,
             status: 'success',
             isClosable: true,
           });
@@ -65,7 +65,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
         } catch (err) {
           setError(err);
           // toast({
-          //   title: 'Namespace create failed',
+          //   title: 'Gateway create failed',
           //   description: err,
           //   status: 'error',
           //   isClosable: true,
@@ -79,11 +79,11 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
       <ModalContent borderRadius="4px">
-        <ModalHeader>Create Namespace</ModalHeader>
+        <ModalHeader>Create Gateway</ModalHeader>
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={4} isInvalid={Boolean(error)}>
-              <FormLabel>Namespace Name</FormLabel>
+              <FormLabel>Gateway Name</FormLabel>
               <Input
                 isDisabled={createMutation.isLoading}
                 name="name"
@@ -120,7 +120,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
               onClick={handleCreateNamespace}
               data-testid="ns-modal-create-btn"
             >
-              Create Namespace
+              Create Gateway
             </Button>
           </ButtonGroup>
         </ModalFooter>

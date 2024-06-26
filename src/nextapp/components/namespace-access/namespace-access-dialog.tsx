@@ -201,6 +201,6 @@ const permissionHelpTextLookup = {
   'GatewayConfig.Publish':
     'Can publish gateway configuration to Kong and to view the status of the upstreams.',
   'Namespace.Manage':
-    'Can update the Access Control List for controlling access to viewing metrics, service configuration and service account management. This is a superuser for the Namespace.',
-  'Namespace.View': 'Read-only access to the namespace.',
+    'Can update the Access Control List for controlling access to viewing metrics, service configuration and service account management. This is a superuser for the gateway.',
+  'Namespace.View': 'Read-only access to the gateway.',
 };
