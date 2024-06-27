@@ -29,7 +29,6 @@ const links: NavLink[] = [
     access: ['portal-user'],
     altUrls: [
       '/devportal/access/[id]',
-      '/devportal/resources/[id]',
       '/devportal/requests/new/[id]',
       '/devportal/requests/new/tokens',
     ],
