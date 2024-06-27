@@ -65,7 +65,7 @@ const links: NavLink[] = [
       '/manager/authorization-profiles',
       '/manager/authorization-profiles/new',
       '/manager/authorization-profiles/[id]',
-      '/manager/namespace-access',
+      '/manager/admin-access',
       '/manager/service-accounts',
     ],
     sites: ['devportal'],

@@ -25,7 +25,7 @@ import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 const AccessRedirectPage: React.FC = () => {
   const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([
-    { href: '/manager/namespace-access', text: 'Administration Access' },
+    { href: '/manager/admin-access', text: 'Administration Access' },
   ]);
 
   const namespaceDetails = useApi(

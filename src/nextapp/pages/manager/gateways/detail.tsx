@@ -104,7 +104,7 @@ const secondaryActions = [
   },
   {
     title: 'Administration Access',
-    url: '/manager/namespace-access',
+    url: '/manager/admin-access',
     icon: FaUserFriends,
     roles: ['api-owner'],
     description: 'Manage gateway administration access by users and service accounts',
