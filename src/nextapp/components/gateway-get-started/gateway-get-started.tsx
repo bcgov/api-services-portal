@@ -65,7 +65,7 @@ const GatewayGetStarted: React.FC = () => {
           <Heading size="md">No gateways created yet</Heading>
         </VStack>
         <Heading size="lg">What is a gateway?</Heading>
-        <Text pt={6} pb={8}>
+        <Text pt={6} pb={6}>
           A gateway acts as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
         </Text>            
         <Text pt={0} pb={8}>
@@ -111,7 +111,7 @@ const GatewayGetStarted: React.FC = () => {
         <Box>
           <Heading size="lg">Steps to create and configure your first gateway</Heading>
           <Text pt={6} pb={10}>
-            Follow these steps to create and configure your first gateway. For more details on how to set up an API, consult our API provider{' '}
+            Follow these steps to create and configure your first gateway. For a more detailed introduction to setting up an API, consult our{' '} 
             <Link
                 href={QuickStartUrl}
                 target="_blank"
@@ -215,7 +215,7 @@ const GatewayGetStarted: React.FC = () => {
               <SmoothScrollLink
                 href={"#generate-config"}
                 >template</SmoothScrollLink>
-              {' '}to set up its configuration: services, routes and plugins.
+              {' '}to set up service and route configuration. 
             </Text>
             </VStack>
           </Box>
@@ -325,7 +325,7 @@ const GatewayGetStarted: React.FC = () => {
             id='generate-config'
             title='Generate gateway configuration file'
             description='Run this command to generate a basic gateway configuration YAML file.'
-            command='gwa generate-config --template quick-start' 
+            command='gwa generate-config --template basic-service' 
           />
 
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your gateway</Heading>
@@ -340,31 +340,40 @@ const GatewayGetStarted: React.FC = () => {
             title='Test your gateway'
             description={
               <>
-                Visit the{' '}             
-                <Link
+                Get the URL for your newly published gateway service <Code>...api.gov.bc.ca</Code> using this command.
+                Visit the URL in a browser to see your API gateway in action.
+              </>
+            }
+            command='gwa status --hosts' 
+          />
+          <Box pt={10}>
+          <Heading size="md">Next steps</Heading>
+          <Text pt={6}>
+            Congratulations! You have set up your first gateway service, creating a custom route to your service through your API gateway.  
+          </Text>
+          <Text pt={6}>
+            For a deeper introduction to the API Services Portal, follow the {' '}
+            <Link
                 href={QuickStartUrl}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-                >Your Products page</Link> to request credentials.
-                Then, get the URL for your newly published gateway service <Code>...api.gov.bc.ca</Code> using this command.
-                Pass the client ID and secret in a POST request to this URL to get a JWT token to access your API.  
-              </>
-            }
-            command='gwa status -hosts' 
-          />
+              >Quick Start tutorial</Link>
+            {' '}to create a protected API.
+          </Text>
+        </Box>
 
-          <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
-          <CliCommand 
-            title='Help'
-            description={
-              <>
-                If you are not sure about how to use a specific command, you can type <Code>--help</Code> after the
-                command's name to learn more about its usage and syntax.
-              </>
-            }
-            command='gwa <command> --help' 
-          />
+        <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
+        <CliCommand 
+          title='Help'
+          description={
+            <>
+              If you are not sure about how to use a specific command, you can type <Code>--help</Code> after the
+              command's name to learn more about its usage and syntax.
+            </>
+          }
+          command='gwa <command> --help' 
+        />
         </Box>
       </Card>
     </>
