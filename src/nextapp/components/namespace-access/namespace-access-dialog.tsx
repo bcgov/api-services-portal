@@ -153,7 +153,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                             }}
                             isChecked={selected.includes(r.name)}
                           >
-                            {r.name}
+                            {r.name.replace(/Namespace/g, 'Gateway')}
                           </Checkbox>
                           <Text fontSize="sm" color="bc-component" ml={6}>
                             {permissionHelpTextLookup[r.name] ?? ''}

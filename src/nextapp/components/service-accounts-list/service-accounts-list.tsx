@@ -35,6 +35,7 @@ const ServiceAccountsList: React.FC<ServiceAccountsListProps> = ({
   const client = useQueryClient();
   const revoke = useApiMutation(revokeMutation);
   const list = data?.sort((a, b) => a.name.localeCompare(b.name));
+  console.log('list',list)
 
   const handleRevoke = async (policyId: string) => {
     try {

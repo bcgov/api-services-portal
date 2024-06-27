@@ -173,5 +173,5 @@ function template(string: string, data: TemplateMap): string {
     }
 
     return result || '';
-  }).replace(/namespace/g, 'gateway'); 
+  }).replace(/namespace/gi, (match) => match === 'namespace' ? 'gateway' : 'Gateway') // Replace both 'namespace' and 'Namespace'
 }
