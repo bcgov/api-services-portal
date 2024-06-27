@@ -148,7 +148,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto" >
             <Box ml={6} w={'338px'}>
               <SearchInput
-                placeholder="Find a Gateway by name or ID"
+                placeholder="Find a gateway by display name or ID"
                 onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
                 value={search}
@@ -219,7 +219,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 </Box>
                 <Flex justifyContent='center' flexDirection='column' alignItems='center'>
                   <Text pt={8} fontSize='sm' fontWeight='bold'>
-                    {`You have ${data.allNamespaces.length} Gateway${
+                    {`You have ${data.allNamespaces.length} gateway${
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
                   </Text>
@@ -237,7 +237,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   >
                     Go to the{' '}
                     <Text as="span" pl={1} textDecoration="underline" color="bc-link">
-                      full Gateways list
+                      full gateways list
                     </Text>
                   </MenuItem>
                 </Flex>
