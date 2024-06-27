@@ -12,13 +12,11 @@ import {
   Spacer,
   useToast,
   Select,
-  Center,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { gql } from 'graphql-request';
 import { FaPlus, FaLaptopCode, FaRocket, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
-import { differenceInDays } from 'date-fns';
 
 import PageHeader from '@/components/page-header';
 import GridLayout from '@/layouts/grid';
@@ -31,6 +29,7 @@ import PublishingPopover from '@/components/publishing-popover';
 import { useRouter } from 'next/router';
 import { updateRecentlyViewedNamespaces } from '@/shared/services/utils';
 import { useAuth } from '@/shared/services/auth';
+import { useGlobal } from '@/shared/services/global';
 
 type GatewayActions = {
   title: string;
@@ -41,36 +40,6 @@ type GatewayActions = {
   descriptionEnd: string;
 };
 
-const actions: GatewayActions[] = [
-  {
-    title: 'Need to create a new gateway?',
-    url:
-      'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/tutorials/quick-start/',
-    urlText: 'API Provider Quick Start',
-    icon: FaPlus,
-    description: 'Follow our',
-    descriptionEnd: 'guide.',
-  },
-  {
-    title: 'GWA CLI commands',
-    url:
-      'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/resources/gwa-commands/',
-    urlText: 'GWA CLI',
-    icon: FaLaptopCode,
-    description: 'Explore helpful commands in our',
-    descriptionEnd: 'guide.',
-  },
-  {
-    title: 'Ready to deploy to production?',
-    url:
-      'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/guides/owner-journey-v1/#production-links',
-    urlText: 'going to production',
-    icon: FaRocket,
-    description: 'Check our',
-    descriptionEnd: 'checklist.',
-  },
-];
-
 const MyGatewaysPage: React.FC = () => {
   const { user } = useAuth();
   const managerDisclosure = useDisclosure();
@@ -79,6 +48,43 @@ const MyGatewaysPage: React.FC = () => {
     { query },
     { suspense: false }
   );
+
+  // External links
+  const global = useGlobal();
+  const QuickStartUrl =
+    global?.helpLinks.helpSupportUrl + 'tutorials/quick-start';
+  const GwaUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands';
+  const ProdChecklistUrl =
+    global?.helpLinks.helpSupportUrl +
+    'unlisted/owner-journey-v1/#production-links';
+
+  // Action items
+  const actions: GatewayActions[] = [
+    {
+      title: 'Need to create a new gateway?',
+      url: QuickStartUrl,
+      urlText: 'API Provider Quick Start',
+      icon: FaPlus,
+      description: 'Follow our',
+      descriptionEnd: 'guide.',
+    },
+    {
+      title: 'GWA CLI commands',
+      url: GwaUrl,
+      urlText: 'GWA CLI',
+      icon: FaLaptopCode,
+      description: 'Explore helpful commands in our',
+      descriptionEnd: 'guide.',
+    },
+    {
+      title: 'Ready to deploy to production?',
+      url: ProdChecklistUrl,
+      urlText: 'going to production',
+      icon: FaRocket,
+      description: 'Check our',
+      descriptionEnd: 'checklist.',
+    },
+  ];
 
   // Redirect to Get Started page if no gateways
   const router = useRouter();

@@ -13,11 +13,18 @@ import {
 } from '@chakra-ui/react';
 import { FaClock, FaMinusCircle, FaCheckCircle } from 'react-icons/fa';
 
+import { useGlobal } from '@/shared/services/global';
+
 interface PublishingPopoverProps {
   status: string;
 }
 
 const PublishingPopover: React.FC<PublishingPopoverProps> = ({ status }) => {
+  const global = useGlobal();
+  const DiscoveryUrl =
+    global?.helpLinks.helpSupportUrl +
+    'how-to/api-discovery/#enabling-for-discovery';
+
   return (
     <>
       {status === 'disabled' && (
@@ -44,7 +51,7 @@ const PublishingPopover: React.FC<PublishingPopoverProps> = ({ status }) => {
                 directory any API contained in this gateway. Request publishing
                 permission by{' '}
                 <Link
-                  href="https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/how-to/api-discovery/#enabling-for-discovery"
+                  href={DiscoveryUrl}
                   target="_blank"
                   color="bc-link"
                   textDecor="underline"
