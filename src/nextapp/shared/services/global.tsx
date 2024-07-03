@@ -5,6 +5,7 @@ type GlobalContent = {
   readonly version: string;
   readonly revision: string;
   readonly cluster: string;
+  readonly apiRootUrl: string;
   readonly accountLinks: Record<string, string>;
   readonly helpLinks: Record<string, string>;
   readonly identities: {
@@ -18,6 +19,7 @@ const defaultState = {
   version: '',
   revision: '',
   cluster: '',
+  apiRootUrl: '',
   identities: {
     developer: ['idir'],
     provider: ['idir'],

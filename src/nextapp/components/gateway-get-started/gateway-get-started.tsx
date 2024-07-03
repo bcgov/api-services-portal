@@ -50,6 +50,8 @@ const GatewayGetStarted: React.FC = () => {
   const QuickStartUrl = global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'
   const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
   const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'
+  const apiRootUrl = global?.apiRootUrl
+  const configHost = apiRootUrl ? apiRootUrl.replace('https://', '').replace('http://', '') : ''
 
   return (
     <>
@@ -304,11 +306,13 @@ const GatewayGetStarted: React.FC = () => {
         </Box>
         <Box>
           <Heading size="md" fontSize="18px" pt={10} pb={6}>Prepare your configuration</Heading>
-          <CliCommand 
-            title='Use the test environment'
-            description='Configure the CLI to run against a test environment while you are getting familiarized with the API Services Portal.'
-            command='gwa config set host api-gov-bc-ca.test.api.gov.bc.ca' 
-          />
+          {global?.apiRootUrl && (
+            <CliCommand 
+              title='Use the test environment'
+              description='Configure the CLI to run against a test environment while you are getting familiarized with the API Services Portal.'
+              command={`gwa config set host ${configHost}`}
+            />
+          )}
           <CliCommand 
             title='Log in'
             description='Log in via device with your IDIR.'
