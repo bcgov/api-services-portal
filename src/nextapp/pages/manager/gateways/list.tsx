@@ -46,7 +46,11 @@ const MyGatewaysPage: React.FC = () => {
   const { data, isLoading, isSuccess, isError } = useApi(
     'allNamespaces',
     { query },
-    { suspense: false }
+    {
+      suspense: false,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    }
   );
 
   // External links
