@@ -11,7 +11,11 @@ import {
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { getRecords, removeEmpty } from '../../batch/feed-worker';
+import {
+  getRecords,
+  parseJsonString,
+  removeEmpty,
+} from '../../batch/feed-worker';
 import { GatewayRoute, GatewayService } from './types';
 
 interface MatchList {
@@ -38,9 +42,9 @@ export class EndpointsController extends Controller {
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.sudo();
-    const records = await getRecords(ctx, 'GatewayRoute', 'allGatewayRoutes', [
-      'service',
-    ]);
+    const records = (
+      await getRecords(ctx, 'GatewayRoute', 'allGatewayRoutes', ['service'])
+    ).map((o) => parseJsonString(o, ['hosts']));
 
     let counter = 0;
     let matchHostList: MatchList;
@@ -67,8 +71,8 @@ export class EndpointsController extends Controller {
       names: [`${serviceName}`, `${serviceName}-dev`, `${serviceName}-test`],
       hosts: [
         `${serviceName}.api.gov.bc.ca`,
-        `${serviceName}.api.dev.gov.bc.ca`,
-        `${serviceName}.api.test.gov.bc.ca`,
+        `${serviceName}.dev.api.gov.bc.ca`,
+        `${serviceName}.test.api.gov.bc.ca`,
         `${serviceName}-api-gov-bc-ca.dev.api.gov.bc.ca`,
         `${serviceName}-api-gov-bc-ca.test.api.gov.bc.ca`,
       ],
