@@ -51,8 +51,7 @@ describe('Create API Spec', () => {
   it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
-        nameSpace = namespace
-        home.createNamespace(namespace)
+        cy.createGatewayV3(namespace) 
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.response.headers['x-auth-request-access-token']
         })

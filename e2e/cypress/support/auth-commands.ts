@@ -61,10 +61,9 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
   }
 
   if (!skipFlag) {
-    cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
+    cy.get(home.gatewaysNavButtom, { timeout: 6000 }).then(($el) => {
       expect($el).to.exist
       expect($el).to.be.visible
-      expect($el).contain('No Active Namespace')
     })
     cy.log('> Log in')
   }
@@ -77,6 +76,27 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+})
+
+Cypress.Commands.add('createGatewayV3', (gatewayid?: string, displayname?: string) => {
+  cy.log('< Create namespace - ')
+  const payload = {
+    gatewayId: gatewayid ? gatewayid : '',
+    displayName: displayname ? displayname : '',
+  }
+  cy.setHeaders({ 'Content-Type': 'application/json' })
+  cy.setRequestBody(payload)
+  cy.callAPI('ds/api/v3/gateways', 'POST').then(
+    ({ apiRes: { body, status } }: any) => {
+      expect(status).to.be.equal(200)
+      if (payload.gatewayId) {
+        expect(body.gatewayId).to.be.equal(payload.gatewayId)
+      }
+      if (payload.displayName) {
+        expect(body.displayName).to.be.equal(payload.displayName)
+      }
+    }
+  )
 })
 
 Cypress.Commands.add('getLastConsumerID', () => {

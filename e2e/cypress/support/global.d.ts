@@ -28,6 +28,11 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
+    createGatewayV3(
+      gatewayid?: string,
+      displayname?: string,
+    ): Chainable<any>
+
     saveState(
       key: string,
       value: string,

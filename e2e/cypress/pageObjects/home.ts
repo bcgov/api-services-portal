@@ -9,6 +9,7 @@ class HomePage {
   manageNamespace: string = '[data-testid="ns-dropdown-manage-btn"]'
   confirmDeleteNamespaceBtn: string = '[data-testid="confirm-delete-namespace-btn"]'
   namespaceCancelBtn: string = '[data-testid="ns-modal-cancel-btn"]'
+  gatewaysNavButtom: string = '[data-testid="navbar-link-Gateways"]'
 
   createNamespace(name: string): void {
     cy.get(this.nsDropdown).click()
