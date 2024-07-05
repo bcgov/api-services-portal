@@ -171,7 +171,7 @@ const NamespacesPage: React.FC = () => {
         router?.push('/manager');
 
         toast({
-          title: ' Gateway deleted',
+          title: 'Gateway deleted',
           status: 'success',
           isClosable: true,
         });

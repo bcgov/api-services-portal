@@ -45,7 +45,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       }
 
       toast({
-        title: ' Gateway deleted',
+        title: 'Gateway deleted',
         status: 'success',
         isClosable: true,
       });

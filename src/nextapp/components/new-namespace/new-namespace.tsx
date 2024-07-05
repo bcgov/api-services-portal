@@ -83,7 +83,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={4} isInvalid={Boolean(error)}>
-              <FormLabel>Gateway Name</FormLabel>
+              <FormLabel>Gateway ID</FormLabel>
               <Input
                 isDisabled={createMutation.isLoading}
                 name="name"
@@ -99,7 +99,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
                     Alphanumeric (letters, numbers and dashes only, no special
                     characters)
                   </ListItem>
-                  <ListItem>Unique to all other namespaces</ListItem>
+                  <ListItem>Unique to all other gateways</ListItem>
                 </UnorderedList>
               </FormHelperText>
             </FormControl>
