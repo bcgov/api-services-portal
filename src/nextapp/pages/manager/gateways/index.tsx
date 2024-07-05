@@ -55,7 +55,11 @@ export default GatewaysHome;
 const query = gql`
   query GetNamespaces {
     allNamespaces {
+      id
       name
+      displayName
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;
