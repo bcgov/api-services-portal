@@ -31,7 +31,7 @@ export async function getAllNamespaces(envCtx: EnvironmentContext) {
   const nsList = namespaces.map((ns: ResourceSet) => ({
     id: ns.id,
     name: ns.name,
-    displayName: ns.displayName,
+    displayName: ns.displayName || `Gateway ${ns.name}`,
     scopes: ns.resource_scopes,
     prodEnvId: envCtx.prodEnv.id,
   }));

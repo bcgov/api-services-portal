@@ -61,6 +61,7 @@ import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 import { useGlobal } from '@/shared/services/global';
 import EditNamespaceDisplayName from '@/components/edit-display-name';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 const actions = [
   {
@@ -120,6 +121,9 @@ const secondaryActions = [
 ];
 
 const NamespacesPage: React.FC = () => {
+  // Redirect to My Gateways page if no gateway selected
+  NoGatewayRedirect();
+
   const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs();
   const hasNamespace = !!user?.namespace;
@@ -155,14 +159,6 @@ const NamespacesPage: React.FC = () => {
       text: 'Your Organization and Business Unit will appear here',
     };
   }, [namespace]);
-
-  // Redirect to My Gateways page if no gateway selected
-  React.useEffect(() => {
-    if (!hasNamespace) {
-      router.push('/manager/gateways/list');
-    }
-  }, [hasNamespace]);
-
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
       try {

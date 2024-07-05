@@ -21,8 +21,12 @@ import {
 } from '@/components/namespace-access';
 import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 const AccessRedirectPage: React.FC = () => {
+  // Redirect to My Gateways page if no gateway selected
+  NoGatewayRedirect();
+
   const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([
     { href: '/manager/admin-access', text: 'Administration Access' },

@@ -535,6 +535,7 @@ module.exports = {
                   'Namespace.Manage',
                   'CredentialIssuer.Admin',
                   'GatewayConfig.Publish',
+                  'Access.Manage',
                 ]) {
                   await permissionApi.createPermission(
                     rset.id,

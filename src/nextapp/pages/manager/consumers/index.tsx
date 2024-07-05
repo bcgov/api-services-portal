@@ -36,6 +36,7 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
 import AccessRequestsList from '@/components/access-request/access-requests-list';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 const sortDate = new Intl.DateTimeFormat('en-ca', { dateStyle: 'short' });
 
@@ -76,6 +77,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+  // Redirect to My Gateways page if no gateway selected
+  NoGatewayRedirect();
+
   const toast = useToast();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Consumers' }]);
   const client = useQueryClient();

@@ -58,7 +58,6 @@ const transformations = {
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
   assert.strictEqual(entity in metadata, true);
-  logger.info('putFeedWorker %s', entity);
 
   const md = metadata[entity];
   const refKey = md.refKey;
