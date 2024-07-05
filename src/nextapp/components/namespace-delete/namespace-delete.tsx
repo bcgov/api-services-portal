@@ -36,6 +36,11 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
   const deleteMutation = useApiMutation(mutation);
 
   const handleDelete = React.useCallback(async () => {
+    toast({
+      title: `Deleting gateway: ${name}`,
+      status: 'info',
+      isClosable: true,
+    });
     try {
       await deleteMutation.mutateAsync({ name, force });
 

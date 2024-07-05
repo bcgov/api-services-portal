@@ -160,9 +160,15 @@ const NamespacesPage: React.FC = () => {
     };
   }, [namespace]);
   const handleDelete = React.useCallback(async () => {
+    console.log('handle delete from detail');
     if (user?.namespace) {
+      toast({
+        title: `Deleting gateway: ${namespace.data?.currentNamespace?.displayName}`,
+        status: 'info',
+        isClosable: true,
+      });
       try {
-        await mutate.mutateAsync({ name: user?.namespace });
+        await mutate.mutateAsync({ name: user.namespace });
         await restApi('/admin/switch', { method: 'PUT' });
         router?.push('/manager');
 
