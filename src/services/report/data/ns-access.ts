@@ -7,6 +7,7 @@ import { ReportOfNamespaces } from './namespaces';
 
 interface ReportOfNamespaceAccess {
   namespace: string;
+  displayName?: string;
   subject: string;
   subjectName: string;
   subjectEmail: string;
@@ -38,6 +39,7 @@ export async function getNamespaceAccess(
           policy.scopes.forEach((scope) => {
             data.push({
               namespace: ns.name,
+              displayName: ns.displayName,
               subject,
               subjectName: '',
               subjectEmail: '',

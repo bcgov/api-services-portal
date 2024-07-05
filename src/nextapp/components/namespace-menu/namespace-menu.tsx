@@ -78,7 +78,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to  ${namespace.name} gateway`,
+        title: `Switching to gateway: ${namespace.displayName}`,
         status: 'info',
         isClosable: true,
       });
@@ -89,7 +89,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to  ${namespace.name} gateway`,
+          title: `Switched to gateway: ${namespace.displayName}`,
           status: 'success',
           isClosable: true,
         });
@@ -148,16 +148,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto" >
             <Box ml={6} w={'338px'}>
               <SearchInput
-                placeholder="Find a Gateway by name or ID"
+                placeholder="Find a gateway by display name or ID"
                 onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
                 value={search}
                 data-testid="namespace-search-input"
               />
             </Box>                
-            {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
+            {isLoading && <MenuItem isDisabled>Loading gateways...</MenuItem>}
             {isError && (
-              <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
+              <MenuItem isDisabled>Gateways Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
@@ -210,7 +210,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       >
                         <Box display="flex" alignItems="center">
                           <Icon as={FaServer} />
-                          <Text ml={2}>{n.displayName ? n.displayName : `Gateway ${n.name}`}</Text>
+                          <Text ml={2}>{n.displayName}</Text>
                         </Box>
                         <Text ml={6} color='text'>{n.name}</Text>
                       </MenuItem>
@@ -219,7 +219,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 </Box>
                 <Flex justifyContent='center' flexDirection='column' alignItems='center'>
                   <Text pt={8} fontSize='sm' fontWeight='bold'>
-                    {`You have ${data.allNamespaces.length} Gateway${
+                    {`You have ${data.allNamespaces.length} gateway${
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
                   </Text>
@@ -237,7 +237,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   >
                     Go to the{' '}
                     <Text as="span" pl={1} textDecoration="underline" color="bc-link">
-                      full Gateways list
+                      full gateways list
                     </Text>
                   </MenuItem>
                 </Flex>

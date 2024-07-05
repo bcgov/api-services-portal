@@ -22,6 +22,7 @@ import { lookupServicesByNamespace } from '../../keystone/gateway-service';
 
 export interface ReportOfServiceAccess {
   namespace: string;
+  displayName?: string;
   service_name: string;
   routes?: string;
   plugin: string;
@@ -76,6 +77,7 @@ export async function getServiceAccess(
 
         const partial: ReportOfServiceAccess = {
           namespace: ns.name,
+          displayName: ns.displayName,
           service_name: service.name,
           routes: buildRouteList(service),
           plugin: plugin[0].name,

@@ -39,7 +39,7 @@ const ApiDiscoveryPage: React.FC = () => {
             {namespace.data?.currentNamespace?.orgEnabled && (
               <Tooltip
                 hasArrow
-                label={`${user.namespace} is enabled to publish APIs to the directory`}
+                label={`${namespace.data?.currentNamespace?.displayName} is enabled to publish APIs to the directory`}
               >
                 <Box display="flex">
                   <Icon

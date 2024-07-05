@@ -46,6 +46,7 @@ export async function getNamespaces(
       const detail: ReportOfNamespaces = {
         resource_id: ns.id,
         name: ns.name,
+        displayName: ns.displayName,
       };
       const nsPermissions = await kcGroupService.getGroup('ns', ns.name);
 

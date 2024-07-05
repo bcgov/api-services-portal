@@ -104,11 +104,11 @@ const secondaryActions = [
     description: 'Manage authorization servers used to protect your APIs',
   },
   {
-    title: 'Namespace Access',
-    url: '/manager/namespace-access',
+    title: 'Administration Access',
+    url: '/manager/admin-access',
     icon: FaUserFriends,
     roles: ['api-owner'],
-    description: 'Manage namespace access by users and service accounts',
+    description: 'Manage gateway administration access by users and service accounts',
   },
   {
     title: 'Service Accounts',
@@ -116,7 +116,7 @@ const secondaryActions = [
     icon: FaUserAlt,
     roles: ['api-owner', 'provider-user'],
     description:
-      'Manage service accounts for performing functions on the namespace',
+      'Manage service accounts for performing functions on the gateway',
   },
 ];
 
@@ -167,14 +167,14 @@ const NamespacesPage: React.FC = () => {
         router?.push('/manager');
 
         toast({
-          title: ' Namespace deleted',
+          title: 'Gateway deleted',
           status: 'success',
           isClosable: true,
         });
         client.invalidateQueries();
       } catch (err) {
         toast({
-          title: 'Delete namespace failed',
+          title: 'Delete gateway failed',
           description: err,
           status: 'error',
           isClosable: true,
@@ -198,7 +198,7 @@ const NamespacesPage: React.FC = () => {
             {namespace.data?.currentNamespace?.orgEnabled && (
               <Tooltip
                 hasArrow
-                label={`${user.namespace} is enabled to publish APIs to the directory`}
+                label={`${namespace.data?.currentNamespace?.displayName} is enabled to publish APIs to the directory`}
               >
                 <Box display="flex">
                   <Icon
@@ -268,7 +268,7 @@ const NamespacesPage: React.FC = () => {
     <>
       <Head>
         <title>
-          API Program Services | Namespaces
+          API Program Services | Gateways
           {hasNamespace
             ? ` | ${namespace.data?.currentNamespace?.displayName}`
             : ''}
@@ -292,7 +292,7 @@ const NamespacesPage: React.FC = () => {
             <GridItem>
               <Flex as="header" align="center" mb={4}>
                 <Heading size="sm" fontWeight="normal">
-                  Manage Namespace
+                  Manage Gateway
                 </Heading>
               </Flex>
               <VStack spacing={5} align="stretch">
@@ -401,7 +401,7 @@ const NamespacesPage: React.FC = () => {
                     destructive
                     body="This action cannot be undone"
                     confirmButtonText="Yes, Delete"
-                    title={`Delete ${user.namespace} Namespace?`}
+                    title={`Delete Gateway: ${namespace.data?.currentNamespace?.displayName} (${user.namespace})?`}  
                     onConfirm={handleDelete}
                   >
                     <Flex
@@ -422,7 +422,7 @@ const NamespacesPage: React.FC = () => {
                     >
                       <Flex align="center">
                         <Icon as={FaTrash} boxSize={5} mr={3} />
-                        <Text>Delete Namespace...</Text>
+                        <Text>Delete Gateway...</Text>
                       </Flex>
                     </Flex>
                   </ConfirmationDialog>
