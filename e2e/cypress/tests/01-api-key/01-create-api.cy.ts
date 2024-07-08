@@ -51,6 +51,7 @@ describe('Create API Spec', () => {
   it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
+        nameSpace = namespace
         cy.createGateway(namespace) 
         cy.activateGateway(namespace)
         cy.visit('/manager/gateways/detail')
@@ -107,7 +108,7 @@ it('Verify gwa gateway publish multiple config file', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + nameSpace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

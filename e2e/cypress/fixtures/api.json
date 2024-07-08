@@ -4,7 +4,7 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/organizations",
+    "endPoint": "ds/api/v3/organizations",
     "orgExpectedList": {
       "name": "planning-and-innovation-division",
       "title": "Planning and Innovation Division"
