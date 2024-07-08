@@ -161,7 +161,7 @@ const ActivityPage: React.FC = () => {
             data.pages[0]?.getFilteredNamespaceActivity.length === 0 && (
               <EmptyPane
                 title="No activity to show"
-                message="Events will show up here as you manage your namespace"
+                message="Events will show up here as you manage your gateway"
               />
             )}
           {isError && (
@@ -180,7 +180,7 @@ const ActivityPage: React.FC = () => {
               >
                 <Icon as={FaTimesCircle} color="bc-error" mr={2} />
                 <Text>
-                  There was an error loading your namespace&apos;s activity
+                  There was an error loading your gateway&apos;s activity
                 </Text>
               </Flex>
             </Center>

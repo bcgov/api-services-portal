@@ -159,7 +159,7 @@ const AuthorizationProfiles: React.FC<
                 message={
                   user?.namespace
                     ? 'Manage authentication, authorization and clients access to your API'
-                    : 'Select a namespace first to view its profiles'
+                    : 'Select a gateway first to view its profiles'
                 }
               />
             }

@@ -7,7 +7,6 @@ import { Container } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
 import PageHeader from '@/components/page-header';
-import { has } from 'lodash';
 
 const GatewaysHome: React.FC = () => {
   const { data, isSuccess, isError } = useApi(
@@ -21,7 +20,7 @@ const GatewaysHome: React.FC = () => {
 
   React.useEffect(() => {
     if (hasNamespace) {
-      router.push('/manager/gateways/detail');
+      router.push('/manager/gateways/list');
     } else {
       if (isSuccess && data.allNamespaces.length === 0) {
         router.push('/manager/gateways/get-started');
@@ -56,7 +55,11 @@ export default GatewaysHome;
 const query = gql`
   query GetNamespaces {
     allNamespaces {
+      id
       name
+      displayName
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;

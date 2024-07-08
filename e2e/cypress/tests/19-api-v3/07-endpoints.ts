@@ -11,8 +11,8 @@ describe('Endpoints', () => {
           names: ['testme', 'testme-dev', 'testme-test'],
           hosts: [
             'testme.api.gov.bc.ca',
-            'testme.api.dev.gov.bc.ca',
-            'testme.api.test.gov.bc.ca',
+            'testme.dev.api.gov.bc.ca',
+            'testme.test.api.gov.bc.ca',
             'testme-api-gov-bc-ca.dev.api.gov.bc.ca',
             'testme-api-gov-bc-ca.test.api.gov.bc.ca',
           ],

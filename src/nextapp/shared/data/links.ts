@@ -29,7 +29,6 @@ const links: NavLink[] = [
     access: ['portal-user'],
     altUrls: [
       '/devportal/access/[id]',
-      '/devportal/resources/[id]',
       '/devportal/requests/new/[id]',
       '/devportal/requests/new/tokens',
     ],
@@ -65,9 +64,8 @@ const links: NavLink[] = [
       '/manager/authorization-profiles',
       '/manager/authorization-profiles/new',
       '/manager/authorization-profiles/[id]',
-      '/manager/namespace-access',
+      '/manager/admin-access',
       '/manager/service-accounts',
-      '/manager/poc/activity',
     ],
     sites: ['devportal'],
   },
@@ -91,46 +89,16 @@ const links: NavLink[] = [
     BadgeElement: AccessRequestsBadge,
   },
   {
-    name: 'Access Requests',
-    url: '/manager/poc/requests',
-    access: ['api-owner', 'api-manager', 'credential-admin'],
-    sites: ['manager'],
-  },
-  //   {
-  //     name: 'Service Accounts',
-  //     url: '/manager/poc/service-accounts',
-  //     access: ['api-owner'], sites: ['manager']
-  //   },
-  {
     name: 'Authorization Settings',
     url: '/manager/authorization-profiles',
     access: ['credential-admin'],
     sites: ['manager'],
   },
   {
-    name: 'Activity',
-    url: '/manager/poc/activity',
-    access: ['api-owner'],
-    sites: ['manager'],
-  },
-  // {
-  //   name: 'Documentation',
-  //   url: '/docs',
-  //   altUrls: ['/docs/[slug]'],
-  //   access: [],
-  //   sites: ['devportal'],
-  // },
-  {
     name: 'APS Admin',
     url: '/admin',
     access: ['aps-admin'],
     sites: ['manager'],
-  },
-  {
-    name: 'Applications',
-    url: '/platform/poc/applications',
-    access: ['aps-admin'],
-    sites: ['platform', 'devportal'],
   },
 ];
 

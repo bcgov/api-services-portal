@@ -7,7 +7,7 @@ const Breadcrumb = (crumbs = []) => {
 
   return user
     ? [
-        { href: '/manager/namespaces', text: `Namespaces (${user.namespace})` },
+        { href: '/manager/gateways', text: `Gateways (${user.namespace})` },
       ].concat(crumbs)
     : [];
 };

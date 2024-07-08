@@ -24,6 +24,7 @@ const logger = Logger('report.access');
 
 export interface ReportOfConsumerAccess {
   namespace: string;
+  displayName?: string;
   consumer_username: string;
   prod_env_issuer?: string;
   perm_acl?: string;
@@ -148,6 +149,7 @@ export async function getConsumerAccess(
         .forEach((access) => {
           data.push({
             namespace: ns.name,
+            displayName: ns.displayName,
             prod_name: access.productEnvironment?.product?.name,
             prod_env_name: access.productEnvironment?.name,
             prod_env_app_id: access.productEnvironment?.appId,
@@ -223,6 +225,7 @@ async function fillClientScopeBasedAccess(
 
       data.push({
         namespace: ns.name,
+        displayName: ns.displayName,
         prod_name: env.product.name,
         prod_env_name: env.name,
         prod_env_app_id: env.appId,
@@ -294,6 +297,7 @@ async function fillClientRoleBasedAccess(
 
         data.push({
           namespace: ns.name,
+          displayName: ns.displayName,
           prod_name: env.product.name,
           prod_env_name: env.name,
           prod_env_app_id: env.appId,
@@ -356,6 +360,7 @@ async function fillConsumerKongACLBasedAccess(
 
         data.push({
           namespace: ns.name,
+          displayName: ns.displayName,
           prod_name: env.product.name,
           prod_env_name: env.name,
           prod_env_app_id: env.appId,
@@ -397,6 +402,7 @@ async function fillConsumerKongACLBasedAccess(
 
       data.push({
         namespace: ns.name,
+        displayName: ns.displayName,
         prod_name: '',
         prod_env_name: '',
         prod_env_app_id: acl.group,

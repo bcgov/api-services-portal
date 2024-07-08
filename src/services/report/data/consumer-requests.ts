@@ -7,6 +7,7 @@ import { getAccessRequestsByNamespace } from '../../keystone';
 
 interface ReportOfConsumerRequest {
   namespace: string;
+  displayName?: string;
   prod_name: string;
   prod_env_name: string;
   prod_env_app_id: string;
@@ -36,6 +37,7 @@ export async function getConsumerRequests(
       requests.forEach((req) => {
         data.push({
           namespace: ns.name,
+          displayName: ns.displayName,
           prod_name: req.productEnvironment?.product?.name,
           prod_env_name: req.productEnvironment?.name,
           prod_env_app_id: req.productEnvironment?.appId,
