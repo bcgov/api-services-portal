@@ -195,7 +195,7 @@ const NamespacesPage: React.FC = () => {
       )}
       {namespace.isSuccess && !namespace.isFetching && (
         <>
-          <Flex align="center" gridGap={4}>
+          <Flex data-testid="ns-detail-gateway-display-name" align="center" gridGap={4}>
             {namespace.data?.currentNamespace?.displayName}
             <EditNamespaceDisplayName
               data={namespace.data?.currentNamespace}
