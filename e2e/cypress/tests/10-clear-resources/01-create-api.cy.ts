@@ -42,13 +42,13 @@ describe('Create API Spec for Delete Resources', () => {
 
   it('create namespace using gwa cli command', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+    cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
       cy.replaceWordInJsonObject('ns.deleteplatform', 'ns.' + namespace, 'service-clear-resources-gwa.yml')
       cy.updateJsonValue('common-testdata.json', 'deleteResources.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
-      cy.executeCliCommand("gwa config set --namespace " + namespace)
+      cy.executeCliCommand("gwa config set --gateway " + namespace)
     });
   })
 

@@ -348,7 +348,7 @@ Cypress.Commands.add(
         () => {
           cy.wait(3000)
           cy.get('@accessTokenResponse').then((res: any) => {
-            cy.executeCliCommand('gwa config set --namespace ' + namespace).then(
+            cy.executeCliCommand('gwa config set --gateway ' + namespace).then(
               (response) => {
                 cy.executeCliCommand(
                   'gwa config set --token ' + res.body.access_token

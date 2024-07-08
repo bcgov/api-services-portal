@@ -34,30 +34,30 @@ describe('Verify namespace delete using gwa command', () => {
 
     it('Create namespace using gwa cli command', () => {
         var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-        cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+        cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
             assert.isNotNaN(response.stdout)
             _namespace = response.stdout
         });
     })
 
-    it('Check gwa namespace destroy command for soft deleting namespace', () => {
-        cy.executeCliCommand('gwa namespace destroy ' + _namespace).then((response) => {
+    it('Check gwa gateway destroy command for soft deleting namespace', () => {
+        cy.executeCliCommand('gwa gateway destroy ' + _namespace).then((response) => {
             expect(response.stdout).to.contain('Namespace destroyed: ' + _namespace);
         });
     })
 
-    it('Check that deleted namespace does not display in gwa namespace list command', () => {
-        cy.executeCliCommand('gwa namespace list').then((response) => {
+    it('Check that deleted namespace does not display in gwa gateway list command', () => {
+        cy.executeCliCommand('gwa gateway list').then((response) => {
             expect(response.stdout).not.to.contain(_namespace);
         });
     })
 
-    it('Check gwa namespace destroy command for the namespace associated with services', () => {
+    it('Check gwa gateway destroy command for the namespace associated with services', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             _namespace = namespace
-            cy.executeCliCommand('gwa config set --namespace ' + namespace).then((response) => {
+            cy.executeCliCommand('gwa config set --gateway ' + namespace).then((response) => {
                 expect(response.stdout).to.contain("Config settings saved")
-                cy.executeCliCommand('gwa namespace destroy').then((response) => {
+                cy.executeCliCommand('gwa gateway destroy').then((response) => {
                     expect(response.stderr).to.contain('Error: Validation Failed');
                 });
             })
@@ -65,7 +65,7 @@ describe('Verify namespace delete using gwa command', () => {
     })
 
     it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
-        cy.executeCliCommand('gwa namespace destroy --force').then((response) => {
+        cy.executeCliCommand('gwa gateway destroy --force').then((response) => {
             expect(response.stderr).to.contain('Error: Validation Failed');
         });
     })

@@ -77,15 +77,15 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa command to create namespace', () => {
-    cy.executeCliCommand('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
       namespace = response.stdout
     });
   })
 
 
-  it('Check gwa namespace list command and verify the created namespace in the list', () => {
-    cy.executeCliCommand('gwa namespace list --host ' + cleanedUrl + ' --scheme http').then((response) => {
+  it('Check gwa gateway list command and verify the created namespace in the list', () => {
+    cy.executeCliCommand('gwa gatway list --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain(namespace);
     });
   })
