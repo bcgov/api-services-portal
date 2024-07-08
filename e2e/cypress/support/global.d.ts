@@ -28,10 +28,12 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
-    createGatewayV3(
+    createGateway(
       gatewayid?: string,
       displayname?: string,
     ): Chainable<any>
+
+    activateGateway(gatewayId: string): Chainable<Cypress.Response<any>>
 
     saveState(
       key: string,
@@ -82,7 +84,9 @@ declare namespace Cypress {
     setRequestBody(requestBody: any): void
 
     setAuthorizationToken(token: string): void
-
+    
+    gqlQuery<T = any>(query: string, variables?: Record<string, any>): Chainable<T>
+        
     callAPI(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>

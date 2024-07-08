@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken'
+import { gql } from 'graphql-request'
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
@@ -78,7 +79,7 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.loginSubmitButton).click()
 })
 
-Cypress.Commands.add('createGatewayV3', (gatewayid?: string, displayname?: string) => {
+Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string) => {
   cy.log('< Create namespace - ')
   const payload = {
     gatewayId: gatewayid ? gatewayid : '',
@@ -97,6 +98,34 @@ Cypress.Commands.add('createGatewayV3', (gatewayid?: string, displayname?: strin
       }
     }
   )
+})
+
+Cypress.Commands.add('activateGateway', (gatewayId: string) => {
+  const query = gql`
+query GetNamespaces {
+  allNamespaces {
+    id
+    name
+  }
+}
+`
+  return cy.gqlQuery(query).then((response) => {
+    const nsdata = response.apiRes.body.data.allNamespaces.find((ns: { name: string }) => ns.name === gatewayId)
+    if (nsdata) {
+      return nsdata.id
+    } else {
+      throw new Error('Namespace not found')
+    }
+  }).then((namespaceId) => {
+    cy.log(`The namespace ID is: ${namespaceId}`)
+    // activate namespace
+    cy.setHeaders({ 'Content-Type': 'application/json' })
+    cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')
+    cy.visit('/manager/gateways/detail')
+    cy.get('[data-testid="ns-detail-gatewayid"]').then(($el) => {
+      expect($el).contain(gatewayId)
+    })
+  })
 })
 
 Cypress.Commands.add('getLastConsumerID', () => {
@@ -538,6 +567,30 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
       // You can also return data or use it in further tests
       const responseData = {
         astraRes: astraResponse,
+        apiRes: apiResponse,
+      }
+      // cy.addToAstraScanIdList(response2.body.status)
+      return responseData
+    })
+  })
+})
+
+Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
+  cy.loginByAuthAPI('', '').then((token_res: any) => {
+    cy.setHeaders({ 
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    })
+    cy.setAuthorizationToken(token_res.token)
+    return cy.request({
+      url: Cypress.env('BASE_URL') + '/gql/api',
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+      failOnStatusCode: false,
+    }).then((apiResponse) => {
+      // You can also return data or use it in further tests
+      const responseData = {
         apiRes: apiResponse,
       }
       // cy.addToAstraScanIdList(response2.body.status)
