@@ -30,7 +30,7 @@ describe('Get the user session token to check ', () => {
             cy.get('@apiowner').then(({ user }: any) => {
                 cy.get('@common-testdata').then(({ apiTest }: any) => {
                     cy.login(user.credentials.username, user.credentials.password)
-                    home.useNamespace(apiTest.namespace)
+                    cy.activateGateway(apiTest.namespace)
                     namespace = apiTest.namespace
                     cy.get('@login').then(function (xhr: any) {
                         userSession = xhr.response.headers['x-auth-request-access-token']

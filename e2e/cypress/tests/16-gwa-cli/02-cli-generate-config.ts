@@ -59,7 +59,7 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('Verify that the product created through gwa command is displayed in the portal', () => {

@@ -54,7 +54,7 @@ describe('Multiple Org Adming for the organization', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
 

@@ -53,7 +53,7 @@ describe('Create API Spec', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('creates a new service account', () => {

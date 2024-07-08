@@ -60,7 +60,7 @@ describe('Add Organization to publish API', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('creates a new service account', () => {
@@ -158,7 +158,7 @@ describe('Org Admin approves the request', () => {
   })
 
   it('Select the namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('Clik on Enable Publishing option from Namespace Page', () => {
@@ -198,7 +198,7 @@ describe('Activate the API to make it visible in API Directory', () => {
   it('Authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace)
+      cy.activateGateway(namespace)
     })
   })
 
@@ -301,7 +301,7 @@ describe('Access manager approves developer access request for Kong API ACL auth
   it('Access Manager logs in', () => {
     cy.get('@access-manager').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(namespace)
+      cy.activateGateway(namespace)
     })
   })
 

@@ -29,7 +29,7 @@ describe('Delete created resources', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(deleteResources.namespace);
+        cy.activateGateway(deleteResources.namespace);
       })
     })
   })
@@ -70,7 +70,7 @@ describe('Delete created resources', () => {
     })
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       flag = true
-      home.useNamespace(deleteResources.namespace)
+      cy.activateGateway(deleteResources.namespace)
     })
   })
 

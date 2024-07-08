@@ -23,7 +23,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@access-manager').then(({ user }: any) => {
             cy.get('@common-testdata').then(({ namespace }: any) => {
                 cy.login(user.credentials.username, user.credentials.password).then(() => {
-                    home.useNamespace(namespace);
+                    cy.activateGateway(namespace);
                 })
             })
         })

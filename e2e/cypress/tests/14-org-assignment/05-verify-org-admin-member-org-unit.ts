@@ -53,7 +53,7 @@ describe('Multiple Org Admin for the organization', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('creates a new service account', () => {

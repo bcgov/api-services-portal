@@ -166,7 +166,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     cy.get('@common-testdata').then(({ checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
+      cy.activateGateway(checkPermission.namespace)
       cy.visit(na.path)
       na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
       cy.wait(2000)
@@ -192,9 +192,9 @@ Cypress.Commands.add(
       cy.get('@apiowner').then(({ user }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        // home.useNamespace(apiTest.namespace)
+        // cy.activateGateway(apiTest.namespace)
         if (isNamespaceSelected || undefined) {
-          home.useNamespace(namespace)
+          cy.activateGateway(namespace)
         }
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.response.headers['x-auth-request-access-token']

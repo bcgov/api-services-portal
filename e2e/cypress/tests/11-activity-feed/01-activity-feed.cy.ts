@@ -108,7 +108,7 @@ describe('Verify the Activity filter for users', () => {
 
     it('activates new namespace', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
-            home.useNamespace(namespace)
+            cy.activateGateway(namespace)
         })
     })
 

@@ -51,7 +51,7 @@ describe('Grant appropriate permissions to team members for client credential fl
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
 

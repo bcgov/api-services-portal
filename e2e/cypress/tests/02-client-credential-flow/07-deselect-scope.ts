@@ -29,7 +29,7 @@ describe('Deselect the scope from authorization tab', () => {
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password).then(() => {
-          home.useNamespace(clientCredentials.namespace);
+          cy.activateGateway(clientCredentials.namespace);
         })
       })
     })

@@ -28,7 +28,7 @@ describe('Grant Credential Issuer Role', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
@@ -75,7 +75,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
         cy.visit(mp.path)
       })
     })

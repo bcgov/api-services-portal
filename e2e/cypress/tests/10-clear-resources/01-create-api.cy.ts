@@ -53,7 +53,7 @@ describe('Create API Spec for Delete Resources', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('creates a new service account', () => {

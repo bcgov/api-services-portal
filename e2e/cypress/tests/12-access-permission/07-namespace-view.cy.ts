@@ -29,7 +29,7 @@ describe('Grant Namespace View Role to Mark', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
@@ -75,7 +75,7 @@ describe('Verify that Mark is unable to create service account', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
         cy.visit(mp.path)
       })
     })

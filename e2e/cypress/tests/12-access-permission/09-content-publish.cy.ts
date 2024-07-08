@@ -26,7 +26,7 @@ describe('Verify Content Publish Permission', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })

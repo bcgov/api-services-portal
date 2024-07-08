@@ -24,7 +24,7 @@ describe('Assign Access to existing user Spec', () => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
@@ -68,7 +68,7 @@ describe('Authernticate with old user to initiate migration', () => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(oldUser.credentials.username, oldUser.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
@@ -105,14 +105,14 @@ describe('Verify that permission of old user is migrated to new user', () => {
 
   // it('activates new namespace', () => {
   //   cy.get('@apiowner').then(({ namespace }: any) => {
-  //     home.useNamespace(namespace)
+  //     cy.activateGateway(namespace)
   //   })
   // })
 
   it('Get the permission of the user', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
         cy.get('@login').then(function (xhr: any) {
           userScopes = xhr.response.body.user.scopes
         })

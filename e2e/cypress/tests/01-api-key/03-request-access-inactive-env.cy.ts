@@ -30,7 +30,7 @@ describe('Change an Active environment to Inactive', () => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
@@ -129,7 +129,7 @@ describe('Change an the environment back to active', () => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
