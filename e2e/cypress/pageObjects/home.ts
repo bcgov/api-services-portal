@@ -11,18 +11,6 @@ class HomePage {
   namespaceCancelBtn: string = '[data-testid="ns-modal-cancel-btn"]'
   gatewaysNavButtom: string = '[data-testid="navbar-link-Gateways"]'
 
-  createNamespace(name: string): void {
-    cy.get(this.nsDropdown).click()
-    cy.get(this.nsDropdownCreateNsBtn).click()
-    cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
-    cy.get(this.nsCreateBtn).click()
-    cy.verifyToastMessage("Namespace "+name+" created!")
-    cy.wait(5000) // wait for dropdown to have latest text
-    cy.get(this.nsDropdown).then(($el) => {
-      expect($el).contain(name)
-    })
-  }
-
   useNamespace(name: string): Boolean {
     var flag = new Boolean(false);
     cy.get(this.nsDropdown).click()

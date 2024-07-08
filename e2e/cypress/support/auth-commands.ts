@@ -101,7 +101,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
 })
 
 Cypress.Commands.add('activateGateway', (gatewayId: string) => {
-  const query = gql`
+  const getAllNsQuery = gql`
 query GetNamespaces {
   allNamespaces {
     id
@@ -109,7 +109,17 @@ query GetNamespaces {
   }
 }
 `
-  return cy.gqlQuery(query).then((response) => {
+  const currentNsQuery = gql`
+  query GetCurrentNamespace {
+    currentNamespace {
+      name
+      org
+      orgUnit
+    }
+  }
+`
+  // get the (true) id for the namespace
+  return cy.gqlQuery(getAllNsQuery).then((response) => {
     const nsdata = response.apiRes.body.data.allNamespaces.find((ns: { name: string }) => ns.name === gatewayId)
     if (nsdata) {
       return nsdata.id
@@ -118,12 +128,12 @@ query GetNamespaces {
     }
   }).then((namespaceId) => {
     cy.log(`The namespace ID is: ${namespaceId}`)
-    // activate namespace
+    // then activate the namespace
     cy.setHeaders({ 'Content-Type': 'application/json' })
     cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')
-    cy.visit('/manager/gateways/detail')
-    cy.get('[data-testid="ns-detail-gatewayid"]').then(($el) => {
-      expect($el).contain(gatewayId)
+    return cy.gqlQuery(currentNsQuery).then((response) => {
+      const currentNs = response.apiRes.body.data.currentNamespace
+      expect(currentNs.name).to.eq(gatewayId)
     })
   })
 })
