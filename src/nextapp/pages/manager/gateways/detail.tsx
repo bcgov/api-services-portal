@@ -216,7 +216,7 @@ const NamespacesPage: React.FC = () => {
               </Tooltip>
             )}
           </Flex>
-          <Text fontSize="xl" pt={1}>
+          <Text data-testid="ns-detail-gatewayid" fontSize="xl" pt={1}>
             {namespace?.data.currentNamespace?.name}
           </Text>
           <Flex align="center" mt={4}>
