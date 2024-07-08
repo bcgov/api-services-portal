@@ -35,7 +35,7 @@
           {
             "resourceType": "namespace",
             "scopes": [
-              "Namespace.View"
+              "Gateway.View"
             ]
           }
         ]
@@ -363,7 +363,7 @@
           "name": "GatewayConfig.Publish"
         },
         {
-          "name": "Namespace.Manage"
+          "name": "Gateway.Manage"
         },
         {
           "name": "Access.Manage"
@@ -372,7 +372,7 @@
           "name": "Content.Publish"
         },
         {
-          "name": "Namespace.View"
+          "name": "Gateway.View"
         },
         {
           "name": "CredentialIssuer.Admin"

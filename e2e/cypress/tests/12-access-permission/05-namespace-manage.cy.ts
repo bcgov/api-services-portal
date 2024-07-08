@@ -34,7 +34,7 @@ describe('Grant Namespace Manage Role', () => {
     })
   })
 
-  it('Grant only "Namespace.Manage" permission to Wendy', () => {
+  it('Grant only "Gateway.Manage" permission to Wendy', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       // na.revokeAllPermission('wendy@idir')

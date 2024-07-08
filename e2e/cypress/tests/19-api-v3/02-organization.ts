@@ -169,7 +169,7 @@ describe('Organization', () => {
             resourceType: 'organization',
             scopes: ['GroupAccess.Manage', 'Namespace.Assign', 'Dataset.Manage'],
           },
-          { resourceType: 'namespace', scopes: ['Namespace.View'] },
+          { resourceType: 'namespace', scopes: ['Gateway.View'] },
         ],
       },
     }

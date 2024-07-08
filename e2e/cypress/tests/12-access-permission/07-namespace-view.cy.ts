@@ -34,7 +34,7 @@ describe('Grant Namespace View Role to Mark', () => {
     })
   })
 
-  it('Grant only "Namespace.View" permission to Mark', () => {
+  it('Grant only "Gateway.View" permission to Mark', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.revokeAllPermission(checkPermission.grantPermission.Mark.userName)

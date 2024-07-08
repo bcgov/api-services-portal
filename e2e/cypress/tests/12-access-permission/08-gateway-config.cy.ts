@@ -36,7 +36,7 @@ describe('Grant Gateway Config Role to Wendy', () => {
     })
   })
 
-  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
+  it('Grant "GatewayConfig.Publish" and "Gateway.View" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       // na.revokePermission(checkPermission.grantPermission.Wendy)
