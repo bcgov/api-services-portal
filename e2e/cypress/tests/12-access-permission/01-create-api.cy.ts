@@ -81,7 +81,7 @@ describe('Create API Spec', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + namespace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

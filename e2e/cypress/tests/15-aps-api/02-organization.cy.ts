@@ -204,7 +204,7 @@ describe('Delete the Namespace associated with the organization', () => {
     it('Delete the namespace associated with the organization, organization unit and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ organization }: any) => {
-                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res:any) => {
+                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + nameSpace, 'DELETE').then((res:any) => {
                     expect(res.apiRes.status).to.be.equal(200)
                     cy.addToAstraScanIdList(res.astraRes.body.status)
                     response = res.apiRes.body

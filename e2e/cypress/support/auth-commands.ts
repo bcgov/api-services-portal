@@ -86,8 +86,9 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
   }
   cy.setHeaders({ 'Content-Type': 'application/json' })
   cy.setRequestBody(payload)
-  cy.callAPI('ds/api/v3/gateways', 'POST').then(
+  return cy.callAPI('ds/api/v3/gateways', 'POST').then(
     ({ apiRes: { body, status } }: any) => {
+      cy.log(JSON.stringify(body, null, 2))
       expect(status).to.be.equal(200)
       if (payload.gatewayId) {
         expect(body.gatewayId).to.be.equal(payload.gatewayId)
@@ -95,6 +96,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
       if (payload.displayName) {
         expect(body.displayName).to.be.equal(payload.displayName)
       }
+      return cy.wrap(body)
     }
   )
 })
@@ -117,6 +119,7 @@ query GetNamespaces {
     }
   }
 `
+  cy.log('< Activating namespace - ' + gatewayId)
   // get the (true) id for the namespace
   cy.setHeaders({ 'Content-Type': 'application/json' })
   return cy.gqlQuery(getAllNsQuery).then((response) => {
@@ -127,7 +130,6 @@ query GetNamespaces {
       throw new Error('Namespace not found')
     }
   }).then((namespaceId) => {
-    cy.log(`The namespace ID is: ${namespaceId}`)
     // then activate the namespace
     cy.setHeaders({ 'Content-Type': 'application/json' })
     cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')

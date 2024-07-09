@@ -79,9 +79,9 @@
     }
   },
   "apiDirectory": {
-    "endPoint": "ds/api/v2/namespaces",
-    "orgEndPoint": "ds/api/v2/organizations",
-    "directoryEndPoint": "ds/api/v2/directory",
+    "endPoint": "ds/api/v3/gateways",
+    "orgEndPoint": "ds/api/v3/gateways",
+    "directoryEndPoint": "ds/api/v3/directory",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -323,7 +323,7 @@
       },
       "owner": "janis@testmail.com"
     },
-    "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
+    "endPoint": "ds/api/v3/gateways/apiplatform/issuers",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -334,8 +334,8 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/namespaces/apiplatform/products",
-    "deleteEnvironmentEndPoint": "ds/api/v2/namespaces/apiplatform/environments",
+    "endPoint": "ds/api/v3/gateways/apiplatform/products",
+    "deleteEnvironmentEndPoint": "ds/api/v3/gateways/apiplatform/environments",
     "body": {
       "name": "my-new-product",
       "appId": "DRE123456",
@@ -355,7 +355,7 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/namespaces",
+    "endPoint": "ds/api/v3/gateways",
     "activity": {
       "name": "newplatform",
       "scopes": [
