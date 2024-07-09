@@ -1,5 +1,4 @@
 import * as jwt from 'jsonwebtoken'
-import { gql } from 'graphql-request'
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
@@ -101,7 +100,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
 })
 
 Cypress.Commands.add('activateGateway', (gatewayId: string) => {
-  const getAllNsQuery = gql`
+  const getAllNsQuery = `
 query GetNamespaces {
   allNamespaces {
     id
@@ -109,7 +108,7 @@ query GetNamespaces {
   }
 }
 `
-  const currentNsQuery = gql`
+  const currentNsQuery = `
   query GetCurrentNamespace {
     currentNamespace {
       name
