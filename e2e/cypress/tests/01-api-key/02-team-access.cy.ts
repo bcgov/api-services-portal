@@ -6,6 +6,7 @@ describe('Team Access Spec', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
+  let userSession: any
 
   before(() => {
     cy.visit('/')
@@ -17,15 +18,14 @@ describe('Team Access Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('common-testdata').as('common-testdata')
-    // cy.visit(login.path)
   })
-
+  
   it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        cy.log('Logged in!')
-        cy.activateGateway(namespace)
+        cy.getUserSessionTokenValue(namespace, true).then((value) => {
+          userSession = value
+        })
       })
     })
   })

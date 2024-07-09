@@ -118,6 +118,7 @@ query GetNamespaces {
   }
 `
   // get the (true) id for the namespace
+  cy.setHeaders({ 'Content-Type': 'application/json' })
   return cy.gqlQuery(getAllNsQuery).then((response) => {
     const nsdata = response.apiRes.body.data.allNamespaces.find((ns: { name: string }) => ns.name === gatewayId)
     if (nsdata) {
@@ -268,7 +269,7 @@ Cypress.Commands.add('logout', () => {
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.visit('/')
-      cy.wait(3000)
+      // cy.wait(3000)
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
     })

@@ -52,7 +52,7 @@ describe('Create API Spec', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        cy.createGateway(namespace) 
+        cy.createGateway(namespace)
         cy.activateGateway(namespace)
         cy.visit('/manager/gateways/detail')
         cy.get('[data-testid="ns-detail-gatewayid"]').then(($el) => {
