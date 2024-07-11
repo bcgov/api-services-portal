@@ -48,7 +48,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to  ${namespace.name} namespace`,
+        title: `Switching to  ${namespace.name} gateway`,
         status: 'info',
         isClosable: true,
       });
@@ -57,14 +57,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to  ${namespace.name} namespace`,
+          title: `Switched to  ${namespace.name} gateway`,
           status: 'success',
           isClosable: true,
         });
       } catch (err) {
         toast.closeAll();
         toast({
-          title: 'Unable to switch namespaces',
+          title: 'Unable to switch gateways',
           status: 'error',
           isClosable: true,
         });
@@ -90,7 +90,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           _expanded={isNamespaceSelector ? {} : { bg: 'blue.400' }}
           _focus={{ boxShadow: 'outline' }}
         >
-          {user?.namespace ?? buttonMessage ?? 'No Active Namespace'}{' '}
+          {user?.namespace ?? buttonMessage ?? 'No Active Gateway'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList
@@ -104,14 +104,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           }}
         >
           <>
-            {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
+            {isLoading && <MenuItem isDisabled>Loading gateways...</MenuItem>}
             {isError && (
-              <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
+              <MenuItem isDisabled>Gateways Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <Box maxHeight="calc(100vh / 2)" overflowY="auto">
                 <MenuOptionGroup
-                  title={isNamespaceSelector ? '' : 'Switch Namespace'}
+                  title={isNamespaceSelector ? '' : 'Switch Gateway'}
                 >
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
@@ -149,13 +149,13 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           {!isNamespaceSelector && (
             <>
               <MenuDivider />
-              <MenuOptionGroup title="Namespace Actions">
+              <MenuOptionGroup title="Gateway Actions">
                 <MenuItem
                   onClick={newNamespaceDisclosure.onOpen}
                   color="bc-blue-alt"
                   data-testid="ns-dropdown-create-btn"
                 >
-                  Create New Namespace
+                  Create New Gateway
                 </MenuItem>
                 <MenuItem
                   isDisabled={!data}
@@ -163,7 +163,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   onClick={managerDisclosure.onOpen}
                   data-testid="ns-dropdown-manage-btn"
                 >
-                  Export Namespace Report
+                  Export Gateway Report
                 </MenuItem>
               </MenuOptionGroup>
             </>

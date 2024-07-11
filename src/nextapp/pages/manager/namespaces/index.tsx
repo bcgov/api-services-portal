@@ -95,11 +95,11 @@ const secondaryActions = [
     description: 'Manage authorization servers used to protect your APIs',
   },
   {
-    title: 'Namespace Access',
+    title: 'Gateway Access',
     url: '/manager/namespace-access',
     icon: FaUserFriends,
     roles: ['api-owner'],
-    description: 'Manage namespace access by users and service accounts',
+    description: 'Manage gateway access by users and service accounts',
   },
   {
     title: 'Service Accounts',
@@ -107,7 +107,7 @@ const secondaryActions = [
     icon: FaUserAlt,
     roles: ['api-owner', 'provider-user'],
     description:
-      'Manage service accounts for performing functions on the namespace',
+      'Manage service accounts for performing functions on the gateway',
   },
 ];
 
@@ -149,14 +149,14 @@ const NamespacesPage: React.FC = () => {
         router?.push('/manager');
 
         toast({
-          title: ' Namespace deleted',
+          title: ' Gateway deleted',
           status: 'success',
           isClosable: true,
         });
         client.invalidateQueries();
       } catch (err) {
         toast({
-          title: 'Delete namespace failed',
+          title: 'Delete gateway failed',
           description: err,
           status: 'error',
           isClosable: true,
@@ -214,7 +214,7 @@ const NamespacesPage: React.FC = () => {
                 <PopoverArrow bgColor="#373d3f" />
                 <PopoverBody>
                   If you need to change the Organization or Business Unit for
-                  your Namespace, submit a request through the{' '}
+                  your Gateway, submit a request through the{' '}
                   <Link
                     href={global.helpLinks.helpChangeOrgUrl}
                     target="_blank"
@@ -237,7 +237,7 @@ const NamespacesPage: React.FC = () => {
     <>
       <Head>
         <title>
-          API Program Services | Namespaces
+          API Program Services | Gateways
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
@@ -247,8 +247,8 @@ const NamespacesPage: React.FC = () => {
         <PageHeader title={hasNamespace ? title : ''} />
         {!hasNamespace && (
           <EmptyPane
-            message="To get started select a Namespace from the dropdown below or create a new Namespace"
-            title="No Namespace selected yet"
+            message="To get started select a Gateway from the dropdown below or create a new Gateway"
+            title="No Gateway selected yet"
             boxProps={{ borderRadius: 0, mx: 0 }}
             my={0}
           >
@@ -256,11 +256,11 @@ const NamespacesPage: React.FC = () => {
               <NamespaceMenu
                 user={user}
                 variant="ns-selector"
-                buttonMessage="Select a Namespace"
+                buttonMessage="Select a Gateway"
               />
               <Text>or</Text>
               <Button variant="primary" onClick={onOpen}>
-                Create New Namespace
+                Create New Gateway
               </Button>
             </Flex>
             <NewNamespace isOpen={isOpen} onClose={onClose} />
@@ -271,7 +271,7 @@ const NamespacesPage: React.FC = () => {
             <GridItem>
               <Flex as="header" align="center" mb={4}>
                 <Heading size="sm" fontWeight="normal">
-                  Manage Namespace
+                  Manage Gateway
                 </Heading>
               </Flex>
               <VStack spacing={5} align="stretch">
@@ -380,7 +380,7 @@ const NamespacesPage: React.FC = () => {
                     destructive
                     body="This action cannot be undone"
                     confirmButtonText="Yes, Delete"
-                    title={`Delete ${user.namespace} Namespace?`}
+                    title={`Delete ${user.namespace} Gateway?`}
                     onConfirm={handleDelete}
                   >
                     <Flex
@@ -401,7 +401,7 @@ const NamespacesPage: React.FC = () => {
                     >
                       <Flex align="center">
                         <Icon as={FaTrash} boxSize={5} mr={3} />
-                        <Text>Delete Namespace...</Text>
+                        <Text>Delete Gateway...</Text>
                       </Flex>
                     </Flex>
                   </ConfirmationDialog>

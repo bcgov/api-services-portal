@@ -21,7 +21,7 @@ export const DeleteNamespaceValidate = async (
   ns: string,
   force: boolean
 ): Promise<void> => {
-  logger.debug('Validate Deleting Namespace ns=%s', ns);
+  logger.debug('Validate Deleting Gateway ns=%s', ns);
 
   const gwServices = await lookupServicesByNamespace(context, ns);
 
@@ -36,14 +36,14 @@ export const DeleteNamespaceValidate = async (
     messages.push(
       `${accessList.length} ${
         accessList.length == 1 ? 'consumer has' : 'consumers have'
-      } access to products in this namespace.`
+      } access to products in this gateway.`
     );
   }
   if (gwServices.length > 0) {
     messages.push(
       `${gwServices.length} ${
         gwServices.length == 1 ? 'service has' : 'services have'
-      } been configured in this namespace.`
+      } been configured in this gateway.`
     );
   }
 
@@ -51,7 +51,7 @@ export const DeleteNamespaceValidate = async (
   if (accessList.length != 0) {
     const msg = `${accessList.length} ${
       accessList.length == 1 ? 'consumer has' : 'consumers have'
-    } access to products in this namespace.`;
+    } access to products in this gateway.`;
     assert.strictEqual(accessList.length == 0, true, msg);
   }
   if (!force) {
@@ -63,7 +63,7 @@ export const DeleteNamespaceRecordActivity = async (
   context: any,
   ns: string
 ): Promise<{ id: string }> => {
-  logger.debug('Record Activity for Deleting Namespace ns=%s', ns);
+  logger.debug('Record Activity for Deleting Gateway ns=%s', ns);
 
   const envs = await lookupEnvironmentsByNS(context, ns);
 
@@ -98,7 +98,7 @@ export const DeleteNamespace = async (
   subjectToken: string,
   ns: string
 ) => {
-  logger.debug('Deleting Namespace ns=%s', ns);
+  logger.debug('Deleting Gateway ns=%s', ns);
   assert.strictEqual(
     typeof ns === 'string' && ns.length > 0,
     true,
