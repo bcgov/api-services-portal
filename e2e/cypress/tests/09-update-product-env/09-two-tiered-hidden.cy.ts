@@ -50,9 +50,7 @@ describe('Verify Two Tiered Hidden', () => {
   it('create namespace with cli', () => {
     cy.get('@common-testdata').then(({ twoTieredHidden }: any) => {
       cy.executeCliCommand(
-        'gwa gateway create --gateway-id ' +
-          twoTieredHidden.namespace +
-          ' --description="Two Tiered Hidden"'
+        'gwa gateway create --gateway-id ' + twoTieredHidden.namespace + ' --display-name="Two Tiered Hidden"'
       ).then((response) => {
         expect(response.stdout).to.contain(twoTieredHidden.namespace)
       })

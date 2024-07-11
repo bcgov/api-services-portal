@@ -49,10 +49,9 @@ describe('Add Organization to publish API', () => {
   })
 
   it('create namespace using gwa cli command', () => {
-    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+    cy.createGateway().then((response) => {
+      namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
       cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --gateway " + namespace)
