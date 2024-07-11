@@ -113,6 +113,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.activateGateway(namespace)
+        cy.visit('/')
         cy.get('@login').then(function (xhr: any) {
           userScopes = xhr.response.body.user.scopes
         })

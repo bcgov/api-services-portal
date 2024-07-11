@@ -270,10 +270,14 @@ Cypress.Commands.add('logout', () => {
   cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
-      cy.visit('/')
-      // cy.wait(3000)
-      cy.get('[data-testid=auth-menu-user]').click({ force: true })
-      cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
+      cy.visit('/').then(() => {
+        cy.get('body').then($body => {
+          if ($body.find('[data-testid=auth-menu-user]').length) {
+            cy.get('[data-testid=auth-menu-user]').click();
+            cy.get('[data-testid=auth-menu-signout-btn]').click();
+          }
+        });
+      })
     })
   })
   cy.log('> Logging out')
