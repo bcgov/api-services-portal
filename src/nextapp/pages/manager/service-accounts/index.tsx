@@ -35,6 +35,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import ServiceAccountCreate from '@/components/service-account-create';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import EmptyPane from '@/components/empty-pane';
+import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'getServiceAccounts';
@@ -63,6 +64,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ServiceAccountsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+  // Redirect to My Gateways page if no gateway selected
+  NoGatewayRedirect();
+
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Service Accounts' }]);
   const client = useQueryClient();
   const [credentials, setCredentials] = React.useState<Record<string, string>>(

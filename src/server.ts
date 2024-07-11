@@ -384,6 +384,7 @@ const configureExpress = (app: any) => {
       version: process.env.NEXT_PUBLIC_APP_VERSION,
       revision: process.env.NEXT_PUBLIC_APP_REVISION,
       cluster: process.env.NEXT_PUBLIC_KUBE_CLUSTER,
+      apiRootUrl: process.env.NEXT_PUBLIC_API_ROOT,
       identities: {
         developer: (process.env.NEXT_PUBLIC_DEVELOPER_IDS || '').split(','),
         provider: (process.env.NEXT_PUBLIC_PROVIDER_IDS || '').split(','),

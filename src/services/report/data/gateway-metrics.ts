@@ -6,6 +6,7 @@ import { dateRange } from '../../utils';
 
 export interface ReportOfGatewayMetrics {
   namespace: string;
+  displayName?: string;
   prod_name?: string;
   prod_env_name?: string;
   prod_env_app_id?: string;
@@ -32,6 +33,7 @@ export async function getGatewayMetrics(
 
         data.push({
           namespace: ns.name,
+          displayName: ns.displayName,
           service_name: svc.name,
           prod_name: svc.environment?.product?.name,
           prod_env_name: svc.environment?.name,

@@ -3,6 +3,7 @@
     allNamespaces {
       id
       name
+      displayName
       orgEnabled
       orgUpdatedAt
     }

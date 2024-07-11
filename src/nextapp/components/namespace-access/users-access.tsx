@@ -86,7 +86,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
           requesterEmail,
           scopes: groupedByRequester[r].map((d) => ({
             id: d.scope,
-            name: d.scopeName,
+            name: d.scopeName.replace(/Namespace/g, 'Gateway'),
           })),
           tickets: groupedByRequester[r].map((d) => d.id),
         };

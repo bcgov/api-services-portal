@@ -16,7 +16,7 @@ export async function connectExclusiveListCreate(
 ) {
   logger.debug('%s %j %j %j', fieldKey, currentData, inputData, parentRecord);
 
-  await applyTransformationsToNewCreation(
+  const createInputData = await applyTransformationsToNewCreation(
     keystone,
     transformInfo,
     inputData[fieldKey],
@@ -35,7 +35,7 @@ export async function connectExclusiveListCreate(
 
   if (inputData[fieldKey]) {
     return {
-      create: inputData[fieldKey],
+      create: createInputData,
     };
   } else {
     return null;

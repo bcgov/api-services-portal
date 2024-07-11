@@ -45,7 +45,10 @@ import {
   getAllNamespaces,
   getKeycloakGroupApi,
   getResource,
+  generateDisplayName,
   transformOrgAndOrgUnit,
+  validateDisplayName,
+  validateNamespaceName,
 } from '../../services/keycloak/namespace-details';
 import { newNamespaceID } from '../../services/identifiers';
 
@@ -144,6 +147,8 @@ module.exports = {
                 const resource: any = await getResource(selectedNS, envCtx);
                 merged['id'] = resource['id'];
                 merged['scopes'] = resource['scopes'];
+                merged['displayName'] =
+                  resource['displayName'] || `Gateway ${resource['name']}`;
               }
 
               if (merged.org) {
@@ -343,6 +348,41 @@ module.exports = {
           },
           {
             schema:
+              'updateCurrentNamespaceDisplayName(displayName: String): String',
+            resolver: async (
+              item: any,
+              { displayName }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              const ns = context.req.user?.namespace;
+
+              validateDisplayName(displayName);
+
+              const prodEnv = await getGwaProductEnvironment(context, true);
+
+              await getNamespaceResourceSets(prodEnv); // sets accessToken
+
+              const resourcesApi = new UMAResourceRegistrationService(
+                prodEnv.uma2.resource_registration_endpoint,
+                prodEnv.accessToken
+              );
+
+              await resourcesApi.updateDisplayName(ns, displayName);
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
               'updateCurrentNamespace(org: String, orgUnit: String): String',
             resolver: async (
               item: any,
@@ -416,6 +456,7 @@ module.exports = {
                 });
               }
             },
+            access: EnforcementPoint,
           },
           {
             schema:
@@ -427,15 +468,14 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespaceValidationRule = '^[a-z][a-z0-9-]{3,13}[a-z0-9]$';
-
               const newNS = args.name ? args.name : newNamespaceID();
 
-              regExprValidation(
-                namespaceValidationRule,
-                newNS,
-                'Gateway name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.'
-              );
+              validateNamespaceName(newNS);
+
+              const displayName =
+                args.displayName || generateDisplayName(context, newNS);
+
+              validateDisplayName(displayName);
 
               const noauthContext = context.createContext({
                 skipAccessControl: true,
@@ -478,7 +518,7 @@ module.exports = {
               ];
               const res = <ResourceSetInput>{
                 name: newNS,
-                displayName: args.displayName,
+                displayName,
                 type: 'namespace',
                 resource_scopes: scopes,
                 ownerManagedAccess: true,
@@ -495,6 +535,7 @@ module.exports = {
                   'Namespace.Manage',
                   'CredentialIssuer.Admin',
                   'GatewayConfig.Publish',
+                  'Access.Manage',
                 ]) {
                   await permissionApi.createPermission(
                     rset.id,

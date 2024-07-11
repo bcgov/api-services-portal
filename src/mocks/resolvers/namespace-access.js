@@ -131,6 +131,7 @@ let umaPolicies = [
 let currentNamespace = {
   id: 'ns1',
   name: 'aps-portal',
+  displayName: 'API Services Portal gw',
   scopes: [
     { name: 'GatewayConfig.Publish' },
     { name: 'Namespace.Manage' },
@@ -172,6 +173,7 @@ export const updateCurrentNamesSpaceHandler = (req, res, ctx) => {
     ...req.variables,
     org: req.variables.org ? { title: req.variables.org } : null,
     orgUnit: req.variables.orgUnit ? { title: req.variables.orgUnit } : null,
+    displayName: req.variables.displayName ? { title: req.variables.displayName } : null,
   };
   return res(ctx.data({}));
 };

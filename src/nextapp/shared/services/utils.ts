@@ -1,8 +1,8 @@
+import { UserData } from '@/types';
 import {
   FaKey,
   FaLock,
-  FaLockOpen,
-  // FaUserSecret,
+  FaLockOpen
 } from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
 
@@ -70,4 +70,23 @@ export const delay = async (timeout = 100): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(resolve, timeout);
   });
+};
+
+export const updateRecentlyViewedNamespaces = (namespacesRecentlyViewed: any[], user: UserData) => {
+  const existingEntryIndex = namespacesRecentlyViewed.findIndex((entry: any) => entry.userId === user.userId && entry.namespace === user.namespace);
+
+  if (existingEntryIndex !== -1) {
+    // Update existing entry
+    namespacesRecentlyViewed[existingEntryIndex].updatedAt = user.updatedAt;
+  } else {
+    // Add new entry
+    namespacesRecentlyViewed.push({
+      userId: user.userId,
+      namespace: user.namespace,
+      updatedAt: user.updatedAt
+    });
+  }
+
+  // Update localStorage
+  localStorage.setItem('namespacesRecentlyViewed', JSON.stringify(namespacesRecentlyViewed));
 };

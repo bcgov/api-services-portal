@@ -1,6 +1,7 @@
 import './commands'
 import 'cypress-xpath'
 import './auth-commands'
+import './prep-commands'
 import './util-commands'
 import '@cypress/code-coverage/support'
 const _ = require('lodash')

@@ -90,10 +90,10 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
         <ModalContent>
           <ModalCloseButton />
           <ModalHeader pb={0}>
-            <Heading size="inherit">Export Namespace Report</Heading>
+            <Heading size="inherit">Export Gateway Report</Heading>
             <Box fontSize="md" fontWeight="normal" width="100%" mt={3}>
               <Text color="bc-component" mb={2.5}>
-                Export a detailed report of your namespace metrics and
+                Export a detailed report of your gateway metrics and
                 activities
               </Text>
               <Flex
@@ -144,9 +144,9 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                     size="sm"
                     data-testid="export-report-empty-text"
                   >
-                    You have no namespaces
+                    You have no gateways
                   </Heading>
-                  <Text fontSize="sm">Create a namespace to manage.</Text>
+                  <Text fontSize="sm">Create a gateway to manage.</Text>
                 </Box>
               </Center>
             )}
@@ -181,7 +181,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
             <Box>
               {isInvalid && (
                 <Text color="bc-error" data-testid="export-report-select-error">
-                  *Please select a namespace
+                  *Please select a gateway
                 </Text>
               )}
             </Box>

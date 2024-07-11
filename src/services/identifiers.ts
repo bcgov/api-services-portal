@@ -23,3 +23,5 @@ export function newEnvironmentID(): string {
 export function newNamespaceID(): string {
   return 'gw-' + uuidv4().replace(/-/g, '').toLowerCase().substring(0, 5);
 }
+
+export const newGatewayID = newNamespaceID;
