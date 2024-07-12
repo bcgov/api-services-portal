@@ -59,7 +59,7 @@ describe('Delete created resources', () => {
 
   it('Delete Namespace', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
-      cy.visit(ns.path)
+      cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
     })
   })

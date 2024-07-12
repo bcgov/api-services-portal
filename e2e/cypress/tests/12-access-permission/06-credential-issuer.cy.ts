@@ -79,7 +79,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   })
 
   it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
-    cy.visit(ns.path)
+    cy.visit(ns.detailPath)
     ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
   })
 

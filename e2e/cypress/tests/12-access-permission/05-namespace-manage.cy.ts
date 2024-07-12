@@ -81,7 +81,7 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
   })
 
   it('Verify that all the namespace options and activities are displayed', () => {
-    cy.visit(ns.path)
+    cy.visit(ns.detailPath)
     ns.verifyThatAllOptionsAreDisplayed()
   })
 
