@@ -92,6 +92,8 @@ declare namespace Cypress {
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     getUserSession(): Chainable<Cypress.Response<any>>
+    
+    interceptUserSession(): Chainable<Cypress.Response<any>>
 
     compareJSONObjects(
       actualResponse: any,

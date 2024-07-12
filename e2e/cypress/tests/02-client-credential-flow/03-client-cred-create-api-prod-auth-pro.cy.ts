@@ -44,7 +44,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
         nameSpace = clientCredentials.namespace
         cy.activateGateway(clientCredentials.namespace)
         // cy.get('@login').then(function (xhr: any) {
-        //   userSession = xhr.response.headers['x-auth-request-access-token']
+        //   userSession = xhr.headers['x-auth-request-access-token']
         // })
       })
     })

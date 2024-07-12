@@ -190,7 +190,7 @@ Cypress.Commands.add(
     cy.fixture('apiowner').as('apiowner')
     cy.preserveCookies()
     cy.visit(login.path)
-    cy.getUserSession().then(() => {
+    cy.interceptUserSession().then(() => {
       cy.get('@apiowner').then(({ user }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
@@ -635,6 +635,14 @@ Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
 })
 
 Cypress.Commands.add('getUserSession', () => {
+  cy.request({
+    method: 'GET',
+    url: Cypress.config('baseUrl') + '/admin/session',
+    failOnStatusCode: true
+  }).as('login')
+});
+
+Cypress.Commands.add('interceptUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 

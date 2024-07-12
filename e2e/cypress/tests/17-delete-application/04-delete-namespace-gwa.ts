@@ -36,13 +36,20 @@ describe('Verify namespace delete using gwa command', () => {
         var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
         cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
             assert.isNotNaN(response.stdout)
-            _namespace = response.stdout
+            // Use regex to extract the gateway ID
+            const match = response.stdout.match(/Gateway ID: ([\w-]+)/);
+            if (match && match[1]) {
+                _namespace = match[1];
+                assert.isNotNull(_namespace);
+            } else {
+                throw new Error('Failed to extract Gateway ID from response: ' + response.stdout);
+            }
         });
-    })
+    });
 
     it('Check gwa gateway destroy command for soft deleting namespace', () => {
         cy.executeCliCommand('gwa gateway destroy ' + _namespace).then((response) => {
-            expect(response.stdout).to.contain('Namespace destroyed: ' + _namespace);
+            expect(response.stdout).to.contain('Gateway destroyed: ' + _namespace);
         });
     })
 

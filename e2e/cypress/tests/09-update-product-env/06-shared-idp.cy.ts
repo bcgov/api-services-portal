@@ -39,7 +39,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
           cy.login(user.credentials.username, user.credentials.password)
           cy.activateGateway(namespace)
           cy.get('@login').then(function (xhr: any) {
-            userSession = xhr.response.headers['x-auth-request-access-token']
+            userSession = xhr.headers['x-auth-request-access-token']
           })
         })
       })
@@ -104,7 +104,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
           cy.login(user.credentials.username, user.credentials.password)
           cy.activateGateway(namespace)
           cy.get('@login').then(function (xhr: any) {
-            userSession = xhr.response.headers['x-auth-request-access-token']
+            userSession = xhr.headers['x-auth-request-access-token']
           })
         })
       })

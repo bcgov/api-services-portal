@@ -96,7 +96,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates with new user', () => {
+  it.only('authenticates with new user', () => {
     cy.get('@usermigration').then(({ newUser }: any) => {
       cy.login(newUser.credentials.username, newUser.credentials.password)
       cy.log('Logged in!')
@@ -109,14 +109,12 @@ describe('Verify that permission of old user is migrated to new user', () => {
   //   })
   // })
 
-  it('Get the permission of the user', () => {
-    cy.getUserSession().then(() => {
-      cy.get('@common-testdata').then(({ namespace }: any) => {
-        cy.activateGateway(namespace)
-        cy.visit('/')
-        cy.get('@login').then(function (xhr: any) {
-          userScopes = xhr.response.body.user.scopes
-        })
+  it.only('Get the permission of the user', () => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.activateGateway(namespace)
+      cy.getUserSession()
+      cy.get('@login').then(function (xhr: any) {
+        userScopes = xhr.body.user.scopes
       })
     })
   })

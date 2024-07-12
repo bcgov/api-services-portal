@@ -33,7 +33,7 @@ describe('Get the user session token to check ', () => {
                     cy.activateGateway(apiTest.namespace)
                     namespace = apiTest.namespace
                     cy.get('@login').then(function (xhr: any) {
-                        userSession = xhr.response.headers['x-auth-request-access-token']
+                        userSession = xhr.headers['x-auth-request-access-token']
                     })
                 })
             })

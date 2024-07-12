@@ -48,7 +48,7 @@ describe('Add Organization to publish API', () => {
     });
   })
 
-  it('create namespace using gwa cli command', () => {
+  it('create namespace', () => {
     cy.createGateway().then((response) => {
       namespace = response.gatewayId
       cy.log('New namespace created: ' + namespace)

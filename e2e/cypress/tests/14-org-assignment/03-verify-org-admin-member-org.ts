@@ -42,7 +42,7 @@ describe('Multiple Org Adming for the organization', () => {
     });
   })
 
-  it('create namespace using gwa cli command', () => {
+  it('create namespace', () => {
     cy.createGateway().then((response) => {
       namespace = response.gatewayId
       cy.log('New namespace created: ' + namespace)

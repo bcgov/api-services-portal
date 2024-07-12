@@ -69,7 +69,7 @@ describe('Verify Two Tiered Hidden', () => {
         nameSpace = twoTieredHidden.namespace
         cy.activateGateway(twoTieredHidden.namespace)
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
     })
