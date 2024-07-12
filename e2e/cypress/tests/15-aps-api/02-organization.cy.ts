@@ -35,8 +35,8 @@ describe('API Tests to verify the Organization details in the response', () => {
 
     beforeEach(() => {
         cy.preserveCookies()
-        cy.fixture('api').as('api')
-        cy.request("ds/api/v3/organizations")
+        cy.fixture('api-v2').as('api')
+        cy.request("ds/api/v2/organizations")
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -62,8 +62,8 @@ describe('Verify /Organization/{Org} end point', () => {
 
     beforeEach(() => {
         cy.preserveCookies()
-        cy.fixture('api').as('api')
-        cy.request("ds/api/v3/organizations")
+        cy.fixture('api-v2').as('api')
+        cy.request("ds/api/v2/organizations")
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -99,7 +99,7 @@ describe('Get the Organization Role', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -128,7 +128,7 @@ describe('Get the Organization Role', () => {
     })
 
     it('Get the list of roles and verify the success code in the response', () => {
-        cy.makeAPIRequest('ds/api/v3/roles', 'GET').then((res:any) => {
+        cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res:any) => {
             expect(res.apiRes.status).to.be.equal(200)
             response = res.apiRes.body
             cy.addToAstraScanIdList(res.astraRes.body.status)
@@ -151,7 +151,7 @@ describe('Get the Namespace associated with the organization', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -189,7 +189,7 @@ describe('Delete the Namespace associated with the organization', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -204,7 +204,7 @@ describe('Delete the Namespace associated with the organization', () => {
     it('Delete the namespace associated with the organization, organization unit and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ namespace }: any) => {
             cy.get('@api').then(({ organization }: any) => {
-                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + nameSpace, 'DELETE').then((res:any) => {
+                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res:any) => {
                     expect(res.apiRes.status).to.be.equal(200)
                     cy.addToAstraScanIdList(res.astraRes.body.status)
                     response = res.apiRes.body
@@ -232,7 +232,7 @@ describe('Add and Get Organization Access', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
     })
 

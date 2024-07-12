@@ -96,7 +96,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
     cy.visit(login.path)
   })
 
-  it.only('authenticates with new user', () => {
+  it('authenticates with new user', () => {
     cy.get('@usermigration').then(({ newUser }: any) => {
       cy.login(newUser.credentials.username, newUser.credentials.password)
       cy.log('Logged in!')
@@ -109,7 +109,7 @@ describe('Verify that permission of old user is migrated to new user', () => {
   //   })
   // })
 
-  it.only('Get the permission of the user', () => {
+  it('Get the permission of the user', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.activateGateway(namespace)
       cy.getUserSession()

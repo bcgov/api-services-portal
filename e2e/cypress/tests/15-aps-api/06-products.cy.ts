@@ -26,14 +26,14 @@ describe('Get the user session token to check ', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
+        cy.interceptUserSession().then(() => {
             cy.get('@apiowner').then(({ user }: any) => {
                 cy.get('@common-testdata').then(({ apiTest }: any) => {
                     cy.login(user.credentials.username, user.credentials.password)
                     cy.activateGateway(apiTest.namespace)
                     namespace = apiTest.namespace
                     cy.get('@login').then(function (xhr: any) {
-                        userSession = xhr.headers['x-auth-request-access-token']
+                        userSession = xhr.response.headers['x-auth-request-access-token']
                     })
                 })
             })
@@ -49,7 +49,7 @@ describe('API Tests for Updating Products', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -104,7 +104,7 @@ describe('Verify that created Product is displayed in UI', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('common-testdata').as('common-testdata')
         cy.visit(login.path)
     })
@@ -124,7 +124,7 @@ describe('API Tests for Delete Products', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {

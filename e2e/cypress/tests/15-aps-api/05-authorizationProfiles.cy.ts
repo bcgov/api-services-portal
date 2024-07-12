@@ -49,7 +49,7 @@ testData.forEach((testCase: any) => {
         var expectedResponse: any = {}
 
         beforeEach(() => {
-            cy.fixture('api').as('api')
+            cy.fixture('api-v2').as('api')
         })
 
         it('Prepare the Request Specification for the API', () => {
@@ -113,7 +113,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     let expectedResponse: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -128,7 +128,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
 
     it('Put the resource to create shared IDP profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.makeAPIRequest('ds/api/v3/gateways/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
                 expect(response.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(response.astraRes.body.status)
             })
@@ -145,7 +145,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
 
     it('Create an authorization profile using inheritFrom attribute and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.makeAPIRequest('ds/api/v3/gateways/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
                 expect(response.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(response.astraRes.body.status)
                 expect(response.apiRes.body.result).to.be.equal("created")
@@ -155,7 +155,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
 
     it('Get list of authorization profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.makeAPIRequest('ds/api/v3/gateways/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
                 expect(res.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(res.astraRes.body.status)
                 response = res.apiRes.body
@@ -180,7 +180,7 @@ describe('Published a shared authorization profile', () => {
     let expectedResponse: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -195,7 +195,7 @@ describe('Published a shared authorization profile', () => {
 
     it('Create a shared credential issuer', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.makeAPIRequest('ds/api/v3/gateways/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'PUT').then((response:any) => {
                 expect(response.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(response.astraRes.body.status)
                 expect(response.apiRes.body.result).to.be.equal("created")
@@ -205,7 +205,7 @@ describe('Published a shared authorization profile', () => {
 
     it('Get list of authorization profile and verify the success code in the response', () => {
         cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.makeAPIRequest('ds/api/v3/gateways/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
+            cy.makeAPIRequest('ds/api/v2/namespaces/' + apiTest.namespace + '/issuers', 'GET').then((res:any) => {
                 expect(res.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(res.astraRes.body.status)
                 response = res.apiRes.body
@@ -233,7 +233,7 @@ describe('Deleted shared auth profile', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('common-testdata').as('common-testdata')
     })
 
@@ -242,7 +242,7 @@ describe('Deleted shared auth profile', () => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace
-                cy.activateGateway(namespace);
+                home.useNamespace(namespace);
             })
         })
     })
@@ -285,7 +285,7 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('state/regen').as('regen')
         cy.fixture('admin').as('admin')
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Authenticates Admin owner', () => {
