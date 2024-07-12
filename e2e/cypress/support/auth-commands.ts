@@ -565,14 +565,32 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
   requestData['method'] = methodType
 
   // Scan request with Astra
-  cy.request({
-    url: 'http://astra.localtest.me:8094/scan/',
-    method: 'POST',
-    body: requestData,
-    headers: headers,
-    failOnStatusCode: false,
-  }).then((astraResponse) => {
-    // Actual API request
+  if (Cypress.env('ASTRA_SCAN_ENABLED') == 'true') {
+    cy.request({
+      url: 'http://astra.localtest.me:8094/scan/',
+      method: 'POST',
+      body: requestData,
+      headers: headers,
+      failOnStatusCode: false,
+    }).then((astraResponse) => {
+      // Actual API request
+      cy.request({
+        url: Cypress.env('BASE_URL') + '/' + endPoint,
+        method: methodType,
+        body: body,
+        headers: headers,
+        failOnStatusCode: false,
+      }).then((apiResponse) => {
+        // You can also return data or use it in further tests
+        const responseData = {
+          astraRes: astraResponse,
+          apiRes: apiResponse,
+        }
+        // cy.addToAstraScanIdList(response2.body.status)
+        return responseData
+      })
+    })
+  } else {
     cy.request({
       url: Cypress.env('BASE_URL') + '/' + endPoint,
       method: methodType,
@@ -580,15 +598,12 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
       headers: headers,
       failOnStatusCode: false,
     }).then((apiResponse) => {
-      // You can also return data or use it in further tests
       const responseData = {
-        astraRes: astraResponse,
         apiRes: apiResponse,
       }
-      // cy.addToAstraScanIdList(response2.body.status)
       return responseData
     })
-  })
+  }
 })
 
 Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
