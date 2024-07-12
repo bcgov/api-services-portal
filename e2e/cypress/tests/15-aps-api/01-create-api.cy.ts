@@ -45,7 +45,7 @@ describe('Create API Spec', () => {
       namespace = response.gatewayId
       cy.log('New namespace created: ' + namespace)
       cy.updateJsonValue('common-testdata.json', 'apiTest.namespace', namespace)
-      cy.updateJsonValue('api.json', 'organization.expectedNamespace.name', namespace)
+      cy.updateJsonValue('api-v2.json', 'organization.expectedNamespace.name', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
       cy.executeCliCommand("gwa config set --gateway " + namespace)
     });

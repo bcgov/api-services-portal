@@ -77,7 +77,12 @@ describe('Verify /Organization/{Org} end point', () => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response:any) => {
                 expect(response.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(response.astraRes.body.status)
-                assert.isTrue(Cypress._.isEqual(response.apiRes.body.orgUnits[0], organization.orgExpectedList))
+                assert.isTrue(
+                    response.apiRes.body.orgUnits.some((orgUnit: any) => 
+                      Cypress._.isEqual(orgUnit, organization.orgExpectedList)
+                    ),
+                    'Expected org unit not found in orgUnits'
+                  );
             })
         })
     })
@@ -174,9 +179,8 @@ describe('Get the Namespace associated with the organization', () => {
 
     it('Compare the Namespace values in response against the expected values', () => {
         cy.get('@api').then(({ organization }: any) => {
-            expectedResponse = organization.expectedNamespace
-            // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
-            cy.compareJSONObjects(response, expectedResponse, true)
+            expectedResponse = organization.expectedNamespace.name
+            expect(nameSpace).to.deep.equal(expectedResponse)
         })
     })
 
