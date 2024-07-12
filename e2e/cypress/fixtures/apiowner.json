@@ -361,8 +361,8 @@
       }
     },
     "orgAdminNotification": {
-      "parent": "Your Organization Administrator has been notified to enable API Publishing to the Directory for the orgassignment namespace.",
-      "child": "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
+      "parent": "Your Organization Administrator has been notified to enable API Publishing to the Directory for the gateway orgassignment.", 
+      "child": "New gateways must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
     }
   },
   "orgAssignmentMultipleAdmin": {

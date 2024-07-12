@@ -9,6 +9,7 @@ import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import MyAccessPage from '../../pageObjects/myAccess'
 import ConsumersPage from '../../pageObjects/consumers'
 let namespace: string
+let displayName: string
 
 describe('Add Organization to publish API', () => {
   const login = new LoginPage()
@@ -51,6 +52,7 @@ describe('Add Organization to publish API', () => {
   it('create namespace', () => {
     cy.createGateway().then((response) => {
       namespace = response.gatewayId
+      displayName = response.displayName
       cy.log('New namespace created: ' + namespace)
       cy.updateJsonValue('common-testdata.json', 'orgAssignment.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
@@ -122,7 +124,7 @@ describe('Add Organization to publish API', () => {
   it('Verify Organization Administrator notification banner', () => {
     cy.visit(apiDir.path)
     cy.get('@apiowner').then(({ orgAssignment }: any) => {
-      cy.replaceWord(orgAssignment.orgAdminNotification.parent, 'orgassignment', namespace).then((updatedNotification: string) => {
+      cy.replaceWord(orgAssignment.orgAdminNotification.parent, 'orgassignment', displayName).then((updatedNotification: string) => {
         apiDir.checkOrgAdminNotificationBanner(updatedNotification, orgAssignment.orgAdminNotification.child)
       })
     })
@@ -160,8 +162,8 @@ describe('Org Admin approves the request', () => {
     cy.activateGateway(namespace)
   })
 
-  it('Clik on Enable Publishing option from Namespace Page', () => {
-    cy.visit(ns.path)
+  it('Click on Enable Publishing option from Namespace Page', () => {
+    cy.visit(ns.detailPath)
     cy.wait(2000)
     cy.contains('a', 'Enable Publishing').click()
     cy.wait(2000)
