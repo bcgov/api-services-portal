@@ -242,7 +242,7 @@ describe('Deleted shared auth profile', () => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace
-                home.useNamespace(namespace);
+                cy.activateGateway(namespace);
             })
         })
     })

@@ -178,7 +178,7 @@ describe('API Tests for Create Namespace', () => {
             cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                 expect(res.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body.displayName).to.be.equal(null)
+                expect(res.apiRes.body.displayName).to.be.equal("janis's Gateway")
                 nameSpace = res.apiRes.body.name
             })
         })
