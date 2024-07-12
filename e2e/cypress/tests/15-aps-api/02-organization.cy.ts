@@ -36,7 +36,7 @@ describe('API Tests to verify the Organization details in the response', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('api').as('api')
-        cy.request("ds/api/v2/organizations")
+        cy.request("ds/api/v3/organizations")
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -63,7 +63,7 @@ describe('Verify /Organization/{Org} end point', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('api').as('api')
-        cy.request("ds/api/v2/organizations")
+        cy.request("ds/api/v3/organizations")
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -128,7 +128,7 @@ describe('Get the Organization Role', () => {
     })
 
     it('Get the list of roles and verify the success code in the response', () => {
-        cy.makeAPIRequest('ds/api/v2/roles', 'GET').then((res:any) => {
+        cy.makeAPIRequest('ds/api/v3/roles', 'GET').then((res:any) => {
             expect(res.apiRes.status).to.be.equal(200)
             response = res.apiRes.body
             cy.addToAstraScanIdList(res.astraRes.body.status)
