@@ -171,19 +171,23 @@ Cypress.Commands.add('deleteFileInE2EFolder', (fileName: string) => {
 });
 
 Cypress.Commands.add('addToAstraScanIdList', (item) => {
-  cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
-    // Initialize the list if it doesn't exist
-    const items = fileContent.items || [];
+  if (Cypress.env('ASTRA_SCAN_ENABLED') == 'true') {
+    cy.readFile('cypress/fixtures/state/scanID.json').then((fileContent) => {
+      // Initialize the list if it doesn't exist
+      const items = fileContent.items || [];
 
-    // Append the new item to the list
-    items.push(item);
+      // Append the new item to the list
+      items.push(item);
 
-    // Create an object with the updated list
-    const updatedData = { items };
+      // Create an object with the updated list
+      const updatedData = { items };
 
-    // Write the updated object back to the file
-    cy.writeFile('cypress/fixtures/state/scanID.json', updatedData);
-  });
+      // Write the updated object back to the file
+      cy.writeFile('cypress/fixtures/state/scanID.json', updatedData);
+    });
+  } else {
+    cy.log('Astra Scan is disabled')
+  }
 });
 
 Cypress.Commands.add('replaceWord', (originalString: string, wordToReplace: string, replacementWord: string)=> {

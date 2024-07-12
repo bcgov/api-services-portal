@@ -595,6 +595,7 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
       failOnStatusCode: false,
     }).then((apiResponse) => {
       const responseData = {
+        astraRes: { body: { status: null } },
         apiRes: apiResponse,
       }
       return responseData
