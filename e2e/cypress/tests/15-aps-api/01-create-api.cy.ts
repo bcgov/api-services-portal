@@ -21,7 +21,7 @@ describe('Create API Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    cy.fixture('api').as('api')
+    cy.fixture('api-v2').as('api')
     cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
@@ -59,7 +59,7 @@ describe('Create API Spec', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + namespace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })
