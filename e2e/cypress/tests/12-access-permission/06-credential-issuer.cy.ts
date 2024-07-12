@@ -2,7 +2,6 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import NameSpacePage from '../../pageObjects/namespace'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 
@@ -53,7 +52,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const ns = new NameSpacePage()
-  const mp = new MyProfilePage()
   const tb = new ToolBar()
   const authProfile = new AuthorizationProfile()
 
@@ -76,7 +74,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
         cy.activateGateway(checkPermission.namespace)
-        cy.visit(mp.path)
       })
     })
   })

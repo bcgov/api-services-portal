@@ -1,6 +1,5 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import ConsumersPage from '../../pageObjects/consumers'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
@@ -52,7 +51,6 @@ describe('Verify that Mark is unable to create service account', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const mp = new MyProfilePage()
   const consumers = new ConsumersPage()
   const sa = new ServiceAccountsPage()
 
@@ -76,7 +74,6 @@ describe('Verify that Mark is unable to create service account', () => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
         cy.activateGateway(checkPermission.namespace)
-        cy.visit(mp.path)
       })
     })
   })

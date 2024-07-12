@@ -1,7 +1,6 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ConsumersPage from '../../pageObjects/consumers'
 
 describe('Grant Access Manager Role', () => {
@@ -50,7 +49,6 @@ describe('Verify that Mark is able to view the pending request', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const consumers = new ConsumersPage()
-  const mp = new MyProfilePage()
   const na = new NamespaceAccessPage()
 
 
@@ -73,7 +71,6 @@ describe('Verify that Mark is able to view the pending request', () => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
         cy.activateGateway(checkPermission.namespace)
-        cy.visit(mp.path)
       })
     })
   })

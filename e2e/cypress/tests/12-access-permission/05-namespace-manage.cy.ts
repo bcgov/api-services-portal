@@ -1,7 +1,6 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NameSpacePage from '../../pageObjects/namespace'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
@@ -55,7 +54,6 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
   const login = new LoginPage()
   const home = new HomePage()
   const ns = new NameSpacePage()
-  const mp = new MyProfilePage()
   const tb = new ToolBar()
   const authProfile = new AuthorizationProfile()
 
@@ -78,7 +76,6 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
         cy.activateGateway(checkPermission.namespace)
-        cy.visit(mp.path)
       })
     })
   })
