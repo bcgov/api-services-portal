@@ -61,7 +61,7 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
   }
 
   if (!skipFlag) {
-    cy.get(home.gatewaysNavButtom, { timeout: 6000 }).then(($el) => {
+    cy.get(home.accessNavButtom, { timeout: 6000 }).then(($el) => {
       expect($el).to.exist
       expect($el).to.be.visible
     })

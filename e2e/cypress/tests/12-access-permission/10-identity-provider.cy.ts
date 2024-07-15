@@ -32,7 +32,7 @@ describe('Confirm users can see the proper nav bar items', () => {
 
   it('authenticates Janis (api owner) - GitHub', () => {
     cy.get('@apiowner').then(({ githubUser }: any) => {
-        cy.login(githubUser.credentials.username, githubUser.credentials.password, true)
+        cy.login(githubUser.credentials.username, githubUser.credentials.password)
         cy.get(home.apiDirectoryNavButtom).should('be.visible')
         cy.get(home.accessNavButtom).should('be.visible')
         cy.get(home.applicationsNavButtom).should('be.visible')
