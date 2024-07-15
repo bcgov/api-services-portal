@@ -86,7 +86,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
           requesterEmail,
           scopes: groupedByRequester[r].map((d) => ({
             id: d.scope,
-            name: d.scopeName.replace(/Namespace/g, 'Gateway'),
+            name: d.scopeName,
           })),
           tickets: groupedByRequester[r].map((d) => d.id),
         };
@@ -265,7 +265,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
               <Wrap>
                 {d.scopes.map((s) => (
                   <WrapItem key={uid(s)}>
-                    <Tag variant="outline">{s.name}</Tag>
+                    <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
                   </WrapItem>
                 ))}
               </Wrap>
