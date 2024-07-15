@@ -64,7 +64,7 @@ describe('Delete created resources', () => {
     })
   })
 
-  it('Verify that the deleted namespace does not display in namespace list', () => {
+  it('Verify that the deleted namespace cannot be activated', () => {
     cy.on('fail', (err, runnable) => {
       flag = false
     })
