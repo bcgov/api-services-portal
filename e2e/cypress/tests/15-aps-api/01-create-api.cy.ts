@@ -34,20 +34,12 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('Set token with gwa config command', () => {
-    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      expect(response.stdout).to.contain("Config settings saved")
-    });
-  })
-
   it('create namespace', () => {
     cy.createGateway().then((response) => {
       namespace = response.gatewayId
       cy.log('New namespace created: ' + namespace)
       cy.updateJsonValue('common-testdata.json', 'apiTest.namespace', namespace)
       cy.updateJsonValue('api-v2.json', 'organization.expectedNamespace.name', namespace)
-      // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
-      cy.executeCliCommand("gwa config set --gateway " + namespace)
     });
   })
 
