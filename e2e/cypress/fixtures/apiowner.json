@@ -791,5 +791,11 @@
         "name": "dev"
       }
     }
+  },
+  "githubUser": {
+    "credentials": {
+      "username": "janis@github",
+      "password": "awsummer"
+    }
   }
 }
