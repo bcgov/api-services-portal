@@ -11,7 +11,6 @@ import Products from '../../pageObjects/products'
 
 describe('Apply Shared IDP while creating Authorization Profile', () => {
   const login = new LoginPage()
-  var nameSpace: string
   const home = new HomePage()
   const authProfile = new AuthorizationProfile()
   let userSession: any
@@ -41,7 +40,6 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
-        nameSpace = namespace
         cy.activateGateway(namespace)
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.headers['x-auth-request-access-token']
@@ -86,12 +84,12 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  var nameSpace: string
   let userSession: string
   const authProfile = new AuthorizationProfile()
 
   before(() => {
     cy.visit('/')
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -105,7 +103,6 @@ describe('Update IDP issuer for shared IDP profile', () => {
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
-        nameSpace = namespace
         cy.activateGateway(namespace)
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.headers['x-auth-request-access-token']
