@@ -101,7 +101,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
   )
 })
 
-Cypress.Commands.add('activateGateway', (gatewayId: string) => {
+Cypress.Commands.add('activateGateway', (gatewayId: string, checkNoNamespace: boolean = false) => {
   const getAllNsQuery = `
 query GetNamespaces {
   allNamespaces {
@@ -127,9 +127,16 @@ query GetNamespaces {
     if (nsdata) {
       return nsdata.id
     } else {
-      throw new Error('Namespace not found')
+      if (checkNoNamespace) {
+        return 'Namespace not found'
+      } else {
+        throw new Error('Namespace not found')
+      }
     }
   }).then((namespaceId) => {
+    if (namespaceId === 'Namespace not found') {
+      return namespaceId;
+    }    
     // then activate the namespace
     cy.setHeaders({ 'Content-Type': 'application/json' })
     cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')

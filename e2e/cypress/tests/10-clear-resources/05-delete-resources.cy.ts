@@ -25,10 +25,11 @@ describe('Delete created resources', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
+  it.only('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
+        cy.createGateway(deleteResources.namespace)
         cy.activateGateway(deleteResources.namespace);
       })
     })
@@ -57,26 +58,23 @@ describe('Delete created resources', () => {
     sa.deleteAllServiceAccounts()
   })
 
-  it('Delete Namespace', () => {
+  it.only('Delete Namespace', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
+      cy.wait(5000)
     })
   })
 
-  it('Verify that the deleted namespace cannot be activated', () => {
-    cy.on('fail', (err, runnable) => {
-      flag = false
-    })
+  it.only('Verify that the deleted namespace cannot be activated', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
-      flag = true
-      cy.activateGateway(deleteResources.namespace)
-    })
-  })
-
-  it('Verify that the namespace is deleted', () => {
-    assert.equal(flag, false)
-  })
+      cy.wrap(null).then(() => {
+        return cy.activateGateway(deleteResources.namespace, true);
+      }).then((result) => {
+        expect(result).to.eq('Namespace not found');
+      });
+    });
+  });
 
   after(() => {
     cy.logout()

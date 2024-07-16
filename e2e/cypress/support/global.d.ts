@@ -33,7 +33,10 @@ declare namespace Cypress {
       displayname?: string,
     ): Chainable<any>
 
-    activateGateway(gatewayId: string): Chainable<Cypress.Response<any>>
+    activateGateway(
+      gatewayId: string,
+      checkNoNamespace?: boolean
+    ): Chainable<Cypress.Response<any>>
 
     saveState(
       key: string,
