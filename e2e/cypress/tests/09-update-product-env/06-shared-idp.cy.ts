@@ -49,8 +49,6 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
       })
     })
   })
-  
-
 
   it('Prepare the Request Specification for the API', () => {
     cy.get('@api').then(({ authorizationProfiles }: any) => {
@@ -88,6 +86,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
+  var nameSpace: string
   let userSession: string
   const authProfile = new AuthorizationProfile()
 
@@ -103,17 +102,23 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner) to get the user session token', () => {
+  it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ user }: any) => {
-        cy.get('@common-testdata').then(({ namespace }: any) => {
-          cy.login(user.credentials.username, user.credentials.password)
-          cy.activateGateway(namespace)
-          cy.get('@login').then(function (xhr: any) {
-            userSession = xhr.headers['x-auth-request-access-token']
-          })
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        nameSpace = namespace
+        cy.activateGateway(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
+    })
+  })
+
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ authorizationProfiles }: any) => {
+      cy.setHeaders(authorizationProfiles.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.setRequestBody(authorizationProfiles.shared_IDP_body)
     })
   })
 
