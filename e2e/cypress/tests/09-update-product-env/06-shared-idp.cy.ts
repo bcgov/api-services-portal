@@ -100,6 +100,12 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.visit(login.path)
   })
 
+  it('Authenticates api owner', () => {
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+    })
+  })
+
   it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {

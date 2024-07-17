@@ -25,11 +25,10 @@ describe('Delete created resources', () => {
     cy.visit(login.path)
   })
 
-  it.only('authenticates Janis (api owner)', () => {
+  it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        cy.createGateway(deleteResources.namespace)
         cy.activateGateway(deleteResources.namespace);
       })
     })
@@ -58,7 +57,7 @@ describe('Delete created resources', () => {
     sa.deleteAllServiceAccounts()
   })
 
-  it.only('Delete Namespace', () => {
+  it('Delete Namespace', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
@@ -66,7 +65,7 @@ describe('Delete created resources', () => {
     })
   })
 
-  it.only('Verify that the deleted namespace cannot be activated', () => {
+  it('Verify that the deleted namespace cannot be activated', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.wrap(null).then(() => {
         return cy.activateGateway(deleteResources.namespace, true);
