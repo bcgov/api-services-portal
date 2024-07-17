@@ -61,9 +61,9 @@ describe('Delete created resources', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
-      cy.wait(5000)
-    })
-  })
+    });
+  });
+  
 
   it('Verify that the deleted namespace cannot be activated', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
