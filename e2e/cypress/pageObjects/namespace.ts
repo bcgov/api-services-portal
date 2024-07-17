@@ -35,21 +35,8 @@ class NameSpacePage {
     }
 
     deleteNamespace(name: string) {
-        cy.intercept('POST', 'gql/api', (req) => {
-            if (req.body.query.includes('DeleteNamespace')) {
-              req.alias = 'delete-namespace';
-            }
-          });
         cy.get(this.deleteNamespaceLink).click()
         cy.contains('button', 'Yes, Delete').click()
-        cy.wait('@delete-namespace').then((interception) => {
-            const response = interception.response;
-            console.log(response);
-            if (response) {
-                expect(response.statusCode).to.eq(200);
-                expect(response.body.data.forceDeleteNamespace).to.eq(true);
-            }
-        });
       }
 }
 

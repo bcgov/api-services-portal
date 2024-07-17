@@ -2,6 +2,11 @@
 /// <reference types="cypress-xpath" />
 
 declare namespace Cypress {
+  interface Namespace {
+    id: string;
+    name: string;
+  }
+
   interface Chainable<Subject> {
     login(username: string, password: string, skipFlag?: boolean): Chainable<any>
 
@@ -37,6 +42,8 @@ declare namespace Cypress {
       gatewayId: string,
       checkNoNamespace?: boolean
     ): Chainable<Cypress.Response<any>>
+
+    getGateways(): Chainable<Namespace[]>
 
     saveState(
       key: string,

@@ -147,6 +147,28 @@ query GetNamespaces {
   })
 })
 
+Cypress.Commands.add('getGateways', () => {
+  const getAllNsQuery = `
+query GetNamespaces {
+  allNamespaces {
+    id
+    name
+  }
+}
+`
+  cy.log('< Getting namespaces - ')
+  // get the (true) id for the namespace
+  cy.setHeaders({ 'Content-Type': 'application/json' })
+  return cy.gqlQuery(getAllNsQuery).then((response) => {
+    const allNamespaces = response.apiRes.body.data.allNamespaces
+    if (allNamespaces) {
+      return allNamespaces
+    } else {
+      throw new Error('Namespaces could not be retrieved')
+    }
+  })
+})
+
 Cypress.Commands.add('getLastConsumerID', () => {
   let id: any
   cy.get('[data-testid="all-consumer-control-tbl"]')

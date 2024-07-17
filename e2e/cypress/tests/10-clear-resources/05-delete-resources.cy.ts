@@ -64,13 +64,15 @@ describe('Delete created resources', () => {
     });
   });
   
-
-  it('Verify that the deleted namespace cannot be activated', () => {
+  it('Verify that namespace is no longer available', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.wrap(null).then(() => {
-        return cy.activateGateway(deleteResources.namespace, true);
+        return cy.getGateways();
       }).then((result) => {
-        expect(result).to.eq('Namespace not found');
+        console.log(result);
+        const namespaceNames = result.map((ns: { name: any }) => ns.name);
+        console.log(namespaceNames);
+        expect(namespaceNames).to.not.include(deleteResources.namespace);
       });
     });
   });
