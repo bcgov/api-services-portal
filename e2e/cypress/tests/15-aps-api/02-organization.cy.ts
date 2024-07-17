@@ -179,8 +179,8 @@ describe('Get the Namespace associated with the organization', () => {
 
     it('Compare the Namespace values in response against the expected values', () => {
         cy.get('@api').then(({ organization }: any) => {
-            expectedResponse = organization.expectedNamespace.name
-            expect(nameSpace).to.deep.equal(expectedResponse)
+            expectedResponse = organization.expectedNamespace
+            cy.compareJSONObjects(response, expectedResponse, true)
         })
     })
 
