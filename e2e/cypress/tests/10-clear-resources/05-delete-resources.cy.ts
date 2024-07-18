@@ -61,12 +61,13 @@ describe('Delete created resources', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
       cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
-      cy.wait(5000)
+      cy.wait(10000)
     });
   });
   
   it('Verify that namespace is no longer available', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
+      cy.visit('/')
       cy.wrap(null).then(() => {
         return cy.getGateways();
       }).then((result) => {
