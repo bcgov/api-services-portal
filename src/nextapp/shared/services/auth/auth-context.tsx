@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Text>You do not have permission to view this page.</Text>
             </Box>
             <Button
-              href={`/login?${new URLSearchParams({
+              href={`/login?identity=provider&${new URLSearchParams({
                 f: router?.asPath,
               })}`}
             >
