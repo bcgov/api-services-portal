@@ -21,7 +21,7 @@ export const DeleteNamespaceValidate = async (
   ns: string,
   force: boolean
 ): Promise<void> => {
-  logger.debug('Validate Deleting Gateway ns=%s', ns);
+  logger.debug('Validate Deleting Namespace ns=%s', ns);
 
   const gwServices = await lookupServicesByNamespace(context, ns);
 
@@ -63,7 +63,7 @@ export const DeleteNamespaceRecordActivity = async (
   context: any,
   ns: string
 ): Promise<{ id: string }> => {
-  logger.debug('Record Activity for Deleting Gateway ns=%s', ns);
+  logger.debug('Record Activity for Deleting Namespace ns=%s', ns);
 
   const envs = await lookupEnvironmentsByNS(context, ns);
 
@@ -98,7 +98,7 @@ export const DeleteNamespace = async (
   subjectToken: string,
   ns: string
 ) => {
-  logger.debug('Deleting Gateway ns=%s', ns);
+  logger.debug('Deleting Namespace ns=%s', ns);
   assert.strictEqual(
     typeof ns === 'string' && ns.length > 0,
     true,

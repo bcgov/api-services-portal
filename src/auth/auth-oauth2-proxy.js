@@ -208,7 +208,7 @@ class Oauth2ProxyAuthStrategy {
 
           res.json({ switch: switched });
         } catch (err) {
-          logger.error('Error clearing gateway %s', err);
+          logger.error('Error clearing namespace %s', err);
           res.status(400).json({ switch: false, error: 'ns_cleared_fail' });
         }
       }

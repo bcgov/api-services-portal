@@ -40,7 +40,7 @@ export const ValidateIssuer = async (
     );
     if (!privileged) {
       logger.warn(
-        '[%s] Setting shared is only available in privileged gateways',
+        '[%s] Setting shared is only available in privileged namespaces',
         resolvedData['namespace']
       );
       addValidationError(

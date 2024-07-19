@@ -15,7 +15,7 @@ class HomePage {
     cy.get(this.nsDropdownCreateNsBtn).click()
     cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
     cy.get(this.nsCreateBtn).click()
-    cy.verifyToastMessage("Gateway "+name+" created!")
+    cy.verifyToastMessage("Namespace "+name+" created!")
     cy.wait(5000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el).contain(name)
@@ -56,7 +56,7 @@ class HomePage {
       cy.wait(1000)
       cy.get(this.namespaceNameInput).next('div').then(($ele) => {
         let validationMessage = $ele.text()
-        assert.equal(validationMessage,"Gateway name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.")
+        assert.equal(validationMessage,"Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.")
       })
       // cy.verifyToastMessage("Namespace create failed")
     })

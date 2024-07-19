@@ -67,7 +67,7 @@ export const ValidateActiveEnvironment = async (
         );
       } else if (typeof nsOrgDetails === 'undefined') {
         logger.error(
-          '[dataset] Gateway not found %s',
+          '[dataset] Namespace not found %s',
           envServices.product.namespace
         );
         addValidationError(
