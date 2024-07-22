@@ -33,7 +33,6 @@ const HelpMenu: React.FC = () => {
       >
         <Menu placement="bottom-end">
           <MenuButton
-            isDisabled={!data?.helpLinks}
             px={2}
             py={1}
             transition="all 0.2s"

@@ -35,7 +35,7 @@ describe('API Tests to verify the Organization details in the response', () => {
 
     beforeEach(() => {
         cy.preserveCookies()
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.request("ds/api/v2/organizations")
     })
 
@@ -62,7 +62,7 @@ describe('Verify /Organization/{Org} end point', () => {
 
     beforeEach(() => {
         cy.preserveCookies()
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.request("ds/api/v2/organizations")
     })
 
@@ -77,7 +77,12 @@ describe('Verify /Organization/{Org} end point', () => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response:any) => {
                 expect(response.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(response.astraRes.body.status)
-                assert.isTrue(Cypress._.isEqual(response.apiRes.body.orgUnits[0], organization.orgExpectedList))
+                assert.isTrue(
+                    response.apiRes.body.orgUnits.some((orgUnit: any) => 
+                      Cypress._.isEqual(orgUnit, organization.orgExpectedList)
+                    ),
+                    'Expected org unit not found in orgUnits'
+                  );
             })
         })
     })
@@ -99,7 +104,7 @@ describe('Get the Organization Role', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -151,7 +156,7 @@ describe('Get the Namespace associated with the organization', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -175,7 +180,6 @@ describe('Get the Namespace associated with the organization', () => {
     it('Compare the Namespace values in response against the expected values', () => {
         cy.get('@api').then(({ organization }: any) => {
             expectedResponse = organization.expectedNamespace
-            // assert.isTrue(Cypress._.isEqual(response, expectedResponse))
             cy.compareJSONObjects(response, expectedResponse, true)
         })
     })
@@ -189,7 +193,7 @@ describe('Delete the Namespace associated with the organization', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -232,7 +236,7 @@ describe('Add and Get Organization Access', () => {
     var expectedResponse: any = {}
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
     })
 

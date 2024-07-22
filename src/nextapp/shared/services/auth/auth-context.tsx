@@ -37,10 +37,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     route?.access &&
     route?.access.length > 0 &&
     route?.access.indexOf('portal-user') == -1 &&
+    route?.access.indexOf('idir-user') == -1 &&
     !session.user.namespace;
 
   if (isUnauthorizedProvider) {
-    router?.push('/');
+    router?.push('/manager/gateways');
     return <></>;
   }
 

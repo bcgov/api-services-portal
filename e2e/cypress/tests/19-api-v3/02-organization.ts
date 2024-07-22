@@ -53,16 +53,17 @@ describe('Organization', () => {
   })
 
   it('GET /organizations/{org}/access', () => {
+    // ignore specific member contents since previous tests will have created members 
     const match = {
       name: 'ministry-of-health',
       parent: '/ca.bc.gov',
-      members: [],
-    }
-
+    };
+  
     cy.callAPI('ds/api/v3/organizations/ministry-of-health/access', 'GET').then(
       ({ apiRes: { status, body } }: any) => {
-        expect(status).to.be.equal(200)
-        expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
+        expect(status).to.be.equal(200);
+        expect(body).to.include(match);
+        expect(body.members).to.be.an('array');
       }
     )
   })

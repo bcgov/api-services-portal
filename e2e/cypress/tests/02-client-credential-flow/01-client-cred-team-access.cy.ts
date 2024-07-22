@@ -24,36 +24,23 @@ describe('Grant appropriate permissions to team members for client credential fl
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@apiowner').then(({ apiTest }: any) => {
-      cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.getUserSessionTokenValue(clientCredentials.namespace, false).then((value) => {
         userSession = value
       })
     })
   })
 
-  it('Set token with gwa config command', () => {
-    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      expect(response.stdout).to.contain("Config settings saved")
-    });
-  })
-
-  it('create namespace using gwa cli command', () => {
-    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 5000, failOnNonZeroExit: false }).then((response) => {
-      debugger
-      assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+  it('Create new namespace and activate it', () => {
+    cy.createGateway().then((response) => {
+      namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
       cy.replaceWordInJsonObject('ccplatform', namespace, 'cc-service-gwa.yml')
       cy.updateJsonValue('common-testdata.json', 'clientCredentials.namespace', namespace)
-      // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
-      cy.executeCliCommand("gwa config set --namespace " + namespace)
-    });
+      cy.updateJsonValue('apiowner.json', 'clientCredentials.namespace', namespace)
+      cy.activateGateway(namespace)
+    })
   })
-
-  it('activates new namespace', () => {
-    home.useNamespace(namespace)
-  })
-
 
   it('Grant namespace access to access manager(Mark)', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {

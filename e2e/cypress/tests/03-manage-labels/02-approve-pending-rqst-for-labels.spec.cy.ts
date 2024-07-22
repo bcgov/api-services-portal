@@ -28,7 +28,7 @@ describe('Approve Pending Request Spec', () => {
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace);
+        cy.activateGateway(namespace);
       })
     })
   })

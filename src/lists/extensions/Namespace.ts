@@ -251,7 +251,7 @@ module.exports = {
               assert.strictEqual(
                 re.test(args.namespace),
                 true,
-                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+                'Gateway name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
               );
               const noauthContext = context.createContext({
                 skipAccessControl: true,

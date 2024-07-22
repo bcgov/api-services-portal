@@ -2,7 +2,6 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import NameSpacePage from '../../pageObjects/namespace'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 
@@ -28,7 +27,7 @@ describe('Grant Credential Issuer Role', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
@@ -53,7 +52,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const ns = new NameSpacePage()
-  const mp = new MyProfilePage()
   const tb = new ToolBar()
   const authProfile = new AuthorizationProfile()
 
@@ -75,14 +73,13 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
-        cy.visit(mp.path)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
 
   it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
-    cy.visit(ns.path)
+    cy.visit(ns.detailPath)
     ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
   })
 

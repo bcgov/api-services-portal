@@ -28,7 +28,7 @@ describe('Access manager approves developer access request for Client ID/Secret 
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
       })
     })
   })

@@ -36,14 +36,14 @@ export const DeleteNamespaceValidate = async (
     messages.push(
       `${accessList.length} ${
         accessList.length == 1 ? 'consumer has' : 'consumers have'
-      } access to products in this namespace.`
+      } access to products in this gateway.`
     );
   }
   if (gwServices.length > 0) {
     messages.push(
       `${gwServices.length} ${
         gwServices.length == 1 ? 'service has' : 'services have'
-      } been configured in this namespace.`
+      } been configured in this gateway.`
     );
   }
 
@@ -51,7 +51,7 @@ export const DeleteNamespaceValidate = async (
   if (accessList.length != 0) {
     const msg = `${accessList.length} ${
       accessList.length == 1 ? 'consumer has' : 'consumers have'
-    } access to products in this namespace.`;
+    } access to products in this gateway.`;
     assert.strictEqual(accessList.length == 0, true, msg);
   }
   if (!force) {

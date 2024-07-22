@@ -1,6 +1,5 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import AuthorizationProfile from '../../pageObjects/authProfile'
@@ -31,12 +30,12 @@ describe('Grant Gateway Config Role to Wendy', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
 
-  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
+  it('Grant "GatewayConfig.Publish" and "Gateway.View" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       // na.revokePermission(checkPermission.grantPermission.Wendy)
@@ -56,7 +55,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const ns = new NameSpacePage()
-  const mp = new MyProfilePage()
   const tb = new ToolBar()
   const authProfile = new AuthorizationProfile()
 
@@ -78,8 +76,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
-        cy.visit(mp.path)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })

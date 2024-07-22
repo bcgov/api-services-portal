@@ -142,7 +142,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               <Avatar name={user.name} size="sm" />
               <Icon
                 aria-label="chevron down icon"
-                size="sm"
                 ml={2}
                 as={FaChevronDown}
                 color="white"

@@ -29,7 +29,7 @@ describe('Delete created resources', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(deleteResources.namespace);
+        cy.activateGateway(deleteResources.namespace);
       })
     })
   })
@@ -59,24 +59,25 @@ describe('Delete created resources', () => {
 
   it('Delete Namespace', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
-      cy.visit(ns.path)
+      cy.visit(ns.detailPath)
       ns.deleteNamespace(deleteResources.namespace)
-    })
-  })
-
-  it('Verify that the deleted namespace does not display in namespace list', () => {
-    cy.on('fail', (err, runnable) => {
-      flag = false
-    })
+      cy.wait(10000)
+    });
+  });
+  
+  it('Verify that namespace is no longer available', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
-      flag = true
-      home.useNamespace(deleteResources.namespace)
-    })
-  })
-
-  it('Verify that the namespace is deleted', () => {
-    assert.equal(flag, false)
-  })
+      cy.visit('/')
+      cy.wrap(null).then(() => {
+        return cy.getGateways();
+      }).then((result) => {
+        console.log(result);
+        const namespaceNames = result.map((ns: { name: any }) => ns.name);
+        console.log(namespaceNames);
+        expect(namespaceNames).to.not.include(deleteResources.namespace);
+      });
+    });
+  });
 
   after(() => {
     cy.logout()
