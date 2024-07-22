@@ -61,10 +61,9 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
   }
 
   if (!skipFlag) {
-    cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
+    cy.get(home.accessNavButtom, { timeout: 6000 }).then(($el) => {
       expect($el).to.exist
       expect($el).to.be.visible
-      expect($el).contain('No Active Namespace')
     })
     cy.log('> Log in')
   }
@@ -77,6 +76,97 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+})
+
+Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string) => {
+  cy.log('< Create namespace - ')
+  const payload = {
+    gatewayId: gatewayid ? gatewayid : '',
+    displayName: displayname ? displayname : '',
+  }
+  cy.setHeaders({ 'Content-Type': 'application/json' })
+  cy.setRequestBody(payload)
+  return cy.callAPI('ds/api/v3/gateways', 'POST').then(
+    ({ apiRes: { body, status } }: any) => {
+      cy.log(JSON.stringify(body, null, 2))
+      expect(status).to.be.equal(200)
+      if (payload.gatewayId) {
+        expect(body.gatewayId).to.be.equal(payload.gatewayId)
+      }
+      if (payload.displayName) {
+        expect(body.displayName).to.be.equal(payload.displayName)
+      }
+      return cy.wrap(body)
+    }
+  )
+})
+
+Cypress.Commands.add('activateGateway', (gatewayId: string, checkNoNamespace: boolean = false) => {
+  const getAllNsQuery = `
+query GetNamespaces {
+  allNamespaces {
+    id
+    name
+  }
+}
+`
+  const currentNsQuery = `
+  query GetCurrentNamespace {
+    currentNamespace {
+      name
+      org
+      orgUnit
+    }
+  }
+`
+  cy.log('< Activating namespace - ' + gatewayId)
+  // get the (true) id for the namespace
+  cy.setHeaders({ 'Content-Type': 'application/json' })
+  return cy.gqlQuery(getAllNsQuery).then((response) => {
+    const nsdata = response.apiRes.body.data.allNamespaces.find((ns: { name: string }) => ns.name === gatewayId)
+    if (nsdata) {
+      return nsdata.id
+    } else {
+      if (checkNoNamespace) {
+        return 'Namespace not found'
+      } else {
+        throw new Error('Namespace not found')
+      }
+    }
+  }).then((namespaceId) => {
+    if (namespaceId === 'Namespace not found') {
+      return namespaceId;
+    }    
+    // then activate the namespace
+    cy.setHeaders({ 'Content-Type': 'application/json' })
+    cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')
+    return cy.gqlQuery(currentNsQuery).then((response) => {
+      const currentNs = response.apiRes.body.data.currentNamespace
+      expect(currentNs.name).to.eq(gatewayId)
+    })
+  })
+})
+
+Cypress.Commands.add('getGateways', () => {
+  const getAllNsQuery = `
+query GetNamespaces {
+  allNamespaces {
+    id
+    name
+  }
+}
+`
+  cy.log('< Getting namespaces - ')
+  // get the (true) id for the namespace
+  cy.setHeaders({ 'Content-Type': 'application/json' })
+  return cy.gqlQuery(getAllNsQuery).then((response) => {
+    const allNamespaces = response.apiRes.body.data.allNamespaces
+    if (allNamespaces) {
+      return allNamespaces
+    } else {
+      throw new Error('Namespaces could not be retrieved')
+    }
+  })
 })
 
 Cypress.Commands.add('getLastConsumerID', () => {
@@ -107,7 +197,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     cy.get('@common-testdata').then(({ checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
+      cy.activateGateway(checkPermission.namespace)
       cy.visit(na.path)
       na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
       cy.wait(2000)
@@ -129,13 +219,13 @@ Cypress.Commands.add(
     cy.fixture('apiowner').as('apiowner')
     cy.preserveCookies()
     cy.visit(login.path)
-    cy.getUserSession().then(() => {
+    cy.interceptUserSession().then(() => {
       cy.get('@apiowner').then(({ user }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        // home.useNamespace(apiTest.namespace)
+        // cy.activateGateway(apiTest.namespace)
         if (isNamespaceSelected || undefined) {
-          home.useNamespace(namespace)
+          cy.activateGateway(namespace)
         }
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.response.headers['x-auth-request-access-token']
@@ -289,7 +379,7 @@ Cypress.Commands.add(
         () => {
           cy.wait(3000)
           cy.get('@accessTokenResponse').then((res: any) => {
-            cy.executeCliCommand('gwa config set --namespace ' + namespace).then(
+            cy.executeCliCommand('gwa config set --gateway ' + namespace).then(
               (response) => {
                 cy.executeCliCommand(
                   'gwa config set --token ' + res.body.access_token
@@ -500,14 +590,32 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
   requestData['method'] = methodType
 
   // Scan request with Astra
-  cy.request({
-    url: 'http://astra.localtest.me:8094/scan/',
-    method: 'POST',
-    body: requestData,
-    headers: headers,
-    failOnStatusCode: false,
-  }).then((astraResponse) => {
-    // Actual API request
+  if (Cypress.env('ASTRA_SCAN_ENABLED') == 'true') {
+    cy.request({
+      url: 'http://astra.localtest.me:8094/scan/',
+      method: 'POST',
+      body: requestData,
+      headers: headers,
+      failOnStatusCode: false,
+    }).then((astraResponse) => {
+      // Actual API request
+      cy.request({
+        url: Cypress.env('BASE_URL') + '/' + endPoint,
+        method: methodType,
+        body: body,
+        headers: headers,
+        failOnStatusCode: false,
+      }).then((apiResponse) => {
+        // You can also return data or use it in further tests
+        const responseData = {
+          astraRes: astraResponse,
+          apiRes: apiResponse,
+        }
+        // cy.addToAstraScanIdList(response2.body.status)
+        return responseData
+      })
+    })
+  } else {
     cy.request({
       url: Cypress.env('BASE_URL') + '/' + endPoint,
       method: methodType,
@@ -515,9 +623,31 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
       headers: headers,
       failOnStatusCode: false,
     }).then((apiResponse) => {
+      const responseData = {
+        astraRes: { body: { status: null } },
+        apiRes: apiResponse,
+      }
+      return responseData
+    })
+  }
+})
+
+Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
+  cy.loginByAuthAPI('', '').then((token_res: any) => {
+    cy.setHeaders({ 
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    })
+    cy.setAuthorizationToken(token_res.token)
+    return cy.request({
+      url: Cypress.env('BASE_URL') + '/gql/api',
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+      failOnStatusCode: false,
+    }).then((apiResponse) => {
       // You can also return data or use it in further tests
       const responseData = {
-        astraRes: astraResponse,
         apiRes: apiResponse,
       }
       // cy.addToAstraScanIdList(response2.body.status)
@@ -535,6 +665,14 @@ Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
 })
 
 Cypress.Commands.add('getUserSession', () => {
+  cy.request({
+    method: 'GET',
+    url: Cypress.config('baseUrl') + '/admin/session',
+    failOnStatusCode: true
+  }).as('login')
+});
+
+Cypress.Commands.add('interceptUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 

@@ -48,7 +48,7 @@ describe('Apply multiple services to the product environment', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
@@ -215,7 +215,7 @@ describe('Access manager approves developer access request for Client ID/Secret 
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })

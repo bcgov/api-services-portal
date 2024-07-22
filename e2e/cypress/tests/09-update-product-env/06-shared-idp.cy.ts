@@ -11,10 +11,9 @@ import Products from '../../pageObjects/products'
 
 describe('Apply Shared IDP while creating Authorization Profile', () => {
   const login = new LoginPage()
-  var nameSpace: string
   const home = new HomePage()
   const authProfile = new AuthorizationProfile()
-  let userSession: string
+  let userSession: any
 
   before(() => {
     cy.visit('/')
@@ -32,15 +31,18 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner) to get the user session token', () => {
+  it('Authenticates api owner', () => {
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+    })
+  })
+
+  it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ user }: any) => {
-        cy.get('@common-testdata').then(({ namespace }: any) => {
-          cy.login(user.credentials.username, user.credentials.password)
-          home.useNamespace(namespace)
-          cy.get('@login').then(function (xhr: any) {
-            userSession = xhr.response.headers['x-auth-request-access-token']
-          })
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.activateGateway(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
     })
@@ -56,7 +58,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
 
   it('Publish the Shared IDP profile', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response:any) => {
+      cy.makeAPIRequest('ds/api/v3/gateways/' + namespace + '/issuers', 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
         expect(response.apiRes.body.result).to.be.contain('created')
       })
@@ -87,6 +89,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   before(() => {
     cy.visit('/')
+    cy.reload(true)
   })
 
   beforeEach(() => {
@@ -97,17 +100,28 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner) to get the user session token', () => {
+  it('Authenticates api owner', () => {
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+    })
+  })
+
+  it('Activates the namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ user }: any) => {
-        cy.get('@common-testdata').then(({ namespace }: any) => {
-          cy.login(user.credentials.username, user.credentials.password)
-          home.useNamespace(namespace)
-          cy.get('@login').then(function (xhr: any) {
-            userSession = xhr.response.headers['x-auth-request-access-token']
-          })
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.activateGateway(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
+    })
+  })
+
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ authorizationProfiles }: any) => {
+      cy.setHeaders(authorizationProfiles.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.setRequestBody(authorizationProfiles.shared_IDP_body)
     })
   })
 
@@ -121,7 +135,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
 
   it('Put the resource and verify the success code in the response', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
-      cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response:any) => {
+      cy.makeAPIRequest('ds/api/v3/gateways/' + namespace + '/issuers', 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

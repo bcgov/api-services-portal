@@ -43,9 +43,9 @@ describe('Change Authorization profile', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
     })
@@ -182,7 +182,7 @@ describe('Access manager approves developer access request for Kong API ACL auth
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
       })
     })
   })

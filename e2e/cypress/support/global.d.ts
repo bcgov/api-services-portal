@@ -2,6 +2,11 @@
 /// <reference types="cypress-xpath" />
 
 declare namespace Cypress {
+  interface Namespace {
+    id: string;
+    name: string;
+  }
+
   interface Chainable<Subject> {
     login(username: string, password: string, skipFlag?: boolean): Chainable<any>
 
@@ -27,6 +32,18 @@ declare namespace Cypress {
     ): Chainable<any>
 
     preserveCookiesDefaults(): void
+
+    createGateway(
+      gatewayid?: string,
+      displayname?: string,
+    ): Chainable<any>
+
+    activateGateway(
+      gatewayId: string,
+      checkNoNamespace?: boolean
+    ): Chainable<Cypress.Response<any>>
+
+    getGateways(): Chainable<Namespace[]>
 
     saveState(
       key: string,
@@ -77,12 +94,16 @@ declare namespace Cypress {
     setRequestBody(requestBody: any): void
 
     setAuthorizationToken(token: string): void
-
+    
+    gqlQuery<T = any>(query: string, variables?: Record<string, any>): Chainable<T>
+        
     callAPI(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     getUserSession(): Chainable<Cypress.Response<any>>
+    
+    interceptUserSession(): Chainable<Cypress.Response<any>>
 
     compareJSONObjects(
       actualResponse: any,

@@ -38,7 +38,7 @@ describe('API Tests for Updating documentation', () => {
     const home = new HomePage()
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -69,7 +69,7 @@ describe('API Tests for Fetching documentation', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -103,7 +103,7 @@ describe('API Tests for Deleting documentation', () => {
     const home = new HomePage()
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -137,7 +137,7 @@ describe('API Tests to verify no value in Get call after deleting document conte
     const home = new HomePage()
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -164,7 +164,7 @@ describe('API Tests to verify Get documentation content', () => {
     let slugID: string
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {

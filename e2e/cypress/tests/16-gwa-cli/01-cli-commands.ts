@@ -77,15 +77,22 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa command to create namespace', () => {
-    cy.executeCliCommand('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+      // Use regex to extract the gateway ID
+      const match = response.stdout.match(/Gateway ID: ([\w-]+)/);
+      if (match && match[1]) {
+          namespace = match[1];
+          assert.isNotNull(namespace);
+      } else {
+          throw new Error('Failed to extract Gateway ID from response: ' + response.stdout);
+      }
     });
   })
 
 
-  it('Check gwa namespace list command and verify the created namespace in the list', () => {
-    cy.executeCliCommand('gwa namespace list --host ' + cleanedUrl + ' --scheme http').then((response) => {
+  it('Check gwa gateway list command and verify the created namespace in the list', () => {
+    cy.executeCliCommand('gwa gateway list --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain(namespace);
     });
   })

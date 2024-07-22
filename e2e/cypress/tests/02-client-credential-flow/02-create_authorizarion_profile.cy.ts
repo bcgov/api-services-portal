@@ -32,7 +32,7 @@ describe('Generate Authorization Profiles', () => {
 
   it('Select the namespace created for client credential ', () => {
     cy.get('@common-testdata').then(({ clientCredentials }: any) => {
-      home.useNamespace(clientCredentials.namespace)
+      cy.activateGateway(clientCredentials.namespace)
     })
   })
 

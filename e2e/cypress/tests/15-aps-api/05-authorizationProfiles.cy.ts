@@ -49,7 +49,7 @@ testData.forEach((testCase: any) => {
         var expectedResponse: any = {}
 
         beforeEach(() => {
-            cy.fixture('api').as('api')
+            cy.fixture('api-v2').as('api')
         })
 
         it('Prepare the Request Specification for the API', () => {
@@ -113,7 +113,7 @@ describe('API Tests for Authorization Profiles created with inheritFrom attribut
     let expectedResponse: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -180,7 +180,7 @@ describe('Published a shared authorization profile', () => {
     let expectedResponse: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -233,7 +233,7 @@ describe('Deleted shared auth profile', () => {
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('apiowner').as('apiowner')
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('common-testdata').as('common-testdata')
     })
 
@@ -242,7 +242,7 @@ describe('Deleted shared auth profile', () => {
             cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
                 namespace = apiTest.namespace
-                home.useNamespace(namespace);
+                cy.activateGateway(namespace);
             })
         })
     })
@@ -285,7 +285,7 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('state/regen').as('regen')
         cy.fixture('admin').as('admin')
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Authenticates Admin owner', () => {

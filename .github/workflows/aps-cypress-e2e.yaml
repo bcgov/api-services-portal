@@ -58,14 +58,20 @@ jobs:
             fi
           done
 
-      - name: Upload E2E Test Results Report
+      - name: Upload E2E Test Results HTML Report
         uses: actions/upload-artifact@v2
         with:
-          name: test-results
+          name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
-      - name: Upload E2E Code Coverage Report
+      - name: Upload E2E Test Results JSON Report
         uses: actions/upload-artifact@v2
+        with:
+          name: test-results-json
+          path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
+
+      - name: Upload E2E Code Coverage Report
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
@@ -100,8 +106,8 @@ jobs:
         run: |
           FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
           if [[ "$FAILURE_COUNT" -gt 0 ]]; then
-            FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==true) | .title')
-            STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats')
+            FAILED_TESTS=$(jq -r '.results[] | {file: .file, suites: .suites[]} | .suites as $suite | {file: .file, failed_tests: ($suite.tests[] | select(.fail == true) | {title})} | select(.failed_tests != null) | "- " + (.file | split("/") | .[2:] | join("/")) + " - " + .failed_tests.title' ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json)
+            STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' | column -t)
             echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
             export MSG=$(cat msg)
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"

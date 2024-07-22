@@ -211,7 +211,7 @@ const MyGatewaysPage: React.FC = () => {
         </Box>
         <GridLayout>
           {actions.map((action) => (
-            <Card>
+            <Card key={action.title}>
               <Box p={4}>
                 <Heading size="sm" mb={2}>
                   <Flex alignItems="center">
@@ -273,6 +273,7 @@ const MyGatewaysPage: React.FC = () => {
                 )
                 .map((namespace) => (
                   <Flex
+                    key={namespace.name}
                     borderRadius={10}
                     border="1px solid"
                     borderColor="#E1E1E5"
