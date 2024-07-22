@@ -165,7 +165,7 @@ export class NamespaceController extends Controller {
       result.errors.forEach((err: any, ind: number) => {
         errors[`d${ind}`] = { message: err.message };
       });
-      throw new ValidateError(errors, 'Unable to create namespace');
+      throw new ValidateError(errors, 'Unable to create gateway');
     }
     return {
       name: result.data.createNamespace.name,
@@ -201,7 +201,7 @@ export class NamespaceController extends Controller {
       result.errors.forEach((err: any, ind: number) => {
         errors[`d${ind}`] = { message: err.message };
       });
-      throw new ValidateError(errors, 'Unable to delete namespace');
+      throw new ValidateError(errors, 'Unable to delete gateway');
     }
     return result.data.forceDeleteNamespace;
   }

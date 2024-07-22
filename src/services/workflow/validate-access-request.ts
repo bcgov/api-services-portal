@@ -89,7 +89,7 @@ export const Validate = async (
         'Can not mark a new request approved'
       );
 
-      // assert that either the Product is Active or it belongs to the authorized Subject namespace
+      // assert that either the Product is Active or it belongs to the authorized Subject gateway
       assert.strictEqual(
         prodEnv.active === true ||
           prodEnv.product.namespace === context.authedItem.namespace,
