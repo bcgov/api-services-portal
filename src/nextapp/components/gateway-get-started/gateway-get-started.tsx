@@ -48,6 +48,7 @@ const GatewayGetStarted: React.FC = () => {
   const global = useGlobal();
   const GlossaryUrl = global?.helpLinks.helpSupportUrl + 'reference/glossary'
   const QuickStartUrl = global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'
+  const ClientCredTutorialUrl = global?.helpLinks.helpSupportUrl + 'tutorials/protect-client-cred'
   const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
   const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'
   const apiRootUrl = global?.apiRootUrl
@@ -64,14 +65,14 @@ const GatewayGetStarted: React.FC = () => {
             title="Empty folder"
             alt="Empty folder"
           />
-          <Heading size="md">No gateways created yet</Heading>
+          <Heading size="md">No Gateways created yet</Heading>
         </VStack>
-        <Heading size="lg">What is a gateway?</Heading>
+        <Heading size="lg">What is a Gateway?</Heading>
         <Text pt={6} pb={6}>
-          A gateway acts as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
+          A Gateway acts as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.
         </Text>            
         <Text pt={0} pb={8}>
-          After your first gateway is created, in this section you can do things like:
+          After your first Gateway is created, in this section you can do things like:
         </Text>
         <Grid templateColumns="repeat(3, 1fr)" gap={7}>
           <Box>
@@ -111,9 +112,9 @@ const GatewayGetStarted: React.FC = () => {
       </Card>
       <Card mb={8} px={12} py={8}>
         <Box>
-          <Heading size="lg">Steps to create and configure your first gateway</Heading>
+          <Heading size="lg">Steps to create and configure your first Gateway</Heading>
           <Text pt={6} pb={10}>
-            Follow these steps to create and configure your first gateway. For a more detailed introduction to setting up an API, consult our{' '} 
+            Follow these steps to create and configure your first Gateway. For a more detailed introduction to setting up an API, consult our{' '} 
             <Link
                 href={QuickStartUrl}
                 target="_blank"
@@ -162,7 +163,7 @@ const GatewayGetStarted: React.FC = () => {
                 Download our Command Line Interface (CLI)
             </Heading>
             <Text pt={2}>
-              Our CLI is a convenient way to configure your gateways.{' '}                   
+              Our <Code>gwa</Code> CLI allows you to configure your Gateways.{' '}                   
               <Link
                 href={GwaInstallUrl}
                 target="_blank"
@@ -212,7 +213,7 @@ const GatewayGetStarted: React.FC = () => {
             <Text pt={2}>
               <SmoothScrollLink
                 href={"#create-gateway"}
-                >Create a gateway</SmoothScrollLink> 
+                >Create a Gateway</SmoothScrollLink> 
               {' '} and use our{' '} 
               <SmoothScrollLink
                 href={"#generate-config"}
@@ -256,14 +257,14 @@ const GatewayGetStarted: React.FC = () => {
                 </Box>
               </Box>
             <Heading size="sm" pt={4}>
-              Apply configuration to your gateway
+              Apply configuration to your Gateway
             </Heading>
             <Text pt={2}>
               Run the{' '}
               <SmoothScrollLink
                 href={"#apply-config"}
                 >apply command</SmoothScrollLink>
-              {' '}in the CLI to apply your configuration to your gateway.
+              {' '}in the CLI to apply your configuration to your Gateway.
             </Text>
             </VStack>
           </Box>
@@ -294,7 +295,7 @@ const GatewayGetStarted: React.FC = () => {
         <Box pt={20}>
           <Heading size="md">GWA CLI commands</Heading>
           <Text pt={6}>
-            These useful commands help you manage your gateway resources. For more details visit our {' '}
+            These useful commands help you manage your Gateway resources. For more details visit our {' '}
             <Link
                 href={GwaCommandsUrl}
                 target="_blank"
@@ -320,31 +321,31 @@ const GatewayGetStarted: React.FC = () => {
           />
           <CliCommand 
             id='create-gateway'
-            title='Create gateway'
-            description='Generate a new gateway with this command. The new gateway will be automatically assigned an ID
-              and you can set a display name to easily identify this gateway.'
+            title='Create Gateway'
+            description='Generate a new Gateway with this command. The new Gateway will be automatically assigned an ID
+              and you can set a display name to easily identify this Gateway.'
             command='gwa gateway create' 
           />
           <CliCommand 
             id='generate-config'
-            title='Generate gateway configuration file'
-            description='Run this command to generate a basic gateway configuration YAML file.'
-            command='gwa generate-config --template basic-service' 
+            title='Generate Gateway configuration file'
+            description='Run this command to generate a basic Gateway configuration YAML file.'
+            command='gwa generate-config --template quick-start'
           />
 
-          <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your gateway</Heading>
+          <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your Gateway</Heading>
           <CliCommand 
             id='apply-config'
             title='Apply your configuration'
-            description='With this command you can apply your configuration to your recently created gateway. 
+            description='With this command you can apply your configuration to your recently created Gateway. 
               If you need to make updates or republish, simply run this command again.'
             command='gwa apply --input gw-config.yaml' 
           />
           <CliCommand 
-            title='Test your gateway'
+            title='Test your Gateway'
             description={
               <>
-                Get the URL for your newly published gateway service <Code>...api.gov.bc.ca</Code> using this command.
+                Get the URL for your newly published Gateway Service <Code>...api.gov.bc.ca</Code> using this command.
                 Visit the URL in a browser to see your API gateway in action.
               </>
             }
@@ -353,16 +354,16 @@ const GatewayGetStarted: React.FC = () => {
           <Box pt={10}>
           <Heading size="md">Next steps</Heading>
           <Text pt={6}>
-            Congratulations! You have set up your first gateway service, creating a custom route to your service through your API gateway.  
+            Congratulations! You have set up your first Gateway Service, creating a custom route to your service through your API gateway, along with a listing in the API Directory. 
           </Text>
           <Text pt={6}>
             For a deeper introduction to the API Services Portal, follow the {' '}
             <Link
-                href={QuickStartUrl}
+                href={ClientCredTutorialUrl}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-              >Quick Start tutorial</Link>
+              >Protect an API with Client Credential Flow tutorial</Link>
             {' '}to create a protected API.
           </Text>
         </Box>
