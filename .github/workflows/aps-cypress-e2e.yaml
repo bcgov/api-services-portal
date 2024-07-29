@@ -59,13 +59,13 @@ jobs:
           done
 
       - name: Upload E2E Test Results HTML Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
       - name: Upload E2E Test Results JSON Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-json
           path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
