@@ -44,7 +44,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const providerUrl = React.useMemo(() => {
     const providerUrl = new URL('/login', location.origin);
     providerUrl.searchParams.set('identity', 'provider');
-    const f = makeRedirectUrl(router.asPath);
+    const f = makeRedirectUrl(router.asPath, 'provider');
     providerUrl.searchParams.set('f', f);
     return providerUrl;
   }, []);
