@@ -32,14 +32,14 @@
         "userName": "Mark F Mark L",
         "email": "mark@gmail.com",
         "accessRole": [
-          "Namespace.View"
+          "Gateway.View"
         ]
       },
       "Wendy": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
         "accessRole": [
-          "Namespace.Manage",
+          "Gateway.Manage",
           "CredentialIssuer.Admin"
         ]
       },
@@ -47,7 +47,7 @@
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
         "accessRole": [
-          "Namespace.Manage"
+          "Gateway.Manage"
         ]
       },
       "Wendy_CA": {
@@ -62,14 +62,14 @@
         "email": "wendy@test.com",
         "accessRole": [
           "GatewayConfig.Publish",
-          "Namespace.View"
+          "Gateway.View"
         ]
       },
       "Janis": {
         "userName": "Janis Smith",
         "email": "janis@testmail.com",
         "accessRole": [
-          "Namespace.Manage",
+          "Gateway.Manage",
           "CredentialIssuer.Admin"
         ]
       }

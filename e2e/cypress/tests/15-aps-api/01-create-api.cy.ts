@@ -21,7 +21,7 @@ describe('Create API Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    cy.fixture('api').as('api')
+    cy.fixture('api-v2').as('api')
     cy.fixture('common-testdata').as('common-testdata')
     cy.visit(login.path)
   })
@@ -34,26 +34,17 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('Set token with gwa config command', () => {
-    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      expect(response.stdout).to.contain("Config settings saved")
-    });
-  })
-
-  it('create namespace using gwa cli command', () => {
-    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+  it('create namespace', () => {
+    cy.createGateway().then((response) => {
+      namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
       cy.updateJsonValue('common-testdata.json', 'apiTest.namespace', namespace)
-      cy.updateJsonValue('api.json', 'organization.expectedNamespace.name', namespace)
-      // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
-      cy.executeCliCommand("gwa config set --namespace " + namespace)
+      cy.updateJsonValue('api-v2.json', 'organization.expectedNamespace.name', namespace)
     });
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('Associate Namespace to the organization Unit', () => {

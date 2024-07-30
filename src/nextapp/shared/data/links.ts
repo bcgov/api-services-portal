@@ -49,7 +49,7 @@ const links: NavLink[] = [
   {
     name: 'Gateways',
     url: '/manager/gateways',
-    access: ['portal-user'],
+    access: ['idir-user'],
     altUrls: [
       '/manager/gateways/get-started',
       '/manager/gateways/detail',

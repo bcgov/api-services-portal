@@ -134,7 +134,7 @@ const ApiPage: React.FC<
               Published by
               <br />
               {data?.organizationUnit && (
-                <Link color="bc-link">{data.organizationUnit.title}</Link>
+                <Text color="bc-link">{data.organizationUnit.title}</Text>
               )}
             </Text>
           </Box>

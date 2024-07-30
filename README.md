@@ -51,7 +51,7 @@ Run this command to test logging in and creating a namespace:
 
 ```
 gwa login
-gwa namespace create --name gw-12345
+gwa gateway create --gateway-id gw-12345
 ```
 
 ### Keycloak configuration
