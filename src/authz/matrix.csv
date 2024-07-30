@@ -73,6 +73,7 @@ NS MANAGER,,getConsumerProdEnvAccess,,,,,,,api-owner,,,allow,
 NS MANAGER,,allProductsByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
 NS MANAGER,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
 NS MANAGER,,getFilteredNamespaceConsumers,,,,,,,api-owner,,,allow,filterByUserNS
+Any User,,,AccessRequest,update,,"isApproved,isIssued",,,,,,deny,
 API Owner Role Rules,,,AccessRequest,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,

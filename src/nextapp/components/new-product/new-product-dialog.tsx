@@ -65,10 +65,11 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
           isClosable: true,
         });
         onClose();
-      } catch {
+      } catch (err: any) {
         toast({
           title: 'Create failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
