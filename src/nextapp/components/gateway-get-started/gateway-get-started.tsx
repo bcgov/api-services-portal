@@ -20,6 +20,10 @@ import {
 } from 'react-icons/fa';
 import { useGlobal } from '@/shared/services/global';
 
+interface GatewayGetStartedProps {
+  hasNamespaces?: boolean;
+}
+
 function SmoothScrollLink({ href, children }) {
   const handleClick = (event) => {
     event.preventDefault();
@@ -43,8 +47,9 @@ function SmoothScrollLink({ href, children }) {
     </Link>
   )
 }
-
-const GatewayGetStarted: React.FC = () => {
+const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
+  hasNamespaces
+}) => {
   const global = useGlobal();
   const GlossaryUrl = global?.helpLinks.helpSupportUrl + 'reference/glossary'
   const QuickStartUrl = global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'
@@ -59,16 +64,18 @@ const GatewayGetStarted: React.FC = () => {
   return (
     <>
       <Card mb={8} px={12} py={8}>
-        <VStack align="center" justifyContent="center" gridGap={2} pb={6}>
-          <img
-            src="/images/empty_folder.png"
-            width={85}
-            height={85}
-            title="Empty folder"
-            alt="Empty folder"
-          />
-          <Heading size="md">No Gateways created yet</Heading>
-        </VStack>
+        {!hasNamespaces && (
+          <VStack align="center" justifyContent="center" gridGap={2} pb={6}>
+            <img
+              src="/images/empty_folder.png"
+              width={85}
+              height={85}
+              title="Empty folder"
+              alt="Empty folder"
+            />
+            <Heading size="md">No Gateways created yet</Heading>
+          </VStack>
+        )}
         <Heading size="lg">What is a Gateway?</Heading>
         <Text pt={6} pb={6}>
           A Gateway acts as a central entry point for multiple APIs. Its main purpose is to facilitate communication and control the data flow between your APIs and those who consume them.

@@ -58,7 +58,7 @@ const NamespacesPage: React.FC = () => {
       <Container maxW="6xl">
         <PageHeader title={'My Gateways'} />
         <>
-          <GatewayGetStarted />
+          <GatewayGetStarted hasNamespaces={data?.allNamespaces.length !== 0} />
         </>
       </Container>
     </>
