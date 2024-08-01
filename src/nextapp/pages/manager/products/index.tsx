@@ -76,7 +76,7 @@ const ProductsPage: React.FC = () => {
         >
           <Box maxW="65%">
             <Text>
-              <Text as="strong">Products</Text> are groups of APIs that are
+              Products are groups of APIs that are
               protected in the same way, and are discoverable by Citizens
               through the BC Data Catalogue, or by invitation from an API
               Manager.
