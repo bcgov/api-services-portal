@@ -51,6 +51,8 @@ const GatewayGetStarted: React.FC = () => {
   const ClientCredTutorialUrl = global?.helpLinks.helpSupportUrl + 'tutorials/protect-client-cred'
   const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
   const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'
+  const HelpDeskURL = global?.helpLinks.helpDeskUrl
+  const HelpChatURL = global?.helpLinks.helpChatUrl
   const apiRootUrl = global?.apiRootUrl
   const configHost = apiRootUrl ? apiRootUrl.replace('https://', '').replace('http://', '') : ''
 
@@ -169,7 +171,7 @@ const GatewayGetStarted: React.FC = () => {
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-              >Download it here.</Link>
+              >Download it here</Link>.
             </Text>
             </VStack>
           </Box>
@@ -292,21 +294,8 @@ const GatewayGetStarted: React.FC = () => {
             {' '}for easy-to-understand definitions
           </Text>
         </HStack>
-        <Box pt={20}>
-          <Heading size="md">GWA CLI commands</Heading>
-          <Text pt={6}>
-            These useful commands help you manage your Gateway resources. For more details visit our {' '}
-            <Link
-                href={GwaCommandsUrl}
-                target="_blank"
-                color="bc-link"
-                textDecor="underline"
-              >GWA CLI commands</Link>
-            {' '}documentation.
-          </Text>
-        </Box>
         <Box>
-          <Heading size="md" fontSize="18px" pt={10} pb={6}>Prepare your configuration</Heading>
+          <Heading size="md" pt={10} pb={6}>Prepare your configuration</Heading>
           {global?.apiRootUrl && (
             <CliCommand 
               title='Use the test environment'
@@ -333,7 +322,7 @@ const GatewayGetStarted: React.FC = () => {
             command='gwa generate-config --template quick-start'
           />
 
-          <Heading size="md" fontSize="18px" pt={10} pb={6}>Apply configuration to your Gateway</Heading>
+          <Heading size="md" pt={10} pb={6}>Apply configuration to your Gateway</Heading>
           <CliCommand 
             id='apply-config'
             title='Apply your configuration'
@@ -368,16 +357,48 @@ const GatewayGetStarted: React.FC = () => {
           </Text>
         </Box>
 
-        <Heading size="md" fontSize="18px" pt={10} pb={6}>Help</Heading>
+        <Heading size="md" pt={10} pb={6}>Help</Heading>
         <CliCommand 
-          title='Help'
+          title='CLI help'
           description={
             <>
-              If you are not sure about how to use a specific command, you can type <Code>--help</Code> after the
-              command's name to learn more about its usage and syntax.
+              If you are not sure about how to use a specific <Code>gwa</Code> command, you can type <Code>--help</Code> after the
+              command's name to learn more about its usage and syntax. 
+              Alternatively, view the {' '}
+            <Link
+                href={GwaCommandsUrl}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              > CLI reference documentation</Link>.
             </>
           }
           command='gwa <command> --help' 
+        />
+        <CliCommand 
+          title='Contact us'
+          description={
+            <>
+              Join the{' '}
+            <Link
+                href={HelpChatURL}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >#aps-ops channel</Link>
+              {' '} on Rocket.Chat to connect with our team and user community.
+              Alternatively, {' '}
+            <Link
+                href={HelpDeskURL}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >open a support ticket</Link>
+              {' '} and we'll get back to you via email in 3-5 business days.
+              Either way, our team is here to answer your questions. 
+            </>
+          }
+          command='' 
         />
         </Box>
       </Card>

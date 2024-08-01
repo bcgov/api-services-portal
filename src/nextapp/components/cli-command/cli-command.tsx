@@ -40,29 +40,31 @@ const CliCommand: React.FC<CliCommandProps> = ({ id, title, description, command
     >
       <Heading size="sm">{title}</Heading>
       <Text pb={4}>{description}</Text>
-      <Box
-        border="1px solid"
-        borderColor="bc-outline"
-        backgroundColor="#FAFAFA"
-        p={10}
-        borderRadius={6}
-        w="100%"
-        mb={4}
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Text fontFamily="mono" fontSize="sm">$ {command}</Text>
-        <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
-          <IconButton 
-            aria-label="Copy to clipboard" 
-            variant="ghost"
-            icon={<IoCopy />}
-            fontSize='20px'
-            onClick={handleClipboard(command)}
-          />
-        </Tooltip>
-      </Box>
+      {command && (
+        <Box
+          border="1px solid"
+          borderColor="bc-outline"
+          backgroundColor="#FAFAFA"
+          p={10}
+          borderRadius={6}
+          w="100%"
+          mb={4}
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Text fontFamily="mono" fontSize="sm">$ {command}</Text>
+          <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
+            <IconButton 
+              aria-label="Copy to clipboard" 
+              variant="ghost"
+              icon={<IoCopy />}
+              fontSize='20px'
+              onClick={handleClipboard(command)}
+            />
+          </Tooltip>
+        </Box>
+      )}
     </Box>  
   );
 };

@@ -54,7 +54,6 @@ import PreviewBanner from '@/components/preview-banner';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 import Card from '@/components/card';
-import GatewayGetStarted from '@/components/gateway-get-started';
 import EmptyPane from '@/components/empty-pane';
 import { Namespace, Query } from '@/shared/types/query.types';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
@@ -291,7 +290,6 @@ const NamespacesPage: React.FC = () => {
         )}
         <>
           {isError && <Heading>Gateways Failed to Load</Heading>}
-          {isSuccess && data.allNamespaces.length == 0 && <GatewayGetStarted />}
         </>
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
