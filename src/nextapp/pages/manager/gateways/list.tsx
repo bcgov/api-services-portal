@@ -55,8 +55,7 @@ const MyGatewaysPage: React.FC = () => {
 
   // External links
   const global = useGlobal();
-  const QuickStartUrl =
-    global?.helpLinks.helpSupportUrl + 'tutorials/quick-start';
+  const CreateGatewayUrl = global?.helpLinks.helpSupportUrl + 'how-to/create-gateway';
   const GwaUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands';
   const ProdChecklistUrl =
     global?.helpLinks.helpSupportUrl +
@@ -65,11 +64,11 @@ const MyGatewaysPage: React.FC = () => {
   // Action items
   const actions: GatewayActions[] = [
     {
-      title: 'Need to create a new gateway?',
-      url: QuickStartUrl,
-      urlText: 'API Provider Quick Start',
+      title: 'Need to create a new Gateway?',
+      url: CreateGatewayUrl,
+      urlText: 'Create a Gateway',
       icon: FaPlus,
-      description: 'Follow our',
+      description: 'See the',
       descriptionEnd: 'guide.',
     },
     {
@@ -208,6 +207,13 @@ const MyGatewaysPage: React.FC = () => {
             }
             title="My Gateways"
           ></PageHeader>
+        </Box>
+        <Box maxW="65%">
+          <Text>
+            Gateways are the top-level entity in the API Services Portal.
+            Gateways hold a collection of Gateway Services
+            and Routes, generally managed by a single team or business unit.
+          </Text>
         </Box>
         <GridLayout>
           {actions.map((action) => (

@@ -39,7 +39,7 @@ const NamespacesPage: React.FC = () => {
               <Flex align="center" gridGap={4}>
                 <Icon as={FaInfoCircle} boxSize="6" />
                 <Text fontSize="sm" fontWeight="bold">
-                  You have gateways. Visit the{' '}
+                  You have Gateways. Visit the{' '}
                   <Link
                     href={'/manager/gateways/list'}
                     target="_blank"
