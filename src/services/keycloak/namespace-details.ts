@@ -200,11 +200,11 @@ export function validateNamespaceName(name: string) {
 }
 
 export function validateDisplayName(displayName: string) {
-  const displayNameValidationRule = "^[A-Za-z0-9-()_ .'\\/]{0,30}$";
+  const displayNameValidationRule = "^[A-Za-z0-9][A-Za-z0-9-()_ .'\\/]{2,29}$";
 
   regExprValidation(
     displayNameValidationRule,
     displayName,
-    'Display name can not be longer than 30 characters and can only use special characters "-()_ .\'/".'
+    'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".'
   );
 }
