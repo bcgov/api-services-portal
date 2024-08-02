@@ -4,20 +4,28 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { identity } = context.query;
+
   return {
-    props: {},
+    props: {
+      identity: identity || null,
+    },
   };
 };
 
 const AuthCallbackPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = () => {
+> = ({ identity }) => {
   const { ok } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
     if (ok) {
-      router.push('/devportal/api-directory');
+      if (identity === 'provider') {
+        router.push('/manager/gateways');
+      } else {
+        router.push('/devportal/api-directory');
+      }        
     } else {
       router.push('/login');
     }
