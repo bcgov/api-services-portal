@@ -40,7 +40,8 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const [charCount, setCharCount] = React.useState(
     data.displayName?.length || 0
   );
-  const charLimit = 30;
+  const minCharLimit = 3;
+  const maxCharLimit = 30;
   const handleInputChange = (event) => {
     const { value } = event.target;
     setInputValue(value);
@@ -49,7 +50,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   const form = React.useRef<HTMLFormElement>();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (charCount <= charLimit) {
+    if (charCount >= minCharLimit && charCount <= maxCharLimit) {
       updateNamespaceDisplayName();
     }
   };
@@ -107,23 +108,28 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                 </FormHelperText>
                 <Text
                   fontSize={'12px'}
-                  color={charCount > charLimit ? 'bc-error' : 'gray.500'}
+                  color={charCount > maxCharLimit || charCount < minCharLimit ? 'bc-error' : 'gray.500'}
                   mt={2}
                   textAlign="right"
                 >
-                  {charCount}/{charLimit}
+                  {charCount}/{maxCharLimit}
                 </Text>
                 <Input
                   value={inputValue}
                   onChange={handleInputChange}
                   name="displayName"
                   variant="bc-input"
-                  isInvalid={charCount > charLimit}
+                  isInvalid={charCount > maxCharLimit || charCount < minCharLimit}
                   data-testid="edit-display-name-input"
                 />
-                {charCount > charLimit && (
+                {charCount > maxCharLimit && (
                   <Text color="bc-error" mt={2} mb={-8}>
                     You have reached the character limit
+                  </Text>
+                )}
+                {charCount < minCharLimit && (
+                  <Text color="bc-error" mt={2} mb={-8}>
+                    Display name must be at least 3 characters
                   </Text>
                 )}
               </FormControl>
@@ -143,7 +149,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                 type="submit"
                 onClick={handleSaveClick}
                 data-testid="edit-display-name-submit-btn"
-                isDisabled={charCount > charLimit}
+                isDisabled={charCount > maxCharLimit || charCount < minCharLimit}
               >
                 Save
               </Button>
