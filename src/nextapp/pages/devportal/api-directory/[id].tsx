@@ -48,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   preview === 'false' &&
     (await queryClient.prefetchQuery(
       queryKey,
-      async () => await restApi<ApiDataset>(`/ds/api/v2/directory/${id}`)
+      async () => await restApi<ApiDataset>(`/ds/api/v3/directory/${id}`)
     ));
 
   return {
@@ -68,8 +68,8 @@ const ApiPage: React.FC<
   const { data } = useQuery<ApiDataset>(queryKey, () =>
     restApi<ApiDataset>(
       preview
-        ? `/ds/api/v2/namespaces/${user?.namespace}/directory/${id}`
-        : `/ds/api/v2/directory/${id}`
+        ? `/ds/api/v3/gateways/${user?.namespace}/directory/${id}`
+        : `/ds/api/v3/directory/${id}`
     )
   );
   const breadcrumb = React.useMemo(() => {

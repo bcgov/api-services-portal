@@ -22,7 +22,7 @@ const ApiDiscoveryPage: React.FC = () => {
   const { user } = useAuth();
   const { data } = useQuery(['yourProducts', user?.namespace], () =>
     restApi<DiscoveryDataset[]>(
-      `/ds/api/v2/namespaces/${user?.namespace}/directory`
+      `/ds/api/v3/gateways/${user?.namespace}/directory`
     )
   );
   const namespace = useCurrentNamespace();
