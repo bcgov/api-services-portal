@@ -266,7 +266,9 @@ export const getRecords = async function (
   feedEntity: string,
   query: string = undefined,
   children: string[] = undefined,
-  where: BatchWhereClause = undefined
+  where: BatchWhereClause = undefined,
+  skip: number = 0,
+  first: number = 5000,
 ): Promise<any[]> {
   const md = (metadata as any)[feedEntity];
 
@@ -275,7 +277,9 @@ export const getRecords = async function (
   return await batchService.listAll(
     query ? query : md.query,
     buildQueryResponse(md, children),
-    where
+    where,
+    skip,
+    first
   );
 };
 
