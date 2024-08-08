@@ -130,7 +130,7 @@ const MyGatewaysPage: React.FC = () => {
         });
       }
     },
-    [client, toast]
+    [client, toast, user, router]
   );
 
   // Filtering
