@@ -119,13 +119,13 @@ describe('Gateways', () => {
       )
     })
 
-    it.only('GET /gateways', () => {
+    it('GET /gateways', () => {
       const { gateway } = workingData
       cy.callAPI(`ds/api/v3/gateways`, 'GET').then(
         ({ apiRes: { body, status } }: any) => {
           expect(status).to.be.equal(200)
           cy.log(JSON.stringify(body, null, 2))
-          
+
           // Look for the specific gateway in the response body
           const foundGateway = body.find(
             (item: { gatewayId: string, displayName: string }) => 
