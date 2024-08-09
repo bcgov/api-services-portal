@@ -105,19 +105,19 @@ export class NamespaceController extends Controller {
    */
   @Get()
   @OperationId('gateway-list')
-  public async list(@Request() request: any): Promise<{ gatewayId: string, displayName: string }[]> {
+  public async list(@Request() request: any): Promise<Gateway[]> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: list,
     });
     logger.debug('Result %j', result);
-    type NamespaceInfo = { gatewayId: string, displayName: string };
     return result.data.allNamespaces
-      .map((ns: Namespace) => ({ gatewayId: ns.name, displayName: ns.displayName }))
-      .sort((a: NamespaceInfo, b: NamespaceInfo) => {
+      .map((ns: Namespace): Gateway => ({ gatewayId: ns.name, displayName: ns.displayName }))
+      .sort((a: Gateway, b: Gateway) => {
         const displayNameComparison = a.displayName.localeCompare(b.displayName);
         return displayNameComparison !== 0 ? displayNameComparison : a.gatewayId.localeCompare(b.gatewayId);
-      });  }
+      });
+  }
 
   /**
    * Get details about the gateway, such as permissions for what the gateway is setup with.

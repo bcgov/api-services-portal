@@ -119,6 +119,26 @@ describe('Gateways', () => {
       )
     })
 
+    it.only('GET /gateways', () => {
+      const { gateway } = workingData
+      cy.callAPI(`ds/api/v3/gateways`, 'GET').then(
+        ({ apiRes: { body, status } }: any) => {
+          expect(status).to.be.equal(200)
+          cy.log(JSON.stringify(body, null, 2))
+          
+          // Look for the specific gateway in the response body
+          const foundGateway = body.find(
+            (item: { gatewayId: string, displayName: string }) => 
+              item.gatewayId === gateway.gatewayId && item.displayName === gateway.displayName
+          );
+
+          // Assert that the gateway was found
+          expect(foundGateway).to.not.be.undefined;
+          cy.log(`Found gateway: ${JSON.stringify(foundGateway, null, 2)}`);
+        }
+      )
+    })
+
     it('GET /gateways/{gatewayId}', () => {
       const { gateway } = workingData
       cy.callAPI(`ds/api/v3/gateways/${gateway.gatewayId}`, 'GET').then(
