@@ -1,5 +1,6 @@
 class NameSpacePage {
     path: string = '/manager/gateways'
+    listPath: string = 'manager/gateways/list'
     detailPath: string = '/manager/gateways/detail'
     gatewayServiceLink: string = '[data-testid="ns-manage-link-Gateway Services"]'
     productsLink: string = '[data-testid="ns-manage-link-Gateway Services"]'

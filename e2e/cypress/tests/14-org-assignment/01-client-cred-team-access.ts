@@ -15,6 +15,7 @@ describe('Add Organization to publish API', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
+  const ns = new NameSpacePage()
   const pd = new Products()
   const sa = new ServiceAccountsPage()
   const apiDir = new ApiDirectoryPage()
@@ -114,11 +115,21 @@ describe('Add Organization to publish API', () => {
     })
   })
 
+  it('Verify My Gateways shows publishing "disabled"', () => {
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Publishing disabled')
+  })
+
   it('Assign organization to the created namespace', () => {
     cy.visit(apiDir.path)
     cy.get('@apiowner').then(({ product }: any) => {
       apiDir.addOrganizationAndOrgUnit(product)
     })
+  })
+
+  it('Verify My Gateways shows publishing "pending"', () => {
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Pending publishing permission')
   })
 
   it('Verify Organization Administrator notification banner', () => {
@@ -182,6 +193,7 @@ describe('Org Admin approves the request', () => {
 describe('Activate the API to make it visible in API Directory', () => {
   const login = new LoginPage()
   const home = new HomePage()
+  const ns = new NameSpacePage()
   const pd = new Products()
   const apiDir = new ApiDirectoryPage()
 
@@ -201,6 +213,11 @@ describe('Activate the API to make it visible in API Directory', () => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.activateGateway(namespace)
     })
+  })
+
+  it('Verify My Gateways shows publishing "enabled"', () => {
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Publishing enabled')
   })
 
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {

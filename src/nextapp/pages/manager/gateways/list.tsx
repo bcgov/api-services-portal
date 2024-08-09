@@ -287,6 +287,7 @@ const MyGatewaysPage: React.FC = () => {
                     px={5}
                     py={2}
                     mb={4}
+                    data-testid={`ns-list-item-${namespace.name}`}
                   >
                     <Box>
                       <Flex alignItems="center">
