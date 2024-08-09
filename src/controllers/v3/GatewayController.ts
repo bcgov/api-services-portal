@@ -105,14 +105,19 @@ export class NamespaceController extends Controller {
    */
   @Get()
   @OperationId('gateway-list')
-  public async list(@Request() request: any): Promise<string[]> {
+  public async list(@Request() request: any): Promise<{ gatewayId: string, displayName: string }[]> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: list,
     });
     logger.debug('Result %j', result);
-    return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
-  }
+    type NamespaceInfo = { gatewayId: string, displayName: string };
+    return result.data.allNamespaces
+      .map((ns: Namespace) => ({ gatewayId: ns.name, displayName: ns.displayName }))
+      .sort((a: NamespaceInfo, b: NamespaceInfo) => {
+        const displayNameComparison = a.displayName.localeCompare(b.displayName);
+        return displayNameComparison !== 0 ? displayNameComparison : a.gatewayId.localeCompare(b.gatewayId);
+      });  }
 
   /**
    * Get details about the gateway, such as permissions for what the gateway is setup with.
@@ -281,6 +286,7 @@ const list = gql`
   query Namespaces {
     allNamespaces {
       name
+      displayName
     }
   }
 `;
