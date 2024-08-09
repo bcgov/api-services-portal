@@ -81,5 +81,8 @@
   },
   "twoTieredHidden": {
     "namespace": "two-tier-hidden"
+  },
+  "serviceAvailability": {
+    "namespace": "service-avail"
   }
 }

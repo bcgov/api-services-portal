@@ -219,16 +219,16 @@ Cypress.Commands.add(
     cy.fixture('apiowner').as('apiowner')
     cy.preserveCookies()
     cy.visit(login.path)
-    cy.interceptUserSession().then(() => {
-      cy.get('@apiowner').then(({ user }: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        cy.log('Logged in!')
-        // cy.activateGateway(apiTest.namespace)
-        if (isNamespaceSelected || undefined) {
-          cy.activateGateway(namespace)
-        }
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
+      // cy.activateGateway(apiTest.namespace)
+      if (isNamespaceSelected || undefined) {
+        cy.activateGateway(namespace)
+      }
+      cy.getUserSession().then(() => {
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
           return userSession
         })
       })

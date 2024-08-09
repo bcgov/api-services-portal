@@ -1,0 +1,19 @@
+kind: GatewayService
+name: taken-service-name
+host: httpbin.org
+tags: [ns.service-avail]
+port: 446
+protocol: https
+retries: 0
+routes:
+  - name: taken-service-name
+    tags: [ns.service-avail]
+    hosts:
+      - taken-service-name.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
