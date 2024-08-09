@@ -248,6 +248,7 @@ const MyGatewaysPage: React.FC = () => {
               mr={4}
               placeholder="Filter by: All"
               onChange={handleFilterChange}
+              data-testid="ns-filter-select"
             >
               <option value="disabled">Publishing disabled</option>
               <option value="pending">Pending publishing permission</option>

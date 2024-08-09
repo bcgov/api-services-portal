@@ -118,6 +118,10 @@ describe('Add Organization to publish API', () => {
   it('Verify My Gateways shows publishing "disabled"', () => {
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Publishing disabled')
+    cy.get(ns.listFilterSelect).select('disabled')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('exist')
+    cy.get(ns.listFilterSelect).select('enabled')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('not.exist')
   })
 
   it('Assign organization to the created namespace', () => {
@@ -130,6 +134,10 @@ describe('Add Organization to publish API', () => {
   it('Verify My Gateways shows publishing "pending"', () => {
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Pending publishing permission')
+    cy.get(ns.listFilterSelect).select('pending')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('exist')
+    cy.get(ns.listFilterSelect).select('enabled')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('not.exist')
   })
 
   it('Verify Organization Administrator notification banner', () => {
@@ -218,6 +226,10 @@ describe('Activate the API to make it visible in API Directory', () => {
   it('Verify My Gateways shows publishing "enabled"', () => {
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('contain.text', 'Publishing enabled')
+    cy.get(ns.listFilterSelect).select('enabled')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('exist')
+    cy.get(ns.listFilterSelect).select('disabled')
+    cy.get(`[data-testid="ns-list-item-${namespace}"]`).should('not.exist')
   })
 
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
