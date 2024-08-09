@@ -99,7 +99,7 @@ export class NamespaceController extends Controller {
   }
 
   /**
-   * @summary List of Gateway IDs
+   * @summary List of Gateways available to the user
    * @param request
    * @returns
    */
