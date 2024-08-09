@@ -891,9 +891,9 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    type: string
+                                    $ref: '#/components/schemas/Gateway'
                                 type: array
-            summary: 'List of Gateway IDs'
+            summary: 'List of Gateways available to the user'
             tags:
                 - Gateways
             security:
