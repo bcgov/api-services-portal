@@ -101,6 +101,16 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
   )
 })
 
+Cypress.Commands.add('deleteGatewayCli', (gatewayid: string, force: boolean = false) => {
+  cy.executeCliCommand('gwa config set gateway ' + gatewayid).then(() => {
+    cy.executeCliCommand(`gwa gateway destroy ${force ? '--force' : ''}`).then(
+      (response) => {
+        console.log(response)
+        expect(response.stdout).to.contain('Gateway destroyed: ' + gatewayid)
+    })
+  })
+})
+
 Cypress.Commands.add('activateGateway', (gatewayId: string, checkNoNamespace: boolean = false) => {
   const getAllNsQuery = `
 query GetNamespaces {

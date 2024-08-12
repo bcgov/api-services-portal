@@ -1,5 +1,6 @@
 import LoginPage from '../../pageObjects/login'
 import NameSpacePage from '../../pageObjects/namespace'
+const cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
 
 // Elements of this page must be checked when there are no Gateways, so this test comes first of all
 describe('Gateway Get Started page', () => {
@@ -24,7 +25,20 @@ describe('Gateway Get Started page', () => {
   it('authenticates Janis (api owner) to get the user session token', () => {
     cy.getUserSessionTokenValue('', false).then((value) => {
       userSession = value
+      console.log('first user session', userSession)
     })
+  })
+  
+  it('Set token with gwa config command', () => {
+    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('Set environment with gwa config command', () => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
   })
 
   it('Check for redirect to Get Started page', () => {
@@ -43,16 +57,13 @@ describe('Gateway Get Started page', () => {
   })
 
   it('Check for banner that says "You have gateways"', () => {
-    // unfocus and refocus the page to refetch the data
     cy.reload()
     cy.get('[data-testid="no-gateways"]').should('not.exist')
     cy.get('[data-testid="you-have-gateways-banner"]').should('exist')
   })
 
   it('Cleanup: delete namespace', () => {
-    cy.activateGateway(namespace)
-    cy.visit(ns.detailPath)
-    ns.deleteNamespace(namespace)
+    cy.deleteGatewayCli(namespace, true)
   })
   
   after(() => {
