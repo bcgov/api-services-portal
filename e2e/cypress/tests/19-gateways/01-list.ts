@@ -1,5 +1,4 @@
 import { report } from 'process'
-import LoginPage from '../../pageObjects/login'
 import NameSpacePage from '../../pageObjects/namespace'
 let gateways: any
 
@@ -7,7 +6,6 @@ const { v4: uuidv4 } = require('uuid')
 const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
 
 describe('My Gateways list page', () => { 
-  const login = new LoginPage()
   const ns = new NameSpacePage()
   let userSession: any
 

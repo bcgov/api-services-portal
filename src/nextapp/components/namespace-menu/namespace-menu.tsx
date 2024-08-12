@@ -152,7 +152,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
                 value={search}
-                data-testid="namespace-search-input"
+                data-testid="ns-dropdown-search-input"
               />
             </Box>                
             {isLoading && <MenuItem isDisabled>Loading gateways...</MenuItem>}
@@ -167,6 +167,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     pb={2}
                     m={0}
                     ml={5}
+                    data-testid="ns-dropdown-heading"
                     // @ts-ignore - need bold font in title
                     title={
                       search !== ''
@@ -186,7 +187,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     }
                   >
                   {(search !== '' && namespaceSearchResults.length === 0) && (
-                    <Box display="flex" alignItems="center" justifyContent="center" py={2}>
+                    <Box display="flex" alignItems="center" justifyContent="center" py={2}
+                    data-testid="ns-dropdown-no-results-box">
                       <img
                         src="/images/no_results_folder.png"
                         width={85}
@@ -218,7 +220,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   </MenuOptionGroup>
                 </Box>
                 <Flex justifyContent='center' flexDirection='column' alignItems='center'>
-                  <Text pt={8} fontSize='sm' fontWeight='bold'>
+                  <Text pt={8} fontSize='sm' fontWeight='bold' data-testid="ns-dropdown-total-gateways">
                     {`You have ${data.allNamespaces.length} gateway${
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
