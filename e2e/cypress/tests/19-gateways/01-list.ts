@@ -49,23 +49,18 @@ describe('My Gateways list page', () => {
     });
   })
 
+  it('Check Gateway link goes to details page', () => {  
+    var gateway1Id = gateways["namespace1"].gatewayId + '-' + customId
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-activate-link-${gateway1Id}"]`).click()
+    cy.url().should('include', '/manager/gateways/detail')
+  })
+
   it('Cleanup: delete namespaces', () => {
     Cypress._.forEach(gateways, (gateway) => {
       cy.deleteGatewayCli(gateway.gatewayId + '-' + customId, false)
     });
   })
-    
-
-
-
-  // it('Verify My Gateways shows the created gateways', () => {
-  //   cy.visit(ns.listPath)
-  //   cy.get(`[data-testid="ns-list-item-${namespace}"]`)
-  //   .should('contain.text', namespace1)
-  // })
-  // it('activates new namespace', () => {
-  //   cy.activateGateway(namespace)
-  // })
 
   after(() => {
     cy.logout()

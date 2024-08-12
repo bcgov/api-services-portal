@@ -304,6 +304,7 @@ const MyGatewaysPage: React.FC = () => {
                           color="bc-blue"
                           mr={2}
                           onClick={handleNamespaceChange(namespace)}
+                          data-testid={`ns-list-activate-link-${namespace.name}`}
                         >
                           {namespace.displayName}
                         </Link>
