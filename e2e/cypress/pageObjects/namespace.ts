@@ -4,7 +4,6 @@ class NameSpacePage {
     detailPath: string = '/manager/gateways/detail'
     getStartedPath: string = '/manager/gateways/get-started'
     listFilterSelect: string = '[data-testid="ns-filter-select"]'
-    listSearchInput: string = '[data-testid="namespace-search-input"]'
     gatewayServiceLink: string = '[data-testid="ns-manage-link-Gateway Services"]'
     productsLink: string = '[data-testid="ns-manage-link-Gateway Services"]'
     consumersLink: string = '[data-testid="ns-manage-link-Consumers"]'
