@@ -53,6 +53,7 @@ describe('My Gateways list page', () => {
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()
     cy.url().should('include', '/manager/gateways/detail')
+    cy.get('h1').should('contain.text', gateways["namespace1"].displayName)   
   })
 
   it('Test search - find results', () => {
@@ -88,6 +89,28 @@ describe('My Gateways list page', () => {
     cy.get('[data-testid="ns-filter-select"]').select('disabled')
     cy.get('[data-testid="ns-search-input"]').type(gateways["namespace1"].displayName)
     cy.get(`[data-testid="ns-list-item-${gateways["namespace1"].gatewayId + '-' + customId}"]`).should('exist')
+  })
+
+  it('Edit Gateway display name - valid', () => {  
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()
+    cy.get('[data-testid="display-name-edit-btn"]').click()
+    cy.get('[data-testid="edit-display-name-input"]').type(' Pie')
+    cy.get('[data-testid="edit-display-name-submit-btn"]').click()
+    cy.get('h1').should('contain.text', 'Apple Pie')
+  })
+  
+  it('Edit Gateway display name - too short or too long', () => {  
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()
+    cy.get('[data-testid="display-name-edit-btn"]').click()
+    cy.get('[data-testid="edit-display-name-input"]').clear().type('12')
+    cy.get('[data-testid="edit-display-name-submit-btn"]').should('be.disabled')
+    cy.get('[data-testid="edit-display-name-input"]').clear().type('Supercalifragilisticexpialidocious')
+    cy.get('[data-testid="edit-display-name-submit-btn"]').should('be.disabled')
+    cy.get('[data-testid="edit-display-name-input"]').clear().type('A reasonable name')
+    cy.get('[data-testid="edit-display-name-submit-btn"]').should('be.enabled')
+    cy.get('[data-testid="edit-display-name-cancel-btn"]').click() 
   })
 
   it('Export Gateway Report', () => {
