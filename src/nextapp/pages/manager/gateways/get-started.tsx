@@ -33,7 +33,8 @@ const NamespacesPage: React.FC = () => {
       </Head>
       {isError && <Heading>Gateways Failed to Load</Heading>}
       {isSuccess && data.allNamespaces.length != 0 && (
-        <Box width="100%" bgColor="#DAE7F0" color="bc-blue" boxShadow="md">
+        <Box width="100%" bgColor="#DAE7F0" color="bc-blue" boxShadow="md"
+        data-testid="you-have-gateways-banner">
           <Container maxW="6xl" py={6}>
             <Flex align="center" justify="space-between" gridGap={8}>
               <Flex align="center" gridGap={4}>

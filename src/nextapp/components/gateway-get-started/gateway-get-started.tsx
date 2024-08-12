@@ -65,7 +65,7 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
     <>
       <Card mb={8} px={12} py={8}>
         {!hasNamespaces && (
-          <VStack align="center" justifyContent="center" gridGap={2} pb={6}>
+          <VStack align="center" justifyContent="center" gridGap={2} pb={6} data-testid="no-gateways">
             <img
               src="/images/empty_folder.png"
               width={85}

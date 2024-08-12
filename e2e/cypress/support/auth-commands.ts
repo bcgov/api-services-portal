@@ -209,7 +209,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
 
 Cypress.Commands.add(
   'getUserSessionTokenValue',
-  (namespace: string, isNamespaceSelected?: boolean) => {
+  (namespace: string = 'ns', isNamespaceSelected?: boolean) => {
     const login = new LoginPage()
     const home = new HomePage()
     const na = new NamespaceAccessPage()
