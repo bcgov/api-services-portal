@@ -55,7 +55,7 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
   const QuickStartUrl = global?.helpLinks.helpSupportUrl + 'tutorials/quick-start'
   const ClientCredTutorialUrl = global?.helpLinks.helpSupportUrl + 'tutorials/protect-client-cred'
   const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
-  const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'resources/gwa-commands'
+  const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands'
   const HelpDeskURL = global?.helpLinks.helpDeskUrl
   const HelpChatURL = global?.helpLinks.helpChatUrl
   const apiRootUrl = global?.apiRootUrl
@@ -123,7 +123,7 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
         <Box>
           <Heading size="lg">Steps to create and configure your first Gateway</Heading>
           <Text pt={6} pb={10}>
-            Follow these steps to create and configure your first Gateway. For a more detailed introduction to setting up an API, consult our{' '} 
+            Follow these steps to create and configure your first Gateway. For more detailed instructions on setting up an API, consult our{' '}  
             <Link
                 href={QuickStartUrl}
                 target="_blank"
@@ -312,7 +312,7 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
           )}
           <CliCommand 
             title='Log in'
-            description='Log in via device with your IDIR.'
+            description='Log in with your IDIR via the CLI.'
             command='gwa login' 
           />
           <CliCommand 
@@ -325,8 +325,15 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
           <CliCommand 
             id='generate-config'
             title='Generate Gateway configuration file'
-            description='Run this command to generate a basic Gateway configuration YAML file.'
-            command='gwa generate-config --template quick-start'
+            description={
+              <>
+              Run this command to generate a basic Gateway configuration YAML file from a template.
+              <br /><br />
+            First, choose a unique name for your API service to be shown as part of your vanity URL: <Code>&lt;MYSERVICE&gt;.dev.api.gov.bc.ca</Code>.
+            Then run the following command, substituting your service name for <Code>&lt;MYSERVICE&gt;</Code>:
+              </>
+            }
+            command='gwa generate-config --template quick-start --service <MYSERVICE> --upstream https://httpbin.org'
           />
 
           <Heading size="md" pt={10} pb={6}>Apply configuration to your Gateway</Heading>
@@ -341,11 +348,25 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
             title='Test your Gateway'
             description={
               <>
-                Get the URL for your newly published Gateway Service <Code>...api.gov.bc.ca</Code> using this command.
+                Get the URL for your newly published Gateway Service <Code>&lt;MYSERVICE&gt;.dev.api.gov.bc.ca</Code> using this command.
                 Visit the URL in a browser to see your API gateway in action.
               </>
             }
             command='gwa status --hosts' 
+          />
+          <CliCommand 
+            title='View your API in the API Directory'
+            description={
+              <>
+                On the API Services Portal, go to the <Text as="span" fontWeight="bold">Gateways</Text> tab
+                and select your newly created Gateway. In the <Text as="span" fontWeight="bold">Products</Text> panel, 
+                click the <Text as="span" fontWeight="bold">Preview in Directory</Text> link.
+                <br/><br/>
+                You will see a card with the service name you chose earlier (<Code>&lt;MYSERVICE&gt;</Code>).
+                This card is a preview of how the service would look when shared to the API Directory.
+              </>
+            }
+            command='' 
           />
           <Box pt={10}>
           <Heading size="md">Next steps</Heading>
