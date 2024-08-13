@@ -45,7 +45,7 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('Check gwa command to generate config for client credential template', () => {
-    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
+    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division --out gw-config.yaml').then((response) => {
       expect(response.stdout).to.contain("File gw-config.yaml created")
     });
   })
