@@ -2,6 +2,7 @@ import NameSpacePage from '../../pageObjects/namespace'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 let gateways: any
 let gateway1: any
+let totalGateways: number
 
 const { v4: uuidv4 } = require('uuid')
 const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
@@ -34,6 +35,21 @@ describe('Gateway selector dropdown', () => {
     });
   })
 
+  it('Get current total number of gateways', () => {
+    // Create a new gateway to ensure there is at least one gateway
+    cy.createGateway();
+
+    cy.visit(ad.yourProductsPath);
+    cy.get('[data-testid="ns-dropdown-btn"]').click();
+    cy.get('[data-testid="ns-dropdown-total-gateways"]').should('be.visible').then(($el) => {
+      const totalText = $el.text();
+      totalGateways = parseInt(
+        totalText.replace(/You have /, '').replace(/ Gateways in total/, '')
+      );
+      cy.log('Existing gateways: ' + totalGateways);
+    });
+  })  
+
   it('create a set of namespaces', () => {
     cy.get('@common-testdata').then(({ myGateways }: any) => {
       gateways = myGateways
@@ -44,11 +60,11 @@ describe('Gateway selector dropdown', () => {
     });
   });
 
-  it('Verify dropdown shows the total number of gateways', () => {
+  it('Verify dropdown shows the new total number of gateways', () => {
     cy.visit(ad.yourProductsPath)
     cy.get('[data-testid="ns-dropdown-btn"]').should('contain.text', "No Active Gateway")
     cy.get('[data-testid="ns-dropdown-btn"]').click()
-    cy.get('[data-testid="ns-dropdown-total-gateways"]').should('contain.text', `You have 4 gateways in total`)
+    cy.get('[data-testid="ns-dropdown-total-gateways"]').should('contain.text', `You have ${totalGateways + 4} Gateways in total`)
   })
 
   it('Check Gateway button activates the Gateway', () => {  
@@ -106,7 +122,7 @@ describe('Gateway selector dropdown', () => {
   })
 
   after(() => {
-    cy.logout()
+    // cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
