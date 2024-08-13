@@ -59,7 +59,7 @@ const MyGatewaysPage: React.FC = () => {
   const GwaUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands';
   const ProdChecklistUrl =
     global?.helpLinks.helpSupportUrl +
-    'unlisted/owner-journey-v1/#production-links';
+    'how-to/prod-checklist';
 
   // Action items
   const actions: GatewayActions[] = [
