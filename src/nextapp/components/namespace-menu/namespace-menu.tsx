@@ -78,7 +78,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to gateway: ${namespace.displayName}`,
+        title: `Switching to Gateway: ${namespace.displayName}`,
         status: 'info',
         isClosable: true,
       });
@@ -89,14 +89,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to gateway: ${namespace.displayName}`,
+          title: `Switched to Gateway: ${namespace.displayName}`,
           status: 'success',
           isClosable: true,
         });
       } catch (err) {
         toast.closeAll();
         toast({
-          title: 'Unable to switch gateways',
+          title: 'Unable to switch Gateways',
           status: 'error',
           isClosable: true,
         });
@@ -148,14 +148,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
           <Box w={'403px'} maxHeight="calc(100vh / 2 + 100px)" overflowY="auto" >
             <Box ml={6} w={'338px'}>
               <SearchInput
-                placeholder="Find a gateway by display name or ID"
+                placeholder="Find a Gateway by display name or ID"
                 onBlur={(event) => event.currentTarget.focus()}
                 onChange={handleSearchChange}
                 value={search}
-                data-testid="namespace-search-input"
+                data-testid="ns-dropdown-search-input"
               />
             </Box>                
-            {isLoading && <MenuItem isDisabled>Loading gateways...</MenuItem>}
+            {isLoading && <MenuItem isDisabled>Loading Gateways...</MenuItem>}
             {isError && (
               <MenuItem isDisabled>Gateways Failed to Load</MenuItem>
             )}
@@ -167,6 +167,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     pb={2}
                     m={0}
                     ml={5}
+                    data-testid="ns-dropdown-heading"
                     // @ts-ignore - need bold font in title
                     title={
                       search !== ''
@@ -186,7 +187,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     }
                   >
                   {(search !== '' && namespaceSearchResults.length === 0) && (
-                    <Box display="flex" alignItems="center" justifyContent="center" py={2}>
+                    <Box display="flex" alignItems="center" justifyContent="center" py={2}
+                    data-testid="ns-dropdown-no-results-box">
                       <img
                         src="/images/no_results_folder.png"
                         width={85}
@@ -218,8 +220,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   </MenuOptionGroup>
                 </Box>
                 <Flex justifyContent='center' flexDirection='column' alignItems='center'>
-                  <Text pt={8} fontSize='sm' fontWeight='bold'>
-                    {`You have ${data.allNamespaces.length} gateway${
+                  <Text pt={8} fontSize='sm' fontWeight='bold' data-testid="ns-dropdown-total-gateways">
+                    {`You have ${data.allNamespaces.length} Gateway${
                           data.allNamespaces.length !== 1 ? 's' : ''
                         } in total`}
                   </Text>
@@ -237,11 +239,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                   >
                     Go to the{' '}
                     <Text as="span" pl={1} textDecoration="underline" color="bc-link">
-                      full gateways list
+                      full Gateways list
                     </Text>
                   </MenuItem>
                 </Flex>
               </>
+            )}
+            {isSuccess && data.allNamespaces.length === 0 && (
+              <Text pt={8} fontSize='sm' fontWeight='bold' data-testid="ns-dropdown-no-gateways">
+                No Gateways found
+              </Text>
             )}
           </Box>
         </MenuList>

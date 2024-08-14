@@ -65,13 +65,6 @@ describe('Create API Spec', () => {
     })
   })
 
-  // TODO: Update this test to use gwa cli (if not covered in other tests)
-  // it('Verify for invalid namespace name', () => {
-  //   cy.get('@apiowner').then(({ invalid_namespace }: any) => {
-  //     home.validateNamespaceName(invalid_namespace)
-  //   })
-  // })
-
   it('creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {

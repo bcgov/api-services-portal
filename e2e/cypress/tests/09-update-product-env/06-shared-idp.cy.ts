@@ -121,14 +121,6 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.get('@api').then(({ authorizationProfiles }: any) => {
       cy.setHeaders(authorizationProfiles.headers)
       cy.setAuthorizationToken(userSession)
-      cy.setRequestBody(authorizationProfiles.shared_IDP_body)
-    })
-  })
-
-  it('Prepare the Request Specification for the API', () => {
-    cy.get('@api').then(({ authorizationProfiles }: any) => {
-      cy.setHeaders(authorizationProfiles.headers)
-      cy.setAuthorizationToken(userSession)
       cy.setRequestBody(authorizationProfiles.shared_IDP_update_body)
     })
   })

@@ -10,7 +10,7 @@
     "namespace": "gw-16a3a"
   },
   "orgAssignment": {
-    "namespace": "gw-f016e"
+    "namespace": "gw-f6a4d"
   },
   "orgAssignmentMultipleAdmin": {
     "namespace": "orgassignment1"
@@ -81,5 +81,26 @@
   },
   "twoTieredHidden": {
     "namespace": "two-tier-hidden"
+  },
+  "serviceAvailability": {
+    "namespace": "service-avail"
+  },
+  "myGateways": {
+    "namespace1": {
+      "gatewayId": "gw-apple",
+      "displayName": "Apple"
+    },
+    "namespace2": {
+      "gatewayId": "gw-banana",
+      "displayName": "Banana"
+    },
+    "namespace3": {
+      "gatewayId": "gw-date",
+      "displayName": "Cherry"
+    },
+    "namespace4": {
+      "gatewayId": "gw-cherry",
+      "displayName": "Cherry"
+    }
   }
 }

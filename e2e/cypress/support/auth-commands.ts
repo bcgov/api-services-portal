@@ -101,6 +101,16 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
   )
 })
 
+Cypress.Commands.add('deleteGatewayCli', (gatewayid: string, force: boolean = false) => {
+  cy.executeCliCommand('gwa config set gateway ' + gatewayid).then(() => {
+    cy.executeCliCommand(`gwa gateway destroy ${force ? '--force' : ''}`).then(
+      (response) => {
+        console.log(response)
+        expect(response.stdout).to.contain('Gateway destroyed: ' + gatewayid)
+    })
+  })
+})
+
 Cypress.Commands.add('activateGateway', (gatewayId: string, checkNoNamespace: boolean = false) => {
   const getAllNsQuery = `
 query GetNamespaces {
@@ -209,7 +219,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
 
 Cypress.Commands.add(
   'getUserSessionTokenValue',
-  (namespace: string, isNamespaceSelected?: boolean) => {
+  (namespace: string = 'ns', isNamespaceSelected?: boolean) => {
     const login = new LoginPage()
     const home = new HomePage()
     const na = new NamespaceAccessPage()
@@ -219,16 +229,16 @@ Cypress.Commands.add(
     cy.fixture('apiowner').as('apiowner')
     cy.preserveCookies()
     cy.visit(login.path)
-    cy.interceptUserSession().then(() => {
-      cy.get('@apiowner').then(({ user }: any) => {
-        cy.login(user.credentials.username, user.credentials.password)
-        cy.log('Logged in!')
-        // cy.activateGateway(apiTest.namespace)
-        if (isNamespaceSelected || undefined) {
-          cy.activateGateway(namespace)
-        }
+    cy.get('@apiowner').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
+      // cy.activateGateway(apiTest.namespace)
+      if (isNamespaceSelected || undefined) {
+        cy.activateGateway(namespace)
+      }
+      cy.getUserSession().then(() => {
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
           return userSession
         })
       })

@@ -159,7 +159,6 @@ const NamespacesPage: React.FC = () => {
     };
   }, [namespace]);
   const handleDelete = React.useCallback(async () => {
-    console.log('handle delete from detail');
     if (user?.namespace) {
       toast({
         title: `Deleting gateway: ${namespace.data?.currentNamespace?.displayName}`,

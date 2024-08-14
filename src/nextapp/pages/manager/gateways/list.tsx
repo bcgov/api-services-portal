@@ -248,6 +248,7 @@ const MyGatewaysPage: React.FC = () => {
               mr={4}
               placeholder="Filter by: All"
               onChange={handleFilterChange}
+              data-testid="ns-filter-select"
             >
               <option value="disabled">Publishing disabled</option>
               <option value="pending">Pending publishing permission</option>
@@ -258,7 +259,7 @@ const MyGatewaysPage: React.FC = () => {
               onBlur={(event) => event.currentTarget.focus()}
               onChange={handleSearchChange}
               value={search}
-              data-testid="namespace-search-input"
+              data-testid="ns-search-input"
             />
           </Flex>
           {isSuccess &&
@@ -287,6 +288,7 @@ const MyGatewaysPage: React.FC = () => {
                     px={5}
                     py={2}
                     mb={4}
+                    data-testid={`ns-list-item-${namespace.name}`}
                   >
                     <Box>
                       <Flex alignItems="center">
@@ -302,6 +304,7 @@ const MyGatewaysPage: React.FC = () => {
                           color="bc-blue"
                           mr={2}
                           onClick={handleNamespaceChange(namespace)}
+                          data-testid={`ns-list-activate-link-${namespace.name}`}
                         >
                           {namespace.displayName}
                         </Link>
@@ -345,7 +348,7 @@ const MyGatewaysPage: React.FC = () => {
                     justifyContent="center"
                     py={2}
                   >
-                    <Text fontSize="lg" as="b">
+                    <Text fontSize="lg" as="b" data-testid="ns-no-results-text">
                       No results found
                     </Text>
                   </Box>

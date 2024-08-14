@@ -1,6 +1,7 @@
 | Test                                                        | Dependencies                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
 | 01-api-key                                                  |                                                                |
+| │   00-get-started.cy.ts                                    | Must run without existing namespaces|
 | │   01-create-api.cy.ts                                     | NA                                                             |
 | │   02-team-access.cy.ts                                    | 1.1                                                            |
 | │   03-request-access-inactive-env.cy.ts                    | 1.1 to 1.2                                                     |
@@ -117,3 +118,6 @@
 | |   05-issuers.cy.ts                                        | ?                                                              |
 | |   06-identifiers.cy.ts                                    | ?                                                              |
 | |   07-endpoints.cy.ts                                      | ?                                                              |
+| 20-gateways                                                 |                                                                |
+| |   01-list.cy.ts                                           | NA                                                             |
+| |   02-create.cy.ts                                         | NA                                                             |

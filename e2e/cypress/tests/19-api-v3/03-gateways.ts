@@ -210,7 +210,7 @@ describe('Gateways', () => {
             details: {
               d0: {
                 message:
-                  'Display name can not be longer than 30 characters and can only use special characters "-()_ .\'/".',
+                  'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
               },
             },
           }
@@ -232,7 +232,7 @@ describe('Gateways', () => {
             details: {
               d0: {
                 message:
-                  'Display name can not be longer than 30 characters and can only use special characters "-()_ .\'/".',
+                  'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
               },
             },
           }

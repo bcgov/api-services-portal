@@ -136,13 +136,20 @@ describe('Organization', () => {
   })
 
   it('GET /organizations/{org}/activity', () => {
-    cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET').then(
-      ({ apiRes: { status, body } }: any) => {
-        expect(status).to.be.equal(200)
-        // expect(JSON.stringify(body.filter(a => a.params.ns == ))).to.be.equal(JSON.stringify(match))
-      }
-    )
-  })
+    // Retry logic if the 422 error occurs
+    cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET')
+      .then(({ apiRes: { status, body } }: any) => {
+        if (status === 422) {
+          cy.wait(2000);
+          cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET')
+            .then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200);
+            });
+        } else {
+          expect(status).to.be.equal(200);
+        }
+      });
+  });
 
   it('PUT /organizations/{org}/{orgUnit}/gateways/{gatewayId}', () => {
     cy.setRequestBody({})

@@ -37,11 +37,11 @@ describe('Authorization Profiles', () => {
           const issuer = body[0]
 
           expect(issuer.name).to.be.equal(`my-auth-profile-for-${gateway.gatewayId}`)
-          expect(issuer.environmentDetails[0].environment).to.be.equal('test')
-          expect(issuer.environmentDetails[0].issuerUrl).to.be.equal(
+          expect(issuer.environmentDetails[1].environment).to.be.equal('test')
+          expect(issuer.environmentDetails[1].issuerUrl).to.be.equal(
             Cypress.env('OIDC_ISSUER')
           )
-          expect(issuer.environmentDetails[0].clientId).to.be.equal(
+          expect(issuer.environmentDetails[1].clientId).to.be.equal(
             `ap-my-auth-profile-for-${gateway.gatewayId}-test`
           )
         }
