@@ -59,7 +59,7 @@ const MyGatewaysPage: React.FC = () => {
   const GwaUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands';
   const ProdChecklistUrl =
     global?.helpLinks.helpSupportUrl +
-    'unlisted/owner-journey-v1/#production-links';
+    'how-to/prod-checklist';
 
   // Action items
   const actions: GatewayActions[] = [
@@ -120,7 +120,7 @@ const MyGatewaysPage: React.FC = () => {
           status: 'success',
           isClosable: true,
         });
-        router.push('/manager/gateways/detail');
+        await router.push('/manager/gateways/detail');
       } catch (err) {
         toast.closeAll();
         toast({

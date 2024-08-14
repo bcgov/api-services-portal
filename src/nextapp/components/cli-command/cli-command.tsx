@@ -53,7 +53,7 @@ const CliCommand: React.FC<CliCommandProps> = ({ id, title, description, command
           alignItems="center"
           justifyContent="space-between"
         >
-          <Text fontFamily="mono" fontSize="sm">$ {command}</Text>
+          <Text fontFamily="mono" fontSize="sm">{command}</Text>
           <Tooltip label="Copy to clipboard" aria-label="Copy to clipboard tooltip">
             <IconButton 
               aria-label="Copy to clipboard" 
