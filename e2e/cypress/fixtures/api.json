@@ -185,7 +185,7 @@
       "owner": "janis@idir"
     },
     "shared_IDP_update_body": {
-      "name": "Sample Shared IdP",
+      "name": "Sample Shared IdP updated",
       "description": "A Shared IdP for Teams to use",
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
