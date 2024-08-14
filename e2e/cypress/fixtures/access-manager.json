@@ -13,7 +13,7 @@
     "namespace": "permission"
   },
   "serviceAccount": {
-    "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
+    "scopes": ["GatewayConfig.Publish", "Gateway.Manage", "Content.Publish"]
   },
   "labels_consumer1": {
     "labels": {

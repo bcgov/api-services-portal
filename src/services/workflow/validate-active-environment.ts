@@ -71,11 +71,11 @@ export const ValidateActiveEnvironment = async (
           envServices.product.namespace
         );
         addValidationError(
-          `[dataset] Unexpected error finding namespace.  Unable to complete request.`
+          `[dataset] Unexpected error finding gateway.  Unable to complete request.`
         );
       } else if (nsOrgDetails.enabled === false) {
         addValidationError(
-          `[dataset] Namespace must be assigned to an Organization before an Environment can be active.`
+          `[dataset] Gateway must be assigned to an Organization before an Environment can be active.`
         );
       } else if (
         nsOrgDetails.name === envDataset?.organization?.name &&
@@ -83,7 +83,7 @@ export const ValidateActiveEnvironment = async (
       ) {
       } else {
         addValidationError(
-          `[dataset] Namespace and Dataset must belong to the same Organization Unit (ns:${nsOrgDetails.orgUnit}, dataset:${envDataset?.organizationUnit?.name})`
+          `[dataset] Gateway and Dataset must belong to the same Organization Unit (ns:${nsOrgDetails.orgUnit}, dataset:${envDataset?.organizationUnit?.name})`
         );
       }
 

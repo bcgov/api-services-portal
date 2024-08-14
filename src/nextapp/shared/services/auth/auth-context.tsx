@@ -25,22 +25,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
   const isUnauthorized =
     (session.error || !session.user) && route?.access.length > 0;
+  
+  const providerPage =
+    route?.access.indexOf('api-owner') > -1 ||
+    route?.access.indexOf('idir-user') > -1;
+
+  const identityParam = providerPage ? 'identity=provider&' : '';
 
   if (session.status == 'loading') {
     return <></>;
   }
 
   // A logged in user trying to access a Namespace'd page (page that is not protected with "portal-user" role)
-  // and no namespace set, then redirect to home page
-  const isUnauthorizedProvider =
+  // and no namespace set, then redirect to Gateways page
+  const noNamespace =
     session.user &&
     route?.access &&
     route?.access.length > 0 &&
     route?.access.indexOf('portal-user') == -1 &&
+    route?.access.indexOf('idir-user') == -1 &&
     !session.user.namespace;
 
-  if (isUnauthorizedProvider) {
-    router?.push('/');
+  if (noNamespace) {
+    router?.push('/manager/gateways');
     return <></>;
   }
 
@@ -60,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Text>You do not have permission to view this page.</Text>
             </Box>
             <Button
-              href={`/login?${new URLSearchParams({
+              href={`/login?${identityParam}${new URLSearchParams({
                 f: router?.asPath,
               })}`}
             >

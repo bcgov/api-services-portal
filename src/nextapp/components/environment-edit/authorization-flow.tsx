@@ -141,7 +141,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
             <Tooltip
               hasArrow
               isDisabled={Boolean(data?.currentNamespace.org)}
-              label="Available after an Organization has been associated to your namespace."
+              label="Available after an Organization has been associated with your Gateway."
             >
               <Box>
                 <Checkbox

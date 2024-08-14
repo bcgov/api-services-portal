@@ -1,7 +1,6 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NameSpacePage from '../../pageObjects/namespace'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
@@ -29,12 +28,12 @@ describe('Grant Namespace Manage Role', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
 
-  it('Grant only "Namespace.Manage" permission to Wendy', () => {
+  it('Grant only "Gateway.Manage" permission to Wendy', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       // na.revokeAllPermission('wendy@idir')
@@ -55,7 +54,6 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
   const login = new LoginPage()
   const home = new HomePage()
   const ns = new NameSpacePage()
-  const mp = new MyProfilePage()
   const tb = new ToolBar()
   const authProfile = new AuthorizationProfile()
 
@@ -77,14 +75,13 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
-        cy.visit(mp.path)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
 
   it('Verify that all the namespace options and activities are displayed', () => {
-    cy.visit(ns.path)
+    cy.visit(ns.detailPath)
     ns.verifyThatAllOptionsAreDisplayed()
   })
 

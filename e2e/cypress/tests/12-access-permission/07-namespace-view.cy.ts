@@ -1,6 +1,5 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import ConsumersPage from '../../pageObjects/consumers'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
@@ -29,12 +28,12 @@ describe('Grant Namespace View Role to Mark', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })
 
-  it('Grant only "Namespace.View" permission to Mark', () => {
+  it('Grant only "Gateway.View" permission to Mark', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.revokeAllPermission(checkPermission.grantPermission.Mark.userName)
@@ -52,7 +51,6 @@ describe('Verify that Mark is unable to create service account', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const mp = new MyProfilePage()
   const consumers = new ConsumersPage()
   const sa = new ServiceAccountsPage()
 
@@ -75,8 +73,7 @@ describe('Verify that Mark is unable to create service account', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
-        cy.visit(mp.path)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })

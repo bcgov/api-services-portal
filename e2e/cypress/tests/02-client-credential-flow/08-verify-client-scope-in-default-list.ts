@@ -81,7 +81,7 @@ describe('Verify the selected client scoped is not displayed in assigned default
 //     cy.get('@apiowner').then(({ clientCredentials }: any) => {
 //       cy.get('@access-manager').then(({ user }: any) => {
 //         cy.login(user.credentials.username, user.credentials.password)
-//         home.useNamespace(clientCredentials.namespace);
+//         cy.activateGateway(clientCredentials.namespace);
 //       })
 //     })
 //   })

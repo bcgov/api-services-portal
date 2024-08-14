@@ -79,7 +79,7 @@ describe('Access manager apply "Write" role and approves developer access reques
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
       })
     })
   })

@@ -42,7 +42,7 @@ describe('Apply Kong API key only plugin', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })
@@ -204,7 +204,7 @@ describe('Approve Pending Request Spec', () => {
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace);
+        cy.activateGateway(namespace);
       })
     })
   })

@@ -11,17 +11,17 @@ export const reportOrder = [
 
 export const reportStructure: any = {
   namespaces: {
-    label: 'Namespaces',
+    label: 'Gateways',
     fields: [
       {
-        header: 'Name',
+        header: 'Gateway ID',
         key: 'name',
-        width: 32,
+        width: 20,
       },
       {
-        header: 'Display Name',
+        header: 'Gateway Display Name',
         key: 'displayName',
-        width: 32,
+        width: 26,
       },
       {
         header: 'Privileged',
@@ -51,12 +51,17 @@ export const reportStructure: any = {
     ],
   },
   ns_access: {
-    label: 'Namespace Access',
+    label: 'Gateway Access',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       {
         header: 'Subject',
@@ -69,7 +74,7 @@ export const reportStructure: any = {
         width: 40,
       },
       {
-        header: 'Scope',
+        header: 'Permission',
         key: 'scope',
         width: 25,
       },
@@ -79,9 +84,14 @@ export const reportStructure: any = {
     label: 'Gateway Metrics',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       {
         header: 'Product',
@@ -105,9 +115,14 @@ export const reportStructure: any = {
     label: 'Gateway Controls',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       {
         header: 'Product',
@@ -133,9 +148,14 @@ export const reportStructure: any = {
     label: 'Consumer Requests',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       { header: 'Requestor', key: 'requestor', width: 25 },
       { header: 'Application', key: 'app_name', width: 30 },
@@ -154,9 +174,14 @@ export const reportStructure: any = {
     label: 'Consumer Access',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       { header: 'Service', key: 'service_name', width: 40 },
       { header: 'Routes', key: 'routes', width: 60 },
@@ -175,9 +200,14 @@ export const reportStructure: any = {
     label: 'Consumer Access',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       { header: 'Consumer', key: 'consumer_username', width: 55 },
       { header: 'Issuer', key: 'prod_env_issuer', width: 25 },
@@ -207,9 +237,14 @@ export const reportStructure: any = {
     label: 'Consumer Metrics',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       {
         header: 'Consumer',
@@ -238,9 +273,14 @@ export const reportStructure: any = {
     label: 'Consumer Controls',
     fields: [
       {
-        header: 'Namespace',
+        header: 'Gateway ID',
         key: 'namespace',
         width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'displayName',
+        width: 26,
       },
       {
         header: 'Consumer',

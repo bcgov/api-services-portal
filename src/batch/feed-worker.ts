@@ -58,7 +58,6 @@ const transformations = {
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
   assert.strictEqual(entity in metadata, true);
-  logger.info('putFeedWorker %s', entity);
 
   const md = metadata[entity];
   const refKey = md.refKey;
@@ -267,7 +266,9 @@ export const getRecords = async function (
   feedEntity: string,
   query: string = undefined,
   children: string[] = undefined,
-  where: BatchWhereClause = undefined
+  where: BatchWhereClause = undefined,
+  skip: number = 0,
+  first: number = 5000,
 ): Promise<any[]> {
   const md = (metadata as any)[feedEntity];
 
@@ -276,7 +277,9 @@ export const getRecords = async function (
   return await batchService.listAll(
     query ? query : md.query,
     buildQueryResponse(md, children),
-    where
+    where,
+    skip,
+    first
   );
 };
 
@@ -472,6 +475,13 @@ export const syncRecords = async function (
         json.hasOwnProperty(md['refKey']) &&
         json[md['refKey']] != localRecord[md['refKey']]
       ) {
+        logger.error(
+          '[syncRecords] (%s) %s != %s',
+          md['refKey'],
+          json[md['refKey']],
+          localRecord[md['refKey']]
+        );
+
         throw new Error('Unexpected ' + md['refKey']);
       }
       const transformKeys =
@@ -613,7 +623,7 @@ export const applyTransformationsToNewCreation = async (
   transformInfo: any,
   inputData: any,
   parentRecord: any
-) => {
+): Promise<any[]> => {
   if (!inputData) {
     return;
   }
@@ -627,36 +637,52 @@ export const applyTransformationsToNewCreation = async (
   const transformKeys =
     'transformations' in md ? Object.keys(md.transformations) : [];
 
-  for (const inputDataRecord of inputData) {
-    for (const transformKey of transformKeys) {
-      logger.debug(
-        ' -- (applyTransformations) changed trans? (%s)',
-        transformKey
-      );
-      const transformInfo = md.transformations[transformKey];
-
-      if (transformInfo.filterByNamespace && parentRecord) {
-        inputDataRecord['_namespace'] = parentRecord['namespace'];
+  return Promise.all(
+    inputData.map(async (inputDataRecord: any) => {
+      const data: any = {};
+      for (const field of md.sync) {
+        if (field in inputDataRecord) {
+          data[field] = inputDataRecord[field];
+        }
       }
 
-      const transformMutation = await transformations[transformInfo.name](
-        keystone,
-        transformInfo,
-        null,
-        inputDataRecord,
-        transformKey
-      );
-      delete inputDataRecord['_namespace'];
-      if (transformMutation && transformMutation != null) {
+      if (inputDataRecord.hasOwnProperty(md.refKey)) {
+        data[md.refKey] = inputDataRecord[md.refKey];
+      } else if (inputDataRecord.hasOwnProperty('id')) {
+        data[md.refKey] = inputDataRecord['id'];
+      }
+
+      for (const transformKey of transformKeys) {
         logger.debug(
-          ' -- (applyTransformations) trans (%s) %j',
-          transformKey,
-          transformMutation
+          ' -- (applyTransformations) changed trans? (%s)',
+          transformKey
         );
-        inputDataRecord[transformKey] = transformMutation;
+        const transformInfo = md.transformations[transformKey];
+
+        if (transformInfo.filterByNamespace && parentRecord) {
+          inputDataRecord['_namespace'] = parentRecord['namespace'];
+        }
+
+        const transformMutation = await transformations[transformInfo.name](
+          keystone,
+          transformInfo,
+          null,
+          inputDataRecord,
+          transformKey
+        );
+        delete inputDataRecord['_namespace'];
+        if (transformMutation && transformMutation != null) {
+          logger.debug(
+            ' -- (applyTransformations) trans (%s) %j',
+            transformKey,
+            transformMutation
+          );
+          data[transformKey] = transformMutation;
+        }
       }
-    }
-  }
+      return data;
+    })
+  );
 };
 
 export const removeEmpty = (obj: object) => {
@@ -673,6 +699,17 @@ export const removeKeys = (obj: object, keys: string[]) => {
     ([key, val]) =>
       (keys.includes(key) && delete (obj as any)[key]) ||
       (val && typeof val === 'object' && removeKeys(val, keys))
+  );
+  return obj;
+};
+
+export const replaceKey = (obj: object, oldKey: string, newKey: string) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (oldKey == key &&
+        delete (obj as any)[key] &&
+        ((obj as any)[newKey] = val)) ||
+      (val && typeof val === 'object' && replaceKey(val, oldKey, newKey))
   );
   return obj;
 };

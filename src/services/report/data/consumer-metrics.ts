@@ -7,6 +7,7 @@ import { ReportOfConsumerAccess } from './consumer-access';
 
 interface ReportOfConsumerMetrics {
   namespace: string;
+  displayName?: string;
   consumer_username: string;
   prod_name?: string;
   prod_env_name?: string;
@@ -54,6 +55,7 @@ export async function getReportOfConsumerMetrics(
 
           data.push({
             namespace: ns.name,
+            displayName: ns.displayName,
             consumer_username: consumer,
             prod_name: serviceLookup.get(serviceName)?.prod_name,
             prod_env_name: serviceLookup.get(serviceName)?.prod_env_name,

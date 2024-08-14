@@ -1,6 +1,7 @@
 
 class ApiDirectoryPage {
   path: string = '/devportal/api-directory'
+  yourProductsPath: string = '/devportal/api-directory/your-products'
   rqstAccessBtn: string = '[data-testid=request-access-button]'
   appSelect: string = '[data-testid=access-application-select]'
   additionalNotes: string = '[data-testid=access-rqst-add-notes-text]'

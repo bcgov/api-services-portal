@@ -265,7 +265,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
               <Wrap>
                 {d.scopes.map((s) => (
                   <WrapItem key={uid(s)}>
-                    <Tag variant="outline">{s.name}</Tag>
+                    <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
                   </WrapItem>
                 ))}
               </Wrap>

@@ -71,6 +71,34 @@ components:
                 tags:
                     - tag1
                     - tag2
+        DatasetContact:
+            properties:
+                name:
+                    type: string
+                email:
+                    type: string
+                role:
+                    type: string
+                    enum:
+                        - pointOfContact
+                    nullable: false
+            type: object
+            additionalProperties: false
+        DatasetResource:
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                format:
+                    type: string
+                    enum:
+                        - openapi-json
+                        - json
+                url:
+                    type: string
+            type: object
+            additionalProperties: false
         OrganizationRefID:
             type: string
         OrganizationUnitRefID:
@@ -100,7 +128,13 @@ components:
                 isDraft:
                     type: string
                 contacts:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetContact'
+                    type: array
+                resources:
+                    items:
+                        $ref: '#/components/schemas/DatasetResource'
+                    type: array
                 extSource:
                     type: string
                 extRecordHash:
@@ -109,7 +143,6 @@ components:
                     items:
                         type: string
                     type: array
-                resources: {}
                 organization:
                     $ref: '#/components/schemas/OrganizationRefID'
                 organizationUnit:
@@ -161,9 +194,13 @@ components:
                 isDraft:
                     type: boolean
                 contacts:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetContact'
+                    type: array
                 resources:
-                    type: string
+                    items:
+                        $ref: '#/components/schemas/DatasetResource'
+                    type: array
                 tags:
                     items:
                         type: string

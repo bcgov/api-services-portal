@@ -118,7 +118,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                         {data.currentNamespace?.scopes?.map((s) => (
                           <WrapItem key={s.name}>
                             <Checkbox value={s.name} name="scopes">
-                              {s.name}
+                              {s.name.replace(/Namespace/g, 'Gateway')}
                             </Checkbox>
                           </WrapItem>
                         ))}

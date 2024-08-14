@@ -89,12 +89,14 @@ const allNamespaces = [
   {
     id: 'n1',
     name: 'aps-portal',
+    displayName: 'API Services Portal gw',
     orgEnabled: true,
     createdAt: subDays(new Date(), 20).toISOString(),
   },
   {
     id: 'n2',
     name: 'loc',
+    displayName: 'Location services',
     orgEnabled: false,
     createdAt: subDays(new Date(), 5).toISOString(),
   },

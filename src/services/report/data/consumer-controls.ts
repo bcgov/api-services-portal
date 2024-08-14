@@ -7,6 +7,7 @@ import { ReportOfGatewayMetrics } from './gateway-metrics';
 
 interface ReportOfConsumerControls {
   namespace: string;
+  displayName?: string;
   consumer_username: string;
   prod_name?: string;
   prod_env_name?: string;
@@ -35,6 +36,7 @@ export async function getConsumerControls(
           if (plugin.service != null) {
             data.push({
               namespace: ns.name,
+              displayName: ns.displayName,
               consumer_username: access.consumer.username,
               prod_name: serviceLookup.get(plugin.service.name)?.prod_name,
               prod_env_name: serviceLookup.get(plugin.service.name)
@@ -46,6 +48,7 @@ export async function getConsumerControls(
           } else if (plugin.route != null) {
             data.push({
               namespace: ns.name,
+              displayName: ns.displayName,
               consumer_username: access.consumer.username,
               prod_name: serviceLookup.get(plugin.route.service.name)
                 ?.prod_name,
@@ -59,6 +62,7 @@ export async function getConsumerControls(
           } else {
             data.push({
               namespace: ns.name,
+              displayName: ns.displayName,
               consumer_username: access.consumer.username,
               service_name: '== ALL ==',
               route_name: '== ALL ==',

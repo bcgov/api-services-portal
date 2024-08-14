@@ -51,7 +51,7 @@ Run this command to test logging in and creating a namespace:
 
 ```
 gwa login
-gwa namespace create --name gw-12345
+gwa gateway create --gateway-id gw-12345
 ```
 
 ### Keycloak configuration
@@ -67,17 +67,19 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
    1. If using Node version > 17, run `npm install --legacy-peer-deps`
 
-1. Turn off the docker compose Portal: `docker stop apsportal`
-1. Configure the `oauth2-proxy` that is running in Docker:
+1. Turn off the docker compose Portal and OAuth2 Proxy: `docker stop apsportal oauth2-proxy`
 
-   1. Update `upstreams` in `local/oauth2-proxy/oauth2-proxy-local.cfg` to include the IP address of your local machine, e.g. `upstreams=["http://172.100.100.01:3000"]`
-      <br>You can obtain the IP address using `hostname -I`.
+1. Start the OAuth2 Proxy locally:
 
-   1. Restart the oauth2-proxy: `docker compose restart oauth2-proxy`
-   1. Update `DESTINATION_URL` in `local/feeds/.env.local` to include the IP address of your local machine
-   1. Restart the feeder: `docker compose restart feeder`
-   1. Update `PORTAL_ACTIVITY_URL` in `local/gwa-api/.env.local` to include the IP address of your local machine
-   1. Restart the feeder: `docker compose restart gwa-api`
+```sh
+hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
+
+docker run -ti --rm --name proxy --net=host \
+  --add-host portal.localtest.me:$hostip \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
+  quay.io/oauth2-proxy/oauth2-proxy:v7.2.0 \
+  --config /oauth2.config
+```
 
 1. Start the Portal locally:
 

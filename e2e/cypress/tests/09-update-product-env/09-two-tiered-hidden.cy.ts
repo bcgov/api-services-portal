@@ -50,9 +50,7 @@ describe('Verify Two Tiered Hidden', () => {
   it('create namespace with cli', () => {
     cy.get('@common-testdata').then(({ twoTieredHidden }: any) => {
       cy.executeCliCommand(
-        'gwa namespace create --name ' +
-          twoTieredHidden.namespace +
-          ' --description="Two Tiered Hidden"'
+        'gwa gateway create --gateway-id ' + twoTieredHidden.namespace + ' --display-name="Two Tiered Hidden"'
       ).then((response) => {
         expect(response.stdout).to.contain(twoTieredHidden.namespace)
       })
@@ -69,9 +67,9 @@ describe('Verify Two Tiered Hidden', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ twoTieredHidden }: any) => {
         nameSpace = twoTieredHidden.namespace
-        home.useNamespace(twoTieredHidden.namespace)
+        cy.activateGateway(twoTieredHidden.namespace)
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
     })

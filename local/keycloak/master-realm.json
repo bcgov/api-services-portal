@@ -967,6 +967,45 @@
       "groups": []
     },
     {
+      "id": "bf498a7b-b6e0-49bb-9ea8-0241d7792fe3",
+      "createdTimestamp": 1642463435902,
+      "username": "janis@github",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Janis",
+      "lastName": "Smith",
+      "email": "janis@testmail.com",
+      "attributes": {
+        "provider_user_guid": ["220469E037C84A7ABDFAB15204A607C6"],
+        "identity_provider": ["github"],
+        "display_name": ["Janis@github"],
+        "provider_username": ["janis"]
+      },
+      "credentials": [
+        {
+          "id": "6aa0a7ca-c2ad-43f5-9bdb-3f58693b28bd",
+          "type": "password",
+          "createdDate": 1642466403247,
+          "secretData": "{\"value\":\"ltS/DMUYOCSmZZRbf7rYFTpLa9cqQDewFO1jwRPczU99leiyGtOCsbdAPRmSvLVhOLnzqvcaua3B17ej2d6/7w==\",\"salt\":\"ZrR/QMSRwruFRU5FsPUgHQ==\"}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "uma_authorization",
+        "aps-admin",
+        "offline_access",
+        "api-owner"
+      ],
+      "clientRoles": {
+        "account": ["manage-account", "view-profile"]
+      },
+      "notBefore": 0,
+      "groups": []
+    },
+    {
       "id": "7f9dcdfc-6100-4ec8-ba3f-8bd26d184585",
       "createdTimestamp": 1623537499547,
       "username": "local",
@@ -2071,7 +2110,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "scopes": "[\"GroupAccess.Manage\",\"Namespace.Assign\"]",
+              "scopes": "[\"GroupAccess.Manage\",\"Namespace.Assign\",\"Dataset.Manage\"]",
               "applyPolicies": "[\"janis\"]"
             }
           },
@@ -2317,9 +2356,7 @@
           }
         }
       ],
-      "defaultClientScopes": [
-        "profile"
-      ],
+      "defaultClientScopes": ["profile"],
       "optionalClientScopes": []
     },
     {

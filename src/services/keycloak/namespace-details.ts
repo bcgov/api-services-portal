@@ -1,4 +1,8 @@
-import { camelCaseAttributes, transformSingleValueAttributes } from '../utils';
+import {
+  camelCaseAttributes,
+  regExprValidation,
+  transformSingleValueAttributes,
+} from '../utils';
 import { IssuerEnvironmentConfig } from '../workflow/types';
 import { KeycloakGroupService } from './group-service';
 
@@ -27,6 +31,7 @@ export async function getAllNamespaces(envCtx: EnvironmentContext) {
   const nsList = namespaces.map((ns: ResourceSet) => ({
     id: ns.id,
     name: ns.name,
+    displayName: ns.displayName || `Gateway ${ns.name}`,
     scopes: ns.resource_scopes,
     prodEnvId: envCtx.prodEnv.id,
   }));
@@ -169,8 +174,37 @@ export async function getResource(
     .map((ns: ResourceSet) => ({
       id: ns.id,
       name: ns.name,
-      displayName: ns.displayName,
+      displayName: ns.displayName || `Gateway ${ns.name}`,
       scopes: ns.resource_scopes,
     }))
     .pop();
+}
+
+export function generateDisplayName(context: any, gatewayId: string): string {
+  logger.debug('[generateDisplayName] %j', context.req?.user);
+  if (context.req?.user?.provider_username) {
+    return `${context.req?.user?.provider_username}'s Gateway`;
+  } else {
+    return null;
+  }
+}
+
+export function validateNamespaceName(name: string) {
+  const namespaceValidationRule = '^[a-z][a-z0-9-]{3,13}[a-z0-9]$';
+
+  regExprValidation(
+    namespaceValidationRule,
+    name,
+    'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.'
+  );
+}
+
+export function validateDisplayName(displayName: string) {
+  const displayNameValidationRule = "^[A-Za-z0-9][A-Za-z0-9-()_ .'\\/]{2,29}$";
+
+  regExprValidation(
+    displayNameValidationRule,
+    displayName,
+    'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".'
+  );
 }

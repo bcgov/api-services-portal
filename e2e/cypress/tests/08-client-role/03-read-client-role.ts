@@ -80,7 +80,7 @@ describe('Access manager apply "Read" role and approves developer access request
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
       })
     })
   })

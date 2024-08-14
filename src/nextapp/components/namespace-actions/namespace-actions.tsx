@@ -33,13 +33,13 @@ const NamespaceActions: React.FC<NamespaceActionsProps> = ({ name }) => {
       <Menu>
         <MenuButton
           as={IconButton}
-          aria-label="Namespace Menu"
+          aria-label="Gateway Menu"
           icon={<Icon as={FaCog} />}
           variant="primary"
         />
         <MenuList>
           <MenuItem icon={<Icon as={FaTrash} />} onClick={handleDelete}>
-            Delete Namespace...
+            Delete Gateway...
           </MenuItem>
         </MenuList>
       </Menu>
