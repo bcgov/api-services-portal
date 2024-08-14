@@ -99,19 +99,24 @@ export class NamespaceController extends Controller {
   }
 
   /**
-   * @summary List of Gateway IDs
+   * @summary List of Gateways available to the user
    * @param request
    * @returns
    */
   @Get()
   @OperationId('gateway-list')
-  public async list(@Request() request: any): Promise<string[]> {
+  public async list(@Request() request: any): Promise<Gateway[]> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: list,
     });
     logger.debug('Result %j', result);
-    return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
+    return result.data.allNamespaces
+      .map((ns: Namespace): Gateway => ({ gatewayId: ns.name, displayName: ns.displayName }))
+      .sort((a: Gateway, b: Gateway) => {
+        const displayNameComparison = a.displayName.localeCompare(b.displayName);
+        return displayNameComparison !== 0 ? displayNameComparison : a.gatewayId.localeCompare(b.gatewayId);
+      });
   }
 
   /**
@@ -281,6 +286,7 @@ const list = gql`
   query Namespaces {
     allNamespaces {
       name
+      displayName
     }
   }
 `;
