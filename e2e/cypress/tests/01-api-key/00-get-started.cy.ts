@@ -25,7 +25,6 @@ describe('Gateway Get Started page', () => {
   it('authenticates Janis (api owner) to get the user session token', () => {
     cy.getUserSessionTokenValue('', false).then((value) => {
       userSession = value
-      console.log('first user session', userSession)
     })
   })
   

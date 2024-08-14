@@ -4,6 +4,8 @@ import NameSpacePage from '../../pageObjects/namespace'
 import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
+const cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+
 describe('Delete created resources', () => {
   const login = new LoginPage()
   const home = new HomePage()
@@ -11,6 +13,7 @@ describe('Delete created resources', () => {
   const pd = new Products()
   const ns = new NameSpacePage
   let flag: boolean
+  let userSession: any
 
   before(() => {
     cy.visit('/')
@@ -30,6 +33,9 @@ describe('Delete created resources', () => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.activateGateway(deleteResources.namespace);
+        cy.getUserSessionTokenValue(deleteResources.namespace, false).then((value) => {
+          userSession = value
+        })
       })
     })
   })
@@ -57,11 +63,21 @@ describe('Delete created resources', () => {
     sa.deleteAllServiceAccounts()
   })
 
-  it('Delete Namespace', () => {
+  it('Set token with gwa config command', () => {
+    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('Set environment with gwa config command', () => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('Delete Namespace (CLI)', () => {
     cy.get('@common-testdata').then(({ deleteResources }: any) => {
-      cy.visit(ns.detailPath)
-      ns.deleteNamespace(deleteResources.namespace)
-      cy.wait(10000)
+      cy.deleteGatewayCli(deleteResources.namespace, true)
     });
   });
   
@@ -71,10 +87,26 @@ describe('Delete created resources', () => {
       cy.wrap(null).then(() => {
         return cy.getGateways();
       }).then((result) => {
-        console.log(result);
         const namespaceNames = result.map((ns: { name: any }) => ns.name);
-        console.log(namespaceNames);
         expect(namespaceNames).to.not.include(deleteResources.namespace);
+      });
+    });
+  });
+
+  it('Verify delete namespace works from the UI', () => {
+    cy.createGateway().then((response) => {
+      const namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
+      cy.activateGateway(namespace);
+      cy.visit(ns.detailPath)
+      ns.deleteNamespace(namespace)
+
+      cy.visit('/')
+      cy.wrap(null).then(() => {
+        return cy.getGateways();
+      }).then((result) => {
+        const namespaceNames = result.map((ns: { name: any }) => ns.name);
+        expect(namespaceNames).to.not.include(namespace);
       });
     });
   });
