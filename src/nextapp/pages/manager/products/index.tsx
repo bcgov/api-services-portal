@@ -44,7 +44,7 @@ const ProductsPage: React.FC = () => {
     const { name, org, orgUnit } = namespace.data?.currentNamespace;
     try {
       await mutate.mutateAsync({
-        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}?enable=${enable}`,
+        url: `/ds/api/v3/organizations/${org.name}/${orgUnit.name}/gateways/${name}?enable=${enable}`,
         options: { method: 'PUT' },
       });
 
