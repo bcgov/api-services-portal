@@ -1,7 +1,6 @@
 
   query GetNamespaces {
     allNamespaces {
-      id
       name
     }
   }

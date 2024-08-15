@@ -46,7 +46,7 @@ const LoginPage: React.FC<
 
   React.useEffect(() => {
     if (ok) {
-      router.push('/devportal/api-directory');
+      router.push(isProvider ? '/manager/gateways' : '/devportal/api-directory');
     }
   }, [ok]);
 

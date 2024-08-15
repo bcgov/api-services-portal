@@ -27,7 +27,7 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
     cy.get('@common-testdata').then(({ namespace }: any) => {
       cy.get('@access-manager').then(({ user }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(namespace);
+        cy.activateGateway(namespace);
       })
     })
   })

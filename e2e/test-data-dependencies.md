@@ -1,6 +1,7 @@
 | Test                                                        | Dependencies                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
 | 01-api-key                                                  |                                                                |
+| │   00-get-started.cy.ts                                    | Must run without existing namespaces|
 | │   01-create-api.cy.ts                                     | NA                                                             |
 | │   02-team-access.cy.ts                                    | 1.1                                                            |
 | │   03-request-access-inactive-env.cy.ts                    | 1.1 to 1.2                                                     |
@@ -59,8 +60,9 @@
 | │   06-shared-idp.cy.ts                                     | Folder 01-api-key and 02-client-credential-flow and 9.1 to 9.5 |
 | │   07-kong-public-auth.ts                                  | Folder 01-api-key and 02-client-credential-flow and 9.1 to 9.6 |
 | │   08-protected-externally.ts                              | Folder 01-api-key and 02-client-credential-flow and 9.1 to 9.7 |
+| │   09-two-tiered-hidden.cy.ts                              | NA                                                             |
 | 10-clear-resources                                          |                                                                |
-| │   01-create-api.cy.ts                                     |                                                                |
+| │   01-create-api.cy.ts                                     | NA (CONFIRM: Is this accurate?)                                |
 | │   02-team-access.cy.ts                                    | 10.1                                                           |
 | │   03-rqst-access.cy.ts                                    | 10.1 to 10.2                                                   |
 | │   04-delete-consumer.ts                                   | 10.1 to 10.3                                                   |
@@ -79,6 +81,7 @@
 | │   07-namespace-view.cy.ts                                 | 12.1 to 12.2                                                   |
 | │   08-gateway-config.cy.ts                                 | 12.1 to 12.2                                                   |
 | │   09-content-publish.cy.ts                                | 12.1 to 12.2                                                   |
+| │   10-identity-provider.cy.ts                              | NA                                                             |
 | 13-namespace-preview-mode                                   |                                                                |
 | │   01-create-api.cy.ts                                     | NA                                                             |
 | │   02-namespace-preview-mode.cy.ts                         | 13.1                                                           |
@@ -102,8 +105,19 @@
 | │   02-cli-generate-config.ts                               | 16.1                                                           |
 | 17-delete-application                                       |                                                                |
 | │   01-delete-application-without-access.cy.ts              | NA                                                             |
-| │   02-delete-application-with-pending-request.cy.ts        | 17.1                                                           |
+| │   02-delete-application-with-pending-request.cy.ts        | 17.1 (CONFIRM: requires product, created in 01-api-key?)       |   
 | │   03-delete-application-with-approved-request.cy.ts       | 17.1 to 17.2                                                   |
 | │   04-delete-namespace-gwa.ts                              | 17.1 to 17.3                                                   |
 | 18-scan-astra-result                                        |                                                                |
-|     01-store-and-scan-astra-result.ts                       | NA                                                             |
+| |   01-store-and-scan-astra-result.ts                       | NA                                                             |
+| 19-api-v3                                                   |                                                                |
+| |   01-api-directory.cy.ts                                  | ?                                                              |
+| |   02-organization.cy.ts                                   | ?                                                              |
+| |   03-gateways.cy.ts                                       | ?                                                              |
+| |   04-products.cy.ts                                       | ?                                                              |
+| |   05-issuers.cy.ts                                        | ?                                                              |
+| |   06-identifiers.cy.ts                                    | ?                                                              |
+| |   07-endpoints.cy.ts                                      | ?                                                              |
+| 20-gateways                                                 |                                                                |
+| |   01-list.cy.ts                                           | NA                                                             |
+| |   02-create.cy.ts                                         | NA                                                             |

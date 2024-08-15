@@ -1,0 +1,398 @@
+{
+  "organization": {
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "endPoint": "ds/api/v2/organizations",
+    "orgExpectedList": {
+      "name": "planning-and-innovation-division",
+      "title": "Planning and Innovation Division"
+    },
+    "orgName": "ministry-of-health",
+    "expectedScope": [
+      "Dataset.Manage",
+      "GroupAccess.Manage",
+      "Namespace.Assign"
+    ],
+    "expectedNamespace": {
+      "name": "gw-3a443",
+      "orgUnit": "planning-and-innovation-division",
+      "enabled": true
+    },
+    "expectedRoles": {
+      "organization-admin": {
+        "label": "Organization Administrator",
+        "permissions": [
+          {
+            "resourceType": "organization",
+            "scopes": [
+              "GroupAccess.Manage",
+              "Namespace.Assign",
+              "Dataset.Manage"
+            ]
+          },
+          {
+            "resourceType": "namespace",
+            "scopes": [
+              "Namespace.View"
+            ]
+          }
+        ]
+      }
+    },
+    "body": {
+      "name": "ministry-of-health",
+      "parent": "/ca.bc.gov",
+      "members": [
+        {
+          "member": {
+            "id": "janis@idir",
+            "email": "janis@testmail.com"
+          },
+          "roles": [
+            "organization-admin"
+          ]
+        }
+      ]
+    }
+  },
+  "documentation": {
+    "endPoint": "ds/api/v2/namespaces/apiplatform/contents",
+    "getDocumentation_endPoint": "ds/api/v2/documentation",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "body": {
+      "externalLink": "https://externalsite/my_content",
+      "title": "my_content",
+      "description": "Summary of Test content",
+      "content": "Markdown content",
+      "order": 0,
+      "isPublic": true,
+      "isComplete": true,
+      "tags": [
+        "tag1",
+        "tag2"
+      ]
+    }
+  },
+  "apiDirectory": {
+    "endPoint": "ds/api/v2/namespaces",
+    "orgEndPoint": "ds/api/v2/organizations",
+    "directoryEndPoint": "ds/api/v2/directory",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "body": {
+      "name": "auto-test-product-new",
+      "license_title": "Open Government Licence - British Columbia",
+      "security_class": "PUBLIC",
+      "view_audience": "Government",
+      "download_audience": "Public",
+      "notes": "Some notes",
+      "title": "Dataset for Test API",
+      "isInCatalog": "false",
+      "isDraft": "false",
+      "tags": [
+        "gateway",
+        "kong"
+      ],
+      "organization": "ministry-of-health",
+      "organizationUnit": "planning-and-innovation-division"
+    },
+    "directory": {
+      "name": "gwa-auto-test-product",
+      "title": "GWA Auto Test Product",
+      "notes": "For Test Purpose",
+      "license_title": "Open Government Licence - British Columbia",
+      "view_audience": "Public",
+      "security_class": "PUBLIC",
+      "record_publish_date": "2017-09-05",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "organization": {
+        "name": "ministry-of-health",
+        "title": "Ministry of Health"
+      },
+      "organizationUnit": {
+        "name": "planning-and-innovation-division",
+        "title": "Planning and Innovation Division"
+      },
+      "products": [
+        {
+          "id": "2",
+          "name": "GWA Auto Test Product",
+          "environments": [
+            {
+              "name": "dev",
+              "active": true,
+              "flow": "kong-api-key-only"
+            },
+            {
+              "name": "test",
+              "active": true,
+              "flow": "client-credentials"
+            }
+          ]
+        }
+      ]
+    },
+    "namespaceDirectory": {
+      "name": "client-credentials-test-product",
+      "title": "Client Credentials Test Product",
+      "notes": "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.",
+      "license_title": "Access Only",
+      "view_audience": "Government",
+      "security_class": "LOW-PUBLIC",
+      "tags": [
+        "gateway",
+        "kong",
+        "openapi"
+      ],
+      "organization": {
+        "name": "ministry-of-health",
+        "title": "Ministry of Health"
+      },
+      "organizationUnit": {
+        "name": "planning-and-innovation-division",
+        "title": "Planning and Innovation Division"
+      },
+      "products": [
+        {
+          "id": "2",
+          "name": "Client Credentials Test Product",
+          "environments": [
+            {
+              "name": "test",
+              "active": true,
+              "flow": "client-credentials"
+            },
+            {
+              "name": "dev",
+              "active": true,
+              "flow": "client-credentials"
+            },
+            {
+              "name": "sandbox",
+              "active": true,
+              "flow": "client-credentials"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "authorizationProfiles": {
+    "body": {
+      "name": "my-auth-profile",
+      "description": "Auth connection to my IdP",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "dev",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      ],
+      "owner": "janis@idir"
+    },
+    "shared_IDP_update_body": {
+      "name": "Sample Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "gwa-api",
+          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+        }
+      ],
+      "isShared": true
+    },
+    "shared_gwa": {
+      "name": "Gold Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "gwa-api",
+          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+        }
+      ],
+      "isShared": true
+    },
+    "shared_gwa_publish": {
+      "name": "Gold Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "mode": "auto",
+      "clientAuthenticator": "client-secret",
+      "environmentDetails": [
+        {
+          "clientId": "gwa-api",
+          "clientRegistration": "managed",
+          "clientSecret": "****",
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "exists": true
+        }
+      ],
+      "clientRoles": [],
+      "clientMappers": [],
+      "availableScopes": [],
+      "resourceScopes": [],
+      "isShared": true,
+      "apiKeyName": "X-API-KEY"
+    },
+    "shared_IDP_body": {
+      "name": "Sample Shared IdP new",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "gwa-api",
+          "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+        }
+      ],
+      "isShared": true
+    },
+    "shared_IDP_inheritFrom": {
+      "environmentDetails": [],
+      "mode": "auto",
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "name": "my-auth-client-secret-1",
+      "description": "Auth connection to my IdP",
+      "owner": "janis@testmail.com",
+      "inheritFrom": "Sample Shared IdP new"
+    },
+    "shared_IDP_inheritFrom_expectedResponse": {
+      "name": "my-auth-client-secret-1",
+      "description": "Auth connection to my IdP",
+      "flow": "client-credentials",
+      "mode": "auto",
+      "clientAuthenticator": "client-secret",
+      "environmentDetails": [
+        {
+          "exists": true,
+          "environment": "test",
+          "issuerUrl": "http://keycloak.localtest.me:9081/auth/realms/master",
+          "clientRegistration": "shared-idp",
+          "clientId": "ap-my-auth-client-secret-1-test"
+        }
+      ],
+      "clientRoles": [
+        "administrator"
+      ],
+      "clientMappers": [
+        "test-audience"
+      ],
+      "isShared": false,
+      "apiKeyName": "X-API-KEY",
+      "inheritFrom": {
+        "name": "Sample Shared IdP"
+      },
+      "owner": "janis@testmail.com"
+    },
+    "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    }
+  },
+  "products": {
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "endPoint": "ds/api/v2/namespaces/apiplatform/products",
+    "deleteEnvironmentEndPoint": "ds/api/v2/namespaces/apiplatform/environments",
+    "body": {
+      "name": "my-new-product",
+      "appId": "DRE123456",
+      "environments": [
+        {
+          "name": "test",
+          "active": false,
+          "approval": false,
+          "flow": "public",
+          "appId": "6754"
+        }
+      ]
+    }
+  },
+  "namespaces": {
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "endPoint": "ds/api/v2/namespaces",
+    "activity": {
+      "name": "newplatform",
+      "scopes": [
+        {
+          "name": "GatewayConfig.Publish"
+        },
+        {
+          "name": "Namespace.Manage"
+        },
+        {
+          "name": "Access.Manage"
+        },
+        {
+          "name": "Content.Publish"
+        },
+        {
+          "name": "Namespace.View"
+        },
+        {
+          "name": "CredentialIssuer.Admin"
+        }
+      ],
+      "permDomains": [
+        ".api.gov.bc.ca"
+      ],
+      "permDataPlane": "local.dataplane",
+      "permProtectedNs": "deny",
+      "org": "ministry-of-health",
+      "orgUnit": "planning-and-innovation-division"
+    },
+    "userDefinedNamespace": {
+      "name": "gwanelatform",
+      "displayName": "Test for GWA test"
+    },
+    "inValidNamespace": {
+      "name": "gwa",
+      "displayName": "Test for GWA test"
+    }
+  }
+}

@@ -63,12 +63,12 @@ const NewOrganizationForm: React.FC = () => {
         onClose();
         toast({
           status: 'success',
-          title: 'Namespace updated',
+          title: 'Gateway updated',
         });
       } catch (err) {
         toast({
           status: 'error',
-          title: 'Namespace update failed',
+          title: 'Gateway update failed',
           description: err,
         });
       }
@@ -88,9 +88,9 @@ const NewOrganizationForm: React.FC = () => {
           <ModalCloseButton />
           <ModalBody>
             <Text fontSize="sm" mb={4}>
-              Adding your Organization and Business Unit to your namespace will
+              Adding your Organization and Business Unit to your gateway will
               notify the Organization Administrator to enable API publishing to
-              the Directory for your namespace so consumers can find and request
+              the Directory for your gateway so consumers can find and request
               access to your APIs.
             </Text>
             <Text fontSize="sm" mb={8}>

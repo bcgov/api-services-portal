@@ -4,5 +4,5 @@ module.exports = {
     '@babel/preset-react',
     '@babel/preset-typescript',
   ],
-  plugins: ['transform-class-properties', 'istanbul'],
+  // plugins: ['transform-class-properties', 'istanbul'],
 };

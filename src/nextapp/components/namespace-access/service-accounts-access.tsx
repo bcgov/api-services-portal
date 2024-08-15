@@ -184,7 +184,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
       )}
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
-          {requests?.length ?? '0'} service accounts
+          {requests?.length ?? '0'} service account{requests?.length > 1 && 's'}
         </Heading>
         <Box minW="280px">
           <SearchInput
@@ -239,7 +239,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
               <Wrap>
                 {d.scopes.map((t) => (
                   <WrapItem key={t}>
-                    <Tag variant="outline">{t}</Tag>
+                    <Tag variant="outline">{t.replace(/Namespace/g, 'Gateway')}</Tag>
                   </WrapItem>
                 ))}
               </Wrap>

@@ -79,7 +79,7 @@ class NamespaceAccessPage {
     })
   }
 
-  path: string = '/manager/namespace-access'
+  path: string = '/manager/admin-access'
 
   clickGrantUserAccessButton() {
     cy.wait(3000)

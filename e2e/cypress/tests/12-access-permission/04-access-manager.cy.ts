@@ -1,7 +1,6 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
-import MyProfilePage from '../../pageObjects/myProfile'
 import ConsumersPage from '../../pageObjects/consumers'
 
 describe('Grant Access Manager Role', () => {
@@ -27,7 +26,7 @@ describe('Grant Access Manager Role', () => {
       cy.get('@common-testdata').then(({ checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
-      home.useNamespace(checkPermission.namespace)
+      cy.activateGateway(checkPermission.namespace)
     })
   })
   })
@@ -50,7 +49,6 @@ describe('Verify that Mark is able to view the pending request', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const consumers = new ConsumersPage()
-  const mp = new MyProfilePage()
   const na = new NamespaceAccessPage()
 
 
@@ -72,8 +70,7 @@ describe('Verify that Mark is able to view the pending request', () => {
         cy.visit(login.path)
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(checkPermission.namespace)
-        cy.visit(mp.path)
+        cy.activateGateway(checkPermission.namespace)
       })
     })
   })

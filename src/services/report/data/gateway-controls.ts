@@ -6,6 +6,7 @@ import { ReportOfGatewayMetrics } from './gateway-metrics';
 
 interface ReportOfGatewayControls {
   namespace: string;
+  displayName?: string;
   prod_name?: string;
   prod_env_name?: string;
   service_name: string;
@@ -31,6 +32,7 @@ export async function getGatewayControls(
         svc.plugins?.forEach((plugin) => {
           data.push({
             namespace: ns.name,
+            displayName: ns.displayName,
             prod_name: serviceLookup.get(svc.name)?.prod_name,
             prod_env_name: serviceLookup.get(svc.name)?.prod_env_name,
             service_name: svc.name,

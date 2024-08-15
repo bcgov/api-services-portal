@@ -36,6 +36,12 @@ enum EnvironmentOrder {
   other,
 }
 
+// Utility function to get the first sentence of dataset description
+const getFirstSentence = (text) => {
+  const firstPeriodIndex = text.indexOf('.');
+  return firstPeriodIndex !== -1 ? text.substring(0, firstPeriodIndex + 1) : text;
+};
+
 const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
   data,
   preview,
@@ -112,9 +118,9 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
           {!data.organization && 'Open Dataset'}
         </Heading>
         {data && (
-          <Text fontSize="sm" noOfLines={2}>
-            {data.notes}
-          </Text>
+          <Text fontSize="sm" noOfLines={4}>
+            {getFirstSentence(data.notes)}
+        </Text>
         )}
         {!data && (
           <Text as="em" fontSize="sm" color="gray.400">

@@ -45,13 +45,13 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('Check gwa command to generate config for client credential template', () => {
-    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division').then((response) => {
-      expect(response.stdout).to.contain("File gw-config.yml created")
+    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division --out gw-config.yaml').then((response) => {
+      expect(response.stdout).to.contain("File gw-config.yaml created")
     });
   })
 
   it('Check gwa command to apply generated config', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yml').then((response) => {
+    cy.executeCliCommand('gwa apply -i gw-config.yaml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(3)
       namespace = response.stdout.match(/\bgw-\w+/g)[0]
@@ -59,7 +59,7 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('Verify that the product created through gwa command is displayed in the portal', () => {

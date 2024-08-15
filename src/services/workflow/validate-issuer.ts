@@ -44,7 +44,7 @@ export const ValidateIssuer = async (
         resolvedData['namespace']
       );
       addValidationError(
-        'Setting shared is only available in privileged namespaces'
+        'Setting shared is only available in privileged gateways'
       );
     }
   }

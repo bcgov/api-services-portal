@@ -15,7 +15,7 @@ const metadata = {
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       orgUnits: {
-        name: 'connectExclusiveList',
+        name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
       },
@@ -61,7 +61,7 @@ const metadata = {
     ],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
-      resources: { name: 'toString' },
+      resources: { name: 'toStringDefaultArray' },
       organization: {
         name: 'connectOne',
         key: 'organization.id',
@@ -76,6 +76,16 @@ const metadata = {
       },
       isInCatalog: { name: 'alwaysTrue' },
       isDraft: { name: 'alwaysFalse' },
+    },
+    validations: {
+      resources: {
+        type: 'entityArray',
+        entity: 'DatasetResource',
+      },
+      contacts: {
+        type: 'entityArray',
+        entity: 'DatasetContact',
+      },
     },
   },
   DraftDataset: {
@@ -101,6 +111,8 @@ const metadata = {
     ],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
+      resources: { name: 'toStringDefaultArray' },
+      contacts: { name: 'toStringDefaultArray' },
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
@@ -152,8 +164,14 @@ const metadata = {
       },
       isInCatalog: { type: 'boolean' },
       isDraft: { type: 'boolean' },
-      // contacts : TBD
-      // resources: TBD
+      resources: {
+        type: 'entityArray',
+        entity: 'DatasetResource',
+      },
+      contacts: {
+        type: 'entityArray',
+        entity: 'DatasetContact',
+      },
     },
     example: {
       name: 'my_sample_dataset',
@@ -199,6 +217,18 @@ const metadata = {
     query: 'allNamespaces',
     refKey: 'extRefId',
     sync: ['name', 'displayName'],
+    transformations: {
+      // members: {
+      //   name: 'connectExclusiveList',
+      //   list: 'MemberRole',
+      //   syncFirst: true,
+      // },
+    },
+  },
+  Gateway: {
+    query: 'allNamespaces',
+    refKey: 'gatewayId',
+    sync: ['displayName'],
     transformations: {
       // members: {
       //   name: 'connectExclusiveList',
@@ -694,6 +724,30 @@ const metadata = {
     query: 'allBlobs',
     refKey: 'ref',
     sync: ['ref', 'type', 'blob'],
+    transformations: {},
+  },
+  DatasetContact: {
+    transient: true,
+    refKey: 'name',
+    sync: ['name', 'email', 'role'],
+    validations: {
+      role: {
+        type: 'enum',
+        values: ['pointOfContact'],
+      },
+    },
+    transformations: {},
+  },
+  DatasetResource: {
+    transient: true,
+    refKey: 'id',
+    sync: ['name', 'format', 'url'],
+    validations: {
+      format: {
+        type: 'enum',
+        values: ['openapi-json', 'json'],
+      },
+    },
     transformations: {},
   },
 };

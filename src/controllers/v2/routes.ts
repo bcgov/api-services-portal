@@ -73,6 +73,27 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DatasetContact": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "email": {"dataType":"string"},
+            "role": {"dataType":"enum","enums":["pointOfContact"]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DatasetResource": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "format": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["openapi-json"]},{"dataType":"enum","enums":["json"]}]},
+            "url": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "OrganizationRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -97,11 +118,11 @@ const models: TsoaRoute.Models = {
             "title": {"dataType":"string"},
             "isInCatalog": {"dataType":"string"},
             "isDraft": {"dataType":"string"},
-            "contacts": {"dataType":"string"},
+            "contacts": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetContact"}},
+            "resources": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetResource"}},
             "extSource": {"dataType":"string"},
             "extRecordHash": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
-            "resources": {"dataType":"any"},
             "organization": {"ref":"OrganizationRefID"},
             "organizationUnit": {"ref":"OrganizationUnitRefID"},
         },
@@ -121,8 +142,8 @@ const models: TsoaRoute.Models = {
             "title": {"dataType":"string"},
             "isInCatalog": {"dataType":"boolean"},
             "isDraft": {"dataType":"boolean"},
-            "contacts": {"dataType":"string"},
-            "resources": {"dataType":"string"},
+            "contacts": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetContact"}},
+            "resources": {"dataType":"array","array":{"dataType":"refObject","ref":"DatasetResource"}},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
             "organization": {"ref":"OrganizationRefID"},
             "organizationUnit": {"ref":"OrganizationUnitRefID"},
