@@ -12,6 +12,7 @@ const NoGatewayRedirect = () => {
       router.push('/manager/gateways/list');
     }
   }, [hasNamespace]);
+  return null
 };
 
 export default NoGatewayRedirect;
