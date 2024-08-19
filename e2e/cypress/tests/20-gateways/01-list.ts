@@ -1,4 +1,3 @@
-import { report } from 'process'
 import NameSpacePage from '../../pageObjects/namespace'
 let gateways: any
 
@@ -129,6 +128,59 @@ describe('My Gateways list page', () => {
     Cypress._.forEach(gateways, (gateway) => {
       cy.deleteGatewayCli(gateway.gatewayId + '-' + customId, false)
     });
+  })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+
+})
+
+describe.only('My Gateways list page', () => { 
+  const ns = new NameSpacePage()
+  let userSession: any
+
+  before(() => {
+    cy.deleteAllCookies()
+  })
+
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
+  })
+
+  it('authenticates Janis (api owner) to get the user session token', () => {
+    cy.getUserSessionTokenValue('', false).then((value) => {
+      userSession = value
+    })
+  })
+
+  it('create a set of namespaces', () => {
+    cy.get('@common-testdata').then(({ myGateways }: any) => {
+      gateways = myGateways
+      gateways["namespace1"] = gateways["namespace1"]
+      Cypress._.forEach(gateways, (gateway) => {
+        cy.createGateway(gateway.gatewayId + '-' + customId, gateway.displayName);
+      });
+    });
+  });
+
+  it('Verify My Gateways shows the created gateways', () => {
+    cy.visit(ns.listPath)
+    Cypress._.forEach(gateways, (gateway) => {
+      cy.get(`[data-testid="ns-list-item-${gateway.gatewayId + '-' + customId}"]`)
+        .should('contain.text', gateway.displayName)
+    });
+  })
+
+  it('Check Gateway link goes to details page', () => {  
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()
+    cy.url().should('include', '/manager/gateways/detail')
+    cy.get('h1').should('contain.text', gateways["namespace1"].displayName)   
   })
 
   after(() => {
