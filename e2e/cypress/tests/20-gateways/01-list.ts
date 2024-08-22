@@ -1,4 +1,3 @@
-import { report } from 'process'
 import NameSpacePage from '../../pageObjects/namespace'
 let gateways: any
 
@@ -34,7 +33,6 @@ describe('My Gateways list page', () => {
   it('create a set of namespaces', () => {
     cy.get('@common-testdata').then(({ myGateways }: any) => {
       gateways = myGateways
-      gateways["namespace1"] = gateways["namespace1"]
       Cypress._.forEach(gateways, (gateway) => {
         cy.createGateway(gateway.gatewayId + '-' + customId, gateway.displayName);
       });
