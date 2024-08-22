@@ -10,7 +10,7 @@ let customId: string
 
 var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
 
-describe('Verify "gateway create" command', () => {  
+describe('Verify "gateway create" and "gateway list" commands', () => {   
   const ns = new NameSpacePage()
   customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
 
@@ -58,13 +58,21 @@ describe('Verify "gateway create" command', () => {
             throw new Error('Failed to extract Display Name from response: ' + response.stdout);
         }
       });
-      // Verify the created gateway
+      // Verify the created gateway in Portal
       cy.visit(ns.listPath)
       cy.get(`[data-testid="ns-list-item-${gatewayId}"]`)
         .should('contain.text', gatewayId)
         .should('contain.text', displayName)
-      cy.deleteGatewayCli(gatewayId, false)
     });
+  });
+
+  it('verify gateway list command', () => {
+    cy.executeCliCommand('gwa gateway list').then((response) => {
+      assert.isNotNaN(response.stdout)
+      assert.isTrue(response.stdout.includes(gatewayId), `The output should include the gateway ID: ${gatewayId}`)
+      assert.isTrue(response.stdout.includes(displayName), `The output should include the display name: ${displayName}`)
+    });
+    cy.deleteGatewayCli(gatewayId, false)
   });
 
   it('create gateway - id provided', () => {
