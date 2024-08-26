@@ -68,6 +68,12 @@ describe('Verify CLI commands for generate/apply config', () => {
     });
   })
 
+  it('Check gwa status --hosts include routes', () => {
+    cy.executeCliCommand('gwa status --hosts').then((response) => {
+      expect(response.stdout).to.contain('https://' + serviceName + '.dev.api.gov.bc.ca')
+    });
+  })
+
   it('activates namespace in Portal', () => {
     cy.executeCliCommand('gwa gateway current').then((response) => {
       const namespace = response.stdout.match(/\bgw-\w+/g)[0]
