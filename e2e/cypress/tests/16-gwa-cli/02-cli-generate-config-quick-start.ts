@@ -53,15 +53,16 @@ describe('Verify CLI commands for generate/apply config', () => {
       `--service ${serviceName}`,
       '--upstream https://httpbin.org',
       '--org ministry-of-health',
-      '--org-unit planning-and-innovation-division'
+      '--org-unit planning-and-innovation-division',
+      '--output gw-config-qs.yaml'
     ].join(' ');
     cy.executeCliCommand(command).then((response) => {
-      expect(response.stdout).to.contain("File gw-config.yaml created")
+      expect(response.stdout).to.contain("File gw-config-qs.yaml created")
     });
   })
 
   it('Check gwa command to apply generated config', () => {
-    cy.executeCliCommand('gwa apply -i gw-config.yaml').then((response) => {
+    cy.executeCliCommand('gwa apply -i gw-config-qs.yaml').then((response) => {
       expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
