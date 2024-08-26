@@ -62,9 +62,9 @@ describe('Verify CLI commands for generate/apply config', () => {
 
   it('Check gwa command to apply generated config', () => {
     cy.executeCliCommand('gwa apply -i gw-config.yaml').then((response) => {
+      expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
       expect(wordOccurrences).to.equal(2)
-      expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
     });
   })
 
