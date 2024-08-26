@@ -5,10 +5,13 @@ import MyAccessPage from '../../pageObjects/myAccess'
 import HomePage from '../../pageObjects/home';
 import Products from '../../pageObjects/products';
 const YAML = require('yamljs');
-let userSession: any
 let cli = require("../../fixtures/test_data/gwa-cli.json")
-
+const { v4: uuidv4 } = require('uuid')
 const jose = require('node-jose')
+
+let userSession: any
+const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
+const serviceName = 'my-service-' + customId
 
 describe('Verify CLI commands for generate/apply config', () => {
   const login = new LoginPage()
@@ -45,7 +48,14 @@ describe('Verify CLI commands for generate/apply config', () => {
   })
 
   it('Check gwa command to generate config for client credential template', () => {
-    cy.executeCliCommand('gwa generate-config --template client-credentials-shared-idp --service my-service --upstream https://httpbin.org --org ministry-of-health --org-unit planning-and-innovation-division --out gw-config.yaml').then((response) => {
+    const command = [
+      'gwa generate-config --template quick-start',
+      `--service ${serviceName}`,
+      '--upstream https://httpbin.org',
+      '--org ministry-of-health',
+      '--org-unit planning-and-innovation-division'
+    ].join(' ');
+    cy.executeCliCommand(command).then((response) => {
       expect(response.stdout).to.contain("File gw-config.yaml created")
     });
   })
@@ -53,35 +63,42 @@ describe('Verify CLI commands for generate/apply config', () => {
   it('Check gwa command to apply generated config', () => {
     cy.executeCliCommand('gwa apply -i gw-config.yaml').then((response) => {
       let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
-      expect(wordOccurrences).to.equal(3)
-      namespace = response.stdout.match(/\bgw-\w+/g)[0]
+      expect(wordOccurrences).to.equal(2)
+      expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
     });
   })
 
-  it('activates new namespace', () => {
-    cy.activateGateway(namespace)
+  it('activates namespace in Portal', () => {
+    cy.executeCliCommand('gwa gateway current').then((response) => {
+      const namespace = response.stdout.match(/\bgw-\w+/g)[0]
+      cy.activateGateway(namespace)
+    })
   })
 
   it('Verify that the product created through gwa command is displayed in the portal', () => {
     cy.visit(pd.path)
-    pd.editProductEnvironment('my-service API', 'dev')
-  })
-
-  it('Verify the Authorization scope and issuer details for the product', () => {
-    pd.verifyAuthScope('Oauth2 Client Credentials Flow')
-  })
-
-  it('Verify the issuer details for the product', () => {
-    pd.verifyIssuer(namespace + ' default (test)')
+    pd.editProductEnvironment(serviceName + ' API', 'dev')
   })
 
   it('Verify that the dataset created through GWA comand is assocuated with the product', () => {
     cy.visit(pd.path)
-    pd.verifyDataset('my-service', 'my-service API')
+    pd.verifyDataset(serviceName, serviceName + ' API')
   })
 
-  it('Navigate to home path', () => {
-    cy.visit(login.path)
+  it('Verify service name validation error in new namespace', () => {
+    const command = [
+      'gwa generate-config --template quick-start',
+      `--service ${serviceName}`,
+      '--upstream https://httpbin.org',
+      '--org ministry-of-health',
+      '--org-unit planning-and-innovation-division'
+    ].join(' ');
+    cy.executeCliCommand('gwa gateway create --generate').then((response) => {
+      const namespace = response.stdout.match(/\bgw-\w+/g)[0]
+      cy.executeCliCommand(command).then((response) => {
+        expect(response.stderr).to.contain(`Error: Service ${serviceName} is already in use. Suggestion: ${namespace}-${serviceName}`)
+      });
+    });
   })
 
   after(() => {

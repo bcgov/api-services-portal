@@ -2,6 +2,7 @@
 import { updateYamlDocument } from "@atomist/yaml-updater";
 import _ = require("cypress/types/lodash");
 const YAML = require('yamljs');
+const { kebabCase } = require('lodash');
 
 class Products {
   path: string = '/manager/products'
@@ -57,7 +58,7 @@ class Products {
   }
 
   editProduct(productName: string) {
-    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    const pname: string = kebabCase(productName)
     cy.get(`[data-testid=${pname}-more-options-btn]`).first().click()
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click()
     // cy.get(this.updateBtn).click()
@@ -92,7 +93,7 @@ class Products {
   }
 
   editProductEnvironment(productName: string, envName: string) {
-    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    const pname: string = kebabCase(productName)
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
     cy.wait(2000)
@@ -228,7 +229,7 @@ class Products {
   }
 
   deleteProductEnvironment(productName: string, envName: string) {
-    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    const pname: string = kebabCase(productName)
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-more-options-btn]`).click()
     cy.get(`[data-testid=${pname}-${env}-delete-btn]`).click()
@@ -236,8 +237,7 @@ class Products {
   }
 
   deleteProduct(productName: string) {
-    // this.editProduct(productName)
-    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    const pname: string = kebabCase(productName)
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click({ force: true })
     cy.get(`[data-testid=${pname}-delete-btn]`).first().click({ force: true })
     cy.get(this.deleteProductConfirmationBtn).click()
