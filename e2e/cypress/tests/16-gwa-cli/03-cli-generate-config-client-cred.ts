@@ -55,7 +55,7 @@ describe('Verify CLI commands for generate/apply config', () => {
       '--upstream https://httpbin.org',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division',
-      '--output gw-config-cc.yaml'
+      '--out gw-config-cc.yaml'
     ].join(' ');
     cy.executeCliCommand(command).then((response) => {
       expect(response.stdout).to.contain("File gw-config-cc.yaml created")
