@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid')
 const jose = require('node-jose')
 
 let userSession: any
+let namespace: string
 const customId = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 3)
 const serviceName = 'my-service-' + customId
 
@@ -19,7 +20,6 @@ describe('Verify CLI commands for generate/apply config', () => {
   const app = new ApplicationPage()
   const ma = new MyAccessPage()
   const pd = new Products()
-  let namespace: string
   const home = new HomePage()
 
   before(() => {
@@ -72,7 +72,7 @@ describe('Verify CLI commands for generate/apply config', () => {
 
   it('activates namespace in Portal', () => {
     cy.executeCliCommand('gwa gateway current').then((response) => {
-      const namespace = response.stdout.match(/\bgw-\w+/g)[0]
+      namespace = response.stdout.match(/\bgw-\w+/g)[0]
       cy.activateGateway(namespace)
     })
   })
