@@ -80,13 +80,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gw-config-cc
-          path: ${{ github.workspace }}/e2e/gw-config-cc.yaml
+          path: ${{ github.workspace }}/gw-config-cc.yaml
 
       - name: Upload gw config qs file
         uses: actions/upload-artifact@v4
         with:
           name: gw-config-qs
-          path: ${{ github.workspace }}/e2e/gw-config-qs.yaml
+          path: ${{ github.workspace }}/gw-config-qs.yaml
 
       - name: Instrument the code for coverage analysis
         run: |
