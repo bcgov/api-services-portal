@@ -76,18 +76,6 @@ jobs:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
 
-      - name: Upload gw config cc file
-        uses: actions/upload-artifact@v4
-        with:
-          name: gw-config-cc
-          path: ${{ github.workspace }}/gw-config-cc.yaml
-
-      - name: Upload gw config qs file
-        uses: actions/upload-artifact@v4
-        with:
-          name: gw-config-qs
-          path: ${{ github.workspace }}/gw-config-qs.yaml
-
       - name: Instrument the code for coverage analysis
         run: |
           # Rewrite the paths as the coverage starts with '../app'!

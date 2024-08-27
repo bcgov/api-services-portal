@@ -102,8 +102,8 @@
 | │   08-namespaces.cy.ts                                     | 1.1 and 15.1                                                   |
 | 16-gwa-cli                                                  |                                                                |
 | │   01-cli-commands.ts                                      | NA                                                             |
-| │   02-cli-generate-config-quick-start.ts                   | 16.1 + more (requireds Gold Shared IdP)                        |
-| │   03-cli-generate-config-client-cred.ts                   | 16.1 + more (requireds Gold Shared IdP)                        |
+| │   02-cli-generate-config-quick-start.ts                   | 16.1                                                           |
+| │   03-cli-generate-config-client-cred.ts                   | 1.1, 2.1 to 2.3, 15.1, 15.5. 16.1                              |
 | │   04-cli-gateway-create.ts                                | NA                                                             | 
 | 17-delete-application                                       |                                                                |
 | │   01-delete-application-without-access.cy.ts              | NA                                                             |
