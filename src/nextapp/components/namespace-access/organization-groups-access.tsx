@@ -136,7 +136,7 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
               <Wrap>
                 {d.scopes.map((t) => (
                   <WrapItem key={t}>
-                    <Tag variant="outline">{t}</Tag>
+                    <Tag variant="outline">{t.replace(/Namespace/g, 'Gateway')}</Tag>
                   </WrapItem>
                 ))}
               </Wrap>
