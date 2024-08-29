@@ -158,6 +158,9 @@ const NamespacesPage: React.FC = () => {
       text: 'Your Organization and Business Unit will appear here',
     };
   }, [namespace]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
       toast({
