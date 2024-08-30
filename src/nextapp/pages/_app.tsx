@@ -31,6 +31,7 @@ import '@/shared/styles/global.css';
 import { AppWrapper } from './context';
 import '../../mocks';
 import CompleteProfile from '@/components/complete-profile';
+import GatewayToastHandler from '@/components/no-gateway-redirect/gateway-toast-handler';
 
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
@@ -122,6 +123,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 }}
               >
                 <AppWrapper router={router}>
+                  <GatewayToastHandler />
                   <Component {...pageProps} />
                 </AppWrapper>
               </Box>
