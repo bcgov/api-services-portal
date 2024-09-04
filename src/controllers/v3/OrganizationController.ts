@@ -18,7 +18,7 @@ import { inject, injectable } from 'tsyringe';
 import {
   syncRecords,
   getRecords,
-  parseJsonString,
+  parseBlobString,
   removeEmpty,
   removeKeys,
   transformAllRefID,
@@ -301,6 +301,6 @@ export class OrganizationController extends Controller {
     return transformActivity(records)
       .map((o) => removeEmpty(o))
       .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']));
+      .map((o) => parseBlobString(o, ['blob']));
   }
 }
