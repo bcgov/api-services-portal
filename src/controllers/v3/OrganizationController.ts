@@ -23,6 +23,7 @@ import {
   removeKeys,
   transformAllRefID,
   syncRecordsThrowErrors,
+  parseBlobString,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
@@ -266,8 +267,8 @@ export class OrganizationController extends Controller {
   /**
    * > `Required Scope:` Namespace.Assign
    *
-   * @summary Get administration activity for gateways associated with this Organization Unit
-   * @param orgUnit
+   * @summary Get administration activity for gateways associated with this Organization
+   * @param org
    * @param first
    * @param skip
    * @returns Activity[]
@@ -299,8 +300,9 @@ export class OrganizationController extends Controller {
     );
 
     return transformActivity(records)
+      .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']));
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
   }
 }
