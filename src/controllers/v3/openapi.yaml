@@ -1536,7 +1536,7 @@ paths:
                                     $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.Assign'
-            summary: 'Get administration activity for gateways associated with this Organization Unit'
+            summary: 'Get administration activity for gateways associated with this Organization'
             tags:
                 - Organizations
             security:
