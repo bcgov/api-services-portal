@@ -33,7 +33,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   queryKey,
 }) => {
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose: originalOnClose } = useDisclosure();
   const queryClient = useQueryClient();
   const mutate = useApiMutation(mutation);
   const [inputValue, setInputValue] = React.useState(data.displayName || '');
@@ -68,7 +68,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
           const entries = Object.fromEntries(formData);
           await mutate.mutateAsync(entries);
           queryClient.invalidateQueries(queryKey);
-          onClose();
+          originalOnClose();
           toast({
             title: 'Display name successfully edited',
             status: 'success',
@@ -92,6 +92,14 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
 
   const isInputValid = charCount >= minCharLimit && charCount <= maxCharLimit && isValidFormat;
 
+  // Add this new function to handle closing and resetting
+  const handleClose = () => {
+    setInputValue(data.displayName || '');
+    setCharCount(data.displayName?.length || 0);
+    setIsValidFormat(true);
+    originalOnClose();
+  };
+
   return (
     <>
       <Button
@@ -104,7 +112,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
       >
         Edit
       </Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleClose}>
         <ModalOverlay />
         <ModalContent borderRadius="4px" px={11}>
           <ModalHeader pt={10}>Edit display name</ModalHeader>
@@ -154,7 +162,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
             <ButtonGroup>
               <Button
                 px={7}
-                onClick={onClose}
+                onClick={handleClose}
                 variant="secondary"
                 data-testid="edit-display-name-cancel-btn"
               >
