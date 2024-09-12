@@ -173,6 +173,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                 onClick={handleSaveClick}
                 data-testid="edit-display-name-submit-btn"
                 isDisabled={!isInputValid}
+                variant="primary"
               >
                 Save
               </Button>
