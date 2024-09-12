@@ -47,6 +47,12 @@ describe('My Gateways list page', () => {
     });
   })
 
+  it('Verify redirect to My Gateways page if no gateway selected', () => {
+    cy.visit(ns.detailPath)
+    cy.wait(2000)
+    cy.verifyToastMessage('First select a Gateway to view that page')
+  })
+
   it('Check Gateway link goes to details page', () => {  
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()

@@ -312,7 +312,7 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
           )}
           <CliCommand 
             title='Log in'
-            description='Log in with your IDIR via the CLI.'
+            description='Log in with your IDIR via the CLI. Follow the prompts provided in the terminal to complete the login process.'
             command='gwa login' 
           />
           <CliCommand 

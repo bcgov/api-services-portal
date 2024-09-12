@@ -33,7 +33,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   queryKey,
 }) => {
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose: originalOnClose } = useDisclosure();
   const queryClient = useQueryClient();
   const mutate = useApiMutation(mutation);
   const [inputValue, setInputValue] = React.useState(data.displayName || '');
@@ -42,18 +42,24 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
   );
   const minCharLimit = 3;
   const maxCharLimit = 30;
+  const [isValidFormat, setIsValidFormat] = React.useState(true);
+  const validNameRegex = /^[a-zA-Z0-9][\w\s().'/-]*$/;
+
   const handleInputChange = (event) => {
     const { value } = event.target;
     setInputValue(value);
     setCharCount(value.length);
+    setIsValidFormat(validNameRegex.test(value));
   };
+
   const form = React.useRef<HTMLFormElement>();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (charCount >= minCharLimit && charCount <= maxCharLimit) {
+    if (charCount >= minCharLimit && charCount <= maxCharLimit && isValidFormat) {
       updateNamespaceDisplayName();
     }
   };
+
   const updateNamespaceDisplayName = async () => {
     if (form.current) {
       try {
@@ -62,7 +68,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
           const entries = Object.fromEntries(formData);
           await mutate.mutateAsync(entries);
           queryClient.invalidateQueries(queryKey);
-          onClose();
+          originalOnClose();
           toast({
             title: 'Display name successfully edited',
             status: 'success',
@@ -79,9 +85,21 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
       }
     }
   };
+
   const handleSaveClick = () => {
     form.current?.requestSubmit();
   };
+
+  const isInputValid = charCount >= minCharLimit && charCount <= maxCharLimit && isValidFormat;
+
+  // Add this new function to handle closing and resetting
+  const handleClose = () => {
+    setInputValue(data.displayName || '');
+    setCharCount(data.displayName?.length || 0);
+    setIsValidFormat(true);
+    originalOnClose();
+  };
+
   return (
     <>
       <Button
@@ -94,7 +112,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
       >
         Edit
       </Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleClose}>
         <ModalOverlay />
         <ModalContent borderRadius="4px" px={11}>
           <ModalHeader pt={10}>Edit display name</ModalHeader>
@@ -119,17 +137,22 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                   onChange={handleInputChange}
                   name="displayName"
                   variant="bc-input"
-                  isInvalid={charCount > maxCharLimit || charCount < minCharLimit}
+                  isInvalid={!isInputValid}
                   data-testid="edit-display-name-input"
                 />
                 {charCount > maxCharLimit && (
                   <Text color="bc-error" mt={2} mb={-8}>
-                    You have reached the character limit
+                    Display name must be less than 30 characters
                   </Text>
                 )}
                 {charCount < minCharLimit && (
                   <Text color="bc-error" mt={2} mb={-8}>
                     Display name must be at least 3 characters
+                  </Text>
+                )}
+                {!isValidFormat && (charCount >= minCharLimit) && (charCount <= maxCharLimit) && (
+                  <Text color="bc-error" mt={2}>
+                    Display name must start with an alphanumeric character and can only use special characters "-()_ .'/"
                   </Text>
                 )}
               </FormControl>
@@ -139,7 +162,7 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
             <ButtonGroup>
               <Button
                 px={7}
-                onClick={onClose}
+                onClick={handleClose}
                 variant="secondary"
                 data-testid="edit-display-name-cancel-btn"
               >
@@ -149,7 +172,8 @@ const EditNamespaceDisplayName: React.FC<EditNamespaceDisplayNameProps> = ({
                 type="submit"
                 onClick={handleSaveClick}
                 data-testid="edit-display-name-submit-btn"
-                isDisabled={charCount > maxCharLimit || charCount < minCharLimit}
+                isDisabled={!isInputValid}
+                variant="primary"
               >
                 Save
               </Button>

@@ -106,7 +106,7 @@ const MyGatewaysPage: React.FC = () => {
   const handleNamespaceChange = React.useCallback(
     (namespace: Namespace) => async () => {
       toast({
-        title: `Switching to gateway: ${namespace.displayName}`,
+        title: `Switching to Gateway: ${namespace.displayName}`,
         status: 'info',
         isClosable: true,
       });
@@ -116,7 +116,7 @@ const MyGatewaysPage: React.FC = () => {
         toast.closeAll();
         client.invalidateQueries();
         toast({
-          title: `Switched to gateway: ${namespace.displayName}`,
+          title: `Switched to Gateway: ${namespace.displayName}`,
           status: 'success',
           isClosable: true,
         });
@@ -124,7 +124,7 @@ const MyGatewaysPage: React.FC = () => {
       } catch (err) {
         toast.closeAll();
         toast({
-          title: 'Unable to switch gateways',
+          title: 'Unable to switch Gateways',
           status: 'error',
           isClosable: true,
         });
@@ -264,11 +264,11 @@ const MyGatewaysPage: React.FC = () => {
           </Flex>
           {isSuccess &&
             (namespaceSearchResults.length === 1 ? (
-              <Text mb={4}>{namespaceSearchResults.length} gateway</Text>
+              <Text mb={4}>{namespaceSearchResults.length} Gateway</Text>
             ) : (
-              <Text mb={4}>{namespaceSearchResults.length} gateways</Text>
+              <Text mb={4}>{namespaceSearchResults.length} Gateways</Text>
             ))}
-          {isLoading && <Text mb={4}>Loading gateways...</Text>}
+          {isLoading && <Text mb={4}>Loading Gateways...</Text>}
           {isError && <Text mb={4}>Gateways failed to load</Text>}
           {isSuccess && (
             <>
