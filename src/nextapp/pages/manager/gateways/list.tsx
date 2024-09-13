@@ -17,7 +17,6 @@ import Head from 'next/head';
 import { gql } from 'graphql-request';
 import { FaPlus, FaLaptopCode, FaRocket, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
-import { css } from '@emotion/react';
 
 import PageHeader from '@/components/page-header';
 import GridLayout from '@/layouts/grid';
@@ -188,14 +187,6 @@ const MyGatewaysPage: React.FC = () => {
     }
   }, [data, search, filter]);
 
-  const clickableItemStyle = css`
-    cursor: pointer;
-    transition: background-color 0.2s;
-    &:hover {
-      background-color: #f0f0f0;
-    }
-  `;
-
   return (
     <>
       <Head>
@@ -299,7 +290,9 @@ const MyGatewaysPage: React.FC = () => {
                     mb={4}
                     data-testid={`ns-list-item-${namespace.name}`}
                     onClick={handleNamespaceChange(namespace)}
-                    css={clickableItemStyle}
+                    cursor="pointer"
+                    transition="background-color 0.2s"
+                    _hover={{ backgroundColor: "#f0f0f0" }}
                   >
                     <Box>
                       <Flex alignItems="center">
