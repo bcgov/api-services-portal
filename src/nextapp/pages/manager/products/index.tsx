@@ -23,11 +23,8 @@ import useCurrentNamespace, {
 import { useRestMutationApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { useAuth } from '@/shared/services/auth';
-import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 const ProductsPage: React.FC = () => {
-  // Redirect to My Gateways page if no gateway selected
-  NoGatewayRedirect();
 
   const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);

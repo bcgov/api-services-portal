@@ -10,6 +10,24 @@ export interface NavLink {
   access: string[];
 }
 
+export const gatewayPages = [
+  '/manager/gateways/detail',
+  '/manager/services',
+  '/manager/services/[id]',
+  '/manager/products',
+  '/manager/products/[id]',
+  '/manager/consumers',
+  '/manager/consumers/[id]',
+  '/manager/requests/[id]',
+  '/manager/authorization-profiles',
+  '/manager/authorization-profiles/new',
+  '/manager/authorization-profiles/[id]',
+  '/manager/admin-access',
+  '/manager/service-accounts',
+  '/manager/activity',
+  '/devportal/api-directory/your-products',
+];
+
 const links: NavLink[] = [
   //   { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
   //   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
@@ -52,20 +70,8 @@ const links: NavLink[] = [
     access: ['idir-user'],
     altUrls: [
       '/manager/gateways/get-started',
-      '/manager/gateways/detail',
       '/manager/gateways/list',
-      '/manager/services',
-      '/manager/services/[id]',
-      '/manager/products',
-      '/manager/products/[id]',
-      '/manager/consumers',
-      '/manager/consumers/[id]',
-      '/manager/requests/[id]',
-      '/manager/authorization-profiles',
-      '/manager/authorization-profiles/new',
-      '/manager/authorization-profiles/[id]',
-      '/manager/admin-access',
-      '/manager/service-accounts',
+      ...gatewayPages,
     ],
     sites: ['devportal'],
   },
