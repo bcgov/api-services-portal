@@ -17,6 +17,7 @@ import Head from 'next/head';
 import { gql } from 'graphql-request';
 import { FaPlus, FaLaptopCode, FaRocket, FaServer } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
+import { css } from '@emotion/react';
 
 import PageHeader from '@/components/page-header';
 import GridLayout from '@/layouts/grid';
@@ -187,6 +188,14 @@ const MyGatewaysPage: React.FC = () => {
     }
   }, [data, search, filter]);
 
+  const clickableItemStyle = css`
+    cursor: pointer;
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  `;
+
   return (
     <>
       <Head>
@@ -289,6 +298,8 @@ const MyGatewaysPage: React.FC = () => {
                     py={2}
                     mb={4}
                     data-testid={`ns-list-item-${namespace.name}`}
+                    onClick={handleNamespaceChange(namespace)}
+                    css={clickableItemStyle}
                   >
                     <Box>
                       <Flex alignItems="center">
@@ -298,16 +309,15 @@ const MyGatewaysPage: React.FC = () => {
                           mr={4}
                           boxSize={4}
                         />
-                        <Link
+                        <Text
                           fontSize="md"
-                          as="b"
+                          fontWeight="bold"
                           color="bc-blue"
                           mr={2}
-                          onClick={handleNamespaceChange(namespace)}
                           data-testid={`ns-list-activate-link-${namespace.name}`}
                         >
                           {namespace.displayName}
-                        </Link>
+                        </Text>
                       </Flex>
                       <Text fontSize="md" pl="33px">
                         {namespace.name}
