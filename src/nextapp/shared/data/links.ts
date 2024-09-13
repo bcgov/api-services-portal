@@ -71,7 +71,7 @@ const links: NavLink[] = [
     altUrls: [
       '/manager/gateways/get-started',
       '/manager/gateways/list',
-      ...gatewayPages,
+      ...gatewayPages.filter(page => !page.startsWith('/devportal')),
     ],
     sites: ['devportal'],
   },
