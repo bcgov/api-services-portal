@@ -10,7 +10,7 @@ const NoGatewayRedirect = () => {
   React.useEffect(() => {
     const checkNamespaceAndRedirect = async () => {
       // Wait for a short period to ensure user data is loaded
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       setIsChecking(false);
 
