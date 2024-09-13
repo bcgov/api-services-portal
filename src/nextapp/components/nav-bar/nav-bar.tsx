@@ -4,6 +4,7 @@ import NextLink from 'next/link';
 import type { NavLink } from '@/shared/data/links';
 import NamespaceMenu from '../namespace-menu';
 import { useAuth } from '@/shared/services/auth';
+import { gatewayPages } from '@/shared/data/links';   
 
 const linkProps = {
   px: 4,
@@ -47,6 +48,8 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
 
     return '';
   }, [pathname]);
+
+  const requiresNamespace = gatewayPages.includes(pathname);
 
   return (
     <Flex>
@@ -100,11 +103,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
           ))}
         </Container>
       </Box>
-      {((pathname.startsWith('/manager/') &&
-        pathname !== '/manager/gateways' &&
-        pathname !== '/manager/gateways/get-started' &&
-        pathname !== '/manager/gateways/list') ||
-        pathname === '/devportal/api-directory/your-products') && (
+      {requiresNamespace && (
         <Box
           as="nav"
           role="banner"
