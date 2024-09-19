@@ -27,7 +27,7 @@ describe('Verify Gateway Service details', () => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })

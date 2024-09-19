@@ -24,13 +24,32 @@ export class KeycloakTokenService {
     clientId: string,
     clientSecret: string
   ): Promise<string> {
+    return this.getKeycloakSessionByGrant(
+      clientId,
+      clientSecret,
+      'client_credentials'
+    );
+  }
+
+  public async getKeycloakSessionByGrant(
+    clientId: string,
+    clientSecret: string,
+    grantType: string,
+    username?: string,
+    password?: string
+  ): Promise<string> {
     const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
+    params.append('grant_type', grantType);
     params.append('client_id', clientId);
     params.append('client_secret', clientSecret);
+    if (username) {
+      params.append('username', username);
+      params.append('password', password);
+    }
 
     logger.debug(
-      '[getKeycloakSession] Using %s for endpoint %s',
+      '[getKeycloakSession] Using %s %s for endpoint %s',
+      grantType,
       clientId,
       this.tokenUrl
     );

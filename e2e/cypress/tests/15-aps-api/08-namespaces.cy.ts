@@ -39,7 +39,7 @@ describe('API Tests for Namespace Report', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -65,7 +65,7 @@ describe('API Tests for Namespace List', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -97,7 +97,7 @@ describe('API Tests for Namespace Activities', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
     })
 
     it('Prepare the Request Specification for the API', () => {
@@ -124,7 +124,7 @@ describe('API Tests for Namespace Summary', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })
@@ -162,7 +162,7 @@ describe('API Tests for Create Namespace', () => {
     var response: any
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
     })
 
@@ -178,7 +178,7 @@ describe('API Tests for Create Namespace', () => {
             cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                 expect(res.apiRes.status).to.be.equal(200)
                 cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body.displayName).to.be.equal(null)
+                expect(res.apiRes.body.displayName).to.be.equal("janis's Gateway")
                 nameSpace = res.apiRes.body.name
             })
         })
@@ -220,7 +220,7 @@ describe('API Tests for Create Namespace', () => {
 describe('API Tests for invalid namespace name', () => {
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
     })
 
@@ -253,7 +253,7 @@ describe('API Tests for invalid namespace name', () => {
 
 
 //     beforeEach(() => {
-//         cy.fixture('api').as('api')
+//         cy.fixture('api-v2').as('api')
 //         cy.fixture('apiowner').as('apiowner')
 //     })
 

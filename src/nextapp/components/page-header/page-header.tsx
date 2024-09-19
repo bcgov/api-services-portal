@@ -15,6 +15,7 @@ interface PageHeaderProps {
   breadcrumb?: { href?: string; text: string }[];
   children?: React.ReactNode;
   title: React.ReactNode;
+  apiDirectoryNav?: boolean;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -22,9 +23,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   breadcrumb,
   children,
   title,
+  apiDirectoryNav
 }) => {
   return (
-    <Box pt={!breadcrumb ? 10 : 4} pb={4}>
+    <Box pt={!breadcrumb && !apiDirectoryNav ? 10 : 4} pb={4}>
       <Box as="header" display="flex" flexDirection="column" mb={4}>
         {breadcrumb && (
           <Box as="hgroup" mb={2}>

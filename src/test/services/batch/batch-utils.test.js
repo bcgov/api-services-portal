@@ -5,6 +5,7 @@ import {
   removeEmpty,
   removeKeys,
   dot,
+  replaceKey,
 } from '../../../batch/feed-worker';
 import YAML from 'js-yaml';
 
@@ -136,5 +137,35 @@ describe('Batch Utilities', function () {
     expect(dot(value, 'name')).toBe('joe');
     expect(dot(value, '.nowhere')).toBe(null);
     expect(dot(value, 'a.b.c')).toBe(null);
+  });
+
+  it('should replace key', async function () {
+    const input = {
+      gatewayId: 'gw-1234',
+      name: 'sample name',
+      attribute: null,
+      block: {
+        type: 'bland',
+      },
+      nested: {
+        id: '000011',
+        another: null,
+      },
+    };
+    const output = {
+      name: 'sample name',
+      attribute: null,
+      block: {
+        type: 'bland',
+      },
+      nested: {
+        id: '000011',
+        another: null,
+      },
+      namespace: 'gw-1234',
+    };
+
+    const result = replaceKey(input, 'gatewayId', 'namespace');
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
   });
 });

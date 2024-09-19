@@ -47,7 +47,7 @@ describe('Change Product environment from active to inactive', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        home.useNamespace(namespace)
+        cy.activateGateway(namespace)
       })
     })
   })

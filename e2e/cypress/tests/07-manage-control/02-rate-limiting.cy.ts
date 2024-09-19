@@ -28,7 +28,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
         cy.get('@access-manager').then(({ user }: any) => {
             cy.get('@common-testdata').then(({ namespace }: any) => {
                 cy.login(user.credentials.username, user.credentials.password).then(() => {
-                    home.useNamespace(namespace);
+                    cy.activateGateway(namespace);
                 })
             })
         })

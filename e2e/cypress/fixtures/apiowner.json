@@ -15,7 +15,7 @@
   "serviceAccount": {
     "scopes": [
       "GatewayConfig.Publish",
-      "Namespace.Manage",
+      "Gateway.Manage",
       "Content.Publish"
     ]
   },
@@ -316,7 +316,7 @@
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
-        "Namespace.Manage"
+        "Gateway.Manage"
       ]
     },
     "product": {
@@ -345,7 +345,7 @@
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
-        "Namespace.Manage"
+        "Gateway.Manage"
       ]
     },
     "product": {
@@ -361,8 +361,8 @@
       }
     },
     "orgAdminNotification": {
-      "parent": "Your Organization Administrator has been notified to enable API Publishing to the Directory for the orgassignment namespace.",
-      "child": "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
+      "parent": "Your Organization Administrator has been notified to enable API Publishing to the Directory for the gateway orgassignment.", 
+      "child": "New gateways must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
     }
   },
   "orgAssignmentMultipleAdmin": {
@@ -435,7 +435,7 @@
     "serviceAccount": {
       "scopes": [
         "GatewayConfig.Publish",
-        "Namespace.Manage"
+        "Gateway.Manage"
       ]
     },
     "product": {
@@ -462,14 +462,14 @@
         "userName": "Mark F Mark L",
         "email": "mark@gmail.com",
         "accessRole": [
-          "Namespace.View"
+          "Gateway.View"
         ]
       },
       "Wendy": {
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
         "accessRole": [
-          "Namespace.Manage",
+          "Gateway.Manage",
           "CredentialIssuer.Admin"
         ]
       },
@@ -477,7 +477,7 @@
         "userName": "Wendy F Wendy L",
         "email": "wendy@test.com",
         "accessRole": [
-          "Namespace.Manage"
+          "Gateway.Manage"
         ]
       },
       "Wendy_CA": {
@@ -492,14 +492,14 @@
         "email": "wendy@test.com",
         "accessRole": [
           "GatewayConfig.Publish",
-          "Namespace.View"
+          "Gateway.View"
         ]
       },
       "Janis": {
         "userName": "Janis Smith",
         "email": "janis@testmail.com",
         "accessRole": [
-          "Namespace.Manage",
+          "Gateway.Manage",
           "CredentialIssuer.Admin"
         ]
       }
@@ -508,7 +508,7 @@
       "Mark": {
         "userName": "mark",
         "accessRole": [
-          "Namespace.View",
+          "Gateway.View",
           "Access.Manage"
         ]
       },
@@ -521,7 +521,7 @@
       "Wendy": {
         "userName": "wendy",
         "accessRole": [
-          "Namespace.Manage"
+          "Gateway.Manage"
         ]
       },
       "Wendy_ci": {
@@ -532,7 +532,7 @@
       },
       "serviceAccount": {
         "scopes": [
-          "Namespace.Manage",
+          "Gateway.Manage",
           "Content.Publish"
         ]
       }
@@ -544,7 +544,7 @@
       "email": "mark@gmail.com",
       "accessRole": [
         "Access.Manage",
-        "Namespace.View"
+        "Gateway.View"
       ]
     },
     "Janis": {
@@ -552,7 +552,7 @@
       "email": "janis@testmail.com",
       "accessRole": [
         "CredentialIssuer.Admin",
-        "Namespace.Manage"
+        "Gateway.Manage"
       ]
     },
     "OldUser": {
@@ -560,8 +560,8 @@
       "email": "olduser@testmail.com",
       "accessRole": [
         "Access.Manage",
-        "Namespace.View",
-        "Namespace.Manage"
+        "Gateway.View",
+        "Gateway.Manage"
       ]
     }
   },
@@ -570,7 +570,7 @@
       "userName": "mark",
       "accessRole": [
         "Access.Manage",
-        "Namespace.View"
+        "Gateway.View"
       ]
     }
   },
@@ -790,6 +790,12 @@
       "environment": {
         "name": "dev"
       }
+    }
+  },
+  "githubUser": {
+    "credentials": {
+      "username": "janis@github",
+      "password": "awsummer"
     }
   }
 }

@@ -25,6 +25,7 @@ import { gql } from 'graphql-request';
 import { useAuth } from '@/shared/services/auth';
 
 const ProductsPage: React.FC = () => {
+
   const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
   const client = useQueryClient();
@@ -40,7 +41,7 @@ const ProductsPage: React.FC = () => {
     const { name, org, orgUnit } = namespace.data?.currentNamespace;
     try {
       await mutate.mutateAsync({
-        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}?enable=${enable}`,
+        url: `/ds/api/v3/organizations/${org.name}/${orgUnit.name}/gateways/${name}?enable=${enable}`,
         options: { method: 'PUT' },
       });
 
@@ -72,7 +73,7 @@ const ProductsPage: React.FC = () => {
         >
           <Box maxW="65%">
             <Text>
-              <Text as="strong">Products</Text> are groups of APIs that are
+              Products are groups of APIs that are
               protected in the same way, and are discoverable by Citizens
               through the BC Data Catalogue, or by invitation from an API
               Manager.

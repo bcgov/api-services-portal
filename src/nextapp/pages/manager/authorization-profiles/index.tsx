@@ -69,6 +69,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const AuthorizationProfiles: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
       href: '/manager/authorization-profiles',
@@ -155,7 +156,7 @@ const AuthorizationProfiles: React.FC<
                 message={
                   user?.namespace
                     ? 'Manage authentication, authorization and clients access to your API'
-                    : 'Select a namespace first to view its profiles'
+                    : 'Select a gateway first to view its profiles'
                 }
               />
             }

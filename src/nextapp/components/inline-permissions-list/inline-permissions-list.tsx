@@ -27,7 +27,7 @@ const InlinePermissionsList: React.FC<InlinePermissionsListProps> = ({
       {data.map((p) => (
         <WrapItem key={p.id}>
           <Tag variant="solid" colorScheme="cyan" whiteSpace="nowrap">
-            {p.scopeName}
+            {p.scopeName.replace(/Namespace/g, 'Gateway')}
             {enableRevoke && <TagCloseButton onClick={handleRevoke(p.id)} />}
           </Tag>
         </WrapItem>

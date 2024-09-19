@@ -26,6 +26,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const ServicesPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ metricsUrl }) => {
+
   const title = 'Gateway Services';
   const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);
   const { user } = useAuth();

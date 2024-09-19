@@ -3,6 +3,8 @@ import { Box, Center, Heading, Text } from '@chakra-ui/react';
 import Button from '@/components/button';
 import links from '@/shared/data/links';
 import { useRouter } from 'next/router';
+import { gatewayPages } from '@/shared/data/links';
+import { useToast } from '@chakra-ui/react';
 
 import { useSession, UserSessionResult } from './use-session';
 
@@ -19,28 +21,42 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const session = useSession();
+  const toast = useToast();
   const router = useRouter();
   const route = links.find(
     (d) => d.url === router?.pathname || d.altUrls?.includes(router?.pathname)
   );
   const isUnauthorized =
     (session.error || !session.user) && route?.access.length > 0;
+  
+  const providerPage =
+    route?.access.indexOf('api-owner') > -1 ||
+    route?.access.indexOf('idir-user') > -1;
+
+  const identityParam = providerPage ? 'identity=provider&' : '';
 
   if (session.status == 'loading') {
     return <></>;
   }
 
   // A logged in user trying to access a Namespace'd page (page that is not protected with "portal-user" role)
-  // and no namespace set, then redirect to home page
-  const isUnauthorizedProvider =
+  // and no namespace set, then redirect to Gateways page
+  const requiresNamespace = gatewayPages.includes(router?.pathname);
+
+  const noNamespace =
     session.user &&
-    route?.access &&
-    route?.access.length > 0 &&
-    route?.access.indexOf('portal-user') == -1 &&
+    requiresNamespace &&
     !session.user.namespace;
 
-  if (isUnauthorizedProvider) {
-    router?.push('/');
+  if (noNamespace) {
+    router?.push('/manager/gateways/list').then(() => {
+      toast({
+        title: `First select a Gateway to view that page`,
+        status: 'error',
+        isClosable: true,
+        duration: 5000,
+      });
+    });
     return <></>;
   }
 
@@ -60,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Text>You do not have permission to view this page.</Text>
             </Box>
             <Button
-              href={`/login?${new URLSearchParams({
+              href={`/login?${identityParam}${new URLSearchParams({
                 f: router?.asPath,
               })}`}
             >

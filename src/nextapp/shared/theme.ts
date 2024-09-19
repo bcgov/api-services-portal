@@ -58,7 +58,7 @@ const _focus = {
   boxShadow: 'sm',
 };
 const _disabled = {
-  opacity: 0.3,
+  opacity: 0.4,
   cursor: 'not-allowed',
 };
 const _invalid = {
@@ -122,7 +122,8 @@ const buttonVariants = {
     _disabled: {
       ..._disabled,
       _hover: {
-        background: 'bc-blue',
+        bg: '#003366 !important', // Use the hex value of bc-blue directly, necessary oddly.
+        opacity: 0.4,
       },
     },
   },

@@ -4,7 +4,7 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/organizations",
+    "endPoint": "ds/api/v3/organizations",
     "orgExpectedList": {
       "name": "planning-and-innovation-division",
       "title": "Planning and Innovation Division"
@@ -35,7 +35,7 @@
           {
             "resourceType": "namespace",
             "scopes": [
-              "Namespace.View"
+              "Gateway.View"
             ]
           }
         ]
@@ -57,31 +57,10 @@
       ]
     }
   },
-  "documentation": {
-    "endPoint": "ds/api/v2/namespaces/apiplatform/contents",
-    "getDocumentation_endPoint": "ds/api/v2/documentation",
-    "headers": {
-      "accept": "application/json",
-      "content-type": "application/json"
-    },
-    "body": {
-      "externalLink": "https://externalsite/my_content",
-      "title": "my_content",
-      "description": "Summary of Test content",
-      "content": "Markdown content",
-      "order": 0,
-      "isPublic": true,
-      "isComplete": true,
-      "tags": [
-        "tag1",
-        "tag2"
-      ]
-    }
-  },
   "apiDirectory": {
-    "endPoint": "ds/api/v2/namespaces",
-    "orgEndPoint": "ds/api/v2/organizations",
-    "directoryEndPoint": "ds/api/v2/directory",
+    "endPoint": "ds/api/v3/gateways",
+    "orgEndPoint": "ds/api/v3/gateways",
+    "directoryEndPoint": "ds/api/v3/directory",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -206,7 +185,7 @@
       "owner": "janis@idir"
     },
     "shared_IDP_update_body": {
-      "name": "Sample Shared IdP",
+      "name": "Sample Shared IdP updated",
       "description": "A Shared IdP for Teams to use",
       "flow": "client-credentials",
       "clientAuthenticator": "client-secret",
@@ -323,7 +302,7 @@
       },
       "owner": "janis@testmail.com"
     },
-    "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
+    "endPoint": "ds/api/v3/gateways/apiplatform/issuers",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -334,8 +313,8 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/namespaces/apiplatform/products",
-    "deleteEnvironmentEndPoint": "ds/api/v2/namespaces/apiplatform/environments",
+    "endPoint": "ds/api/v3/gateways/apiplatform/products",
+    "deleteEnvironmentEndPoint": "ds/api/v3/gateways/apiplatform/environments",
     "body": {
       "name": "my-new-product",
       "appId": "DRE123456",
@@ -355,7 +334,7 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/namespaces",
+    "endPoint": "ds/api/v3/gateways",
     "activity": {
       "name": "newplatform",
       "scopes": [
@@ -363,7 +342,7 @@
           "name": "GatewayConfig.Publish"
         },
         {
-          "name": "Namespace.Manage"
+          "name": "Gateway.Manage"
         },
         {
           "name": "Access.Manage"
@@ -372,7 +351,7 @@
           "name": "Content.Publish"
         },
         {
-          "name": "Namespace.View"
+          "name": "Gateway.View"
         },
         {
           "name": "CredentialIssuer.Admin"

@@ -26,7 +26,7 @@ describe('Access manager approves developer access request for JWT - Generated K
     cy.get('@access-manager').then(({ user }: any) => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
-        home.useNamespace(clientCredentials.namespace)
+        cy.activateGateway(clientCredentials.namespace)
       })
     })
   })
@@ -60,7 +60,7 @@ describe('Make an API request using JWT signed with private key', () => {
         let alg = 'RS256'
 
         let claims = {
-          aud: Cypress.env('OIDC_ISSUER') + '/auth/realms/master',
+          aud: Cypress.env('OIDC_ISSUER'),
         }
 
         let jwt = njwt
@@ -78,7 +78,8 @@ describe('Make an API request using JWT signed with private key', () => {
             grant_type: 'client_credentials',
             client_id: clientId,
             scopes: 'openid',
-            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            client_assertion_type:
+              'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
             client_assertion: jwt,
           },
           form: true,

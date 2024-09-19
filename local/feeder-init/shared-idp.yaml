@@ -12,6 +12,11 @@ record:
   owner: janis@testmail.com
   isShared: true
   environmentDetails:
+    - environment: dev
+      issuerUrl: http://keycloak.localtest.me:9081/auth/realms/master
+      clientId: gwa-api
+      clientRegistration: managed
+      clientSecret: '18900468-3db1-43f7-a8af-e75f079eb742'
     - environment: test
       issuerUrl: http://keycloak.localtest.me:9081/auth/realms/master
       clientId: gwa-api

@@ -18,7 +18,7 @@ import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
 import MaintenanceBanner from '@/components/maintenance-banner';
 import theme from '@/shared/theme';
-import links from '@/shared/data/links';
+import links, { gatewayPages } from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
@@ -56,9 +56,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
   const site: string = React.useMemo(() => {
-    //if (router?.pathname.startsWith('/manager')) {
-    //  return 'manager';
-    //}
     if (router?.pathname.startsWith('/platform')) {
       return 'platform';
     }
@@ -68,6 +65,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return 'devportal';
   }, [router]);
+
+  // Temp solution for handing spacing around new gateways dropdown menu
+  const requiresNamespace = gatewayPages.includes(router?.pathname);
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -105,7 +105,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AuthAction site={site} />
               </Header>
               <NavBar links={links} site={site} pathname={router?.pathname} />
-              <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
+              <Box
+                as="main"
+                flex={1}
+                mt={{
+                  base: requiresNamespace ? '303px' : '65px',
+                  sm: requiresNamespace ? '163px' : '115px',
+                }}
+              >
                 <AppWrapper router={router}>
                   <Component {...pageProps} />
                 </AppWrapper>

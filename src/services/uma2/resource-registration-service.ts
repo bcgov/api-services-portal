@@ -48,6 +48,18 @@ export interface ResourceSetInput {
   ownerManagedAccess: boolean;
 }
 
+export interface ResourceSetUpdateInput {
+  _id: string;
+  name: string;
+  displayName: string;
+  type: string;
+  uris: string[];
+  icon_uri: string;
+  scopes: string[];
+  owner: ResourceOwner;
+  ownerManagedAccess: boolean;
+}
+
 export class UMAResourceRegistrationService {
   private resourceRegistrationEndpoint: string;
   private accessToken: string;
@@ -72,6 +84,40 @@ export class UMAResourceRegistrationService {
     return result;
   }
 
+  async updateResourceSet(set: ResourceSetUpdateInput) {
+    const url = `${this.resourceRegistrationEndpoint}/${set._id}`;
+    logger.debug('[updateResourceSet] URL %s', url);
+    logger.debug('[updateResourceSet] %j', set);
+    const result = await fetch(url, {
+      method: 'put',
+      body: JSON.stringify(set),
+      headers: headers(this.accessToken) as any,
+    }).then(checkStatus);
+    logger.debug('[updateResourceSet] (%s) [%j] OK', set._id, result.status);
+  }
+
+  public async updateDisplayName(name: string, displayName: string) {
+    const before = await this.findResourceByName(name);
+
+    await this.updateResourceSet({
+      _id: before.id,
+      name: before.name,
+      displayName,
+      type: before.type,
+      uris: before.uris,
+      icon_uri: before.icon_uri,
+      scopes: before.resource_scopes.map((s) => s.name),
+      owner: before.owner,
+      ownerManagedAccess: before.ownerManagedAccess,
+    });
+
+    // need a small pause here, otherwise keycloak
+    // gives a 'reason: socket hang up' on next call to it
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+  }
+
   public async deleteResourceSet(rid: string) {
     const url = `${this.resourceRegistrationEndpoint}/${rid}`;
     logger.debug('[deleteResourceSet] URL %s', url);
@@ -79,7 +125,7 @@ export class UMAResourceRegistrationService {
       method: 'delete',
       headers: headers(this.accessToken) as any,
     }).then(checkStatus);
-    logger.debug('[deleteResourceSet] (%s) OK', rid);
+    logger.debug('[deleteResourceSet] (%s) [%j] OK', rid, result.status);
   }
 
   public async getResourceSet(rid: string): Promise<ResourceSet> {

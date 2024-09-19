@@ -1,22 +1,11 @@
-import LoginPage from '../../pageObjects/login'
-import ApplicationPage from '../../pageObjects/applications'
-import ApiDirectoryPage from '../../pageObjects/apiDirectory'
-import MyAccessPage from '../../pageObjects/myAccess'
-const YAML = require('yamljs');
-let userSession: any
 let cli = require("../../fixtures/test_data/gwa-cli.json")
+let userSession: any
 var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-const jose = require('node-jose')
 
-describe('Verify CLI commands', () => {
-  const login = new LoginPage()
-  const apiDir = new ApiDirectoryPage()
-  const app = new ApplicationPage()
-  const ma = new MyAccessPage()
+describe('Verify config / login CLI commands', () => {
   let namespace: string
 
   before(() => {
-    // cy.visit('/')
     cy.deleteAllCookies()
     cy.reload(true)
   })
@@ -25,7 +14,6 @@ describe('Verify CLI commands', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('common-testdata').as('common-testdata')
-    // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
@@ -77,15 +65,21 @@ describe('Verify CLI commands', () => {
   })
 
   it('Check gwa command to create namespace', () => {
-    cy.executeCliCommand('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http').then((response) => {
       assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+      // Use regex to extract the gateway ID
+      const match = response.stdout.match(/Gateway ID: ([\w-]+)/);
+      if (match && match[1]) {
+          namespace = match[1];
+          assert.isNotNull(namespace);
+      } else {
+          throw new Error('Failed to extract Gateway ID from response: ' + response.stdout);
+      }
     });
   })
 
-
-  it('Check gwa namespace list command and verify the created namespace in the list', () => {
-    cy.executeCliCommand('gwa namespace list --host ' + cleanedUrl + ' --scheme http').then((response) => {
+  it('Check gwa gateway list command and verify the created namespace in the list', () => {
+    cy.executeCliCommand('gwa gateway list --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain(namespace);
     });
   })

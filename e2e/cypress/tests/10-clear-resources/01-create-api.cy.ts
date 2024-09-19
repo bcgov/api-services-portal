@@ -40,20 +40,19 @@ describe('Create API Spec for Delete Resources', () => {
     });
   })
 
-  it('create namespace using gwa cli command', () => {
-    var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.exec('gwa namespace create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      assert.isNotNaN(response.stdout)
-      namespace = response.stdout
+  it('create namespace', () => {
+    cy.createGateway().then((response) => {
+      namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
       cy.replaceWordInJsonObject('ns.deleteplatform', 'ns.' + namespace, 'service-clear-resources-gwa.yml')
       cy.updateJsonValue('common-testdata.json', 'deleteResources.namespace', namespace)
       // cy.updateJsonValue('apiowner.json', 'clientCredentials.clientIdSecret.product.environment.name.config.serviceName', 'cc-service-for-' + namespace)
-      cy.executeCliCommand("gwa config set --namespace " + namespace)
+      cy.executeCliCommand("gwa config set --gateway " + namespace)
     });
   })
 
   it('activates new namespace', () => {
-    home.useNamespace(namespace)
+    cy.activateGateway(namespace)
   })
 
   it('creates a new service account', () => {
@@ -83,7 +82,7 @@ describe('Create API Spec for Delete Resources', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + namespace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + namespace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

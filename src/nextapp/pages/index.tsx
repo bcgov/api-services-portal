@@ -25,12 +25,12 @@ const actions: HomeActions[] = [
   },
   {
     title: 'For API Providers',
-    url: '/manager/namespaces',
+    url: '/manager/gateways',
     fallbackUrl: '/login?identity=provider&f=%2F',
     icon: FaToolbox,
     roles: [],
     description:
-      '<a href="/manager/namespaces">Login</a> with BC Government credentials to start building and sharing APIs from your Ministry',
+      '<a href="/manager/gateways">Login</a> with BC Government credentials to start building and sharing APIs from your Ministry',
   },
 ];
 

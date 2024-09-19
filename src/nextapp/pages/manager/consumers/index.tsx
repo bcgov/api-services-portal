@@ -76,6 +76,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+
   const toast = useToast();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Consumers' }]);
   const client = useQueryClient();

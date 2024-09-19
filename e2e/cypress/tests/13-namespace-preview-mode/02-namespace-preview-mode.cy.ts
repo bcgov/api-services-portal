@@ -34,7 +34,7 @@ describe('Verify Products when namespace in Preview Mode', () => {
       cy.get('@common-testdata').then(({ namespacePreview }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(namespacePreview.namespace)
+        cy.activateGateway(namespacePreview.namespace)
       })
     })
   })

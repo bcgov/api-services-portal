@@ -24,7 +24,6 @@ import {
   makeRedirectUrl,
   useAuth,
 } from '@/shared/services/auth';
-import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
 import NextLink from 'next/link';
 import { useGlobal } from '@/shared/services/global';
@@ -45,7 +44,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const providerUrl = React.useMemo(() => {
     const providerUrl = new URL('/login', location.origin);
     providerUrl.searchParams.set('identity', 'provider');
-    const f = makeRedirectUrl(router.asPath);
+    const f = makeRedirectUrl(router.asPath, 'provider');
     providerUrl.searchParams.set('f', f);
     return providerUrl;
   }, []);
@@ -67,7 +66,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
-        <Divider orientation="vertical" color="white" height="32px" />
         <Menu placement="bottom-end">
           <MenuButton
             px={2}
@@ -120,12 +118,8 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   return (
     <HStack
-      divider={
-        <StackDivider borderColor="white" height="24px" alignSelf="center" />
-      }
       spacing={4}
     >
-      {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <HelpMenu />
       <Box
         as="span"
@@ -148,7 +142,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               <Avatar name={user.name} size="sm" />
               <Icon
                 aria-label="chevron down icon"
-                size="sm"
                 ml={2}
                 as={FaChevronDown}
                 color="white"

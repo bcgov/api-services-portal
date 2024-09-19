@@ -24,7 +24,7 @@ describe('Team Access Spec', () => {
       cy.get('@common-testdata').then(({ deleteResources }: any) => {
         cy.login(user.credentials.username, user.credentials.password)
         cy.log('Logged in!')
-        home.useNamespace(deleteResources.namespace)
+        cy.activateGateway(deleteResources.namespace)
       })
     })
   })

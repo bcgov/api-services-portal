@@ -1,11 +1,15 @@
 class NameSpacePage {
-    path: string = '/manager/namespaces'
+    path: string = '/manager/gateways'
+    listPath: string = 'manager/gateways/list'
+    detailPath: string = '/manager/gateways/detail'
+    getStartedPath: string = '/manager/gateways/get-started'
+    listFilterSelect: string = '[data-testid="ns-filter-select"]'
     gatewayServiceLink: string = '[data-testid="ns-manage-link-Gateway Services"]'
     productsLink: string = '[data-testid="ns-manage-link-Gateway Services"]'
     consumersLink: string = '[data-testid="ns-manage-link-Consumers"]'
     activityLink: string = '[data-testid="ns-action-link-Activity"]'
     authorizationProfileLink: string = '[data-testid="ns-action-link-Authorization Profiles"]'
-    namespaceAccessLink: string = '[data-testid="ns-action-link-Namespace Access"]'
+    namespaceAccessLink: string = '[data-testid="ns-action-link-Administration Access"]'
     serviceAccountsLink: string = '[data-testid="ns-action-link-Service Accounts"]'
     deleteNamespaceLink: string = '[data-testid="ns-action-link-delete"]'
     

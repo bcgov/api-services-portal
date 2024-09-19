@@ -31,8 +31,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
 
   it('authenticates Janis (api owner) to get the user session token', () => {
-    cy.get('@common-testdata').then(({ apiTest }: any) => {
-      cy.getUserSessionTokenValue(apiTest.namespace, false).then((value) => {
+    cy.get('@common-testdata').then(({ clientCredentials }: any) => {
+      cy.getUserSessionTokenValue(clientCredentials.namespace, false).then((value) => {
         userSession = value
       })
     })
@@ -42,10 +42,10 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ clientCredentials }: any) => {
         nameSpace = clientCredentials.namespace
-        home.useNamespace(clientCredentials.namespace)
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
-        })
+        cy.activateGateway(clientCredentials.namespace)
+        // cy.get('@login').then(function (xhr: any) {
+        //   userSession = xhr.headers['x-auth-request-access-token']
+        // })
       })
     })
   })
@@ -83,7 +83,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + nameSpace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

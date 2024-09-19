@@ -63,6 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ServiceAccountsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Service Accounts' }]);
   const client = useQueryClient();
   const [credentials, setCredentials] = React.useState<Record<string, string>>(

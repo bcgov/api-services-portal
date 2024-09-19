@@ -40,7 +40,7 @@ describe('API Tests for Updating dataset', () => {
     let directoryName: string
 
     beforeEach(() => {
-        cy.fixture('api').as('api')
+        cy.fixture('api-v2').as('api')
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('common-testdata').as('common-testdata')
     })

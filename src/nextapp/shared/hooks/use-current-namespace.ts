@@ -11,7 +11,9 @@ const useCurrentNamespace = (options: UseQueryOptions = {}) => {
 const query = gql`
   query GetCurrentNamespace {
     currentNamespace {
+      id
       name
+      displayName
       org
       orgUnit
       orgUpdatedAt

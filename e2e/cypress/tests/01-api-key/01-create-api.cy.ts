@@ -52,17 +52,16 @@ describe('Create API Spec', () => {
     cy.getUserSession().then(() => {
       cy.get('@common-testdata').then(({ namespace }: any) => {
         nameSpace = namespace
-        home.createNamespace(namespace)
+        cy.createGateway(namespace)
+        cy.activateGateway(namespace)
+        cy.visit('/manager/gateways/detail')
+        cy.get('[data-testid="ns-detail-gatewayid"]').then(($el) => {
+          expect($el).contain(namespace)
+        })
         cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.response.headers['x-auth-request-access-token']
+          userSession = xhr.headers['x-auth-request-access-token']
         })
       })
-    })
-  })
-
-  it('Verify for invalid namespace name', () => {
-    cy.get('@apiowner').then(({ invalid_namespace }: any) => {
-      home.validateNamespaceName(invalid_namespace)
     })
   })
 
@@ -102,7 +101,7 @@ it('Verify gwa gateway publish multiple config file', () => {
     cy.get('@api').then(({ organization }: any) => {
       cy.setHeaders(organization.headers)
       cy.setAuthorizationToken(userSession)
-      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response:any) => {
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/gateways/' + nameSpace, 'PUT').then((response:any) => {
         expect(response.apiRes.status).to.be.equal(200)
       })
     })

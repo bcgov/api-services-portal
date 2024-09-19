@@ -33,7 +33,7 @@ describe('Apply client roles to the Authorization Profile', () => {
 
   it('Select the namespace created for client credential ', () => {
     cy.get('@common-testdata').then(({ clientCredentials }: any) => {
-      home.useNamespace(clientCredentials.namespace)
+      cy.activateGateway(clientCredentials.namespace)
     })
   })
 

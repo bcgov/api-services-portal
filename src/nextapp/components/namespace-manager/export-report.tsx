@@ -49,7 +49,7 @@ const ExportReport: React.FC<ExportReportProps> = ({
       const blob = await req.blob();
       const href = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.setAttribute('download', 'namespace-report.xlsx');
+      link.setAttribute('download', 'gateway-report.xlsx');
       link.setAttribute('href', href);
       document.body.appendChild(link);
       link.click();

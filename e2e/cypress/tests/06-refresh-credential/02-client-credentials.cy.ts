@@ -31,7 +31,7 @@ import MyAccessPage from '../../pageObjects/myAccess'
 //       cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
 //         cy.get('@developer').then(({ clientCredentials }: any) => {
 //           cy.login(user.credentials.username, user.credentials.password).then(() => {
-//             home.useNamespace(clientCredentials.namespace);
+//             cy.activateGateway(clientCredentials.namespace);
 //             cy.visit(consumers.path);
 //             consumers.filterConsumerByTypeAndValue('Environment', clientCredentials.clientIdSecret.product.environment)
 //             consumers.clickOnTheFirstConsumerID()
