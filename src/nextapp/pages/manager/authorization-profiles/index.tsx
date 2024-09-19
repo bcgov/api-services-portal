@@ -41,7 +41,6 @@ import type {
   Mutation,
   Query,
 } from '@/shared/types/query.types';
-import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'authorizationProfiles';
@@ -70,8 +69,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const AuthorizationProfiles: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
-  // Redirect to My Gateways page if no gateway selected
-  NoGatewayRedirect();
 
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
