@@ -26,7 +26,6 @@ import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
 import ActivityItem from '@/components/activity-item';
-import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 const timeZone = 'America/Vancouver';
 
@@ -51,8 +50,6 @@ interface FilterState {
 }
 
 const ActivityPage: React.FC = () => {
-  // Redirect to My Gateways page if no gateway selected
-  NoGatewayRedirect();
 
   const breadcrumbs = useNamespaceBreadcrumbs([
     {

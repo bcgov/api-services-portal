@@ -12,7 +12,6 @@ import ServicesFilters from '@/components/services-list/services-filters';
 import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import NoGatewayRedirect from '@/components/no-gateway-redirect';
 
 import { FilterState } from '@/components/services-list/types';
 
@@ -27,8 +26,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const ServicesPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ metricsUrl }) => {
-  // Redirect to My Gateways page if no gateway selected
-  NoGatewayRedirect();
 
   const title = 'Gateway Services';
   const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);

@@ -18,7 +18,7 @@ import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
 import MaintenanceBanner from '@/components/maintenance-banner';
 import theme from '@/shared/theme';
-import links from '@/shared/data/links';
+import links, { gatewayPages } from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
@@ -31,7 +31,6 @@ import '@/shared/styles/global.css';
 import { AppWrapper } from './context';
 import '../../mocks';
 import CompleteProfile from '@/components/complete-profile';
-import GatewayToastHandler from '@/components/no-gateway-redirect/gateway-toast-handler';
 
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
@@ -57,9 +56,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
   const site: string = React.useMemo(() => {
-    //if (router?.pathname.startsWith('/manager')) {
-    //  return 'manager';
-    //}
     if (router?.pathname.startsWith('/platform')) {
       return 'platform';
     }
@@ -71,12 +67,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   }, [router]);
 
   // Temp solution for handing spacing around new gateways dropdown menu
-  const gatewaysMenu =
-    (router?.pathname.startsWith('/manager/') &&
-      router?.pathname !== '/manager/gateways' &&
-      router?.pathname !== '/manager/gateways/get-started' &&
-      router?.pathname !== '/manager/gateways/list') ||
-    router?.pathname === '/devportal/api-directory/your-products';
+  const requiresNamespace = gatewayPages.includes(router?.pathname);
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -118,12 +109,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 as="main"
                 flex={1}
                 mt={{
-                  base: gatewaysMenu ? '303px' : '65px',
-                  sm: gatewaysMenu ? '163px' : '115px',
+                  base: requiresNamespace ? '303px' : '65px',
+                  sm: requiresNamespace ? '163px' : '115px',
                 }}
               >
                 <AppWrapper router={router}>
-                  <GatewayToastHandler />
                   <Component {...pageProps} />
                 </AppWrapper>
               </Box>
