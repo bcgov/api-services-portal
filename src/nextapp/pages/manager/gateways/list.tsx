@@ -292,7 +292,15 @@ const MyGatewaysPage: React.FC = () => {
                     onClick={handleNamespaceChange(namespace)}
                     cursor="pointer"
                     transition="background-color 0.2s"
-                    _hover={{ backgroundColor: "#f0f0f0" }}
+                    _hover={{
+                      backgroundColor: "#EDEBE9",
+                      h2: {
+                        color: 'bc-blue',
+                        textDecor: 'underline',
+                      },
+
+                      cursor: 'pointer',
+                    }}
                   >
                     <Box>
                       <Flex alignItems="center">
@@ -302,15 +310,15 @@ const MyGatewaysPage: React.FC = () => {
                           mr={4}
                           boxSize={4}
                         />
-                        <Text
+                        <Heading
                           fontSize="md"
                           fontWeight="bold"
-                          color="bc-blue"
+                          lineHeight={6}
                           mr={2}
                           data-testid={`ns-list-activate-link-${namespace.name}`}
                         >
                           {namespace.displayName}
-                        </Text>
+                        </Heading>
                       </Flex>
                       <Text fontSize="md" pl="33px">
                         {namespace.name}
