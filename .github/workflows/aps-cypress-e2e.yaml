@@ -76,6 +76,12 @@ jobs:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
 
+      - name: Upload Astra scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-scan-results
+          path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
+
       - name: Instrument the code for coverage analysis
         run: |
           # Rewrite the paths as the coverage starts with '../app'!
