@@ -247,7 +247,7 @@ const NamespacesPage: React.FC = () => {
                   <PopoverArrow bgColor="#373d3f" />
                   <PopoverBody>
                     If you need to change the Organization or Business Unit for
-                    your Namespace, submit a request through the{' '}
+                    your Gateway, submit a request through the{' '}
                     <Link
                       href={global.helpLinks.helpChangeOrgUrl}
                       target="_blank"
