@@ -122,12 +122,73 @@ export async function lookupServicesByNamespace(
   });
   logger.debug('Query result %j', result);
   result.data.allGatewayServices.forEach((svc: GatewayService) => {
-    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)));
-    svc.routes?.map((route) =>
+    svc.plugins?.forEach(
+      (plugin) => (plugin.config = JSON.parse(plugin.config))
+    );
+    svc.routes?.forEach((route) => {
       route.plugins?.map(
         (plugin) => (plugin.config = JSON.parse(plugin.config))
-      )
+      );
+    });
+  });
+  return result.data.allGatewayServices;
+}
+
+export async function lookupServicesByNamespaceForReporting(
+  context: any,
+  ns: string
+): Promise<GatewayService[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetServicesForReporting($ns: String!) {
+                    allGatewayServices(where: {namespace: $ns}) {
+                            name
+                            host
+                            plugins {
+                                name
+                                config
+                            }
+                            routes {
+                                name
+                                methods
+                                hosts
+                                paths
+                                plugins {
+                                    name
+                                    config
+                                }
+                            }
+                            environment {
+                              name
+                              active
+                              appId
+                              flow
+                              credentialIssuer {
+                                inheritFrom {
+                                  name
+                                }
+                              }
+                              product {
+                                name
+                              }
+                            }
+                    }
+                }`,
+    variables: { ns: ns },
+  });
+  logger.debug(
+    '[lookupServicesByNamespaceForReporting] Query result %j',
+    result
+  );
+  result.data.allGatewayServices.forEach((svc: GatewayService) => {
+    svc.plugins?.forEach(
+      (plugin) => (plugin.config = JSON.parse(plugin.config))
     );
+    svc.routes?.forEach((route) => {
+      route.hosts = JSON.parse(route.hosts);
+      route.plugins?.map(
+        (plugin) => (plugin.config = JSON.parse(plugin.config))
+      );
+    });
   });
   return result.data.allGatewayServices;
 }

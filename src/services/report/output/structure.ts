@@ -38,15 +38,16 @@ export const reportStructure: any = {
         key: 'permDataPlane',
         width: 25,
       },
+      { header: 'Decommissioned', key: 'decommissioned', width: 10 },
       {
         header: 'Org',
-        key: 'org',
-        width: 40,
+        key: 'org.title',
+        width: 50,
       },
       {
         header: 'Org Unit',
-        key: 'orgUnit',
-        width: 25,
+        key: 'orgUnit.title',
+        width: 50,
       },
     ],
   },
@@ -90,8 +91,28 @@ export const reportStructure: any = {
       },
       {
         header: 'Gateway Display Name',
-        key: 'displayName',
+        key: 'display_name',
         width: 26,
+      },
+      {
+        header: 'Data Plane',
+        key: 'data_plane',
+        width: 20,
+      },
+      {
+        header: 'Route Host',
+        key: 'request_uri_host',
+        width: 50,
+      },
+      {
+        header: 'Features',
+        key: 'features',
+        width: 32,
+      },
+      {
+        header: 'Plugins',
+        key: 'plugins',
+        width: 32,
       },
       {
         header: 'Product',
@@ -106,6 +127,16 @@ export const reportStructure: any = {
       {
         header: 'Service',
         key: 'service_name',
+        width: 40,
+      },
+      {
+        header: 'Service Upstream',
+        key: 'upstream',
+        width: 40,
+      },
+      {
+        header: 'Route',
+        key: 'route_names',
         width: 40,
       },
       { header: '30 Day Total', key: 'day_30_total', width: 20 },
