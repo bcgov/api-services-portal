@@ -15,9 +15,9 @@ export interface ReportOfGatewayMetrics {
   prod_env_name?: string;
   prod_env_app_id?: string;
   day_30_total: number;
-  route_names: string;
-  plugins: string;
-  features: string;
+  route_names: string[];
+  plugins: string[];
+  features: string[];
   upstream: string;
 }
 
@@ -89,14 +89,13 @@ export async function getGatewayMetrics(
             day_30_total: totalRequests,
             route_names: prelimListForRoute
               .map((route) => route.route_name)
-              .sort()
-              .join(', '),
+              .sort(),
             plugins: mergeAndDedup(
               prelimListForRoute.map((route) => route.plugins)
-            ).join(', '),
+            ),
             features: mergeAndDedup(
               prelimListForRoute.map((route) => route.features)
-            ).join(', '),
+            ),
           });
         }
       });

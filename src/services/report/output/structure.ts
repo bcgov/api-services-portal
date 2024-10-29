@@ -38,7 +38,12 @@ export const reportStructure: any = {
         key: 'permDataPlane',
         width: 25,
       },
-      { header: 'Decommissioned', key: 'decommissioned', width: 10 },
+      {
+        header: 'Features',
+        key: 'features',
+        width: 60,
+      },
+      { header: 'Decommissioned', key: 'decommissioned', width: 20 },
       {
         header: 'Org',
         key: 'org.title',

@@ -1,6 +1,7 @@
 import {
   transformSingleValueAttributes,
   camelCaseAttributes,
+  dedup,
 } from '../../utils';
 import { KeycloakGroupService } from '../../keycloak';
 import { getMyNamespaces } from '../../workflow';
@@ -9,6 +10,8 @@ import {
   NamespaceSummary,
 } from '../../workflow/get-namespaces';
 import { GWAService } from '../../gwaapi';
+import { ReportOfGatewayMetrics } from './gateway-metrics';
+import { ReportOfProducts } from './products';
 
 export interface ReportOfNamespaces {
   resource_id: string;
@@ -20,6 +23,7 @@ export interface ReportOfNamespaces {
   org?: string;
   orgUnit?: string;
   decommissioned?: string;
+  features?: string[];
 }
 
 /*
@@ -75,4 +79,26 @@ export async function getNamespaces(
   );
 
   return Promise.all(dataPromises);
+}
+
+export function rollupFeatures(
+  namespaces: ReportOfNamespaces[],
+  gatewayMetrics: ReportOfGatewayMetrics[],
+  products: ReportOfProducts[]
+) {
+  namespaces.forEach((ns) => {
+    ns.features = [];
+    gatewayMetrics
+      .filter((gw) => gw.namespace == ns.name)
+      .forEach((gw) => {
+        ns.features.push.apply(ns.features, gw.features);
+      });
+    products
+      .filter((gw) => gw.namespace == ns.name)
+      .forEach((gw) => {
+        ns.features.push.apply(ns.features, gw.features);
+      });
+
+    ns.features = dedup(ns.features).sort();
+  });
 }

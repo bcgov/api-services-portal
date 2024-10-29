@@ -21,6 +21,8 @@ import {
 import { lookupProductEnvironmentServicesBySlug } from '../../../services/keystone';
 import { getNamespaces } from '../../../services/report/ops-metrics';
 import { generateExcelWorkbook } from '../../../services/report/output/xls-generator';
+import { rollupFeatures } from '../../../services/report/data/namespaces';
+import { getProducts } from '../../../services/report/data/products';
 
 const logger = Logger('test.reports');
 
@@ -61,18 +63,25 @@ const logger = Logger('test.reports');
   nslist.sort((a, b) => a.name.localeCompare(b.name));
   o(nslist);
 
-  const gatewayMetrics = await getGatewayMetrics(
-    ctx,
-    nslist
-      // .filter((ns) => ['dss-loc-gold', 'dss-loc'].indexOf(ns.name) >= 0)
-      .map((ns) => ({
-        resource_id: ns.id,
-        name: ns.name,
-        displayName: ns.displayName,
-        permDataPlane: ns.permDataPlane,
-      }))
+  const filteredNS = nslist
+    // .filter(
+    //   (ns) => ['dss-loc-gold', 'dss-loc', 'social-gold'].indexOf(ns.name) >= 0
+    // )
+    .map((ns) => ({
+      resource_id: ns.id,
+      name: ns.name,
+      displayName: ns.displayName,
+      permDataPlane: ns.permDataPlane,
+    }));
+
+  const products = await getProducts(ctx, filteredNS);
+
+  const gatewayMetrics = await getGatewayMetrics(ctx, filteredNS);
+  gatewayMetrics.sort((a, b) =>
+    a.request_uri_host.localeCompare(b.request_uri_host)
   );
-  o(gatewayMetrics);
+
+  rollupFeatures(nslist as any, gatewayMetrics, products);
 
   const workbook = generateExcelWorkbook({
     namespaces: nslist,
