@@ -31,25 +31,30 @@ import ProtocolMapperRepresentation from '@keycloak/keycloak-admin-client/lib/de
     await kc.login(process.env.CID, process.env.CSC);
 
     const cids: string[] = [];
-    // await kc.regenerateSecret('6af832cb-6178-438f-a4fc-8c5e1d14d5d2');
+
     for (const cid of cids) {
       try {
         const res = await kc.findByClientId(cid);
-        const mapper: ProtocolMapperRepresentation = res.protocolMappers
-          .filter((m) => m.name == 'Client ID')
-          .pop();
-        if (mapper) {
-          console.log(`${cid} : ${mapper.config['claim.name']}`);
-          if (mapper.config['claim.name'] == 'clientId') {
-            console.log('Updating!');
-            mapper.config['claim.name'] = 'client_id';
-            await kc.updateClient(res.id, mapper.id, mapper);
-            console.log('Updated!');
+        if (res.enabled) {
+          const mapper: ProtocolMapperRepresentation = res.protocolMappers
+            .filter((m) => m.name == 'Client ID')
+            .pop();
+          if (mapper) {
+            console.log(`${cid} : ${mapper.config['claim.name']}`);
+            if (mapper.config['claim.name'] == 'clientId') {
+              console.log('Updating!');
+              mapper.config['claim.name'] = 'client_id';
+              await kc.updateClient(res.id, mapper.id, mapper);
+              console.log('Updated!');
+            }
+          } else {
+            console.log(`${cid} : MISSING`);
           }
         } else {
-          console.log(`${cid} : MISSING`);
+          console.log(`${cid} : DISABLED`);
         }
       } catch (e) {
+        console.log(e);
         console.log(`${cid} : SKIPPED`);
       }
     }
