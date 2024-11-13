@@ -12,6 +12,8 @@ import {
 import { GWAService } from '../../gwaapi';
 import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { ReportOfProducts } from './products';
+import { ReportOfConsumerRequest } from './consumer-requests';
+import { lookupUsersByNamespace } from '@/services/keystone';
 
 export interface ReportOfNamespaces {
   resource_id: string;
@@ -23,7 +25,9 @@ export interface ReportOfNamespaces {
   org?: string;
   orgUnit?: string;
   decommissioned?: string;
-  features?: string[];
+  consumers?: number;
+  day_30_total?: number;
+  features?: { [feature: string]: string };
 }
 
 /*
@@ -87,18 +91,29 @@ export function rollupFeatures(
   products: ReportOfProducts[]
 ) {
   namespaces.forEach((ns) => {
-    ns.features = [];
+    ns.features = {};
+    ns.day_30_total = 0;
     gatewayMetrics
       .filter((gw) => gw.namespace == ns.name)
       .forEach((gw) => {
-        ns.features.push.apply(ns.features, gw.features);
+        gw.features.forEach((feat) => (ns.features[feat] = 'Y'));
+        ns.day_30_total = ns.day_30_total + gw.day_30_total;
       });
     products
       .filter((gw) => gw.namespace == ns.name)
       .forEach((gw) => {
-        ns.features.push.apply(ns.features, gw.features);
+        gw.features.forEach((feat) => (ns.features[feat] = 'Y'));
       });
+  });
+}
 
-    ns.features = dedup(ns.features).sort();
+export function rollupConsumers(
+  namespaces: ReportOfNamespaces[],
+  requests: ReportOfConsumerRequest[]
+) {
+  namespaces.forEach((ns) => {
+    ns.consumers = requests.filter(
+      (req) => req.namespace === ns.name && req.req_result === 'Approved'
+    ).length;
   });
 }

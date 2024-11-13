@@ -1,6 +1,9 @@
+import { FeatureList } from '../data/features';
+
 export const reportOrder = [
   'namespaces',
   'ns_access',
+  'products',
   'gateway_metrics',
   'gateway_controls',
   'consumer_requests',
@@ -9,7 +12,7 @@ export const reportOrder = [
   'consumer_controls',
 ];
 
-export const reportStructure: any = {
+const reportStructure: any = {
   namespaces: {
     label: 'Gateways',
     fields: [
@@ -22,6 +25,16 @@ export const reportStructure: any = {
         header: 'Gateway Display Name',
         key: 'displayName',
         width: 26,
+      },
+      {
+        header: 'Consumers',
+        key: 'consumers',
+        width: 25,
+      },
+      {
+        header: '30 Day Total',
+        key: 'day_30_total',
+        width: 25,
       },
       {
         header: 'Privileged',
@@ -38,11 +51,6 @@ export const reportStructure: any = {
         key: 'permDataPlane',
         width: 25,
       },
-      {
-        header: 'Features',
-        key: 'features',
-        width: 60,
-      },
       { header: 'Decommissioned', key: 'decommissioned', width: 20 },
       {
         header: 'Org',
@@ -57,7 +65,7 @@ export const reportStructure: any = {
     ],
   },
   ns_access: {
-    label: 'Gateway Access',
+    label: 'Gateway Admin Access',
     fields: [
       {
         header: 'Gateway ID',
@@ -70,13 +78,13 @@ export const reportStructure: any = {
         width: 26,
       },
       {
-        header: 'Subject',
-        key: 'subject',
+        header: 'Subject Name',
+        key: 'subjectName',
         width: 40,
       },
       {
-        header: 'Subject Name',
-        key: 'subjectName',
+        header: 'Subject Email',
+        key: 'subjectEmail',
         width: 40,
       },
       {
@@ -86,8 +94,8 @@ export const reportStructure: any = {
       },
     ],
   },
-  gateway_metrics: {
-    label: 'Gateway Metrics',
+  products: {
+    label: 'Gateway Products',
     fields: [
       {
         header: 'Gateway ID',
@@ -100,24 +108,14 @@ export const reportStructure: any = {
         width: 26,
       },
       {
-        header: 'Data Plane',
-        key: 'data_plane',
-        width: 20,
+        header: 'Dataset',
+        key: 'dataset_title',
+        width: 45,
       },
       {
-        header: 'Route Host',
-        key: 'request_uri_host',
-        width: 50,
-      },
-      {
-        header: 'Features',
-        key: 'features',
-        width: 32,
-      },
-      {
-        header: 'Plugins',
-        key: 'plugins',
-        width: 32,
+        header: 'Dataset Name',
+        key: 'dataset_name',
+        width: 45,
       },
       {
         header: 'Product',
@@ -130,6 +128,57 @@ export const reportStructure: any = {
         width: 15,
       },
       {
+        header: 'Environment App ID',
+        key: 'prod_env_app_id',
+        width: 30,
+      },
+      {
+        header: 'Active',
+        key: 'prod_env_active',
+        width: 15,
+      },
+      {
+        header: 'Approval',
+        key: 'prod_env_approval',
+        width: 15,
+      },
+      {
+        header: 'Flow',
+        key: 'prod_env_flow',
+        width: 32,
+      },
+      {
+        header: 'Services',
+        key: 'service_names',
+        width: 32,
+      },
+      {
+        header: 'Features',
+        key: 'features',
+        width: 32,
+      },
+    ],
+  },
+  gateway_metrics: {
+    label: 'Gateway Service Metrics',
+    fields: [
+      {
+        header: 'Gateway ID',
+        key: 'namespace',
+        width: 20,
+      },
+      {
+        header: 'Gateway Display Name',
+        key: 'display_name',
+        width: 26,
+      },
+      {
+        header: 'Route Host',
+        key: 'request_uri_host',
+        width: 50,
+      },
+      { header: '30 Day Total', key: 'day_30_total', width: 20 },
+      {
         header: 'Service',
         key: 'service_name',
         width: 40,
@@ -140,11 +189,35 @@ export const reportStructure: any = {
         width: 40,
       },
       {
+        header: 'Features',
+        key: 'features',
+        width: 32,
+      },
+      {
+        header: 'Plugins',
+        key: 'plugins',
+        width: 32,
+      },
+      {
+        header: 'Data Plane',
+        key: 'data_plane',
+        width: 20,
+      },
+      {
         header: 'Route',
         key: 'route_names',
         width: 40,
       },
-      { header: '30 Day Total', key: 'day_30_total', width: 20 },
+      {
+        header: 'Product',
+        key: 'prod_name',
+        width: 32,
+      },
+      {
+        header: 'Environment',
+        key: 'prod_env_name',
+        width: 15,
+      },
     ],
   },
   gateway_controls: {
@@ -344,3 +417,16 @@ export const reportStructure: any = {
     ],
   },
 };
+
+reportStructure.namespaces.fields.push.apply(
+  reportStructure.namespaces.fields,
+  Object.keys(FeatureList)
+    .sort()
+    .map((feat) => ({
+      header: feat,
+      key: `features.${feat}`,
+      width: 30,
+    }))
+);
+
+export { reportStructure };

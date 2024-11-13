@@ -85,6 +85,7 @@ export class WorkbookService {
     const data = {
       namespaces,
       ns_access,
+      products,
       gateway_metrics,
       gateway_controls,
       service_access,

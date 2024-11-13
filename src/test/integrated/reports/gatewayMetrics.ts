@@ -11,6 +11,7 @@ import InitKeystone from '../keystonejs/init';
 import { o } from '../util';
 import { Logger } from '../../../logger';
 import {
+  getConsumerRequests,
   getGatewayMetrics,
   getNamespaceAccess,
 } from '../../../services/report/data';
@@ -21,7 +22,10 @@ import {
 import { lookupProductEnvironmentServicesBySlug } from '../../../services/keystone';
 import { getNamespaces } from '../../../services/report/ops-metrics';
 import { generateExcelWorkbook } from '../../../services/report/output/xls-generator';
-import { rollupFeatures } from '../../../services/report/data/namespaces';
+import {
+  rollupConsumers,
+  rollupFeatures,
+} from '../../../services/report/data/namespaces';
 import { getProducts } from '../../../services/report/data/products';
 
 const logger = Logger('test.reports');
@@ -74,18 +78,29 @@ const logger = Logger('test.reports');
       permDataPlane: ns.permDataPlane,
     }));
 
+  const envCtx = await getGwaProductEnvironment(ctx, true);
+  await injectResSvrAccessTokenToContext(envCtx);
+  // const nsAccess = await getNamespaceAccess(ctx, envCtx, filteredNS);
+
+  // const consumerRequests = await getConsumerRequests(ctx, filteredNS);
+
   const products = await getProducts(ctx, filteredNS);
 
-  const gatewayMetrics = await getGatewayMetrics(ctx, filteredNS);
-  gatewayMetrics.sort((a, b) =>
-    a.request_uri_host.localeCompare(b.request_uri_host)
-  );
+  // const gatewayMetrics = await getGatewayMetrics(ctx, filteredNS);
+  // gatewayMetrics.sort((a, b) =>
+  //   a.request_uri_host.localeCompare(b.request_uri_host)
+  // );
 
-  rollupFeatures(nslist as any, gatewayMetrics, products);
+  // rollupFeatures(nslist as any, gatewayMetrics, products);
+
+  // rollupConsumers(nslist as any, consumerRequests);
 
   const workbook = generateExcelWorkbook({
     namespaces: nslist,
-    gateway_metrics: gatewayMetrics,
+    products,
+    // ns_access: nsAccess,
+    // consumer_requests: consumerRequests,
+    // gateway_metrics: gatewayMetrics,
   });
   const buffer = await workbook.xlsx.writeBuffer();
 
