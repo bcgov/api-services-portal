@@ -1,8 +1,7 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
+import KcAdminClient from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
 import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
 import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
@@ -56,7 +55,7 @@ export class KeycloakClientPolicyService {
   public async listPolicies(
     id: string,
     query?: PolicyQuery
-  ): Promise<PolicyRepresentation[]> {
+  ): Promise<'' | PolicyRepresentation[]> {
     logger.debug('[listPolicies] %s', id);
     return this.kcAdminClient.clients
       .listPolicies({ ...{ id, max: 1000 }, ...query })

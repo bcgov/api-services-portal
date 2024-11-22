@@ -23,6 +23,7 @@
   },
   "scripts": {
     "prebuild": "tslint -p tsconfig.json --fix",
+    "preinstall": "npm install --prefix keycloak-admin-client",
     "ts-watch": "tsc --watch --jsx react-jsx",
     "ts-build": "tsc",
     "tsoa-build-v1": "tsoa -c tsoa.json spec-and-routes",
@@ -59,11 +60,12 @@
     "start:coverage": "NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' nyc npm run start"
   },
   "dependencies": {
+    "@packages/keycloak-admin-client": "file://./keycloak-admin-client",
+    "@keycloak/keycloak-admin-client": "^26.0.6",
     "@bcgov/bc-sans": "^1.0.1",
     "@chakra-ui/react": "^1.6.0",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
-    "@keycloak/keycloak-admin-client": "^17.0.0-dev.26",
     "@keystone-next/admin-ui": "^7.0.0",
     "@keystonejs/access-control": "^7.1.1",
     "@keystonejs/adapter-mongoose": "^11.2.2",

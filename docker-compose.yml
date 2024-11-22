@@ -8,19 +8,21 @@ x-common-variables: &common-variables
   KONG_PG_PASSWORD: konguser
 
 services:
-  keycloak:
+  keycloak-nodes:
     image: keycloak:latest
-    container_name: keycloak
     hostname: keycloak
+    deploy:
+      replicas: 1
+      endpoint_mode: dnsrr
     build:
       context: .
       dockerfile: ./local/keycloak/Dockerfile
     depends_on:
       - kong-db
-    command:
-      [
+    command: [
         'start',
         '--optimized',
+        # '--cache=ispn',
         '--hostname',
         'http://keycloak.localtest.me:9081/auth',
         '--db-url',
@@ -35,14 +37,27 @@ services:
         '9081',
         '--import-realm',
       ]
-    ports:
-      - 9081:9081/tcp
     volumes:
       - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
+    networks:
+      aps-net: {}
+
+  keycloak:
+    image: nginx:latest
+    ports:
+      - '9081:9081'
+    depends_on:
+      - keycloak-nodes
+    volumes:
+      - ./local/keycloak/nginx-lb.conf:/etc/nginx/conf.d/default.conf
     networks:
       aps-net:
         aliases:
           - keycloak.localtest.me
+    deploy:
+      restart_policy:
+        condition: any
+
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
     container_name: oauth2-proxy

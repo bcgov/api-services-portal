@@ -1,9 +1,8 @@
 import 'crypto';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
+import KcAdminClient from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 import { KeycloakUserService } from './user-service';
 import { EnvironmentContext } from '../workflow/get-namespaces';

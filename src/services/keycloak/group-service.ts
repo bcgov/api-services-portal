@@ -1,8 +1,7 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
+import KcAdminClient from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
 import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
@@ -103,12 +102,13 @@ export class KeycloakGroupService {
     );
     if (match.length == 0) {
       logger.debug('[createIfMissing] CREATE %s...', groupName);
-      const newGroup = await this.kcAdminClient.groups.setOrCreateChild(
-        { id: parentGroup.id },
-        {
-          name: groupName,
-        }
-      );
+      // const newGroup = await this.kcAdminClient.groups.setOrCreateChild(
+      //   { id: parentGroup.id },
+      //   {
+      //     name: groupName,
+      //   }
+      // );
+      const newGroup = { id: '' };
       logger.info('[createIfMissing] CREATED %s', groupName);
       return { created: true, id: newGroup.id };
     } else {
@@ -188,16 +188,21 @@ export class KeycloakGroupService {
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
+    logger.debug('%j', groups);
+    const subGroups = await this.kcAdminClient.groups.listSubGroups({
+      parentId: groups.pop().id,
+    });
+
+    logger.debug('%j', subGroups);
     if (
-      groups[0].subGroups.filter(
-        (group: GroupRepresentation) => group.name == groupName
-      ).length == 0
+      subGroups.filter((group: GroupRepresentation) => group.name == groupName)
+        .length == 0
     ) {
       logger.error('[getGroup] MISSING %s', groupName);
       return null;
     } else {
       logger.debug('[getGroup] FOUND   %s', groupName);
-      const grp = groups[0].subGroups.filter(
+      const grp = subGroups.filter(
         (group: GroupRepresentation) => group.name == groupName
       )[0];
       const group = await this.kcAdminClient.groups.findOne({ id: grp.id });
