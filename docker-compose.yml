@@ -9,34 +9,36 @@ x-common-variables: &common-variables
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1
+    image: keycloak:latest
     container_name: keycloak
     hostname: keycloak
+    build:
+      context: .
+      dockerfile: ./local/keycloak/Dockerfile
     depends_on:
       - kong-db
     command:
       [
-        '-b',
-        '0.0.0.0',
-        '-Djboss.socket.binding.port-offset=1001',
-        '-Dkeycloak.migration.action=import',
-        '-Dkeycloak.migration.provider=singleFile',
-        '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
-        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
-        '-Dkeycloak.profile.feature.upload_scripts=enabled',
+        'start',
+        '--optimized',
+        '--hostname',
+        'http://keycloak.localtest.me:9081/auth',
+        '--db-url',
+        'jdbc:postgresql://kong-db/keycloak',
+        '--db-username',
+        'keycloakuser',
+        '--db-password',
+        'keycloakuser',
+        '--http-enabled',
+        'true',
+        '--http-port',
+        '9081',
+        '--import-realm',
       ]
     ports:
       - 9081:9081/tcp
-    environment:
-      #KEYCLOAK_USER: local
-      #KEYCLOAK_PASSWORD: local
-      DB_VENDOR: POSTGRES
-      DB_SCHEMA: public
-      DB_ADDR: kong-db:5432
-      DB_USER: keycloakuser
-      DB_PASSWORD: keycloakuser
     volumes:
-      - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
+      - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
     networks:
       aps-net:
         aliases:
