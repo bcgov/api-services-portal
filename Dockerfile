@@ -22,7 +22,7 @@ COPY src ./
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 
-RUN npm run build --openssl-legacy-provider
+RUN npm run build
 
 # Create the /.npm directory and grant access to group 0 to allow npm v9 to work
 # See: https://docs.openshift.com/container-platform/4.11/openshift_images/create-images.html#use-uid_create-images
