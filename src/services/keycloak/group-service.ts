@@ -1,12 +1,17 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KcAdminClient from '@packages/keycloak-admin-client';
-import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
+import {
+  KeycloakAdminClient,
+  GroupRepresentation,
+  UserRepresentation,
+} from '@packages/keycloak-admin-client';
+// import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
+//import { GroupRepresentation } from '@packages/keycloak-admin-client';
+// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
-// import GroupRepresentation from 'keycloak-admin/lib/defs/groupRepresentation';
+// import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
+// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import UserRepresentation from 'keycloak-admin/lib/defs/userRepresentation';
 
 const logger = Logger('kc.group');
@@ -19,7 +24,7 @@ export class KeycloakGroupService {
     const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
     const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
     logger.debug('%s %s', baseUrl, realmName);
-    this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+    this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
   }
 
   public async cacheGroups() {

@@ -1,12 +1,13 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KcAdminClient from '@packages/keycloak-admin-client';
-import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
+import {
+  KeycloakAdminClient,
+  PolicyRepresentation,
+  ResourceRepresentation,
+  ResourceServerRepresentation,
+  ScopeRepresentation,
+} from '@packages/keycloak-admin-client';
 import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
-import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
-import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
-import ScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/scopeRepresentation';
 
 //import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
@@ -24,7 +25,7 @@ export class KeycloakClientPolicyService {
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
       logger.debug('%s %s', baseUrl, realmName);
-      this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+      this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
     }
   }
 

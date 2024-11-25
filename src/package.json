@@ -60,8 +60,6 @@
     "start:coverage": "NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' nyc npm run start"
   },
   "dependencies": {
-    "@packages/keycloak-admin-client": "file://./keycloak-admin-client",
-    "@keycloak/keycloak-admin-client": "^26.0.6",
     "@bcgov/bc-sans": "^1.0.1",
     "@chakra-ui/react": "^1.6.0",
     "@emotion/react": "^11.4.1",
@@ -81,6 +79,7 @@
     "@keystonejs/keystone": "^19.3.2",
     "@keystonejs/list-plugins": "^7.1.5",
     "@keystonejs/utils": "^6.1.1",
+    "@packages/keycloak-admin-client": "file://./keycloak-admin-client",
     "@tailwindcss/postcss7-compat": "^2.0.2",
     "autoprefixer": "^9.8.6",
     "connect-mongo": "^3.2.0",

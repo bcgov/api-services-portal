@@ -1,11 +1,12 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 
-import KcAdminClient from '@packages/keycloak-admin-client';
-import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
+import {
+  KeycloakAdminClient,
+  UserRepresentation,
+} from '@packages/keycloak-admin-client';
 import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
 import { checkKeystoneStatus } from '../checkKeystoneStatus';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 
 const logger = Logger('kc.user');
 
@@ -16,10 +17,10 @@ export class KeycloakUserService {
     const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
     const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
     logger.debug('%s %s', baseUrl, realmName);
-    this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+    this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
   }
 
-  public useAdminClient(client: KcAdminClient) {
+  public useAdminClient(client: KeycloakAdminClient) {
     this.kcAdminClient = client;
     return this;
   }

@@ -1,15 +1,21 @@
 {
     "name": "@packages/keycloak-admin-client",
     "version": "1.0.0",
-    "main": "./index.js",
-    "types": "./index.d.ts",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
     "scripts": {
-        "postinstall": "esbuild index.ts --platform=node --bundle --format=cjs --outfile=index.js"
+        "compile": "tsc --noEmit",
+        "build": "esbuild lib/index.d.ts --platform=node --bundle --format=cjs --outfile=lib/index.js",
+        "prepublish": "npm run compile && npm run build"
     },
     "dependencies": {
         "@keycloak/keycloak-admin-client": "^26.0.6"
     },
     "devDependencies": {
-        "esbuild": "^0.24.0"
-    }
+        "esbuild": "^0.24.0",
+        "typescript": "^5.7.2"
+    },
+    "files": [
+        "dist/**/*"
+    ]
 }
