@@ -15,7 +15,7 @@ WORKDIR /app
 COPY src/keycloak-admin-client ./keycloak-admin-client
 
 COPY src/*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --openssl-legacy-provider
 
 COPY src ./
 
