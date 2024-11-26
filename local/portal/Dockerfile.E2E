@@ -1,5 +1,5 @@
 #FROM node:lts-alpine3.18
-FROM node:16.14.2-alpine3.15
+FROM node:20-alpine3.19
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
@@ -12,11 +12,15 @@ RUN apk add curl jq
 USER node
 WORKDIR /app
 
+# Workaround due to an ESM error
+COPY --chown=node src/keycloak-admin-client ./keycloak-admin-client
+
 COPY --chown=node src/*.json ./
 
 COPY --chown=node src/nyc.config.js ./
 
 RUN npm install --legacy-peer-deps
+# --openssl-legacy-provider
 
 COPY --chown=node src ./
 

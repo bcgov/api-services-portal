@@ -1,5 +1,4 @@
-#FROM node:lts-alpine3.17
-FROM node:21-alpine3.19
+FROM node:20-alpine3.19
 
 ARG APP_VERSION
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}
@@ -15,7 +14,7 @@ WORKDIR /app
 COPY src/keycloak-admin-client ./keycloak-admin-client
 
 COPY src/*.json ./
-RUN npm install --legacy-peer-deps --openssl-legacy-provider
+RUN npm install --legacy-peer-deps
 
 COPY src ./
 

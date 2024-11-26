@@ -10,7 +10,6 @@ x-common-variables: &common-variables
 services:
   keycloak-nodes:
     image: keycloak:latest
-    hostname: keycloak
     deploy:
       replicas: 1
       endpoint_mode: dnsrr
