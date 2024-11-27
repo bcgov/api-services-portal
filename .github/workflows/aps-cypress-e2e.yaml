@@ -54,6 +54,7 @@ jobs:
               break
             else
               echo  "Waiting for Cypress to Complete E2E Tests....."
+              docker compose logs cypress-e2e -n 5
               sleep 1m
             fi
           done
