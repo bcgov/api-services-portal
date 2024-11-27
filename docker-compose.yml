@@ -21,7 +21,7 @@ services:
     command: [
         'start',
         '--optimized',
-        # '--cache=ispn',
+        #'--cache=ispn',
         '--hostname',
         'http://keycloak.localtest.me:9081/auth',
         '--db-url',
