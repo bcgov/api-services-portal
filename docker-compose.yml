@@ -1,3 +1,4 @@
+name: e2e
 version: '3.8'
 
 x-common-variables: &common-variables
@@ -11,17 +12,18 @@ services:
   keycloak-nodes:
     image: keycloak:latest
     deploy:
-      replicas: 1
+      replicas: 2
       endpoint_mode: dnsrr
     build:
       context: .
       dockerfile: ./local/keycloak/Dockerfile
     depends_on:
       - kong-db
-    command: [
+    command:
+      [
         'start',
         '--optimized',
-        #'--cache=ispn',
+        '--cache=ispn',
         '--hostname',
         'http://keycloak.localtest.me:9081/auth',
         '--db-url',
