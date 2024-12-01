@@ -70,7 +70,7 @@ export class KeycloakClientPolicyService {
     id: string,
     resourceId: string
   ): Promise<ResourceServerRepresentation[]> {
-    logger.debug('[listPermissionsByResource] %s %s', id, resourceId);
+    logger.debug('[listPermissionsByResource] cid=%s rid=%s', id, resourceId);
     const permissions: any = await this.kcAdminClient.clients
       .listPolicies({ id, resource: resourceId })
       .catch((e: any) => {

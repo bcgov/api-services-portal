@@ -183,6 +183,18 @@ export class KeycloakGroupService {
     }
   }
 
+  public async setSubGroups(
+    group: GroupRepresentation
+  ): Promise<GroupRepresentation[]> {
+    if (group.subGroups.length == 0 && group.subGroupCount > 0) {
+      const subGroups = await this.kcAdminClient.groups.listSubGroups({
+        parentId: group.id,
+      });
+      group.subGroups = subGroups;
+    }
+    return group.subGroups;
+  }
+
   private async subGroups(
     group: GroupRepresentation
   ): Promise<GroupRepresentation[]> {

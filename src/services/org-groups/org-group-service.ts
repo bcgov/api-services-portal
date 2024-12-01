@@ -90,6 +90,14 @@ export class OrgGroupService {
 
   public async backfillGroups(): Promise<void> {
     this.groups = await this.keycloakService.getAllGroups();
+    await this.traverseBackfill(this.groups);
+  }
+
+  private async traverseBackfill(groups: GroupRepresentation[]): Promise<void> {
+    for (const group of groups) {
+      await this.keycloakService.setSubGroups(group);
+      await this.traverseBackfill(group.subGroups);
+    }
   }
 
   public findGroup(id: string): string {

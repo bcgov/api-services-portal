@@ -1,6 +1,6 @@
 {
     "data_planes": {
-        "local-dataplane": {
+        "local.dataplane": {
             "kube-api": "http://kubenull",
             "kube-ns": "local-cluster",
             "validate-upstreams": false
