@@ -129,7 +129,7 @@ export class NamespaceController extends Controller {
    * @returns
    */
   @Get('/{gatewayId}')
-  @OperationId('namespace-profile')
+  @OperationId('gateway-profile')
   @Security('jwt', ['Namespace.Manage'])
   public async profile(
     @Path() gatewayId: string,

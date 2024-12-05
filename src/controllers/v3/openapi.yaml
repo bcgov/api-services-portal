@@ -925,7 +925,7 @@ paths:
                             $ref: '#/components/schemas/Gateway'
     '/gateways/{gatewayId}':
         get:
-            operationId: namespace-profile
+            operationId: gateway-profile
             responses:
                 '200':
                     description: Ok
