@@ -121,7 +121,7 @@ export class NamespaceController extends Controller {
 
   /**
    * Get details about the gateway, such as permissions for what the gateway is setup with.
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Gateway Summary
    * @param ns
@@ -174,7 +174,7 @@ export class NamespaceController extends Controller {
         errors[`d${ind}`] = { message: err.message };
       });
       logger.error('%j', result);
-      throw new ValidateError(errors, 'Unable to create namespace');
+      throw new ValidateError(errors, 'Unable to create Gateway');
     }
     return {
       gatewayId: result.data.createNamespace.name,
@@ -184,7 +184,7 @@ export class NamespaceController extends Controller {
 
   /**
    * Delete the gateway
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Delete Gateway
    * @param ns
@@ -192,7 +192,7 @@ export class NamespaceController extends Controller {
    * @returns
    */
   @Delete('/{gatewayId}')
-  @OperationId('delete-namespace')
+  @OperationId('delete-gateway')
   @Security('jwt', ['Namespace.Manage'])
   public async delete(
     @Path() gatewayId: string,
@@ -218,9 +218,9 @@ export class NamespaceController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.View
+   * > `Required Scope:` Gateway.View
    *
-   * @summary Get administration activity for this gateway
+   * @summary Get administration activity for this Gateway
    * @param ns
    * @param first
    * @param skip
@@ -251,7 +251,7 @@ export class NamespaceController extends Controller {
 
   /**
    * Get a summary of your endpoints
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Get endpoints
    */
