@@ -22,6 +22,7 @@
     "delay": 2500
   },
   "scripts": {
+    "prepare": "cd .. && husky install src/.husky && husky install",
     "prebuild": "tslint -p tsconfig.json --fix",
     "ts-watch": "tsc --watch --jsx react-jsx",
     "ts-build": "tsc",
@@ -47,6 +48,7 @@
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
     "lint": "eslint ./nextapp --ext .ts,.tsx --quiet",
     "lint:ts": "tsc -p ./nextapp/tsconfig.json --noEmit",
+    "lint:ts-server": "tsc -p ./tsconfig.json --noEmit",
     "test": "cross-env NODE_ENV=test jest --config ./jest.config.js --coverage --detectOpenHandles",
     "test:next": "jest --config ./nextapp/jest.config.js --coverage",
     "test:next-watch": "jest --watch --config ./nextapp/jest.config.js",
@@ -186,6 +188,7 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^8.0.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.5.1",
     "mocha": "^5.2.0",
