@@ -43,7 +43,7 @@
     "mock-server": "nodemon ./test/mock-server/server.js",
     "ks-build": "cross-env NODE_ENV=production keystone build --entry=dist/server.js --out=dist2",
     "start": "cross-env NODE_ENV=production keystone start --entry=dist/server.js",
-    "build": "NODE_OPTIONS='--dns-result-order=ipv4first' npm-run-all delete-assets copy-assets tsoa-build-v1 tsoa-build-v2 tsoa-build-v3 ts-build ks-build copy-keystone-admin-assets",
+    "build": "NODE_OPTIONS='--dns-result-order=ipv4first --openssl-legacy-provider' npm-run-all delete-assets copy-assets tsoa-build-v1 tsoa-build-v2 tsoa-build-v3 ts-build ks-build copy-keystone-admin-assets",
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
     "lint": "eslint ./nextapp --ext .ts,.tsx --quiet",
     "lint:ts": "tsc -p ./nextapp/tsconfig.json --noEmit",
