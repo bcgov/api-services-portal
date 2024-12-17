@@ -1,7 +1,7 @@
 name: 'Send review reminders'
 on:
   schedule:
-    - cron: '30 8 * * 1,2,3,4,5' # Scheduled to run at 1:30 AM, weekdays
+    - cron: '30 13 * * 1,2,3,4,5' # Scheduled to run at 5:30 AM PST, weekdays
 
 jobs:
   remind:
