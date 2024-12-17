@@ -181,7 +181,7 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.Assign
+   * > `Required Scope:` Gateway.Assign
    */
   @Get('{org}/gateways')
   @OperationId('organization-gateways')
@@ -196,7 +196,7 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.Assign
+   * > `Required Scope:` Gateway.Assign
    */
   @Put('{org}/{orgUnit}/gateways/{gatewayId}')
   @OperationId('assign-namespace-to-organization')
@@ -231,7 +231,7 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.Assign
+   * > `Required Scope:` Gateway.Assign
    */
   @Delete('{org}/{orgUnit}/gateways/{gatewayId}')
   @OperationId('unassign-namespace-from-organization')
@@ -265,16 +265,16 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.Assign
+   * > `Required Scope:` Gateway.Assign
    *
-   * @summary Get administration activity for gateways associated with this Organization
+   * @summary Get administration activity for Gateways associated with this Organization
    * @param org
    * @param first
    * @param skip
    * @returns Activity[]
    */
   @Get('{org}/activity')
-  @OperationId('org-namespace-activity')
+  @OperationId('org-gateway-activity')
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,
