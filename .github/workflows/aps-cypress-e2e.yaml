@@ -53,8 +53,16 @@ jobs:
               docker compose down
               break
             else
-              echo  "Waiting for Cypress to Complete E2E Tests....."
-              sleep 1m
+              echo "Current Test Progress:"
+              docker logs cypress-e2e 2>&1 | grep -E "Running:|✓|×" | tail -n 5
+              
+              # Get failure count from the most recent logs
+              FAILURES=$(docker logs cypress-e2e 2>&1 | grep -c "×" || true)
+              if [ $FAILURES -gt 0 ]; then
+                echo "❌ Current failure count: $FAILURES"
+              fi
+              
+              sleep 30s
             fi
           done
 
