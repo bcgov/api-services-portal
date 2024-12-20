@@ -15,6 +15,10 @@ const logger = Logger('kc.group');
 export class KeycloakGroupService {
   private allGroups: any = undefined;
   private kcAdminClient: KeycloakAdminClient;
+  private clientId: string;
+  private clientSecret: string;
+  private lastAuthTime: number = 0;
+  private readonly AUTH_TIMEOUT = 280 * 1000; // 280 seconds (slightly less than typical 5 min token lifetime)
 
   constructor(issuerUrl: string) {
     const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
@@ -23,26 +27,52 @@ export class KeycloakGroupService {
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
   }
 
+  private async ensureAuthenticated(): Promise<void> {
+    if (this.clientId && (Date.now() - this.lastAuthTime > this.AUTH_TIMEOUT)) {
+      logger.debug('[ensureAuthenticated] Re-authenticating due to timeout');
+      await this.login(this.clientId, this.clientSecret);
+    }
+  }
+
   public async cacheGroups() {
     this.allGroups = await this.getAllGroups();
   }
 
   public async login(
     clientId: string,
-    clientSecret: string
+    clientSecret: string,
+    retryAttempts: number = 3
   ): Promise<KeycloakGroupService> {
-    logger.debug('[login] %s', clientId);
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    
+    const result = await this._login(retryAttempts);
+    this.lastAuthTime = Date.now();
+    return result;
+  }
 
-    await this.kcAdminClient
-      .auth({
-        grantType: 'client_credentials',
-        clientId: clientId,
-        clientSecret: clientSecret,
-      })
-      .catch((err: any) => {
-        logger.error('[login] Login failed %s', err);
-        throw err;
-      });
+  private async _login(retryAttempts: number): Promise<KeycloakGroupService> {
+    logger.debug('[login] %s', this.clientId);
+
+    for (let attempt = 1; attempt <= retryAttempts; attempt++) {
+      try {
+        await this.kcAdminClient
+          .auth({
+            grantType: 'client_credentials',
+            clientId: this.clientId,
+            clientSecret: this.clientSecret,
+          });
+        return this;
+      } catch (err: any) {
+        if (attempt === retryAttempts) {
+          logger.error('[login] Login failed after %d attempts: %s', retryAttempts, err);
+          throw err;
+        }
+        logger.warn('[login] Attempt %d failed, retrying: %s', attempt, err);
+        // Add exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 100));
+      }
+    }
     return this;
   }
 
@@ -70,6 +100,7 @@ export class KeycloakGroupService {
   }
 
   public async updateGroup(group: GroupRepresentation): Promise<void> {
+    await this.ensureAuthenticated();
     logger.debug('[updateGroup] %j', group);
     await this.kcAdminClient.groups.update({ id: group.id }, group);
   }
