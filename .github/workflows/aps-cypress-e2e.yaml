@@ -54,10 +54,11 @@ jobs:
               break
             else
               echo "Current Test Progress:"
-              docker logs cypress-e2e 2>&1 | grep -E "Running:|✓|×" | tail -n 5
+              docker logs cypress-e2e 2>&1 | grep -E "Running:|✓|^[0-9]+\)" | tail -n 5
               
               # Get failure count from the most recent logs
-              FAILURES=$(docker logs cypress-e2e 2>&1 | grep -c "×" || true)
+              # Count lines starting with a number followed by ')'
+              FAILURES=$(docker logs cypress-e2e 2>&1 | grep -c "^[0-9]\+)" || true)
               if [ $FAILURES -gt 0 ]; then
                 echo "❌ Current failure count: $FAILURES"
               fi
