@@ -17,7 +17,7 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Build GWA API Image
         run: |
@@ -47,22 +47,19 @@ jobs:
 
       - name: Execute Tests & Clean Up
         run: |
+          # Start following logs in the background with continuous output
+          docker logs -f cypress-e2e 2>&1 &
+          LOG_PID=$!
+          
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+              echo "Cypress tests completed."
+            # Kill the log following process
+              kill $LOG_PID
               # cleanup
               docker compose down
               break
             else
-              echo "Current Test Progress:"
-              docker logs cypress-e2e 2>&1 | grep -E "Running:|✓|^[0-9]+\)" | tail -n 5
-              
-              # Get failure count from the most recent logs
-              # Count lines starting with a number followed by ')'
-              FAILURES=$(docker logs cypress-e2e 2>&1 | grep -c "^[0-9]\+)" || true)
-              if [ $FAILURES -gt 0 ]; then
-                echo "❌ Current failure count: $FAILURES"
-              fi
-              
               sleep 30s
             fi
           done
