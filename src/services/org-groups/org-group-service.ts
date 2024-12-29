@@ -1,22 +1,19 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
 import {
   KeycloakClientPolicyService,
   KeycloakClientService,
   KeycloakGroupService,
   KeycloakUserService,
 } from '../keycloak';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
-import PolicyRepresentation, {
+import {
+  GroupRepresentation,
+  ClientScopeRepresentation,
+  PolicyRepresentation,
+  UserRepresentation,
   DecisionStrategy,
   Logic,
-} from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
+} from '@packages/keycloak-admin-client';
 
 import { root } from './group-converter-utils';
 import { User } from '../keystone/types';
@@ -93,6 +90,14 @@ export class OrgGroupService {
 
   public async backfillGroups(): Promise<void> {
     this.groups = await this.keycloakService.getAllGroups();
+    await this.traverseBackfill(this.groups);
+  }
+
+  private async traverseBackfill(groups: GroupRepresentation[]): Promise<void> {
+    for (const group of groups) {
+      await this.keycloakService.setSubGroups(group);
+      await this.traverseBackfill(group.subGroups);
+    }
   }
 
   public findGroup(id: string): string {

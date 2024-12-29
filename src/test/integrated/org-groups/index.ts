@@ -21,7 +21,9 @@ import { o } from '../util';
 (async () => {
   const kc = new OrgGroupService(process.env.ISSUER);
 
-  await (await kc.login(process.env.CID, process.env.CSC)).backfillGroups();
+  await kc.login(process.env.CID, process.env.CSC);
+
+  await kc.backfillGroups();
 
   const org = {
     name: 'databc',
@@ -33,11 +35,11 @@ import { o } from '../util';
     parent: '/data-custodian/ministry-citizens-services',
   };
 
-  console.log(JSON.stringify(await kc.listMembers(org), null, 4));
+  // console.log(JSON.stringify(await kc.listMembers(org), null, 4));
 
-  console.log(await kc.getValidRoles());
-  console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
-  console.log(await kc.getGroupPathsByGroupName('databc'));
+  // console.log(await kc.getValidRoles());
+  // console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
+  // console.log(await kc.getGroupPathsByGroupName('databc'));
 
   if (false) {
     await kc.createGroupIfMissing(org);
@@ -103,10 +105,20 @@ import { o } from '../util';
     );
   }
 
-  const result = await kc.getPermissionsForGroupPolicy(org, 'org/databc');
-  o(result);
+  if (false) {
+    const result = await kc.getPermissionsForGroupPolicy(
+      org,
+      'org/ministry-of-health'
+    );
+    o(result);
+  }
 
   if (true) {
+    const resourceId = '8fb82265-8e8d-4cc5-b967-f231d4cab7ce';
+    const res = await kc.getGroupPermissionsByResource(resourceId);
+    o(res);
+  }
+  if (false) {
     await kc.createOrUpdateOrgPermission(org, [
       'Namespace.View',
       'Namepsace.Manage',

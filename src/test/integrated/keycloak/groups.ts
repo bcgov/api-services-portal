@@ -16,7 +16,7 @@ node dist/test/integrated/keycloak/groups.js
 
 import { o } from '../util';
 
-import { KeycloakGroupService } from '../../../services/keycloak';
+import { KeycloakGroupService } from '../../../services/keycloak/group-service';
 
 (async () => {
   const kc = new KeycloakGroupService(process.env.ISSUER);
@@ -28,8 +28,10 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   //const groups = await kc.search('orgcontrol');
   //o(groups);
 
-  const groupByName = await kc.findByName('ns', 'simple', false);
-  o(groupByName);
+  const groupByNameSearched = await kc.findByName('ns', 'gw-f33e5', false);
+  o(groupByNameSearched);
 
+  const groupByName = await kc.getGroup('ns', 'gw-f33e5');
+  o(groupByName);
   // console.log(await kc.listMembers('660cadef-9233-4532-ba45-5393beaddea4'));
 })();

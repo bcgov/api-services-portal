@@ -1,4 +1,3 @@
-src/node_modules
 src/.npm
 src/_tmp
 src/.cache
@@ -7,3 +6,5 @@ src/.nyc_output
 src/dist
 **/.next
 _data
+**/node_modules
+__coverage__

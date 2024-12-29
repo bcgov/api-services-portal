@@ -1,3 +1,4 @@
+name: e2e
 version: '3.8'
 
 x-common-variables: &common-variables
@@ -8,39 +9,56 @@ x-common-variables: &common-variables
   KONG_PG_PASSWORD: konguser
 
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1
-    container_name: keycloak
-    hostname: keycloak
+  keycloak-nodes:
+    image: keycloak:latest
+    deploy:
+      replicas: 2
+      endpoint_mode: dnsrr
+    build:
+      context: .
+      dockerfile: ./local/keycloak/Dockerfile
     depends_on:
       - kong-db
     command:
       [
-        '-b',
-        '0.0.0.0',
-        '-Djboss.socket.binding.port-offset=1001',
-        '-Dkeycloak.migration.action=import',
-        '-Dkeycloak.migration.provider=singleFile',
-        '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
-        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
-        '-Dkeycloak.profile.feature.upload_scripts=enabled',
+        'start',
+        '--optimized',
+        '--cache=ispn',
+        '--hostname',
+        'http://keycloak.localtest.me:9081/auth',
+        '--db-url',
+        'jdbc:postgresql://kong-db/keycloak',
+        '--db-username',
+        'keycloakuser',
+        '--db-password',
+        'keycloakuser',
+        '--http-enabled',
+        'true',
+        '--http-port',
+        '9081',
+        '--import-realm',
       ]
-    ports:
-      - 9081:9081/tcp
-    environment:
-      #KEYCLOAK_USER: local
-      #KEYCLOAK_PASSWORD: local
-      DB_VENDOR: POSTGRES
-      DB_SCHEMA: public
-      DB_ADDR: kong-db:5432
-      DB_USER: keycloakuser
-      DB_PASSWORD: keycloakuser
     volumes:
-      - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
+      - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
+    networks:
+      aps-net: {}
+
+  keycloak:
+    image: nginx:latest
+    ports:
+      - '9081:9081'
+    depends_on:
+      - keycloak-nodes
+    volumes:
+      - ./local/keycloak/nginx-lb.conf:/etc/nginx/conf.d/default.conf
     networks:
       aps-net:
         aliases:
           - keycloak.localtest.me
+    deploy:
+      restart_policy:
+        condition: any
+
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
     container_name: oauth2-proxy

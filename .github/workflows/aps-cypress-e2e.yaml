@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git
+          git clone -b feature/kc-upgrade https://github.com/bcgov/gwa-api.git
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
@@ -54,6 +54,7 @@ jobs:
               break
             else
               echo  "Waiting for Cypress to Complete E2E Tests....."
+              docker compose logs cypress -n 5
               sleep 1m
             fi
           done

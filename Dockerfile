@@ -1,5 +1,4 @@
-#FROM node:lts-alpine3.17
-FROM node:16.14.2-alpine3.15
+FROM node:20-alpine3.19
 
 ARG APP_VERSION
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}
@@ -10,6 +9,9 @@ ENV NEXT_PUBLIC_APP_REVISION=${APP_REVISION}
 RUN apk add curl jq
 
 WORKDIR /app
+
+# Workaround due to an ESM error
+COPY src/keycloak-admin-client ./keycloak-admin-client
 
 COPY src/*.json ./
 RUN npm install --legacy-peer-deps
