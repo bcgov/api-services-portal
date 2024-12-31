@@ -17,11 +17,11 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git
+          git clone https://github.com/bcgov/gwa-api.git --branch v1.0.40
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
