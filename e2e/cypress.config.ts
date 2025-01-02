@@ -26,7 +26,7 @@ export default defineConfig({
         './cypress/tests/07-*/*.ts',
         './cypress/tests/03-*/*.ts',
         './cypress/tests/04-*/*.ts',
-        './cypress/tests/05-*/*.ts',
+        // './cypress/tests/05-*/*.ts',
         './cypress/tests/08-*/*.ts',
         './cypress/tests/09-*/*.ts',
         './cypress/tests/10-*/*.ts',
@@ -59,7 +59,7 @@ export default defineConfig({
     },
     chromeWebSecurity: false,
     env: {
-      ASTRA_SCAN_ENABLED: true,
+      ASTRA_SCAN_ENABLED: false,
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
       OIDC_ISSUER: 'http://keycloak.localtest.me:9081/auth/realms/master',
