@@ -59,7 +59,7 @@ export default defineConfig({
     },
     chromeWebSecurity: false,
     env: {
-      ASTRA_SCAN_ENABLED: false,
+      ASTRA_SCAN_ENABLED: true,
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
       OIDC_ISSUER: 'http://keycloak.localtest.me:9081/auth/realms/master',
