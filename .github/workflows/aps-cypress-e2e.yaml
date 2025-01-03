@@ -65,18 +65,21 @@ jobs:
           done
 
       - name: Upload E2E Test Results HTML Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
       - name: Upload E2E Test Results JSON Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-json
           path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
 
       - name: Upload E2E Code Coverage Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage
@@ -89,6 +92,7 @@ jobs:
           path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
 
       - name: Instrument the code for coverage analysis
+        if: always()
         run: |
           # Rewrite the paths as the coverage starts with '../app'!
           sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
@@ -98,6 +102,7 @@ jobs:
           #npx nyc instrument --compact=false . --in-place
 
       - name: SonarCloud Scan
+        if: always()
         uses: sonarsource/sonarcloud-github-action@master
         with:
           args: >
@@ -113,6 +118,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Check for failed tests and create Issue
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
