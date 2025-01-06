@@ -120,7 +120,7 @@ const MyGatewaysPage: React.FC = () => {
           status: 'success',
           isClosable: true,
         });
-        window.location.assign('/manager/gateways/detail');
+        await router.push('/manager/gateways/detail');
       } catch (err) {
         toast.closeAll();
         toast({
