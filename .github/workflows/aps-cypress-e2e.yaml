@@ -4,6 +4,8 @@ on:
   workflow_dispatch: {}
   push:
     branches: ['test', 'cypress/*']
+  pull_request:
+    branches: ['dev']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
