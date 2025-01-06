@@ -64,7 +64,7 @@ export const getSessionL = async (): Promise<SessionData> => {
 };
 
 export const useSession = (): UserSessionResult => {
-  const { data, status, error, isLoading } = useQuery<SessionData, Error>(
+  const { data, status, error, isLoading, isStale, isIdle, isFetching, isError } = useQuery<SessionData, Error>(
     'user',
     getSessionL,
     {
@@ -72,7 +72,7 @@ export const useSession = (): UserSessionResult => {
       refetchOnWindowFocus: true,
     }
   );
-
+  console.log(JSON.stringify(data), status, error, isError, isLoading, isIdle, isStale, isFetching);
   return {
     isLoading,
     ok: Boolean(data?.user),
