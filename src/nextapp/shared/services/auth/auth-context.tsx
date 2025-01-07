@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const identityParam = providerPage ? 'identity=provider&' : '';
 
-  if (session.status == 'loading' || session.isFetching) {
+  if (session.status == 'loading') {
     return <></>;
   }
 
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     requiresNamespace &&
     !session.user.namespace;
 
-  if (noNamespace) {
+  if (noNamespace && session.isFetching == false) {
     router?.push('/manager/gateways/list').then(() => {
       toast({
         title: `First select a Gateway to view that page`,
