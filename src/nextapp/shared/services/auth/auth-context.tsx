@@ -10,6 +10,7 @@ import { useSession, UserSessionResult } from './use-session';
 
 const authContext = React.createContext<UserSessionResult>({
   isLoading: false,
+  isFetching: false,
   ok: false,
   maintenance: false,
   status: 'idle',
