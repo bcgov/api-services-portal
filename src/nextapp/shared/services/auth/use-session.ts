@@ -8,6 +8,7 @@ export interface AuthFailedResponse {
 
 export interface UserSessionResult {
   isLoading: boolean;
+  isFetching: boolean;
   ok: boolean;
   maintenance: boolean;
   user?: UserData;
@@ -64,7 +65,7 @@ export const getSessionL = async (): Promise<SessionData> => {
 };
 
 export const useSession = (): UserSessionResult => {
-  const { data, status, error, isLoading, isStale, isIdle, isFetching, isError } = useQuery<SessionData, Error>(
+  const { data, status, error, isLoading, isFetching } = useQuery<SessionData, Error>(
     'user',
     getSessionL,
     {
@@ -72,9 +73,10 @@ export const useSession = (): UserSessionResult => {
       refetchOnWindowFocus: true,
     }
   );
-  console.log(JSON.stringify(data), status, error, isError, isLoading, isIdle, isStale, isFetching);
+
   return {
     isLoading,
+    isFetching,
     ok: Boolean(data?.user),
     user: data?.user,
     maintenance: data?.maintenance,

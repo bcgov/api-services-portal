@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const identityParam = providerPage ? 'identity=provider&' : '';
 
-  if (session.status == 'loading') {
+  if (session.status == 'loading' || session.isFetching) {
     return <></>;
   }
 
