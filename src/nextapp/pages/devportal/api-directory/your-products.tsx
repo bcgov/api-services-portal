@@ -29,7 +29,7 @@ const ApiDiscoveryPage: React.FC = () => {
   const hasNamespace = !!user?.namespace;
   const title = (
     <>
-      {(namespace.isFetching || namespace.isLoading) && (
+      {(namespace.isFetching) && (
         <Skeleton width="400px" height="20px" mt={4} />
       )}
       {namespace.isSuccess && !namespace.isFetching && (
