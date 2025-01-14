@@ -13,12 +13,7 @@ export class NamespaceService {
   }
 
   async login(clientId: string, clientSecret: string) {
-    try {
-      await this.groupService.login(clientId, clientSecret);
-    } catch (err) {
-      logger.error('[login] Failed to login to Keycloak: %s', err);
-      throw new Error('Failed to authenticate with Keycloak');
-    }
+    await this.groupService.login(clientId, clientSecret);
   }
 
   async markNotification(ns: string, viewed: boolean): Promise<void> {
