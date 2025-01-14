@@ -195,7 +195,7 @@ export function validateNamespaceName(name: string) {
   regExprValidation(
     namespaceValidationRule,
     name,
-    'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.'
+    'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start and end with a letter.'
   );
 }
 

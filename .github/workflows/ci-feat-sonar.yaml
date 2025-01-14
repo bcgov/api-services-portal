@@ -42,7 +42,7 @@ jobs:
           docker compose down
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
             -Dsonar.organization=bcgov-oss

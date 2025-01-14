@@ -103,7 +103,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     cy.executeCliCommand('gwa gateway create --generate').then((response) => {
       const namespace = response.stdout.match(/\bgw-\w+/g)[0]
       cy.executeCliCommand(command).then((response) => {
-        expect(response.stderr).to.contain(`Error: Service ${serviceName} is already in use. Suggestion: ${namespace}-${serviceName}`)
+        expect(response.stderr).to.contain(`Error: Checking service availability: Service ${serviceName} is already in use. Suggestion: ${namespace}-${serviceName}`)
       });
     });
   })

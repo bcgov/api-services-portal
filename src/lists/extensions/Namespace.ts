@@ -251,7 +251,7 @@ module.exports = {
               assert.strictEqual(
                 re.test(args.namespace),
                 true,
-                'Gateway name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+                'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start and end with a letter.'
               );
               const noauthContext = context.createContext({
                 skipAccessControl: true,

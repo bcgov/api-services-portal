@@ -13,10 +13,17 @@ import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRep
 const logger = Logger('kc.group');
 
 export class KeycloakGroupService {
+  private static instanceCount = 0;  // Track total instances created
+  private instanceId: string;
+  private createdAt: Date;
   private allGroups: any = undefined;
   private kcAdminClient: KeycloakAdminClient;
 
   constructor(issuerUrl: string) {
+    this.instanceId = `kc-group-${++KeycloakGroupService.instanceCount}`;
+    this.createdAt = new Date();
+    logger.info('[Instance Created] id=%s, created=%s', this.instanceId, this.createdAt);
+
     const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
     const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
     logger.debug('%s %s', baseUrl, realmName);
