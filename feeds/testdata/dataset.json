@@ -124,7 +124,7 @@
       "name": "travel planning"
     }
   ],
-  "contacts": "[{\"name\":\"DataBC Operations\",\"email\":\"data@gov.bc.ca\",\"org\":\"d2e433a1-b785-4d03-8a2b-392069175eb4\",\"role\":\"pointOfContact\",\"displayed\":true}]",
+  "contacts": "[{\"name\":\"DataBC Operations\",\"email\":\"data@gov.bc.ca\",\"org\":\"d2e433a1-b785-4d03-8a2b-392069175eb4\",\"role\":\"pointOfContact\",\"displayed\":[\"displayed\"]}]",
   "resource_status": "completed",
   "tracking_summary": {
     "total": 917,
