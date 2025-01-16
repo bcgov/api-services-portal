@@ -62,6 +62,7 @@ const metadata = {
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       resources: { name: 'toStringDefaultArray' },
+      contacts: { name: 'toStringDefaultArray' },
       organization: {
         name: 'connectOne',
         key: 'organization.id',
