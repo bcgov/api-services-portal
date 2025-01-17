@@ -31,12 +31,12 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker compose --profile testsuite build
+          docker compose --profile testsuite-playwright build
 
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CI=true
-          docker compose --profile testsuite up -d
+          docker compose --profile testsuite-playwright up -d
 
       - name: Execute Tests & Clean Up
         run: |
