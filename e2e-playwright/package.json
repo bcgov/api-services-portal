@@ -1,0 +1,23 @@
+{
+  "name": "api-services-portal-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for API Services Portal",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^20.17.13",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/dotenv": "^6.1.1",
+    "dotenv": "^16.4.7",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "uuid": "^11.0.5"
+  }
+}
