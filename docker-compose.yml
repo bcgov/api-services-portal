@@ -271,5 +271,24 @@ services:
     profiles:
       - testsuite
 
+  playwright:
+    image: aps-playwright-e2e:latest
+    container_name: playwright-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    depends_on:
+      - feeder-seeding
+    build:
+      context: .
+      dockerfile: e2e-playwright/Dockerfile.playwright
+    # volumes:
+    #   - ./e2e-playwright/playwright-results
+    #   - ./e2e-playwright/playwright-reports
+    networks:
+      - aps-net
+    profiles:
+      - testsuite-playwright
+
 networks:
   aps-net: {}

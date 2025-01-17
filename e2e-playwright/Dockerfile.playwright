@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/playwright:v1.49.1-noble
+
+WORKDIR /e2e-playwright
+
+# Copy package.json and package-lock.json
+COPY e2e-playwright/package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy test files and configurations
+COPY e2e-playwright/playwright.config.ts ./
+COPY e2e-playwright/tests ./tests
+COPY e2e-playwright/entrypoint.playwright.sh /tmp/entrypoint.sh
+COPY e2e-playwright/fixtures ./fixtures
+COPY e2e-playwright/helpers ./helpers
+COPY e2e-playwright/.env.e2e ./
+
+# Create directories for results and reports
+RUN mkdir -p playwright-results playwright-reports
+
+CMD ["npx", "playwright", "test"]
