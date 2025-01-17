@@ -1,0 +1,59 @@
+name: Cypress and Execute Tests
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['playwright']
+#     branches: ['test', 'cypress/*']
+#   pull_request:
+#     branches: ['dev']
+
+# env:
+#   EXECUTION_ENV: prod
+#   GIT_COMMIT_BRANCH: ${{ github.ref_name }}
+#   GIT_COMMIT_SHA: ${{ github.sha }}
+#   GIT_COMMIT_AUTHOR: ${{ github.actor }}
+#   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+#   GIT_REPO_URL: ${{ github.repository }}
+
+jobs:
+  playwright-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build GWA API Image
+        run: |
+          git clone https://github.com/bcgov/gwa-api.git --branch v1.0.40
+          cd gwa-api/microservices/gatewayApi
+          docker build -t gwa-api:e2e .
+
+      - name: Checkout Portal
+        uses: actions/checkout@v2
+
+      - name: Build Docker Images
+        run: |
+          docker compose --profile testsuite build
+
+      - name: Spin up API Services Portal and Run E2E Tests
+        run: |
+          export CI=true
+          docker compose --profile testsuite up -d
+
+      - name: Execute Tests & Clean Up
+        run: |
+          # Start following logs in the background with continuous output
+          docker logs -f playwright-e2e 2>&1 &
+          LOG_PID=$!
+          
+          while true; do
+            if [ "$(docker ps -aq -f status=exited -f name=playwright-e2e)" ]; then
+              echo "E2E tests completed."
+              # cleanup
+              docker compose down
+              break
+            else
+              sleep 30s
+            fi
+          done
+
+
+

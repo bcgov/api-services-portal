@@ -282,9 +282,9 @@ services:
     build:
       context: .
       dockerfile: e2e-playwright/Dockerfile.playwright
-    # volumes:
-    #   - ./e2e-playwright/playwright-results
-    #   - ./e2e-playwright/playwright-reports
+    volumes:
+      - ./e2e-playwright/test-results:/e2e-playwright/playwright-results
+      - ./e2e-playwright/playwright-report:/e2e-playwright/playwright-reports
     networks:
       - aps-net
     profiles:
