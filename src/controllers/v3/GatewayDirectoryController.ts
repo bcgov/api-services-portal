@@ -61,7 +61,7 @@ export class GatewayDirectoryController extends Controller {
 
   /**
    * Used primarily for "Preview Mode"
-   * List the datasets belonging to a particular namespace
+   * List the datasets belonging to a particular Gateway
    *
    * @param ns
    * @param name

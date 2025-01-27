@@ -188,7 +188,7 @@ describe('Gateways', () => {
             details: {
               d0: {
                 message:
-                  'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and start and end with an alphabet.',
+                  'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start with a letter.',
               },
             },
           }

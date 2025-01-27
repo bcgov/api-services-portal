@@ -37,7 +37,11 @@ describe('Gateway selector dropdown', () => {
 
   it('Get current total number of gateways', () => {
     // Create a new gateway to ensure there is at least one gateway
-    cy.createGateway();
+    cy.createGateway().then((response) => {
+      const namespace = response.gatewayId
+      cy.log('New namespace created: ' + namespace)
+      cy.activateGateway(namespace);
+    });
 
     cy.visit(ad.yourProductsPath);
     cy.get('[data-testid="ns-dropdown-btn"]').click();
@@ -81,8 +85,8 @@ describe('Gateway selector dropdown', () => {
   it('Recently used gateways are shown in the dropdown', () => {
     cy.visit(ns.listPath)
     cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace1"].gatewayId + '-' + customId}"]`).click()
-    cy.get('[data-testid="ns-dropdown-btn"]').click()
-    cy.get(`[data-testid="ns-dropdown-item-${gateways["namespace2"].gatewayId + '-' + customId}"]`).click()
+    cy.visit(ns.listPath)
+    cy.get(`[data-testid="ns-list-activate-link-${gateways["namespace2"].gatewayId + '-' + customId}"]`).click()
     cy.get('[data-testid="ns-dropdown-btn"]').click()
     cy.get('[data-testid="ns-dropdown-heading"]').should('contain.text', "Recently viewed")
     cy.get(`[data-testid="ns-dropdown-item-${gateways["namespace1"].gatewayId + '-' + customId}"]`).should('exist')

@@ -60,8 +60,8 @@ export class IssuerController extends Controller {
   }
 
   /**
-   * Get Authorization Profiles setup in this namespace
-   * > `Required Scope:` Namespace.Manage
+   * Get Authorization Profiles setup in this Gateway
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Get Authorization Profiles
    */

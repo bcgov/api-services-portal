@@ -1,4 +1,4 @@
-FROM node:16.14.2-alpine3.15 AS BUILD
+FROM node:22.12.0-alpine3.21 AS BUILD
 
 COPY package*.json /app/
 

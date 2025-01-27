@@ -40,7 +40,7 @@ export class DatasetController extends Controller {
 
   /**
    * Update metadata about a Dataset
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Update Dataset
    */
@@ -66,7 +66,7 @@ export class DatasetController extends Controller {
 
   /**
    * Get metadata about a Dataset
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Get Dataset
    */

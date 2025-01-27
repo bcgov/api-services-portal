@@ -1,0 +1,14 @@
+name: 'Send review reminders'
+on:
+  schedule:
+    - cron: '30 13 * * 1,2,3,4,5' # Scheduled to run at 5:30 AM PST, weekdays
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run PR reviewer reminder
+        uses: bcgov/aps-devops/pr-reminder@dev
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: "false"

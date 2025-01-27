@@ -4,7 +4,7 @@ on: [issues, issue_comment]
 jobs:
   sync-issues:
     name: Sync issues to Jira
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: ikethecoder/sync-issues-github-jira@dev
         with:
