@@ -16,9 +16,9 @@ jobs:
         uses: anchore/scan-action@main
         with:
           image: 'bcgov/api-services-portal:anchore-scan'
-          acs-report-enable: true
           fail-build: false
+          output-file: 'anchore-results.sarif'
       - name: Upload Anchore Scan Results
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
+          sarif_file: anchore-results.sarif

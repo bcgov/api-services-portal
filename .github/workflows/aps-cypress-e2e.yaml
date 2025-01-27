@@ -4,6 +4,8 @@ on:
   workflow_dispatch: {}
   push:
     branches: ['test', 'cypress/*']
+  pull_request:
+    branches: ['dev']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -21,7 +23,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git
+          git clone https://github.com/bcgov/gwa-api.git --branch v1.0.40
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
@@ -47,60 +49,50 @@ jobs:
 
       - name: Execute Tests & Clean Up
         run: |
+          # Start following logs in the background with continuous output
+          docker logs -f cypress-e2e 2>&1 &
+          LOG_PID=$!
+          
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+              echo "Cypress tests completed."
               # cleanup
               docker compose down
               break
             else
-              echo  "Waiting for Cypress to Complete E2E Tests....."
-              sleep 1m
+              sleep 30s
             fi
           done
 
       - name: Upload E2E Test Results HTML Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
       - name: Upload E2E Test Results JSON Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-json
           path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
 
       - name: Upload E2E Code Coverage Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
 
-      - name: Instrument the code for coverage analysis
-        run: |
-          # Rewrite the paths as the coverage starts with '../app'!
-          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
-
-          #cd src
-          #npm install --legacy-peer-deps
-          #npx nyc instrument --compact=false . --in-place
-
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+      - name: Upload Astra scan results
+        uses: actions/upload-artifact@v4
         with:
-          args: >
-            -Dsonar.organization=bcgov-oss
-            -Dsonar.projectKey=aps-portal-e2e
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectBaseDir=src
-            -Dsonar.sources=.
-            -Dsonar.exclusions=nextapp/**,mocks/**,test/**,tools/**,*.json,*.js
-            -Dsonar.javascript.lcov.reportPaths=/github/workspace/lcov.info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+          name: astra-scan-results
+          path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
+          
       - name: Check for failed tests and create Issue
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -121,6 +113,30 @@ jobs:
             gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
             exit 1
           fi
+
+      - name: Instrument the code for coverage analysis
+        run: |
+          # Rewrite the paths as the coverage starts with '../app'!
+          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
+
+          #cd src
+          #npm install --legacy-peer-deps
+          #npx nyc instrument --compact=false . --in-place
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.organization=bcgov-oss
+            -Dsonar.projectKey=aps-portal-e2e
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectBaseDir=src
+            -Dsonar.sources=.
+            -Dsonar.exclusions=nextapp/**,mocks/**,test/**,tools/**,*.json,*.js
+            -Dsonar.javascript.lcov.reportPaths=/github/workspace/lcov.info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Set up Python 3.9
         if: failure()

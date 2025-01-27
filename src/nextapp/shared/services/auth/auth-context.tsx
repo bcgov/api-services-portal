@@ -10,6 +10,7 @@ import { useSession, UserSessionResult } from './use-session';
 
 const authContext = React.createContext<UserSessionResult>({
   isLoading: false,
+  isFetching: false,
   ok: false,
   maintenance: false,
   status: 'idle',
@@ -48,7 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     requiresNamespace &&
     !session.user.namespace;
 
-  if (noNamespace) {
+  if (noNamespace && session.isFetching == false) {
     router?.push('/manager/gateways/list').then(() => {
       toast({
         title: `First select a Gateway to view that page`,

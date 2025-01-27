@@ -58,7 +58,7 @@ export function regExprValidation(
   errorMessage: string
 ) {
   const re = new RegExp(rule);
-  assert.strictEqual(re.test(value), true, errorMessage);
+  assert.ok(re.test(value), errorMessage);
 }
 
 export async function fetchWithTimeout(resource: string, options: any = {}) {

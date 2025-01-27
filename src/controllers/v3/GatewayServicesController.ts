@@ -47,7 +47,7 @@ export class GatewayController extends Controller {
 
   /**
    * Get a summary of your Gateway Services
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Gateway.Manage
    *
    * @summary Get Gateway Services
    */
