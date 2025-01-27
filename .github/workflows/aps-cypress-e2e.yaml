@@ -28,7 +28,9 @@ jobs:
           docker build -t gwa-api:e2e .
 
       - name: Checkout Portal
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Build Docker Images
         run: |
