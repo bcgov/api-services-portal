@@ -52,7 +52,9 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
     [setSearch]
   );
   const handleBlur = () => {
-    if (search.trim()) {
+    if (selected) {
+      setSelected(selected);
+    } else if (search.trim()) {
       const result = data?.allDatasets.find((d) => {
         if (search.trim()) {
           return d.title.toLowerCase() === search.toLowerCase();
