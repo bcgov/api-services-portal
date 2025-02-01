@@ -27,4 +27,4 @@ RUN (cd priority-updater/template/plugin && KONG_PRIORITY=200 KONG_PRIORITY_NAME
 
 USER kong
 
-ENV KONG_PLUGINS="bundled, jwt-keycloak_1010, rate-limiting_902, post-function_200, oidc, oidc-consumer, bcgov-gwa-endpoint, gwa-ip-anonymity, kong-spec-expose, kong-upstream-jwt, referer, jwt-keycloak, kong-upstream-jwt, upstream-auth-basic"
+ENV KONG_PLUGINS="bundled, jwt-keycloak_1010, rate-limiting_902, post-function_200, oidc, oidc-consumer, bcgov-gwa-endpoint, gwa-ip-anonymity, kong-spec-expose, kong-upstream-jwt, referer, jwt-keycloak, kong-upstream-jwt"
