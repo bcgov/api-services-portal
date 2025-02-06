@@ -111,11 +111,11 @@ export class BatchService {
         result['data'][query].length
       );
       records.push(
-        result['data'][query].length == 0 ? [] : result['data'][query]
+        ...(result['data'][query].length == 0 ? [] : result['data'][query])
       );
     } while (more);
 
-    logger.info('[listAllPages] TOTAL COUNT %d', records.length);
+    logger.info('[listAllPages] (%s) TOTAL COUNT %d', query, records.length);
 
     return records;
   }
