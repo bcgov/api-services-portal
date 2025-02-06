@@ -61,6 +61,65 @@ export class BatchService {
     return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 
+  public async listAllPages(
+    query: any,
+    fields: string[],
+    where: BatchWhereClause = undefined
+  ) {
+    const records = [];
+
+    const pageSize = 50;
+    const first = pageSize;
+    let skip = 0;
+    let more = true;
+
+    logger.debug('[listAllPages] : %s', query);
+    do {
+      logger.debug('[listAllPages] : %d', skip);
+      let queryString;
+      if (where) {
+        queryString = `query(${where.query}) {
+        ${query}(where: ${where.clause}, first: ${first}, skip: ${skip}) {
+          id, ${fields.join(',')}
+        }
+      }`;
+      } else {
+        queryString = `query {
+        ${query}(first: ${first}, skip: ${skip}) {
+          id, ${fields.join(',')}
+        }
+      }`;
+      }
+      logger.debug('[listAllPages] %s', queryString);
+
+      const result = await this.context.executeGraphQL({
+        query: queryString,
+        variables: where ? where.variables : {},
+      });
+
+      if ('errors' in result) {
+        logger.error('[listAll] RESULT %j', result);
+        return null;
+      }
+
+      more = result['data'][query].length > 0;
+
+      skip += pageSize;
+
+      logger.debug(
+        '[listAllPages] RESULT COUNT %d',
+        result['data'][query].length
+      );
+      records.push(
+        result['data'][query].length == 0 ? [] : result['data'][query]
+      );
+    } while (more);
+
+    logger.info('[listAllPages] TOTAL COUNT %d', records.length);
+
+    return records;
+  }
+
   public async list(
     query: any,
     refKey: string,
