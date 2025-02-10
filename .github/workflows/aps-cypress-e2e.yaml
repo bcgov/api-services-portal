@@ -54,7 +54,7 @@ jobs:
           # Start following logs in the background with continuous output
           docker logs -f cypress-e2e 2>&1 &
           LOG_PID=$!
-
+          
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               echo "Cypress tests completed."
@@ -91,7 +91,11 @@ jobs:
         if: always()
         run: |
           # Rewrite the paths as the coverage starts with '../app'!
-          sed -e 's/..\/app/./g' ${{ github.workspace }}/e2e/coverage/lcov.info > ${{ github.workspace }}/lcov.info
+          sed -e 's/..\/app/./g' ./e2e/coverage/lcov.info > lcov.info
+
+          #cd src
+          #npm install --legacy-peer-deps
+          #npx nyc instrument --compact=false . --in-place
 
       - name: SonarCloud Scan
         if: always()
@@ -101,10 +105,10 @@ jobs:
             -Dsonar.organization=bcgov-oss
             -Dsonar.projectKey=aps-portal-e2e
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectBaseDir=${{ github.workspace }}/src
+            -Dsonar.projectBaseDir=src
             -Dsonar.sources=.
             -Dsonar.exclusions=nextapp/**,mocks/**,test/**,tools/**,*.json,*.js
-            -Dsonar.javascript.lcov.reportPaths=${{ github.workspace }}/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=/github/workspace/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -114,7 +118,7 @@ jobs:
         with:
           name: astra-scan-results
           path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
-
+          
       - name: Check for failed tests and create Issue
         if: always()
         env:
