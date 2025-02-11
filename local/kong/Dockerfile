@@ -4,16 +4,16 @@ USER root
 
 RUN apk add git ethtool strace unzip
 
-RUN git clone -b cleanup https://github.com/bcgov/kong-oss-plugins.git \
+RUN git clone -b v1.5.0-1 https://github.com/bcgov/kong-oss-plugins.git \
  && cd kong-oss-plugins/plugins \
  && (cd jwt-keycloak && luarocks make) \
  && (cd oidc && luarocks make) \
  && (cd oidc-consumer && luarocks make)
 
-RUN git clone -b feature/kong-2.0-upgrade https://github.com/bcgov/gwa-kong-endpoint.git
+RUN git clone https://github.com/bcgov/gwa-kong-endpoint.git
 RUN (cd gwa-kong-endpoint && ./devBuild.sh)
 
-RUN git clone -b hotfix/ips-not-always-string https://github.com/bcgov/gwa-ip-anonymity.git
+RUN git clone https://github.com/bcgov/gwa-ip-anonymity.git
 RUN (cd gwa-ip-anonymity && ./devBuild.sh)
 
 RUN luarocks install kong-spec-expose \
