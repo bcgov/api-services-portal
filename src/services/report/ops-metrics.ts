@@ -524,7 +524,6 @@ async function getAllRoutes(ctx: any) {
 async function getAllConsumers(ctx: any) {
   const batch = new BatchService(ctx);
 
-  // Limiting to 1000 is not great!  We should really recurse until we get to the end!
   const allConsumers = await batch.listAllPages('allServiceAccesses', [
     'namespace',
     'active',
