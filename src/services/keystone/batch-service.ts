@@ -66,7 +66,7 @@ export class BatchService {
     fields: string[],
     where: BatchWhereClause = undefined
   ) {
-    const records = [];
+    const records: any[] = [];
 
     const pageSize = 50;
     const first = pageSize;
