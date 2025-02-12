@@ -52,7 +52,9 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
     [setSearch]
   );
   const handleBlur = () => {
-    if (search.trim()) {
+    if (selected) {
+      setSelected(selected);
+    } else if (search.trim()) {
       const result = data?.allDatasets.find((d) => {
         if (search.trim()) {
           return d.title.toLowerCase() === search.toLowerCase();
@@ -75,6 +77,11 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
   });
 
   const isInvalid = search.length > 0 && !selected;
+
+  const titleCounts = (results || []).reduce((acc, d) => {
+    acc[d.title] = (acc[d.title] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <>
@@ -158,7 +165,9 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                         },
                       })}
                     >
-                      <Text fontSize="md">{d.title}</Text>
+                      <Text fontSize="md">
+                        {d.title} {titleCounts[d.title] > 1 ? `(${d.name})` : ''}
+                      </Text>
                     </Box>
                   ))}
                 {isOpen && isSuccess && !results.length && (

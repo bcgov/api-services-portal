@@ -524,22 +524,15 @@ async function getAllRoutes(ctx: any) {
 async function getAllConsumers(ctx: any) {
   const batch = new BatchService(ctx);
 
-  // Limiting to 1000 is not great!  We should really recurse until we get to the end!
-  const allConsumers = await batch.listAll(
-    'allServiceAccesses',
-    [
-      'namespace',
-      'active',
-      'consumerType',
-      'consumer { username }',
-      'application { name, owner { name }}',
-      'productEnvironment { namespace, name, flow, product { name, namespace, dataset { title } } }',
-      'createdAt',
-    ],
-    undefined,
-    0,
-    1000
-  );
+  const allConsumers = await batch.listAllPages('allServiceAccesses', [
+    'namespace',
+    'active',
+    'consumerType',
+    'consumer { username }',
+    'application { name, owner { name }}',
+    'productEnvironment { namespace, name, flow, product { name, namespace, dataset { title } } }',
+    'createdAt',
+  ]);
 
   return allConsumers;
 }
