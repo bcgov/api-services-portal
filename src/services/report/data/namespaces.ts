@@ -1,6 +1,7 @@
 import {
   transformSingleValueAttributes,
   camelCaseAttributes,
+  dedup,
 } from '../../utils';
 import { KeycloakGroupService } from '../../keycloak';
 import { getMyNamespaces } from '../../workflow';
@@ -9,6 +10,10 @@ import {
   NamespaceSummary,
 } from '../../workflow/get-namespaces';
 import { GWAService } from '../../gwaapi';
+import { ReportOfGatewayMetrics } from './gateway-metrics';
+import { ReportOfProducts } from './products';
+import { ReportOfConsumerRequest } from './consumer-requests';
+import { lookupUsersByNamespace } from '@/services/keystone';
 
 export interface ReportOfNamespaces {
   resource_id: string;
@@ -20,6 +25,9 @@ export interface ReportOfNamespaces {
   org?: string;
   orgUnit?: string;
   decommissioned?: string;
+  consumers?: number;
+  day_30_total?: number;
+  features?: { [feature: string]: string };
 }
 
 /*
@@ -75,4 +83,37 @@ export async function getNamespaces(
   );
 
   return Promise.all(dataPromises);
+}
+
+export function rollupFeatures(
+  namespaces: ReportOfNamespaces[],
+  gatewayMetrics: ReportOfGatewayMetrics[],
+  products: ReportOfProducts[]
+) {
+  namespaces.forEach((ns) => {
+    ns.features = {};
+    ns.day_30_total = 0;
+    gatewayMetrics
+      .filter((gw) => gw.namespace == ns.name)
+      .forEach((gw) => {
+        gw.features.forEach((feat) => (ns.features[feat] = 'Y'));
+        ns.day_30_total = ns.day_30_total + gw.day_30_total;
+      });
+    products
+      .filter((gw) => gw.namespace == ns.name)
+      .forEach((gw) => {
+        gw.features.forEach((feat) => (ns.features[feat] = 'Y'));
+      });
+  });
+}
+
+export function rollupConsumers(
+  namespaces: ReportOfNamespaces[],
+  requests: ReportOfConsumerRequest[]
+) {
+  namespaces.forEach((ns) => {
+    ns.consumers = requests.filter(
+      (req) => req.namespace === ns.name && req.req_result === 'Approved'
+    ).length;
+  });
 }

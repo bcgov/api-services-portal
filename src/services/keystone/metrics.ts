@@ -7,6 +7,7 @@ import format from 'date-fns/format';
 import times from 'lodash/times';
 import sum from 'lodash/sum';
 import formatISO from 'date-fns/formatISO';
+import { strictEqual } from 'assert';
 
 interface DailyDatum {
   day: string;
@@ -21,13 +22,13 @@ interface DailyDatum {
 const logger = Logger('keystone.metrics');
 
 const getServiceMetricsQuery = gql`
-  query GetServiceMetrics($service: String!, $days: [String!]) {
+  query GetServiceMetrics($services: [String]!, $days: [String!]) {
     allMetrics(
       sortBy: day_ASC
       where: {
         query: "kong_http_requests_hourly_service"
         day_in: $days
-        service: { name_contains: $service }
+        service: { name_in: $services }
       }
     ) {
       query
@@ -82,17 +83,23 @@ const getAllConsumerDailyMetricsQuery = gql`
 
 export async function getServiceMetrics(
   context: any,
-  service: string,
+  services: string[],
   days: string[]
 ): Promise<Metric[]> {
+  strictEqual(services.length > 0, true);
+
   const result = await context.executeGraphQL({
     query: getServiceMetricsQuery,
-    variables: { service, days },
+    variables: { services, days },
   });
+
+  if (result.errors) {
+    logger.error('[getServiceMetrics] %j', result.errors);
+  }
   logger.debug(
-    '[getServiceMetrics] (%s) result row count %d',
-    service,
-    result.data.allMetrics.length
+    '[getServiceMetrics] (%j) result row count %d',
+    services,
+    result.data.allMetrics?.length ?? 0
   );
   return result.data.allMetrics;
 }

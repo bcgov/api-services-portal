@@ -15,9 +15,9 @@ describe('KeystoneJS', function () {
         '2021-10-18',
         '2021-10-17',
       ];
-      const service = 'aps-authz';
+      const services = ['aps-authz'];
 
-      const metrics = await getServiceMetrics(context, service, days);
+      const metrics = await getServiceMetrics(context, services, days);
       expect(metrics.length).toBe(5);
 
       const { totalRequests } = calculateStats(metrics);
