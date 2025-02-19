@@ -2,6 +2,7 @@ export interface IssuerMisconfigDetail {
   reason: string;
   description: string;
   status: string;
+  statusCode: number;
 }
 
 export class IssuerMisconfigError extends Error {
