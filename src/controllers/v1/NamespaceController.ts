@@ -14,6 +14,8 @@ import { WorkbookService } from '../../services/report/workbook.service';
 import { Namespace } from '@/services/keystone/types';
 import { Logger } from '../../logger';
 
+import { strict as assert } from 'assert';
+
 import { Readable } from 'stream';
 
 /**
@@ -81,6 +83,7 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
+    assert.strictEqual('errors' in result, false, 'Unable to process request');
     return result.data.allNamespaces.map((ns: Namespace) => ns.name);
   }
 }
