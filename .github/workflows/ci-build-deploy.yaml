@@ -214,7 +214,7 @@ jobs:
                   whitelist_domains="authz-apps-gov-bc-ca.dev.api.gov.bc.ca"
                   # redis_connection_url="redis://redis-headless:6379"
                   # session_store_type="redis"
-                  # redis_password="${var.dr.redis_password}"
+                  # redis_password=""
                   # insecure-oidc-allow-unverified-email: 'true'
                   # insecure-oidc-skip-issuer-verification: 'true'
                   # oidc-email-claim: 'sub'
