@@ -1,0 +1,75 @@
+injectRequestHeaders:
+  - name: X-Forwarded-Groups
+    values:
+      - claim: groups
+  - name: X-Forwarded-User
+    values:
+      - claim: user
+  - name: X-Forwarded-Email
+    values:
+      - claim: email
+  - name: X-Forwarded-Preferred-Username
+    values:
+      - claim: preferred_username
+  - name: X-Forwarded-Access-Token
+    values:
+      - claim: access_token
+injectResponseHeaders:
+  - name: X-Auth-Request-User
+    values:
+      - claim: user
+  - name: X-Auth-Request-Email
+    values:
+      - claim: email
+  - name: X-Auth-Request-Preferred-Username
+    values:
+      - claim: preferred_username
+  - name: X-Auth-Request-Groups
+    values:
+      - claim: groups
+  - name: X-Auth-Request-Access-Token
+    values:
+      - claim: access_token
+metricsServer:
+  BindAddress: ''
+  SecureBindAddress: ''
+  TLS: null
+providers:
+  - clientID: aps-portal
+    clientSecret: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+    id: oidc=aps-portal
+    loginURL: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/auth
+    loginURLParameters:
+      - default:
+          - force
+        name: approval_prompt
+      - allow:
+          - pattern: '.*$'
+        name: kc_idp_hint
+    oidcConfig:
+      audienceClaims:
+        - aud
+      emailClaim: email
+      groupsClaim: groups
+      insecureAllowUnverifiedEmail: true
+      insecureSkipNonce: true
+      issuerURL: http://keycloak.localtest.me:9081/auth/realms/master
+      userIDClaim: email
+    profileURL: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/userinfo
+    provider: oidc
+    redeemURL: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token
+    scope: openid
+    validateURL: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/userinfo
+server:
+  BindAddress: 0.0.0.0:4180
+  SecureBindAddress: ''
+  TLS: null
+upstreamConfig:
+  upstreams:
+    - flushInterval: 1s
+      id: /
+      passHostHeader: true
+      path: /
+      proxyWebSockets: true
+      timeout: 30s
+      uri: http://portal.localtest.me:3000

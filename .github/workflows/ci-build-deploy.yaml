@@ -197,29 +197,96 @@ jobs:
 
           oauthProxy:
             enabled: true
-            image:
-              repository: ${{ env.REGISTRY }}/bcgov-dss/api-serv-infra/oauth2-proxy
-              tag: 7.2.1-8c743f0c
-              pullPolicy: IfNotPresent
 
             config:
-              upstream: http://127.0.0.1:3000
-              client-id: ${{ secrets.OIDC_CLIENT_ID }}
-              client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
-              oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
-              redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|/content|^[/]$'
-              whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
-              skip-provider-button: 'true'
-              profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
-              insecure-oidc-allow-unverified-email: 'true'
-              oidc-email-claim: 'sub'
-              pass-basic-auth: 'false'
-              pass-access-token: 'true'
-              set-xauthrequest: 'true'
-              skip-jwt-bearer-tokens: 'false'
-              set-authorization-header: 'false'
-              pass-authorization-header: 'false'
+              - filename: oauth2-proxy.cfg
+                mountPath: /oauth2-proxy.cfg
+                contents: |-
+                  cookie_expire="24h"
+                  cookie_refresh="3m"
+                  cookie_secure="true"
+                  cookie_samesite="strict"
+                  email_domains="*"
+                  redirect_url="https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback"
+                  skip_auth_regex="/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/admin/session|/about|/maintenance|/feed|/metrics|/ds/api|/gw/api|/signout|/content|^[/]$"
+                  skip_jwt_bearer_tokens="false"
+                  skip_provider_button='true'
+                  whitelist_domains="authz-apps-gov-bc-ca.dev.api.gov.bc.ca"
+                  # redis_connection_url="redis://redis-headless:6379"
+                  # session_store_type="redis"
+                  # redis_password="${var.dr.redis_password}"
+                  # insecure-oidc-allow-unverified-email: 'true'
+                  # insecure-oidc-skip-issuer-verification: 'true'
+                  # oidc-email-claim: 'sub'
+                  # pass-authorization-header: 'false'
+                  # set-authorization-header: 'false'
+
+              - filename: oauth2-proxy.yaml
+                mountPath: /oauth2-proxy.yaml
+                yaml:
+                  injectRequestHeaders:
+                    - name: X-Forwarded-Groups
+                      values:
+                        - claim: groups
+                    - name: X-Forwarded-User
+                      values:
+                        - claim: user
+                    - name: X-Forwarded-Email
+                      values:
+                        - claim: email
+                    - name: X-Forwarded-Preferred-Username
+                      values:
+                        - claim: preferred_username
+                    - name: X-Forwarded-Access-Token
+                      values:
+                        - claim: access_token
+                  injectResponseHeaders: []
+                  metricsServer:
+                    BindAddress: ""
+                    SecureBindAddress: ""
+                    TLS: null
+                  providers:
+                    - clientID: ${{ secrets.OIDC_CLIENT_ID }}
+                      clientSecret: ${{ secrets.OIDC_CLIENT_SECRET }}
+                      loginURL: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/auth
+                      id: oidc=aps-portal
+                      loginURLParameters:
+                        - default:
+                            - force
+                          name: approval_prompt
+                        - allow:
+                            - pattern: ".*$"
+                          name: kc_idp_hint
+                      oidcConfig:
+                        audienceClaims:
+                          - aud
+                        emailClaim: sub
+                        groupsClaim: groups
+                        insecureAllowUnverifiedEmail: true
+                        insecureSkipNonce: true
+                        issuerURL: ${{ secrets.OIDC_ISSUER }}
+                        userIDClaim: sub
+
+                      profileURL: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
+                      provider: oidc
+                      redeemURL: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/token
+                      scope: openid
+                      validateURL: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
+
+                  server:
+                    BindAddress: 0.0.0.0:7999
+                    SecureBindAddress: ""
+                    TLS: null
+                  upstreamConfig:
+                    upstreams:
+                      - flushInterval: 1s
+                        id: /
+                        passHostHeader: true
+                        path: /
+                        proxyWebSockets: true
+                        timeout: 30s
+                        uri: http://127.0.0.1:3000
+
           env:
             SESSION_SECRET:
               value: '234873290483290'
