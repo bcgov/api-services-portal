@@ -206,7 +206,7 @@ jobs:
                   cookie_refresh='3m'
                   cookie_secure='true'
                   cookie_samesite='strict'
-                  email_domains='*''
+                  email_domains='*'
                   redirect_url='https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback'
                   skip_auth_regex='/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed|/metrics|/signout|/gw/api|/content|^[/]$'
                   skip_jwt_bearer_tokens='false'
