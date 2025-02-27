@@ -1,9 +1,13 @@
 ---
-name: API Services Portal Issue Template
-about: Generic template for all GitHub issues
+name: API Services Portal Bug Issue Template
+about: Generic template for bug GitHub issues
+title: ''
+labels: bug, jira
+assignees: ''
+
 ---
 
-# API Services Portal Issue
+# API Services Portal Bug Issue
 
 <!-- Use what you want. Remove what you don't want. -->
 

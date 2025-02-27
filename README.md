@@ -76,9 +76,10 @@ hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
 
 docker run -ti --rm --name proxy --net=host \
   --add-host portal.localtest.me:$hostip \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.yaml:/oauth2.yaml \
   -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
-  quay.io/oauth2-proxy/oauth2-proxy:v7.2.0 \
-  --config /oauth2.config
+  quay.io/oauth2-proxy/oauth2-proxy:v7.8.1 \
+  --alpha-config /oauth2.yaml --config /oauth2.config
 ```
 
 1. Start the Portal locally:

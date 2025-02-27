@@ -110,6 +110,7 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
+    assert.strictEqual('errors' in result, false, 'Unable to process request');
     return result.data.allNamespaces.map((ns: Namespace) => ns.name).sort();
   }
 
