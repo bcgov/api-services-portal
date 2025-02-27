@@ -42,18 +42,17 @@ services:
         aliases:
           - keycloak.localtest.me
   oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.8.1
     container_name: oauth2-proxy
-    command: --config ./oauth2-proxy.cfg
+    command: --alpha-config /oauth2-proxy.yaml --config /oauth2-proxy.cfg
     depends_on:
       - keycloak
     ports:
       - 4180:4180/tcp
     volumes:
+      - ./local/oauth2-proxy/oauth2-proxy-local.yaml:/oauth2-proxy.yaml
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
-    env_file:
-      - .env.local
     networks:
       aps-net:
         aliases:
