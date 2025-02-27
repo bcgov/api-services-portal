@@ -13,6 +13,7 @@ export async function checkStatus(res: any) {
       reason: 'unknown_error',
       description: '',
       status: `${res.status} ${res.statusText}`,
+      statusCode: res.status,
     };
     logger.error('Error - %d %s', res.status, res.statusText);
     const body = await res.text();

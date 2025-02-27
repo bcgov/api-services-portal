@@ -111,11 +111,22 @@ export class NamespaceController extends Controller {
       query: list,
     });
     logger.debug('Result %j', result);
+    assert.strictEqual('errors' in result, false, 'Unable to process request');
+
     return result.data.allNamespaces
-      .map((ns: Namespace): Gateway => ({ gatewayId: ns.name, displayName: ns.displayName }))
+      .map(
+        (ns: Namespace): Gateway => ({
+          gatewayId: ns.name,
+          displayName: ns.displayName,
+        })
+      )
       .sort((a: Gateway, b: Gateway) => {
-        const displayNameComparison = a.displayName.localeCompare(b.displayName);
-        return displayNameComparison !== 0 ? displayNameComparison : a.gatewayId.localeCompare(b.gatewayId);
+        const displayNameComparison = a.displayName.localeCompare(
+          b.displayName
+        );
+        return displayNameComparison !== 0
+          ? displayNameComparison
+          : a.gatewayId.localeCompare(b.gatewayId);
       });
   }
 
