@@ -97,7 +97,9 @@ export class UMA2TokenService {
           return res.json();
         } else if (res.status == 403) {
           // users that have no resources will get a 403, so gracefully handle that as "access to no resources"
-          return [];
+          return new Promise((resolve) => {
+            resolve([]);
+          });
         } else {
           return checkStatus(res);
         }
