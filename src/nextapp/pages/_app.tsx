@@ -17,6 +17,7 @@ import Global from '@/shared/services/global';
 import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
 import MaintenanceBanner from '@/components/maintenance-banner';
+import KongBanner from '@/components/kong3-banner';
 import theme from '@/shared/theme';
 import links, { gatewayPages } from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
@@ -101,6 +102,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               </Head>
               <CompleteProfile />
               <MaintenanceBanner />
+              {router?.pathname.startsWith('/manager') ? <KongBanner /> : null}
               <Header site={site}>
                 <AuthAction site={site} />
               </Header>
