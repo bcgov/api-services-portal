@@ -102,7 +102,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               </Head>
               <CompleteProfile />
               <MaintenanceBanner />
-              {router?.pathname.startsWith('/manager') ? <KongBanner /> : null}
               <Header site={site}>
                 <AuthAction site={site} />
               </Header>
@@ -115,6 +114,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   sm: requiresNamespace ? '163px' : '115px',
                 }}
               >
+                {router?.pathname.startsWith('/manager') ? <KongBanner /> : null}
                 <AppWrapper router={router}>
                   <Component {...pageProps} />
                 </AppWrapper>

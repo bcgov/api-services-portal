@@ -19,7 +19,7 @@ const KongBanner: React.FC<KongBannerProps> = ({
   text = (
     <>
       APS is preparing to upgrade to Kong Gateway version 3. For more information, please consult the{' '}
-      <Link href="https://example.com/transition-guide" color="blue.500" fontWeight="bold" isExternal>
+      <Link href="https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/kong3-upgrade/" color="blue.500" fontWeight="bold" isExternal>
         transition guide
       </Link>.
     </>
@@ -59,11 +59,8 @@ const KongBanner: React.FC<KongBannerProps> = ({
         height={{ base: '120px', sm: '100px' }}
         bgColor="#F9F1C6"
         d="flex"
-        pos="fixed"
-        top={0}
-        left={0}
+        pos="relative"
         w="100%"
-        zIndex="1000"
         border="none"
         color="#6C4A00"
         px={{ base: 4, sm: 16 }}
