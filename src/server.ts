@@ -289,7 +289,7 @@ const configureExpress = (app: any) => {
     require('@cypress/code-coverage/middleware/express')(app);
   }
 
-  app.use(express.json());
+  app.use(express.json({ limit: '300kb' }));
 
   app.use(function errorHandler(err: any, req: any, res: any, next: any) {
     if (err instanceof SyntaxError) {
