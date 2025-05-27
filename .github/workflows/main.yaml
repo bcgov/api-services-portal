@@ -44,7 +44,7 @@ jobs:
           echo "::set-output name=APP_REVISION::${GITHUB_SHA}"
         id: set-deploy-id
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
