@@ -1,9 +1,9 @@
 {
   "user": {
     "credentials": {
-      "username": "janis@idir",
+      "username": "320469e037c84a7abdfab15204a607c6@idir",
       "email": "janis@testmail.com",
-      "password": "awsummer"
+      "password": "asdf1234"
     }
   },
   "namespace": "newplatform",
@@ -795,7 +795,7 @@
   "githubUser": {
     "credentials": {
       "username": "janis@github",
-      "password": "awsummer"
+      "password": "asdf1234"
     }
   }
 }

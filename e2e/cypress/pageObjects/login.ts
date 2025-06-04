@@ -1,5 +1,5 @@
 class LoginPage {
-  path: string = '/'
+  path: string = '/oauth2/start?kc_idp_hint=none&rd=%2Fadmin%2Fsignin%3Ff%3D%252Fauth_callback'
 
   loginDropDown: string = '[data-testid=login-dropdown-btn]'
   usernameInput: string = '[id=username]'

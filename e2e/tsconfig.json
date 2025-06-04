@@ -7,7 +7,7 @@
     "noImplicitAny": true,
     "strict": true,
     "module": "commonjs",
-    "baseUrl": "http://oauth2proxy.localtest.me:4180/"
+    "baseUrl": "https://api-gov-bc-ca-lab.dev.api.gov.bc.ca"
   },
   "include": ["./cypress/**/*.ts", "**/*.d.ts"],
   "exclude": [],

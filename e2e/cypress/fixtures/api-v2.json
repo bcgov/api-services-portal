@@ -47,7 +47,7 @@
       "members": [
         {
           "member": {
-            "id": "janis@idir",
+            "id": "320469e037c84a7abdfab15204a607c6@idir",
             "email": "janis@testmail.com"
           },
           "roles": [
@@ -203,7 +203,7 @@
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
       ],
-      "owner": "janis@idir"
+      "owner": "320469e037c84a7abdfab15204a607c6@idir"
     },
     "shared_IDP_update_body": {
       "name": "Sample Shared IdP",

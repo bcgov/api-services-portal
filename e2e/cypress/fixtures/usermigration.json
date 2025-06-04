@@ -2,13 +2,13 @@
   "oldUser": {
     "credentials": {
       "username": "olduser@idir",
-      "password": "awsummer"
+      "password": "asdf1234"
     }
   },
   "newUser": {
     "credentials": {
       "username": "220469e037c84a7abdfab15204a60701@olduser",
-      "password": "awsummer"
+      "password": "asdf1234"
     }
   },
   "namespace": "newplatform"

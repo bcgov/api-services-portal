@@ -96,6 +96,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
       if (payload.displayName) {
         expect(body.displayName).to.be.equal(payload.displayName)
       }
+      cy.wait(500);
       return cy.wrap(body)
     }
   )
@@ -230,7 +231,10 @@ Cypress.Commands.add(
     cy.preserveCookies()
     cy.visit(login.path)
     cy.get('@apiowner').then(({ user }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
+      //cy.login(user.credentials.username, user.credentials.password)
+      cy.get(login.usernameInput).click().type(user.credentials.username)
+      cy.get(login.passwordInput).click().type(user.credentials.password)
+      cy.get(login.loginSubmitButton).click()
       cy.log('Logged in!')
       // cy.activateGateway(apiTest.namespace)
       if (isNamespaceSelected || undefined) {
@@ -239,6 +243,7 @@ Cypress.Commands.add(
       cy.getUserSession().then(() => {
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.headers['x-auth-request-access-token']
+          cy.wait(500)
           return userSession
         })
       })

@@ -1,7 +1,7 @@
 import cypress, { defineConfig } from 'cypress'
 //import plugins from './cypress/plugins/index.js'
 
-const baseUrl = 'http://oauth2proxy.localtest.me:4180'
+const baseUrl = 'https://api-gov-bc-ca-lab.dev.api.gov.bc.ca'
 
 export default defineConfig({
   env: {
@@ -62,18 +62,18 @@ export default defineConfig({
       ASTRA_SCAN_ENABLED: true,
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
-      OIDC_ISSUER: 'http://keycloak.localtest.me:9081/auth/realms/master',
+      OIDC_ISSUER: 'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca/auth/realms/master',
       TOKEN_URL:
-        'http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token',
+        'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token',
       GWA_API_URL: 'http://gwa-api.localtest.me:2000/v2',
       KONG_URL: 'http://kong.localtest.me:8000',
       JWKS_URL: 'http://cypress-jwks-url.localtest.me:3500',
       KONG_CONFIG_URL: 'http://kong.localtest.me:8001',
-      BASE_URL: 'http://oauth2proxy.localtest.me:4180',
-      KEYCLOAK_URL: 'http://keycloak.localtest.me:9081',
+      BASE_URL: 'https://api-gov-bc-ca-lab.dev.api.gov.bc.ca',
+      KEYCLOAK_URL: 'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca',
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
-      DEV_USERNAME: 'janis@idir',
-      DEV_PASSWORD: 'awsummer',
+      DEV_USERNAME: '320469e037c84a7abdfab15204a607c6@idir',
+      DEV_PASSWORD: 'asdf1234',
     },
     retries: {
       runMode: 2,

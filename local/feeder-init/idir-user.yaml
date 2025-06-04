@@ -1,6 +1,6 @@
 entity: User
 record:
-  id: 'janis@idir'
+  id: '320469e037c84a7abdfab15204a607c6@idir'
   name: 'Janis Smith'
   email: 'janis@testmail.com'
   provider: 'idir'
