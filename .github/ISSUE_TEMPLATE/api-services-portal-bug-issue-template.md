@@ -2,7 +2,7 @@
 name: API Services Portal Bug Issue Template
 about: Generic template for bug GitHub issues
 title: ''
-labels: bug, jira
+labels: bug
 assignees: ''
 
 ---

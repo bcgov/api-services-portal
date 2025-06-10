@@ -8,27 +8,27 @@ const log = Logger('prometheus');
 
 const queryRanges = [
   {
-    query: 'sum(increase(kong_http_status[1d])) by (service,code)',
+    query: 'sum(increase(kong_http_requests_total[1d])) by (service,code)',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily_service_code',
   },
   {
-    query: 'sum(increase(kong_http_status[60m])) by (service,namespace)',
+    query: 'sum(increase(kong_http_requests_total[60m])) by (service,namespace)',
     step: 60 * 60,
     id: 'kong_http_requests_hourly_service',
   },
   {
-    query: 'sum(increase(kong_http_status[60m])) by (namespace)',
+    query: 'sum(increase(kong_http_requests_total[60m])) by (namespace)',
     step: 60 * 60,
     id: 'kong_http_requests_hourly_namespace',
   },
   {
-    query: 'sum(increase(kong_http_status[1d])) by (namespace)',
+    query: 'sum(increase(kong_http_requests_total[1d])) by (namespace)',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily_namespace',
   },
   {
-    query: 'sum(increase(kong_http_status[1d]))',
+    query: 'sum(increase(kong_http_requests_total[1d]))',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily',
   },
