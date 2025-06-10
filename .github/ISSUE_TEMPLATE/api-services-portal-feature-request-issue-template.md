@@ -2,7 +2,7 @@
 name: API Services Portal Feature Request Issue Template
 about: Generic template for feature request GitHub issues
 title: ''
-labels: enhancement, jira
+labels: enhancement
 assignees: ''
 
 ---
