@@ -17,5 +17,9 @@
   "github": {
     "text": "Github",
     "description": ""
+  },
+  "verifiedcredential": {
+    "text": "Verified Credential",
+    "description": "A digital credential that proves your identity and is issued by a trusted authority."
   }
 }
