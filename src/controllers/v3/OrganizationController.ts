@@ -208,9 +208,9 @@ export class OrganizationController extends Controller {
    * @returns
    */
   @Post('{org}/gateways')
-  @OperationId('create-gateway')
+  @OperationId('organization-create-gateway')
   @Security('jwt', ['Namespace.Assign'])
-  public async create(
+  public async createGateway(
     @Request() request: any,
     @Body() vars: Gateway
   ): Promise<Gateway> {
