@@ -19,3 +19,11 @@ export interface PublishResult {
   results?: string;
   error?: string;
 }
+
+export interface GatewayAdd {
+  gatewayId?: string; // Primary Key
+  displayName?: string;
+  org?: string;
+  domains?: string;
+  dataPlane?: string;
+}

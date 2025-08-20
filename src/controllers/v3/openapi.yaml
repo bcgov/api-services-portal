@@ -187,10 +187,6 @@ components:
                     type: string
                 displayName:
                     type: string
-                domains:
-                    type: string
-                dataPlane:
-                    type: string
             type: object
             additionalProperties: false
         ActivityDetail:
@@ -519,6 +515,20 @@ components:
                 - orgUnit
                 - enabled
                 - updatedAt
+            type: object
+            additionalProperties: false
+        GatewayAdd:
+            properties:
+                gatewayId:
+                    type: string
+                displayName:
+                    type: string
+                org:
+                    type: string
+                domains:
+                    type: string
+                dataPlane:
+                    type: string
             type: object
             additionalProperties: false
         DraftDatasetRefID:
@@ -1470,7 +1480,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Gateway'
+                            $ref: '#/components/schemas/GatewayAdd'
     '/organizations/{org}/{orgUnit}/gateways/{gatewayId}':
         put:
             operationId: assign-namespace-to-organization

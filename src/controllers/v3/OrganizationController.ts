@@ -47,7 +47,7 @@ import { getActivity } from '../../services/keystone/activity';
 import { Activity, Gateway, Organization } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
 import { ActivitySummary } from '../../services/keystone/types';
-import { ActivityDetail } from './types-extra';
+import { ActivityDetail, GatewayAdd } from './types-extra';
 import { BatchResult } from '../../batch/types';
 import { assertEqual } from '../ioc/assert';
 import { gql } from 'graphql-request';
@@ -213,7 +213,7 @@ export class OrganizationController extends Controller {
   public async createGateway(
     @Path() org: string,
     @Request() request: any,
-    @Body() vars: Gateway
+    @Body() vars: GatewayAdd
   ): Promise<Gateway> {
     const modifiedVars = replaceKey(vars, 'gatewayId', 'name');
     const result = await this.keystone.executeGraphQL({

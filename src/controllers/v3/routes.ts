@@ -134,8 +134,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "gatewayId": {"dataType":"string"},
             "displayName": {"dataType":"string"},
-            "domains": {"dataType":"string"},
-            "dataPlane": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -344,6 +342,18 @@ const models: TsoaRoute.Models = {
             "orgUnit": {"dataType":"string","required":true},
             "enabled": {"dataType":"boolean","required":true},
             "updatedAt": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GatewayAdd": {
+        "dataType": "refObject",
+        "properties": {
+            "gatewayId": {"dataType":"string"},
+            "displayName": {"dataType":"string"},
+            "org": {"dataType":"string"},
+            "domains": {"dataType":"string"},
+            "dataPlane": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -1335,7 +1345,7 @@ export function RegisterRoutes(app: express.Router) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    vars: {"in":"body","name":"vars","required":true,"ref":"Gateway"},
+                    vars: {"in":"body","name":"vars","required":true,"ref":"GatewayAdd"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
