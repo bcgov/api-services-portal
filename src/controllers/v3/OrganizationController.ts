@@ -217,7 +217,7 @@ export class OrganizationController extends Controller {
   ): Promise<Gateway> {
     const modifiedVars = replaceKey(vars, 'gatewayId', 'name');
     const result = await this.keystone.executeGraphQL({
-      context: this.keystone.createContext(request),
+      context: this.keystone.createContext(request, true),
       query: createNS,
       variables: modifiedVars,
     });
