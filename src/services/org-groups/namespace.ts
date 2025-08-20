@@ -160,7 +160,7 @@ export class NamespaceService {
       )
       .map((group) => ({
         name: group.name,
-        orgUnit: group.attributes['org-unit'][0],
+        orgUnit: 'org-unit' in group.attributes ? group.attributes['org-unit'][0] : null,
         enabled:
           'org-enabled' in group.attributes
             ? group.attributes['org-enabled'][0] === 'true'
