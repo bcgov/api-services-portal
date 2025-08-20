@@ -211,6 +211,7 @@ export class OrganizationController extends Controller {
   @OperationId('organization-create-gateway')
   @Security('jwt', ['Namespace.Assign'])
   public async createGateway(
+    @Path() org: string,
     @Request() request: any,
     @Body() vars: Gateway
   ): Promise<Gateway> {
@@ -229,7 +230,7 @@ export class OrganizationController extends Controller {
     }
     return {
       gatewayId: result.data.createNamespace.name,
-      displayName: result.data.createNamespace.displayName,
+      displayName: result.data.createNamespace.displayName
     };
   }
 
