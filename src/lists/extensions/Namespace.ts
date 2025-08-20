@@ -460,7 +460,7 @@ module.exports = {
           },
           {
             schema:
-              'createNamespace(name: String, displayName: String): Namespace',
+              'createNamespace(name: String, displayName: String, org: String, domains: String, dataPlane: String): Namespace',
             resolver: async (
               item: any,
               args: any,
@@ -554,7 +554,27 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientSecret
               );
 
-              await kcGroupService.createIfMissing('ns', newNS);
+              const group = await kcGroupService.createIfMissing('ns', newNS);
+
+              const groupDetail = await kcGroupService.getGroupById(group.id);
+              
+              groupDetail.attributes = groupDetail.attributes || {};
+              let update = false;
+              if (args.org) {
+                update = true;
+                groupDetail.attributes['org'] = args.org;
+              }
+              if (args.domains) {
+                update = true;
+                groupDetail.attributes['perm-domains'] = args.domains.split(',');
+              }
+              if (args.dataPlane) {
+                update = true;
+                groupDetail.attributes['perm-data-plane'] = args.dataPlane;
+              }
+              if (update) {
+                await kcGroupService.updateGroup(groupDetail);
+              }
 
               await recordActivity(
                 context.sudo(),

@@ -77,11 +77,11 @@ export class KeycloakGroupService {
   public async createIfMissing(
     parentGroupName: string,
     groupName: string
-  ): Promise<void> {
+  ): Promise<{ created: boolean; id: string }> {
     const groups = (await this.kcAdminClient.groups.find()).filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
-    await this.createIfMissingForParentGroup(groups[0], groupName);
+    return await this.createIfMissingForParentGroup(groups[0], groupName);
   }
 
   public async createRootGroup(groupName: string) {

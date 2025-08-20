@@ -145,6 +145,8 @@ export interface Namespace {
 export interface Gateway {
   gatewayId?: string; // Primary Key
   displayName?: string;
+  domains?: string;
+  dataPlane?: string;
 }
 
 

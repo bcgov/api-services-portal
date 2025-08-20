@@ -347,8 +347,8 @@ export class OrganizationController extends Controller {
 }
 
 const createNS = gql`
-  mutation CreateNamespace($name: String, $displayName: String) {
-    createNamespace(name: $name, displayName: $displayName) {
+  mutation CreateNamespace($name: String, $displayName: String, $org: String, $domains: String, $dataPlane: String) {
+    createNamespace(name: $name, displayName: $displayName, org: $org, domains: $domains, dataPlane: $dataPlane) {
       name
       displayName
     }
