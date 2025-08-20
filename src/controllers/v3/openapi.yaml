@@ -187,6 +187,10 @@ components:
                     type: string
                 displayName:
                     type: string
+                domains:
+                    type: string
+                dataPlane:
+                    type: string
             type: object
             additionalProperties: false
         ActivityDetail:
@@ -1454,7 +1458,13 @@ paths:
                 -
                     jwt:
                         - Namespace.Assign
-            parameters: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
             requestBody:
                 required: true
                 content:

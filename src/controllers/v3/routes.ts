@@ -134,6 +134,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "gatewayId": {"dataType":"string"},
             "displayName": {"dataType":"string"},
+            "domains": {"dataType":"string"},
+            "dataPlane": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -1331,6 +1333,7 @@ export function RegisterRoutes(app: express.Router) {
 
             async function OrganizationController_createGateway(request: any, response: any, next: any) {
             const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     vars: {"in":"body","name":"vars","required":true,"ref":"Gateway"},
             };
