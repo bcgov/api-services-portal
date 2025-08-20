@@ -562,7 +562,7 @@ module.exports = {
               let update = false;
               if (args.org) {
                 update = true;
-                groupDetail.attributes['org'] = args.org;
+                groupDetail.attributes['org'] = [ args.org ];
               }
               if (args.domains) {
                 update = true;
@@ -570,7 +570,7 @@ module.exports = {
               }
               if (args.dataPlane) {
                 update = true;
-                groupDetail.attributes['perm-data-plane'] = args.dataPlane;
+                groupDetail.attributes['perm-data-plane'] = [ args.dataPlane ];
               }
               if (update) {
                 await kcGroupService.updateGroup(groupDetail);
