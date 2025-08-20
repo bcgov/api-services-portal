@@ -138,13 +138,17 @@ export async function transformOrgAndOrgUnit(
   const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
   if (orgInfo) {
     merged['org'] = { name: orgInfo.name, title: orgInfo.title };
-    merged['orgUnit'] = {
-      name: orgInfo.orgUnits[0].name,
-      title: orgInfo.orgUnits[0].title,
-    };
+    if ('orgUnit' in orgInfo) {
+      merged['orgUnit'] = {
+        name: orgInfo.orgUnits[0].name,
+        title: orgInfo.orgUnits[0].title,
+      };
+    }
   } else {
     merged['org'] = { name: merged.org, title: merged.org };
-    merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
+    if ('orgUnit' in merged) {
+      merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
+    }
   }
 
   // lookup org admins from
