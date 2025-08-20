@@ -138,7 +138,7 @@ export async function transformOrgAndOrgUnit(
   const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
   if (orgInfo) {
     merged['org'] = { name: orgInfo.name, title: orgInfo.title };
-    if ('orgUnit' in orgInfo) {
+    if (orgInfo.orgUnits) {
       merged['orgUnit'] = {
         name: orgInfo.orgUnits[0].name,
         title: orgInfo.orgUnits[0].title,
@@ -146,7 +146,7 @@ export async function transformOrgAndOrgUnit(
     }
   } else {
     merged['org'] = { name: merged.org, title: merged.org };
-    if ('orgUnit' in merged) {
+    if (merged.orgUnits) {
       merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
     }
   }
