@@ -464,12 +464,6 @@ const metadata = {
         refKey: 'name',
         filterByNamespace: true,
       },
-      spec: {
-        name: 'connectExclusiveOne',
-        list: 'Blob',
-        refKey: 'ref',
-        filterByNamespace: true,
-      },
     },
     validations: {
       active: { type: 'boolean' },
