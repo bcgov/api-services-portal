@@ -403,8 +403,6 @@ const models: TsoaRoute.Models = {
             "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
-            "organization": {"ref":"OrganizationRefID"},
-            "organizationUnit": {"ref":"OrganizationUnitRefID"},
         },
         "additionalProperties": false,
     },

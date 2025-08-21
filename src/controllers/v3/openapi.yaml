@@ -609,10 +609,6 @@ components:
                     items:
                         $ref: '#/components/schemas/Environment'
                     type: array
-                organization:
-                    $ref: '#/components/schemas/OrganizationRefID'
-                organizationUnit:
-                    $ref: '#/components/schemas/OrganizationUnitRefID'
             type: object
             additionalProperties: false
             example:

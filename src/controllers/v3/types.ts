@@ -296,8 +296,6 @@ export interface Product {
   openapiSpecs?: string[];
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
-  organization?: OrganizationRefID;
-  organizationUnit?: OrganizationUnitRefID;
 }
 
 

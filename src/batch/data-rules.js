@@ -408,7 +408,7 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'type', 'description', 'namespace', 'organization', 'organizationUnit', 'openapiSpecs'],
+    sync: ['name', 'type', 'description', 'namespace', 'openapiSpecs'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       openapiSpecs: { name: "toStringDefaultArray" },
@@ -417,17 +417,7 @@ const metadata = {
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
-      },
-      organization: {
-        name: 'connectOne',
-        list: 'allOrganizations',
-        refKey: 'name',
-      },
-      organizationUnit: {
-        name: 'connectOne',
-        list: 'allOrganizationUnits',
-        refKey: 'name',
-      },
+      }
     },
     validations: {
       type: {
