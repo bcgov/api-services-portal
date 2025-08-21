@@ -63,7 +63,7 @@ export class OrgProductController extends Controller {
       ctx,
       'Product',
       undefined,
-      [],
+      ['environments'],
       batchClause
     );
 
