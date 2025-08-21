@@ -263,6 +263,7 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
+  gatewayId?: string;
   owner?: UserRefID;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
@@ -290,8 +291,12 @@ export interface Product {
   name?: string;
   description?: string;
   gatewayId?: string;
+  openapSpecs?: string;
+  openapiSpecs?: string[];
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
+  organizationUnit?: OrganizationUnitRefID;
 }
 
 
@@ -312,6 +317,7 @@ export interface Environment {
   approval?: boolean;
   flow?: "public" | "protected-externally" | "authorization-code" | "client-credentials" | "kong-acl-only" | "kong-api-key-only" | "kong-api-key-acl";
   additionalDetailsToRequest?: string;
+  spec?: string;
   services?: GatewayServiceRefID[];
   legal?: LegalRefID;
   credentialIssuer?: CredentialIssuerRefID;
@@ -337,7 +343,7 @@ export interface CredentialIssuer {
   flow?: "client-credentials";
   mode?: "auto";
   authPlugin?: string;
-  clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url";
+  clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url" | "client-certificate";
   instruction?: string;
   environmentDetails?: IssuerEnvironmentConfig[];
   resourceType?: string;

@@ -335,6 +335,7 @@ components:
                         - client-secret
                         - client-jwt
                         - client-jwt-jwks-url
+                        - client-certificate
                 instruction:
                     type: string
                 environmentDetails:
@@ -565,6 +566,8 @@ components:
                         - kong-api-key-acl
                 additionalDetailsToRequest:
                     type: string
+                spec:
+                    type: string
                 services:
                     items:
                         $ref: '#/components/schemas/GatewayServiceRefID'
@@ -591,12 +594,22 @@ components:
                     type: string
                 gatewayId:
                     type: string
+                openapSpecs:
+                    type: string
+                openapiSpecs:
+                    items:
+                        type: string
+                    type: array
                 dataset:
                     $ref: '#/components/schemas/DraftDatasetRefID'
                 environments:
                     items:
                         $ref: '#/components/schemas/Environment'
                     type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
             type: object
             additionalProperties: false
             example:
@@ -1610,6 +1623,63 @@ paths:
                         default: 0
                         format: double
                         type: number
+    '/organizations/{org}/products':
+        get:
+            operationId: organization-products
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Dataset'
+                                type: array
+            description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Get Organization Datasets'
+            tags:
+                - 'API Directory (Administration)'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+        put:
+            operationId: organization-put-product
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Manage Products for APIs that will appear on the API Directory\n> `Required Scope:` Namespace.Manage"
+            summary: 'Manage Products'
+            tags:
+                - 'API Directory (Administration)'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Product'
     /roles:
         get:
             operationId: GetRoles

@@ -18,6 +18,10 @@ module.exports = {
         { value: 'json', label: 'JSON' },
       ],
     },
+    namespace: {
+      type: Text,
+      isRequired: false,
+    },
     blob: {
       type: Text,
       isRequired: true,

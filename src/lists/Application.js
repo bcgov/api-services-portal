@@ -25,6 +25,11 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    namespace: {
+        type: Text,
+        isRequired: false,
+        access: { update: false },
+    },
     description: {
         type: Text,
         isRequired: true,

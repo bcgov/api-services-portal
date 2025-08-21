@@ -352,6 +352,7 @@ components:
                         - client-secret
                         - client-jwt
                         - client-jwt-jwks-url
+                        - client-certificate
                 instruction:
                     type: string
                 environmentDetails:
@@ -623,6 +624,8 @@ components:
                         - kong-api-key-acl
                 additionalDetailsToRequest:
                     type: string
+                spec:
+                    type: string
                 services:
                     items:
                         $ref: '#/components/schemas/GatewayServiceRefID'
@@ -649,12 +652,22 @@ components:
                     type: string
                 namespace:
                     type: string
+                openapSpecs:
+                    type: string
+                openapiSpecs:
+                    items:
+                        type: string
+                    type: array
                 dataset:
                     $ref: '#/components/schemas/DraftDatasetRefID'
                 environments:
                     items:
                         $ref: '#/components/schemas/Environment'
                     type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
             type: object
             additionalProperties: false
             example:

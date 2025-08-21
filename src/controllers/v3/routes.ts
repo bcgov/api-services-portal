@@ -23,6 +23,8 @@ import { IssuerController } from './IssuerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrganizationController } from './OrganizationController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrgProductController } from './OrgProductController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrgRoleController } from './OrgRoleController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductController } from './ProductController';
@@ -231,7 +233,7 @@ const models: TsoaRoute.Models = {
             "flow": {"dataType":"enum","enums":["client-credentials"]},
             "mode": {"dataType":"enum","enums":["auto"]},
             "authPlugin": {"dataType":"string"},
-            "clientAuthenticator": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["client-secret"]},{"dataType":"enum","enums":["client-jwt"]},{"dataType":"enum","enums":["client-jwt-jwks-url"]}]},
+            "clientAuthenticator": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["client-secret"]},{"dataType":"enum","enums":["client-jwt"]},{"dataType":"enum","enums":["client-jwt-jwks-url"]},{"dataType":"enum","enums":["client-certificate"]}]},
             "instruction": {"dataType":"string"},
             "environmentDetails": {"dataType":"array","array":{"dataType":"refObject","ref":"IssuerEnvironmentConfig"}},
             "resourceType": {"dataType":"string"},
@@ -382,6 +384,7 @@ const models: TsoaRoute.Models = {
             "approval": {"dataType":"boolean"},
             "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
             "additionalDetailsToRequest": {"dataType":"string"},
+            "spec": {"dataType":"string"},
             "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
             "legal": {"ref":"LegalRefID"},
             "credentialIssuer": {"ref":"CredentialIssuerRefID"},
@@ -396,8 +399,12 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string"},
             "description": {"dataType":"string"},
             "gatewayId": {"dataType":"string"},
+            "openapSpecs": {"dataType":"string"},
+            "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
+            "organization": {"ref":"OrganizationRefID"},
+            "organizationUnit": {"ref":"OrganizationUnitRefID"},
         },
         "additionalProperties": false,
     },
@@ -1457,6 +1464,67 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.namespaceActivity.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v3/organizations/:org/products',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgProductController_getProducts(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgProductController>(OrgProductController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getProducts.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v3/organizations/:org/products',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgProductController_put(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"Product"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgProductController>(OrgProductController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.put.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

@@ -387,7 +387,7 @@ const metadata = {
   Application: {
     query: 'allApplications',
     refKey: 'appId',
-    sync: ['name', 'description'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
       owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
       organization: {
@@ -408,15 +408,29 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'description', 'namespace'],
+    sync: ['name', 'description', 'namespace', 'organization', 'organizationUnit', 'openapSpecs'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
+      openapiSpecs: { name: "toStringDefaultArray" },
       environments: {
         name: 'connectExclusiveListCreate',
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
       },
+      organization: {
+        name: 'connectOne',
+        key: 'organization.id',
+        list: 'allOrganizations',
+        refKey: 'orgUnits.extForeignKey',
+      },
+      organizationUnit: {
+        name: 'connectOne',
+        key: 'organization.id',
+        list: 'allOrganizationUnits',
+        refKey: 'extForeignKey',
+      },
+
     },
     example: {
       name: 'my-new-product',
@@ -439,7 +453,7 @@ const metadata = {
       'name',
       { key: 'parent.id', whereClause: 'product: { id: $parent_id }' },
     ],
-    sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
+    sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest', 'spec'],
     ownedBy: 'product',
     transformations: {
       services: {
@@ -449,10 +463,17 @@ const metadata = {
         filterByNamespace: true,
       },
       legal: { name: 'connectOne', list: 'allLegals', refKey: 'reference' },
+      spec: { name: 'connectOne', list: 'allBlobs', refKey: 'name' },
       credentialIssuer: {
         name: 'connectOne',
         list: 'allCredentialIssuers',
         refKey: 'name',
+        filterByNamespace: true,
+      },
+      spec: {
+        name: 'connectExclusiveOne',
+        list: 'Blob',
+        refKey: 'ref',
         filterByNamespace: true,
       },
     },
@@ -530,7 +551,7 @@ const metadata = {
       mode: { type: 'enum', values: ['auto'] },
       clientAuthenticator: {
         type: 'enum',
-        values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url'],
+        values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url', 'client-certificate'],
       },
       environmentDetails: {
         type: 'entityArray',
