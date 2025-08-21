@@ -87,21 +87,23 @@ export class OrgProductController extends Controller {
    * @param body
    * @param request
    */
-  @Put('/{org}/products')
+  @Put('/{org}/gateways/{gatewayId}/products')
   @OperationId('organization-put-product')
   @Security('jwt', ['Dataset.Manage'])
   public async put(
+    @Path() gatewayId: string,
     @Path() org: string,
     @Body() body: Product,
     @Request() request: any
   ): Promise<BatchResult> {
     // TODO: Make sure namespace is allowed for this org
+    body['gatewayId'] = gatewayId;
 
     return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'Product',
       body['appId'],
-      body
+      replaceKey(body, 'gatewayId', 'namespace')
     );
   }  
 }

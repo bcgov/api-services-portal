@@ -408,7 +408,7 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'description', 'namespace', 'organization', 'organizationUnit', 'openapSpecs'],
+    sync: ['name', 'description', 'namespace', 'organization', 'organizationUnit', 'openapiSpecs'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       openapiSpecs: { name: "toStringDefaultArray" },
@@ -420,17 +420,14 @@ const metadata = {
       },
       organization: {
         name: 'connectOne',
-        key: 'organization.id',
         list: 'allOrganizations',
-        refKey: 'orgUnits.extForeignKey',
+        refKey: 'name',
       },
       organizationUnit: {
         name: 'connectOne',
-        key: 'organization.id',
         list: 'allOrganizationUnits',
-        refKey: 'extForeignKey',
+        refKey: 'name',
       },
-
     },
     example: {
       name: 'my-new-product',
