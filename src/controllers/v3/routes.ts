@@ -399,7 +399,6 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string"},
             "description": {"dataType":"string"},
             "gatewayId": {"dataType":"string"},
-            "openapSpecs": {"dataType":"string"},
             "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
@@ -1500,11 +1499,12 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/v3/organizations/:org/products',
+        app.put('/ds/api/v3/organizations/:org/gateways/:gatewayId/products',
             authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
 
             async function OrgProductController_put(request: any, response: any, next: any) {
             const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"Product"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},

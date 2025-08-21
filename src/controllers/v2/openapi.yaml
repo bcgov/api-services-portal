@@ -652,8 +652,6 @@ components:
                     type: string
                 namespace:
                     type: string
-                openapSpecs:
-                    type: string
                 openapiSpecs:
                     items:
                         type: string

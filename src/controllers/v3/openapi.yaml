@@ -594,8 +594,6 @@ components:
                     type: string
                 gatewayId:
                     type: string
-                openapSpecs:
-                    type: string
                 openapiSpecs:
                     items:
                         type: string
@@ -1650,6 +1648,7 @@ paths:
                     required: true
                     schema:
                         type: string
+    '/organizations/{org}/gateways/{gatewayId}/products':
         put:
             operationId: organization-put-product
             responses:
@@ -1668,6 +1667,12 @@ paths:
                     jwt:
                         - Dataset.Manage
             parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
                 -
                     in: path
                     name: org

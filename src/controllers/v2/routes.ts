@@ -417,7 +417,6 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string"},
             "description": {"dataType":"string"},
             "namespace": {"dataType":"string"},
-            "openapSpecs": {"dataType":"string"},
             "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},

@@ -291,7 +291,6 @@ export interface Product {
   name?: string;
   description?: string;
   namespace?: string;
-  openapSpecs?: string;
   openapiSpecs?: string[];
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
