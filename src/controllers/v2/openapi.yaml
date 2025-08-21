@@ -648,6 +648,11 @@ components:
                     type: string
                 name:
                     type: string
+                type:
+                    type: string
+                    enum:
+                        - app
+                        - service
                 description:
                     type: string
                 namespace:
@@ -671,6 +676,7 @@ components:
             example:
                 name: my-new-product
                 appId: '000000000000'
+                type: service
                 environments:
                     -
                         name: dev

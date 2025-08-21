@@ -415,6 +415,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "appId": {"dataType":"string"},
             "name": {"dataType":"string"},
+            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["app"]},{"dataType":"enum","enums":["service"]}]},
             "description": {"dataType":"string"},
             "namespace": {"dataType":"string"},
             "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
