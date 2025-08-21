@@ -98,6 +98,7 @@ export class OrgProductController extends Controller {
   ): Promise<BatchResult> {
     // TODO: Make sure namespace is allowed for this org
     body['gatewayId'] = gatewayId;
+    body['organization'] = org;
 
     return await syncRecordsThrowErrors(
       this.keystone.createContext(request, true),
