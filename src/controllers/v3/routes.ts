@@ -370,6 +370,11 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"string","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BlobRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "CredentialIssuerRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -384,9 +389,9 @@ const models: TsoaRoute.Models = {
             "approval": {"dataType":"boolean"},
             "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
             "additionalDetailsToRequest": {"dataType":"string"},
-            "spec": {"dataType":"string"},
             "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
             "legal": {"ref":"LegalRefID"},
+            "spec": {"ref":"BlobRefID"},
             "credentialIssuer": {"ref":"CredentialIssuerRefID"},
         },
         "additionalProperties": false,
@@ -403,6 +408,7 @@ const models: TsoaRoute.Models = {
             "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
+            "organization": {"ref":"OrganizationRefID"},
         },
         "additionalProperties": false,
     },

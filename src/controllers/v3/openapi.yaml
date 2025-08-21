@@ -536,6 +536,8 @@ components:
             type: string
         LegalRefID:
             type: string
+        BlobRefID:
+            type: string
         CredentialIssuerRefID:
             type: string
         Environment:
@@ -566,14 +568,14 @@ components:
                         - kong-api-key-acl
                 additionalDetailsToRequest:
                     type: string
-                spec:
-                    type: string
                 services:
                     items:
                         $ref: '#/components/schemas/GatewayServiceRefID'
                     type: array
                 legal:
                     $ref: '#/components/schemas/LegalRefID'
+                spec:
+                    $ref: '#/components/schemas/BlobRefID'
                 credentialIssuer:
                     $ref: '#/components/schemas/CredentialIssuerRefID'
             type: object
@@ -609,6 +611,8 @@ components:
                     items:
                         $ref: '#/components/schemas/Environment'
                     type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
             type: object
             additionalProperties: false
             example:

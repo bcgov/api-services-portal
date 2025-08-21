@@ -296,6 +296,7 @@ export interface Product {
   openapiSpecs?: string[];
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
 }
 
 
@@ -316,9 +317,9 @@ export interface Environment {
   approval?: boolean;
   flow?: "public" | "protected-externally" | "authorization-code" | "client-credentials" | "kong-acl-only" | "kong-api-key-only" | "kong-api-key-acl";
   additionalDetailsToRequest?: string;
-  spec?: string;
   services?: GatewayServiceRefID[];
   legal?: LegalRefID;
+  spec?: BlobRefID;
   credentialIssuer?: CredentialIssuerRefID;
 }
 
@@ -545,6 +546,11 @@ export interface DatasetResource {
  * @tsoaModel
  */  
 export type ApplicationRefID = string
+
+/**
+ * @tsoaModel
+ */  
+export type BlobRefID = string
 
 /**
  * @tsoaModel
