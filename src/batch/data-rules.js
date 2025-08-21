@@ -408,7 +408,7 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'description', 'namespace', 'organization', 'organizationUnit', 'openapiSpecs'],
+    sync: ['name', 'type', 'description', 'namespace', 'organization', 'organizationUnit', 'openapiSpecs'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       openapiSpecs: { name: "toStringDefaultArray" },
@@ -429,9 +429,16 @@ const metadata = {
         refKey: 'name',
       },
     },
+    validations: {
+      type: {
+        type: 'enum',
+        values: ['app', 'service'],
+      },
+    },
     example: {
       name: 'my-new-product',
       appId: '000000000000',
+      type: 'service',
       environments: [
         {
           name: 'dev',
