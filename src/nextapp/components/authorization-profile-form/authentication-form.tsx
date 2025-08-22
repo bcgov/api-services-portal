@@ -82,6 +82,14 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
                   Client Credential Flow, using signed JWT with JWKS URL or
                   Public Key
                 </Radio>
+                <Radio
+                  name="flow"
+                  data-testid="cc-jwt-cert-chkBox"
+                  value="client-credentials.client-certificate"
+                >
+                  Client Credential Flow, using x509 Certificate
+                </Radio>
+
               </VStack>
             </RadioGroup>
           </FormControl>
