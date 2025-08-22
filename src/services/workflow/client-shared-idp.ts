@@ -119,8 +119,10 @@ async function addClientToSharedIdP(
   ).clientRegistration(
     clientAuthenticator,
     clientId,
+    '',
     uuidv4(),
     controls.clientCertificate,
+    controls.subjectDn,
     controls.jwksUrl,
     clientMappers,
     true,

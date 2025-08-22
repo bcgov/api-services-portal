@@ -51,6 +51,7 @@ export interface RequestControls {
   plugins?: ConsumerPlugin[];
   clientCertificate?: string;
   clientGenCertificate?: boolean;
+  subjectDn?: string; // Subject DN for the client certificate
   jwksUrl?: string;
   subject?: SubjectIdentity;
 }

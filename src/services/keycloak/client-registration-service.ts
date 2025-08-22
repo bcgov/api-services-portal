@@ -71,8 +71,10 @@ export class KeycloakClientRegistrationService {
   public async clientRegistration(
     authenticator: ClientAuthenticator,
     clientId: string,
+    name: string,
     clientSecret: string,
     certificate: string,
+    subjectDn: string,
     jwksUrl: string,
     clientMappers: ClientMapper[],
     enabled: boolean = false,
@@ -83,6 +85,7 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.ClientSecret:
         body = Object.assign(JSON.parse(clientTemplateClientSecret), {
           enabled,
+          name,
           clientId,
           secret: clientSecret,
         });
@@ -90,6 +93,7 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.ClientJWT:
         body = Object.assign(JSON.parse(clientTemplateClientJwt), {
           enabled,
+          name,
           clientId,
           attributes: {
             'jwt.credential.public.key': certificate,
@@ -99,13 +103,17 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.ClientCertificate:
         body = Object.assign(JSON.parse(clientTemplateClientCertificate), {
           enabled,
+          name,
           clientId,
-          secret: clientSecret,
+          attributes: {
+            'x509.subjectdn': subjectDn
+          }
         });
         break;
       case ClientAuthenticator.SharedIdP:
         body = Object.assign(JSON.parse(clientTemplateSharedIdP), {
           enabled,
+          name,
           clientId,
           baseUrl,
           attributes: {},
@@ -114,6 +122,7 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.SharedIdPWithAuthz:
         body = Object.assign(JSON.parse(clientTemplateSharedIdPAuthz), {
           enabled,
+          name,
           clientId,
           baseUrl,
           attributes: {},

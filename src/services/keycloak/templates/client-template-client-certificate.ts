@@ -36,7 +36,7 @@ export const clientTemplateClientCertificate = JSON.stringify({
     "request.object.encryption.enc": "any",
     "dpop.bound.access.tokens": "false",
     "saml.assertion.signature": "false",
-    "x509.subjectdn": "CN=sdx-pub-icbc-sap.api.gov.bc.ca",
+    "x509.subjectdn": "",
     "request.object.encryption.alg": "any",
     "client.introspection.response.allow.jwt.claim.enabled": "false",
     "saml.encrypt": "false",
