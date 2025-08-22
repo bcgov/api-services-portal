@@ -41,3 +41,26 @@ export async function lookupMyApplicationsById(
   logger.debug('[lookupMyApplicationsById] result %j', result);
   return result.data.myApplications[0];
 }
+
+
+export async function createApplication(
+  context: any,
+  data: { name: string, ownerId: string, description?: string }
+): Promise<Application> {
+  logger.debug('[createApplication] %j', data);
+  const result = await context.executeGraphQL({
+    query: `mutation CreateApplication($name: String!, $description: String, $ownerId: ID!) {
+                  createApplication(data: {name: $name, owner: {connect: {id: $ownerId}}, description: $description}) {
+                      id
+                      appId
+                      name
+                      owner {
+                        name
+                      }
+                  }
+              }`,
+    variables: data,
+  });
+  logger.debug('[createApplication] result %j', result);
+  return result.data.createApplication;
+}

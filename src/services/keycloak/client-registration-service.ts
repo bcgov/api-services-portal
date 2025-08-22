@@ -7,6 +7,7 @@ import { headers } from './keycloak-api';
 import { strict as assert } from 'assert';
 
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
+import { clientTemplateClientCertificate } from './templates/client-template-client-certificate';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
 import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
@@ -38,6 +39,7 @@ export enum ClientAuthenticator {
   ClientJWT = 'client-jwt',
   ClientJWTwithJWKS = 'client-jwt-jwks-url',
   ClientSecret = 'client-secret',
+  ClientCertificate = 'client-certificate',
   SharedIdP = 'shared-idp',
   SharedIdPWithAuthz = 'shared-idp-authz',
 }
@@ -92,6 +94,13 @@ export class KeycloakClientRegistrationService {
           attributes: {
             'jwt.credential.public.key': certificate,
           },
+        });
+        break;
+      case ClientAuthenticator.ClientCertificate:
+        body = Object.assign(JSON.parse(clientTemplateClientCertificate), {
+          enabled,
+          clientId,
+          secret: clientSecret,
         });
         break;
       case ClientAuthenticator.SharedIdP:

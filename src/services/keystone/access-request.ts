@@ -1,9 +1,102 @@
 import { gql } from 'graphql-request';
 import { Logger } from '../../logger';
-import { AccessRequest, AccessRequestUpdateInput } from './types';
+import {
+  AccessRequest,
+  AccessRequestCreateInput,
+  AccessRequestUpdateInput,
+} from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.access-req');
+
+/*
+acceptLegal
+: 
+false
+additionalDetails
+: 
+""
+applicationId
+: 
+"2"
+controls
+: 
+"{\"clientGenCertificate\":false,\"jwksUrl\":\"\",\"clientCertificate\":\"\"}"
+name
+: 
+"Sample API FOR Cope, Aidan CITZ:EX"
+productEnvironmentId
+: 
+"12"
+requestor
+: 
+"12"*/
+
+export async function addAccessRequest(
+  context: any,
+  data: any
+): Promise<AccessRequest> {
+  const query = gql`
+    mutation AddAccessRequest(
+      $name: String!
+      $controls: String
+      $requestor: ID!
+      $applicationId: ID!
+      $productEnvironmentId: ID!
+      $additionalDetails: String
+      $acceptLegal: Boolean!
+    ) {
+      acceptLegal(
+        productEnvironmentId: $productEnvironmentId
+        acceptLegal: $acceptLegal
+      ) {
+        legalsAgreed
+      }
+
+      createAccessRequest(
+        data: {
+          name: $name
+          controls: $controls
+          additionalDetails: $additionalDetails
+          requestor: { connect: { id: $requestor } }
+          application: { connect: { id: $applicationId } }
+          productEnvironment: { connect: { id: $productEnvironmentId } }
+        }
+      ) {
+        id
+      }
+    }
+  `;
+
+  logger.debug('Mutation [addAccessRequest] data %j', data);
+  const result = await context.executeGraphQL({
+    query,
+    variables: { ...data },
+  });
+  logger.debug('Mutation [addAccessRequest] result %j', result);
+  return result.data.createAccessRequest;
+}
+
+export async function collectCredentials(context: any, id: string): Promise<AccessRequest> {
+  logger.debug('Collecting credentials for access request %s', id);
+  const query = gql`
+  mutation genCredential($id: ID!) {
+    updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+      credential
+    }
+  }`
+  const result = await context.executeGraphQL({
+    query,
+    variables: { id },
+  });
+  logger.debug('Mutation [collectCredentials] result %j', result);
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    'Error collecting credentials'
+  );
+  return result.data.updateAccessRequest;
+}
 
 export async function getAccessRequestsByNamespace(
   context: any,
