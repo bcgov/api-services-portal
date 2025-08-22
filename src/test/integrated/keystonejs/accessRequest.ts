@@ -31,11 +31,8 @@ export FEEDER_URL=http://localhost:6767
 
 import InitKeystone from './init';
 import { o } from '../util';
-import { addAccessRequest, collectCredentials, getAccessRequest, getOpenAccessRequestsByConsumer } from '../../../services/keystone/access-request';
-import { add } from 'lodash';
-import { AccessRequestCreateInput } from 'apis/shared/types/query.types';
+import { addAccessRequest, collectCredentials, getAccessRequest } from '../../../services/keystone/access-request';
 import { createApplication } from '../../../services/keystone/application';
-import { deleteServiceAccess } from '../../../services/keystone';
 import { revokeAllConsumerAccess } from '../../../services/workflow';
 
 (async () => {
