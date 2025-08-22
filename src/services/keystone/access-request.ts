@@ -84,8 +84,32 @@ export async function getAccessRequest(context: any, id: string): Promise<Access
         isApproved
         isIssued
         isComplete
+        controls
+        productEnvironment {
+          id
+          name
+          appId
+          product {
+            openapiSpecs
+            name
+          }
+        }
+        requestor {
+          username
+        }
+        application {
+          id
+          appId
+          namespace
+          name
+        }
         serviceAccess {
           id
+          consumer {
+            id
+            username
+            tags
+          }
         }
       }
     }

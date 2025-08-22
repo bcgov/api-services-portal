@@ -31,9 +31,16 @@ export FEEDER_URL=http://localhost:6767
 
 import InitKeystone from './init';
 import { o } from '../util';
-import { addAccessRequest, collectCredentials, getAccessRequest } from '../../../services/keystone/access-request';
+import {
+  addAccessRequest,
+  collectCredentials,
+  getAccessRequest,
+} from '../../../services/keystone/access-request';
 import { createApplication } from '../../../services/keystone/application';
-import { revokeAllConsumerAccess } from '../../../services/workflow';
+import {
+  revokeAllConsumerAccess,
+  saveConsumerLabels,
+} from '../../../services/workflow';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -46,7 +53,7 @@ import { revokeAllConsumerAccess } from '../../../services/workflow';
   const identity = {
     id: null,
     username: 'sample_username',
-    name: "SampleF UserL",
+    name: 'SampleF UserL',
     namespace: ns,
     roles: JSON.stringify(['api-owner']),
     scopes: [],
@@ -65,16 +72,19 @@ import { revokeAllConsumerAccess } from '../../../services/workflow';
     additionalDetails: 'here is some additional details',
     //applicationId: '5', // App2
     //controls: '{"clientGenCertificate":false,"jwksUrl":"","clientCertificate":""}',
-    controls: JSON.stringify({ "jwksUrl":"",subjectDn: "CN=my-site"}),
+    controls: JSON.stringify({ jwksUrl: '', subjectDn: 'CN=my-site' }),
     name: 'Sample API FOR Cope, Aidan CITZ:EX',
     productEnvironmentId: '13',
     requestor: userId,
   } as any;
 
-
   // userId is needed for Legal
 
-  const app = await createApplication(ctx, { name: 'App', description: 'App Desc', ownerId: userId });
+  const app = await createApplication(ctx, {
+    name: 'App ' + new Date().toISOString(),
+    description: 'App Desc',
+    ownerId: userId,
+  });
 
   accessRequestData.applicationId = app.id;
 
@@ -82,39 +92,46 @@ import { revokeAllConsumerAccess } from '../../../services/workflow';
   o(result);
 
   const creds = await collectCredentials(ctx, result.id);
-  o(JSON.parse(creds.credential));
-  
-//   query
-// : 
-// "\n  mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {\n    saveConsumerLabels(consumerId: $consumerId, labels: $labels)\n  }\n"
-// variables
-// : 
-// {consumerId: "27",…}
-// consumerId
-// : 
-// "27"
-// labels
-// : 
-// [{labelGroup: "Priority", values: ["Mister"]}, {labelGroup: "", values: []}]
+  const credDetails = JSON.parse(creds.credential);
+  o(credDetails);
 
+  //   query
+  // :
+  // "\n  mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {\n    saveConsumerLabels(consumerId: $consumerId, labels: $labels)\n  }\n"
+  // variables
+  // :
+  // {consumerId: "27",…}
+  // consumerId
+  // :
+  // "27"
+  // labels
+  // :
+  // [{labelGroup: "Priority", values: ["Mister"]}, {labelGroup: "", values: []}]
+
+  const labels = [
+    { labelGroup: 'sdx-member', values: ['/MIN/CITZ'] },
+    { labelGroup: 'sdx-res-locator', values: ['/LAB/MIN/CITZ/MYSVC-API'] },
+  ];
 
   const request = await getAccessRequest(ctx, result.id);
   o(request);
 
-  const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
-  o(revoke);
-  
+  await saveConsumerLabels(ctx, ns, request.serviceAccess.consumer.id, labels);
+
+  // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
+  // o(revoke);
+
   // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
   // o(revoke);
-  
-// flow: client-credentials
-// clientId: 50C1D755-945C1E80ABB
-// clientSecret: null
-// issuer: null
-// tokenEndpoint: >-
-//   https://sdx-authz-apps-gov-bc-ca-lab.apps.gov.bc.ca/auth/realms/sdx/protocol/openid-connect/token
-// clientPublicKey: null
-// clientPrivateKey: null
+
+  // flow: client-credentials
+  // clientId: 50C1D755-945C1E80ABB
+  // clientSecret: null
+  // issuer: null
+  // tokenEndpoint: >-
+  //   https://sdx-authz-apps-gov-bc-ca-lab.apps.gov.bc.ca/auth/realms/sdx/protocol/openid-connect/token
+  // clientPublicKey: null
+  // clientPrivateKey: null
 
   // const serviceAccess = await getOpenAccessRequestsByConsumer(
   //   ctx,
@@ -122,7 +139,6 @@ import { revokeAllConsumerAccess } from '../../../services/workflow';
   //   '653860ee26683257394cfe3c'
   // );
   // o(serviceAccess);
-
 
   await keystone.disconnect();
 })();
