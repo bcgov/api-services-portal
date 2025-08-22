@@ -20,7 +20,7 @@ export interface NewCredential {
   apiKey?: string;
   clientPublicKey?: string;
   clientPrivateKey?: string;
-  subjectDn?: string; // Subject DN for the client certificate
+  subjectDn?: string; // Subject DN for the client certificate,
 }
 
 export interface CredentialReference {

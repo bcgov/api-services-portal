@@ -9,29 +9,6 @@ import {
 const assert = require('assert').strict;
 const logger = Logger('keystone.access-req');
 
-/*
-acceptLegal
-: 
-false
-additionalDetails
-: 
-""
-applicationId
-: 
-"2"
-controls
-: 
-"{\"clientGenCertificate\":false,\"jwksUrl\":\"\",\"clientCertificate\":\"\"}"
-name
-: 
-"Sample API FOR Cope, Aidan CITZ:EX"
-productEnvironmentId
-: 
-"12"
-requestor
-: 
-"12"*/
-
 export async function addAccessRequest(
   context: any,
   data: any
@@ -96,6 +73,30 @@ export async function collectCredentials(context: any, id: string): Promise<Acce
     'Error collecting credentials'
   );
   return result.data.updateAccessRequest;
+}
+
+export async function getAccessRequest(context: any, id: string): Promise<AccessRequest> {
+  const query = gql`
+    query GetAccessRequestById($id: ID!) {
+      AccessRequest(where: { id: $id }) {
+        id
+        name
+        isApproved
+        isIssued
+        isComplete
+        serviceAccess {
+          id
+        }
+      }
+    }
+  `;
+
+  const result = await context.executeGraphQL({
+    query,
+    variables: { id },
+  });
+  logger.debug('Query [getAccessRequest] result %j', result);
+  return result.data.AccessRequest;
 }
 
 export async function getAccessRequestsByNamespace(
