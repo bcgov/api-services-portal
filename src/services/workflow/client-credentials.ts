@@ -77,8 +77,6 @@ export async function registerClient(
 
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
-  issuer.clientAuthenticator = ClientAuthenticator.ClientCertificate;
-
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
   const client = await new KeycloakClientRegistrationService(
     issuerEnvConfig.issuerUrl,
