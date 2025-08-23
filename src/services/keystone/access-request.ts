@@ -4,6 +4,7 @@ import {
   AccessRequest,
   AccessRequestCreateInput,
   AccessRequestUpdateInput,
+  AccessRequestWhereInput,
 } from './types';
 
 const assert = require('assert').strict;
@@ -126,12 +127,15 @@ export async function getAccessRequest(context: any, id: string): Promise<Access
 
 export async function getAccessRequestsByNamespace(
   context: any,
-  ns: string
+  nsList: string[]
 ): Promise<AccessRequest[]> {
   const query = gql`
-    query GetNamespaceAccessRequests($ns: String!) {
+    query GetNamespaceAccessRequests($nsList: [String]!) {
       allAccessRequests(
-        where: { productEnvironment: { product: { namespace: $ns } } }
+        where: { OR: [
+          { productEnvironment: { product: { namespace_in: $nsList } } },
+          { application: { namespace_in: $nsList } }
+        ] }
       ) {
         id
         name
@@ -145,6 +149,7 @@ export async function getAccessRequestsByNamespace(
         application {
           name
           appId
+          namespace
         }
         requestor {
           username
@@ -154,6 +159,8 @@ export async function getAccessRequestsByNamespace(
           appId
           flow
           product {
+            namespace
+            openapiSpecs
             name
           }
         }
@@ -161,6 +168,7 @@ export async function getAccessRequestsByNamespace(
           id
           consumer {
             username
+            tags
           }
         }
         createdAt
@@ -168,7 +176,7 @@ export async function getAccessRequestsByNamespace(
     }
   `;
 
-  const result = await context.executeGraphQL({ query, variables: { ns } });
+  const result = await context.executeGraphQL({ query, variables: { nsList } });
   logger.debug('Query [getAccessRequestsByNamespace] result %j', result);
   return result.data.allAccessRequests;
 }

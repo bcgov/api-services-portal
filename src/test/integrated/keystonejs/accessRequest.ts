@@ -36,6 +36,7 @@ import {
   addAccessRequest,
   collectCredentials,
   getAccessRequest,
+  getAccessRequestsByNamespace,
 } from '../../../services/keystone/access-request';
 import { createApplication } from '../../../services/keystone/application';
 import {
@@ -66,54 +67,66 @@ import {
     authentication: { item: identity },
   });
 
-  // o(await getOrganizations(ctx));
-  const app = await createApplication(ctx, {
-    name: 'App ' + new Date().toISOString(),
-    description: 'App Desc',
-    ownerId: userId,
-  });
+  if (false) {
+    // o(await getOrganizations(ctx));
+    const app = await createApplication(ctx, {
+      name: 'App ' + new Date().toISOString(),
+      description: 'App Desc',
+      ownerId: userId,
+    });
 
-  const controls = {
-    clientName: app.name,
-    subjectDn: 'CN=my-site',
-    //defaultClientScopes: [],
-    optionalClientScopes: ['user/Test1'],
-  };
+    const controls = {
+      clientName: app.name,
+      subjectDn: 'CN=my-site',
+      //defaultClientScopes: [],
+      optionalClientScopes: ['user/Test1'],
+    };
 
-  const accessRequestData = {
-    acceptLegal: false,
-    additionalDetails: 'here is some additional details',
-    controls: JSON.stringify(controls),
-    name: 'Sample API FOR Cope, Aidan CITZ:EX',
-    productEnvironmentId: '13',
-    requestor: userId,
-  } as any;
+    const accessRequestData = {
+      acceptLegal: false,
+      additionalDetails: 'here is some additional details',
+      controls: JSON.stringify(controls),
+      name: 'Sample API FOR Cope, Aidan CITZ:EX',
+      productEnvironmentId: '13',
+      requestor: userId,
+    } as any;
 
-  accessRequestData.applicationId = app.id;
+    accessRequestData.applicationId = app.id;
 
-  const result = await addAccessRequest(ctx, accessRequestData);
-  o(result);
+    const result = await addAccessRequest(ctx, accessRequestData);
+    o(result);
 
-  const creds = await collectCredentials(ctx, result.id);
-  const credDetails = JSON.parse(creds.credential);
-  o(credDetails);
+    const creds = await collectCredentials(ctx, result.id);
+    const credDetails = JSON.parse(creds.credential);
+    o(credDetails);
 
-  const request = await getAccessRequest(ctx, result.id);
-  o(request);
+    const request = await getAccessRequest(ctx, result.id);
+    o(request);
 
-  const labels = [
-    { labelGroup: 'sdx-member', values: ['/MIN/CITZ'] },
-    { labelGroup: 'sdx-res-locator', values: ['/LAB/MIN/CITZ/MYSVC-API'] },
-    { labelGroup: "application", values: [app.name] }
-  ];
+    const labels = [
+      { labelGroup: 'sdx-member', values: ['/MIN/CITZ'] },
+      { labelGroup: 'sdx-res-locator', values: ['/LAB/MIN/CITZ/MYSVC-API'] },
+      { labelGroup: 'application', values: [app.name] },
+    ];
 
-  await saveConsumerLabels(ctx, ns, request.serviceAccess.consumer.id, labels);
+    await saveConsumerLabels(
+      ctx,
+      ns,
+      request.serviceAccess.consumer.id,
+      labels
+    );
 
-  // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
-  // o(revoke);
+    // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
+    // o(revoke);
 
-  // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
-  // o(revoke);
+    // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
+    // o(revoke);
+  }
+
+  if (true) {
+    const result = await getAccessRequestsByNamespace(ctx, [ns]);
+    o(result);
+  }
 
   // const serviceAccess = await getOpenAccessRequestsByConsumer(
   //   ctx,
