@@ -346,7 +346,7 @@ async function setupAuthorizationAndEnable(
         : issuerEnvConfig.initialAccessToken;
 
     const controls: RequestControls = {
-      ...{ defaultClientScopes: [] },
+      ...{ defaultClientScopes: [], optionalClientScopes: [] },
       ...setup.controls,
     };
 
@@ -362,11 +362,14 @@ async function setupAuthorizationAndEnable(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
     );
-    const clientScopes = controls.defaultClientScopes;
+
+      const optionalClientScopes = controls.optionalClientScopes;
+
+    const defaultClientScopes = controls.defaultClientScopes;
     if (controls.roles) {
-      clientScopes.push('roles');
+      defaultClientScopes.push('roles');
     }
-    await kcClientService.syncAndApply(clientId, clientScopes, []);
+    await kcClientService.syncAndApply(clientId, defaultClientScopes, optionalClientScopes);
 
     if (controls.roles) {
       const clientRolesService = new KeycloakClientRolesService(

@@ -45,8 +45,9 @@ export interface SubjectIdentity {
   email?: string;
 }
 export interface RequestControls {
+  clientName?: string;
   defaultClientScopes?: string[];
-  defaultOptionalScopes?: string[];
+  optionalClientScopes?: string[];
   roles?: string[];
   aclGroups?: string[];
   plugins?: ConsumerPlugin[];

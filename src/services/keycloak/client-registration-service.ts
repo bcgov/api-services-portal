@@ -33,6 +33,7 @@ export interface ClientRegistration {
   clientId: string;
   clientSecret?: string;
   enabled?: boolean;
+  attributes?: { [key: string]: string };
 }
 
 export enum ClientAuthenticator {

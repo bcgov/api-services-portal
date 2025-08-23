@@ -24,6 +24,7 @@ kubectl port-forward -n 1d4461-prod service/bcgov-aps-portal-feeder-generic-api 
 
 export FEEDER_URL=http://localhost:6767
 
+
 // userId is needed for Legal
 // namespace has to match requesting product if not published
 
@@ -66,25 +67,27 @@ import {
   });
 
   // o(await getOrganizations(ctx));
-
-  const accessRequestData = {
-    acceptLegal: false,
-    additionalDetails: 'here is some additional details',
-    //applicationId: '5', // App2
-    //controls: '{"clientGenCertificate":false,"jwksUrl":"","clientCertificate":""}',
-    controls: JSON.stringify({ jwksUrl: '', subjectDn: 'CN=my-site' }),
-    name: 'Sample API FOR Cope, Aidan CITZ:EX',
-    productEnvironmentId: '13',
-    requestor: userId,
-  } as any;
-
-  // userId is needed for Legal
-
   const app = await createApplication(ctx, {
     name: 'App ' + new Date().toISOString(),
     description: 'App Desc',
     ownerId: userId,
   });
+
+  const controls = {
+    clientName: app.name,
+    subjectDn: 'CN=my-site',
+    //defaultClientScopes: [],
+    optionalClientScopes: ['user/Test1'],
+  };
+
+  const accessRequestData = {
+    acceptLegal: false,
+    additionalDetails: 'here is some additional details',
+    controls: JSON.stringify(controls),
+    name: 'Sample API FOR Cope, Aidan CITZ:EX',
+    productEnvironmentId: '13',
+    requestor: userId,
+  } as any;
 
   accessRequestData.applicationId = app.id;
 
@@ -95,26 +98,14 @@ import {
   const credDetails = JSON.parse(creds.credential);
   o(credDetails);
 
-  //   query
-  // :
-  // "\n  mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {\n    saveConsumerLabels(consumerId: $consumerId, labels: $labels)\n  }\n"
-  // variables
-  // :
-  // {consumerId: "27",…}
-  // consumerId
-  // :
-  // "27"
-  // labels
-  // :
-  // [{labelGroup: "Priority", values: ["Mister"]}, {labelGroup: "", values: []}]
+  const request = await getAccessRequest(ctx, result.id);
+  o(request);
 
   const labels = [
     { labelGroup: 'sdx-member', values: ['/MIN/CITZ'] },
     { labelGroup: 'sdx-res-locator', values: ['/LAB/MIN/CITZ/MYSVC-API'] },
+    { labelGroup: "application", values: [app.name] }
   ];
-
-  const request = await getAccessRequest(ctx, result.id);
-  o(request);
 
   await saveConsumerLabels(ctx, ns, request.serviceAccess.consumer.id, labels);
 
@@ -123,15 +114,6 @@ import {
 
   // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
   // o(revoke);
-
-  // flow: client-credentials
-  // clientId: 50C1D755-945C1E80ABB
-  // clientSecret: null
-  // issuer: null
-  // tokenEndpoint: >-
-  //   https://sdx-authz-apps-gov-bc-ca-lab.apps.gov.bc.ca/auth/realms/sdx/protocol/openid-connect/token
-  // clientPublicKey: null
-  // clientPrivateKey: null
 
   // const serviceAccess = await getOpenAccessRequestsByConsumer(
   //   ctx,

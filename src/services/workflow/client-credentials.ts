@@ -19,6 +19,9 @@ import {
 } from './types';
 import { ClientAuthenticator } from '../keycloak/client-registration-service';
 import { genClientId } from './client-shared-idp';
+import { Logger } from '../../logger';
+
+const logger = Logger('wf.ClientCreds');
 
 /**
  * Steps:
@@ -77,15 +80,17 @@ export async function registerClient(
 
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
-  // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-  const client = await new KeycloakClientRegistrationService(
+  const regService = new KeycloakClientRegistrationService(
     issuerEnvConfig.issuerUrl,
     openid.registration_endpoint,
     token
-  ).clientRegistration(
+  );
+
+  // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
+  const client = await regService.clientRegistration(
     <ClientAuthenticator>issuer.clientAuthenticator,
     newClientId,
-    '',
+    controls.clientName || "", // if no client name provided, use the clientId
     uuidv4(),
     controls.clientCertificate,
     controls.subjectDn,
@@ -94,6 +99,18 @@ export async function registerClient(
     false
   );
   assert.strictEqual(client.clientId, newClientId);
+
+  if (issuer.clientAuthenticator === "client-certificate") {
+    logger.warn("Workaround to set standard.token.exchange.enabled for client-certificate - not setting on creation");
+    regService.updateClientRegistration(newClientId, {
+      clientId: newClientId,
+      attributes: {
+        "standard.token.exchange.enabled": 'true',
+        "tls.client.certificate.bound.access.tokens": 'true',
+        //"dpop.bound.access.tokens": 'true',
+      }
+    })
+  }
 
   return {
     openid,

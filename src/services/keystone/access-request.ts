@@ -90,6 +90,7 @@ export async function getAccessRequest(context: any, id: string): Promise<Access
           name
           appId
           product {
+            namespace
             openapiSpecs
             name
           }
