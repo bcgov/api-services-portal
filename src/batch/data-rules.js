@@ -1,4 +1,3 @@
-const AccessRequest = require("../lists/AccessRequest");
 
 const metadata = {
   Organization: {

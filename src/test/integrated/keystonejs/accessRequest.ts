@@ -38,11 +38,19 @@ import {
   getAccessRequest,
   getAccessRequestsByNamespace,
 } from '../../../services/keystone/access-request';
-import { createApplication } from '../../../services/keystone/application';
+import {
+  createApplication,
+  lookupApplicationByNamespaces,
+} from '../../../services/keystone/application';
 import {
   revokeAllConsumerAccess,
   saveConsumerLabels,
 } from '../../../services/workflow';
+import {
+  getGwaProductEnvironment,
+  getOrgNamespaces,
+} from '../../../services/workflow/get-namespaces';
+import { getRecords } from '../../../batch/feed-worker';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -67,12 +75,13 @@ import {
     authentication: { item: identity },
   });
 
-  if (true) {
+  if (false) {
     // o(await getOrganizations(ctx));
     const app = await createApplication(ctx, {
       name: 'App y ' + new Date().toISOString(),
       description: 'App Desc',
       ownerId: userId,
+      namespace: ns,
     });
 
     const controls = {
@@ -121,6 +130,38 @@ import {
 
     // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
     // o(revoke);
+  }
+
+  if (true) {
+    const org = 'ministry-of-citizens-services';
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
+
+    const nsList = await getOrgNamespaces(org, prodEnv);
+    o(nsList);
+
+    const apps = await lookupApplicationByNamespaces(ctx, [ns]);
+    o(apps);
+
+    const result = await getAccessRequestsByNamespace(
+      ctx,
+      nsList.map((n) => n.name)
+    );
+    o(result);
+
+    const batchClause = {
+      query: '$org: String',
+      clause: '{ organization: { name: $org } }',
+      variables: { org },
+    };
+
+    const records = await getRecords(
+      ctx,
+      'Product',
+      undefined,
+      ['environments'],
+      batchClause
+    );
+    o(records);
   }
 
   if (false) {

@@ -27,6 +27,10 @@ import {
 import { BatchResult } from '../../batch/types';
 import { Dataset, DraftDataset } from './types';
 import { Product } from './types';
+import { getGwaProductEnvironment } from '@/services/workflow';
+import { getOrgNamespaces } from '@/services/workflow/get-namespaces';
+import { getAccessRequestsByNamespace } from '@/services/keystone';
+import { OrgAccessRequest } from './types-extra';
 
 @injectable()
 @Route('/organizations')
@@ -50,34 +54,21 @@ export class OrgAccessRequestsController extends Controller {
   public async getRequests(
     @Path() org: string,
     @Request() request: any
-  ): Promise<Dataset[]> {
+  ): Promise<OrgAccessRequest[]> {
     const ctx = this.keystone.createContext(request);
 
-    // get list of namespaces for this org
-    // then get access requests for those namespaces
-    // const batchClause = {
-    //   query: '$org: String',
-    //   clause: '{ organization: { name: $org } }',
-    //   variables: { org },
-    // };
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
 
-    // const records = await getRecords(
-    //   ctx,
-    //   'Product',
-    //   undefined,
-    //   ['environments'],
-    //   batchClause
-    // );
+    const nsList = await getOrgNamespaces(org, prodEnv);
 
+    const records = await getAccessRequestsByNamespace(ctx, nsList.map((n) => n.name));
     // return records
     //   .map((o) => removeEmpty(o))
     //   .map((o) => transformAllRefID(o, ['organization', 'organizationUnit']))
     //   .map((o) =>
-    //     removeKeys(o, [
-    //       'id'
-    //     ])
+    //     replaceKey(o, 'gatewayId', 'namespace')
     //   );
-    return [];
+    return records as any
   }
 
 
@@ -90,11 +81,10 @@ export class OrgAccessRequestsController extends Controller {
    * @param body
    * @param request
    */
-  @Put('/{org}/gateways/{gatewayId}/access_requests')
+  @Put('/{org}/access_requests')
   @OperationId('organization-put-access-requests')
   @Security('jwt', ['Namespace.Assign'])
   public async put(
-    @Path() gatewayId: string,
     @Path() org: string,
     @Body() body: Product,
     @Request() request: any

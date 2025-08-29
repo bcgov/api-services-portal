@@ -27,3 +27,38 @@ export interface GatewayAdd {
   domains?: string;
   dataPlane?: string;
 }
+
+export interface OrgAccessRequest {
+  id: string;
+  name: string;
+  isApproved: boolean;
+  isIssued: boolean;
+  isComplete: boolean;
+  requestor: {
+    name: string;
+    username: string;
+  };
+  application: {
+    name: string;
+    appId: string;
+    namespace: string;
+  };
+  productEnvironment: {
+    name: string;
+    appId: string;
+    flow: string;
+    product: {
+      namespace: string;
+      openapiSpecs: string[];
+      name: string;
+    };
+  };
+  serviceAccess: {      
+    id: string;
+    consumer: {
+      username: string;
+      tags: string[];
+    };
+  };
+  createdAt: Scalars['DateTime'];
+}
