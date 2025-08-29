@@ -67,10 +67,10 @@ import {
     authentication: { item: identity },
   });
 
-  if (false) {
+  if (true) {
     // o(await getOrganizations(ctx));
     const app = await createApplication(ctx, {
-      name: 'App ' + new Date().toISOString(),
+      name: 'App y ' + new Date().toISOString(),
       description: 'App Desc',
       ownerId: userId,
     });
@@ -86,7 +86,7 @@ import {
       acceptLegal: false,
       additionalDetails: 'here is some additional details',
       controls: JSON.stringify(controls),
-      name: 'Sample API FOR Cope, Aidan CITZ:EX',
+      name: 'Sampler API FOR Cope, Aidan CITZ:EX',
       productEnvironmentId: '13',
       requestor: userId,
     } as any;
@@ -123,7 +123,7 @@ import {
     // o(revoke);
   }
 
-  if (true) {
+  if (false) {
     const result = await getAccessRequestsByNamespace(ctx, [ns]);
     o(result);
   }
