@@ -9,27 +9,14 @@ import {
   Body,
   Get,
   Tags,
-  Delete,
 } from 'tsoa';
-import { strict as assert } from 'assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import {
-  syncRecordsThrowErrors,
-  getRecords,
-  parseJsonString,
-  removeEmpty,
-  removeKeys,
-  transformAllRefID,
-  deleteRecord,
-  replaceKey,
-} from '../../batch/feed-worker';
 import { BatchResult } from '../../batch/types';
-import { Dataset, DraftDataset } from './types';
 import { Product } from './types';
-import { getGwaProductEnvironment } from '@/services/workflow';
-import { getOrgNamespaces } from '@/services/workflow/get-namespaces';
-import { getAccessRequestsByNamespace } from '@/services/keystone';
+import { getGwaProductEnvironment } from '../../services/workflow';
+import { getOrgNamespaces } from '../../services/workflow/get-namespaces';
+import { getAccessRequestsByNamespace } from '../../services/keystone';
 import { OrgAccessRequest } from './types-extra';
 
 @injectable()
