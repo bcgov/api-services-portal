@@ -40,7 +40,7 @@ import {
 } from '../../../services/keystone/access-request';
 import {
   createApplication,
-  lookupApplicationByNamespaces,
+  lookupApplicationsByNamespaces,
 } from '../../../services/keystone/application';
 import {
   revokeAllConsumerAccess,
@@ -50,12 +50,13 @@ import {
   getGwaProductEnvironment,
   getOrgNamespaces,
 } from '../../../services/workflow/get-namespaces';
-import { getRecords } from '../../../batch/feed-worker';
+import { getRecords, replaceKey } from '../../../batch/feed-worker';
+import { OrgAccessRequest } from '../../../services/workflow/org-access-request';
 
 (async () => {
   const keystone = await InitKeystone();
 
-  const ns = 'gw-0a524';
+  const ns = 'gw-84b1f';
   const skipAccessControl = true;
 
   const userId = '12';
@@ -75,6 +76,14 @@ import { getRecords } from '../../../batch/feed-worker';
     authentication: { item: identity },
   });
 
+  if (true) {
+    // 424C7EB5 SDX-WORKING-API (dev)
+    // 38D0FED9 SDX-SAMPLE-API (prod)
+    // 
+    const result = await OrgAccessRequest(ctx, 'ministry-of-citizens-services', 'MIN/CITZ', userId, '424C7EB5', '7A031F2A', "SDX Onboarding", "CN=abcd", ["user/Test2"]);
+    o(result);
+  }
+  
   if (false) {
     // o(await getOrganizations(ctx));
     const app = await createApplication(ctx, {
@@ -132,39 +141,43 @@ import { getRecords } from '../../../batch/feed-worker';
     // o(revoke);
   }
 
-  if (true) {
+  if (false) {
     const org = 'ministry-of-citizens-services';
     const prodEnv = await getGwaProductEnvironment(ctx, false);
 
     const nsList = await getOrgNamespaces(org, prodEnv);
     o(nsList);
 
-    const apps = await lookupApplicationByNamespaces(ctx, [ns]);
+    const apps = await lookupApplicationsByNamespaces(ctx, [ns]);
     o(apps);
 
     const result = await getAccessRequestsByNamespace(
       ctx,
       nsList.map((n) => n.name)
     );
-    o(result);
+    const recs = result
+      .map((o) =>
+        replaceKey(o, 'gatewayId', 'namespace')
+      );
+    o(recs);
 
-    const batchClause = {
-      query: '$org: String',
-      clause: '{ organization: { name: $org } }',
-      variables: { org },
-    };
+    // const batchClause = {
+    //   query: '$org: String',
+    //   clause: '{ organization: { name: $org } }',
+    //   variables: { org },
+    // };
 
-    const records = await getRecords(
-      ctx,
-      'Product',
-      undefined,
-      ['environments'],
-      batchClause
-    );
-    o(records);
+    // const records = await getRecords(
+    //   ctx,
+    //   'Product',
+    //   undefined,
+    //   ['environments'],
+    //   batchClause
+    // );
+    // o(records);
   }
 
-  if (false) {
+  if (true) {
     const result = await getAccessRequestsByNamespace(ctx, [ns]);
     o(result);
   }

@@ -85,6 +85,7 @@ export async function lookupProductEnvironmentServicesBySlug(
                         name
                         flow
                         product {
+                            name
                             namespace
                         }
                         credentialIssuer {

@@ -42,7 +42,7 @@ export class OrgAccessRequestsController extends Controller {
     @Path() org: string,
     @Request() request: any
   ): Promise<OrgAccessRequest[]> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.createContext(request, true);
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
 
