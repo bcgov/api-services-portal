@@ -79,7 +79,8 @@ export class OrgAccessRequestsController extends Controller {
   ): Promise<OrgAccessRequest> {
     const ctx = this.keystone.createContext(request, true);
 
-    const userId = ctx['user']['id'];
+
+    const userId = ctx.authedItem.userId
 
     const result = await OrgAccessRequestCreate(ctx, org, body.orgMemberId, userId, 
       body.consumerProductEnvAppId, body.providerProductEnvAppId, body.businessProcess, body.accessPointDN, body.optionalClientScopes);
