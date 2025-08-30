@@ -17,7 +17,8 @@ import { Product } from './types';
 import { getGwaProductEnvironment } from '../../services/workflow';
 import { getOrgNamespaces } from '../../services/workflow/get-namespaces';
 import { getAccessRequestsByNamespace } from '../../services/keystone';
-import { OrgAccessRequest } from './types-extra';
+import { OrgAccessRequest, OrgAccessRequestCreateInput } from './types-extra';
+import { OrgAccessRequestCreate } from '../../services/workflow/org-access-request';
 
 @injectable()
 @Route('/organizations')
@@ -73,19 +74,16 @@ export class OrgAccessRequestsController extends Controller {
   @Security('jwt', ['Namespace.Assign'])
   public async put(
     @Path() org: string,
-    @Body() body: Product,
+    @Body() body: OrgAccessRequestCreateInput,
     @Request() request: any
-  ): Promise<BatchResult> {
-    // TODO: Make sure namespace is allowed for this org
-    // body['gatewayId'] = gatewayId;
-    // body['organization'] = org;
+  ): Promise<OrgAccessRequest> {
+    const ctx = this.keystone.createContext(request, true);
 
-    // return await syncRecordsThrowErrors(
-    //   this.keystone.createContext(request, true),
-    //   'Product',
-    //   body['appId'],
-    //   replaceKey(body, 'gatewayId', 'namespace')
-    // );
-    return { status: 400, result: 'Not implemented'}
+    const userId = ctx['user']['id'];
+
+    const result = await OrgAccessRequestCreate(ctx, org, body.orgMemberId, userId, 
+      body.consumerProductEnvAppId, body.providerProductEnvAppId, body.businessProcess, body.accessPointDN, body.optionalClientScopes);
+
+    return result.accessRequest as any
   }  
 }

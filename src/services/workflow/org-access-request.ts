@@ -18,7 +18,7 @@ import { NewCredential } from './types';
 
 const logger = Logger('wf.OrgAccessReq');
 
-export const OrgAccessRequest = async (
+export const OrgAccessRequestCreate = async (
   context: any,
   org: string,
   orgMemberID: string,
@@ -70,7 +70,7 @@ credential: NewCredential,
 
   // prepare the access request
   const controls = {
-    clientName: app.name,
+    clientName: `${formatResourceLocator(orgMemberID, consumerProdEnv)} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`,
     subjectDn: accessPointDN,
     //defaultClientScopes: [],
     optionalClientScopes,

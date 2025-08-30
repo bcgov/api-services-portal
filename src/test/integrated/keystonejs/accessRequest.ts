@@ -51,7 +51,7 @@ import {
   getOrgNamespaces,
 } from '../../../services/workflow/get-namespaces';
 import { getRecords, replaceKey } from '../../../batch/feed-worker';
-import { OrgAccessRequest } from '../../../services/workflow/org-access-request';
+import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-request';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -80,7 +80,8 @@ import { OrgAccessRequest } from '../../../services/workflow/org-access-request'
     // 424C7EB5 SDX-WORKING-API (dev)
     // 38D0FED9 SDX-SAMPLE-API (prod)
     // 
-    const result = await OrgAccessRequest(ctx, 'ministry-of-citizens-services', 'MIN/CITZ', userId, '424C7EB5', '7A031F2A', "SDX Onboarding", "CN=abcd", ["user/Test2"]);
+    const result = await OrgAccessRequestCreate(ctx, 'ministry-of-citizens-services', 'MIN/CITZ', userId, 
+      '424C7EB5', '7A031F2A', "SDX Onboarding", "CN=abcd", ["user/Test2"]);
     o(result);
   }
   
