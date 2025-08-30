@@ -30,6 +30,7 @@ export interface GatewayAdd {
 
 export interface OrgAccessRequestCreateInput {
   orgMemberId: string;
+  userId: string;
   consumerProductEnvAppId: string;
   providerProductEnvAppId: string;
   businessProcess: string;
