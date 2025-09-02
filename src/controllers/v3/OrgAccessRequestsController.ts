@@ -25,7 +25,7 @@ import { OrgAccessRequestCreate } from '../../services/workflow/org-access-reque
 import { Logger } from '../../logger';
 import { gql } from 'graphql-request';
 import { data } from 'msw/lib/types/context';
-import { getAccessRequest } from '@/services/keystone/access-request';
+import { getAccessRequest } from '../../services/keystone/access-request';
 import { assert } from 'console';
 
 const logger = Logger('controllers.OrgAccessReq');
