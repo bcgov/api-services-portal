@@ -252,55 +252,33 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "DraftDatasetRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BlobRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CredentialIssuerRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Environment": {
+    "OrgAccessRequest": {
         "dataType": "refObject",
         "properties": {
-            "appId": {"dataType":"string"},
-            "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["sandbox"]},{"dataType":"enum","enums":["other"]}]},
-            "active": {"dataType":"boolean"},
-            "approval": {"dataType":"boolean"},
-            "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
-            "additionalDetailsToRequest": {"dataType":"string"},
-            "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
-            "legal": {"ref":"LegalRefID"},
-            "spec": {"ref":"BlobRefID"},
-            "credentialIssuer": {"ref":"CredentialIssuerRefID"},
+            "id": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "isApproved": {"dataType":"boolean","required":true},
+            "isIssued": {"dataType":"boolean","required":true},
+            "isComplete": {"dataType":"boolean","required":true},
+            "requestor": {"dataType":"nestedObjectLiteral","nestedProperties":{"username":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "application": {"dataType":"nestedObjectLiteral","nestedProperties":{"namespace":{"dataType":"string","required":true},"appId":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "productEnvironment": {"dataType":"nestedObjectLiteral","nestedProperties":{"product":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"openapiSpecs":{"dataType":"array","array":{"dataType":"string"},"required":true},"namespace":{"dataType":"string","required":true}},"required":true},"flow":{"dataType":"string","required":true},"appId":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "serviceAccess": {"dataType":"nestedObjectLiteral","nestedProperties":{"consumer":{"dataType":"nestedObjectLiteral","nestedProperties":{"tags":{"dataType":"array","array":{"dataType":"string"},"required":true},"username":{"dataType":"string","required":true}},"required":true},"id":{"dataType":"string","required":true}},"required":true},
+            "createdAt": {"dataType":"any","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Product": {
+    "OrgAccessRequestCreateInput": {
         "dataType": "refObject",
         "properties": {
-            "appId": {"dataType":"string"},
-            "name": {"dataType":"string"},
-            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["app"]},{"dataType":"enum","enums":["service"]}]},
-            "description": {"dataType":"string"},
-            "gatewayId": {"dataType":"string"},
-            "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
-            "dataset": {"ref":"DraftDatasetRefID"},
-            "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
-            "organization": {"ref":"OrganizationRefID"},
+            "orgMemberId": {"dataType":"string","required":true},
+            "userId": {"dataType":"string","required":true},
+            "consumerProductEnvAppId": {"dataType":"string","required":true},
+            "providerProductEnvAppId": {"dataType":"string","required":true},
+            "businessProcess": {"dataType":"string","required":true},
+            "accessPointDN": {"dataType":"string","required":true},
+            "optionalClientScopes": {"dataType":"array","array":{"dataType":"string"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -411,6 +389,59 @@ const models: TsoaRoute.Models = {
             "org": {"dataType":"string"},
             "domains": {"dataType":"string"},
             "dataPlane": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DraftDatasetRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "LegalRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BlobRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CredentialIssuerRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Environment": {
+        "dataType": "refObject",
+        "properties": {
+            "appId": {"dataType":"string"},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["sandbox"]},{"dataType":"enum","enums":["other"]}]},
+            "active": {"dataType":"boolean"},
+            "approval": {"dataType":"boolean"},
+            "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["protected-externally"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
+            "additionalDetailsToRequest": {"dataType":"string"},
+            "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
+            "legal": {"ref":"LegalRefID"},
+            "spec": {"ref":"BlobRefID"},
+            "credentialIssuer": {"ref":"CredentialIssuerRefID"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Product": {
+        "dataType": "refObject",
+        "properties": {
+            "appId": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["app"]},{"dataType":"enum","enums":["service"]}]},
+            "description": {"dataType":"string"},
+            "gatewayId": {"dataType":"string"},
+            "openapiSpecs": {"dataType":"array","array":{"dataType":"string"}},
+            "dataset": {"ref":"DraftDatasetRefID"},
+            "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
+            "organization": {"ref":"OrganizationRefID"},
         },
         "additionalProperties": false,
     },
@@ -1178,14 +1209,13 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/v3/organizations/:org/gateways/:gatewayId/access_requests',
+        app.put('/ds/api/v3/organizations/:org/access_requests',
             authenticateMiddleware([{"jwt":["Namespace.Assign"]}]),
 
             async function OrgAccessRequestsController_put(request: any, response: any, next: any) {
             const args = {
-                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"Product"},
+                    body: {"in":"body","name":"body","required":true,"ref":"OrgAccessRequestCreateInput"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

@@ -9,6 +9,8 @@ import {
   Body,
   Get,
   Tags,
+  FieldErrors,
+  ValidateError,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
@@ -19,6 +21,11 @@ import { getOrgNamespaces } from '../../services/workflow/get-namespaces';
 import { getAccessRequestsByNamespace } from '../../services/keystone';
 import { OrgAccessRequest, OrgAccessRequestCreateInput } from './types-extra';
 import { OrgAccessRequestCreate } from '../../services/workflow/org-access-request';
+import { Logger } from '../../logger';
+import { gql } from 'graphql-request';
+import { data } from 'msw/lib/types/context';
+
+const logger = Logger('controllers.OrgAccessReq');
 
 @injectable()
 @Route('/organizations')
@@ -76,17 +83,34 @@ export class OrgAccessRequestsController extends Controller {
     @Path() org: string,
     @Body() body: OrgAccessRequestCreateInput,
     @Request() request: any
-  ): Promise<OrgAccessRequest> {
-    const ctx = this.keystone.createContext(request, true);
+  ): Promise<{id: string}> {
 
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: createAccessRequest,
+      variables: { data: body },
+    });
+    logger.debug('Result %j', result);
+    if (result.errors) {
+      const errors: FieldErrors = {};
+      result.errors.forEach((err: any, ind: number) => {
+        errors[`d${ind}`] = { message: err.message };
+      });
+      logger.error('%j', result);
+      throw new ValidateError(errors, 'Unable to create Gateway');
+    }
+    return {
+      id: result.data.orgAccessRequest.id,
+    };
 
-    const userId = body.userId;
-    
-    //const userId = ctx.authedItem.userId
-
-    const result = await OrgAccessRequestCreate(ctx, org, body.orgMemberId, userId, 
-      body.consumerProductEnvAppId, body.providerProductEnvAppId, body.businessProcess, body.accessPointDN, body.optionalClientScopes);
-
-    return result.accessRequest as any
   }  
 }
+
+const createAccessRequest = gql`
+  mutation OrgAccessRequestCreate($data: OrgAccessRequestCreateInput!) {
+    orgAccessRequest(data: $data) {
+      id
+    }
+  }
+`;
+

@@ -52,11 +52,13 @@ import {
 } from '../../../services/workflow/get-namespaces';
 import { getRecords, replaceKey } from '../../../batch/feed-worker';
 import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-request';
+import { OrgAccessRequestCreateInput } from '../../../services/workflow/types';
 
 (async () => {
   const keystone = await InitKeystone();
 
-  const ns = 'gw-84b1f';
+//  const ns = 'gw-84b1f';
+  const ns = 'gw-31a33';
   const skipAccessControl = true;
 
   const userId = '12';
@@ -77,14 +79,78 @@ import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-re
   });
 
   if (true) {
-    // 424C7EB5 SDX-WORKING-API (dev)
-    // 38D0FED9 SDX-SAMPLE-API (prod)
-    // 
-    const result = await OrgAccessRequestCreate(ctx, 'ministry-of-citizens-services', 'MIN/CITZ', userId, 
-      '424C7EB5', '7A031F2A', "SDX Onboarding", "CN=abcd", ["user/Test2"]);
+    const result = await ctx.executeGraphQL({
+      query: `
+          mutation OrgCreateAccessRequest ($data: OrgAccessRequestCreateInput) { 
+            orgCreateAccessRequest (data: $data) {
+              application {
+                appId
+              }
+              accessRequest {
+                id
+                name
+                status
+                productEnvironment {
+                  id
+                  name
+                  product {
+                    id
+                    name
+                    namespace
+                  }
+                }
+                application {
+                  id
+                  name  
+                  namespace
+                }
+                serviceAccess {
+                  id
+                  name
+                  consumer {
+                    id
+                    name
+                    namespace
+                  }
+                }
+              }
+            }
+          }
+      `,
+      variables: {
+        data: {
+          org: 'ministry-of-puppies-and-kittens',
+          orgMemberId: 'MIN/PUKI',
+          userId,
+          consumerProductEnvAppId: 'E7FEB796',
+          providerProductEnvAppId: '1400BE49',
+          businessProcess: 'Vet Services',
+          accessPointDN: 'CN=sdx.gov.bc.ca',
+          optionalClientScopes: ['user/Test2'],
+        } as OrgAccessRequestCreateInput,
+      },
+    });
     o(result);
   }
-  
+
+  if (false) {
+    // 424C7EB5 SDX-WORKING-API (dev)
+    // 38D0FED9 SDX-SAMPLE-API (prod)
+    //
+    const result = await OrgAccessRequestCreate(
+      ctx,
+      'ministry-of-citizens-services',
+      'MIN/CITZ',
+      userId,
+      '424C7EB5',
+      '7A031F2A',
+      'SDX Onboarding',
+      'CN=abcd',
+      ['user/Test2']
+    );
+    o(result);
+  }
+
   if (false) {
     // o(await getOrganizations(ctx));
     const app = await createApplication(ctx, {
@@ -156,10 +222,7 @@ import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-re
       ctx,
       nsList.map((n) => n.name)
     );
-    const recs = result
-      .map((o) =>
-        replaceKey(o, 'gatewayId', 'namespace')
-      );
+    const recs = result.map((o) => replaceKey(o, 'gatewayId', 'namespace'));
     o(recs);
 
     // const batchClause = {
@@ -178,7 +241,7 @@ import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-re
     // o(records);
   }
 
-  if (true) {
+  if (false) {
     const result = await getAccessRequestsByNamespace(ctx, [ns]);
     o(result);
   }

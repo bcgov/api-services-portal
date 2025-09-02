@@ -51,7 +51,15 @@ export async function addAccessRequest(
     query,
     variables: { ...data },
   });
+
   logger.debug('Mutation [addAccessRequest] result %j', result);
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    'Error adding access request'
+  );
+
   return result.data.createAccessRequest;
 }
 

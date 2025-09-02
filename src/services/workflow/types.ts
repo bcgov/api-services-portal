@@ -217,3 +217,14 @@ export interface ActivitySummary {
   activityAt: Scalars['DateTime'];
   blob?: any;
 }
+
+export interface OrgAccessRequestCreateInput {
+  org: string;
+  orgMemberId: string;
+  userId: string;
+  consumerProductEnvAppId: string;
+  providerProductEnvAppId: string;
+  businessProcess: string;
+  accessPointDN: string;
+  optionalClientScopes: string[];
+}

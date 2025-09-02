@@ -1,6 +1,11 @@
 import { assert } from 'console';
 import { Logger } from '../../logger';
-import { lookupCredentialIssuerById, lookupEnvironmentAndIssuerById, lookupProduct, lookupProductEnvironmentServicesBySlug } from '../keystone';
+import {
+  lookupCredentialIssuerById,
+  lookupEnvironmentAndIssuerById,
+  lookupProduct,
+  lookupProductEnvironmentServicesBySlug,
+} from '../keystone';
 import {
   addAccessRequest,
   collectCredentials,
@@ -27,13 +32,13 @@ export const OrgAccessRequestCreate = async (
   providerProdEnvAppId: string,
   businessProcess: string,
   accessPointDN: string,
-  optionalClientScopes: string[],
+  optionalClientScopes: string[]
 ): Promise<{
-    application: Application,
-    providerProdEnv: Environment,
-accessRequest: AccessRequest,
-credential: NewCredential,
-  }> => {
+  application: Application;
+  providerProdEnv: Environment;
+  accessRequest: AccessRequest;
+  credential: NewCredential;
+}> => {
   // get list of namespaces for this org
   const prodEnv = await getGwaProductEnvironment(context, false);
   const nsList = await getOrgNamespaces(org, prodEnv);
@@ -44,7 +49,11 @@ credential: NewCredential,
     consumerProdEnvAppId
   );
 
-  assert(nsList.filter(ns => ns.name === consumerProdEnv.product.namespace).length === 1, `Consumer Product Environment ${consumerProdEnvAppId} not found`);
+  assert(
+    nsList.filter((ns) => ns.name === consumerProdEnv.product.namespace)
+      .length === 1,
+    `Consumer Product Environment ${consumerProdEnvAppId} not found`
+  );
 
   // create the application if it does not exist
   const app = {
@@ -65,12 +74,18 @@ credential: NewCredential,
   );
 
   // get the provider credential issuer details
-  const providerCredIssuer = await lookupCredentialIssuerById(context, providerProdEnv.credentialIssuer.id);
+  const providerCredIssuer = await lookupCredentialIssuerById(
+    context,
+    providerProdEnv.credentialIssuer.id
+  );
   providerProdEnv.credentialIssuer = providerCredIssuer;
 
   // prepare the access request
   const controls = {
-    clientName: `${formatResourceLocator(orgMemberID, consumerProdEnv)} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`,
+    clientName: `${formatResourceLocator(
+      orgMemberID,
+      consumerProdEnv
+    )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`,
     subjectDn: accessPointDN,
     //defaultClientScopes: [],
     optionalClientScopes,
@@ -104,7 +119,10 @@ credential: NewCredential,
 
   // add some standard labels to the consumer
   const labels = [
-    { labelGroup: 'sdx-res-locator', values: [formatResourceLocator(orgMemberID, consumerProdEnv)] },
+    {
+      labelGroup: 'sdx-res-locator',
+      values: [formatResourceLocator(orgMemberID, consumerProdEnv)],
+    },
     { labelGroup: 'sdx-member', values: [orgMemberID] },
   ];
 
@@ -167,10 +185,11 @@ const checkAccessRequestExists = async (
 };
 
 const formatResourceLocator = (
-  orgMemberID: string,providerProdEnv: Environment, 
+  orgMemberID: string,
+  providerProdEnv: Environment
 ): string => {
   const env = providerProdEnv.name.toUpperCase();
   const serviceId = providerProdEnv.product.name;
 
   return `/${env}/${orgMemberID}/${serviceId}`;
-}
+};

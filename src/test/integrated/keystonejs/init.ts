@@ -106,6 +106,7 @@ export default async function InitKeystone(
     'CredentialIssuerExt',
     'Namespace',
     'NamespaceActivity',
+    'OrgAccessRequest',
     'OrganizationPolicy',
     'ServiceAccess',
     'ServiceAccount',

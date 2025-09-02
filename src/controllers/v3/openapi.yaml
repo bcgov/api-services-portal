@@ -380,100 +380,130 @@ components:
                 mode: auto
                 environmentDetails: []
                 owner: janis@gov.bc.ca
-        DraftDatasetRefID:
-            type: string
-        LegalRefID:
-            type: string
-        BlobRefID:
-            type: string
-        CredentialIssuerRefID:
-            type: string
-        Environment:
+        OrgAccessRequest:
             properties:
-                appId:
+                id:
                     type: string
                 name:
                     type: string
-                    enum:
-                        - dev
-                        - test
-                        - prod
-                        - sandbox
-                        - other
-                active:
+                isApproved:
                     type: boolean
-                approval:
+                isIssued:
                     type: boolean
-                flow:
-                    type: string
-                    enum:
-                        - public
-                        - protected-externally
-                        - authorization-code
-                        - client-credentials
-                        - kong-acl-only
-                        - kong-api-key-only
-                        - kong-api-key-acl
-                additionalDetailsToRequest:
-                    type: string
-                services:
-                    items:
-                        $ref: '#/components/schemas/GatewayServiceRefID'
-                    type: array
-                legal:
-                    $ref: '#/components/schemas/LegalRefID'
-                spec:
-                    $ref: '#/components/schemas/BlobRefID'
-                credentialIssuer:
-                    $ref: '#/components/schemas/CredentialIssuerRefID'
+                isComplete:
+                    type: boolean
+                requestor:
+                    properties:
+                        username:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - username
+                        - name
+                    type: object
+                application:
+                    properties:
+                        namespace:
+                            type: string
+                        appId:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - namespace
+                        - appId
+                        - name
+                    type: object
+                productEnvironment:
+                    properties:
+                        product:
+                            properties:
+                                name:
+                                    type: string
+                                openapiSpecs:
+                                    items: {type: string}
+                                    type: array
+                                namespace:
+                                    type: string
+                            required:
+                                - name
+                                - openapiSpecs
+                                - namespace
+                            type: object
+                        flow:
+                            type: string
+                        appId:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - product
+                        - flow
+                        - appId
+                        - name
+                    type: object
+                serviceAccess:
+                    properties:
+                        consumer:
+                            properties:
+                                tags:
+                                    items: {type: string}
+                                    type: array
+                                username:
+                                    type: string
+                            required:
+                                - tags
+                                - username
+                            type: object
+                        id:
+                            type: string
+                    required:
+                        - consumer
+                        - id
+                    type: object
+                createdAt: {}
+            required:
+                - id
+                - name
+                - isApproved
+                - isIssued
+                - isComplete
+                - requestor
+                - application
+                - productEnvironment
+                - serviceAccess
+                - createdAt
             type: object
             additionalProperties: false
-            example:
-                name: dev
-                active: false
-                approval: false
-                flow: public
-                appId: '00000000'
-        Product:
+        OrgAccessRequestCreateInput:
             properties:
-                appId:
+                orgMemberId:
                     type: string
-                name:
+                userId:
                     type: string
-                type:
+                consumerProductEnvAppId:
                     type: string
-                    enum:
-                        - app
-                        - service
-                description:
+                providerProductEnvAppId:
                     type: string
-                gatewayId:
+                businessProcess:
                     type: string
-                openapiSpecs:
+                accessPointDN:
+                    type: string
+                optionalClientScopes:
                     items:
                         type: string
                     type: array
-                dataset:
-                    $ref: '#/components/schemas/DraftDatasetRefID'
-                environments:
-                    items:
-                        $ref: '#/components/schemas/Environment'
-                    type: array
-                organization:
-                    $ref: '#/components/schemas/OrganizationRefID'
+            required:
+                - orgMemberId
+                - userId
+                - consumerProductEnvAppId
+                - providerProductEnvAppId
+                - businessProcess
+                - accessPointDN
+                - optionalClientScopes
             type: object
             additionalProperties: false
-            example:
-                name: my-new-product
-                appId: '000000000000'
-                type: service
-                environments:
-                    -
-                        name: dev
-                        active: false
-                        approval: false
-                        flow: public
-                        appId: '00000000'
         OrganizationUnit:
             properties:
                 extForeignKey:
@@ -626,6 +656,100 @@ components:
                     type: string
             type: object
             additionalProperties: false
+        DraftDatasetRefID:
+            type: string
+        LegalRefID:
+            type: string
+        BlobRefID:
+            type: string
+        CredentialIssuerRefID:
+            type: string
+        Environment:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                    enum:
+                        - dev
+                        - test
+                        - prod
+                        - sandbox
+                        - other
+                active:
+                    type: boolean
+                approval:
+                    type: boolean
+                flow:
+                    type: string
+                    enum:
+                        - public
+                        - protected-externally
+                        - authorization-code
+                        - client-credentials
+                        - kong-acl-only
+                        - kong-api-key-only
+                        - kong-api-key-acl
+                additionalDetailsToRequest:
+                    type: string
+                services:
+                    items:
+                        $ref: '#/components/schemas/GatewayServiceRefID'
+                    type: array
+                legal:
+                    $ref: '#/components/schemas/LegalRefID'
+                spec:
+                    $ref: '#/components/schemas/BlobRefID'
+                credentialIssuer:
+                    $ref: '#/components/schemas/CredentialIssuerRefID'
+            type: object
+            additionalProperties: false
+            example:
+                name: dev
+                active: false
+                approval: false
+                flow: public
+                appId: '00000000'
+        Product:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                type:
+                    type: string
+                    enum:
+                        - app
+                        - service
+                description:
+                    type: string
+                gatewayId:
+                    type: string
+                openapiSpecs:
+                    items:
+                        type: string
+                    type: array
+                dataset:
+                    $ref: '#/components/schemas/DraftDatasetRefID'
+                environments:
+                    items:
+                        $ref: '#/components/schemas/Environment'
+                    type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+            type: object
+            additionalProperties: false
+            example:
+                name: my-new-product
+                appId: '000000000000'
+                type: service
+                environments:
+                    -
+                        name: dev
+                        active: false
+                        approval: false
+                        flow: public
+                        appId: '00000000'
     securitySchemes:
         jwt:
             type: oauth2
@@ -1315,7 +1439,7 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    $ref: '#/components/schemas/Dataset'
+                                    $ref: '#/components/schemas/OrgAccessRequest'
                                 type: array
             description: "Get Access Requests that are available by API for this organization\n> `Required Scope:` Namespace.Assign"
             summary: 'Get Organization Access Requests'
@@ -1332,7 +1456,6 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{org}/gateways/{gatewayId}/access_requests':
         put:
             operationId: organization-put-access-requests
             responses:
@@ -1341,7 +1464,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/BatchResult'
+                                $ref: '#/components/schemas/OrgAccessRequest'
             description: "Manage Access Requests for APIs that will appear on the API Directory\n> `Required Scope:` Namespace.Assign"
             summary: 'Manage Access Requests'
             tags:
@@ -1353,12 +1476,6 @@ paths:
             parameters:
                 -
                     in: path
-                    name: gatewayId
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
                     name: org
                     required: true
                     schema:
@@ -1368,7 +1485,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Product'
+                            $ref: '#/components/schemas/OrgAccessRequestCreateInput'
     /organizations:
         get:
             operationId: organization-list
