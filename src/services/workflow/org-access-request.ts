@@ -1,4 +1,5 @@
-import { assert } from 'console';
+
+import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import {
   lookupCredentialIssuerById,
@@ -39,6 +40,7 @@ export const OrgAccessRequestCreate = async (
   accessRequest: AccessRequest;
   credential: NewCredential;
 }> => {
+
   // get list of namespaces for this org
   const prodEnv = await getGwaProductEnvironment(context, false);
   const nsList = await getOrgNamespaces(org, prodEnv);
