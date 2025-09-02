@@ -59,7 +59,10 @@ export const OrgAccessRequestCreate = async (
   const app = {
     appId: `sdx${consumerProdEnv.appId}`,
     name: `${consumerProdEnv.product.name} ${consumerProdEnv.name}`,
-    description: '',
+    description: `SDX Resource Locator: ${formatResourceLocator(
+      orgMemberID,
+      consumerProdEnv
+    )} (Gateway ID ${consumerProdEnv.product.namespace})`,
     owner: { id: userId },
     namespace: consumerProdEnv.product.namespace,
   } as Application;
@@ -80,12 +83,14 @@ export const OrgAccessRequestCreate = async (
   );
   providerProdEnv.credentialIssuer = providerCredIssuer;
 
-  // prepare the access request
-  const controls = {
-    clientName: `${formatResourceLocator(
+  const clientName = `${formatResourceLocator(
       orgMemberID,
       consumerProdEnv
-    )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`,
+    )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`;
+
+  // prepare the access request
+  const controls = {
+    clientName,
     subjectDn: accessPointDN,
     //defaultClientScopes: [],
     optionalClientScopes,
@@ -95,7 +100,7 @@ export const OrgAccessRequestCreate = async (
     acceptLegal: false,
     additionalDetails: 'here is some additional details',
     controls: JSON.stringify(controls),
-    name: 'Sampler API FOR Cope, Aidan CITZ:EX',
+    name: clientName,
     applicationId: appId,
     productEnvironmentId: providerProdEnv.id,
     requestor: userId,
@@ -186,10 +191,10 @@ const checkAccessRequestExists = async (
 
 const formatResourceLocator = (
   orgMemberID: string,
-  providerProdEnv: Environment
+  serviceProdEnv: Environment
 ): string => {
-  const env = providerProdEnv.name.toUpperCase();
-  const serviceId = providerProdEnv.product.name;
+  const env = serviceProdEnv.name.toUpperCase();
+  const serviceId = serviceProdEnv.product.name;
 
   return `/${env}/${orgMemberID}/${serviceId}`;
 };

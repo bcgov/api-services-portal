@@ -11,19 +11,22 @@ import {
   Tags,
   FieldErrors,
   ValidateError,
+  Delete,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../batch/types';
 import { Product } from './types';
-import { getGwaProductEnvironment } from '../../services/workflow';
+import { getGwaProductEnvironment, revokeAllConsumerAccess } from '../../services/workflow';
 import { getOrgNamespaces } from '../../services/workflow/get-namespaces';
-import { getAccessRequestsByNamespace } from '../../services/keystone';
+import { getAccessRequestByNamespaceServiceAccess, getAccessRequestsByNamespace } from '../../services/keystone';
 import { OrgAccessRequest, OrgAccessRequestCreateInput } from './types-extra';
 import { OrgAccessRequestCreate } from '../../services/workflow/org-access-request';
 import { Logger } from '../../logger';
 import { gql } from 'graphql-request';
 import { data } from 'msw/lib/types/context';
+import { getAccessRequest } from '@/services/keystone/access-request';
+import { assert } from 'console';
 
 const logger = Logger('controllers.OrgAccessReq');
 
@@ -67,6 +70,32 @@ export class OrgAccessRequestsController extends Controller {
   }
 
 
+  /** Delete Access Request
+   * > `Required Scope:` Namespace.Assign
+   */
+  @Delete('/{org}/access_requests/{id}')
+  @OperationId('organization-delete-access-request')
+  @Security('jwt', ['Namespace.Assign'])
+  public async deleteRequest( 
+    @Path() org: string,
+    @Path() id: string,
+    @Request() request: any
+  ): Promise<{}> {
+    const ctx = this.keystone.createContext(request, true);
+
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
+
+    const accessRequest = await getAccessRequest(ctx, id);
+
+    const ns = accessRequest.productEnvironment.product.namespace;
+
+    const revoke = await revokeAllConsumerAccess(ctx, ns, accessRequest.serviceAccess.id);
+    logger.debug('Revoke Result %j', revoke);
+
+    return {};
+  }
+
+
   /**
    * Manage Access Requests for APIs that will appear on the API Directory
    * > `Required Scope:` Namespace.Assign
@@ -85,6 +114,8 @@ export class OrgAccessRequestsController extends Controller {
     @Request() request: any
   ): Promise<{id: string}> {
 
+    body.org = org;
+
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: createAccessRequest,
@@ -97,7 +128,7 @@ export class OrgAccessRequestsController extends Controller {
         errors[`d${ind}`] = { message: err.message };
       });
       logger.error('%j', result);
-      throw new ValidateError(errors, 'Unable to create Gateway');
+      throw new ValidateError(errors, 'Unable to create Access Request');
     }
     return {
       id: result.data.orgAccessRequest.id,
@@ -107,8 +138,9 @@ export class OrgAccessRequestsController extends Controller {
 }
 
 const createAccessRequest = gql`
-  mutation OrgAccessRequestCreate($data: OrgAccessRequestCreateInput!) {
-    orgAccessRequest(data: $data) {
+
+  mutation OrgAccessRequestCreate ($data: OrgAccessRequestCreateInput!) {
+    orgAccessRequest (data: $data) {
       id
     }
   }
