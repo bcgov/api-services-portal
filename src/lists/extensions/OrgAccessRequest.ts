@@ -45,8 +45,9 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              const noauthContext = context.createContext({ skipAccessControl: true });
               const result = await OrgAccessRequestCreate(
-                context,
+                noauthContext,
                 args.data.org,
                 args.data.orgMemberId,
                 args.data.userId,
