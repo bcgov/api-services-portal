@@ -141,7 +141,12 @@ const createAccessRequest = gql`
 
   mutation OrgAccessRequestCreate ($data: OrgAccessRequestCreateInput!) {
     orgAccessRequest (data: $data) {
-      id
+      application {
+        appId
+      }
+      accessRequest {
+        id
+      }
     }
   }
 `;
