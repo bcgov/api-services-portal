@@ -19,7 +19,7 @@ import { BatchResult } from '../../batch/types';
 import { Product } from './types';
 import { getGwaProductEnvironment, revokeAllConsumerAccess } from '../../services/workflow';
 import { getOrgNamespaces } from '../../services/workflow/get-namespaces';
-import { getAccessRequestByNamespaceServiceAccess, getAccessRequestsByNamespace } from '../../services/keystone';
+import { deleteServiceAccess, getAccessRequestByNamespaceServiceAccess, getAccessRequestsByNamespace } from '../../services/keystone';
 import { OrgAccessRequest, OrgAccessRequestCreateInput } from './types-extra';
 import { OrgAccessRequestCreate } from '../../services/workflow/org-access-request';
 import { Logger } from '../../logger';
@@ -85,9 +85,9 @@ export class OrgAccessRequestsController extends Controller {
 
     const accessRequest = await getAccessRequest(ctx, id);
 
-    const ns = accessRequest.productEnvironment.product.namespace;
+    //const ns = accessRequest.productEnvironment.product.namespace;
 
-    const revoke = await revokeAllConsumerAccess(ctx, ns, accessRequest.serviceAccess.id);
+    const revoke = await deleteServiceAccess(ctx, accessRequest.serviceAccess.id);
     logger.debug('Revoke Result %j', revoke);
 
     return {};
