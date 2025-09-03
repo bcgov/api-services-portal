@@ -111,11 +111,12 @@ export class OrgAccessRequestsController extends Controller {
     @Body() body: OrgAccessRequestCreateInput,
     @Request() request: any
   ): Promise<{id: string}> {
+    const ctx = this.keystone.createContext(request, true);
 
     body.org = org;
 
     const result = await this.keystone.executeGraphQL({
-      context: this.keystone.createContext(request),
+      context: ctx,
       query: createAccessRequest,
       variables: { data: body },
     });
