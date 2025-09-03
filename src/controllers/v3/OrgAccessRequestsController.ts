@@ -136,9 +136,8 @@ export class OrgAccessRequestsController extends Controller {
 }
 
 const createAccessRequest = gql`
-
-  mutation OrgAccessRequestCreate ($data: OrgAccessRequestCreateInput!) {
-    orgAccessRequest (data: $data) {
+  mutation OrgAccessRequestCreate ($data: OrgAccessRequestCreateInput) {
+    orgCreateAccessRequest (data: $data) {
       application {
         appId
       }
