@@ -17,6 +17,7 @@ import {
 } from '../../lists/extensions/Common';
 import { GWAService } from '../gwaapi';
 import { strict as assert } from 'assert';
+import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 
 const logger = Logger('kc.nsdetails');
 
@@ -79,6 +80,18 @@ export async function backfillGroupAttributes(
 
   assert.strictEqual(Boolean(nsPermissions), true, 'Invalid namespace');
 
+  return backfillGroupRepAttributes(nsPermissions, detail, defaultSettings);
+  
+}
+
+export async function backfillGroupRepAttributes(
+  nsPermissions: GroupRepresentation,
+  detail: any,
+  defaultSettings: any,
+): Promise<any> {
+
+  assert.strictEqual(Boolean(nsPermissions), true, 'Invalid namespace');
+
   transformSingleValueAttributes(nsPermissions.attributes, [
     'description',
     'perm-data-plane',
@@ -89,12 +102,6 @@ export async function backfillGroupAttributes(
     'org-notice-viewed',
     'org-updated-at',
   ]);
-
-  logger.debug(
-    '[backfillGroupAttributes] %s attributes %j',
-    ns,
-    nsPermissions.attributes
-  );
 
   const merged = {
     ...detail,

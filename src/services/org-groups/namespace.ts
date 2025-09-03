@@ -161,6 +161,12 @@ export class NamespaceService {
       .map((group) => ({
         name: group.name,
         orgUnit: 'org-unit' in group.attributes ? group.attributes['org-unit'][0] : null,
+        permDataPlane:
+          'perm-data-plane' in group.attributes
+            ? group.attributes['perm-data-plane'].pop() : '',
+        permDomains:
+          'perm-domains' in group.attributes
+            ? group.attributes['perm-domains'] : [],
         enabled:
           'org-enabled' in group.attributes
             ? group.attributes['org-enabled'][0] === 'true'
@@ -181,6 +187,12 @@ export class NamespaceService {
       return {
         name: nsGroup.attributes['org'].pop(),
         orgUnit: nsGroup.attributes['org-unit'].pop(),
+        permDataPlane:
+          'perm-data-plane' in nsGroup.attributes
+            ? nsGroup.attributes['perm-data-plane'] : '',
+        permDomains:
+          'perm-domains' in nsGroup.attributes
+            ? nsGroup.attributes['perm-domains'] : [],
         enabled:
           'org-enabled' in nsGroup.attributes
             ? nsGroup.attributes['org-enabled'][0] === 'true'
