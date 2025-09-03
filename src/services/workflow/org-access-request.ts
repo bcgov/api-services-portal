@@ -1,4 +1,3 @@
-
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import {
@@ -40,116 +39,120 @@ export const OrgAccessRequestCreate = async (
   accessRequest: AccessRequest;
   credential: NewCredential;
 }> => {
+  try {
+    // get list of namespaces for this org
+    const prodEnv = await getGwaProductEnvironment(context, false);
+    const nsList = await getOrgNamespaces(org, prodEnv);
 
-  // get list of namespaces for this org
-  const prodEnv = await getGwaProductEnvironment(context, false);
-  const nsList = await getOrgNamespaces(org, prodEnv);
+    // get the consumer product environment details
+    const consumerProdEnv = await lookupProductEnvironmentServicesBySlug(
+      context,
+      consumerProdEnvAppId
+    );
 
-  // get the consumer product environment details
-  const consumerProdEnv = await lookupProductEnvironmentServicesBySlug(
-    context,
-    consumerProdEnvAppId
-  );
+    assert(
+      nsList.filter((ns) => ns.name === consumerProdEnv.product.namespace)
+        .length === 1,
+      `Consumer Product Environment ${consumerProdEnvAppId} not found`
+    );
 
-  assert(
-    nsList.filter((ns) => ns.name === consumerProdEnv.product.namespace)
-      .length === 1,
-    `Consumer Product Environment ${consumerProdEnvAppId} not found`
-  );
+    // create the application if it does not exist
+    const app = {
+      appId: `sdx${consumerProdEnv.appId}`,
+      name: `${consumerProdEnv.product.name} ${consumerProdEnv.name}`,
+      description: `SDX Resource Locator: ${formatResourceLocator(
+        orgMemberID,
+        consumerProdEnv
+      )} (Gateway ID ${consumerProdEnv.product.namespace})`,
+      owner: { id: userId },
+      namespace: consumerProdEnv.product.namespace,
+    } as Application;
 
-  // create the application if it does not exist
-  const app = {
-    appId: `sdx${consumerProdEnv.appId}`,
-    name: `${consumerProdEnv.product.name} ${consumerProdEnv.name}`,
-    description: `SDX Resource Locator: ${formatResourceLocator(
-      orgMemberID,
-      consumerProdEnv
-    )} (Gateway ID ${consumerProdEnv.product.namespace})`,
-    owner: { id: userId },
-    namespace: consumerProdEnv.product.namespace,
-  } as Application;
+    const appId = await UpsertApplication(context, app);
+    logger.debug('App ID: %s', appId);
 
-  const appId = await UpsertApplication(context, app);
-  logger.debug('App ID: %s', appId);
+    // get the provider product environment details
+    const providerProdEnv = await lookupProductEnvironmentServicesBySlug(
+      context,
+      providerProdEnvAppId
+    );
 
-  // get the provider product environment details
-  const providerProdEnv = await lookupProductEnvironmentServicesBySlug(
-    context,
-    providerProdEnvAppId
-  );
+    // get the provider credential issuer details
+    const providerCredIssuer = await lookupCredentialIssuerById(
+      context,
+      providerProdEnv.credentialIssuer.id
+    );
+    providerProdEnv.credentialIssuer = providerCredIssuer;
 
-  // get the provider credential issuer details
-  const providerCredIssuer = await lookupCredentialIssuerById(
-    context,
-    providerProdEnv.credentialIssuer.id
-  );
-  providerProdEnv.credentialIssuer = providerCredIssuer;
-
-  const clientName = `${formatResourceLocator(
+    const clientName = `${formatResourceLocator(
       orgMemberID,
       consumerProdEnv
     )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`;
 
-  // prepare the access request
-  const controls = {
-    clientName,
-    subjectDn: accessPointDN,
-    //defaultClientScopes: [],
-    optionalClientScopes,
-  };
+    // prepare the access request
+    const controls = {
+      clientName,
+      subjectDn: accessPointDN,
+      //defaultClientScopes: [],
+      optionalClientScopes,
+    };
 
-  const accessRequestData = {
-    acceptLegal: false,
-    additionalDetails: 'here is some additional details',
-    controls: JSON.stringify(controls),
-    name: clientName,
-    applicationId: appId,
-    productEnvironmentId: providerProdEnv.id,
-    requestor: userId,
-  } as any;
+    const accessRequestData = {
+      acceptLegal: false,
+      additionalDetails: 'here is some additional details',
+      controls: JSON.stringify(controls),
+      name: clientName,
+      applicationId: appId,
+      productEnvironmentId: providerProdEnv.id,
+      requestor: userId,
+    } as any;
 
-  // create the access request
-  const accessRequestCreated = await addAccessRequest(
-    context,
-    accessRequestData
-  );
+    // create the access request
+    const accessRequestCreated = await addAccessRequest(
+      context,
+      accessRequestData
+    );
 
-  // collect the credentials
-  const creds = await collectCredentials(context, accessRequestCreated.id);
-  const credDetails = JSON.parse(creds.credential);
+    // collect the credentials
+    const creds = await collectCredentials(context, accessRequestCreated.id);
+    const credDetails = JSON.parse(creds.credential);
 
-  // get the latest details of the access request
-  const accessRequest = await getAccessRequest(
-    context,
-    accessRequestCreated.id
-  );
+    // get the latest details of the access request
+    const accessRequest = await getAccessRequest(
+      context,
+      accessRequestCreated.id
+    );
 
-  // add some standard labels to the consumer
-  const labels = [
-    {
-      labelGroup: 'sdx-res-locator',
-      values: [formatResourceLocator(orgMemberID, consumerProdEnv)],
-    },
-    { labelGroup: 'sdx-member', values: [orgMemberID] },
-  ];
+    // add some standard labels to the consumer
+    const labels = [
+      {
+        labelGroup: 'sdx-res-locator',
+        values: [formatResourceLocator(orgMemberID, consumerProdEnv)],
+      },
+      { labelGroup: 'sdx-member', values: [orgMemberID] },
+    ];
 
-  if (businessProcess) {
-    labels.push({ labelGroup: 'purpose', values: [businessProcess] });
+    if (businessProcess) {
+      labels.push({ labelGroup: 'purpose', values: [businessProcess] });
+    }
+
+    await saveConsumerLabels(
+      context,
+      app.namespace,
+      accessRequest.serviceAccess.consumer.id,
+      labels
+    );
+
+    return {
+      application: app,
+      providerProdEnv,
+      accessRequest,
+      credential: credDetails,
+    };
+  } catch (error) {
+    logger.error('OrgAccessRequestCreate error: %s', error?.message || error);
+    throw error;
   }
-
-  await saveConsumerLabels(
-    context,
-    app.namespace,
-    accessRequest.serviceAccess.consumer.id,
-    labels
-  );
-
-  return {
-    application: app,
-    providerProdEnv,
-    accessRequest,
-    credential: credDetails,
-  };
 };
 
 const UpsertApplication = async (

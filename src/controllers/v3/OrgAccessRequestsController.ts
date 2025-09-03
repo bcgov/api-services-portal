@@ -83,8 +83,6 @@ export class OrgAccessRequestsController extends Controller {
   ): Promise<{}> {
     const ctx = this.keystone.createContext(request, true);
 
-    const prodEnv = await getGwaProductEnvironment(ctx, false);
-
     const accessRequest = await getAccessRequest(ctx, id);
 
     const ns = accessRequest.productEnvironment.product.namespace;
