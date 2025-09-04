@@ -2,6 +2,7 @@ import { Keystone } from '@keystonejs/keystone';
 import { injectable } from 'tsyringe';
 import { scopes, scopesToRoles } from '../../auth/scope-role-utils';
 import { Logger } from '../../logger';
+import { lookupUserByUsername } from '../../services/keystone';
 
 const logger = Logger('controller');
 
@@ -36,6 +37,49 @@ export class KeystoneService {
 
   public sudo(): any {
     return this.keystone.createContext({ skipAccessControl: true });
+  }
+
+  public async createContextithUser(
+    request: any,
+    skipAccessControl: boolean = false
+  ) {
+    const _scopes = scopes(request.user.scope);
+
+    const identityProvider = request.user.identity_provider;
+
+    if (!request.user && !request.user.preferred_username) {
+      throw new Error(
+        'User information is required to create context with user'
+      );
+    }
+    const tmpCtx = this.keystone.createContext({
+      skipAccessControl: true,
+    });
+    const users = await lookupUserByUsername(
+      tmpCtx,
+      request.user.preferred_username
+    );
+    if (!users) {
+      throw new Error(`User ${request.user.preferred_username} not found`);
+    }
+    const userId = users[0].id;
+
+    const identity = {
+      id: null,
+      name: resolveName(request.user),
+      username: resolveUsername(request.user),
+      namespace: request.params.ns || request.params.gatewayId,
+      roles: JSON.stringify(scopesToRoles(identityProvider, _scopes)),
+      scopes: _scopes,
+      userId,
+    } as any;
+    logger.debug('identity %j', identity);
+    const ctx = this.keystone.createContext({
+      skipAccessControl,
+      authentication: { item: identity },
+    });
+    ctx.req = request;
+    return ctx;
   }
 
   public createContext(request: any, skipAccessControl: boolean = false): any {

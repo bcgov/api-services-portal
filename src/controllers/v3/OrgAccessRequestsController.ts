@@ -111,7 +111,7 @@ export class OrgAccessRequestsController extends Controller {
     @Body() body: OrgAccessRequestCreateInput,
     @Request() request: any
   ): Promise<{id: string}> {
-    const ctx = this.keystone.createContext(request, true);
+    const ctx = await this.keystone.createContextithUser(request, true);
 
     body.org = org;
 
