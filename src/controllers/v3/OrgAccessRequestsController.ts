@@ -114,6 +114,7 @@ export class OrgAccessRequestsController extends Controller {
     const ctx = await this.keystone.createContextithUser(request, true);
 
     body.org = org;
+    body.userId = ctx.authedItem.userId;
 
     const result = await this.keystone.executeGraphQL({
       context: ctx,
