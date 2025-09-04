@@ -25,7 +25,7 @@ import {
   recordActivityWithBlob,
 } from '../../../services/keystone/activity';
 import { id } from 'date-fns/locale';
-import UpdateAPISpec from '../../../services/workflow/update-api-spec';
+import {UpdateAPISpec, GetAPISpecsByOrg} from '../../../services/workflow/api-specs';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -52,6 +52,10 @@ import UpdateAPISpec from '../../../services/workflow/update-api-spec';
   });
 
   if (true) {
+    const result = await GetAPISpecsByOrg(ctx, 'ministry-of-puppies-and-kittens');  
+    o(result);
+  }
+  if (false) {
     const spec=  'https://bcgov.github.io/sdx-openapi/%3CService%3E.v1.yaml';
     const result = await UpdateAPISpec(ctx, spec, 'E7FEB796');  
     o(result);

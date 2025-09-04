@@ -6,15 +6,16 @@ import {
   Path,
   Route,
   Security,
-  Body, Tags,
-  Get
+  Body,
+  Tags,
+  Get,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { OrgAPISpecCreateInput } from './types-extra';
 import { Logger } from '../../logger';
 import { gql } from 'graphql-request';
-import UpdateAPISpec from '../../services/workflow/update-api-spec';
+import { UpdateAPISpec, GetAPISpecsByOrg } from '../../services/workflow/api-specs';
 
 const logger = Logger('controllers.OrgAPISpec');
 
@@ -44,12 +45,12 @@ export class OrgAPISpecController extends Controller {
     @Path() org: string,
     @Body() body: OrgAPISpecCreateInput,
     @Request() request: any
-  ): Promise<{id: string}> {
+  ): Promise<{ id: string }> {
     const ctx = await this.keystone.createContextithUser(request, true);
 
     const result = await UpdateAPISpec(ctx, body.specUrl, body.productEnvAppId);
     logger.debug('OrgAPISpecController: %j', result);
-    return {id: result.id}
+    return { id: result.id };
   }
 
   @Get('/{org}/api_specs')
@@ -58,29 +59,10 @@ export class OrgAPISpecController extends Controller {
   public async get(
     @Path() org: string,
     @Request() request: any
-  ): Promise<{prodEnvId: string, spec: string}> {  
-    const ctx = await this.keystone.createContextithUser(request, true); 
-    const query = gql`
-      query getProductEnvironments($org: String) {
-        allEnvironments(where: { product: { organization: { name: $org } } }) {
-          id
-          appId
-          spec {
-            id
-            blob
-          }
-        }
-          `;
-
-    const specs = await ctx.executeGraphQL({
-      query,
-      variables: { org },
-    });
-    if (specs.errors) {
-      logger.error('Error fetching Specs %j', specs.errors);
-      throw new Error('Error fetching Specs');
-    }
-    return specs.data.allEnvironments.filter((env:any) => env.spec).map((env: any) => (
-      {prodEnvId: env.appId, spec: env.spec}));
+  ): Promise<{ prodEnvId: string; spec: string }> {
+    const ctx = await this.keystone.createContextithUser(request, true);
+    const result = await GetAPISpecsByOrg(ctx, org);
+    logger.debug('OrgAPISpecController: %j', result);
+    return result;
   }
 }
