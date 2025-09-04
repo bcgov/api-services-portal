@@ -58,12 +58,13 @@ export class OrgAPISpecController extends Controller {
   public async get(
     @Path() org: string,
     @Request() request: any
-  ): Promise<string[]> {  
+  ): Promise<{prodEnvId: string, spec: string}> {  
     const ctx = await this.keystone.createContextithUser(request, true); 
     const query = gql`
       query getProductEnvironments($org: String) {
         allEnvironments(where: { product: { organization: { name: $org } } }) {
           id
+          appId
           spec {
             id
             blob
@@ -79,7 +80,7 @@ export class OrgAPISpecController extends Controller {
       logger.error('Error fetching Specs %j', specs.errors);
       throw new Error('Error fetching Specs');
     }
-    return specs.data.allEnvironments.filter((env:any) => env.spec).map((env: any) => env.spec);
+    return specs.data.allEnvironments.filter((env:any) => env.spec).map((env: any) => (
+      {prodEnvId: env.appId, spec: env.spec}));
   }
-
 }
