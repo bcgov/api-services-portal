@@ -32,7 +32,7 @@ const logger = Logger('controllers.OrgAccessReq');
 
 @injectable()
 @Route('/organizations')
-@Tags('API Directory (Administration)')
+@Tags('Organizations')
 export class OrgAccessRequestsController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {

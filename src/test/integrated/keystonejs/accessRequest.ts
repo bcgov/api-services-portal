@@ -50,9 +50,10 @@ import {
   getGwaProductEnvironment,
   getOrgNamespaces,
 } from '../../../services/workflow/get-namespaces';
-import { getRecords, replaceKey } from '../../../batch/feed-worker';
+import { deleteRecord, getRecords, replaceKey, syncRecordsThrowErrors } from '../../../batch/feed-worker';
 import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-request';
 import { OrgAccessRequestCreateInput } from '../../../services/workflow/types';
+import { lookupServiceAccessesByNamespace } from '../../../services/keystone';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -77,6 +78,18 @@ import { OrgAccessRequestCreateInput } from '../../../services/workflow/types';
     skipAccessControl,
     authentication: { item: identity },
   });
+
+  if (true) {
+    const result = await lookupServiceAccessesByNamespace(ctx, ns);
+    o(result);
+
+
+
+    // const res = await deleteRecord(ctx, 'GatewayConsumer', 'b5f06ded-0c3d-4cb7-802a-ed3c03d5cbf8');
+    // o(res);
+    // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
+    // o(revoke);
+  }
 
   if (true) {
     const result = await ctx.executeGraphQL({
@@ -131,6 +144,22 @@ import { OrgAccessRequestCreateInput } from '../../../services/workflow/types';
       },
     });
     o(result);
+
+    /*
+{
+  "org": "ministry-of-puppies-and-kittens",
+  "orgMemberId": "MIN/PUKI",
+  "userId": "12",
+  "consumerProductEnvAppId": "E7FEB796",
+  "providerProductEnvAppId": "1400BE49",
+  "businessProcess": "Vet Services",
+  "accessPointDN": "CN=sdx.gov.bc.ca",
+  "optionalClientScopes": [
+    "user/Test2"
+  ]
+}    
+    */
+
   }
 
   if (false) {

@@ -319,7 +319,6 @@ export interface Environment {
   additionalDetailsToRequest?: string;
   services?: GatewayServiceRefID[];
   legal?: LegalRefID;
-  spec?: BlobRefID;
   credentialIssuer?: CredentialIssuerRefID;
 }
 
@@ -546,11 +545,6 @@ export interface DatasetResource {
  * @tsoaModel
  */  
 export type ApplicationRefID = string
-
-/**
- * @tsoaModel
- */  
-export type BlobRefID = string
 
 /**
  * @tsoaModel

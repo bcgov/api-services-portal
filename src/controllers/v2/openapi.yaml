@@ -580,6 +580,12 @@ components:
                     type: string
                 enabled:
                     type: boolean
+                permDataPlane:
+                    type: string
+                permDomains:
+                    items:
+                        type: string
+                    type: array
                 updatedAt:
                     type: number
                     format: double
@@ -587,14 +593,14 @@ components:
                 - name
                 - orgUnit
                 - enabled
+                - permDataPlane
+                - permDomains
                 - updatedAt
             type: object
             additionalProperties: false
         DraftDatasetRefID:
             type: string
         LegalRefID:
-            type: string
-        BlobRefID:
             type: string
         CredentialIssuerRefID:
             type: string
@@ -632,8 +638,6 @@ components:
                     type: array
                 legal:
                     $ref: '#/components/schemas/LegalRefID'
-                spec:
-                    $ref: '#/components/schemas/BlobRefID'
                 credentialIssuer:
                     $ref: '#/components/schemas/CredentialIssuerRefID'
             type: object

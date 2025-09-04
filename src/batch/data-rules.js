@@ -453,7 +453,7 @@ const metadata = {
       'name',
       { key: 'parent.id', whereClause: 'product: { id: $parent_id }' },
     ],
-    sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest', 'spec'],
+    sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
     ownedBy: 'product',
     transformations: {
       services: {
@@ -463,7 +463,9 @@ const metadata = {
         filterByNamespace: true,
       },
       legal: { name: 'connectOne', list: 'allLegals', refKey: 'reference' },
-      spec: { name: 'connectOne', list: 'allBlobs', refKey: 'name' },
+      // exclude "spec" otherwise batch reading will automatically try to read it
+      // which we don't necessarily want
+      // spec: { name: 'connectOne', list: 'allBlobs', refKey: 'name' },
       credentialIssuer: {
         name: 'connectOne',
         list: 'allCredentialIssuers',

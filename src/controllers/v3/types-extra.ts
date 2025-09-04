@@ -28,6 +28,11 @@ export interface GatewayAdd {
   dataPlane?: string;
 }
 
+export interface OrgAPISpecCreateInput {
+  productEnvAppId: string;
+  specUrl: string;
+}
+
 export interface OrgAccessRequestCreateInput {
   org?: string;
   orgMemberId: string;

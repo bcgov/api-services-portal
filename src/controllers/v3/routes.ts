@@ -25,6 +25,8 @@ import { OrgAccessRequestsController } from './OrgAccessRequestsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrganizationController } from './OrganizationController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrgAPISpecController } from './OrgAPISpecController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrgProductController } from './OrgProductController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrgRoleController } from './OrgRoleController';
@@ -272,8 +274,9 @@ const models: TsoaRoute.Models = {
     "OrgAccessRequestCreateInput": {
         "dataType": "refObject",
         "properties": {
+            "org": {"dataType":"string"},
             "orgMemberId": {"dataType":"string","required":true},
-            "userId": {"dataType":"string","required":true},
+            "userId": {"dataType":"string"},
             "consumerProductEnvAppId": {"dataType":"string","required":true},
             "providerProductEnvAppId": {"dataType":"string","required":true},
             "businessProcess": {"dataType":"string","required":true},
@@ -376,6 +379,8 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
             "enabled": {"dataType":"boolean","required":true},
+            "permDataPlane": {"dataType":"string","required":true},
+            "permDomains": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -393,17 +398,21 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrgAPISpecCreateInput": {
+        "dataType": "refObject",
+        "properties": {
+            "productEnvAppId": {"dataType":"string","required":true},
+            "specUrl": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DraftDatasetRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BlobRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
@@ -424,7 +433,6 @@ const models: TsoaRoute.Models = {
             "additionalDetailsToRequest": {"dataType":"string"},
             "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
             "legal": {"ref":"LegalRefID"},
-            "spec": {"ref":"BlobRefID"},
             "credentialIssuer": {"ref":"CredentialIssuerRefID"},
         },
         "additionalProperties": false,
@@ -1004,6 +1012,7 @@ export function RegisterRoutes(app: express.Router) {
 
             async function GatewayController_put(request: any, response: any, next: any) {
             const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
                     dryRun: {"in":"formData","name":"dryRun","required":true,"dataType":"string"},
                     configFile: {"in":"formData","name":"configFile","required":true,"dataType":"file"},
             };
@@ -1203,6 +1212,37 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.getRequests.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/ds/api/v3/organizations/:org/access_requests/:id',
+            authenticateMiddleware([{"jwt":["Namespace.Assign"]}]),
+
+            async function OrgAccessRequestsController_deleteRequest(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgAccessRequestsController>(OrgAccessRequestsController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.deleteRequest.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -1562,6 +1602,37 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.namespaceActivity.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v3/organizations/:org/api_specs',
+            authenticateMiddleware([{"jwt":["Namespace.Assign"]}]),
+
+            async function OrgAPISpecController_put(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"OrgAPISpecCreateInput"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgAPISpecController>(OrgAPISpecController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.put.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

@@ -373,6 +373,8 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
             "enabled": {"dataType":"boolean","required":true},
+            "permDataPlane": {"dataType":"string","required":true},
+            "permDomains": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -384,11 +386,6 @@ const models: TsoaRoute.Models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BlobRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
@@ -409,7 +406,6 @@ const models: TsoaRoute.Models = {
             "additionalDetailsToRequest": {"dataType":"string"},
             "services": {"dataType":"array","array":{"dataType":"refAlias","ref":"GatewayServiceRefID"}},
             "legal": {"ref":"LegalRefID"},
-            "spec": {"ref":"BlobRefID"},
             "credentialIssuer": {"ref":"CredentialIssuerRefID"},
         },
         "additionalProperties": false,

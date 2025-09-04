@@ -38,6 +38,7 @@ export class GatewayController extends Controller {
   @OperationId('publish-gateway-config')
   @Security('jwt', ['Gateway.Config'])
   public async put(
+    @Path() gatewayId: string,
     @FormField() dryRun: boolean,
     @UploadedFile() configFile: Express.Multer.File
   ): Promise<PublishResult> {
