@@ -1900,6 +1900,34 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/OrgAPISpecCreateInput'
+        get:
+            operationId: organization-get-api-specs
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    spec: {type: string}
+                                    prodEnvId: {type: string}
+                                required:
+                                    - spec
+                                    - prodEnvId
+                                type: object
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
     '/organizations/{org}/products':
         get:
             operationId: organization-products
