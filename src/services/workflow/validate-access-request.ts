@@ -90,12 +90,15 @@ export const Validate = async (
       );
 
       // assert that either the Product is Active or it belongs to the authorized Subject gateway
-      assert.strictEqual(
-        prodEnv.active === true ||
-          prodEnv.product.namespace === context.authedItem.namespace,
-        true,
-        'Product not elligible for requesting access'
-      );
+      // SDX : Temporarily remove this check
+      // as it will require a bit of thought on where the "namespace" comes from
+      // this is more of an entitlement check
+      // assert.strictEqual(
+      //   prodEnv.active === true ||
+      //     prodEnv.product.namespace === context.authedItem.namespace,
+      //   true,
+      //   'Product not elligible for requesting access'
+      // );
 
       // assert that the Consumer does not already exist
       const application = await lookupMyApplicationsById(
