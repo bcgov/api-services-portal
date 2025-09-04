@@ -131,7 +131,7 @@ export class OrgAccessRequestsController extends Controller {
       throw new ValidateError(errors, 'Unable to create Access Request');
     }
     return {
-      id: result.data.orgAccessRequest.id,
+      id: result.data.orgCreateAccessRequest.id,
     };
 
   }  
