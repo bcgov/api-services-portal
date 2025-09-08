@@ -156,7 +156,8 @@ export class NamespaceService {
     const matches = namespaceGroups
       .filter(
         (group) =>
-          'org' in group.attributes && group.attributes['org'][0] === org
+          'org' in group.attributes && group.attributes['org'][0] === org &&
+        !('decommissioned' in group.attributes)
       )
       .map((group) => ({
         name: group.name,
