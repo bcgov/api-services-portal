@@ -13,6 +13,7 @@ import {
   transformAllRefID,
   removeEmpty,
   removeKeys,
+  syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
 import { BatchService } from '../../../services/keystone/batch-service';
@@ -22,7 +23,7 @@ import { BatchService } from '../../../services/keystone/batch-service';
   console.log('K = ' + keystone);
 
   const ns = 'platform';
-  const skipAccessControl = false;
+  const skipAccessControl = true;
 
   const identity = {
     id: null,
@@ -97,10 +98,35 @@ import { BatchService } from '../../../services/keystone/batch-service';
 
   const res = await bapi.lookup(
     'allOrganizations',
-    'orgUnits.name',
-    'heritage',
-    []
+    'name',
+    'ministry-of-citizens-services',
+    ['extForeignKey'] 
   );
-  o(res);
+  const id = res.extForeignKey;
+  const out = await syncRecordsThrowErrors(
+    ctx,
+    'Organization',
+    id,
+      {
+        description: 'Updated desc 2',
+        extForeignKey: id,
+        orgUnits: [
+          {
+            name: 'new-unit',
+            title: 'New Unity',
+            extForeignKey: '00001-new-unit',
+            // extSource: 'custom',
+            // extRecordHash: '1234',
+            // description: 'Newly created unit',
+            // tags: ['tag1', 'tag2'],
+          }
+        ]
+      }
+    ,
+    true
+  )
+    
+
+  o(out);
   await keystone.disconnect();
 })();
