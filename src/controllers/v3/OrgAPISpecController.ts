@@ -55,13 +55,12 @@ export class OrgAPISpecController extends Controller {
 
   @Get('/{org}/api_specs')
   @OperationId('organization-get-api-specs')
-  @Security('jwt', [])
   //@Security('jwt', ['Namespace.Assign'])
   public async get(
     @Path() org: string,
     @Request() request: any
   ): Promise<{ prodEnvId: string; spec: string }> {
-    const ctx = await this.keystone.createContextithUser(request, true);
+    const ctx = await this.keystone.createContext(request, true);
     const result = await GetAPISpecsByOrg(ctx, org);
     logger.debug('OrgAPISpecController: %j', result);
     return result;
