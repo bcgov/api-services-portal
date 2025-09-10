@@ -60,7 +60,8 @@ export class OrgAPISpecController extends Controller {
     @Path() org: string,
     @Request() request: any
   ): Promise<{ prodEnvId: string; spec: string }> {
-    const ctx = await this.keystone.createContext(request, true);
+    const ctx = this.keystone.sudo();    
+    //const ctx = await this.keystone.createContext(request, true);
     const result = await GetAPISpecsByOrg(ctx, org);
     logger.debug('OrgAPISpecController: %j', result);
     return result;
