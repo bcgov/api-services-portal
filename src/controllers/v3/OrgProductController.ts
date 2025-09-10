@@ -31,6 +31,9 @@ import { ProductCatalog, ProductCatalogOperation } from './types-extra';
 import { gql } from 'graphql-request';
 import { Environment } from '../../services/keystone/types';
 import YAML from 'yaml';
+import { getGwaProductEnvironment } from '../../services/workflow';
+import { NamespaceService } from '../../services/org-groups';
+import { OrgNamespace } from '../../services/org-groups/types';
 
 @injectable()
 @Route('/organizations')
@@ -60,9 +63,10 @@ export class OrgProductController extends Controller {
       (e: Environment) => e.product.organization != null
     );
 
-    return envs.map((env: any) => {
+    const output = envs.map((env: any) => {
       const spec = YAML.parse(env.spec?.blob || '{}');
 
+      
       const operations = spec?.paths && Object.keys(spec.paths).map((path) => {
         return Object.keys(spec.paths[path]).map((method) => {
           const op = spec.paths[path][method];
@@ -100,6 +104,15 @@ export class OrgProductController extends Controller {
         },
       };
     });
+
+    const promises = output.filter((env:any) => env.product.namespace).map(async (env: any) => {
+      const nsAttributes = await getNamespaceAttributes(
+        env.product.namespace
+      );
+      env.ns = nsAttributes;
+    });
+    await Promise.all(promises);
+    return output;
   }
 
   /**
@@ -178,6 +191,7 @@ const list = gql`
       }
       product {
         name
+        namespace
         organization {
           name
         }
@@ -185,3 +199,13 @@ const list = gql`
     }
   }
 `;
+
+
+async function getNamespaceAttributes(ns: string) : Promise<OrgNamespace> {
+      const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+      const envConfig = prodEnv.issuerEnvConfig;
+  
+      const svc = new NamespaceService(envConfig.issuerUrl);
+      await svc.login(envConfig.clientId, envConfig.clientSecret);
+      return await svc.getNamespaceOrganizationDetails(ns);
+}

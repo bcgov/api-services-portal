@@ -731,11 +731,37 @@ components:
                         - organization
                         - name
                     type: object
+                ns:
+                    properties:
+                        updatedAt:
+                            type: number
+                            format: double
+                        enabled:
+                            type: boolean
+                        permDomains:
+                            items:
+                                type: string
+                            type: array
+                        permDataPlane:
+                            type: string
+                        orgUnit:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - updatedAt
+                        - enabled
+                        - permDomains
+                        - permDataPlane
+                        - orgUnit
+                        - name
+                    type: object
             required:
                 - appId
                 - name
                 - spec
                 - product
+                - ns
             type: object
             additionalProperties: false
         DraftDatasetRefID:

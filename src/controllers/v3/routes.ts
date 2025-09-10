@@ -424,6 +424,7 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "spec": {"dataType":"nestedObjectLiteral","nestedProperties":{"operations":{"dataType":"array","array":{"dataType":"refObject","ref":"ProductCatalogOperation"},"required":true},"description":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"title":{"dataType":"string","required":true}},"required":true},
             "product": {"dataType":"nestedObjectLiteral","nestedProperties":{"organization":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}},"required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "ns": {"dataType":"nestedObjectLiteral","nestedProperties":{"updatedAt":{"dataType":"double","required":true},"enabled":{"dataType":"boolean","required":true},"permDomains":{"dataType":"array","array":{"dataType":"string"},"required":true},"permDataPlane":{"dataType":"string","required":true},"orgUnit":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
         },
         "additionalProperties": false,
     },

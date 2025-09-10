@@ -184,10 +184,10 @@ export class NamespaceService {
   async getNamespaceOrganizationDetails(ns: string): Promise<OrgNamespace> {
     const nsGroup = await this.groupService.findByName('ns', ns, false);
 
-    if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+    if ('org' in nsGroup.attributes) {
       return {
         name: nsGroup.attributes['org'].pop(),
-        orgUnit: nsGroup.attributes['org-unit'].pop(),
+        orgUnit: 'org-unit' in nsGroup.attributes ? nsGroup.attributes['org-unit'].pop() : '',
         permDataPlane:
           'perm-data-plane' in nsGroup.attributes
             ? nsGroup.attributes['perm-data-plane'] : '',

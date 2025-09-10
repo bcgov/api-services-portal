@@ -100,4 +100,12 @@ export interface ProductCatalog {
       name: string;
     }
   }
+  ns: {
+    name: string;
+    orgUnit: string;
+    permDataPlane: string;
+    permDomains: string[];
+    enabled: boolean;
+    updatedAt: number;
+  }
 }
