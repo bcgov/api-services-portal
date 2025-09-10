@@ -27,6 +27,10 @@ import {
 import { BatchResult } from '../../batch/types';
 import { Dataset, DraftDataset } from './types';
 import { Product } from './types';
+import { ProductCatalog, ProductCatalogOperation } from './types-extra';
+import { gql } from 'graphql-request';
+import { Environment } from '../../services/keystone/types';
+import YAML from 'yaml';
 
 @injectable()
 @Route('/organizations')
@@ -36,6 +40,66 @@ export class OrgProductController extends Controller {
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
+  }
+
+  /**
+   * Get Products that are available by API across all Organizations
+   *
+   * @summary Get Organization Datasets
+   */
+  @Get('/catalog')
+  @OperationId('organization-products-catalog')
+  public async getProductCatalog(
+    @Request() request: any
+  ): Promise<ProductCatalog[]> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.sudo(),
+      query: list,
+    });
+    const envs = result.data.allEnvironments.filter(
+      (e: Environment) => e.product.organization != null
+    );
+
+    return envs.map((env: any) => {
+      const spec = YAML.parse(env.spec?.blob || '{}');
+
+      const operations = spec?.paths && Object.keys(spec.paths).map((path) => {
+        return Object.keys(spec.paths[path]).map((method) => {
+          const op = spec.paths[path][method];
+          return {
+            operationId: op.operationId,
+            summary: op.summary || '',
+            scopes: (op.security && op.security[0] && op.security[0]['bearer_auth']) ? op.security[0]['bearer_auth'] : [],
+          };
+        });
+      });
+
+      const flattenedOperations = [];
+      if (operations) {
+        for (const opList of operations) {
+          for (const op of opList) {
+            flattenedOperations.push(op);
+          }
+        }
+      }
+
+      return {
+        appId: env.appId,
+        name: env.name,
+        spec: {
+          title: spec.info?.title || '',
+          version: spec.info?.version || '',
+          description: spec.info?.description || '',
+          operations: flattenedOperations,
+        },
+        product: {
+          name: env.product.name,
+          organization: {
+            name: env.product.organization.name,
+          },
+        },
+      };
+    });
   }
 
   /**
@@ -70,13 +134,8 @@ export class OrgProductController extends Controller {
     return records
       .map((o) => removeEmpty(o))
       .map((o) => transformAllRefID(o, ['organization', 'organizationUnit']))
-      .map((o) =>
-        removeKeys(o, [
-          'id'
-        ])
-      );
+      .map((o) => removeKeys(o, ['id']));
   }
-
 
   /**
    * Manage Products for APIs that will appear on the API Directory
@@ -106,5 +165,23 @@ export class OrgProductController extends Controller {
       body['appId'],
       replaceKey(body, 'gatewayId', 'namespace')
     );
-  }  
+  }
 }
+
+const list = gql`
+  query OrgProductCatalog {
+    allEnvironments {
+      appId
+      name
+      spec {
+        blob
+      }
+      product {
+        name
+        organization {
+          name
+        }
+      }
+    }
+  }
+`;

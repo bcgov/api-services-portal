@@ -676,6 +676,68 @@ components:
                 - specUrl
             type: object
             additionalProperties: false
+        ProductCatalogOperation:
+            properties:
+                operationId:
+                    type: string
+                summary:
+                    type: string
+                scopes:
+                    items:
+                        type: string
+                    type: array
+            required:
+                - operationId
+                - summary
+                - scopes
+            type: object
+            additionalProperties: false
+        ProductCatalog:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                spec:
+                    properties:
+                        operations:
+                            items:
+                                $ref: '#/components/schemas/ProductCatalogOperation'
+                            type: array
+                        description:
+                            type: string
+                        version:
+                            type: string
+                        title:
+                            type: string
+                    required:
+                        - operations
+                        - description
+                        - version
+                        - title
+                    type: object
+                product:
+                    properties:
+                        organization:
+                            properties:
+                                name:
+                                    type: string
+                            required:
+                                - name
+                            type: object
+                        name:
+                            type: string
+                    required:
+                        - organization
+                        - name
+                    type: object
+            required:
+                - appId
+                - name
+                - spec
+                - product
+            type: object
+            additionalProperties: false
         DraftDatasetRefID:
             type: string
         LegalRefID:
@@ -1917,10 +1979,7 @@ paths:
                                 type: object
             tags:
                 - Organizations
-            security:
-                -
-                    jwt:
-                        - Namespace.Assign
+            security: []
             parameters:
                 -
                     in: path
@@ -1928,6 +1987,24 @@ paths:
                     required: true
                     schema:
                         type: string
+    /organizations/catalog:
+        get:
+            operationId: organization-products-catalog
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/ProductCatalog'
+                                type: array
+            description: 'Get Products that are available by API across all Organizations'
+            summary: 'Get Organization Datasets'
+            tags:
+                - 'API Directory (Administration)'
+            security: []
+            parameters: []
     '/organizations/{org}/products':
         get:
             operationId: organization-products

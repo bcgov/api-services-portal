@@ -407,6 +407,27 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProductCatalogOperation": {
+        "dataType": "refObject",
+        "properties": {
+            "operationId": {"dataType":"string","required":true},
+            "summary": {"dataType":"string","required":true},
+            "scopes": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProductCatalog": {
+        "dataType": "refObject",
+        "properties": {
+            "appId": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "spec": {"dataType":"nestedObjectLiteral","nestedProperties":{"operations":{"dataType":"array","array":{"dataType":"refObject","ref":"ProductCatalogOperation"},"required":true},"description":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"title":{"dataType":"string","required":true}},"required":true},
+            "product": {"dataType":"nestedObjectLiteral","nestedProperties":{"organization":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}},"required":true},"name":{"dataType":"string","required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DraftDatasetRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -1640,7 +1661,6 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v3/organizations/:org/api_specs',
-            authenticateMiddleware([{"jwt":["Namespace.Assign"]}]),
 
             async function OrgAPISpecController_get(request: any, response: any, next: any) {
             const args = {
@@ -1663,6 +1683,34 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.get.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v3/organizations/catalog',
+
+            async function OrgProductController_getProductCatalog(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgProductController>(OrgProductController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getProductCatalog.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

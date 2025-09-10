@@ -78,3 +78,26 @@ export interface OrgAccessRequest {
   };
   createdAt: Scalars['DateTime'];
 }
+
+export interface ProductCatalogOperation {
+  operationId: string;
+  summary: string;
+  scopes: string[];
+}
+
+export interface ProductCatalog {
+  appId: string;
+  name: string;
+  spec: {
+    title: string;
+    version: string;
+    description: string;
+    operations: ProductCatalogOperation[];
+  }
+  product: {
+    name: string;
+    organization: {
+      name: string;
+    }
+  }
+}
