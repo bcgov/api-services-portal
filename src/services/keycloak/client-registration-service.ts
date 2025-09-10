@@ -106,6 +106,7 @@ export class KeycloakClientRegistrationService {
           enabled,
           name,
           clientId,
+          consentRequired: true,
           attributes: {
             'x509.subjectdn': subjectDn
           }
