@@ -55,7 +55,7 @@ export class OrgAPISpecController extends Controller {
 
   @Get('/{org}/api_specs')
   @OperationId('organization-get-api-specs')
-  @Security('jwt', ['Namespace.Assign'])
+  // @Security('jwt', ['Namespace.Assign'])
   public async get(
     @Path() org: string,
     @Request() request: any
