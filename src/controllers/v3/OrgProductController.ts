@@ -98,6 +98,7 @@ export class OrgProductController extends Controller {
         },
         product: {
           name: env.product.name,
+          namespace: env.product.namespace,
           organization: {
             name: env.product.organization.name,
           },
