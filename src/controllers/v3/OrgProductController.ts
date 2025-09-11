@@ -107,8 +107,11 @@ export class OrgProductController extends Controller {
       };
     });
 
+    const ctx = this.keystone.createContext(request);
+
     const promises = output.filter((env:any) => env.product.namespace).map(async (env: any) => {
       const nsAttributes = await getNamespaceAttributes(
+        ctx,
         env.product.namespace
       );
       env.namespace = nsAttributes;
@@ -204,8 +207,8 @@ const list = gql`
 `;
 
 
-async function getNamespaceAttributes(ns: string) : Promise<OrgNamespace> {
-      const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+async function getNamespaceAttributes(ctx: any, ns: string) : Promise<OrgNamespace> {
+      const prodEnv = await getGwaProductEnvironment(ctx, false);
       const envConfig = prodEnv.issuerEnvConfig;
   
       const svc = new NamespaceService(envConfig.issuerUrl);
