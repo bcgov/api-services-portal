@@ -98,6 +98,7 @@ export class OrgProductController extends Controller {
         },
         product: {
           name: env.product.name,
+          type: env.product.type,
           namespace: env.product.namespace,
           organization: {
             name: env.product.organization.name,
@@ -110,7 +111,7 @@ export class OrgProductController extends Controller {
       const nsAttributes = await getNamespaceAttributes(
         env.product.namespace
       );
-      env.ns = nsAttributes;
+      env.namespace = nsAttributes;
     });
     await Promise.all(promises);
     return output;
@@ -192,6 +193,7 @@ const list = gql`
       }
       product {
         name
+        type
         namespace
         organization {
           name

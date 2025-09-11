@@ -96,11 +96,12 @@ export interface ProductCatalog {
   }
   product: {
     name: string;
+    type: string;
     organization: {
       name: string;
     }
   }
-  ns: {
+  namespace: {
     name: string;
     orgUnit: string;
     permDataPlane: string;

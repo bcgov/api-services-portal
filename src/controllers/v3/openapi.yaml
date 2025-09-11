@@ -725,13 +725,16 @@ components:
                             required:
                                 - name
                             type: object
+                        type:
+                            type: string
                         name:
                             type: string
                     required:
                         - organization
+                        - type
                         - name
                     type: object
-                ns:
+                namespace:
                     properties:
                         updatedAt:
                             type: number
@@ -761,7 +764,7 @@ components:
                 - name
                 - spec
                 - product
-                - ns
+                - namespace
             type: object
             additionalProperties: false
         DraftDatasetRefID:
