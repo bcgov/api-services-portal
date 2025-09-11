@@ -94,6 +94,10 @@ export interface ProductCatalog {
     description: string;
     operations: ProductCatalogOperation[];
   }
+  credentialIssuer?: {
+    issuerUrl: string;
+    clientId: string;
+  }
   product: {
     name: string;
     type: string;

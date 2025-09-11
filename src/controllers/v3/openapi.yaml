@@ -716,6 +716,16 @@ components:
                         - version
                         - title
                     type: object
+                credentialIssuer:
+                    properties:
+                        clientId:
+                            type: string
+                        issuerUrl:
+                            type: string
+                    required:
+                        - clientId
+                        - issuerUrl
+                    type: object
                 product:
                     properties:
                         organization:

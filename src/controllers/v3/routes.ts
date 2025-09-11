@@ -423,6 +423,7 @@ const models: TsoaRoute.Models = {
             "appId": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "spec": {"dataType":"nestedObjectLiteral","nestedProperties":{"operations":{"dataType":"array","array":{"dataType":"refObject","ref":"ProductCatalogOperation"},"required":true},"description":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"title":{"dataType":"string","required":true}},"required":true},
+            "credentialIssuer": {"dataType":"nestedObjectLiteral","nestedProperties":{"clientId":{"dataType":"string","required":true},"issuerUrl":{"dataType":"string","required":true}}},
             "product": {"dataType":"nestedObjectLiteral","nestedProperties":{"organization":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}},"required":true},"type":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
             "namespace": {"dataType":"nestedObjectLiteral","nestedProperties":{"updatedAt":{"dataType":"double","required":true},"enabled":{"dataType":"boolean","required":true},"permDomains":{"dataType":"array","array":{"dataType":"string"},"required":true},"permDataPlane":{"dataType":"string","required":true},"orgUnit":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
         },
@@ -1695,6 +1696,7 @@ export function RegisterRoutes(app: express.Router) {
             async function OrgProductController_getProductCatalog(request: any, response: any, next: any) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

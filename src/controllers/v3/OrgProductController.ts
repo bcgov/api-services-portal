@@ -34,6 +34,7 @@ import YAML from 'yaml';
 import { getGwaProductEnvironment } from '../../services/workflow';
 import { NamespaceService } from '../../services/org-groups';
 import { OrgNamespace } from '../../services/org-groups/types';
+import { dynamicallySetEnvironmentDetails } from '../../services/keystone';
 
 @injectable()
 @Route('/organizations')
@@ -90,6 +91,16 @@ export class OrgProductController extends Controller {
         }
       }
 
+      if (env.credentialIssuer != null) {
+        const envDetails = JSON.parse(dynamicallySetEnvironmentDetails(env.credentialIssuer));
+        const credEnv = envDetails.find((e: any) => e.environment === env.name);
+
+        env.credentialIssuer = {
+          issuerUrl: credEnv?.issuerUrl,
+          clientId: credEnv?.clientId,
+        }
+      }
+
       return {
         appId: env.appId,
         name: env.name,
@@ -99,6 +110,7 @@ export class OrgProductController extends Controller {
           description: spec.info?.description || '',
           operations: flattenedOperations,
         },
+        credentialIssuer: env.credentialIssuer,
         product: {
           name: env.product.name,
           type: env.product.type,
@@ -194,6 +206,13 @@ const list = gql`
       name
       spec {
         blob
+      }
+      credentialIssuer {
+        name
+        clientId
+        inheritFrom {
+          environmentDetails
+        } 
       }
       product {
         name
