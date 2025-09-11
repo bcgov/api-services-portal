@@ -1690,11 +1690,11 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/ds/api/v3/organizations/catalog',
+        app.get('/ds/api/v3/organizations/:org/catalog',
 
             async function OrgProductController_getProductCatalog(request: any, response: any, next: any) {
             const args = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

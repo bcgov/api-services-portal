@@ -2013,7 +2013,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    /organizations/catalog:
+    '/organizations/{org}/catalog':
         get:
             operationId: organization-products-catalog
             responses:
@@ -2026,11 +2026,17 @@ paths:
                                     $ref: '#/components/schemas/ProductCatalog'
                                 type: array
             description: 'Get Products that are available by API across all Organizations'
-            summary: 'Get Organization Datasets'
+            summary: 'Get Product Catalog'
             tags:
                 - 'API Directory (Administration)'
             security: []
-            parameters: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
     '/organizations/{org}/products':
         get:
             operationId: organization-products
