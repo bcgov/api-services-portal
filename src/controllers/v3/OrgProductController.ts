@@ -48,12 +48,12 @@ export class OrgProductController extends Controller {
   /**
    * Get Products that are available by API across all Organizations
    *
-   * @summary Get Organization Datasets
+   * @summary Get Product Catalog
    */
-  @Get('/catalog')
+  @Get('/{org}/catalog')
   @OperationId('organization-products-catalog')
   public async getProductCatalog(
-    @Request() request: any
+    @Path() org: string,
   ): Promise<ProductCatalog[]> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.sudo(),
