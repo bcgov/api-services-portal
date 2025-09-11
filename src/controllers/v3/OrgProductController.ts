@@ -54,6 +54,7 @@ export class OrgProductController extends Controller {
   @OperationId('organization-products-catalog')
   public async getProductCatalog(
     @Path() org: string,
+    @Request() request: any
   ): Promise<ProductCatalog[]> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.sudo(),
