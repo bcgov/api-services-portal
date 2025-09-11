@@ -56,8 +56,10 @@ export class OrgProductController extends Controller {
     @Path() org: string,
     @Request() request: any
   ): Promise<ProductCatalog[]> {
+    const ctx = this.keystone.sudo();
+
     const result = await this.keystone.executeGraphQL({
-      context: this.keystone.sudo(),
+      context: ctx,
       query: list,
     });
     const envs = result.data.allEnvironments.filter(
@@ -107,8 +109,6 @@ export class OrgProductController extends Controller {
         },
       };
     });
-
-    const ctx = this.keystone.createContext(request);
 
     const promises = output.filter((env:any) => env.product.namespace).map(async (env: any) => {
       const nsAttributes = await getNamespaceAttributes(
