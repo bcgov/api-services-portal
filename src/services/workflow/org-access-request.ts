@@ -84,10 +84,11 @@ export const OrgAccessRequestCreate = async (
     );
     providerProdEnv.credentialIssuer = providerCredIssuer;
 
-    const clientName = `${formatResourceLocator(
-      orgMemberID,
-      consumerProdEnv
-    )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`;
+    // const clientName = `${formatResourceLocator(
+    //   orgMemberID,
+    //   consumerProdEnv
+    // )} TO ${formatResourceLocator(orgMemberID, providerProdEnv)}`;
+    const clientName = `${consumerProdEnv.product.name} from ${orgMemberID}`;
 
     // prepare the access request
     const controls = {
