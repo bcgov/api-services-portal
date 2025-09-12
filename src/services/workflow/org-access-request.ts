@@ -138,7 +138,7 @@ export const OrgAccessRequestCreate = async (
 
     await saveConsumerLabels(
       context,
-      app.namespace,
+      consumerProdEnv.product.namespace,
       accessRequest.serviceAccess.consumer.id,
       labels
     );
