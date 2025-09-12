@@ -107,8 +107,11 @@ export class KeycloakClientRegistrationService {
           name,
           clientId,
           consentRequired: true,
+          attributes: {
+            "x509.allow.regex.pattern.comparison": "false",
+            "x509.subjectdn": subjectDn,
+          }
         });
-        body.attributes['x509.subjectdn'] = subjectDn;
         break;
       case ClientAuthenticator.SharedIdP:
         body = Object.assign(JSON.parse(clientTemplateSharedIdP), {
