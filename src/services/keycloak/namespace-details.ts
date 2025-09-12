@@ -142,7 +142,7 @@ export async function transformOrgAndOrgUnit(
   merged: any,
   getOrgAdmins: boolean
 ): Promise<void> {
-  const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
+  const orgInfo = merged.orgUnit ? await getOrganizationUnit(context, merged.orgUnit) : undefined;
   if (orgInfo) {
     merged['org'] = { name: orgInfo.name, title: orgInfo.title };
     if (orgInfo.orgUnits) {
@@ -153,7 +153,7 @@ export async function transformOrgAndOrgUnit(
     }
   } else {
     merged['org'] = { name: merged.org, title: merged.org };
-    if (merged.orgUnits) {
+    if (merged.orgUnit) {
       merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
     }
   }
