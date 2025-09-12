@@ -411,6 +411,8 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "operationId": {"dataType":"string","required":true},
+            "method": {"dataType":"string","required":true},
+            "path": {"dataType":"string","required":true},
             "summary": {"dataType":"string","required":true},
             "scopes": {"dataType":"array","array":{"dataType":"string"},"required":true},
         },

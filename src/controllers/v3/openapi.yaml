@@ -680,6 +680,10 @@ components:
             properties:
                 operationId:
                     type: string
+                method:
+                    type: string
+                path:
+                    type: string
                 summary:
                     type: string
                 scopes:
@@ -688,6 +692,8 @@ components:
                     type: array
             required:
                 - operationId
+                - method
+                - path
                 - summary
                 - scopes
             type: object

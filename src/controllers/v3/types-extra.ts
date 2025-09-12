@@ -81,6 +81,8 @@ export interface OrgAccessRequest {
 
 export interface ProductCatalogOperation {
   operationId: string;
+  method: string;
+  path: string;
   summary: string;
   scopes: string[];
 }

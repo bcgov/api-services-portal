@@ -76,6 +76,8 @@ export class OrgProductController extends Controller {
           const op = spec.paths[path][method];
           return {
             operationId: op.operationId,
+            method: method.toUpperCase(),
+            path,
             summary: op.summary || '',
             scopes: (op.security && op.security[0] && op.security[0]['bearer_auth']) ? op.security[0]['bearer_auth'] : [],
           };
