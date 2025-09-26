@@ -109,6 +109,7 @@ export class OrgProductController extends Controller {
         spec: {
           title: spec.info?.title || '',
           version: spec.info?.version || '',
+          summary: spec.info?.summary || '',
           description: spec.info?.description || '',
           operations: flattenedOperations,
         },
@@ -124,9 +125,15 @@ export class OrgProductController extends Controller {
       };
     });
 
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
+    const envConfig = prodEnv.issuerEnvConfig;
+
+    const svc = new NamespaceService(envConfig.issuerUrl);
+    await svc.login(envConfig.clientId, envConfig.clientSecret);
+
     const promises = output.filter((env:any) => env.product.namespace).map(async (env: any) => {
       const nsAttributes = await getNamespaceAttributes(
-        ctx,
+        svc,
         env.product.namespace
       );
       env.namespace = nsAttributes;
@@ -229,11 +236,6 @@ const list = gql`
 `;
 
 
-async function getNamespaceAttributes(ctx: any, ns: string) : Promise<OrgNamespace> {
-      const prodEnv = await getGwaProductEnvironment(ctx, false);
-      const envConfig = prodEnv.issuerEnvConfig;
-  
-      const svc = new NamespaceService(envConfig.issuerUrl);
-      await svc.login(envConfig.clientId, envConfig.clientSecret);
+async function getNamespaceAttributes(svc: NamespaceService, ns: string) : Promise<OrgNamespace> {
       return await svc.getNamespaceOrganizationDetails(ns);
 }
