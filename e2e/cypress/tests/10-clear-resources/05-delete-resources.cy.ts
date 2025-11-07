@@ -70,7 +70,7 @@ describe('Delete created resources', () => {
   })
 
   it('Set environment with gwa config command', () => {
-    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme https').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })

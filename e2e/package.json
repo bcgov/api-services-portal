@@ -49,6 +49,7 @@
   "dependencies": {
     "@atomist/yaml-updater": "^1.0.2",
     "@cypress/instrument-cra": "^1.4.0",
+    "axios": "^1.10.0",
     "cypress-ntlm-auth": "^4.1.2",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",

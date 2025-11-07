@@ -40,6 +40,8 @@ declare namespace Cypress {
 
     deleteGatewayCli(gatewayid: string, force: boolean): Chainable<any>
 
+    deleteGatewayUI(gatewayid: string): Chainable<any>
+
     activateGateway(
       gatewayId: string,
       checkNoNamespace?: boolean

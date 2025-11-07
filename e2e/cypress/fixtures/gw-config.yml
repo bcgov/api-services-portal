@@ -1,29 +1,29 @@
 kind: DraftDataset
-name: gwa-auto-test-product
-license_title: Open Government Licence - British Columbia
-security_class: PUBLIC
-view_audience: Public
+name: org-assignment-product
+license_title: Access Only
+security_class: LOW-PUBLIC
+view_audience: Government
 download_audience: Public
 record_publish_date: '2017-09-05'
-notes: For Test Purpose
-title: GWA Auto Test Product
+notes: For Test Purpose org assignment
+title: Org Assignment Product
 tags:
-  - tag1
-  - tag2
-organization: ministry-of-health
-organizationUnit: planning-and-innovation-division
+  - gateway
+  - kong
+organization: ministry-of-housing
+organizationUnit: residential-tenancy
 isInCatalog: true
 isDraft: false
----
-kind: Product
-name: GWA Auto Test Product
-appId: 'KFH78YU956RE'
-environments:
-  - name: dev
-    active: false
-    approval: false
-    flow: public
-    appId: '406CB7CF'
+# ---
+# kind: Product
+# name: GWA Auto Test Product
+# appId: 'KFH78YU956RE'
+# environments:
+#   - name: dev
+#     active: false
+#     approval: false
+#     flow: public
+#     appId: '406CB7CF'
 # ---
 # kind: ProductEnvironment
 # name: dev

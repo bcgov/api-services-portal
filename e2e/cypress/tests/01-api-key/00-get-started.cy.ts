@@ -1,11 +1,13 @@
 import LoginPage from '../../pageObjects/login'
 import NameSpacePage from '../../pageObjects/namespace'
-const cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
+const cleanedUrl = Cypress.env('BASE_URL').replace(/^https?:\/\//i, "");
 
 // Elements of this page must be checked when there are no Gateways, so this test comes first of all
 describe('Gateway Get Started page', () => {
   const login = new LoginPage()
   const ns = new NameSpacePage()
+  const sa = new ServiceAccountsPage()
   let userSession: any
   let namespace: string
 
@@ -28,15 +30,9 @@ describe('Gateway Get Started page', () => {
       cy.log('User session token: ' + userSession)
     })
   })
-  
-  it('Set token with gwa config command', () => {
-    cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
-      expect(response.stdout).to.contain("Config settings saved")
-    });
-  })
 
   it('Set environment with gwa config command', () => {
-    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme httpss').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })
@@ -55,15 +51,28 @@ describe('Gateway Get Started page', () => {
       namespace = response.gatewayId
     })
   })
+  
+  it('activate gateway', () => {
+    cy.activateGateway(namespace)
+  })
 
-  it('Check for banner that says "You have gateways"', () => {
-    cy.reload()
-    cy.get('[data-testid="no-gateways"]').should('not.exist')
-    cy.get('[data-testid="you-have-gateways-banner"]').should('exist')
+  it('creates a new service account', () => {
+    cy.visit(sa.path)
+    cy.get('@apiowner').then(({ serviceAccount }: any) => {
+      sa.createServiceAccount(serviceAccount.scopes)
+      cy.wait(6000)
+    })
+    sa.saveServiceAcctCreds()
+  })
+
+  it('Login to gwa with service account', () => {
+    cy.exec('gwa login --client-id ' + sa.clientId + ' --client-secret ' + sa.clientSecret, { timeout: 3000, failOnNonZeroExit: false })
   })
 
   it('Cleanup: delete namespace', () => {
-    cy.deleteGatewayCli(namespace, true)
+    cy.visit(ns.path).then(() => {
+      cy.deleteGatewayUI(namespace)
+    })
   })
   
   after(() => {

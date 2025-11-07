@@ -34,7 +34,7 @@ describe('Verify namespace delete using gwa command', () => {
 
     it('Create namespace using gwa cli command', () => {
         var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-        cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme http', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+        cy.exec('gwa gateway create --generate --host ' + cleanedUrl + ' --scheme https', { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
             assert.isNotNaN(response.stdout)
             // Use regex to extract the gateway ID
             const match = response.stdout.match(/Gateway ID: ([\w-]+)/);

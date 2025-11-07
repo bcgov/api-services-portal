@@ -60,9 +60,9 @@ export default defineConfig({
     chromeWebSecurity: false,
     env: {
       ASTRA_SCAN_ENABLED: true,
-      CLIENT_ID: 'aps-portal',
-      CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
-      OIDC_ISSUER: 'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca/auth/realms/master',
+      CLIENT_ID: 'gwa',
+      CLIENT_SECRET: 'b53256fd-1f51-4b63-807a-a2a3b6ca0432',
+      OIDC_ISSUER: 'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca/auth/realms/cypress',
       TOKEN_URL:
         'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token',
       GWA_API_URL: 'http://gwa-api.localtest.me:2000/v2',
@@ -72,7 +72,7 @@ export default defineConfig({
       BASE_URL: 'https://api-gov-bc-ca-lab.dev.api.gov.bc.ca',
       KEYCLOAK_URL: 'https://authz-1d4461-prod.apps.silver.devops.gov.bc.ca',
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
-      DEV_USERNAME: '320469e037c84a7abdfab15204a607c6@idir',
+      DEV_USERNAME: '21bba6476b9c4ec7974ae7f48bcc7a55@idir',
       DEV_PASSWORD: 'asdf1234',
     },
     retries: {

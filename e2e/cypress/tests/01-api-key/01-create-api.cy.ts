@@ -37,13 +37,7 @@ describe('Create API Spec', () => {
 
   it('Check gwa config command to set environment', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
-    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
-      expect(response.stdout).to.contain("Config settings saved")
-    });
-  })
-
-  it('Check gwa config command to set token', () => {
-    cy.executeCliCommand('gwa config set --token ' + userSession).then((response) => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme https').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })
@@ -58,9 +52,6 @@ describe('Create API Spec', () => {
         cy.get('[data-testid="ns-detail-gatewayid"]').then(($el) => {
           expect($el).contain(namespace)
         })
-        cy.get('@login').then(function (xhr: any) {
-          userSession = xhr.headers['x-auth-request-access-token']
-        })
       })
     })
   })
@@ -72,6 +63,10 @@ describe('Create API Spec', () => {
       cy.wait(6000)
     })
     sa.saveServiceAcctCreds()
+  })
+
+  it('Login to gwa with service account', () => {
+    cy.exec('gwa login --client-id ' + sa.clientId + ' --client-secret ' + sa.clientSecret, { timeout: 3000, failOnNonZeroExit: false })
   })
 
 it('Verify gwa gateway publish multiple config file', () => {

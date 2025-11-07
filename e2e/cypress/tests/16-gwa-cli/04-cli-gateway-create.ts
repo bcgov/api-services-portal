@@ -41,7 +41,7 @@ describe('Verify "gateway create" and "gateway list" commands', () => {
     cy.get('@common-testdata').then(({ myGateways }: any) => {
       gatewayId = myGateways["namespace1"].gatewayId + '-' + customId
       displayName = myGateways["namespace1"].displayName
-      cy.executeCliCommand('gwa gateway create --gateway-id ' + gatewayId + ' --display-name ' + displayName + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
+      cy.executeCliCommand('gwa gateway create --gateway-id ' + gatewayId + ' --display-name ' + displayName + ' --host ' + cleanedUrl + ' --scheme https').then((response) => {
         assert.isNotNaN(response.stdout)
         const gatewayIdMatch = response.stdout.match(/Gateway ID: ([\w-]+)/);
         if (gatewayIdMatch && gatewayIdMatch[1]) {
@@ -79,7 +79,7 @@ describe('Verify "gateway create" and "gateway list" commands', () => {
     cy.get('@common-testdata').then(({ myGateways }: any) => {
       gatewayId = myGateways["namespace2"].gatewayId + '-' + customId
       displayName = "janis's Gateway"
-      cy.executeCliCommand('gwa gateway create --gateway-id ' + gatewayId + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
+      cy.executeCliCommand('gwa gateway create --gateway-id ' + gatewayId + ' --host ' + cleanedUrl + ' --scheme https').then((response) => {
         assert.isNotNaN(response.stdout)
         const gatewayIdMatch = response.stdout.match(/Gateway ID: ([\w-]+)/);
         if (gatewayIdMatch && gatewayIdMatch[1]) {
@@ -102,7 +102,7 @@ describe('Verify "gateway create" and "gateway list" commands', () => {
     cy.get('@common-testdata').then(({ myGateways }: any) => {
       let generatedGatewayId: string
       displayName = myGateways["namespace3"].displayName
-      cy.executeCliCommand('gwa gateway create --display-name ' + displayName + ' --host ' + cleanedUrl + ' --scheme http').then((response) => {
+      cy.executeCliCommand('gwa gateway create --display-name ' + displayName + ' --host ' + cleanedUrl + ' --scheme https').then((response) => {
         assert.isNotNaN(response.stdout)
         const gatewayIdMatch = response.stdout.match(/Gateway ID: ([\w-]+)/);
         generatedGatewayId = gatewayIdMatch[1];

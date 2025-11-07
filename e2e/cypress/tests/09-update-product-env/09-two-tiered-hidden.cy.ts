@@ -34,7 +34,7 @@ describe('Verify Two Tiered Hidden', () => {
 
   it('Check gwa config command to set environment', () => {
     var cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, '')
-    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then(
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme https').then(
       (response) => {
         expect(response.stdout).to.contain('Config settings saved')
       }
