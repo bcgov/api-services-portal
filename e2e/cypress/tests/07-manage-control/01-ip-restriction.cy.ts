@@ -50,7 +50,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(403)
-                expect(response.body.message).to.be.contain('Your IP address is not allowed')
+                expect(response.body.message).to.be.contain('IP address not allowed')
             })
         })
     })
@@ -69,7 +69,7 @@ describe('Manage Control-IP Restriction Spec', () => {
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(403)
-                expect(response.body.message).to.be.contain('Your IP address is not allowed')
+                expect(response.body.message).to.be.contain('IP address not allowed')
             })
         })
     })
@@ -160,7 +160,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(403)
-                expect(response.body.message).to.be.contain('Your IP address is not allowed')
+                expect(response.body.message).to.be.contain('IP address not allowed')
             })
         })
     })
@@ -217,7 +217,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.get('@apiowner').then(({ product }: any) => {
             cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(403)
-                expect(response.body.message).to.be.contain('Your IP address is not allowed')
+                expect(response.body.message).to.be.contain('IP address not allowed')
             })
         })
     })
