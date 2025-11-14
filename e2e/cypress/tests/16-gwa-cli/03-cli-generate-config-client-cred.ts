@@ -52,7 +52,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     const command = [
       'gwa generate-config --template client-credentials-shared-idp',
       `--service ${serviceName}`,
-      '--upstream https://httpbin.org',
+      '--upstream https://httpbun.com',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division',
       '--out gw-config-cc.yaml'

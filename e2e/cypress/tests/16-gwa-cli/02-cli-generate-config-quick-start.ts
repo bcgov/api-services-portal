@@ -51,7 +51,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     const command = [
       'gwa generate-config --template quick-start',
       `--service ${serviceName}`,
-      '--upstream https://httpbin.org',
+      '--upstream https://httpbun.com',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division',
       '--out gw-config-qs.yaml'
@@ -96,7 +96,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     const command = [
       'gwa generate-config --template quick-start',
       `--service ${serviceName}`,
-      '--upstream https://httpbin.org',
+      '--upstream https://httpbun.com',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division'
     ].join(' ');

@@ -1,6 +1,6 @@
 services:
 - name: service-for-apiplatform
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.apiplatform]
   port: 443
   protocol: https

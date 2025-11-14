@@ -5,7 +5,7 @@ displayName: two-tier-hidden Display Name
 kind: GatewayService
 name: two-tier-service-dev
 tags: [ns.two-tier-hidden]
-host: httpbin.org
+host: httpbun.com
 port: 443
 protocol: https
 retries: 0

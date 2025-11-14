@@ -1,6 +1,6 @@
 services:
 - name: service-for-permission
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.permission]
   port: 443
   protocol: https
