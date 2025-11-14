@@ -47,7 +47,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     });
   })
 
-  it('Check gwa command to generate config for client credential template', () => {
+  it('Check gwa command to generate config for quick start template', () => {
     const command = [
       'gwa generate-config --template quick-start',
       `--service ${serviceName}`,
