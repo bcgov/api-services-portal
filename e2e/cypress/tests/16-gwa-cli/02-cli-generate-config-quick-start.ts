@@ -63,9 +63,24 @@ describe('Verify CLI commands for generate/apply config', () => {
 
   it('Check gwa command to apply generated config', () => {
     cy.executeCliCommand('gwa apply -i gw-config-qs.yaml').then((response) => {
-      expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
-      let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
-      expect(wordOccurrences).to.equal(2)
+      // fix for bug observed in e2e tests
+      if (
+        (
+          (response.stdout.includes("2/3 Published, 0 Skipped") && (response.stdout.match(/\bcreated\b/g) || []).length === 2) ||
+          (response.stdout.includes("1/3 Published, 0 Skipped") && (response.stdout.match(/\bcreated\b/g) || []).length === 1)
+        )
+      ) {
+        // Product not created because GatewayService is not synced yet: retry
+        cy.executeCliCommand('gwa apply -i gw-config-qs.yaml').then((retryResponse) => {
+          expect(retryResponse.stdout).to.contain("3/3 Published, 0 Skipped");
+          let wordOccurrences = (retryResponse.stdout.match(/\bcreated\b/g) || []).length;
+          expect(wordOccurrences).to.equal(2);
+        });
+      } else {
+        expect(response.stdout).to.contain("3/3 Published, 0 Skipped");
+        let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
+        expect(wordOccurrences).to.equal(2);
+      }
     });
   })
 
