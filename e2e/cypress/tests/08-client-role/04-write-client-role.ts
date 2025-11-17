@@ -147,14 +147,14 @@ describe('Update Kong plugin and verify that only only PUT and POST methods are 
     })
   })
 
-  it.only('Make "POST" call and verify that Kong allows user to access the resources', () => {
+  it('Make "POST" call and verify that Kong allows user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca', 'POST').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(200)
     })
   })
 
-  it.only('Make "PUT" call and verify that Kong allows user to access the resources', () => {
+  it('Make "PUT" call and verify that Kong allows user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca', 'PUT').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(200)
