@@ -26,7 +26,7 @@ export default defineConfig({
         './cypress/tests/07-*/*.ts',
         './cypress/tests/03-*/*.ts',
         './cypress/tests/04-*/*.ts',
-        // './cypress/tests/05-*/*.ts',
+        './cypress/tests/05-*/*.ts',
         './cypress/tests/08-*/*.ts',
         './cypress/tests/09-*/*.ts',
         './cypress/tests/10-*/*.ts',
@@ -74,6 +74,7 @@ export default defineConfig({
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
       DEV_USERNAME: 'janis@idir',
       DEV_PASSWORD: 'awsummer',
+      HAS_KUBE_API: false,
     },
     retries: {
       runMode: 2,

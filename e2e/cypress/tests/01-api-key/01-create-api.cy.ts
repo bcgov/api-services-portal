@@ -166,7 +166,10 @@ it('Verify gwa gateway publish multiple config file', () => {
     })
   })
 
-  it('verify status of the services using "gwa status" command', () => {
+  // TODO: Remove this once we have a way to test the status command with the kube API in e2e tests
+  const runIfKubeAPI = Cypress.env('HAS_KUBE_API') ? it : it.skip;
+
+  runIfKubeAPI('verify status of the services using "gwa status" command', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.executeCliCommand('gwa status').then((response) => {
         expect(response.stdout).to.contain(product.environment.config.serviceName);

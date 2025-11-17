@@ -84,7 +84,10 @@ describe('Verify CLI commands for generate/apply config', () => {
     });
   })
 
-  it('Check gwa status --hosts include routes', () => {
+  // TODO: Remove this once we have a way to test the status command with the kube API in e2e tests
+  const runIfKubeAPI = Cypress.env('HAS_KUBE_API') ? it : it.skip;
+
+  runIfKubeAPI('Check gwa status --hosts include routes', () => {
     cy.executeCliCommand('gwa status --hosts').then((response) => {
       expect(response.stdout).to.contain('https://' + serviceName + '.dev.api.gov.bc.ca')
     });
