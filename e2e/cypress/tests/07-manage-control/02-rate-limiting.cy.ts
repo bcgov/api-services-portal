@@ -116,6 +116,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Redis Polic
         cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
+            consumers.clearRateLimitControl()
             consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Service", "Redis")
         })
     })
@@ -149,6 +150,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Redis Policy'
         cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
+            consumers.clearRateLimitControl()
             consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route", "Redis")
         })
     })
@@ -179,6 +181,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.visit(login.path)
     })
 
+    it('Clear Redis rate limit keys before setting new rate limit', () => {
+        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
+    })
+    
     it('set api rate limit to global service level', () => {
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
@@ -229,6 +235,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.fixture('apiowner').as('apiowner')
         cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
+    })
+
+    it('Clear Redis rate limit keys before setting new rate limit', () => {
+        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
     })
 
     it('set api rate limit to global service level', () => {
