@@ -180,10 +180,6 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
-
-    it('Clear Redis rate limit keys before setting new rate limit', () => {
-        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
-    })
     
     it('set api rate limit to global service level', () => {
         cy.visit(consumers.path);
@@ -201,6 +197,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
                 expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(16, 18)
             })
         })
+    })
+
+    it('Clear Redis rate limit keys before setting new rate limit', () => {
+        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
     })
 
     it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
@@ -237,10 +237,6 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.visit(login.path)
     })
 
-    it('Clear Redis rate limit keys before setting new rate limit', () => {
-        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
-    })
-
     it('set api rate limit to global service level', () => {
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
@@ -258,6 +254,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
                 expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(18)
             })
         })
+    })
+    
+    it('Clear Redis rate limit keys before setting new rate limit', () => {
+        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
     })
 
     it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
