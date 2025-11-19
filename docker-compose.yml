@@ -102,7 +102,7 @@ services:
     networks:
       - aps-net
   kong-db:
-    image: postgres:15
+    image: postgres:14
     container_name: kong-db
     environment:
       POSTGRES_USER: postgres
