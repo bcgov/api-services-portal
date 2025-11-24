@@ -1,13 +1,17 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
+import {
+  KeycloakAdminClient,
+  GroupRepresentation,
+  UserRepresentation,
+} from '@packages/keycloak-admin-client';
+// import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
+//import { GroupRepresentation } from '@packages/keycloak-admin-client';
+// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
-// import GroupRepresentation from 'keycloak-admin/lib/defs/groupRepresentation';
+// import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
+// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import UserRepresentation from 'keycloak-admin/lib/defs/userRepresentation';
 
 const logger = Logger('kc.group');
@@ -20,7 +24,7 @@ export class KeycloakGroupService {
     const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
     const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
     logger.debug('%s %s', baseUrl, realmName);
-    this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+    this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
   }
 
   public async cacheGroups() {
@@ -98,18 +102,20 @@ export class KeycloakGroupService {
     parentGroup: GroupRepresentation,
     groupName: string
   ): Promise<{ created: boolean; id: string }> {
-    const match = parentGroup.subGroups.filter(
+    const subGroups = await this.subGroups(parentGroup);
+
+    const match = subGroups.filter(
       (group: GroupRepresentation) => group.name == groupName
     );
     if (match.length == 0) {
       logger.debug('[createIfMissing] CREATE %s...', groupName);
-      const newGroup = await this.kcAdminClient.groups.setOrCreateChild(
+      const newGroup = await this.kcAdminClient.groups.createChildGroup(
         { id: parentGroup.id },
         {
           name: groupName,
         }
       );
-      logger.info('[createIfMissing] CREATED %s', groupName);
+      logger.info('[createIfMissing] CREATED %s %j', groupName, newGroup);
       return { created: true, id: newGroup.id };
     } else {
       logger.debug('[createIfMissing] EXISTS %s', groupName);
@@ -140,13 +146,7 @@ export class KeycloakGroupService {
     name: string,
     briefRepresentation: boolean = true
   ) {
-    const result = await this.search(name, briefRepresentation);
-    const selectedBranch = result.filter((g) => g.name === root);
-    if (selectedBranch.length == 0) {
-      logger.error('[findByName] %s - not found', root);
-      return null;
-    }
-    return this.searchTree(selectedBranch, name, 'name', false);
+    return await this.getGroup(root, name);
   }
 
   public async getGroups(
@@ -170,8 +170,10 @@ export class KeycloakGroupService {
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
+    const groupSubGroups = await this.subGroups(groups.pop());
+
     if (
-      groups[0].subGroups.filter(
+      groupSubGroups.filter(
         (group: GroupRepresentation) => group.name == groupName
       ).length == 0
     ) {
@@ -181,6 +183,26 @@ export class KeycloakGroupService {
     }
   }
 
+  public async setSubGroups(
+    group: GroupRepresentation
+  ): Promise<GroupRepresentation[]> {
+    if (group.subGroups.length == 0 && group.subGroupCount > 0) {
+      const subGroups = await this.kcAdminClient.groups.listSubGroups({
+        parentId: group.id,
+      });
+      group.subGroups = subGroups;
+    }
+    return group.subGroups;
+  }
+
+  private async subGroups(
+    group: GroupRepresentation
+  ): Promise<GroupRepresentation[]> {
+    return this.kcAdminClient.groups.listSubGroups({
+      parentId: group.id,
+    });
+  }
+
   public async getGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
@@ -188,16 +210,19 @@ export class KeycloakGroupService {
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
+    logger.debug('Groups = %j', groups);
+    const subGroups = await this.subGroups(groups.pop());
+
+    logger.debug('SubGroups = %j', subGroups);
     if (
-      groups[0].subGroups.filter(
-        (group: GroupRepresentation) => group.name == groupName
-      ).length == 0
+      subGroups.filter((group: GroupRepresentation) => group.name == groupName)
+        .length == 0
     ) {
       logger.error('[getGroup] MISSING %s', groupName);
       return null;
     } else {
       logger.debug('[getGroup] FOUND   %s', groupName);
-      const grp = groups[0].subGroups.filter(
+      const grp = subGroups.filter(
         (group: GroupRepresentation) => group.name == groupName
       )[0];
       const group = await this.kcAdminClient.groups.findOne({ id: grp.id });
@@ -237,15 +262,5 @@ export class KeycloakGroupService {
   public async deleteGroup(id: string): Promise<void> {
     logger.debug('[deleteGroup] %s', id);
     await this.kcAdminClient.groups.del({ id });
-  }
-
-  private searchTree(tree: any, value: string, key = 'id', reverse = false) {
-    const stack = [tree[0]];
-    while (stack.length) {
-      const node = stack[reverse ? 'pop' : 'shift']();
-      if (node[key] === value) return node;
-      node.subGroups && stack.push(...node.subGroups);
-    }
-    return null;
   }
 }

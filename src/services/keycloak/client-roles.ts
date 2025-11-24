@@ -1,14 +1,11 @@
 import 'crypto';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
-import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 import { KeycloakUserService } from './user-service';
 import { EnvironmentContext } from '../workflow/get-namespaces';
 import { KeycloakClientService } from './client-service';
-import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
+
+import { KeycloakAdminClient } from '@packages/keycloak-admin-client';
 
 const logger = Logger('kc.roles');
 
@@ -24,7 +21,7 @@ export class KeycloakClientRolesService {
     if (issuerUrl != null) {
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
-      this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+      this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
       this.kcUserService = new KeycloakUserService(issuerUrl);
       this.kcClientService = new KeycloakClientService(issuerUrl);
     }

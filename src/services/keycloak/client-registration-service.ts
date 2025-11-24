@@ -11,9 +11,7 @@ import { clientTemplateClientJwt } from './templates/client-template-client-jwt'
 import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
 import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
 
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
+import { KeycloakAdminClient } from '@packages/keycloak-admin-client';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
 
@@ -62,7 +60,7 @@ export class KeycloakClientRegistrationService {
       // this will probably fail if the issuer is not Keycloak
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
-      this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+      this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
     }
   }
 

@@ -11,6 +11,9 @@ RUN apk add curl jq
 
 WORKDIR /app
 
+# Workaround due to an ESM error
+COPY src/keycloak-admin-client ./keycloak-admin-client
+
 COPY src/*.json ./
 RUN npm install --legacy-peer-deps
 
