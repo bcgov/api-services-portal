@@ -17,7 +17,7 @@ class keycloakClientScopesPage {
       cy.get('.pf-v5-c-table__tbody > .pf-v5-c-table__tr > :nth-child(2)').contains(scope).should('exist');
     }
     else{
-      cy.get('.pf-v5-c-table__tbody > .pf-v5-c-table__tr > :nth-child(2)').contains(scope).should('not.exist');
+      cy.get('[data-testid="empty-state"]').should('exist');
     }
   }
 }
