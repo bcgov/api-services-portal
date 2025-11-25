@@ -322,8 +322,8 @@ Cypress.Commands.add('logout', () => {
 
 Cypress.Commands.add('keycloakLogout', () => {
   cy.log('< Logging out')
-  cy.get('.dropdown-toggle.ng-binding').click()
-  cy.contains('Sign Out').click()
+  cy.get('[data-testid=options-toggle]').click()
+  cy.contains('Sign out').click()
   cy.log('> Logging out')
 })
 

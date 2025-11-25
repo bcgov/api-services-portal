@@ -3,19 +3,21 @@ import { Assertion } from "chai"
 class keycloakClientScopesPage {
   path: string = '/'
 
-  clientTab: string = '[data-ng-controller="ClientTabCtrl"]'
+  clientTabs: string = '[data-testid="client-tabs"]'
+  tableSearchInput: string = '[data-testid="table-search-input"]'
 
   selectTab(tabName: string){
-    cy.get(this.clientTab).contains('a',tabName).click()
+    cy.get(this.clientTabs).contains('a',tabName).click()
   }
 
   verifyAssignedScope(scope: string, expResult:boolean)
   {
+    cy.get(this.tableSearchInput).clear().type(scope).type('{enter}');
     if(expResult){
-      cy.get('[id="assigned"]').find('[title="'+scope+'"]').should('exist');
+      cy.get('.pf-v5-c-table__tbody > .pf-v5-c-table__tr > :nth-child(2)').contains(scope).should('exist');
     }
     else{
-      cy.get('[id="assigned"]').find('[title="'+scope+'"]').should('not.exist');
+      cy.get('.pf-v5-c-table__tbody > .pf-v5-c-table__tr > :nth-child(2)').contains(scope).should('not.exist');
     }
   }
 }

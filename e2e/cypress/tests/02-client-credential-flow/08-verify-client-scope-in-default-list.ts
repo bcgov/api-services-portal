@@ -14,7 +14,7 @@ describe('Verify the selected client scoped is not displayed in assigned default
   const authProfile = new AuthorizationProfile()
 
   before(() => {
-    cy.visit(Cypress.env('KEYCLOAK_URL'))
+    cy.visit(Cypress.env('KEYCLOAK_URL') + '/auth/admin')
     cy.reload(true)
   })
 
@@ -28,24 +28,24 @@ describe('Verify the selected client scoped is not displayed in assigned default
 
   it('Authenticates Admin owner', () => {
     cy.get('@admin').then(({ user }: any) => {
-      cy.contains('Administration Console').click({ force: true })
       cy.keycloakLogin(user.credentials.username, user.credentials.password)
     })
   })
 
   it('Navigate to Clients page', () => {
+    cy.get('[id=nav-toggle').click()
     cy.contains('Clients').click()
   })
 
   it('Select the consumer ID', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
       let cc = JSON.parse(store_res.clientidsecret)
-      cy.contains(cc.clientId).click()
+      cy.contains(cc.clientId).click({ force: true })
     })
   })
 
   it('Navigate to client scope tab', () => {
-    clientScopes.selectTab('Client Scopes')
+    clientScopes.selectTab('Client scopes')
   })
 
   it('Verify that "System.Write" scope is not in assigned default scope', () => {
