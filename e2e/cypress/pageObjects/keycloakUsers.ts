@@ -13,7 +13,7 @@ class keycloakUsersPage {
 
   editUser(userName: string) {
     cy.get(this.userSearchInput).type(userName).type('{enter}')
-    cy.get('a').contains(userName).click()
+    cy.get('a').contains(userName).click({ force: true })
   }
 
   setUserToOrganization(orgName: string) {
@@ -23,11 +23,11 @@ class keycloakUsersPage {
     cy.get('[data-testid="join-button"]').click()
   }
 
-  resetAssociation() {
-    cy.get('[data-ng-click="membershipTree.selectNodeLabel(node)"]').click()
-    cy.contains('Leave').click({force:true})
+  leaveGroup(orgName: string) {
+    cy.get(`[data-testid="leave-${orgName}"]`).click()
+    cy.get('[data-testid="confirm"]').click()
   }
-
+    
 }
 
 export default keycloakUsersPage

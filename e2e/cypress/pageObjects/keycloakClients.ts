@@ -14,7 +14,9 @@ class keycloakClientsPage {
   setRoles(roleName: string, clientName: string){
     cy.get('[id=nav-toggle').click()
     cy.contains('Clients').click()
-    cy.contains(clientName).click({ force: true })
+    cy.get('[id=nav-toggle').click()
+    cy.get('input[placeholder="Search for client"]').type(clientName).type('{enter}')
+    cy.get('a').contains(clientName).click({ force: true })
     this.selectTab('Roles')
     cy.get(this.createRoleBtn).click()
     cy.get(this.roleNameTextField).type(roleName)
