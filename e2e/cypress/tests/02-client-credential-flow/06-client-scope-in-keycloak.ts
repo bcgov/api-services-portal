@@ -1,20 +1,10 @@
-import HomePage from '../../pageObjects/home'
-import LoginPage from '../../pageObjects/login'
-import ConsumersPage from '../../pageObjects/consumers'
-import KeycloakUserGroupPage from '../../pageObjects/keycloakUserGroup'
-import keycloakGroupPage from '../../pageObjects/keycloakGroup'
-import AuthorizationProfile from '../../pageObjects/authProfile'
 import keycloakClientScopesPage from '../../pageObjects/keycloakClientScopes'
 
 describe('Verify the selected client scoped is displayed in assigned default list', () => {
   const clientScopes = new keycloakClientScopesPage()
-  const groups = new keycloakGroupPage()
-  var nameSpace: string
-  const home = new HomePage()
-  const authProfile = new AuthorizationProfile()
 
   before(() => {
-    cy.visit(Cypress.env('KEYCLOAK_URL') + '/auth/admin')
+    cy.visit(Cypress.env('KEYCLOAK_URL'))
     cy.reload(true)
   })
 

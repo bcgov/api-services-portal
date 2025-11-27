@@ -290,7 +290,6 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
 
     it('Authenticates Admin owner', () => {
         cy.get('@admin').then(({ user }: any) => {
-            cy.contains('Administration Console').click({ force: true })
             cy.keycloakLogin(user.credentials.username, user.credentials.password)
         })
     })

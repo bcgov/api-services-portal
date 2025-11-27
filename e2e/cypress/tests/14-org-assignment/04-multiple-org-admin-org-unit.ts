@@ -1,7 +1,6 @@
 import keycloakGroupPage from '../../pageObjects/keycloakGroup'
 import keycloakUsersPage from '../../pageObjects/keycloakUsers'
 
-
 describe('Give a user org admin access at organization unit level', () => {
   const user = new keycloakUsersPage()
   const groups = new keycloakGroupPage()
@@ -23,13 +22,14 @@ describe('Give a user org admin access at organization unit level', () => {
 
   it('Authenticates Admin owner', () => {
     cy.get('@admin').then(({ user }: any) => {
-      cy.contains('Administration Console').click({force:true})
       cy.keycloakLogin(user.credentials.username, user.credentials.password)
     })
   })
 
   it('Navigate to User Groups', () => {
-    groups.navigateToUserGroups()
+    cy.get('[id=nav-toggle').click()
+    cy.contains('Groups').click()
+    cy.get('[id=nav-toggle').click()
   })
 
   it('Add another org unit', () => {

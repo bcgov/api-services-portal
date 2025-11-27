@@ -7,7 +7,7 @@ class keycloakClientScopesPage {
   tableSearchInput: string = '[data-testid="table-search-input"]'
 
   selectTab(tabName: string){
-    cy.get(this.clientTabs).contains('a',tabName).click()
+    cy.get(this.clientTabs).contains('a',tabName).click({ force: true })
   }
 
   verifyAssignedScope(scope: string, expResult:boolean)

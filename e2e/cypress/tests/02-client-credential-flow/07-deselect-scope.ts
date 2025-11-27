@@ -1,10 +1,6 @@
 import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
-import KeycloakUserGroupPage from '../../pageObjects/keycloakUserGroup'
-import keycloakGroupPage from '../../pageObjects/keycloakGroup'
-import AuthorizationProfile from '../../pageObjects/authProfile'
-import keycloakClientScopesPage from '../../pageObjects/keycloakClientScopes'
 
 describe('Deselect the scope from authorization tab', () => {
   const login = new LoginPage()
