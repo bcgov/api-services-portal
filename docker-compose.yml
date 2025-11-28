@@ -11,7 +11,8 @@ services:
     container_name: keycloak
     hostname: keycloak
     depends_on:
-      - kong-db
+      kong-db:
+        condition: service_healthy
     command:
       [
         '-b',
@@ -101,7 +102,7 @@ services:
     networks:
       - aps-net
   kong-db:
-    image: postgres:12.8
+    image: postgres:14
     container_name: kong-db
     environment:
       POSTGRES_USER: postgres
@@ -113,13 +114,19 @@ services:
     volumes:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - aps-net
   kong-migrations:
     image: kong:kong-local
     command: kong migrations bootstrap
     depends_on:
-      - kong-db
+      kong-db:
+        condition: service_healthy
     environment:
       <<: *common-variables
       KONG_DNS_ORDER: 'LAST,A'
@@ -133,8 +140,10 @@ services:
     image: kong:kong-local
     command: kong migrations up && kong migrations finish
     depends_on:
-      - kong-db
-      - kong-migrations
+      kong-db:
+        condition: service_healthy
+      kong-migrations:
+        condition: service_completed_successfully
     environment:
       <<: *common-variables
       KONG_DNS_ORDER: 'LAST,A'
