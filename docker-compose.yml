@@ -27,7 +27,7 @@ services:
         "--hostname",
         "http://keycloak.localtest.me:9081/auth",
         "--db-url",
-        "jdbc:postgresql://kong-db/keycloak",
+        "jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}",
         "--db-username",
         "keycloakuser",
         "--db-password",
@@ -69,7 +69,7 @@ services:
           - oauth2proxy.localtest.me
   apsportal:
     container_name: apsportal
-    image: apsportal:latest
+    image: apsportal:${APSPORTAL_TAG:-latest}
     depends_on:
       - keycloak
     build:
@@ -201,7 +201,7 @@ services:
         aliases:
           - redis-master
   gwa-api:
-    image: gwa-api:e2e
+    image: gwa-api:${GWA_API_TAG:-e2e}
     container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
