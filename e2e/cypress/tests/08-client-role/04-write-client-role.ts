@@ -140,6 +140,7 @@ describe('Update Kong plugin and verify that only only PUT and POST methods are 
   })
 
   it('Make "GET" call and verify that Kong does not allow user to access the resources', () => {
+    cy.wait(4000)
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(404)
