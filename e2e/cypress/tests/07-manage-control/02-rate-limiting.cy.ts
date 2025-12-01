@@ -207,7 +207,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Global, "Service", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Service", "Redis")
         })
     })
 
@@ -264,7 +264,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Global, "Route", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route", "Redis")
         })
     })
 
