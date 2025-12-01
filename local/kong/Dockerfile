@@ -3,7 +3,7 @@ FROM docker.io/kong:${KONG_VERSION}
 
 USER root
 
-RUN apt-get update && apt-get -y install unzip curl
+RUN apt-get update && apt-get -y install unzip curl && apt-get clean
 
 RUN git clone -b feature/mtls https://github.com/bcgov/kong-oss-plugins.git \
   && cd kong-oss-plugins \
@@ -27,22 +27,22 @@ RUN git clone -b feature/mtls https://github.com/bcgov/kong-oss-plugins.git \
   && (cd plugins/trust-verify-digest && luarocks make) \
   && (cd plugins/trust-verify-signature && luarocks make)
  
-RUN git clone -b kong3 https://github.com/bcgov/gwa-kong-endpoint.git
-RUN (cd gwa-kong-endpoint && ./devBuild.sh)
+RUN git clone -b kong3 https://github.com/bcgov/gwa-kong-endpoint.git \
+  && (cd gwa-kong-endpoint && ./devBuild.sh)
 
-RUN git clone -b kong3 https://github.com/bcgov/gwa-ip-anonymity.git
-RUN (cd gwa-ip-anonymity && ./devBuild.sh)
+RUN git clone -b kong3 https://github.com/bcgov/gwa-ip-anonymity.git \
+  && (cd gwa-ip-anonymity && ./devBuild.sh)
 
 RUN luarocks install kong-spec-expose \
 #  && luarocks install kong-plugin-referer \
  && luarocks install kong-upstream-jwt
 
-RUN git clone https://github.com/Kong/priority-updater.git
-RUN (cd priority-updater/template/plugin && KONG_PRIORITY=902 KONG_PRIORITY_NAME=rate-limiting /usr/local/openresty/luajit/bin/luajit ../priority.lua)
-RUN (cd priority-updater/template/plugin && KONG_PRIORITY=1010 KONG_PRIORITY_NAME=jwt-keycloak /usr/local/openresty/luajit/bin/luajit ../priority.lua)
-RUN (cd priority-updater/template/plugin && KONG_PRIORITY=770 KONG_PRIORITY_NAME=pre-function /usr/local/openresty/luajit/bin/luajit ../priority.lua)
-RUN (cd priority-updater/template/plugin && KONG_PRIORITY=200 KONG_PRIORITY_NAME=post-function /usr/local/openresty/luajit/bin/luajit ../priority.lua)
-RUN (cd priority-updater/template/plugin && KONG_PRIORITY=201 KONG_PRIORITY_NAME=post-function /usr/local/openresty/luajit/bin/luajit ../priority.lua)
+RUN git clone https://github.com/Kong/priority-updater.git \
+  && (cd priority-updater/template/plugin && KONG_PRIORITY=902 KONG_PRIORITY_NAME=rate-limiting /usr/local/openresty/luajit/bin/luajit ../priority.lua) \
+  && (cd priority-updater/template/plugin && KONG_PRIORITY=1010 KONG_PRIORITY_NAME=jwt-keycloak /usr/local/openresty/luajit/bin/luajit ../priority.lua) \
+  && (cd priority-updater/template/plugin && KONG_PRIORITY=770 KONG_PRIORITY_NAME=pre-function /usr/local/openresty/luajit/bin/luajit ../priority.lua) \
+  && (cd priority-updater/template/plugin && KONG_PRIORITY=200 KONG_PRIORITY_NAME=post-function /usr/local/openresty/luajit/bin/luajit ../priority.lua) \
+  && (cd priority-updater/template/plugin && KONG_PRIORITY=201 KONG_PRIORITY_NAME=post-function /usr/local/openresty/luajit/bin/luajit ../priority.lua)
 
 USER kong
 
