@@ -48,6 +48,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=api-services-portal
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:
