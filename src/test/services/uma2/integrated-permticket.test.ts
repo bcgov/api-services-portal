@@ -86,8 +86,6 @@ describe('UMA2 Namespace Permission Tickets', function () {
       permissions: [
         {
           scopes: [
-            'Namespace.View',
-            'GatewayConfig.Publish',
             'Namespace.Manage',
           ],
           rsid: '8ddc22f0-3f9d-4c0e-97b6-e2677a785728',
