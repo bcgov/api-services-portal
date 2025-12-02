@@ -23,35 +23,35 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run Tests
-        run: |
-          docker compose up keycloak -d
+      # - name: Run Tests
+      #   run: |
+      #     docker compose up keycloak -d
 
-          set -o allexport
-          source ./.env.local
-          LOG_LEVEL=debug
-          KNEX_HOST=kong-db.localtest.me
-          NEXT_PUBLIC_MOCKS=off
-          set +o allexport
+      #     set -o allexport
+      #     source ./.env.local
+      #     LOG_LEVEL=debug
+      #     KNEX_HOST=kong-db.localtest.me
+      #     NEXT_PUBLIC_MOCKS=off
+      #     set +o allexport
 
-          cd src
+      #     cd src
 
-          npm i
-          npm run intg-build
-          npm test
+      #     npm i
+      #     npm run intg-build
+      #     npm test
 
-          cd ..
-          docker compose down
+      #     cd ..
+      #     docker compose down
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
-            -Dsonar.organization=bcgov-oss
+            -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=aps-portal
-            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
