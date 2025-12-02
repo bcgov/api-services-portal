@@ -533,7 +533,6 @@ module.exports = {
                 );
                 for (const scope of [
                   'Namespace.Manage',
-                  'Namespace.View',
                   'CredentialIssuer.Admin',
                   'GatewayConfig.Publish',
                   'Access.Manage',
