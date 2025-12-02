@@ -16,6 +16,9 @@ import {
 
 const logger = Logger('kc.group');
 
+// KC26 requires explicit pagination - default limit is 10, so we set a high max
+const MAX_GROUPS_RESULTS = 1000;
+
 export class KeycloakGroupService {
   private allGroups: any = undefined;
   private kcAdminClient: KeycloakAdminClient;
@@ -82,7 +85,7 @@ export class KeycloakGroupService {
     parentGroupName: string,
     groupName: string
   ): Promise<void> {
-    const groups = (await this.kcAdminClient.groups.find()).filter(
+    const groups = (await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS })).filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
     await this.createIfMissingForParentGroup(groups[0], groupName);
@@ -124,7 +127,7 @@ export class KeycloakGroupService {
   }
 
   public async getAllGroups() {
-    return this.kcAdminClient.groups.find();
+    return this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
   }
 
   public async search(
@@ -134,7 +137,7 @@ export class KeycloakGroupService {
     const result = await this.kcAdminClient.groups.find({
       search,
       first: 0,
-      max: 500,
+      max: MAX_GROUPS_RESULTS,
       briefRepresentation,
     });
     logger.debug('[search] %j', result);
@@ -154,7 +157,7 @@ export class KeycloakGroupService {
     briefRepresentation: boolean = true
   ) {
     return (
-      await this.kcAdminClient.groups.find({ briefRepresentation })
+      await this.kcAdminClient.groups.find({ briefRepresentation, first: 0, max: MAX_GROUPS_RESULTS })
     ).filter((group: GroupRepresentation) => group.name == parentGroupName);
   }
 
@@ -166,7 +169,7 @@ export class KeycloakGroupService {
   public async hasGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
-      : await this.kcAdminClient.groups.find();
+      : await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
@@ -189,6 +192,8 @@ export class KeycloakGroupService {
     if (group.subGroups.length == 0 && group.subGroupCount > 0) {
       const subGroups = await this.kcAdminClient.groups.listSubGroups({
         parentId: group.id,
+        first: 0,
+        max: MAX_GROUPS_RESULTS,
       });
       group.subGroups = subGroups;
     }
@@ -200,13 +205,15 @@ export class KeycloakGroupService {
   ): Promise<GroupRepresentation[]> {
     return this.kcAdminClient.groups.listSubGroups({
       parentId: group.id,
+      first: 0,
+      max: MAX_GROUPS_RESULTS,
     });
   }
 
   public async getGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
-      : await this.kcAdminClient.groups.find();
+      : await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
