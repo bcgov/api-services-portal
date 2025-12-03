@@ -44,7 +44,8 @@ export class SDXController extends Controller {
   @Security('jwt', [])
   public async put(
     @Path() gatewayId: string,
-    @Body() body: GatewayPatternConfig
+    @Body() body: GatewayPatternConfig,
+    @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
     return await GetConfigUsingPattern(ctx, body);
