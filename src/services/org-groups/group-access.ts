@@ -1,7 +1,6 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KcAdminClient from '@packages/keycloak-admin-client';
-import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import {
   KeycloakClientPolicyService,
   KeycloakClientService,

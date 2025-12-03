@@ -6,14 +6,13 @@ import {
   KeycloakGroupService,
   KeycloakUserService,
 } from '../keycloak';
-import {
-  GroupRepresentation,
-  ClientScopeRepresentation,
-  PolicyRepresentation,
-  UserRepresentation,
+import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
+import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
+import PolicyRepresentation, {
   DecisionStrategy,
   Logic,
-} from '@packages/keycloak-admin-client';
+} from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 
 import { root } from './group-converter-utils';
 import { User } from '../keystone/types';

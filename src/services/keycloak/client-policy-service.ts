@@ -1,12 +1,10 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import {
-  KeycloakAdminClient,
-  PolicyRepresentation,
-  ResourceRepresentation,
-  ResourceServerRepresentation,
-  ScopeRepresentation,
-} from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
+import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
+import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
+import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
+import ScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/scopeRepresentation';
 import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
 
 //import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
@@ -117,9 +115,9 @@ export class KeycloakClientPolicyService {
     type: string,
     policyId: string
   ): Promise<any> {
-    logger.debug('[findPolicyById] c=%s p=%s', id, policyId);
+    logger.debug('[findPolicyById] c=%s t=%s p=%s', id, type, policyId);
 
-    const policy = (await this.kcAdminClient.clients.findOnePolicy({
+    const policy = (await this.kcAdminClient.clients.findOnePolicyWithType({
       id,
       type,
       policyId,

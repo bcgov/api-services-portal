@@ -5,7 +5,7 @@ import { KeycloakUserService } from './user-service';
 import { EnvironmentContext } from '../workflow/get-namespaces';
 import { KeycloakClientService } from './client-service';
 
-import { KeycloakAdminClient } from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 
 const logger = Logger('kc.roles');
 

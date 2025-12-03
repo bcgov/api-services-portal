@@ -1,10 +1,8 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import {
-  KeycloakAdminClient,
-  GroupRepresentation,
-  UserRepresentation,
-} from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
+import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 // import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
 //import { GroupRepresentation } from '@packages/keycloak-admin-client';
 // import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';

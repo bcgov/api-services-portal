@@ -11,7 +11,7 @@ import { clientTemplateClientJwt } from './templates/client-template-client-jwt'
 import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
 import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
 
-import { KeycloakAdminClient } from '@packages/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
 
