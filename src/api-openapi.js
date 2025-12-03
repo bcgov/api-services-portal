@@ -11,6 +11,7 @@ var options = {
 
 const { Register } = require('./controllers/ioc/registry');
 const { UnauthorizedError } = require('express-jwt');
+const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
 
@@ -108,6 +109,11 @@ class ApiOpenapiApp {
 
     app.use(function errorHandler(err, req, res, next) {
       if (err instanceof UnauthorizedError) {
+        return res.status(err.status).json({
+          code: err.code,
+          message: err.message,
+        });
+      } else if (err instanceof ForbiddenError) {
         return res.status(err.status).json({
           code: err.code,
           message: err.message,
