@@ -3,14 +3,6 @@ import { Logger } from '../../logger';
 import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-// import KeycloakAdminClient from '@keycloak/keycloak-admin-client/lib';
-//import { GroupRepresentation } from '@packages/keycloak-admin-client';
-// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-// import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
-// import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
-// import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-// import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-// import UserRepresentation from 'keycloak-admin/lib/defs/userRepresentation';
 
 const logger = Logger('kc.group');
 
@@ -83,10 +75,10 @@ export class KeycloakGroupService {
     parentGroupName: string,
     groupName: string
   ): Promise<void> {
-    const groups = (await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS })).filter(
+    const group = (await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS })).find(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
-    await this.createIfMissingForParentGroup(groups[0], groupName);
+    await this.createIfMissingForParentGroup(group, groupName);
   }
 
   public async createRootGroup(groupName: string) {
@@ -227,9 +219,9 @@ export class KeycloakGroupService {
       return null;
     } else {
       logger.debug('[getGroup] FOUND   %s', groupName);
-      const grp = subGroups.filter(
+      const grp = subGroups.find(
         (group: GroupRepresentation) => group.name == groupName
-      )[0];
+      );
       const group = await this.kcAdminClient.groups.findOne({ id: grp.id });
       logger.debug('[getGroup] FOUND   %j', group);
       return group;
