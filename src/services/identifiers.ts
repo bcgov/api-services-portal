@@ -24,4 +24,8 @@ export function newNamespaceID(): string {
   return 'gw-' + uuidv4().replace(/-/g, '').toLowerCase().substring(0, 5);
 }
 
+export function newJWKID(): string {
+  return uuidv4().replace(/-/g, '').toLowerCase().substring(0, 6);
+}
+
 export const newGatewayID = newNamespaceID;

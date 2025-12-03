@@ -131,7 +131,7 @@ export class KeycloakGroupService {
       max: 500,
       briefRepresentation,
     });
-    logger.debug('[search] %j', result);
+    logger.debug('[search] %j', result.length);
     return result;
   }
 

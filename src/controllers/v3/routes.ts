@@ -32,6 +32,8 @@ import { OrgProductController } from './OrgProductController';
 import { OrgRoleController } from './OrgRoleController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductController } from './ProductController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SDXController } from './SDXController';
 import { expressAuthentication } from './../../auth/auth-tsoa';
 // @ts-ignore - no great way to install types from subpackage
 const promiseAny = require('promise.any');
@@ -475,6 +477,35 @@ const models: TsoaRoute.Models = {
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
             "organization": {"ref":"OrganizationRefID"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GatewayPatternConfig": {
+        "dataType": "refObject",
+        "properties": {
+            "pattern": {"dataType":"string","required":true},
+            "locator": {"dataType":"string","required":true},
+            "parameters": {"ref":"Record_string.string_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CatalogEntry": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "locator": {"dataType":"string","required":true},
+            "product": {"dataType":"nestedObjectLiteral","nestedProperties":{"namespace":{"dataType":"string","required":true},"type":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "organization": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgUnit":{"dataType":"string"},"name":{"dataType":"string","required":true}},"required":true},
+            "gateway": {"dataType":"nestedObjectLiteral","nestedProperties":{"permissions":{"dataType":"nestedObjectLiteral","nestedProperties":{"domains":{"dataType":"array","array":{"dataType":"string"},"required":true},"dataPlane":{"dataType":"array","array":{"dataType":"string"},"required":true}},"required":true},"name":{"dataType":"string","required":true}},"required":true},
+            "edgeServer": {"dataType":"nestedObjectLiteral","nestedProperties":{"dn":{"dataType":"string","required":true},"host":{"dataType":"string","required":true}},"required":true},
+            "hasSpec": {"dataType":"boolean","required":true},
         },
         "additionalProperties": false,
     },
@@ -1928,6 +1959,65 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.deleteEnvironment.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v3/sdx/:gatewayId/config-from-pattern',
+            authenticateMiddleware([{"jwt":[]}]),
+
+            async function SDXController_put(request: any, response: any, next: any) {
+            const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"GatewayPatternConfig"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<SDXController>(SDXController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.put.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v3/sdx',
+            authenticateMiddleware([{"jwt":[]}]),
+
+            async function SDXController_getCatalog(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<SDXController>(SDXController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getCatalog.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

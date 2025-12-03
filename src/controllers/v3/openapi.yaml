@@ -873,6 +873,94 @@ components:
                         approval: false
                         flow: public
                         appId: '00000000'
+        Record_string.string_:
+            properties: {}
+            type: object
+            description: 'Construct a type with a set of properties K of type T'
+        GatewayPatternConfig:
+            properties:
+                pattern:
+                    type: string
+                locator:
+                    type: string
+                parameters:
+                    $ref: '#/components/schemas/Record_string.string_'
+            required:
+                - pattern
+                - locator
+                - parameters
+            type: object
+            additionalProperties: false
+        CatalogEntry:
+            properties:
+                id:
+                    type: string
+                locator:
+                    type: string
+                product:
+                    properties:
+                        namespace:
+                            type: string
+                        type:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - namespace
+                        - type
+                        - name
+                    type: object
+                organization:
+                    properties:
+                        orgUnit:
+                            type: string
+                        name:
+                            type: string
+                    required:
+                        - name
+                    type: object
+                gateway:
+                    properties:
+                        permissions:
+                            properties:
+                                domains:
+                                    items: {type: string}
+                                    type: array
+                                dataPlane:
+                                    items: {type: string}
+                                    type: array
+                            required:
+                                - domains
+                                - dataPlane
+                            type: object
+                        name:
+                            type: string
+                    required:
+                        - permissions
+                        - name
+                    type: object
+                edgeServer:
+                    properties:
+                        dn:
+                            type: string
+                        host:
+                            type: string
+                    required:
+                        - dn
+                        - host
+                    type: object
+                hasSpec:
+                    type: boolean
+            required:
+                - id
+                - locator
+                - product
+                - organization
+                - gateway
+                - edgeServer
+                - hasSpec
+            type: object
+            additionalProperties: false
     securitySchemes:
         jwt:
             type: oauth2
@@ -2249,6 +2337,51 @@ paths:
                     schema:
                         default: false
                         type: boolean
+    '/sdx/{gatewayId}/config-from-pattern':
+        put:
+            operationId: get-config-from-sdx-pattern
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - SDX
+            security:
+                -
+                    jwt: []
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GatewayPatternConfig'
+    /sdx:
+        get:
+            operationId: get-catalog
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/CatalogEntry'
+                                type: array
+            tags:
+                - SDX
+            security:
+                -
+                    jwt: []
+            parameters: []
 servers:
     -
         url: /ds/api/v3
