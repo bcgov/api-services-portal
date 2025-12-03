@@ -44,11 +44,11 @@ jobs:
           docker compose down
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@master
+        uses: sonarsource/sonarqube-scan-action@v6
         with:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=api-services-portal
+            -Dsonar.projectKey=bcgov_api-services-portal
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:
