@@ -47,6 +47,58 @@ describe('Grant Namespace View Role to Mark', () => {
   })
 })
 
+describe('Verify that Mark is unable to view Gateway summary', () => {
+
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
+  const sa = new ServiceAccountsPage()
+  let userSession: any
+  let nameSpace: string
+
+  before(() => {
+    cy.visit('/')
+    cy.reload(true)
+  })
+
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('api').as('api')
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('common-testdata').as('common-testdata')
+  })
+
+  it('authenticates Mark', () => {
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ checkPermission }: any) => {
+        cy.visit(login.path)
+        cy.login(user.credentials.username, user.credentials.password)
+        cy.log('Logged in!')
+        cy.activateGateway(checkPermission.namespace)
+        cy.getUserSessionResponse().then(( response: any ) => {
+          userSession = response.headers['x-auth-request-access-token']
+          nameSpace = checkPermission.namespace
+        })
+      })
+    })
+  })
+
+  it('Verify scopes are limited to those which Mark has been granted - Namespace.Manage scope missing', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace, 'GET').then((res:any) => {
+          expect(res.apiRes.status).to.be.equal(401)
+          expect(res.apiRes.body.message).to.be.contain('Missing authorization scope')
+      })
+    })
+  })
+
+  after(() => {
+    cy.logout()
+  })
+})
+
 describe('Verify that Mark is unable to create service account', () => {
 
   const login = new LoginPage()
