@@ -42,6 +42,7 @@ services:
       - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
     ports:
       - 9081:9081
+      - 9000:9000
     networks:
       aps-net:
         aliases:
