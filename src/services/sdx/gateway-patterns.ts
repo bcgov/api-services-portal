@@ -138,10 +138,10 @@ async function evalConsumerPattern(
       consumer_uri: consumer.locator,
       gateway: consumer.gateway.name,
       ns_qualifier: `AP-C-REQ-${reqId}`,
-      route_host: consumer.edgeServer.host,
+      route_host: consumer.edgeServer.internal_endpoint,
       route_path: `/${provider.locator}`,
       service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
-      upstream_uri: `https://${provider.edgeServer.host}`,
+      upstream_uri: `https://${provider.edgeServer.endpoint}`,
     }
   );
   return result;
@@ -166,7 +166,7 @@ async function evalProviderPattern(
       gateway: provider.gateway.name,
       mtls_allow_list: `"${provider.edgeServer.dn}"`,
       ns_qualifier: `AP-P-REQ-${reqId}`,
-      route_host: provider.edgeServer.host,
+      route_host: provider.edgeServer.endpoint,
       route_path: `/${provider.locator}`,
       service_name: `AP-P-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: upstreamUri,

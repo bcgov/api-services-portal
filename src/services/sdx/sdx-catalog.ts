@@ -30,6 +30,8 @@ export interface CatalogEntry {
   edgeServer: {
     host: string;
     dn: string;
+    endpoint: string;
+    internal_endpoint: string;
   };
   hasSpec: boolean;
 }
