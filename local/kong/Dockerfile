@@ -5,7 +5,7 @@ USER root
 
 RUN apt-get update && apt-get -y install unzip && apt-get clean
 
-RUN git clone -b feature/kong3 https://github.com/bcgov/kong-oss-plugins.git \
+RUN git clone https://github.com/bcgov/kong-oss-plugins.git \
   && cd kong-oss-plugins \
   && (cd plugins/jwt-keycloak && luarocks make) \
   && (cd plugins/oidc && luarocks make kong-plugin-oidc-1.5.0-2.rockspec) \
