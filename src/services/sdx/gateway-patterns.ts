@@ -12,7 +12,7 @@ import { newEnvironmentID, newJWKID } from '../identifiers';
 
 export interface GatewayPatternConfig {
   pattern: string;
-  locator: string;
+  delete?: boolean;
   parameters: Record<string, string>;
 }
 
@@ -21,42 +21,73 @@ export async function GetConfigUsingPattern(
   inputs: GatewayPatternConfig
 ): Promise<any> {
   const catalog = await GetCatalog(ctx);
-  const entry = catalog.find((e) => e.locator === inputs.locator);
-  if (!entry) {
-    throw new Error(
-      `GetConfigUsingPattern: unable to find catalog entry for locator ${inputs.locator}`
-    );
-  }
   if (inputs.pattern.startsWith('sdx-keys-')) {
-    expectRequiredParams(inputs.parameters, ['public_key_pem']);
+    expectRequiredParams(inputs.parameters, ['locator', 'public_key_pem']);
+    const entry = catalog.find(
+      (e) => e.locator === inputs.parameters['locator']
+    );
+    if (!entry) {
+      throw new Error(
+        `GetConfigUsingPattern: unable to find catalog entry for locator ${inputs.parameters['locator']}`
+      );
+    }
+
     return await evalKeysPattern(
       inputs.pattern,
+      inputs.delete === true,
       entry,
       inputs.parameters['public_key_pem']
     );
   } else if (inputs.pattern.startsWith('sdx-p2p-consumer-')) {
-    expectRequiredParams(inputs.parameters, ['provider', 'req_id']);
+    expectRequiredParams(inputs.parameters, ['consumer', 'provider', 'req_id']);
     const provider = catalog.find(
       (e) => e.locator === inputs.parameters['provider']
     );
     const reqId = inputs.parameters['req_id'];
-    return await evalConsumerPattern(inputs.pattern, reqId, entry, provider);
+    const consumer = catalog.find(
+      (e) => e.locator === inputs.parameters['consumer']
+    );
+    if (!consumer) {
+      throw new Error(
+        `GetConfigUsingPattern: unable to find catalog entry for locator ${inputs.parameters['locator']}`
+      );
+    }
+
+    return await evalConsumerPattern(
+      inputs.pattern,
+      inputs.delete === true,
+      reqId,
+      consumer,
+      provider
+    );
   } else if (inputs.pattern.startsWith('sdx-p2p-provider-')) {
     expectRequiredParams(inputs.parameters, [
       'consumer',
+      'provider',
       'req_id',
       'upstream_uri',
     ]);
+    const provider = catalog.find(
+      (e) => e.locator === inputs.parameters['provider']
+    );
+    if (!provider) {
+      throw new Error(
+        `GetConfigUsingPattern: unable to find catalog entry for locator ${inputs.parameters['provider']}`
+      );
+    }
+
     const consumer = catalog.find(
       (e) => e.locator === inputs.parameters['consumer']
     );
     const reqId = inputs.parameters['req_id'];
+
     const upstreamUri = inputs.parameters['upstream_uri'];
     return await evalProviderPattern(
       inputs.pattern,
+      inputs.delete === true,
       reqId,
       upstreamUri,
-      entry,
+      provider,
       consumer
     );
   } else {
@@ -68,6 +99,7 @@ export async function GetConfigUsingPattern(
 
 async function evalKeysPattern(
   pattern: string,
+  deleteFlag: boolean,
   entry: CatalogEntry,
   publicKeyPem: string
 ) {
@@ -75,59 +107,71 @@ async function evalKeysPattern(
 
   const kid = `urn:ca:bc:sdx:service:${entry.locator.toLowerCase()}:${newJWKID()}`;
   const keyName = `SDX.${entry.locator}:0`;
-  const result = await gwa.getGatewayConfigUsingPattern(entry.gateway.name, {
-    pattern: pattern,
-    kid,
-    key_name: keyName,
-    ns_qualifier: `KEYS-${entry.product.name}`,
-    public_key_pem: publicKeyPem,
-  });
+  const result = await gwa.getGatewayConfigUsingPattern(
+    entry.gateway.name,
+    deleteFlag,
+    {
+      pattern: pattern,
+      kid,
+      key_name: keyName,
+      ns_qualifier: `KEYS-${entry.product.name}`,
+      public_key_pem: publicKeyPem,
+    }
+  );
   return result;
 }
 
 async function evalConsumerPattern(
   pattern: string,
+  deleteFlag: boolean,
   reqId: string,
-  entry: CatalogEntry,
+  consumer: CatalogEntry,
   provider: CatalogEntry
 ) {
   const gwa = new GWAService(process.env.GWA_API_URL);
 
-  const kid = `urn:ca:bc:sdx:service:${entry.locator.toLowerCase()}:${newJWKID()}`;
-  const keyName = `SDX.${entry.locator}:0`;
-  const result = await gwa.getGatewayConfigUsingPattern(entry.gateway.name, {
-    pattern,
-    consumer_uri: entry.locator,
-    gateway: entry.gateway.name,
-    ns_qualifier: `AP-C-REQ-${reqId}`,
-    route_host: entry.edgeServer.host,
-    route_path: `/${provider.locator}`,
-    service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
-    upstream_uri: `https://${provider.edgeServer.host}`,
-  });
+  const result = await gwa.getGatewayConfigUsingPattern(
+    consumer.gateway.name,
+    deleteFlag,
+    {
+      pattern,
+      consumer_uri: consumer.locator,
+      gateway: consumer.gateway.name,
+      ns_qualifier: `AP-C-REQ-${reqId}`,
+      route_host: consumer.edgeServer.host,
+      route_path: `/${provider.locator}`,
+      service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
+      upstream_uri: `https://${provider.edgeServer.host}`,
+    }
+  );
   return result;
 }
 
 async function evalProviderPattern(
   pattern: string,
+  deleteFlag: boolean,
   reqId: string,
   upstreamUri: string,
-  entry: CatalogEntry,
+  provider: CatalogEntry,
   consumer: CatalogEntry
 ) {
   const gwa = new GWAService(process.env.GWA_API_URL);
 
-  const result = await gwa.getGatewayConfigUsingPattern(entry.gateway.name, {
-    pattern,
-    consumer_uri: consumer.locator,
-    gateway: entry.gateway.name,
-    mtls_allow_list: `"${entry.edgeServer.dn}"`,
-    ns_qualifier: `AP-P-REQ-${reqId}`,
-    route_host: entry.edgeServer.host,
-    route_path: `/${entry.locator}`,
-    service_name: `AP-P-REQ-${reqId}-${entry.product.name}`,
-    upstream_uri: upstreamUri,
-  });
+  const result = await gwa.getGatewayConfigUsingPattern(
+    provider.gateway.name,
+    deleteFlag,
+    {
+      pattern,
+      consumer_uri: consumer.locator,
+      gateway: provider.gateway.name,
+      mtls_allow_list: `"${provider.edgeServer.dn}"`,
+      ns_qualifier: `AP-P-REQ-${reqId}`,
+      route_host: provider.edgeServer.host,
+      route_path: `/${provider.locator}`,
+      service_name: `AP-P-REQ-${reqId}-${provider.product.name}`,
+      upstream_uri: upstreamUri,
+    }
+  );
   return result;
 }
 

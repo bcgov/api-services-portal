@@ -34,13 +34,17 @@ export class GWAService {
     }).then(checkStatus);
   }
 
-  public async getGatewayConfigUsingPattern(ns: string, payload: any) {
+  public async getGatewayConfigUsingPattern(
+    ns: string,
+    deleteFlag: boolean,
+    payload: any
+  ) {
     const url = `${this.gwaUrl}/v2/namespaces/${ns}/gateway/pattern-output`;
     logger.debug('[getGatewayConfigUsingPattern] ns=%s', ns);
 
     return await fetch(url, {
       method: 'put',
-      body: JSON.stringify({ document: payload }),
+      body: JSON.stringify({ delete: deleteFlag, document: payload }),
       headers: {
         'Content-Type': 'application/json',
       },
