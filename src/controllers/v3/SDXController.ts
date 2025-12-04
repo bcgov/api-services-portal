@@ -11,6 +11,7 @@ import {
   Tags,
   FormField,
   UploadedFile,
+  ValidateError,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
@@ -25,6 +26,7 @@ import { GatewayRoute } from './types';
 import { PublishResult } from './types-extra';
 import { CatalogEntry, GetCatalog } from '../../services/sdx/sdx-catalog';
 import { GetConfigUsingPattern } from '../../services/sdx/gateway-patterns';
+import { assertEqual } from '../ioc/assert';
 
 interface GatewayPatternConfigRequest {
   pattern: string;
@@ -51,15 +53,18 @@ export class SDXController extends Controller {
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
-    return await GetConfigUsingPattern(ctx, body);
+    try {
+      return await GetConfigUsingPattern(ctx, body);
+    } catch (error) {
+      assertEqual(true, true, 'input', error.message);
+    }
   }
 
-  @Get()
+  @Get('/catalog')
   @OperationId('get-catalog')
   @Security('jwt', [])
   public async getCatalog(@Request() request: any): Promise<CatalogEntry[]> {
     const ctx = this.keystone.createContext(request);
-
     return await GetCatalog(ctx);
   }
 }
