@@ -139,6 +139,7 @@ async function evalConsumerPattern(
       gateway: consumer.gateway.name,
       ns_qualifier: `AP-C-REQ-${reqId}`,
       route_host: consumer.edgeServer.internal_endpoint,
+      provider_endpoint: `${provider.edgeServer.endpoint}`,
       route_path: `/${provider.locator}`,
       service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: `https://${provider.edgeServer.endpoint}`,
