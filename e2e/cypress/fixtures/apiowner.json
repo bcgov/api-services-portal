@@ -553,7 +553,8 @@
       "email": "janis@testmail.com",
       "accessRole": [
         "CredentialIssuer.Admin",
-        "Gateway.Manage"
+        "Gateway.Manage",
+        "Gateway.View"
       ]
     },
     "OldUser": {
