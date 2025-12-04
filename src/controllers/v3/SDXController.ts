@@ -28,7 +28,6 @@ import { GetConfigUsingPattern } from '../../services/sdx/gateway-patterns';
 
 interface GatewayPatternConfigRequest {
   pattern: string;
-  locator: string;
   parameters: any;
 }
 
