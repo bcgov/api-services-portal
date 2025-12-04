@@ -24,10 +24,13 @@ import {
 import { GatewayRoute } from './types';
 import { PublishResult } from './types-extra';
 import { CatalogEntry, GetCatalog } from '../../services/sdx/sdx-catalog';
-import {
-  GatewayPatternConfig,
-  GetConfigUsingPattern,
-} from '../../services/sdx/gateway-patterns';
+import { GetConfigUsingPattern } from '../../services/sdx/gateway-patterns';
+
+interface GatewayPatternConfigRequest {
+  pattern: string;
+  locator: string;
+  parameters: any;
+}
 
 @injectable()
 @Route('/sdx')
@@ -44,7 +47,7 @@ export class SDXController extends Controller {
   @Security('jwt', [])
   public async put(
     @Path() gatewayId: string,
-    @Body() body: GatewayPatternConfig,
+    @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
