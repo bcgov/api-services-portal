@@ -58,6 +58,12 @@ describe('Grant appropriate permissions to team members for client credential fl
     })
   })
 
+  it('Grant appropriate permissions to Janis (api owner)', () => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      na.editPermission(clientCredentials.Janis)
+    })
+  })
+
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
