@@ -1,4 +1,4 @@
-FROM cypress/included:12.17.4
+FROM cypress/included:13.17.0
 
 # Copy of the source for code coverage analysis
 WORKDIR /app
