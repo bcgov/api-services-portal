@@ -53,11 +53,7 @@ export class SDXController extends Controller {
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
-    try {
-      return await GetConfigUsingPattern(ctx, body);
-    } catch (error) {
-      assertEqual(true, true, 'input', error.message);
-    }
+    return await GetConfigUsingPattern(ctx, body);
   }
 
   @Get('/catalog')
