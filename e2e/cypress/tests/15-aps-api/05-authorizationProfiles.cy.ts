@@ -295,7 +295,7 @@ describe('Verify that client ID of deleted shared auth profile in IDP', () => {
     })
 
     it('Navigate to Clients', () => {
-        cy.contains('Clients').click()
+        cy.contains('Clients').click({ force: true })
     })
 
     it('Verify that the client id of deleted shared auth profile does not display', () => {
