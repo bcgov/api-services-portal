@@ -89,7 +89,7 @@ describe('Verify that Mark is unable to view Gateway summary', () => {
       cy.setAuthorizationToken(userSession)
       cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace, 'GET').then((res:any) => {
           expect(res.apiRes.status).to.be.equal(403)
-          expect(res.apiRes.body.message).to.be.contain('Missing authorization scope')
+          expect(res.apiRes.body.message).to.be.contain('Missing required scope')
       })
     })
   })
