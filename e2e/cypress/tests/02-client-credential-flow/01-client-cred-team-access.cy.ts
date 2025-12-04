@@ -59,6 +59,7 @@ describe('Grant appropriate permissions to team members for client credential fl
   })
 
   it('Grant appropriate permissions to Janis (api owner)', () => {
+    cy.visit(na.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       na.editPermission(clientCredentials.Janis)
     })
