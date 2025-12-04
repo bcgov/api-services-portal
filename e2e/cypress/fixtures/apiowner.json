@@ -78,6 +78,17 @@
         "CredentialIssuer.Admin"
       ]
     },
+    "Janis": {
+      "userName": "Janis Smith",
+      "email": "janis@testmail.com",
+      "accessRole": [
+        "CredentialIssuer.Admin",
+        "Gateway.Manage",
+        "Gateway.View",
+        "GatewayConfig.Publish",
+        "Access.Manage"
+      ]
+    },
     "jwtKeyPair": {
       "authProfile": {
         "name": "cy-jwt-kp-auth",
