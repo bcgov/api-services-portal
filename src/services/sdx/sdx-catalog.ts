@@ -110,6 +110,8 @@ export async function GetCatalog(ctx: any): Promise<CatalogEntry[]> {
       env.edgeServer = {
         host: edgeServer.host,
         dn: edgeServer.dn,
+        endpoint: edgeServer.endpoint,
+        internal_endpoint: edgeServer.internal_endpoint,
       };
     });
   await Promise.all(promises);
