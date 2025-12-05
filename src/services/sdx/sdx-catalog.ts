@@ -7,6 +7,7 @@ import { getGwaProductEnvironment } from '../workflow';
 import { dynamicallySetEnvironmentDetails } from '../keystone';
 import { LookupMemberOrganization } from './member-id';
 import { LookupEdgeServer } from './edge-servers';
+import { id } from 'date-fns/locale';
 
 export interface CatalogEntry {
   id: string;
@@ -28,6 +29,7 @@ export interface CatalogEntry {
     };
   };
   edgeServer: {
+    id: string;
     host: string;
     dn: string;
     endpoint: string;
@@ -108,6 +110,7 @@ export async function GetCatalog(ctx: any): Promise<CatalogEntry[]> {
         env.gateway.permissions.domains[0]
       );
       env.edgeServer = {
+        id: edgeServer.id,
         host: edgeServer.host,
         dn: edgeServer.dn,
         endpoint: edgeServer.endpoint,

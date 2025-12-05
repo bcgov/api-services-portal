@@ -171,6 +171,7 @@ async function evalProviderPattern(
       route_path: `/${provider.locator}`,
       service_name: `AP-P-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: upstreamUri,
+      edge_kid: `urn:ca:bc:sdx:edge:${provider.edgeServer.id}:0`,
     }
   );
   return result;
