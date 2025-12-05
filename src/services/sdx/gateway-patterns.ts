@@ -143,6 +143,7 @@ async function evalConsumerPattern(
       route_path: `/${provider.locator}`,
       service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: `https://${provider.edgeServer.endpoint}`,
+      edge_kid: `urn:ca:bc:sdx:edge:${consumer.edgeServer.id}:0`,
     }
   );
   return result;
