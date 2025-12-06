@@ -20,6 +20,7 @@ export interface CatalogEntry {
   organization: {
     name: string;
     orgUnit?: string;
+    trustJwksEndpoint?: string;
   };
   gateway: {
     name: string;
@@ -99,6 +100,7 @@ export async function GetCatalog(ctx: any): Promise<CatalogEntry[]> {
       ]
         .join('.')
         .toUpperCase();
+      env.organization.trustJwksEndpoint = member.trust_jwks_endpoint;
 
       const nsAttributes = await getNamespaceAttributes(svc, env.gateway.name);
       env.gateway.permissions = {

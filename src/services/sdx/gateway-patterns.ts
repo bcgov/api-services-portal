@@ -144,6 +144,7 @@ async function evalConsumerPattern(
       service_name: `AP-C-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: `https://${provider.edgeServer.endpoint}`,
       edge_kid: `urn:ca:bc:sdx:edge:${consumer.edgeServer.id}:0`,
+      trust_jwks_endpoint: 'http://localhost:8000/jwks', // TODO: update to route for real endpoint
     }
   );
   return result;
@@ -173,6 +174,7 @@ async function evalProviderPattern(
       service_name: `AP-P-REQ-${reqId}-${provider.product.name}`,
       upstream_uri: upstreamUri,
       edge_kid: `urn:ca:bc:sdx:edge:${provider.edgeServer.id}:0`,
+      trust_jwks_endpoint: 'http://localhost:8000/jwks', // TODO: update to route for real endpoint
     }
   );
   return result;
