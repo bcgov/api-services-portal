@@ -46,7 +46,8 @@ cat > "${CONFIG_PATH:-./config/default.json}" <<EOF
             "redis_timeout": 2000
         }
     },
-    "defaultDataPlane": "local.dataplane"
+    "defaultDataPlane": "local.dataplane",
+    "deckCLI": "${DECK_CLI}"
 }
 EOF
 

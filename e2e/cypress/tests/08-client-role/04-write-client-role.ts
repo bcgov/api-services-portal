@@ -106,7 +106,7 @@ describe('Access manager apply "Write" role and approves developer access reques
   })
 })
 
-describe('Update Kong plugin and verify that only only PUT and POST methods are allowed for Read role', () => {
+describe('Update Kong plugin and verify that only only PUT and POST methods are allowed for Write role', () => {
   beforeEach(() => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('common-testdata').as('common-testdata')
@@ -140,6 +140,7 @@ describe('Update Kong plugin and verify that only only PUT and POST methods are 
   })
 
   it('Make "GET" call and verify that Kong does not allow user to access the resources', () => {
+    cy.wait(4000)
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(404)
@@ -150,14 +151,14 @@ describe('Update Kong plugin and verify that only only PUT and POST methods are 
   it('Make "POST" call and verify that Kong allows user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca', 'POST').then((response) => {
       cy.log(response)
-      expect(response.status).to.be.equal(405)
+      expect(response.status).to.be.equal(200)
     })
   })
 
   it('Make "PUT" call and verify that Kong allows user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca', 'PUT').then((response) => {
       cy.log(response)
-      expect(response.status).to.be.equal(405)
+      expect(response.status).to.be.equal(200)
     })
   })
 

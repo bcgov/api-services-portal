@@ -1,6 +1,6 @@
 services:
 - name: a-service-for-orgassignment
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.orgassignment]
   port: 443
   protocol: https

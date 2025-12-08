@@ -1,6 +1,6 @@
 services:
 - name: a-service-for-newplatform-test
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.newplatform]
   port: 446
   protocol: https

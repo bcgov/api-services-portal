@@ -86,7 +86,7 @@ describe('Regenerate Credential for Client Credentials- Client ID/Secret', () =>
     })
   })
 
-  it('Regenrate credential client ID and Secret', () => {
+  it('Regenerate credential client ID and Secret', () => {
     cy.visit(myAccessPage.path)
     cy.get('@developer').then(({ clientCredentials }: any) => {
       myAccessPage.regenerateCredential(clientCredentials.clientIdSecret.product.environment, clientCredentials.clientIdSecret.application.name)

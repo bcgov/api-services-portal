@@ -1,6 +1,6 @@
 kind: GatewayService
 name: taken-service-name
-host: httpbin.org
+host: httpbun.com
 tags: [ns.service-avail]
 port: 446
 protocol: https

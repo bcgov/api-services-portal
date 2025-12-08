@@ -5,6 +5,10 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
+-- Disable pager to prevent hanging in non-interactive mode
+\pset pager off
+\set QUIET on
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
