@@ -19,3 +19,13 @@ export interface PublishResult {
   results?: string;
   error?: string;
 }
+
+/**
+ * @tsoaModel
+ */
+export class TsoaErrorWrapper {
+  inner: Error;
+  constructor(inner: Error) {
+    this.inner = inner;
+  }
+}

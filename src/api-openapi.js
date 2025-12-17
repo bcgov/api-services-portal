@@ -142,6 +142,13 @@ class ApiOpenapiApp {
         return res.status(422).json({
           message: 'Syntax Error Parsing JSON',
         });
+      } else if (err instanceof TsoaErrorWrapper) {
+        logger.error(err);
+        logger.error('Tsoa Error PATH: %s', req.path);
+        return res.status(400).json({
+          inner: `${err.inner}`,
+          message: `${err.inner.message}`,
+        });
       } else if (err instanceof BatchSyncException) {
         logger.error(err);
         logger.error('BatchSync PATH: %s', req.path);
