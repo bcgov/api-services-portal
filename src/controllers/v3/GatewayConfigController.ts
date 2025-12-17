@@ -14,12 +14,11 @@ import {
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { GetConfigUsingPattern } from '../../services/gateway-patterns/evaluator';
-import { TsoaErrorWrapper } from './types-extra';
+import { TsoaErrorWrapper } from '../types';
 
 interface GatewayPatternConfigRequest {
   pattern: string;
-  delete?: boolean;
-  parameters: any;
+  parameters: { [key: string]: string };
 }
 
 @injectable()
