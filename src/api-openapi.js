@@ -147,7 +147,6 @@ class ApiOpenapiApp {
         logger.error(err);
         logger.error('Tsoa Error PATH: %s', req.path);
         return res.status(400).json({
-          inner: `${err.inner}`,
           message: `${err.inner.message}`,
         });
       } else if (err instanceof BatchSyncException) {
