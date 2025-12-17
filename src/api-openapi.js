@@ -13,6 +13,7 @@ const { Register } = require('./controllers/ioc/registry');
 const { UnauthorizedError } = require('express-jwt');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
+const { TsoaErrorWrapper } = require('./controllers/v3/types-extra');
 
 class ApiOpenapiApp {
   constructor() {}

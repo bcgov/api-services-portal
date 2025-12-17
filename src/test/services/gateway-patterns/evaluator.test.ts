@@ -14,21 +14,23 @@ describe('Gateway Simple Pattern', function () {
 
     const result = await GetConfigUsingPattern(undefined, patternConfig);
 
-    const expected = [
-      {
-        kind: 'GatewayService',
-        name: 'sdx.test-service',
-        tags: ['ns.gw-12345.test-service'],
-        url: 'https://httpbun.com',
-        routes: [
-          {
-            name: 'sdx.test-service',
-            tags: ['ns.gw-12345.test-service'],
-            hosts: ['test-service.dev.api.gov.bc.ca'],
-          },
-        ],
-      },
-    ];
+    const expected = {
+      documents: [
+        {
+          kind: 'GatewayService',
+          name: 'sdx.test-service',
+          tags: ['ns.gw-12345.test-service'],
+          url: 'https://httpbun.com',
+          routes: [
+            {
+              name: 'sdx.test-service',
+              tags: ['ns.gw-12345.test-service'],
+              hosts: ['test-service.dev.api.gov.bc.ca'],
+            },
+          ],
+        },
+      ],
+    };
     expect(result).toStrictEqual(expected);
   });
 

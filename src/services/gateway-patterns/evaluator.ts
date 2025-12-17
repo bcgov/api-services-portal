@@ -17,7 +17,7 @@ export async function GetConfigUsingPattern(
   if (PATTERNS[inputs.pattern]) {
     const pattern = PATTERNS[inputs.pattern];
     expectRequiredParams(inputs.parameters, pattern.requiredParams);
-    return pattern.eval(inputs.parameters);
+    return { documents: pattern.eval(inputs.parameters) };
   } else {
     throw new Error(
       `GetConfigUsingPattern: unsupported pattern ${inputs.pattern}`
