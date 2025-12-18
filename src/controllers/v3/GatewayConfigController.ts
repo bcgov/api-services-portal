@@ -37,7 +37,6 @@ export class GatewayConfigController extends Controller {
   @Example<GatewayPatternConfigRequest>({
     pattern: 'simple-service.r1',
     parameters: {
-      gateway_id: 'gw-12345',
       service_name: 'my-service',
       service_url: 'https://httpbun.com',
     },
@@ -47,14 +46,11 @@ export class GatewayConfigController extends Controller {
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
-    if (body.parameters.gateway_id != gatewayId) {
-      throw new TsoaErrorWrapper(
-        new Error(
-          `gateway_id parameter ${body.parameters.gateway_id} does not match path gatewayId ${gatewayId}`
-        )
-      );
-    }
+    // always inject the gatewayId as a parameter
+    body.parameters.gateway_id = gatewayId;
+
     const ctx = this.keystone.createContext(request);
+
     try {
       return await GetConfigUsingPattern(ctx, body);
     } catch (error) {
