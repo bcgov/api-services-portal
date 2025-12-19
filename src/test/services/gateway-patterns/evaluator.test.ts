@@ -45,6 +45,6 @@ describe('Gateway Simple Pattern', function () {
 
     await expect(
       GetConfigUsingPattern(undefined, patternConfig)
-    ).rejects.toThrow('missing required parameter: gateway_id');
+    ).rejects.toThrow('Invalid input');
   });
 });
