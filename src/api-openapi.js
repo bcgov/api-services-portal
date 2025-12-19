@@ -118,11 +118,11 @@ class ApiOpenapiApp {
           err.message,
           err.fields
         );
-        logger.error('Validation Error: ', Object.keys(err));
+        logger.error('Validation Error: ', err);
         return res.status(422).json({
           code: 'validation_error',
           message: err?.message,
-          details: err?.fields,
+          fields: err?.fields,
         });
       } else if (err instanceof AssertionError) {
         // For some reason `message` is what the `stack` is normally
@@ -142,12 +142,6 @@ class ApiOpenapiApp {
         logger.error('Syntax Error PATH: %s', req.path);
         return res.status(422).json({
           message: 'Syntax Error Parsing JSON',
-        });
-      } else if (err instanceof TsoaErrorWrapper) {
-        logger.error(err);
-        logger.error('Tsoa Error PATH: %s', req.path);
-        return res.status(400).json({
-          message: `${err.inner.message}`,
         });
       } else if (err instanceof BatchSyncException) {
         logger.error(err);

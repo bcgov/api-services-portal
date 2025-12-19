@@ -40,7 +40,7 @@ interface UnauthorizedJSON {
 interface ValidateErrorJSON {
   code: 'validation_error';
   message: 'Invalid input';
-  details: { [name: string]: { message: string } };
+  fields: { [name: string]: { message: string } };
 }
 
 @injectable()
@@ -78,7 +78,7 @@ export class GatewayConfigController extends Controller {
   @Response<ValidateErrorJSON>(422, 'Validation Failed', {
     code: 'validation_error',
     message: 'Invalid input',
-    details: {
+    fields: {
       pattern: {
         message: 'unsupported pattern',
       },
