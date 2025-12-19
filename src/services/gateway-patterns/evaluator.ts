@@ -1,3 +1,4 @@
+import { FieldErrors, ValidateError } from 'tsoa';
 import { SimpleServicePattern } from './patterns/simple-service';
 
 const PATTERNS = {
@@ -19,8 +20,13 @@ export async function GetConfigUsingPattern(
     expectRequiredParams(inputs.parameters, pattern.requiredParams);
     return { documents: pattern.eval(inputs.parameters) };
   } else {
-    throw new Error(
-      `GetConfigUsingPattern: unsupported pattern ${inputs.pattern}`
+    throw new ValidateError(
+      {
+        [inputs.pattern]: {
+          message: 'unsupported pattern',
+        },
+      },
+      'Invalid input'
     );
   }
 }
@@ -29,9 +35,16 @@ function expectRequiredParams(
   provided: Record<string, string>,
   required: string[]
 ) {
+  const errors: FieldErrors = {};
+
   for (const param of required) {
     if (!provided[param]) {
-      throw new Error(`missing required parameter: ${param}`);
+      errors[param] = {
+        message: 'missing required parameter',
+      };
     }
+  }
+  if (Object.keys(errors).length > 0) {
+    throw new ValidateError(errors, 'Invalid input');
   }
 }

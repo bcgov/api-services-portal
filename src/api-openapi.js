@@ -13,7 +13,6 @@ const { Register } = require('./controllers/ioc/registry');
 const { UnauthorizedError } = require('express-jwt');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
-const { TsoaErrorWrapper } = require('./controllers/types');
 
 class ApiOpenapiApp {
   constructor() {}
@@ -119,9 +118,10 @@ class ApiOpenapiApp {
           err.message,
           err.fields
         );
-        logger.error('Validation Error', err);
+        logger.error('Validation Error: ', Object.keys(err));
         return res.status(422).json({
-          message: 'Validation Failed',
+          code: 'validation_error',
+          message: err?.message,
           details: err?.fields,
         });
       } else if (err instanceof AssertionError) {
