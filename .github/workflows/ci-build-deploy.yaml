@@ -371,6 +371,9 @@ jobs:
               value: 'API.Services.Portal@gov.bc.ca'
             EMAIL_HOST:
               value: 'apps.smtp.gov.bc.ca'
+            REFERENCE_DATA_BASE_URI:
+              value: 'https://sdx-beta-api-gov-bc-ca-lab.dev.api.gov.bc.ca/api/rd'
+
 
           readinessProbe:
             exec:
