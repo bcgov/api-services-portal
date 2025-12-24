@@ -1,3 +1,5 @@
+const OpenAPISpec = require('../lists/OpenAPISpec');
+
 const metadata = {
   Organization: {
     query: 'allOrganizations',
@@ -402,6 +404,76 @@ const metadata = {
         list: 'allOrganizationUnits',
         refKey: 'name',
       },
+    },
+  },
+  OpenAPISpec: {
+    query: 'allOpenAPISpecs',
+    refKey: 'ref',
+    compositeRefKey: ['title', 'version', 'namespace'],
+    sync: [
+      'ref',
+      'title',
+      'version',
+      'namespace',
+      'state',
+      'spec',
+      'description',
+      'operations',
+      'subsystem',
+    ],
+    transformations: {
+      subsystem: {
+        refKey: 'name',
+        name: 'connectOne',
+        list: 'allSubsystemsByNamespace',
+        compositeRefKey: ['name', 'namespace'],
+      },
+    },
+    example: {
+      ref: 'my-api-spec',
+      namespace: 'platform',
+      title: 'My API Spec',
+      description: 'Description of my API Spec',
+      version: '1.0.0',
+      operations: '{}',
+      spec: '{}',
+    },
+  },
+  RuntimeGroup: {
+    query: 'allRuntimeGroups',
+    refKey: 'name',
+    sync: [
+      'host',
+      'publicEndpoint',
+      'privateEndpoint',
+      'organization',
+      'namespace',
+    ],
+    transformations: {
+      namespace: { name: 'mapNamespace', update: false },
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    example: {
+      name: 'my-runtime-group',
+      namespace: 'platform',
+      host: 'runtime-group.my-domain.sdx',
+      publicEndpoint: '10.10.10.10:443',
+      privateEndpoint: '10.0.0.11:6443',
+    },
+  },
+  Subsystem: {
+    query: 'allSubsystems',
+    compositeRefKey: ['name', 'namespace'],
+    sync: ['name', 'namespace'],
+    transformations: {
+      namespace: { name: 'mapNamespace', update: false },
+    },
+    example: {
+      name: 'my-new-subsystem',
     },
   },
   Product: {

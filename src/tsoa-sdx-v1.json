@@ -1,0 +1,57 @@
+{
+  "entryFile": "server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": [
+    "controllers/sdx/v1/*Controller.ts"
+  ],
+  "spec": {
+    "name": "SDX Member API",
+    "version": "1.0.0",
+    "description": "",
+    "outputDirectory": "controllers/sdx/v1",
+    "specVersion": 3,
+    "basePath": "/ds/api/sdx/v1",
+    "specFileBaseName": "openapi",
+    "yaml": true,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "oauth2",
+        "description": "Authz Client Credential",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "flow": "application",
+        "tokenUrl": "https://token_endpoint"
+      },
+      "portal": {
+        "type": "http",
+        "description": "Authz Portal Login",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "openid": {
+        "type": "openIdConnect",
+        "description": "OIDC Login",
+        "openIdConnectUrl": "https://well_known_endpoint"
+      }
+    },
+    "tags": [
+      {
+        "name": "Catalog",
+        "description": "Discover all the great services available on BC's Secure Data Exchange"
+      },
+      {
+        "name": "Administration",
+        "description": "Administer your gateway services and subsystems"
+      }
+    ]
+  },
+  "routes": {
+    "routesDir": "controllers/sdx/v1",
+    "basePath": "/ds/api/sdx/v1",
+    "iocModule": "controllers/ioc",
+    "authenticationModule": "./auth/auth-tsoa"
+  },
+  "ignore": [
+    "**/node_modules/**"
+  ]
+}

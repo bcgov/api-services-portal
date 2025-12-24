@@ -87,6 +87,31 @@ class ApiOpenapiApp {
     );
   }
 
+  prepareSDXV1(app) {
+    const {
+      RegisterRoutes: SDXV1Register,
+    } = require('./controllers/sdx/v1/routes');
+    const specFile = fs.realpathSync('controllers/sdx/v1/openapi.yaml');
+    const specObject = YAML.load(fs.readFileSync(specFile));
+
+    specObject.components.securitySchemes.jwt.flows.clientCredentials.tokenUrl = `${process.env.OIDC_ISSUER}/protocol/openid-connect/token`;
+
+    specObject.components.securitySchemes.openid.openIdConnectUrl = `${process.env.OIDC_ISSUER}/.well-known/openid-configuration`;
+
+    SDXV1Register(app);
+
+    app.get('/ds/api/sdx/v1/openapi.yaml', (req, res) => {
+      res.setHeader('Content-Type', 'application/yaml');
+      res.send(YAML.dump(specObject));
+    });
+
+    app.use(
+      '/ds/api/sdx/v1/console',
+      swaggerUi.serveFiles(specObject, options),
+      swaggerUi.setup(specObject)
+    );
+  }
+
   prepareMiddleware({ keystone }) {
     const logger = Logger('dsapi');
 
@@ -98,6 +123,7 @@ class ApiOpenapiApp {
     this.prepareV3(app);
     this.prepareV2(app);
     this.prepareV1(app);
+    this.prepareSDXV1(app);
 
     // RFC 8631 service-desc link relation
     // https://datatracker.ietf.org/doc/html/rfc8631

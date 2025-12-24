@@ -272,6 +272,64 @@ export interface Application {
 /**
  * @tsoaModel
  * @example {
+ *   "ref": "my-api-spec",
+ *   "namespace": "platform",
+ *   "title": "My API Spec",
+ *   "description": "Description of my API Spec",
+ *   "version": "1.0.0",
+ *   "operations": "{}",
+ *   "spec": "{}"
+ * }
+ */  
+export interface OpenAPISpec {
+  ref?: string; // Primary Key
+  title?: string;
+  version?: string;
+  gatewayId?: string;
+  state?: string;
+  spec?: string;
+  description?: string;
+  operations?: string;
+  subsystem?: undefinedRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "name": "my-runtime-group",
+ *   "namespace": "platform",
+ *   "host": "runtime-group.my-domain.sdx",
+ *   "publicEndpoint": "10.10.10.10:443",
+ *   "privateEndpoint": "10.0.0.11:6443"
+ * }
+ */  
+export interface RuntimeGroup {
+  name?: string; // Primary Key
+  host?: string;
+  publicEndpoint?: string;
+  privateEndpoint?: string;
+  gatewayId?: string;
+  organization?: OrganizationRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "name": "my-new-subsystem"
+ * }
+ */  
+export interface Subsystem {
+  undefined?: string; // Primary Key
+  name?: string;
+  gatewayId?: string;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
  *   "name": "my-new-product",
  *   "appId": "000000000000",
  *   "environments": [

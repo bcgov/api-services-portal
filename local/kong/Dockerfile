@@ -1,9 +1,9 @@
-ARG KONG_VERSION="3.9.0"
+ARG KONG_VERSION="3.9.1"
 FROM docker.io/kong:${KONG_VERSION}
 
 USER root
 
-RUN apt-get update && apt-get -y install unzip && apt-get clean
+RUN apt-get update && apt-get -y install curl unzip && apt-get clean
 
 RUN git clone https://github.com/bcgov/kong-oss-plugins.git \
   && cd kong-oss-plugins \
