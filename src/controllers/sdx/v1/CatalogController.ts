@@ -41,7 +41,7 @@ export class CatalogController extends Controller {
    * Retrieve the list of services available in the SDX service catalog.
    */
   @Get('/services')
-  @OperationId('list-service-catalog')
+  @OperationId('listServiceCatalog')
   @Security('jwt', [])
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
@@ -85,7 +85,7 @@ export class CatalogController extends Controller {
    * Retrieve the Service Details
    */
   @Get('/services/{id}')
-  @OperationId('get-oas-service')
+  @OperationId('getOASService')
   @Security('jwt', [])
   public async getOASService(
     @Path('id') id: string,
@@ -106,7 +106,7 @@ export class CatalogController extends Controller {
    * Retrieve the Service OpenAPI Specification in JSON format
    */
   @Get('/services/{id}/oas-spec.json')
-  @OperationId('get-oas-service-spec')
+  @OperationId('getOASServiceSpec')
   @Security('jwt', [])
   public async getOASServiceSpec(
     @Path('id') id: string,
@@ -116,6 +116,6 @@ export class CatalogController extends Controller {
 
     const entry = await GetCatalogById(ctx, id, true);
 
-    return JSON.stringify(YAML.parse(entry.spec));
+    return YAML.parse(entry.spec);
   }
 }

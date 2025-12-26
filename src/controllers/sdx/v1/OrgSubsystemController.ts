@@ -1,7 +1,6 @@
 import {
   Controller,
   Request,
-  Response,
   OperationId,
   Get,
   Put,
@@ -10,13 +9,9 @@ import {
   Security,
   Body,
   Tags,
-  Example,
-  ValidateError,
-  SuccessResponse,
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { GetCatalog } from '../../../services/gateway-patterns/catalog';
 import { SDXSubsystem, SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import {
@@ -26,7 +21,6 @@ import {
   replaceKey,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
-import { Subsystem } from '@/controllers/v3/types';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -42,7 +36,7 @@ export class OrgSubsystemController extends Controller {
    * Create a new subsystem of an organization
    */
   @Put()
-  @OperationId('create-subsystem')
+  @OperationId('createSubsystem')
   @Security('jwt', [])
   public async createSubsystem(
     @Path() org: string,
@@ -65,7 +59,7 @@ export class OrgSubsystemController extends Controller {
    * Retrieve the list of subsystems associated with a gateway
    */
   @Get()
-  @OperationId('list-gateway-subsystems')
+  @OperationId('listSubsystems')
   @Security('jwt', [])
   public async listSubsystems(
     @Path() org: string,

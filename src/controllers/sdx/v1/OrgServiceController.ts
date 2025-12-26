@@ -10,7 +10,6 @@ import {
   Tags,
   FormField,
   UploadedFile,
-  SuccessResponse,
 } from 'tsoa';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
@@ -40,7 +39,7 @@ export class GatewayServiceController extends Controller {
    * Create a new service for an organization
    */
   @Put()
-  @OperationId('create-oas-service')
+  @OperationId('createOASService')
   @Security('jwt', [])
   public async createOASService(
     @Path() org: string,
@@ -70,7 +69,7 @@ export class GatewayServiceController extends Controller {
    * Retrieve the list of oas-services associated with an organization
    */
   @Get()
-  @OperationId('list-gateway-oas-services')
+  @OperationId('listOASServices')
   @Security('jwt', [])
   public async listOASServices(
     @Path() org: string,
@@ -90,9 +89,9 @@ export class GatewayServiceController extends Controller {
    * Retrieve an oas-services associated with an organization
    */
   @Get('/{id}')
-  @OperationId('get-gateway-oas-service')
+  @OperationId('getOASService')
   @Security('jwt', [])
-  public async getOASServices(
+  public async getOASService(
     @Path('id') id: string,
     @Path() org: string,
     @Request() request: any
@@ -114,7 +113,7 @@ export class GatewayServiceController extends Controller {
    * Retrieve the Service OpenAPI Specification in JSON format
    */
   @Get('/{id}/oas-spec.json')
-  @OperationId('get-gateway-oas-service-spec')
+  @OperationId('getOASServiceSpec')
   @Security('jwt', [])
   public async getOASServiceSpec(
     @Path('id') id: string,
@@ -132,6 +131,6 @@ export class GatewayServiceController extends Controller {
       'Not authorized to access this service'
     );
 
-    return JSON.stringify(YAML.parse(entry.spec));
+    return YAML.parse(entry.spec);
   }
 }

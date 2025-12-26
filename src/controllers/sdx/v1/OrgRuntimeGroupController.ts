@@ -1,7 +1,6 @@
 import {
   Controller,
   Request,
-  Response,
   OperationId,
   Get,
   Put,
@@ -10,20 +9,15 @@ import {
   Security,
   Body,
   Tags,
-  Example,
-  ValidateError,
-  SuccessResponse,
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { GetCatalog } from '../../../services/gateway-patterns/catalog';
 import { RuntimeGroupInput, SDXRuntimeGroup } from './types';
 import { BatchResult } from '../../../batch/types';
 import {
   getRecords,
   removeEmpty,
   removeKeys,
-  replaceKey,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
 import { RuntimeGroup } from '@/controllers/v3/types';
@@ -42,7 +36,7 @@ export class RuntimeGroupController extends Controller {
    * Create a new runtime group for an organization
    */
   @Put()
-  @OperationId('create-org-runtime-group')
+  @OperationId('createRuntimeGroup')
   @Security('jwt', [])
   public async createRuntimeGroup(
     @Path() org: string,
@@ -68,7 +62,7 @@ export class RuntimeGroupController extends Controller {
    * Retrieve the list of runtime groups associated with an organization
    */
   @Get()
-  @OperationId('list-org-runtime-groups')
+  @OperationId('listRuntimeGroups')
   @Security('jwt', [])
   public async listRuntimeGroups(
     @Path() org: string,

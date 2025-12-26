@@ -32,6 +32,13 @@ interface GatewayPatternConfigRequest {
   parameters: { [key: string]: string };
 }
 
+/**
+ * @description Unauthorized Access
+ * @example {
+ *   code: 'invalid_token',
+ *   message: 'Missing authorization scope. (403)',
+ * }
+ */
 interface UnauthorizedJSON {
   code: 'invalid_token';
   message: 'Missing authorization scope. (403)';
@@ -45,7 +52,7 @@ interface ValidateErrorJSON {
 
 @injectable()
 @Route('/gateways/{gatewayId}')
-@Tags('Gateway Management')
+@Tags('Gateway Admin')
 export class GatewayConfigController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -59,7 +66,7 @@ export class GatewayConfigController extends Controller {
    * Generate gateway config from pre-defined patterns
    */
   @Put('/pattern')
-  @OperationId('generate-config-from-pattern')
+  @OperationId('generateGatewayConfigFromPattern')
   @Security('jwt', ['GatewayConfig.Publish'])
   @SuccessResponse('200', 'OK')
   @Example<any>({
@@ -71,10 +78,7 @@ export class GatewayConfigController extends Controller {
       },
     ],
   })
-  @Response<UnauthorizedJSON>(401, 'Unauthorized', {
-    code: 'invalid_token',
-    message: 'Missing authorization scope. (403)',
-  })
+  @Response<UnauthorizedJSON>(401)
   @Response<ValidateErrorJSON>(422, 'Validation Failed', {
     code: 'validation_error',
     message: 'Invalid input',

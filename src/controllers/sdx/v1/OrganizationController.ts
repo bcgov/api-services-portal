@@ -38,11 +38,9 @@ import {
   CreateNamespaceArgs,
 } from '../../../services/workflow/create-namespace';
 
-const logger = Logger('controllers.SDXOrganization');
-
 @injectable()
 @Route('/organizations')
-@Tags('Organization Administration')
+@Tags('Organization Admin')
 export class OrganizationController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -157,24 +155,3 @@ export class OrganizationController extends Controller {
       .map((o) => parseBlobString(o));
   }
 }
-
-const createNS = gql`
-  mutation CreateNamespace(
-    $name: String
-    $displayName: String
-    $org: String
-    $domains: String
-    $dataPlane: String
-  ) {
-    createNamespace(
-      name: $name
-      displayName: $displayName
-      org: $org
-      domains: $domains
-      dataPlane: $dataPlane
-    ) {
-      name
-      displayName
-    }
-  }
-`;
