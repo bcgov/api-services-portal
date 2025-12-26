@@ -23,7 +23,8 @@
         "tokenUrl": "https://token_endpoint",
         "scopes": {
           "Namespace.Manage": "Manage namespaces",
-          "GatewayConfig.Publish": "Publish gateway configurations"
+          "GatewayConfig.Publish": "Publish gateway configurations",
+          "Namespace.Assign": "Organization-level scope for managing gateways"
         }
       },
       "portal": {
@@ -44,24 +45,24 @@
         "description": "Discover all the great services available on BC's Secure Data Exchange"
       },
       {
-        "name": "Organization Administration",
+        "name": "Gateway Admin",
+        "description": "Gateway configuration"
+      },
+      {
+        "name": "Organization Admin",
         "description": "Organization management and activity"
-      },
-      {
-        "name": "Subsystems",
-        "description": "Organization subsystems"
-      },
-      {
-        "name": "Services",
-        "description": "Organization system services"
       },
       {
         "name": "Runtime Groups",
         "description": "Organization runtime groups (edge servers)"
       },
       {
-        "name": "Gateway Management",
-        "description": "Gateway configuration"
+        "name": "Services",
+        "description": "Organization system services"
+      },
+      {
+        "name": "Subsystems",
+        "description": "Organization subsystems"
       }
     ]
   },
