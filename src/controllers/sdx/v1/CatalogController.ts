@@ -15,8 +15,10 @@ import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
   GetCatalog,
-  IServiceCatalogEntry,
+  GetCatalogById,
 } from '../../../services/gateway-patterns/catalog';
+import { ServiceCatalogEntry } from './types';
+import YAML from 'yaml';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -42,7 +44,7 @@ export class CatalogController extends Controller {
   @OperationId('list-service-catalog')
   @Security('jwt', [])
   @SuccessResponse('200', 'OK')
-  @Example<IServiceCatalogEntry[]>([
+  @Example<ServiceCatalogEntry[]>([
     {
       id: 'oas-service-123',
       title: 'Sample OAS Service',
@@ -74,7 +76,7 @@ export class CatalogController extends Controller {
   })
   public async listCatalog(
     @Request() request: any
-  ): Promise<IServiceCatalogEntry[]> {
+  ): Promise<ServiceCatalogEntry[]> {
     const ctx = this.keystone.createContext(request);
     return await GetCatalog(ctx);
   }
@@ -88,7 +90,7 @@ export class CatalogController extends Controller {
   public async getOASService(
     @Path('id') id: string,
     @Request() request: any
-  ): Promise<any> {
+  ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
 
     const batchClause = {
@@ -101,9 +103,9 @@ export class CatalogController extends Controller {
   }
 
   /**
-   * Retrieve the Service OpenAPI Specification in YAML format
+   * Retrieve the Service OpenAPI Specification in JSON format
    */
-  @Get('/services/{id}/oas-spec')
+  @Get('/services/{id}/oas-spec.json')
   @OperationId('get-oas-service-spec')
   @Security('jwt', [])
   public async getOASServiceSpec(
@@ -112,14 +114,8 @@ export class CatalogController extends Controller {
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
 
-    const batchClause = {
-      query: '$id: String',
-      clause: '{ name: $id }',
-      variables: { id },
-    };
-    const entry = await GetCatalog(ctx, true, batchClause);
+    const entry = await GetCatalogById(ctx, id, true);
 
-    this.setHeader('Content-Type', 'application/yaml');
-    return entry[0].spec;
+    return JSON.stringify(YAML.parse(entry.spec));
   }
 }

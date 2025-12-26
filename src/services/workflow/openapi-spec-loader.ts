@@ -4,6 +4,7 @@ import { ValidateError } from 'tsoa';
 import YAML from 'yaml';
 import { getRecord, getRecordById, getRecords } from '../../batch/feed-worker';
 import { Subsystem } from '../keystone/types';
+import { IServiceOperation } from '../gateway-patterns/catalog';
 
 const logger = Logger('wf.OASLoader');
 
@@ -81,7 +82,7 @@ function parseSpec(spec: any) {
       });
     });
 
-  const flattenedOperations = [];
+  const flattenedOperations: IServiceOperation[] = [];
   if (operations) {
     for (const opList of operations) {
       for (const op of opList) {

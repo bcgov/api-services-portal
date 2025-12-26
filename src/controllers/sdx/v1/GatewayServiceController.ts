@@ -12,14 +12,19 @@ import {
   UploadedFile,
   SuccessResponse,
 } from 'tsoa';
+import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { ServiceCatalogEntry } from './types';
 import { BatchResult } from '../../../batch/types';
 import { syncRecordsThrowErrors } from '../../../batch/feed-worker';
 import { LoadOpenAPISpec } from '../../../services/workflow/openapi-spec-loader';
-import { GetCatalog } from '../../../services/gateway-patterns/catalog';
+import {
+  GetCatalog,
+  GetCatalogById,
+} from '../../../services/gateway-patterns/catalog';
 import { BackfillSubsystemDetails } from '../../../services/gateway-patterns/runtime-group';
+import YAML from 'yaml';
 
 @injectable()
 @Route('/organizations/{org}/oas-services')
@@ -94,19 +99,21 @@ export class GatewayServiceController extends Controller {
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
 
-    const batchClause = {
-      query: '$id: String,$org: String',
-      clause: '{ name: $id, organization: { name: $org } }',
-      variables: { id, org },
-    };
-    const entry = await GetCatalog(ctx, false, batchClause);
-    return await BackfillSubsystemDetails(ctx, entry[0]);
+    const entry = await GetCatalogById(ctx, id, false);
+    assertEqual(
+      entry && entry.subsystem.organization.name === org,
+      true,
+      'organization',
+      'Not authorized to access this service'
+    );
+
+    return await BackfillSubsystemDetails(ctx, entry);
   }
 
   /**
-   * Retrieve the Service OpenAPI Specification in YAML format
+   * Retrieve the Service OpenAPI Specification in JSON format
    */
-  @Get('/{id}/oas-spec')
+  @Get('/{id}/oas-spec.json')
   @OperationId('get-gateway-oas-service-spec')
   @Security('jwt', [])
   public async getOASServiceSpec(
@@ -116,14 +123,15 @@ export class GatewayServiceController extends Controller {
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
 
-    const batchClause = {
-      query: '$id: String,$org: String',
-      clause: '{ name: $id, organization: { name: $org } }',
-      variables: { id, org },
-    };
-    const entry = await GetCatalog(ctx, true, batchClause);
+    const entry = await GetCatalogById(ctx, id, true);
 
-    this.setHeader('Content-Type', 'application/yaml');
-    return entry[0].spec;
+    assertEqual(
+      entry && entry.subsystem.organization.name === org,
+      true,
+      'organization',
+      'Not authorized to access this service'
+    );
+
+    return JSON.stringify(YAML.parse(entry.spec));
   }
 }

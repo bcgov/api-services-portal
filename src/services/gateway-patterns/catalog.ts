@@ -51,6 +51,19 @@ export interface IServiceCatalogEntry {
   };
 }
 
+export async function GetCatalogById(
+  ctx: any,
+  id: string,
+  includeSpec: boolean = false
+): Promise<IServiceCatalogEntry> {
+  const batchClause = {
+    query: '$name: String',
+    clause: '{ name: $name }',
+    variables: { name: id },
+  };
+  return (await GetCatalog(ctx, includeSpec, batchClause))[0];
+}
+
 export async function GetCatalog(
   ctx: any,
   includeSpec: boolean = false,
