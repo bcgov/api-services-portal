@@ -119,29 +119,31 @@ export class GroupAccessService {
         orgEnabled
       )
     ) {
-      // build the policies if they do not exist
-      await this.buildGroupHierarchyIfMissing(org, orgUnit);
+      if (orgUnit) {
+        // build the policies if they do not exist
+        await this.buildGroupHierarchyIfMissing(org, orgUnit);
 
-      const access = buildGroupAccess(
-        orgUnit,
-        `/ca.bc.gov/${org}`,
-        'namespace',
-        namespace
-      );
+        const access = buildGroupAccess(
+          orgUnit,
+          `/ca.bc.gov/${org}`,
+          'namespace',
+          namespace
+        );
 
-      for (const groupRole of access.roles) {
-        const parent = access.parent ? access.parent : '';
-        const orgGroup: OrganizationGroup = {
-          name: access.name,
-          parent: `/${groupRole.name}${parent}`,
-        };
+        for (const groupRole of access.roles) {
+          const parent = access.parent ? access.parent : '';
+          const orgGroup: OrganizationGroup = {
+            name: access.name,
+            parent: `/${groupRole.name}${parent}`,
+          };
 
-        for (const perm of groupRole.permissions) {
-          await this.orgGroupService.createOrUpdateGroupPermission(
-            orgGroup,
-            perm.resource,
-            perm.scopes
-          );
+          for (const perm of groupRole.permissions) {
+            await this.orgGroupService.createOrUpdateGroupPermission(
+              orgGroup,
+              perm.resource,
+              perm.scopes
+            );
+          }
         }
       }
       return true;

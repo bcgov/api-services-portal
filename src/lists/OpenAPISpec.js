@@ -1,10 +1,16 @@
 const { Select, Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { LoadOpenAPISpec } = require('../services/workflow/openapi-spec-loader');
+const { newID } = require('../services/identifiers');
 
 module.exports = {
   fields: {
     ref: {
+      type: Text,
+      isRequired: true,
+      isUnique: true,
+      access: { update: false },
+    },
+    name: {
       type: Text,
       isRequired: true,
       isUnique: true,
@@ -15,6 +21,7 @@ module.exports = {
       isRequired: true,
       access: { update: false },
     },
+    organization: { type: Relationship, ref: 'Organization' },
     state: {
       type: Select,
       emptyOption: false,
@@ -36,6 +43,10 @@ module.exports = {
       isRequired: true,
       access: { update: false },
     },
+    summary: {
+      type: Text,
+      isRequired: true,
+    },
     description: {
       type: Text,
       isRequired: true,
@@ -47,7 +58,6 @@ module.exports = {
     spec: {
       type: Text,
       isRequired: true,
-      access: { update: false },
     },
     subsystem: {
       type: Relationship,
@@ -58,20 +68,11 @@ module.exports = {
     },
   },
   hooks: {
-    resolveInput: async function ({
-      operation,
-      existingItem,
-      originalInput,
-      resolvedData,
-      context,
-      listKey,
-      fieldPath, // Field hooks only
-    }) {
+    resolveInput: async function ({ operation, resolvedData }) {
       if (operation === 'create') {
-        return await LoadOpenAPISpec(context, resolvedData);
-      } else {
-        return resolvedData;
+        resolvedData.name = newID(20);
       }
+      return resolvedData;
     },
   },
   access: EnforcementPoint,

@@ -20,7 +20,11 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "flow": "application",
-        "tokenUrl": "https://token_endpoint"
+        "tokenUrl": "https://token_endpoint",
+        "scopes": {
+          "Namespace.Manage": "Manage namespaces",
+          "GatewayConfig.Publish": "Publish gateway configurations"
+        }
       },
       "portal": {
         "type": "http",
@@ -40,8 +44,24 @@
         "description": "Discover all the great services available on BC's Secure Data Exchange"
       },
       {
-        "name": "Administration",
-        "description": "Administer your gateway services and subsystems"
+        "name": "Organization Administration",
+        "description": "Organization management and activity"
+      },
+      {
+        "name": "Subsystems",
+        "description": "Organization subsystems"
+      },
+      {
+        "name": "Services",
+        "description": "Organization system services"
+      },
+      {
+        "name": "Runtime Groups",
+        "description": "Organization runtime groups (edge servers)"
+      },
+      {
+        "name": "Gateway Management",
+        "description": "Gateway configuration"
       }
     ]
   },

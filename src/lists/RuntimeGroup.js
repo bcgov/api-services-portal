@@ -19,12 +19,17 @@ module.exports = {
       isRequired: true,
       access: { update: false },
     },
+    organization: { type: Relationship, ref: 'Organization' },
     host: {
       type: Text,
       isRequired: true,
       isUnique: true,
     },
-    organization: { type: Relationship, ref: 'Organization' },
+    hostedOrganizations: {
+      type: Relationship,
+      ref: 'Organization',
+      many: true,
+    },
     publicEndpoint: {
       type: Text,
       isRequired: false,
@@ -37,16 +42,7 @@ module.exports = {
   access: EnforcementPoint,
   plugins: [atTracking()],
   hooks: {
-    resolveInput: async function ({
-      operation,
-      existingItem,
-      originalInput,
-      resolvedData,
-      context,
-      listKey,
-      fieldPath, // Field hooks only
-    }) {
-      // if creating, create a new Gateway for it
+    resolveInput: async function ({ operation, resolvedData }) {
       if (operation !== 'create') {
         return resolvedData;
       }

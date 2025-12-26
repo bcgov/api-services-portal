@@ -158,18 +158,28 @@ export class NamespaceService {
         (group) =>
           'org' in group.attributes && group.attributes['org'][0] === org
       )
-      .map((group) => ({
-        name: group.name,
-        orgUnit: group.attributes['org-unit'][0],
-        enabled:
-          'org-enabled' in group.attributes
-            ? group.attributes['org-enabled'][0] === 'true'
-            : false,
-        updatedAt:
-          'org-updated-at' in group.attributes
-            ? Number(group.attributes['org-updated-at'].pop())
-            : 0,
-      }));
+      .map(
+        (group) =>
+          ({
+            name: group.name,
+            orgUnit:
+              'org-unit' in group.attributes
+                ? group.attributes['org-unit'][0]
+                : undefined,
+            enabled:
+              'org-enabled' in group.attributes
+                ? group.attributes['org-enabled'][0] === 'true'
+                : false,
+            permDomains:
+              'perm-domains' in group.attributes
+                ? group.attributes['perm-domains']
+                : [],
+            updatedAt:
+              'org-updated-at' in group.attributes
+                ? Number(group.attributes['org-updated-at'].pop())
+                : 0,
+          } as OrgNamespace)
+      );
     logger.debug('[listAssignedNamespaces] [%s] Result %j', org, matches);
     return matches;
   }
@@ -177,7 +187,11 @@ export class NamespaceService {
   async getNamespaceOrganizationDetails(ns: string): Promise<OrgNamespace> {
     const nsGroup = await this.groupService.findByName('ns', ns, false);
 
-    if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+    if (
+      nsGroup &&
+      'org' in nsGroup.attributes &&
+      'org-unit' in nsGroup.attributes
+    ) {
       return {
         name: nsGroup.attributes['org'].pop(),
         orgUnit: nsGroup.attributes['org-unit'].pop(),

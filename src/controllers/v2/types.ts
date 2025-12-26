@@ -272,6 +272,67 @@ export interface Application {
 /**
  * @tsoaModel
  * @example {
+ *   "ref": "my-api-spec",
+ *   "title": "My API Spec",
+ *   "description": "Description of my API Spec",
+ *   "version": "1.0.0",
+ *   "operations": "{}",
+ *   "spec": "{}"
+ * }
+ */  
+export interface OpenAPISpec {
+  name?: string; // Primary Key
+  ref?: string;
+  title?: string;
+  version?: string;
+  state?: string;
+  spec?: string;
+  summary?: string;
+  description?: string;
+  operations?: string;
+  namespace?: string;
+  subsystem?: SubsystemRefID;
+  organization?: OrganizationRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "name": "my-runtime-group",
+ *   "namespace": "gw-abc",
+ *   "host": "runtime-group.my-domain.sdx",
+ *   "publicEndpoint": "10.10.10.10:443",
+ *   "privateEndpoint": "10.0.0.11:6443"
+ * }
+ */  
+export interface RuntimeGroup {
+  name?: string; // Primary Key
+  host?: string;
+  publicEndpoint?: string;
+  privateEndpoint?: string;
+  namespace?: string;
+  organization?: OrganizationRefID;
+  hostedOrganizations?: OrganizationRefID[];
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "name": "my-new-subsystem"
+ * }
+ */  
+export interface Subsystem {
+  name?: string;
+  namespace?: string;
+  organization?: OrganizationRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
  *   "name": "my-new-product",
  *   "appId": "000000000000",
  *   "environments": [
@@ -585,6 +646,11 @@ export type OrganizationRefID = string
  * @tsoaModel
  */  
 export type OrganizationUnitRefID = string
+
+/**
+ * @tsoaModel
+ */  
+export type SubsystemRefID = string
 
 /**
  * @tsoaModel

@@ -1,5 +1,15 @@
 ID,matchOneOfBaseQueryName,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchOneOfFieldKey,matchNotOneOfFieldKey,matchUserNS,inRole,matchOneOfScope,matchOneOfRole,result,filters
 ,,,,,"update,create,delete",,,,aps-admin,,,allow,
+Org Admin,,,RuntimeGroup,read,,,,,,,"portal-user",allow,
+Org Admin,,,RuntimeGroup,create,,,,,portal-owner,,,allow,
+Org Admin,,,RuntimeGroup,,"update,delete",,,,portal-owner,,,allow,
+Org Admin,,,Subsystem,read,,,,,,,"portal-user",allow,
+Org Admin,,,Subsystem,create,,,,,portal-user,,,allow,
+Org Admin,,,Subsystem,,"update,delete",,,,portal-user,,,allow,
+Org Admin,,,OpenAPISpec,read,,,,,portal-user,,,allow,
+Org Admin,,,OpenAPISpec,create,,,,,portal-user,,,allow,
+Org Admin,,,OpenAPISpec,,"update,delete",,,,portal-user,,,allow,
+
 ACCESS MANAGER,,,AccessRequest,update,,"isApproved,isIssued",,,access-manager,,,allow,
 ACCESS MANAGER,,,AccessRequest,,"create,read","isApproved,isIssued",,,access-manager,,,allow,
 ACCESS MANAGER,,,AccessRequest,read,,,,,access-manager,,,allow,
@@ -118,18 +128,6 @@ API Owner Role Rules,,,Product,update,,namespace,,,,,,deny,
 API Owner Role Rules,,,Product,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Product,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Product,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,Subsystem,update,,namespace,,,,,,deny,
-API Owner Role Rules,,,Subsystem,read,,,,,,,"api-owner,provider-user",allow,
-API Owner Role Rules,,,Subsystem,create,,,,,api-owner,,,allow,
-API Owner Role Rules,,,Subsystem,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,OpenAPISpec,update,,namespace,,,,,,deny,
-API Owner Role Rules,,,OpenAPISpec,read,,,,,,,"api-owner,provider-user",allow,
-API Owner Role Rules,,,OpenAPISpec,create,,,,,api-owner,,,allow,
-API Owner Role Rules,,,OpenAPISpec,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,RuntimeGroup,update,,namespace,,,,,,deny,
-API Owner Role Rules,,,RuntimeGroup,read,,,,,,,"api-owner,provider-user",allow,
-API Owner Role Rules,,,RuntimeGroup,create,,,,,api-owner,,,allow,
-API Owner Role Rules,,,RuntimeGroup,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,read,,,,,,,"api-owner,provider-user",allow,
@@ -224,9 +222,10 @@ API Owner Role Rules,,allGatewayPluginsByNamespace,,,,,,,,,"api-owner,provider-u
 API Owner Role Rules,,allGatewayServiceMetricsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allSubsystemsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-API Owner Role Rules,,allOpenAPISpecsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allOpenAPISpecsByNamespace,,,,,,,,,"api-owner,provider-user,config-publisher",allow,filterBySubsystemNamespace
+API Owner Role Rules,,allOpenAPISpecs,,,,,,,,,"api-owner,provider-user,config-publisher",allow
 Portal User or Guest,,allProductsByNamespace,,,,,,,,,portal-user,allow,filterByUserNS
 Portal User or Guest,,allSubsystemsByNamespace,,,,,,,,,portal-user,allow,filterByUserNS
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic

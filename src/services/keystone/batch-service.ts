@@ -241,6 +241,12 @@ export class BatchService {
       'Invalid key'
     );
 
+    assert.strictEqual(
+      typeof refKey != 'undefined' && refKey != null,
+      true,
+      'Undefined refKey'
+    );
+
     const refKeys = refKey.split('.');
     if (refKeys.length == 2) {
       return this.lookupByChildItem(query, refKeys[0], refKeys[1], eid, fields);

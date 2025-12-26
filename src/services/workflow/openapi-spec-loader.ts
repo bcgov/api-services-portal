@@ -2,15 +2,15 @@ import { OpenAPISpec } from '@/controllers/v3/types';
 import { Logger } from '../../logger';
 import { ValidateError } from 'tsoa';
 import YAML from 'yaml';
+import { getRecord, getRecordById, getRecords } from '../../batch/feed-worker';
+import { Subsystem } from '../keystone/types';
 
 const logger = Logger('wf.OASLoader');
 
-interface OpenAPISpecInput {
-  title: string;
-  version: string;
-  namespace: string;
-  spec: string;
+export interface OpenAPISpecInput {
+  organization: string;
   subsystem: string;
+  spec: string;
   state?: string;
 }
 
@@ -20,40 +20,45 @@ export const LoadOpenAPISpec = async (
 ): Promise<OpenAPISpec> => {
   const outSpec: OpenAPISpec = {};
 
-  logger.info('Loaded OpenAPI Spec %s - %s', spec?.title, spec?.version);
+  const batchClause = {
+    query: '$org: String, $name: String',
+    clause: '{ name: $name, organization: { name: $org } }',
+    variables: { org: spec.organization, name: spec.subsystem },
+  };
+  const records: Subsystem[] = await getRecords(
+    context,
+    'Subsystem',
+    'allSubsystems',
+    [],
+    batchClause
+  );
+
+  const subsystemRecord = records[0];
 
   const oas = YAML.parse(spec.spec);
 
-  if (spec.title != oas.info?.title) {
-    throw new ValidateError(
-      {
-        spec_title: {
-          message: `Spec title mismatch: spec=${spec.title} vs blob=${oas.info?.title}`,
-        },
+  if (subsystemRecord.organization.name !== spec.organization) {
+    const fields = {
+      organization: {
+        message: `Spec organization mismatch: subsystem=${subsystemRecord.organization.name} vs spec=${spec.organization}`,
       },
-      'Invalid Spec'
-    );
+    };
+    logger.debug('Spec organization mismatch details: %j', fields);
+    throw new ValidateError(fields, 'Invalid Spec - organization mismatch');
   }
-  if (spec.version != oas.info?.version) {
-    throw new ValidateError(
-      {
-        spec_version: {
-          message: `Spec version mismatch: spec=${spec.version} vs blob=${oas.info?.version}`,
-        },
-      },
-      'Invalid Spec'
-    );
-  }
+
   outSpec.spec = spec.spec;
-  (outSpec as any).namespace = spec.namespace;
+  (outSpec as any).namespace = subsystemRecord.namespace;
+  outSpec.organization = spec.organization;
   outSpec.subsystem = spec.subsystem;
   outSpec.state = spec.state;
   outSpec.title = oas.info?.title;
-  // outSpec.summary = oas.info?.summary || '';
+  outSpec.summary = oas.info?.summary;
   outSpec.version = oas.info?.version;
-  outSpec.description = oas.info?.description || '';
-  outSpec.ref = `${spec.namespace}-${outSpec.title}-${outSpec.version}`;
+  outSpec.description = oas.info?.description;
+  outSpec.ref = `${spec.organization}/${outSpec.title}/${outSpec.version}`;
   outSpec.operations = JSON.stringify(parseSpec(oas));
+  logger.debug('Parsed OAS operations: %j', Object.keys(outSpec).sort());
   return outSpec;
 };
 

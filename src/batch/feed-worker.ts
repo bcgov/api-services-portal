@@ -240,6 +240,9 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
         response.push(
           `${field} { id, ${buildQueryResponse(mdRelField, children)} }`
         );
+        // } else if ('compositeRefKey' in md.transformations[field]) {
+        //   const compositeKeyFields = md.transformations[field].compositeRefKey;
+        //   response.push(`${field} { id, ${compositeKeyFields.join(', ')} }`);
       } else {
         const refKey =
           'refKey' in md.transformations[field]
@@ -268,7 +271,7 @@ export const getRecords = async function (
   children: string[] = undefined,
   where: BatchWhereClause = undefined,
   skip: number = 0,
-  first: number = 5000,
+  first: number = 5000
 ): Promise<any[]> {
   const md = (metadata as any)[feedEntity];
 
@@ -280,6 +283,24 @@ export const getRecords = async function (
     where,
     skip,
     first
+  );
+};
+
+export const getRecordById = async function (
+  context: any,
+  feedEntity: string,
+  id: string,
+  children: string[] = undefined
+): Promise<any> {
+  const md = (metadata as any)[feedEntity];
+
+  const batchService = new BatchService(context);
+
+  return await batchService.lookup(
+    md.query,
+    'id',
+    id,
+    buildQueryResponse(md, children)
   );
 };
 

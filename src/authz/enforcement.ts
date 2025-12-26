@@ -54,6 +54,7 @@ const actions: any = {
   filterByEnvironmentPackageNS: require('./actions/filterByEnvironmentPackageNS'),
   filterByNamespaceOrAppOwner: require('./actions/filterByNamespaceOrAppOwner'),
   filterByNamespaceOrPublic: require('./actions/filterByNamespaceOrPublic'),
+  filterBySubsystemNamespace: require('./actions/filterBySubsystemNamespace'),
   filterByOwner: filterByOwner,
   filterByOwnerOrRelated: require('./actions/filterByOwnerOrRelated'),
   filterBySelf: require('./actions/filterBySelf'),
@@ -213,6 +214,7 @@ export function EnforcementPoint(params: any) {
         if (matches.length == 0) {
           return 'NA';
         }
+        logger.debug('Evaluating Rule: %j : %j', ruleConditionState, rule);
         if (ruleConditionState && rule.result === RuleResult.Allow) {
           if (rule.filters != null) {
             const filters = [] as any[];
@@ -226,10 +228,16 @@ export function EnforcementPoint(params: any) {
               if (result) {
                 logger.debug('--> FILTER %j', result);
                 filters.push(result);
+              } else {
+                logger.error('--> No result from filter');
               }
             }
             if (filters.length == 1) {
+              logger.debug('--> With filter: %s', filters[0]);
               return filters[0];
+            } else if (filters.length == 0) {
+              logger.error('--> DENY (no filters)');
+              return false;
             } else {
               return `{ AND: [ ${filters.join(',')} ] }` as any;
             }
@@ -238,7 +246,7 @@ export function EnforcementPoint(params: any) {
         }
         if (ruleConditionState && rule.result === RuleResult.Deny) {
           logger.debug('--> DENY');
-          logger.debug('%j', rule);
+          logger.debug('Rule: %j', rule);
           return false;
         }
         return 'NA';

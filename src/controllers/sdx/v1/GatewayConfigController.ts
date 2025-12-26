@@ -45,7 +45,7 @@ interface ValidateErrorJSON {
 
 @injectable()
 @Route('/gateways/{gatewayId}')
-@Tags('Administration')
+@Tags('Gateway Management')
 export class GatewayConfigController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -56,7 +56,7 @@ export class GatewayConfigController extends Controller {
   /**
    * > `Required Scope:` GatewayConfig.Publish
    *
-   * @summary Generate gateway config from pre-defined patterns
+   * Generate gateway config from pre-defined patterns
    */
   @Put('/pattern')
   @OperationId('generate-config-from-pattern')

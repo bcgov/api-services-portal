@@ -36,7 +36,9 @@ export type DateTime = any;
     );
 
     const fields = [];
-    fields.push(`  ${md.refKey}?: string; // Primary Key`);
+    if (md.refKey) {
+      fields.push(`  ${md.refKey}?: string; // Primary Key`);
+    }
     md.sync
       .concat(md.read ? md.read : [])
       .filter((s) => !relationshipFields.includes(s))

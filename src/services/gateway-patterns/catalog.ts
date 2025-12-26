@@ -1,124 +1,89 @@
-import { gql } from 'graphql-request';
-import { Environment } from '../keystone/types';
-import { NamespaceService } from '../org-groups';
-import { getGwaProductEnvironment } from '../workflow';
-import { LookupMember } from './member-id';
-import { logger } from '../../logger';
+import { OpenApiSpec } from '../keystone/types';
+import { getRecords } from '../../batch/feed-worker';
+import { BatchWhereClause } from '../keystone/batch-service';
 
-export interface CatalogEntry {
+/**
+ * @tsoaModel
+ *
+ */
+export interface IServiceOperation {
+  operationId: string;
+  summary: string;
+  method: string;
+  path: string;
+  scopes?: string[];
+}
+
+/**
+ * @tsoaModel
+ *
+ */
+export interface IServiceCatalogEntry {
   id: string;
-  locator: string;
-  product: {
+  locators?: string[];
+  title: string;
+  version: string;
+  summary: string;
+  description: string;
+  state: string;
+  operations: IServiceOperation[];
+  spec?: string;
+  subsystem: {
     name: string;
-    //type: string;
-    namespace: string;
-  };
-  organization: {
-    name: string;
-    orgUnit?: string;
-    trustJwksEndpoint?: string;
-  };
-  gateway: {
-    name: string;
-    permissions: {
-      dataPlane: string[];
-      domains: string[];
+    organization?: {
+      name: string;
+      orgUnit?: string;
+      trustJwksEndpoint?: string;
+    };
+    gateway?: {
+      id: string;
+      permissions?: {
+        dataPlane: string;
+        domains: string[];
+      };
+    };
+    runtimeGroup?: {
+      name: string;
+      host: string;
+      publicEndpoint?: string;
+      privateEndpoint?: string;
     };
   };
 }
 
-export async function GetCatalog(ctx: any): Promise<CatalogEntry[]> {
-  const result = await ctx.executeGraphQL({
-    context: ctx,
-    query: list,
-  });
-  const envs = result.data.allEnvironments.filter(
-    (e: Environment) => true // e.product.organization != null
+export async function GetCatalog(
+  ctx: any,
+  includeSpec: boolean = false,
+  batchClause?: BatchWhereClause
+): Promise<IServiceCatalogEntry[]> {
+  const records: OpenApiSpec[] = await getRecords(
+    ctx,
+    'OpenAPISpec',
+    'allOpenAPISpecs',
+    ['subsystem', 'organization'],
+    batchClause
   );
 
-  const output: CatalogEntry[] = envs.map((env: any) => {
-    const catalogEntry = {
-      id: env.appId,
-      locator: '',
-      environment: env.name,
-      product: {
-        name: env.product.name,
-      },
-      gateway: {
-        name: env.product.namespace,
-      },
-      organization: {},
-      //hasSpec: env.spec?.id ? true : false,
-    };
-    return catalogEntry;
-  });
-
-  const prodEnv = await getGwaProductEnvironment(ctx, false);
-  const envConfig = prodEnv.issuerEnvConfig;
-
-  const svc = new NamespaceService(envConfig.issuerUrl);
-  await svc.login(envConfig.clientId, envConfig.clientSecret);
-
-  const promises = output
-    .filter((env: any) => env.gateway.name)
-    .map(async (env: any) => {
-      const nsAttributes = await svc.getNamespaceOrganizationDetails(
-        env.gateway.name
-      );
-
-      if (!nsAttributes?.name) {
-        logger.warn(
-          'Namespace %s not assigned to organization',
-          env.gateway.name
-        );
-        return;
-      }
-      env.organization.name = nsAttributes.name;
-      env.organization.orgUnit = nsAttributes.orgUnit;
-      env.gateway.permissions = {
-        dataPlane: nsAttributes.permDataPlane,
-        domains: nsAttributes.permDomains,
-      };
-
-      const member = await LookupMember(nsAttributes.name);
-      if (!member) {
-        logger.warn('Lookup member for org %s not found.', nsAttributes.name);
-        return;
-      }
-
-      env.organization.trustJwksEndpoint = member.trust_jwks_endpoint;
-
-      env.locator = [
-        `${env.environment.toUpperCase()}`,
-        `${member.member_class}`,
-        `${member.member_id}`,
-        `${env.product.name}`,
-      ]
-        .join('.')
-        .toUpperCase();
-      return env;
-    });
-  const out: CatalogEntry[] = await Promise.all(promises);
-  return out.filter((e) => e);
+  return records.map(
+    (c: OpenApiSpec) =>
+      ({
+        id: c.name,
+        title: c.title,
+        version: c.version,
+        summary: c.summary,
+        description: c.description,
+        spec: includeSpec ? c.spec : undefined,
+        subsystem: {
+          name: c.subsystem.name,
+          organization: {
+            name: c.organization.name,
+          },
+          gateway: {
+            id: c.namespace,
+          },
+        },
+        state: c.state,
+        operations: JSON.parse(c.operations || '{}'),
+      } as IServiceCatalogEntry)
+  );
 }
-
-const list = gql`
-  query OrgProductCatalog {
-    allEnvironments {
-      appId
-      name
-      # spec {
-      #   id
-      #   blob
-      # }
-      product {
-        name
-        type
-        namespace
-        # organization {
-        #   name
-        # }
-      }
-    }
-  }
-`;

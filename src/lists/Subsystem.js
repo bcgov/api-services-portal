@@ -1,9 +1,10 @@
-const { Slug, Text } = require('@keystonejs/fields');
+const { Slug, Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
 const { logger } = require('../logger');
 const { strict: assert, AssertionError } = require('assert');
 const { StructuredActivityService } = require('../services/workflow');
 const { regExprValidation } = require('../services/utils');
+const { newNamespaceID } = require('../services/identifiers');
 
 module.exports = {
   fields: {
@@ -17,19 +18,20 @@ module.exports = {
       isRequired: true,
       access: { update: false },
     },
+    organization: { type: Relationship, ref: 'Organization' },
     slug: {
       type: Slug,
       adminConfig: {
         isReadOnly: true,
       },
       generate: ({ resolvedData, existingItem }) => {
-        const ns =
-          'namespace' in resolvedData
-            ? resolvedData['namespace']
-            : existingItem['namespace'];
+        const org =
+          'organization' in resolvedData
+            ? resolvedData['organization']
+            : existingItem['organization'];
         const name =
           'name' in resolvedData ? resolvedData['name'] : existingItem['name'];
-        return `${ns}.${name}`;
+        return `${org}.${name}`;
       },
       makeUnique: (val) => val,
       isUnique: true,
@@ -37,18 +39,11 @@ module.exports = {
   },
   access: EnforcementPoint,
   hooks: {
-    resolveInput: ({ context, operation, resolvedData }) => {
-      logger.debug(
-        '[List.Subsystem] Auth %s %j',
-        operation,
-        context['authedItem']
-      );
-      if (operation == 'create') {
-        if (context['authedItem'] && 'namespace' in context['authedItem']) {
-          resolvedData['namespace'] = context['authedItem']['namespace'];
-        }
+    resolveInput: ({ operation, resolvedData }) => {
+      if (operation !== 'create') {
+        return resolvedData;
       }
-      logger.debug('[List.Subsystem] Resolved %j', resolvedData);
+      resolvedData.namespace = `sdx-${newNamespaceID()}`;
       return resolvedData;
     },
     validateInput: ({ resolvedData, addValidationError }) => {

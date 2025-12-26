@@ -273,7 +273,6 @@ export interface Application {
  * @tsoaModel
  * @example {
  *   "ref": "my-api-spec",
- *   "namespace": "platform",
  *   "title": "My API Spec",
  *   "description": "Description of my API Spec",
  *   "version": "1.0.0",
@@ -282,15 +281,18 @@ export interface Application {
  * }
  */  
 export interface OpenAPISpec {
-  ref?: string; // Primary Key
+  name?: string; // Primary Key
+  ref?: string;
   title?: string;
   version?: string;
-  gatewayId?: string;
   state?: string;
   spec?: string;
+  summary?: string;
   description?: string;
   operations?: string;
-  subsystem?: undefinedRefID;
+  gatewayId?: string;
+  subsystem?: SubsystemRefID;
+  organization?: OrganizationRefID;
 }
 
 
@@ -298,7 +300,7 @@ export interface OpenAPISpec {
  * @tsoaModel
  * @example {
  *   "name": "my-runtime-group",
- *   "namespace": "platform",
+ *   "namespace": "gw-abc",
  *   "host": "runtime-group.my-domain.sdx",
  *   "publicEndpoint": "10.10.10.10:443",
  *   "privateEndpoint": "10.0.0.11:6443"
@@ -311,6 +313,7 @@ export interface RuntimeGroup {
   privateEndpoint?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
+  hostedOrganizations?: OrganizationRefID[];
 }
 
 
@@ -321,9 +324,9 @@ export interface RuntimeGroup {
  * }
  */  
 export interface Subsystem {
-  undefined?: string; // Primary Key
   name?: string;
   gatewayId?: string;
+  organization?: OrganizationRefID;
 }
 
 
@@ -643,6 +646,11 @@ export type OrganizationRefID = string
  * @tsoaModel
  */  
 export type OrganizationUnitRefID = string
+
+/**
+ * @tsoaModel
+ */  
+export type SubsystemRefID = string
 
 /**
  * @tsoaModel

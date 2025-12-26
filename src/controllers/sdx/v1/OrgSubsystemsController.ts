@@ -17,7 +17,7 @@ import {
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { GetCatalog } from '../../../services/gateway-patterns/catalog';
-import { SDXCatalogEntry, SDXSubsystem } from './types';
+import { SDXSubsystem, SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import {
   getRecords,
@@ -26,51 +26,67 @@ import {
   replaceKey,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
+import { Subsystem } from '@/controllers/v3/types';
 
 @injectable()
-@Route('/gateways/{gatewayId}')
-@Tags('Administration')
-export class GatewayAdminController extends Controller {
+@Route('/organizations/{org}/subsystems')
+@Tags('Subsystems')
+export class OrgSubsystemController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
   }
 
-  @Put('/subsystems')
+  /**
+   * Create a new subsystem of an organization
+   */
+  @Put()
   @OperationId('create-subsystem')
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', [])
   public async createSubsystem(
-    @Path() gatewayId: string,
-    @Body() body: SDXSubsystem,
+    @Path() org: string,
+    @Body() body: SubsystemInput,
     @Request() request: any
   ): Promise<BatchResult> {
-    body['gatewayId'] = gatewayId;
+    let input: any = {};
+    Object.assign(input, body);
+    input['organization'] = org;
+
     return await syncRecordsThrowErrors(
       this.keystone.createContext(request),
       'Subsystem',
       undefined,
-      replaceKey(body, 'gatewayId', 'namespace')
+      replaceKey(input, 'gatewayId', 'namespace')
     );
   }
 
-  @Get('/subsystems')
+  /**
+   * Retrieve the list of subsystems associated with a gateway
+   */
+  @Get()
   @OperationId('list-gateway-subsystems')
   @Security('jwt', [])
   public async listSubsystems(
-    @Path() gatewayId: string,
+    @Path() org: string,
     @Request() request: any
   ): Promise<SDXSubsystem[]> {
     const ctx = this.keystone.createContext(request);
+
+    const batchClause = {
+      query: '$org: String',
+      clause: '{ organization: { name: $org } }',
+      variables: { org },
+    };
+
     const records: SDXSubsystem[] = await getRecords(
       ctx,
       'Subsystem',
-      'allSubsystemsByNamespace',
-      []
+      'allSubsystems',
+      [],
+      batchClause
     );
 
-    return records
-      .map((o) => removeEmpty(o))
-      .map((o) => removeKeys(o, ['id', 'namespace']));
+    return records.map((o) => removeEmpty(o)).map((o) => removeKeys(o, ['id']));
   }
 }
