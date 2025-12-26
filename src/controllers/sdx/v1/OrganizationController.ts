@@ -52,9 +52,11 @@ export class OrganizationController extends Controller {
    * > `Required Scope:` Gateway.Assign
    */
   @Get('{org}/gateways')
-  @OperationId('organization-gateways')
+  @OperationId('listOrganizationGateways')
   @Security('jwt', ['Namespace.Assign'])
-  public async listNamespaces(@Path() org: string): Promise<OrgNamespace[]> {
+  public async listOrganizationGateways(
+    @Path() org: string
+  ): Promise<OrgNamespace[]> {
     const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
     const envConfig = prodEnv.issuerEnvConfig;
 
@@ -71,7 +73,7 @@ export class OrganizationController extends Controller {
    * @param request
    */
   @Post('{org}/gateways')
-  @OperationId('organization-create-gateway')
+  @OperationId('createGateway')
   @Security('jwt', ['Namespace.Assign'])
   public async createGateway(
     @Path() org: string,
@@ -123,9 +125,9 @@ export class OrganizationController extends Controller {
    * @returns Activity[]
    */
   @Get('{org}/activity')
-  @OperationId('org-gateway-activity')
+  @OperationId('listOrganizationGatewayActivity')
   @Security('jwt', ['Namespace.Assign'])
-  public async namespaceActivity(
+  public async listOrganizationGatewayActivity(
     @Path() org: string,
     @Query() first: number = 20,
     @Query() skip: number = 0

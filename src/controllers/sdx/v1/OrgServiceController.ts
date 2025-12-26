@@ -69,9 +69,9 @@ export class GatewayServiceController extends Controller {
    * Retrieve the list of oas-services associated with an organization
    */
   @Get()
-  @OperationId('listOASServices')
+  @OperationId('listOrganizationServices')
   @Security('jwt', [])
-  public async listOASServices(
+  public async listOrganizationServices(
     @Path() org: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry[]> {
@@ -89,9 +89,9 @@ export class GatewayServiceController extends Controller {
    * Retrieve an oas-services associated with an organization
    */
   @Get('/{id}')
-  @OperationId('getOASService')
+  @OperationId('getOrganizationService')
   @Security('jwt', [])
-  public async getOASService(
+  public async getOrganizationService(
     @Path('id') id: string,
     @Path() org: string,
     @Request() request: any
@@ -112,10 +112,10 @@ export class GatewayServiceController extends Controller {
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
    */
-  @Get('/{id}/oas-spec.json')
-  @OperationId('getOASServiceSpec')
+  @Get('/{id}/oas-spec')
+  @OperationId('getOrganizationServiceSpec')
   @Security('jwt', [])
-  public async getOASServiceSpec(
+  public async getOrganizationServiceSpec(
     @Path('id') id: string,
     @Path() org: string,
     @Request() request: any

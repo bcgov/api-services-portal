@@ -105,7 +105,7 @@ export class CatalogController extends Controller {
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
    */
-  @Get('/services/{id}/oas-spec.json')
+  @Get('/services/{id}/oas-spec')
   @OperationId('getOASServiceSpec')
   @Security('jwt', [])
   public async getOASServiceSpec(
