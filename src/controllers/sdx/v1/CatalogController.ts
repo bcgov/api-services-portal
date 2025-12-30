@@ -100,12 +100,11 @@ export class CatalogController extends Controller {
    */
   @Get('/services/{id}/oas-spec')
   @OperationId('getOASServiceSpec')
-  @Security('jwt', [])
   public async getOASServiceSpec(
     @Path('id') id: string,
     @Request() request: any
   ): Promise<any> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.sudo();
     const entry = await GetCatalogById(ctx, id, true);
 
     return YAML.parse(entry.spec);
