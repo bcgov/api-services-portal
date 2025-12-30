@@ -12,6 +12,7 @@ export type DateTime = any;
  *
  */  
 export interface Organization {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   sector?: string;
@@ -29,6 +30,7 @@ export interface Organization {
  *
  */  
 export interface OrganizationUnit {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   sector?: string;
@@ -45,6 +47,7 @@ export interface OrganizationUnit {
  *
  */  
 export interface Dataset {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   license_title?: string;
@@ -86,6 +89,7 @@ export interface Dataset {
  * }
  */  
 export interface DraftDataset {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   license_title?: string;
   security_class?: "HIGH-CABINET" | "HIGH-CONFIDENTIAL" | "HIGH-SENSITIVITY" | "MEDIUM-SENSITIVITY" | "MEDIUM-PERSONAL" | "LOW-SENSITIVITY" | "LOW-PUBLIC" | "PUBLIC" | "PROTECTED A" | "PROTECTED B" | "PROTECTED C";
@@ -109,6 +113,7 @@ export interface DraftDataset {
  *
  */  
 export interface Metric {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   query?: string;
   day?: string;
@@ -123,6 +128,7 @@ export interface Metric {
  *
  */  
 export interface Alert {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
 }
 
@@ -132,6 +138,7 @@ export interface Alert {
  *
  */  
 export interface Namespace {
+  id?: string; // Internal Keystone ID
   extRefId?: string; // Primary Key
   name?: string;
   displayName?: string;
@@ -143,6 +150,7 @@ export interface Namespace {
  *
  */  
 export interface Gateway {
+  id?: string; // Internal Keystone ID
   gatewayId?: string; // Primary Key
   displayName?: string;
 }
@@ -153,6 +161,7 @@ export interface Gateway {
  *
  */  
 export interface MemberRole {
+  id?: string; // Internal Keystone ID
   extRefId?: string; // Primary Key
   role?: string;
   user?: UserRefID;
@@ -164,6 +173,7 @@ export interface MemberRole {
  *
  */  
 export interface GatewayService {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   gatewayId?: string;
@@ -180,6 +190,7 @@ export interface GatewayService {
  *
  */  
 export interface GatewayGroup {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   gatewayId?: string;
@@ -193,6 +204,7 @@ export interface GatewayGroup {
  *
  */  
 export interface GatewayRoute {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   gatewayId?: string;
@@ -212,6 +224,7 @@ export interface GatewayRoute {
  *
  */  
 export interface GatewayPlugin {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   name?: string;
   extSource?: string;
@@ -228,6 +241,7 @@ export interface GatewayPlugin {
  *
  */  
 export interface GatewayConsumer {
+  id?: string; // Internal Keystone ID
   extForeignKey?: string; // Primary Key
   username?: string;
   customId?: string;
@@ -245,6 +259,7 @@ export interface GatewayConsumer {
  *
  */  
 export interface ServiceAccess {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   active?: string;
   aclEnabled?: string;
@@ -260,6 +275,7 @@ export interface ServiceAccess {
  *
  */  
 export interface Application {
+  id?: string; // Internal Keystone ID
   appId?: string; // Primary Key
   name?: string;
   description?: string;
@@ -281,6 +297,7 @@ export interface Application {
  * }
  */  
 export interface OpenAPISpec {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   ref?: string;
   title?: string;
@@ -303,10 +320,15 @@ export interface OpenAPISpec {
  *   "namespace": "gw-abc",
  *   "host": "runtime-group.my-domain.sdx",
  *   "publicEndpoint": "10.10.10.10:443",
- *   "privateEndpoint": "10.0.0.11:6443"
+ *   "privateEndpoint": "10.0.0.11:6443",
+ *   "hostedOrganizations": [
+ *     "ministry-of-citizens-services",
+ *     "ministry-of-health"
+ *   ]
  * }
  */  
 export interface RuntimeGroup {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   host?: string;
   publicEndpoint?: string;
@@ -324,6 +346,7 @@ export interface RuntimeGroup {
  * }
  */  
 export interface Subsystem {
+  id?: string; // Internal Keystone ID
   name?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
@@ -347,6 +370,7 @@ export interface Subsystem {
  * }
  */  
 export interface Product {
+  id?: string; // Internal Keystone ID
   appId?: string; // Primary Key
   name?: string;
   description?: string;
@@ -367,6 +391,7 @@ export interface Product {
  * }
  */  
 export interface Environment {
+  id?: string; // Internal Keystone ID
   appId?: string; // Primary Key
   name?: "dev" | "test" | "prod" | "sandbox" | "other";
   active?: boolean;
@@ -392,6 +417,7 @@ export interface Environment {
  * }
  */  
 export interface CredentialIssuer {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   gatewayId?: string;
   description?: string;
@@ -425,6 +451,7 @@ export interface CredentialIssuer {
  * }
  */  
 export interface IssuerEnvironmentConfig {
+  id?: string; // Internal Keystone ID
   environment?: string; // Primary Key
   exists?: boolean;
   issuerUrl?: string;
@@ -452,6 +479,7 @@ export interface IssuerEnvironmentConfig {
  * }
  */  
 export interface Content {
+  id?: string; // Internal Keystone ID
   externalLink?: string; // Primary Key
   title?: string;
   description?: string;
@@ -473,6 +501,7 @@ export interface Content {
  *
  */  
 export interface ContentBySlug {
+  id?: string; // Internal Keystone ID
   slug?: string; // Primary Key
   externalLink?: string;
   title?: string;
@@ -494,6 +523,7 @@ export interface ContentBySlug {
  *
  */  
 export interface Legal {
+  id?: string; // Internal Keystone ID
   reference?: string; // Primary Key
   title?: string;
   link?: string;
@@ -521,6 +551,7 @@ export interface Legal {
  * }
  */  
 export interface Activity {
+  id?: string; // Internal Keystone ID
   extRefId?: string; // Primary Key
   type?: string;
   name?: string;
@@ -546,6 +577,7 @@ export interface Activity {
  *
  */  
 export interface User {
+  id?: string; // Internal Keystone ID
   username?: string; // Primary Key
   name?: string;
   email?: string;
@@ -559,6 +591,7 @@ export interface User {
  *
  */  
 export interface UserLegalsAgreed {
+  id?: string; // Internal Keystone ID
   reference?: string; // Primary Key
   agreedTimestamp?: string;
 }
@@ -569,6 +602,7 @@ export interface UserLegalsAgreed {
  *
  */  
 export interface Blob {
+  id?: string; // Internal Keystone ID
   ref?: string; // Primary Key
   type?: string;
   blob?: string;
@@ -580,6 +614,7 @@ export interface Blob {
  *
  */  
 export interface DatasetContact {
+  id?: string; // Internal Keystone ID
   name?: string; // Primary Key
   email?: string;
   role?: "pointOfContact";

@@ -1,10 +1,8 @@
 const { Slug, Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { logger } = require('../logger');
-const { strict: assert, AssertionError } = require('assert');
 const { StructuredActivityService } = require('../services/workflow');
-const { regExprValidation } = require('../services/utils');
 const { newNamespaceID } = require('../services/identifiers');
+const { SubsystemService } = require('../services/batch/subsystem');
 
 module.exports = {
   fields: {
@@ -46,25 +44,13 @@ module.exports = {
       resolvedData.namespace = `sdx-${newNamespaceID()}`;
       return resolvedData;
     },
-    validateInput: ({ resolvedData, addValidationError }) => {
-      try {
-        regExprValidation(
-          '^[A-Z0-9-]{3,20}$',
-          resolvedData['name'],
-          "Product name must be between 3 and 20 alpha-numeric characters (including special character '-')"
-        );
-      } catch (ex) {
-        if (ex instanceof AssertionError) {
-          addValidationError(ex.message);
-        } else {
-          throw ex;
-        }
-      }
+    validateInput: ({ context, resolvedData, addValidationError }) => {
+      new SubsystemService().validateSubsystem(context, resolvedData['name']);
     },
     afterDelete: async function ({ existingItem, context }) {
       await new StructuredActivityService(
         context,
-        context.authedItem['namespace']
+        existingItem.namespace
       ).logListActivity(
         true,
         'delete',
@@ -79,7 +65,7 @@ module.exports = {
     afterChange: async function ({ operation, updatedItem, context }) {
       await new StructuredActivityService(
         context,
-        context.authedItem['namespace']
+        updatedItem.namespace
       ).logListActivity(
         true,
         operation,

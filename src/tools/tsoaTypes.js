@@ -36,6 +36,10 @@ export type DateTime = any;
     );
 
     const fields = [];
+    if (md.refKey !== 'id') {
+      fields.push(`  id?: string; // Internal Keystone ID`);
+    }
+
     if (md.refKey) {
       fields.push(`  ${md.refKey}?: string; // Primary Key`);
     }
@@ -159,6 +163,15 @@ fs.writeFile('controllers/v2/types.ts', buildContent(false), (err) => {
     return;
   }
   console.log('Updated file: controllers/v2/types.ts');
+  //file written successfully
+});
+
+fs.writeFile('services/batch/types.ts', buildContent(false), (err) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log('Updated file: services/batch/types.ts');
   //file written successfully
 });
 

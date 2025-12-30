@@ -132,12 +132,22 @@ export const deleteRecord = async function (
   if (localRecord == null) {
     return { status: 404, result: 'not-found' };
   } else {
-    const result = await batchService.remove(entity, localRecord.id);
-    if (result == null) {
-      return { status: 400, result: 'deletion-failed' };
-    }
-    return { status: 200, result: 'deleted', id: localRecord.id };
+    return await deleteRecordByInternalId(context, entity, localRecord.id);
   }
+};
+
+export const deleteRecordByInternalId = async function (
+  context: any,
+  entity: string,
+  dbid: string
+): Promise<BatchResult> {
+  const batchService = new BatchService(context);
+
+  const result = await batchService.remove(entity, dbid);
+  if (result == null) {
+    return { status: 400, result: 'deletion-failed' };
+  }
+  return { status: 200, result: 'deleted', id: dbid };
 };
 
 export const getFeedWorker = async (context: any, req: any, res: any) => {

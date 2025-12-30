@@ -9,18 +9,14 @@ import {
   Security,
   Body,
   Tags,
+  Delete,
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { SDXSubsystem, SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
-import {
-  getRecords,
-  removeEmpty,
-  removeKeys,
-  replaceKey,
-  syncRecordsThrowErrors,
-} from '../../../batch/feed-worker';
+import { SubsystemService } from '../../../services/batch/subsystem';
+import { Subsystem } from '../../../services/batch/types';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -43,16 +39,13 @@ export class OrgSubsystemController extends Controller {
     @Body() body: SubsystemInput,
     @Request() request: any
   ): Promise<BatchResult> {
-    let input: any = {};
+    const ctx = this.keystone.createContext(request);
+
+    let input: Subsystem = {};
     Object.assign(input, body);
     input['organization'] = org;
 
-    return await syncRecordsThrowErrors(
-      this.keystone.createContext(request),
-      'Subsystem',
-      undefined,
-      replaceKey(input, 'gatewayId', 'namespace')
-    );
+    return new SubsystemService().createSubsystem(ctx, input);
   }
 
   /**
@@ -66,21 +59,58 @@ export class OrgSubsystemController extends Controller {
     @Request() request: any
   ): Promise<SDXSubsystem[]> {
     const ctx = this.keystone.createContext(request);
+    return new SubsystemService().listSubsystemsByOrganization(ctx, org);
+  }
 
-    const batchClause = {
-      query: '$org: String',
-      clause: '{ organization: { name: $org } }',
-      variables: { org },
-    };
+  /**
+   * A subsystem can be deleted if there are no services associated with it.
+   *
+   * @summary Delete a subsystem
+   * @param org
+   * @param name
+   * @param request
+   * @example { force: false } body
+   */
+  @Delete('/{name}')
+  @OperationId('deleteSubsystem')
+  @Security('jwt', [])
+  public async delete(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { force: boolean },
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const context = this.keystone.createContext(request, true);
 
-    const records: SDXSubsystem[] = await getRecords(
-      ctx,
-      'Subsystem',
-      'allSubsystems',
-      [],
-      batchClause
+    const subsystemSvc = new SubsystemService();
+
+    return subsystemSvc.deleteSubsystem(context, org, name, body.force);
+  }
+
+  /**
+   * Update subsystem's gateway permissions
+   *
+   * @summary Update subsystem gateway permissions
+   * @param org
+   * @param name
+   * @param request
+   */
+  @Put('/{name}/gateway')
+  @OperationId('updateSubsystemGatewayPermissions')
+  @Security('jwt', [])
+  public async updateGatewayPermissions(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { runtimeGroup: string },
+    @Request() request: any
+  ): Promise<{ gatewayId: string; displayName: string }> {
+    const context = this.keystone.createContext(request, true);
+
+    return new SubsystemService().createSubsystemGateway(
+      context,
+      org,
+      name,
+      body.runtimeGroup
     );
-
-    return records.map((o) => removeEmpty(o)).map((o) => removeKeys(o, ['id']));
   }
 }

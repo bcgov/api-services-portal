@@ -480,6 +480,10 @@ const metadata = {
       host: 'runtime-group.my-domain.sdx',
       publicEndpoint: '10.10.10.10:443',
       privateEndpoint: '10.0.0.11:6443',
+      hostedOrganizations: [
+        'ministry-of-citizens-services',
+        'ministry-of-health',
+      ],
     },
   },
   Subsystem: {

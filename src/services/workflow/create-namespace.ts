@@ -15,7 +15,11 @@ import {
 } from '../keystone';
 import { NamespaceService } from '../org-groups';
 import { getEnvironmentContext } from './get-namespaces';
-import { ResourceSetInput, UMAResourceRegistrationService } from '../uma2';
+import {
+  ResourceSet,
+  ResourceSetInput,
+  UMAResourceRegistrationService,
+} from '../uma2';
 import {
   KeycloakGroupService,
   KeycloakPermissionTicketService,
@@ -36,7 +40,7 @@ export interface CreateNamespaceArgs {
 export async function CreateNamespace(
   context: any,
   args: CreateNamespaceArgs
-): Promise<any> {
+): Promise<ResourceSet> {
   const newNS = args.name ? args.name : newNamespaceID();
 
   validateNamespaceName(newNS);

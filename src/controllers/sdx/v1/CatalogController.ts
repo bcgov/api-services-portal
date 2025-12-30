@@ -92,14 +92,7 @@ export class CatalogController extends Controller {
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
-
-    const batchClause = {
-      query: '$id: String',
-      clause: '{ name: $id }',
-      variables: { id },
-    };
-    const entry = await GetCatalog(ctx, false, batchClause);
-    return entry[0];
+    return await GetCatalogById(ctx, id, false);
   }
 
   /**
@@ -113,7 +106,6 @@ export class CatalogController extends Controller {
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
-
     const entry = await GetCatalogById(ctx, id, true);
 
     return YAML.parse(entry.spec);
