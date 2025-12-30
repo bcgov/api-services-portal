@@ -30,10 +30,11 @@ export class OrgSubsystemController extends Controller {
 
   /**
    * Create a new subsystem of an organization
+   * > `Required Scope:` System.Manage
    */
   @Put()
   @OperationId('createSubsystem')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async createSubsystem(
     @Path() org: string,
     @Body() body: SubsystemInput,
@@ -50,10 +51,11 @@ export class OrgSubsystemController extends Controller {
 
   /**
    * Retrieve the list of subsystems associated with a gateway
+   * > `Required Scope:` System.Manage
    */
   @Get()
   @OperationId('listSubsystems')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async listSubsystems(
     @Path() org: string,
     @Request() request: any
@@ -64,6 +66,7 @@ export class OrgSubsystemController extends Controller {
 
   /**
    * A subsystem can be deleted if there are no services associated with it.
+   * > `Required Scope:` System.Manage
    *
    * @summary Delete a subsystem
    * @param org
@@ -73,7 +76,7 @@ export class OrgSubsystemController extends Controller {
    */
   @Delete('/{name}')
   @OperationId('deleteSubsystem')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async delete(
     @Path() org: string,
     @Path() name: string,

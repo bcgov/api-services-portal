@@ -27,6 +27,7 @@ const logger = Logger('org-groups');
 
 enum RoleGroups {
   'organization-admin',
+  'system-owner',
 }
 
 /**
@@ -339,6 +340,12 @@ export class OrgGroupService {
           scopeNames.includes(scope.name)
         )
         .map((c) => c.id);
+
+      if (scopes.length != scopeNames.length) {
+        logger.warn(
+          `Not all scopes found for resource ${resourceName} - expected '${scopeNames}' got '${scopes}'`
+        );
+      }
     } else {
       const allScopes = await clientPolicyService.getAllClientAuthzScopes(cid);
       scopes = allScopes

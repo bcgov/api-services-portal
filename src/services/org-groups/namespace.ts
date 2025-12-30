@@ -60,7 +60,7 @@ export class NamespaceService {
       'org-enabled' in group.attributes &&
       group.attributes['org-enabled'][0] === `${orgEnabled}`
     ) {
-      logger.debug(
+      logger.info(
         '[assignNamespaceToOrganization] %s - Already assigned and %s',
         ns,
         orgEnabled ? 'enabled' : 'disabled'
@@ -116,6 +116,13 @@ export class NamespaceService {
       delete group.attributes['org-updated-at'];
       await this.groupService.updateGroup(group);
       return true;
+    } else {
+      logger.warn(
+        '[unassignNamespaceFromOrganization] %s - No matching assignment found for %s/%s',
+        ns,
+        org,
+        orgUnit
+      );
     }
     return false;
   }

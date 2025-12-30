@@ -40,10 +40,11 @@ export class GatewayServiceController extends Controller {
 
   /**
    * Create a new service for an organization
+   * > `Required Scope:` System.Manage
    */
   @Put()
   @OperationId('createOASService')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async createOASService(
     @Path() org: string,
     @FormField() subsystem: string,
@@ -71,10 +72,11 @@ export class GatewayServiceController extends Controller {
 
   /**
    * Retrieve the list of oas-services associated with an organization
+   * > `Required Scope:` System.Manage
    */
   @Get()
   @OperationId('listOrganizationServices')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async listOrganizationServices(
     @Path() org: string,
     @Request() request: any
@@ -91,10 +93,11 @@ export class GatewayServiceController extends Controller {
 
   /**
    * Retrieve an oas-services associated with an organization
+   * > `Required Scope:` System.Manage
    */
   @Get('/{id}')
   @OperationId('getOrganizationService')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async getOrganizationService(
     @Path('id') id: string,
     @Path() org: string,
@@ -115,10 +118,11 @@ export class GatewayServiceController extends Controller {
 
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
+   * > `Required Scope:` System.Manage
    */
   @Get('/{id}/oas-spec')
   @OperationId('getOrganizationServiceSpec')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async getOrganizationServiceSpec(
     @Path('id') id: string,
     @Path() org: string,

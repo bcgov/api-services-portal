@@ -15,6 +15,7 @@ export const AllOrgAuthzScopes: string[] = [
   'GroupAccess.Manage',
   'Namespace.Assign',
   'Dataset.Manage',
+  'System.Manage',
 ];
 
 export class OrgAuthzService {

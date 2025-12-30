@@ -145,6 +145,32 @@ export class GroupAccessService {
             );
           }
         }
+      } else {
+        // build the policies if they do not exist
+        await this.buildGroupHierarchyIfMissing(org, orgUnit);
+
+        const access = buildGroupAccess(
+          orgUnit,
+          `/ca.bc.gov/${org}`,
+          'namespace',
+          namespace
+        );
+
+        for (const groupRole of access.roles) {
+          const parent = access.parent ? access.parent : '';
+          const orgGroup: OrganizationGroup = {
+            name: access.name,
+            parent: `/${groupRole.name}${parent}`,
+          };
+
+          for (const perm of groupRole.permissions) {
+            await this.orgGroupService.createOrUpdateGroupPermission(
+              orgGroup,
+              perm.resource,
+              perm.scopes
+            );
+          }
+        }
       }
       return true;
     } else {
@@ -295,11 +321,11 @@ export class GroupAccessService {
 
       roleMembers.forEach((userRef) => {
         if (userRef.email in members) {
-          members[userRef.email].roles.push(root(fullGroupPaths[0]));
+          members[userRef.email].roles.push(root(groupPath));
         } else {
           members[userRef.email] = {
             member: userRef,
-            roles: [root(fullGroupPaths[0])],
+            roles: [root(groupPath)],
           };
         }
       });
