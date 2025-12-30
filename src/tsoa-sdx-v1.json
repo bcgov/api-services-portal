@@ -7,7 +7,7 @@
   "spec": {
     "name": "SDX Member API",
     "version": "1.0.0",
-    "description": "",
+    "description": "Secure Data Exchange (SDX) by the Government of the Province of BC",
     "outputDirectory": "controllers/sdx/v1",
     "specVersion": 3,
     "basePath": "/ds/api/sdx/v1",
@@ -43,18 +43,6 @@
       {
         "name": "Catalog",
         "description": "Discover all the great services available on BC's Secure Data Exchange"
-      },
-      {
-        "name": "Gateway Admin",
-        "description": "Gateway configuration"
-      },
-      {
-        "name": "Organization Admin",
-        "description": "Organization management and activity"
-      },
-      {
-        "name": "Runtime Groups",
-        "description": "Organization runtime groups (edge servers)"
       },
       {
         "name": "Services",

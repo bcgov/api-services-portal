@@ -48,112 +48,112 @@ export class OrganizationController extends Controller {
     this.keystone = _keystone;
   }
 
-  /**
-   * > `Required Scope:` Gateway.Assign
-   */
-  @Get('{org}/gateways')
-  @OperationId('listOrganizationGateways')
-  @Security('jwt', ['Namespace.Assign'])
-  public async listOrganizationGateways(
-    @Path() org: string
-  ): Promise<OrgNamespace[]> {
-    const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
-    const envConfig = prodEnv.issuerEnvConfig;
+  // /**
+  //  * > `Required Scope:` Gateway.Assign
+  //  */
+  // @Get('{org}/gateways')
+  // @OperationId('listOrganizationGateways')
+  // @Security('jwt', ['Namespace.Assign'])
+  // public async listOrganizationGateways(
+  //   @Path() org: string
+  // ): Promise<OrgNamespace[]> {
+  //   const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+  //   const envConfig = prodEnv.issuerEnvConfig;
 
-    const svc = new NamespaceService(envConfig.issuerUrl);
-    await svc.login(envConfig.clientId, envConfig.clientSecret);
-    return await svc.listAssignedNamespacesByOrg(org);
-  }
+  //   const svc = new NamespaceService(envConfig.issuerUrl);
+  //   await svc.login(envConfig.clientId, envConfig.clientSecret);
+  //   return await svc.listAssignedNamespacesByOrg(org);
+  // }
 
-  /**
-   * Create a gateway
-   *
-   * @summary Create Gateway
-   * @param ns
-   * @param request
-   */
-  @Post('{org}/gateways')
-  @OperationId('createGateway')
-  @Security('jwt', ['Namespace.Assign'])
-  public async createGateway(
-    @Path() org: string,
-    @Request() request: any,
-    @Body()
-    vars: {
-      runtimeGroup: string;
-    }
-  ): Promise<Gateway> {
-    const context = this.keystone.createContext(request);
+  // /**
+  //  * Create a gateway
+  //  *
+  //  * @summary Create Gateway
+  //  * @param ns
+  //  * @param request
+  //  */
+  // @Post('{org}/gateways')
+  // @OperationId('createGateway')
+  // @Security('jwt', ['Namespace.Assign'])
+  // public async createGateway(
+  //   @Path() org: string,
+  //   @Request() request: any,
+  //   @Body()
+  //   vars: {
+  //     runtimeGroup: string;
+  //   }
+  // ): Promise<Gateway> {
+  //   const context = this.keystone.createContext(request);
 
-    // use the runtimeGroup to get the dataPlane info
-    const runtimeGroup: SDXRuntimeGroup = await getRecord(
-      context,
-      'RuntimeGroup',
-      vars.runtimeGroup,
-      []
-    );
-    assertEqual(
-      runtimeGroup && (runtimeGroup.organization as Organization).name === org,
-      true,
-      'runtimeGroup',
-      'Not authorized to use runtime group'
-    );
+  //   // use the runtimeGroup to get the dataPlane info
+  //   const runtimeGroup: SDXRuntimeGroup = await getRecord(
+  //     context,
+  //     'RuntimeGroup',
+  //     vars.runtimeGroup,
+  //     []
+  //   );
+  //   assertEqual(
+  //     runtimeGroup && (runtimeGroup.organization as Organization).name === org,
+  //     true,
+  //     'runtimeGroup',
+  //     'Not authorized to use runtime group'
+  //   );
 
-    const createArgs: CreateNamespaceArgs = {
-      // displayName: `SDX ${runtimeGroup.name}`,
-      org,
-      orgEnabled: false,
-      dataPlane: 'sdx-ap',
-      domains: [runtimeGroup.host],
-    };
+  //   const createArgs: CreateNamespaceArgs = {
+  //     // displayName: `SDX ${runtimeGroup.name}`,
+  //     org,
+  //     orgEnabled: false,
+  //     dataPlane: 'sdx-ap',
+  //     domains: [runtimeGroup.host],
+  //   };
 
-    const newGateway = await CreateNamespace(context, createArgs);
+  //   const newGateway = await CreateNamespace(context, createArgs);
 
-    return {
-      gatewayId: newGateway.name,
-      displayName: newGateway.displayName,
-    };
-  }
+  //   return {
+  //     gatewayId: newGateway.name,
+  //     displayName: newGateway.displayName,
+  //   };
+  // }
 
-  /**
-   * > `Required Scope:` Gateway.Assign
-   *
-   * @summary Get administration activity for Gateways associated with this Organization
-   * @param org
-   * @param first
-   * @param skip
-   * @returns Activity[]
-   */
-  @Get('{org}/activity')
-  @OperationId('listOrganizationGatewayActivity')
-  @Security('jwt', ['Namespace.Assign'])
-  public async listOrganizationGatewayActivity(
-    @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
-  ): Promise<ActivityDetail[]> {
-    const ctx = this.keystone.sudo();
-    //const org = await getOrganizationUnit(ctx, orgUnit);
-    //assert.strictEqual(org != null, true, 'Invalid Organization Unit');
+  // /**
+  //  * > `Required Scope:` Gateway.Assign
+  //  *
+  //  * @summary Get administration activity for Gateways associated with this Organization
+  //  * @param org
+  //  * @param first
+  //  * @param skip
+  //  * @returns Activity[]
+  //  */
+  // @Get('{org}/activity')
+  // @OperationId('listOrganizationGatewayActivity')
+  // @Security('jwt', ['Namespace.Assign'])
+  // public async listOrganizationGatewayActivity(
+  //   @Path() org: string,
+  //   @Query() first: number = 20,
+  //   @Query() skip: number = 0
+  // ): Promise<ActivityDetail[]> {
+  //   const ctx = this.keystone.sudo();
+  //   //const org = await getOrganizationUnit(ctx, orgUnit);
+  //   //assert.strictEqual(org != null, true, 'Invalid Organization Unit');
 
-    const prodEnv = await getGwaProductEnvironment(ctx, false);
-    const envConfig = prodEnv.issuerEnvConfig;
+  //   const prodEnv = await getGwaProductEnvironment(ctx, false);
+  //   const envConfig = prodEnv.issuerEnvConfig;
 
-    const svc = new NamespaceService(envConfig.issuerUrl);
-    await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org);
-    const records = await getActivity(
-      ctx,
-      assignedNamespaces.map((n) => n.name),
-      undefined,
-      first > 100 ? 100 : first,
-      skip
-    );
+  //   const svc = new NamespaceService(envConfig.issuerUrl);
+  //   await svc.login(envConfig.clientId, envConfig.clientSecret);
+  //   const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org);
+  //   const records = await getActivity(
+  //     ctx,
+  //     assignedNamespaces.map((n) => n.name),
+  //     undefined,
+  //     first > 100 ? 100 : first,
+  //     skip
+  //   );
 
-    return transformActivity(records)
-      .map((o) => removeKeys(o, ['id']))
-      .map((o) => removeEmpty(o))
-      .map((o) => parseJsonString(o, ['context']))
-      .map((o) => parseBlobString(o));
-  }
+  //   return transformActivity(records)
+  //     .map((o) => removeKeys(o, ['id']))
+  //     .map((o) => removeEmpty(o))
+  //     .map((o) => parseJsonString(o, ['context']))
+  //     .map((o) => parseBlobString(o));
+  // }
 }

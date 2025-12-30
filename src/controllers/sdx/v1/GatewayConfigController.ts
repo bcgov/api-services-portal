@@ -60,44 +60,44 @@ export class GatewayConfigController extends Controller {
     this.keystone = _keystone;
   }
 
-  /**
-   * > `Required Scope:` GatewayConfig.Publish
-   *
-   * Generate gateway config from pre-defined patterns
-   */
-  @Put('/pattern')
-  @OperationId('generateGatewayConfigFromPattern')
-  @Security('jwt', ['GatewayConfig.Publish'])
-  @SuccessResponse('200', 'OK')
-  @Example<any>({
-    documents: [
-      {
-        kind: 'GatewayService',
-        name: 'sdx.my-service',
-        routes: [],
-      },
-    ],
-  })
-  @Response<UnauthorizedJSON>(401)
-  @Response<ValidateErrorJSON>(422, 'Validation Failed', {
-    code: 'validation_error',
-    message: 'Invalid input',
-    fields: {
-      pattern: {
-        message: 'unsupported pattern',
-      },
-    },
-  })
-  public async generateConfigFromPattern(
-    @Path() gatewayId: string,
-    @Body() body: GatewayPatternConfigRequest,
-    @Request() request: any
-  ): Promise<any> {
-    // always inject the gatewayId as a parameter
-    body.parameters.gateway_id = gatewayId;
+  // /**
+  //  * > `Required Scope:` GatewayConfig.Publish
+  //  *
+  //  * Generate gateway config from pre-defined patterns
+  //  */
+  // @Put('/pattern')
+  // @OperationId('generateGatewayConfigFromPattern')
+  // @Security('jwt', ['GatewayConfig.Publish'])
+  // @SuccessResponse('200', 'OK')
+  // @Example<any>({
+  //   documents: [
+  //     {
+  //       kind: 'GatewayService',
+  //       name: 'sdx.my-service',
+  //       routes: [],
+  //     },
+  //   ],
+  // })
+  // @Response<UnauthorizedJSON>(401)
+  // @Response<ValidateErrorJSON>(422, 'Validation Failed', {
+  //   code: 'validation_error',
+  //   message: 'Invalid input',
+  //   fields: {
+  //     pattern: {
+  //       message: 'unsupported pattern',
+  //     },
+  //   },
+  // })
+  // public async generateConfigFromPattern(
+  //   @Path() gatewayId: string,
+  //   @Body() body: GatewayPatternConfigRequest,
+  //   @Request() request: any
+  // ): Promise<any> {
+  //   // always inject the gatewayId as a parameter
+  //   body.parameters.gateway_id = gatewayId;
 
-    const ctx = this.keystone.createContext(request);
+  //   const ctx = this.keystone.createContext(request);
 
-    return await GetConfigUsingPattern(ctx, body);
-  }
+  //   return await GetConfigUsingPattern(ctx, body);
+  // }
 }

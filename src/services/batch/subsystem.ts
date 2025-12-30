@@ -10,6 +10,7 @@ import {
 import { regExprValidation } from '../utils';
 import { strict as assert } from 'assert';
 import { RuntimeGroup, Subsystem } from './types';
+import { Subsystem as KeystoneSubsystem } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
 import {
   CreateNamespace,
@@ -67,31 +68,24 @@ class SubsystemService {
   ): Promise<BatchResult> => {
     const subsystem = await this.findSubsystemByName(context, org, name);
 
-    await this.deleteSubsystemGateway(context, org, name, force);
+    //await this.deleteSubsystemGateway(context, subsystem, force);
 
     return await deleteRecordByInternalId(context, 'Subsystem', subsystem.id);
   };
 
-  private deleteSubsystemGateway = async (
-    context: any,
-    org: string,
-    subsystemName: string,
-    force: boolean
-  ): Promise<void> => {
-    const subsystem = await this.findSubsystemByName(
-      context,
-      org,
-      subsystemName
-    );
+  // private deleteSubsystemGateway = async (
+  //   context: any,
+  //   subsystem: KeystoneSubsystem,
+  //   force: boolean
+  // ): Promise<void> => {
+  //   await DeleteNamespaceValidate(context, subsystem.namespace, force);
 
-    await DeleteNamespaceValidate(context, subsystem.namespace, force);
-
-    await DeleteNamespace(
-      context.sudo(),
-      getSubjectToken(context.req),
-      subsystem.namespace
-    );
-  };
+  //   await DeleteNamespace(
+  //     context.sudo(),
+  //     getSubjectToken(context.req),
+  //     subsystem.namespace
+  //   );
+  // };
 
   createSubsystemGateway = async (
     context: Keystone,
@@ -137,7 +131,7 @@ class SubsystemService {
     context: Keystone,
     org: string,
     name: string
-  ): Promise<Subsystem> => {
+  ): Promise<KeystoneSubsystem> => {
     const records = await getRecords(context, 'Subsystem', undefined, [], {
       query: '$org: String!, $name: String!',
       clause: '{ organization: { name: $org }, name: $name }',

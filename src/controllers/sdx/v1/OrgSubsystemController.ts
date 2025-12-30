@@ -82,35 +82,38 @@ export class OrgSubsystemController extends Controller {
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    const subsystemSvc = new SubsystemService();
-
-    return subsystemSvc.deleteSubsystem(context, org, name, body.force);
-  }
-
-  /**
-   * Update subsystem's gateway permissions
-   *
-   * @summary Update subsystem gateway permissions
-   * @param org
-   * @param name
-   * @param request
-   */
-  @Put('/{name}/gateway')
-  @OperationId('updateSubsystemGatewayPermissions')
-  @Security('jwt', [])
-  public async updateGatewayPermissions(
-    @Path() org: string,
-    @Path() name: string,
-    @Body() body: { runtimeGroup: string },
-    @Request() request: any
-  ): Promise<{ gatewayId: string; displayName: string }> {
-    const context = this.keystone.createContext(request, true);
-
-    return new SubsystemService().createSubsystemGateway(
+    return new SubsystemService().deleteSubsystem(
       context,
       org,
       name,
-      body.runtimeGroup
+      body.force
     );
   }
+
+  // /**
+  //  * Update subsystem's gateway permissions
+  //  *
+  //  * @summary Update subsystem gateway permissions
+  //  * @param org
+  //  * @param name
+  //  * @param request
+  //  */
+  // @Put('/{name}/gateway')
+  // @OperationId('updateSubsystemGatewayPermissions')
+  // @Security('jwt', [])
+  // public async updateGatewayPermissions(
+  //   @Path() org: string,
+  //   @Path() name: string,
+  //   @Body() body: { runtimeGroup: string },
+  //   @Request() request: any
+  // ): Promise<{ gatewayId: string; displayName: string }> {
+  //   const context = this.keystone.createContext(request, true);
+
+  //   return new SubsystemService().createSubsystemGateway(
+  //     context,
+  //     org,
+  //     name,
+  //     body.runtimeGroup
+  //   );
+  // }
 }

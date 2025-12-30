@@ -5,6 +5,7 @@ import YAML from 'yaml';
 import { getRecord, getRecordById, getRecords } from '../../batch/feed-worker';
 import { Subsystem } from '../keystone/types';
 import { IServiceOperation } from '../gateway-patterns/catalog';
+import { SubsystemService } from '../batch/subsystem';
 
 const logger = Logger('wf.OASLoader');
 
@@ -21,32 +22,13 @@ export const LoadOpenAPISpec = async (
 ): Promise<OpenAPISpec> => {
   const outSpec: OpenAPISpec = {};
 
-  const batchClause = {
-    query: '$org: String, $name: String',
-    clause: '{ name: $name, organization: { name: $org } }',
-    variables: { org: spec.organization, name: spec.subsystem },
-  };
-  const records: Subsystem[] = await getRecords(
+  const subsystemRecord: Subsystem = await new SubsystemService().findSubsystemByName(
     context,
-    'Subsystem',
-    'allSubsystems',
-    [],
-    batchClause
+    spec.organization,
+    spec.subsystem
   );
 
-  const subsystemRecord = records[0];
-
   const oas = YAML.parse(spec.spec);
-
-  if (subsystemRecord.organization.name !== spec.organization) {
-    const fields = {
-      organization: {
-        message: `Spec organization mismatch: subsystem=${subsystemRecord.organization.name} vs spec=${spec.organization}`,
-      },
-    };
-    logger.debug('Spec organization mismatch details: %j', fields);
-    throw new ValidateError(fields, 'Invalid Spec - organization mismatch');
-  }
 
   outSpec.spec = spec.spec;
   (outSpec as any).namespace = subsystemRecord.namespace;
@@ -58,12 +40,12 @@ export const LoadOpenAPISpec = async (
   outSpec.version = oas.info?.version;
   outSpec.description = oas.info?.description;
   outSpec.ref = `${spec.organization}/${outSpec.title}/${outSpec.version}`;
-  outSpec.operations = JSON.stringify(parseSpec(oas));
-  logger.debug('Parsed OAS operations: %j', Object.keys(outSpec).sort());
+  outSpec.operations = JSON.stringify(parseSpecOperations(oas));
+
   return outSpec;
 };
 
-function parseSpec(spec: any) {
+function parseSpecOperations(spec: any) {
   const operations =
     spec?.paths &&
     Object.keys(spec.paths).map((path) => {

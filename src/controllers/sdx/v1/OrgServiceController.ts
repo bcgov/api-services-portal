@@ -17,7 +17,10 @@ import { inject, injectable } from 'tsyringe';
 import { ServiceCatalogEntry } from './types';
 import { BatchResult } from '../../../batch/types';
 import { syncRecordsThrowErrors } from '../../../batch/feed-worker';
-import { LoadOpenAPISpec } from '../../../services/workflow/openapi-spec-loader';
+import {
+  LoadOpenAPISpec,
+  OpenAPISpecInput,
+} from '../../../services/workflow/openapi-spec-loader';
 import {
   GetCatalog,
   GetCatalogById,
@@ -49,13 +52,14 @@ export class GatewayServiceController extends Controller {
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request);
 
-    const input: any = {};
-    input['organization'] = org;
-    input['subsystem'] = subsystem;
-    input['spec'] = configFile.buffer.toString('utf-8');
-    input['state'] = 'active';
+    const input: OpenAPISpecInput = {
+      organization: org,
+      subsystem,
+      spec: configFile.buffer.toString('utf-8'),
+      state: 'active',
+    };
 
-    const final = await LoadOpenAPISpec(context, { ...input });
+    const final = await LoadOpenAPISpec(context, input);
 
     return await syncRecordsThrowErrors(
       context,
