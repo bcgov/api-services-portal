@@ -24,7 +24,8 @@
         "scopes": {
           "Namespace.Manage": "Manage namespaces",
           "GatewayConfig.Publish": "Publish gateway configurations",
-          "Namespace.Assign": "Organization-level scope for managing gateways"
+          "Namespace.Assign": "Organization-level scope for managing gateways",
+          "System.Manage": "System-level scope for managing organization system and services"
         }
       },
       "portal": {
