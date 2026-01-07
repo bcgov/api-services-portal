@@ -45,7 +45,7 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
               member: {
                 email: 'janis@testmail.com',
               },
-              roles: ['organization-admin'],
+              roles: ['organization-admin', 'system-owner'],
             },
           ],
         }
@@ -143,7 +143,7 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
                 expect(JSON.stringify(body)).to.be.equal(JSON.stringify(match))
 
                 // New Gateway
-                cy.setRequestBody({})
+                cy.setRequestBody({ displayName: `Gateway ${payload.name}` })
                 return cy
                   .callAPI('ds/api/v3/gateways', 'POST')
                   .then(({ apiRes: { body, status } }: any) => {

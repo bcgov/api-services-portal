@@ -10,6 +10,7 @@ import {
   Body,
   Tags,
   Delete,
+  Query,
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
@@ -46,7 +47,7 @@ export class OrgSubsystemController extends Controller {
     Object.assign(input, body);
     input['organization'] = org;
 
-    return new SubsystemService().createSubsystem(ctx, input);
+    return new SubsystemService().upsertSubsystem(ctx, input);
   }
 
   /**
@@ -80,17 +81,12 @@ export class OrgSubsystemController extends Controller {
   public async delete(
     @Path() org: string,
     @Path() name: string,
-    @Body() body: { force: boolean },
+    @Query('force') force: boolean,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    return new SubsystemService().deleteSubsystem(
-      context,
-      org,
-      name,
-      body.force
-    );
+    return new SubsystemService().deleteSubsystem(context, org, name, force);
   }
 
   // /**

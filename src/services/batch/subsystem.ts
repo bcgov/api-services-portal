@@ -4,12 +4,11 @@ import {
   getRecords,
   removeEmpty,
   removeKeys,
-  replaceKey,
   syncRecordsThrowErrors,
 } from '../../batch/feed-worker';
 import { regExprValidation } from '../utils';
 import { strict as assert } from 'assert';
-import { RuntimeGroup, Subsystem } from './types';
+import { Subsystem } from './types';
 import { Subsystem as KeystoneSubsystem } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
 import {
@@ -17,11 +16,6 @@ import {
   CreateNamespaceArgs,
 } from '../workflow/create-namespace';
 import { RuntimeGroupService } from './runtime-group';
-import {
-  DeleteNamespace,
-  DeleteNamespaceValidate,
-} from '../workflow/delete-namespace';
-import getSubjectToken from '../../auth/auth-token';
 
 class SubsystemService {
   validateSubsystem = (context: Keystone, name: string): void => {
@@ -32,11 +26,17 @@ class SubsystemService {
     );
   };
 
-  createSubsystem = async (
+  upsertSubsystem = async (
     context: Keystone,
     body: Subsystem
   ): Promise<BatchResult> => {
-    return await syncRecordsThrowErrors(context, 'Subsystem', undefined, body);
+    const result = await syncRecordsThrowErrors(
+      context,
+      'Subsystem',
+      undefined,
+      body
+    );
+    return result;
   };
 
   listSubsystemsByOrganization = async (
