@@ -81,7 +81,7 @@ export default {
         payload: {
           status: 400,
           result: 'update-failed',
-          reason: 'Failed updating children\n1 !== 0',
+          reason: 'Failed updating children',
           childResults: [
             {
               status: 400,
