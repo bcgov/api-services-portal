@@ -49,9 +49,9 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-oss
             -Dsonar.projectKey=aps-portal
-            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
