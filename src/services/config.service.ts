@@ -43,7 +43,6 @@ export class ConfigService {
         user: process.env.EMAIL_USER || '',
         pass: process.env.EMAIL_PASS || '',
       },
-      referenceDataBaseUri: process.env.REFERENCE_DATA_BASE_URI || '',
     };
   }
 

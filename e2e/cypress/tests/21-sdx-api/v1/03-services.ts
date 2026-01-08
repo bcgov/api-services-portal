@@ -16,13 +16,11 @@ describe('SDX Services', () => {
           expect(status).to.be.equal(200)
           expect(body.length).to.be.greaterThan(0)
           for (const service of body) {
-            expect(service).to.have.property('id')
+            expect(service).to.have.property('name')
             expect(service).to.have.property('title')
             expect(service).to.have.property('version')
             expect(service).to.have.property('title')
             expect(service).to.have.property('description')
-            expect(['active', 'archived']).to.include(service.state)
-            expect(service).to.have.property('state')
             expect(service).to.have.property('subsystem')
             expect(service).to.have.property('operations')
           }

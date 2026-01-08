@@ -88,31 +88,4 @@ export class OrgSubsystemController extends Controller {
 
     return new SubsystemService().deleteSubsystem(context, org, name, force);
   }
-
-  // /**
-  //  * Update subsystem's gateway permissions
-  //  *
-  //  * @summary Update subsystem gateway permissions
-  //  * @param org
-  //  * @param name
-  //  * @param request
-  //  */
-  // @Put('/{name}/gateway')
-  // @OperationId('updateSubsystemGatewayPermissions')
-  // @Security('jwt', [])
-  // public async updateGatewayPermissions(
-  //   @Path() org: string,
-  //   @Path() name: string,
-  //   @Body() body: { runtimeGroup: string },
-  //   @Request() request: any
-  // ): Promise<{ gatewayId: string; displayName: string }> {
-  //   const context = this.keystone.createContext(request, true);
-
-  //   return new SubsystemService().createSubsystemGateway(
-  //     context,
-  //     org,
-  //     name,
-  //     body.runtimeGroup
-  //   );
-  // }
 }

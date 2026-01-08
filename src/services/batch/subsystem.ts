@@ -13,10 +13,6 @@ import { strict as assert } from 'assert';
 import { Subsystem } from './types';
 import { Subsystem as KeystoneSubsystem } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
-import {
-  CreateNamespace,
-  CreateNamespaceArgs,
-} from '../workflow/create-namespace';
 
 class SubsystemService {
   validateSubsystem = (name: string): void => {
@@ -73,64 +69,8 @@ class SubsystemService {
   ): Promise<BatchResult> => {
     const subsystem = await this.findSubsystemByName(context, org, name);
 
-    //await this.deleteSubsystemGateway(context, subsystem, force);
-
     return await deleteRecordByInternalId(context, 'Subsystem', subsystem.id);
   };
-
-  // private deleteSubsystemGateway = async (
-  //   context: any,
-  //   subsystem: KeystoneSubsystem,
-  //   force: boolean
-  // ): Promise<void> => {
-  //   await DeleteNamespaceValidate(context, subsystem.namespace, force);
-
-  //   await DeleteNamespace(
-  //     context.sudo(),
-  //     getSubjectToken(context.req),
-  //     subsystem.namespace
-  //   );
-  // };
-
-  // createSubsystemGateway = async (
-  //   context: Keystone,
-  //   org: string,
-  //   subsystemName: string,
-  //   runtimeGroupName: string
-  // ): Promise<{ gatewayId: string; displayName: string }> => {
-  //   const subsystem = await this.findSubsystemByName(
-  //     context,
-  //     org,
-  //     subsystemName
-  //   );
-  //   const runtimeGroup = await new RuntimeGroupService().findRuntimeGroupByName(
-  //     context,
-  //     runtimeGroupName
-  //   );
-
-  //   assert.strictEqual(
-  //     runtimeGroup.organization.name === org ||
-  //       runtimeGroup.hostedOrganizations?.find((o) => o.name === org) !==
-  //         undefined,
-  //     true,
-  //     `Runtime Group ${runtimeGroupName} is not hosting organization ${org}`
-  //   );
-
-  //   const createArgs: CreateNamespaceArgs = {
-  //     name: subsystem.namespace,
-  //     displayName: `SDX Subsystem ${subsystem.name}`,
-  //     org,
-  //     orgEnabled: false,
-  //     dataPlane: 'sdx-edge',
-  //     domains: [runtimeGroup.host],
-  //   };
-
-  //   const rset = await CreateNamespace(context, createArgs);
-  //   return {
-  //     gatewayId: rset.name,
-  //     displayName: rset.displayName,
-  //   };
-  // };
 
   findSubsystemByName = async (
     context: Keystone,
