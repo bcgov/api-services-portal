@@ -6,7 +6,7 @@ import { BatchWhereClause } from '../keystone/batch-service';
  * @tsoaModel
  *
  */
-export interface IServiceOperation {
+export interface ServiceOperation {
   operationId: string;
   summary: string;
   method: string;
@@ -18,7 +18,7 @@ export interface IServiceOperation {
  * @tsoaModel
  *
  */
-export interface IServiceCatalogEntry {
+export interface ServiceCatalogEntry {
   id: string;
   locators?: string[];
   title: string;
@@ -26,7 +26,7 @@ export interface IServiceCatalogEntry {
   summary: string;
   description: string;
   state: string;
-  operations: IServiceOperation[];
+  operations: ServiceOperation[];
   spec?: string;
   subsystem: {
     name: string;
@@ -55,7 +55,7 @@ export async function GetCatalogById(
   ctx: any,
   id: string,
   includeSpec: boolean = false
-): Promise<IServiceCatalogEntry> {
+): Promise<ServiceCatalogEntry> {
   const batchClause = {
     query: '$name: String',
     clause: '{ name: $name }',
@@ -68,7 +68,7 @@ export async function GetCatalog(
   ctx: any,
   includeSpec: boolean = false,
   batchClause?: BatchWhereClause
-): Promise<IServiceCatalogEntry[]> {
+): Promise<ServiceCatalogEntry[]> {
   const records: OpenApiSpec[] = await getRecords(
     ctx,
     'OpenAPISpec',
@@ -97,6 +97,6 @@ export async function GetCatalog(
         },
         state: c.state,
         operations: JSON.parse(c.operations || '{}'),
-      } as IServiceCatalogEntry)
+      } as ServiceCatalogEntry)
   );
 }

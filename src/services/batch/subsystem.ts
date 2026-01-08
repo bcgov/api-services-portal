@@ -4,7 +4,9 @@ import {
   getRecords,
   removeEmpty,
   removeKeys,
+  replaceKey,
   syncRecordsThrowErrors,
+  transformAllRefID,
 } from '../../batch/feed-worker';
 import { regExprValidation } from '../utils';
 import { strict as assert } from 'assert';
@@ -49,7 +51,7 @@ class SubsystemService {
       variables: { org },
     };
 
-    const records: Subsystem[] = await getRecords(
+    const records: KeystoneSubsystem[] = await getRecords(
       context,
       'Subsystem',
       'allSubsystems',
@@ -57,7 +59,11 @@ class SubsystemService {
       batchClause
     );
 
-    return records.map((o) => removeEmpty(o)).map((o) => removeKeys(o, ['id']));
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['organization']))
+      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
+      .map((o) => removeKeys(o, ['id']));
   };
 
   deleteSubsystem = async (

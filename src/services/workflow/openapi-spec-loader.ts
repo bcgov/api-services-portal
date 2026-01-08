@@ -1,11 +1,9 @@
 import { OpenAPISpec } from '@/controllers/v3/types';
 import { Logger } from '../../logger';
-import { ValidateError } from 'tsoa';
 import YAML from 'yaml';
-import { getRecord, getRecordById, getRecords } from '../../batch/feed-worker';
 import { Subsystem } from '../keystone/types';
-import { IServiceOperation } from '../gateway-patterns/catalog';
 import { SubsystemService } from '../batch/subsystem';
+import { ServiceOperation } from '../gateway-patterns/catalog';
 
 const logger = Logger('wf.OASLoader');
 
@@ -64,7 +62,7 @@ function parseSpecOperations(spec: any) {
       });
     });
 
-  const flattenedOperations: IServiceOperation[] = [];
+  const flattenedOperations: ServiceOperation[] = [];
   if (operations) {
     for (const opList of operations) {
       for (const op of opList) {

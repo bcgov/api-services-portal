@@ -2,13 +2,13 @@ import { getRecords } from '../../batch/feed-worker';
 import { RuntimeGroup } from '../keystone/types';
 import { NamespaceService } from '../org-groups';
 import { getGwaProductEnvironment } from '../workflow';
-import { IServiceCatalogEntry } from './catalog';
+import { ServiceCatalogEntry } from './catalog';
 import { LookupMember } from './member-id';
 
-export async function BackfillSubsystemDetails(
+export async function BackfillRuntimeGroupDetails(
   ctx: any,
-  entry: IServiceCatalogEntry
-): Promise<IServiceCatalogEntry> {
+  entry: ServiceCatalogEntry
+): Promise<ServiceCatalogEntry> {
   const prodEnv = await getGwaProductEnvironment(ctx, false);
   const envConfig = prodEnv.issuerEnvConfig;
 

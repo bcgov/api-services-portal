@@ -16,8 +16,8 @@ import { inject, injectable } from 'tsyringe';
 import {
   GetCatalog,
   GetCatalogById,
+  ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
-import { ServiceCatalogEntry } from './types';
 import YAML from 'yaml';
 
 interface MissingCredentialsJSON {

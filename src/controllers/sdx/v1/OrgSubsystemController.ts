@@ -14,7 +14,7 @@ import {
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { SDXSubsystem, SubsystemInput } from './types';
+import { SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
@@ -60,7 +60,7 @@ export class OrgSubsystemController extends Controller {
   public async listSubsystems(
     @Path() org: string,
     @Request() request: any
-  ): Promise<SDXSubsystem[]> {
+  ): Promise<Subsystem[]> {
     const ctx = this.keystone.createContext(request);
     return new SubsystemService().listSubsystemsByOrganization(ctx, org);
   }

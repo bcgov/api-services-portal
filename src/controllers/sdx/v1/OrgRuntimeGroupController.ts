@@ -12,7 +12,6 @@ import {
 } from 'tsoa';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { RuntimeGroupInput, SDXRuntimeGroup } from './types';
 import { BatchResult } from '../../../batch/types';
 import {
   getRecords,

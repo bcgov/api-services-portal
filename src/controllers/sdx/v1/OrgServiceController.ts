@@ -16,7 +16,6 @@ import {
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { ServiceCatalogEntry } from './types';
 import { BatchResult } from '../../../batch/types';
 import {
   deleteRecordByInternalId,
@@ -30,6 +29,7 @@ import {
 import {
   GetCatalog,
   GetCatalogById,
+  ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
 import YAML from 'yaml';
 import { OpenAPISpecService } from '../../../services/batch/oas-service';
@@ -110,8 +110,8 @@ export class GatewayServiceController extends Controller {
   @OperationId('getOrganizationOASService')
   @Security('jwt', ['System.Manage'])
   public async getOrganizationOASService(
-    @Path('id') id: string,
     @Path() org: string,
+    @Path('id') id: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
@@ -135,8 +135,8 @@ export class GatewayServiceController extends Controller {
   @OperationId('getOrganizationServiceSpec')
   @Security('jwt', ['System.Manage'])
   public async getOrganizationServiceSpec(
-    @Path('id') id: string,
     @Path() org: string,
+    @Path('id') id: string,
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
@@ -168,17 +168,24 @@ export class GatewayServiceController extends Controller {
   @OperationId('deleteOrganizationOASService')
   @Security('jwt', ['System.Manage'])
   public async delete(
+    @Path() org: string,
     @Path('id') id: string,
     @Query('force') force: boolean,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    const spec = await new OpenAPISpecService().findOpenAPISpecByName(
+    const entry = await new OpenAPISpecService().findOpenAPISpecByName(
       context,
       id
     );
+    assertEqual(
+      entry && entry.subsystem.organization.name === org,
+      true,
+      'organization',
+      'Not authorized to access this service'
+    );
 
-    return await deleteRecordByInternalId(context, 'OpenAPISpec', spec.id);
+    return await deleteRecordByInternalId(context, 'OpenAPISpec', entry.id);
   }
 }

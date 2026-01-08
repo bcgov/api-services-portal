@@ -31,7 +31,6 @@ import { Gateway, Organization } from '../../v3/types';
 import { ActivityDetail } from '../../v3/types-extra';
 import { assertEqual } from '../../ioc/assert';
 import { gql } from 'graphql-request';
-import { SDXRuntimeGroup } from './types';
 import { Logger } from '../../../logger';
 import {
   CreateNamespace,

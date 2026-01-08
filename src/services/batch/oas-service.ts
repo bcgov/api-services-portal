@@ -8,11 +8,17 @@ class OpenAPISpecService {
     context: Keystone,
     name: string
   ): Promise<OpenApiSpec> => {
-    const records = await getRecords(context, 'OpenAPISpec', undefined, [], {
-      query: '$name: String!',
-      clause: '{ name: $name }',
-      variables: { name },
-    });
+    const records = await getRecords(
+      context,
+      'OpenAPISpec',
+      undefined,
+      ['subsystem'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
 
     assert.strictEqual(records.length == 0, false, 'OpenAPI Spec not found');
     return records.pop();
