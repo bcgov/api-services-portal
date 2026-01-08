@@ -146,7 +146,6 @@ for (const _list of [
   'Organization',
   'OrganizationUnit',
   'Product',
-  'RuntimeGroup',
   'ServiceAccess',
   'Subsystem',
   'TemporaryIdentity',

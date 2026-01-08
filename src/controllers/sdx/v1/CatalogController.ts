@@ -15,7 +15,7 @@ import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
   GetCatalog,
-  GetCatalogById,
+  GetCatalogByName,
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
 import YAML from 'yaml';
@@ -46,7 +46,7 @@ export class CatalogController extends Controller {
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
     {
-      id: 'oas-service-123',
+      name: 'oas-service-123',
       title: 'Sample OAS Service',
       version: '1.0.0',
       summary: 'A sample OpenAPI service',
@@ -58,7 +58,6 @@ export class CatalogController extends Controller {
           name: 'sample-organization',
         },
       },
-      state: 'active',
       operations: [
         {
           method: 'GET',
@@ -84,29 +83,28 @@ export class CatalogController extends Controller {
   /**
    * Retrieve the Service Details
    */
-  @Get('/services/{id}')
+  @Get('/services/{name}')
   @OperationId('getOASService')
   @Security('jwt', [])
   public async getOASService(
-    @Path('id') id: string,
+    @Path('name') name: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
-    return await GetCatalogById(ctx, id, false);
+    return await GetCatalogByName(ctx, name, false);
   }
 
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
    */
-  @Get('/services/{id}/oas-spec')
+  @Get('/services/{name}/oas-spec')
   @OperationId('getOASServiceSpec')
   public async getOASServiceSpec(
-    @Path('id') id: string,
+    @Path('name') name: string,
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.sudo();
-    const entry = await GetCatalogById(ctx, id, true);
-
+    const entry = await GetCatalogByName(ctx, name, true);
     return YAML.parse(entry.spec);
   }
 }

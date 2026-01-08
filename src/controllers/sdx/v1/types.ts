@@ -1,5 +1,3 @@
-import { RuntimeGroup } from '../../../controllers/v3/types';
-
 /**
  * @tsoaModel
  *
@@ -18,12 +16,12 @@ export interface OpenAPISpecInput {
   subsystem: string;
 }
 
-/**
- * @tsoaModel
- *
- */
-export interface RuntimeGroupInput {
-  name: string;
-  publicEndpoint?: string;
-  privateEndpoint?: string;
-}
+// /**
+//  * @tsoaModel
+//  *
+//  */
+// export interface RuntimeGroupInput {
+//   name: string;
+//   publicEndpoint?: string;
+//   privateEndpoint?: string;
+// }

@@ -4,6 +4,8 @@ import YAML from 'yaml';
 import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
 import { ServiceOperation } from '../gateway-patterns/catalog';
+import { strict as assert } from 'assert';
+import { OpenAPISpecService } from '../batch/oas-service';
 
 const logger = Logger('wf.OASLoader');
 
@@ -18,6 +20,8 @@ export const LoadOpenAPISpec = async (
   context: any,
   spec: OpenAPISpecInput
 ): Promise<OpenAPISpec> => {
+  const specService = new OpenAPISpecService();
+
   const outSpec: OpenAPISpec = {};
 
   const subsystemRecord: Subsystem = await new SubsystemService().findSubsystemByName(
@@ -28,16 +32,20 @@ export const LoadOpenAPISpec = async (
 
   const oas = YAML.parse(spec.spec);
 
+  const serviceName = specService.titleToServiceName(oas.info?.title || '');
+
   outSpec.spec = spec.spec;
+  outSpec.name = `${spec.organization}.${serviceName}.${specService.majorPart(
+    oas.info?.version
+  )}`;
   (outSpec as any).namespace = subsystemRecord.namespace;
   outSpec.organization = spec.organization;
   outSpec.subsystem = spec.subsystem;
-  outSpec.state = spec.state;
   outSpec.title = oas.info?.title;
   outSpec.summary = oas.info?.summary;
   outSpec.version = oas.info?.version;
   outSpec.description = oas.info?.description;
-  outSpec.ref = `${spec.organization}/${outSpec.title}/${outSpec.version}`;
+  outSpec.ref = outSpec.name;
   outSpec.operations = JSON.stringify(parseSpecOperations(oas));
 
   return outSpec;

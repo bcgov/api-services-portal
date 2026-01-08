@@ -4,6 +4,27 @@ import { strict as assert } from 'assert';
 import { OpenApiSpec } from '../keystone/types';
 
 class OpenAPISpecService {
+  majorPart = (version: string | undefined): string => {
+    if (!version) return 'v1';
+    const major = version.split('.')[0];
+    return `v${major}`;
+  };
+
+  titleToServiceName = (title: string): string => {
+    // remove all characters except alphanumeric and replace spaces with dashes
+    // remove various endings like -API, -SERVICE, -SERVICES, -SVC
+    return title
+      .toUpperCase()
+      .trim()
+      .replace(/[^A-Z0-9-\s]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(
+        /(-API|-SERVICE|-SERVICE-SVC|-SERVICE-API|-API-SERVICE|-SERVICES|-SVC)$/,
+        ''
+      )
+      .toLocaleLowerCase();
+  };
+
   findOpenAPISpecByName = async (
     context: Keystone,
     name: string

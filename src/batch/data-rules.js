@@ -420,7 +420,6 @@ const metadata = {
       'name',
       'title',
       'version',
-      'state',
       'spec',
       'summary',
       'description',
@@ -449,41 +448,6 @@ const metadata = {
       version: '1.0.0',
       operations: '{}',
       spec: '{}',
-    },
-  },
-  RuntimeGroup: {
-    query: 'allRuntimeGroups',
-    refKey: 'name',
-    sync: [
-      'host',
-      'publicEndpoint',
-      'privateEndpoint',
-      'organization',
-      'hostedOrganizations',
-      'namespace',
-    ],
-    transformations: {
-      organization: {
-        name: 'connectOne',
-        list: 'allOrganizations',
-        refKey: 'name',
-      },
-      hostedOrganizations: {
-        name: 'connectMany',
-        list: 'allOrganizations',
-        refKey: 'name',
-      },
-    },
-    example: {
-      name: 'my-runtime-group',
-      namespace: 'gw-abc',
-      host: 'runtime-group.my-domain.sdx',
-      publicEndpoint: '10.10.10.10:443',
-      privateEndpoint: '10.0.0.11:6443',
-      hostedOrganizations: [
-        'ministry-of-citizens-services',
-        'ministry-of-health',
-      ],
     },
   },
   Subsystem: {

@@ -28,7 +28,7 @@ import {
 } from '../../../services/workflow/openapi-spec-loader';
 import {
   GetCatalog,
-  GetCatalogById,
+  GetCatalogByName,
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
 import YAML from 'yaml';
@@ -106,17 +106,17 @@ export class GatewayServiceController extends Controller {
    * Retrieve an oas-services associated with an organization
    * > `Required Scope:` System.Manage
    */
-  @Get('/{id}')
+  @Get('/{name}')
   @OperationId('getOrganizationOASService')
   @Security('jwt', ['System.Manage'])
   public async getOrganizationOASService(
     @Path() org: string,
-    @Path('id') id: string,
+    @Path('name') name: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.createContext(request);
 
-    const entry = await GetCatalogById(ctx, id, false);
+    const entry = await GetCatalogByName(ctx, name, false);
     assertEqual(
       entry && entry.subsystem.organization.name === org,
       true,
@@ -131,17 +131,17 @@ export class GatewayServiceController extends Controller {
    * Retrieve the Service OpenAPI Specification in JSON format
    * > `Required Scope:` System.Manage
    */
-  @Get('/{id}/oas-spec')
+  @Get('/{name}/oas-spec')
   @OperationId('getOrganizationServiceSpec')
   @Security('jwt', ['System.Manage'])
   public async getOrganizationServiceSpec(
     @Path() org: string,
-    @Path('id') id: string,
+    @Path('name') name: string,
     @Request() request: any
   ): Promise<any> {
     const ctx = this.keystone.createContext(request);
 
-    const entry = await GetCatalogById(ctx, id, true);
+    const entry = await GetCatalogByName(ctx, name, true);
 
     assertEqual(
       entry && entry.subsystem.organization.name === org,
@@ -159,25 +159,23 @@ export class GatewayServiceController extends Controller {
    *
    * @summary Delete an OAS Service
    * @param org
-   * @param id
-   * @param force
+   * @param name
    * @param request
    * @example { force: false } body
    */
-  @Delete('/{id}')
+  @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')
   @Security('jwt', ['System.Manage'])
   public async delete(
     @Path() org: string,
-    @Path('id') id: string,
-    @Query('force') force: boolean,
+    @Path('name') name: string,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
     const entry = await new OpenAPISpecService().findOpenAPISpecByName(
       context,
-      id
+      name
     );
     assertEqual(
       entry && entry.subsystem.organization.name === org,

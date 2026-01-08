@@ -59,6 +59,8 @@ describe('SDX Subsystem', () => {
           expect(body.length).to.be.equal(1)
           expect(JSON.stringify(body)).to.include(`SUBSYS-${datasetId.toUpperCase()}`)
           expect(body[0].name).to.be.equal(payload.name)
+          expect(body[0]).to.have.property('gatewayId')
+          expect(body[0].organization).to.be.equal(org.name)
         }
       )
     })

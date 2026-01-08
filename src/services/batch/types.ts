@@ -285,7 +285,6 @@ export interface OpenAPISpec {
   ref?: string;
   title?: string;
   version?: string;
-  state?: string;
   spec?: string;
   summary?: string;
   description?: string;
@@ -293,31 +292,6 @@ export interface OpenAPISpec {
   gatewayId?: string;
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
-}
-
-
-/**
- * @tsoaModel
- * @example {
- *   "name": "my-runtime-group",
- *   "namespace": "gw-abc",
- *   "host": "runtime-group.my-domain.sdx",
- *   "publicEndpoint": "10.10.10.10:443",
- *   "privateEndpoint": "10.0.0.11:6443",
- *   "hostedOrganizations": [
- *     "ministry-of-citizens-services",
- *     "ministry-of-health"
- *   ]
- * }
- */  
-export interface RuntimeGroup {
-  name?: string; // Primary Key
-  host?: string;
-  publicEndpoint?: string;
-  privateEndpoint?: string;
-  gatewayId?: string;
-  organization?: OrganizationRefID;
-  hostedOrganizations?: OrganizationRefID[];
 }
 
 

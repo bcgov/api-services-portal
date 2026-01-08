@@ -1,6 +1,7 @@
 import { OpenApiSpec } from '../keystone/types';
 import { getRecords } from '../../batch/feed-worker';
 import { BatchWhereClause } from '../keystone/batch-service';
+import { strict as assert } from 'assert';
 
 /**
  * @tsoaModel
@@ -19,13 +20,12 @@ export interface ServiceOperation {
  *
  */
 export interface ServiceCatalogEntry {
-  id: string;
+  name: string;
   locators?: string[];
   title: string;
   version: string;
-  summary: string;
+  summary?: string;
   description: string;
-  state: string;
   operations: ServiceOperation[];
   spec?: string;
   subsystem: {
@@ -51,17 +51,19 @@ export interface ServiceCatalogEntry {
   };
 }
 
-export async function GetCatalogById(
+export async function GetCatalogByName(
   ctx: any,
-  id: string,
+  name: string,
   includeSpec: boolean = false
 ): Promise<ServiceCatalogEntry> {
   const batchClause = {
     query: '$name: String',
     clause: '{ name: $name }',
-    variables: { name: id },
+    variables: { name },
   };
-  return (await GetCatalog(ctx, includeSpec, batchClause))[0];
+  const records = await GetCatalog(ctx, includeSpec, batchClause);
+  assert.strictEqual(records.length == 0, false, 'Service not found');
+  return records.pop();
 }
 
 export async function GetCatalog(
@@ -80,7 +82,7 @@ export async function GetCatalog(
   return records.map(
     (c: OpenApiSpec) =>
       ({
-        id: c.name,
+        name: c.name,
         title: c.title,
         version: c.version,
         summary: c.summary,
