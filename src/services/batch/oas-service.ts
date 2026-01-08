@@ -22,7 +22,7 @@ class OpenAPISpecService {
         /(-API|-SERVICE|-SERVICE-SVC|-SERVICE-API|-API-SERVICE|-SERVICES|-SVC)$/,
         ''
       )
-      .toLocaleLowerCase();
+      .toLocaleUpperCase();
   };
 
   findOpenAPISpecByName = async (

@@ -44,8 +44,8 @@ describe('Org Group Access Service', function () {
     const kc = new OrgGroupService(uma2.issuer);
 
     const roles = await kc.getValidRoles();
-    expect(roles.length).toBe(1);
-    expect(roles[0]).toBe('organization-admin');
+    expect(roles.length).toBe(2);
+    expect(roles.sort()[0]).toBe('organization-admin');
   });
 
   it('it should findGroup', async function () {
