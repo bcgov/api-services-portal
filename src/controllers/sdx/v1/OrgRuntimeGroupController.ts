@@ -51,19 +51,15 @@ export class RuntimeGroupController extends Controller {
     @Body() body: RuntimeGroupInput,
     @Request() request: any
   ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request);
+
     let input: RuntimeGroup = {};
     Object.assign(input, body);
     input['organization'] = org;
 
-    // host should be based on a standard format for edge servers
-    input['host'] = `${input['name']}.servers.sdx`;
+    const service = new RuntimeGroupService();
 
-    return await syncRecordsThrowErrors(
-      this.keystone.createContext(request, true),
-      'RuntimeGroup',
-      input['name'],
-      input
-    );
+    return service.upsertRuntimeGroup(ctx, input);
   }
 
   /**
@@ -78,24 +74,10 @@ export class RuntimeGroupController extends Controller {
     @Request() request: any
   ): Promise<RuntimeGroup[]> {
     const ctx = this.keystone.createContext(request, true);
-    const batchClause = {
-      query: '$org: String',
-      clause: '{ organization: { name: $org } }',
-      variables: { org },
-    };
-    const records: RuntimeGroup[] = await getRecords(
-      ctx,
-      'RuntimeGroup',
-      'allRuntimeGroups',
-      [],
-      batchClause
-    );
 
-    return records
-      .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['organization']))
-      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
-      .map((o) => removeKeys(o, ['id']));
+    const service = new RuntimeGroupService();
+
+    return service.listRuntimeGroupsByOrganization(ctx, org);
   }
 
   /**
@@ -119,17 +101,8 @@ export class RuntimeGroupController extends Controller {
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    const entry = await new RuntimeGroupService().findRuntimeGroupByName(
-      context,
-      name
-    );
-    assertEqual(
-      entry && entry.organization.name === org,
-      true,
-      'organization',
-      'Not authorized to access this runtime group'
-    );
+    const service = new RuntimeGroupService();
 
-    return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
+    return service.deleteRuntimeGroup(context, org, name, force);
   }
 }

@@ -1,7 +1,7 @@
 const { Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { regExprValidation } = require('../services/utils');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { RuntimeGroupService } = require('../services/batch/runtime-group');
 
 /*
 RuntimeGroup : For SDX this is an Edge Server
@@ -48,11 +48,7 @@ module.exports = {
       return resolvedData;
     },
     validateInput: ({ resolvedData }) => {
-      regExprValidation(
-        '^[a-z0-9]{4,10}$',
-        resolvedData['name'],
-        'Runtime Group name must be between 4 and 10 lowercase alpha-numeric characters'
-      );
+      new RuntimeGroupService().validateRuntimeGroup(resolvedData['name']);
     },
   },
 };
