@@ -128,13 +128,14 @@ describe('Gateways', () => {
 
           // Look for the specific gateway in the response body
           const foundGateway = body.find(
-            (item: { gatewayId: string, displayName: string }) => 
-              item.gatewayId === gateway.gatewayId && item.displayName === gateway.displayName
-          );
+            (item: { gatewayId: string; displayName: string }) =>
+              item.gatewayId === gateway.gatewayId &&
+              item.displayName === gateway.displayName
+          )
 
           // Assert that the gateway was found
-          expect(foundGateway).to.not.be.undefined;
-          cy.log(`Found gateway: ${JSON.stringify(foundGateway, null, 2)}`);
+          expect(foundGateway).to.not.be.undefined
+          cy.log(`Found gateway: ${JSON.stringify(foundGateway, null, 2)}`)
         }
       )
     })
@@ -184,8 +185,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start with a letter.',
@@ -206,8 +208,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
@@ -228,8 +231,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',

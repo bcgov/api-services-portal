@@ -2444,7 +2444,7 @@ CREATE TABLE public."OpenAPISpec" (
     namespace text NOT NULL,
     version text NOT NULL,
     title text NOT NULL,
-    summary text NOT NULL,
+    summary text,
     description text NOT NULL,
     operations text NOT NULL,
     spec text NOT NULL,

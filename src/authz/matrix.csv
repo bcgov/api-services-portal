@@ -1,12 +1,11 @@
 ID,matchOneOfBaseQueryName,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchOneOfFieldKey,matchNotOneOfFieldKey,matchUserNS,inRole,matchOneOfScope,matchOneOfRole,result,filters
 ,,,,,"update,create,delete",,,,aps-admin,,,allow,
-Org Admin,,,Subsystem,read,,,,,,,"portal-user",allow,
-Org Admin,,,Subsystem,create,,,,,system-owner,,,allow,
-Org Admin,,,Subsystem,,"update,delete",,,,system-owner,,,allow,
-Org Admin,,,OpenAPISpec,read,,,,,portal-user,,,allow,
-Org Admin,,,OpenAPISpec,create,,,,,system-owner,,,allow,
-Org Admin,,,OpenAPISpec,,"update,delete",,,,system-owner,,,allow,
-
+Org - Admin,,,Subsystem,read,,,,,,,"portal-user",allow,
+Org - System Owner,,,Subsystem,create,,,,,system-owner,,,allow,
+Org - System Owner,,,Subsystem,,"update,delete",,,,system-owner,,,allow,
+Org - System Owner,,,OpenAPISpec,read,,,,,portal-user,,,allow,
+Org - System Owner,,,OpenAPISpec,create,,,,,system-owner,,,allow,
+Org - System Owner,,,OpenAPISpec,,"update,delete",,,,system-owner,,,allow,
 ACCESS MANAGER,,,AccessRequest,update,,"isApproved,isIssued",,,access-manager,,,allow,
 ACCESS MANAGER,,,AccessRequest,,"create,read","isApproved,isIssued",,,access-manager,,,allow,
 ACCESS MANAGER,,,AccessRequest,read,,,,,access-manager,,,allow,
@@ -218,17 +217,12 @@ API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-us
 API Owner Role Rules,,allGatewayPluginsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allGatewayServiceMetricsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-API Owner Role Rules,,allSubsystemsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-API Owner Role Rules,,allOpenAPISpecsByNamespace,,,,,,,,,"api-owner,provider-user,config-publisher",allow,filterBySubsystemNamespace
-API Owner Role Rules,,allOpenAPISpecs,,,,,,,,,"api-owner,provider-user,config-publisher",allow
 Portal User or Guest,,allProductsByNamespace,,,,,,,,,portal-user,allow,filterByUserNS
-Portal User or Guest,,allSubsystemsByNamespace,,,,,,,,,portal-user,allow,filterByUserNS
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
 Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment
 Portal User or Guest,,allProducts,,,,,,,,,"portal-user,guest",allow,
-Portal User or Guest,,allSubsystems,,,,,,,,,"portal-user,guest",allow,
 Portal User or Guest,,environments,,,,,,,,,"portal-user,guest",allow,
 Portal User or Guest,,allDatasets,,,,,,,,,"portal-user,guest",allow,
 Portal User or Guest,,Environment,,,,,,,,,"portal-user,guest",allow,

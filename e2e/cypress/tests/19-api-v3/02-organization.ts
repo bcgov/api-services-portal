@@ -41,6 +41,12 @@ describe('Organization', () => {
             },
           ],
         },
+        {
+          name: 'system-owner',
+          permissions: [
+            { resource: 'org/ministry-of-health', scopes: ['System.Manage'] },
+          ],
+        },
       ],
     }
 
@@ -53,17 +59,17 @@ describe('Organization', () => {
   })
 
   it('GET /organizations/{org}/access', () => {
-    // ignore specific member contents since previous tests will have created members 
+    // ignore specific member contents since previous tests will have created members
     const match = {
       name: 'ministry-of-health',
       parent: '/ca.bc.gov',
-    };
-  
+    }
+
     cy.callAPI('ds/api/v3/organizations/ministry-of-health/access', 'GET').then(
       ({ apiRes: { status, body } }: any) => {
-        expect(status).to.be.equal(200);
-        expect(body).to.include(match);
-        expect(body.members).to.be.an('array');
+        expect(status).to.be.equal(200)
+        expect(body).to.include(match)
+        expect(body.members).to.be.an('array')
       }
     )
   })
@@ -122,6 +128,7 @@ describe('Organization', () => {
       name: 'platform',
       orgUnit: 'planning-and-innovation-division',
       enabled: false,
+      permDomains: [],
       updatedAt: 0,
     }
 
@@ -137,19 +144,21 @@ describe('Organization', () => {
 
   it('GET /organizations/{org}/activity', () => {
     // Retry logic if the 422 error occurs
-    cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET')
-      .then(({ apiRes: { status, body } }: any) => {
+    cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET').then(
+      ({ apiRes: { status, body } }: any) => {
         if (status === 422) {
-          cy.wait(2000);
-          cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET')
-            .then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200);
-            });
+          cy.wait(2000)
+          cy.callAPI('ds/api/v3/organizations/ministry-of-health/activity', 'GET').then(
+            ({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+            }
+          )
         } else {
-          expect(status).to.be.equal(200);
+          expect(status).to.be.equal(200)
         }
-      });
-  });
+      }
+    )
+  })
 
   it('PUT /organizations/{org}/{orgUnit}/gateways/{gatewayId}', () => {
     cy.setRequestBody({})
@@ -158,8 +167,9 @@ describe('Organization', () => {
       const myGateway = body
 
       cy.setRequestBody({})
+      cy.setQueryString({ enable: 'true' })
       cy.callAPI(
-        `ds/api/v3/organizations/ministry-of-health/planning-and-innovation-division/gateways/${myGateway.gatewayId}?enable=true`,
+        `ds/api/v3/organizations/ministry-of-health/planning-and-innovation-division/gateways/${myGateway.gatewayId}`,
         'PUT'
       ).then(({ apiRes: { status, body } }: any) => {
         expect(status).to.be.equal(200)
@@ -178,6 +188,19 @@ describe('Organization', () => {
             scopes: ['GroupAccess.Manage', 'Namespace.Assign', 'Dataset.Manage'],
           },
           { resourceType: 'namespace', scopes: ['Namespace.View'] },
+        ],
+      },
+      'system-owner': {
+        label: 'System Owner',
+        permissions: [
+          {
+            resourceType: 'organization',
+            scopes: ['System.Manage'],
+          },
+          {
+            resourceType: 'namespace',
+            scopes: ['Namespace.Manage'],
+          },
         ],
       },
     }

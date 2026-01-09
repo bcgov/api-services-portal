@@ -103,7 +103,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Retrieve an oas-services associated with an organization
+   * Retrieve an oas-service associated with an organization
    * > `Required Scope:` System.Manage
    */
   @Get('/{name}')

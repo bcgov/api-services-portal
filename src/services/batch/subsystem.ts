@@ -19,7 +19,7 @@ class SubsystemService {
     regExprValidation(
       '^[A-Z0-9-]{3,20}$',
       name,
-      "Subsystem name must be between 3 and 20 alpha-numeric characters (including special character '-')"
+      "Subsystem name must be between 3 and 20 uppercase alpha-numeric characters (including special character '-')"
     );
   };
 

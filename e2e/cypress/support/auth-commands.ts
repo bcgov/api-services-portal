@@ -653,6 +653,7 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
         url: Cypress.env('BASE_URL') + '/' + endPoint,
         method: methodType,
         body: body,
+        qs: queryString,
         headers: headers,
         failOnStatusCode: false,
       }).then((apiResponse) => {
