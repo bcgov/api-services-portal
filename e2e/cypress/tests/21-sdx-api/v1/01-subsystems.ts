@@ -79,7 +79,7 @@ describe('SDX Subsystem', () => {
           expect(status).to.be.equal(400)
           expect(body.result).to.be.equal('create-failed')
           expect(body.reason).to.be.equal(
-            "Subsystem name must be between 3 and 20 alpha-numeric characters (including special character '-')"
+            "Subsystem name must be between 3 and 20 uppercase alpha-numeric characters (including special character '-')"
           )
         }
       )
