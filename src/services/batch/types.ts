@@ -311,6 +311,31 @@ export interface Subsystem {
 /**
  * @tsoaModel
  * @example {
+ *   "name": "my-runtime-group",
+ *   "namespace": "gw-abc",
+ *   "host": "runtime-group.my-domain.sdx",
+ *   "sdxEndpoint": "10.10.10.10:443",
+ *   "consumerEndpoint": "10.0.0.11:6443",
+ *   "hostedOrganizations": [
+ *     "ministry-of-citizens-services",
+ *     "ministry-of-health"
+ *   ]
+ * }
+ */  
+export interface RuntimeGroup {
+  name?: string; // Primary Key
+  host?: string;
+  sdxEndpoint?: string;
+  consumerEndpoint?: string;
+  gatewayId?: string;
+  organization?: OrganizationRefID;
+  hostedOrganizations?: OrganizationRefID[];
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
  *   "name": "my-new-product",
  *   "appId": "000000000000",
  *   "environments": [

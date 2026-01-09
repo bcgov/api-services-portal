@@ -1,0 +1,108 @@
+import { v4 as uuidv4 } from 'uuid'
+
+describe('SDX Runtime Groups', () => {
+  let workingData: any
+
+  before(() => {
+    cy.buildOrgGatewayDatasetAndProduct().then((data) => {
+      workingData = data
+
+      const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
+      workingData['runtimeGroupId'] = rg.toLowerCase()
+    })
+  })
+
+  describe('Runtime Group Happy Paths', () => {
+    it('PUT /organizations/{org}/runtime-groups', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}`,
+      }
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+        }
+      )
+    })
+
+    it('DELETE /organizations/{org}/runtime-groups/{name}', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}t2`,
+      }
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('created')
+
+          cy.setQueryString({ force: false })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}`,
+            'DELETE'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.result).to.be.equal('deleted')
+          })
+        }
+      )
+    })
+
+    it('GET /organizations/{org}/runtime-groups', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: runtimeGroupId,
+      }
+
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'GET').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.length).to.be.equal(1)
+          expect(body[0].name).to.be.equal(payload.name)
+          expect(body[0]).to.have.property('gatewayId')
+          expect(body[0].organization).to.be.equal(org.name)
+        }
+      )
+    })
+  })
+
+  describe('Runtime Group Sad Paths', () => {
+    it('PUT /organizations/{org}/runtime-groups (invalid)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}longname`,
+      }
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(400)
+          expect(body.result).to.be.equal('create-failed')
+          expect(body.reason).to.be.equal(
+            'Runtime Group name must be between 4 and 10 lowercase alpha-numeric characters'
+          )
+        }
+      )
+    })
+
+    it('DELETE /organizations/{org}/runtime-groups/{name} (not exists)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}404`,
+      }
+      cy.setQueryString({ force: false })
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}`,
+        'DELETE'
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(422)
+        expect(body.message).to.be.equal('Runtime Group not found')
+      })
+    })
+  })
+})
