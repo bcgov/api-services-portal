@@ -496,7 +496,7 @@ const metadata = {
     },
     example: {
       name: 'my-runtime-group',
-      namespace: 'gw-abc',
+      gatewayId: 'gw-abc',
       host: 'runtime-group.my-domain.sdx',
       sdxEndpoint: '10.10.10.10:443',
       consumerEndpoint: '10.0.0.11:6443',

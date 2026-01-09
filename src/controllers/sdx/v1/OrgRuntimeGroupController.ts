@@ -41,10 +41,11 @@ export class RuntimeGroupController extends Controller {
 
   /**
    * Create a new runtime group for an organization
+   * > `Required Scope:` System.Manage
    */
   @Put()
   @OperationId('createRuntimeGroup')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async createRuntimeGroup(
     @Path() org: string,
     @Body() body: RuntimeGroupInput,
@@ -67,10 +68,11 @@ export class RuntimeGroupController extends Controller {
 
   /**
    * Retrieve the list of runtime groups associated with an organization
+   * > `Required Scope:` System.Manage
    */
   @Get()
   @OperationId('listRuntimeGroups')
-  @Security('jwt', [])
+  @Security('jwt', ['System.Manage'])
   public async listRuntimeGroups(
     @Path() org: string,
     @Request() request: any
