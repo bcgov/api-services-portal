@@ -82,15 +82,50 @@ class RuntimeGroupService {
     org: string,
     name: string
   ): Promise<KeystoneRuntimeGroup> => {
+    const rg = await this.findRuntimeGroupByUniqueName(context, name);
+
+    assert.strictEqual(
+      rg.organization?.name === org,
+      false,
+      'Runtime Group not found'
+    );
+
+    return rg;
+  };
+
+  findRuntimeGroupByUniqueName = async (
+    context: Keystone,
+    name: string
+  ): Promise<KeystoneRuntimeGroup> => {
     const records = await getRecords(
       context,
       'RuntimeGroup',
       undefined,
       ['organization', 'hostedOrganizations'],
       {
-        query: '$org: String!, $name: String!',
-        clause: '{ organization: { name: $org }, name: $name }',
-        variables: { org, name },
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
+
+    assert.strictEqual(records.length == 0, false, 'Runtime Group not found');
+    return records.pop();
+  };
+
+  findRuntimeGroupByUniqueHost = async (
+    context: Keystone,
+    host: string
+  ): Promise<KeystoneRuntimeGroup> => {
+    const records = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$host: String!',
+        clause: '{ host: $host }',
+        variables: { host },
       }
     );
 
