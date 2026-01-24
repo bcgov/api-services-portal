@@ -62,6 +62,38 @@ class RuntimeGroupService {
       .map((o) => removeKeys(o, ['id']));
   };
 
+  listHostedRuntimeGroupsForOrganization = async (
+    context: Keystone,
+    org: string
+  ): Promise<RuntimeGroup[]> => {
+    const batchClause = {
+      query: '$org: String',
+      clause: '{ hostedOrganizations_some: { name: $org } }',
+      variables: { org },
+    };
+    const records: RuntimeGroup[] = await getRecords(
+      context,
+      'RuntimeGroup',
+      'allRuntimeGroups',
+      [],
+      batchClause
+    );
+
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['organization']))
+      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
+      .map((o) =>
+        removeKeys(o, [
+          'id',
+          'hostedOrganizations',
+          'sdxEndpoint',
+          'consumerEndpoint',
+          'gatewayId',
+        ])
+      );
+  };
+
   deleteRuntimeGroup = async (
     context: Keystone,
     org: string,

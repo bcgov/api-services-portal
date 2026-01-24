@@ -137,7 +137,7 @@ export async function EnrichWithRuntimeGroup(
     orgNamespace != null,
     'Incomplete subsystem setup',
     'inputs.service_locator',
-    'missing organization assignment'
+    'missing gateway details'
   );
 
   assertAndRaiseValidateError(

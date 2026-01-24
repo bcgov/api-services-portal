@@ -71,13 +71,18 @@ export class RuntimeGroupController extends Controller {
   @Security('jwt', ['System.Manage'])
   public async listRuntimeGroups(
     @Path() org: string,
+    @Query('filter') filter: 'owned' | 'available' = 'owned',
     @Request() request: any
   ): Promise<RuntimeGroup[]> {
     const ctx = this.keystone.createContext(request, true);
 
     const service = new RuntimeGroupService();
 
-    return service.listRuntimeGroupsByOrganization(ctx, org);
+    if (filter === 'available') {
+      return service.listHostedRuntimeGroupsForOrganization(ctx, org);
+    } else {
+      return service.listRuntimeGroupsByOrganization(ctx, org);
+    }
   }
 
   /**

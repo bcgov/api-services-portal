@@ -18,6 +18,9 @@ import { SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
+import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
+import { GetServiceClient } from '../../../services/gateway-patterns/catalog';
+import { assertEqual } from '../../ioc/assert';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -87,5 +90,33 @@ export class OrgSubsystemController extends Controller {
     const context = this.keystone.createContext(request, true);
 
     return new SubsystemService().deleteSubsystem(context, org, name, force);
+  }
+
+  @Put('/{name}/gateway')
+  @OperationId('registerSubsystemOnRuntimeGroup')
+  @Security('jwt', ['System.Manage'])
+  public async registerSubsystem(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { runtimeGroupName: string },
+    @Request() request: any
+  ): Promise<{ gatewayId: string }> {
+    const context = this.keystone.createContext(request, true);
+
+    const client = await GetServiceClient(context, org, name);
+
+    const result = await CreateNamespaceForSubsystem(context, {
+      subsystem: client.subsystem,
+      runtimeGroupName: body.runtimeGroupName,
+    });
+
+    assertEqual(
+      client.subsystem.gateway.id === result.name,
+      true,
+      'gatewayId',
+      'Gateway ID mismatch after creation'
+    );
+
+    return { gatewayId: client.subsystem.gateway.id };
   }
 }
