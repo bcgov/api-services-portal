@@ -20,29 +20,36 @@ export const SDXKeyPattern = {
   inject: async (ctx: any, inputs: Record<string, string>) => {},
 
   eval: (inputs: Record<string, string>) => {
-    const name = `sdx.key.${inputs.runtimeGroupName}.${inputs.organization}:0`;
-    const kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}:org:${inputs.organization}`;
+    const profile: any = {};
+    if (inputs.organization) {
+      profile.name = `sdx.key.${inputs.runtimeGroupName}.${inputs.organization}:0`;
+      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}:org:${inputs.organization}`;
+      profile.qualifier = `key-${inputs.runtimeGroupName}-${inputs.organization}`;
+      profile.type = 'org';
+      profile.value = inputs.organization;
+    } else {
+      profile.name = `sdx.key.${inputs.runtimeGroupName}.edge:0`;
+      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}:edge`;
+      profile.qualifier = `key-${inputs.runtimeGroupName}`;
+      profile.type = 'runtime-group';
+      profile.value = inputs.runtimeGroupName;
+    }
 
-    const nsQualifier = `key-${inputs.runtimeGroupName}-${inputs.organization}`;
-
-    let tags = [`ns.${inputs.gateway_id}.${nsQualifier}`];
+    let tags = [`ns.${inputs.gateway_id}.${profile.qualifier}`];
 
     let publicKeyPem = inputs.public_key_pem;
-
-    let type = 'org';
-    let value = inputs.organization;
 
     return [
       {
         _format_version: '3.0',
         keys: [
           {
-            name,
-            kid,
+            name: profile.name,
+            kid: profile.kid,
             pem: {
               public_key: `${publicKeyPem}`,
             },
-            tags: [...tags, `type:${type}`, `name:${value}`],
+            tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
           },
         ],
       },

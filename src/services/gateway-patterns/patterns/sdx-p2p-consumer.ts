@@ -11,6 +11,7 @@ export interface SDXP2PConsumerPatternConfig extends Record<string, string> {
   client_subsystem: string;
   service_locator: string;
   tls_verify?: string;
+  upgrades: string;
 }
 
 export interface SDXP2PConsumerPatternData {
@@ -67,7 +68,10 @@ export const SDXP2PConsumerPattern = {
         routes: [
           {
             hosts: [routeHostUrl.hostname],
-            snis: [routeHostUrl.hostname],
+            snis:
+              routeHostUrl.protocol === 'https:'
+                ? [routeHostUrl.hostname]
+                : undefined,
             paths: [`/sdx/0/${serviceLocator}`],
             methods: ['GET', 'POST'],
             name: nm,
@@ -92,8 +96,28 @@ export const SDXP2PConsumerPattern = {
               },
             },
           },
+          ...(inputs.upgrades.includes('edge-sign')
+            ? [upgradeToTrustSign(tags, data)]
+            : []),
         ],
       },
     ] as any[];
   },
 };
+
+function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
+  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
+  return {
+    name: 'trust-sign',
+    tags: tags,
+    config: {
+      direction: 'request',
+      signature_header_key: 'X-Edge-Token',
+      keyid: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      alg: 'ES256',
+      jwks_uri: 'https://sdx.gov.bc.ca/jwks',
+      hash_alg: 'sha256',
+    },
+  };
+}

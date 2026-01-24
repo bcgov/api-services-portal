@@ -11,6 +11,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, string> {
   client_subsystem: string;
   service_locator: string;
   upstream_url: string;
+  upgrades: string;
 }
 
 export interface SDXP2PProviderPatternData {
@@ -73,7 +74,7 @@ export const SDXP2PProviderPattern = {
             },
             protocols: ['https'],
             name: `${nm}.UPSTREAM`,
-            strip_path: false,
+            strip_path: true,
             tags,
           },
           {
@@ -104,7 +105,57 @@ export const SDXP2PProviderPattern = {
         ],
         tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
         url: upstreamUrl,
+        plugins: [
+          ...(inputs.upgrades.includes('edge-verify')
+            ? [upgradeToTrustVerify(tags, data)]
+            : []),
+          ...(inputs.upgrades.includes('org-kms-sign')
+            ? [upgradeToTrustKMSSign(tags, data)]
+            : []),
+          ...(inputs.upgrades.includes('timestamp')
+            ? [upgradeToTimestamp(tags, data)]
+            : []),
+        ],
       },
     ] as any[];
   },
 };
+
+function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'trust-verify-signature',
+    tags: tags,
+    config: {
+      direction: 'request',
+      signature_header_key: 'X-Edge-Token',
+      manifest_type: 'signature-only',
+      iss_key_grace_period: 300,
+    },
+  };
+}
+
+function upgradeToTrustKMSSign(
+  tags: string[],
+  data: SDXP2PProviderPatternData
+) {
+  return {
+    name: 'trust-kms',
+    tags: tags,
+    config: {
+      operation: 'sign',
+      keyid:
+        'arn:aws:kms:us-east-1:610924852170:key/a068e370-4ad7-4017-b676-14da9d0cd82e',
+    },
+  };
+}
+
+function upgradeToTimestamp(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'trust-timestamp',
+    tags: tags,
+    config: {
+      endpoint_url: 'https://freetsa.org/tsr',
+      policy_oid: '1.2.1.2.1',
+    },
+  };
+}
