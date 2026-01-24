@@ -1,5 +1,3 @@
-import { newJWKID } from '../../../services/identifiers';
-
 export interface SDXKeyConfig extends Record<string, string> {
   gateway_id: string;
   runtimeGroupName?: string;
