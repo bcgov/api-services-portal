@@ -77,11 +77,17 @@ class SubsystemService {
     org: string,
     name: string
   ): Promise<KeystoneSubsystem> => {
-    const records = await getRecords(context, 'Subsystem', undefined, [], {
-      query: '$org: String!, $name: String!',
-      clause: '{ organization: { name: $org }, name: $name }',
-      variables: { org, name },
-    });
+    const records = await getRecords(
+      context,
+      'Subsystem',
+      undefined,
+      ['organization'],
+      {
+        query: '$org: String!, $name: String!',
+        clause: '{ organization: { name: $org }, name: $name }',
+        variables: { org, name },
+      }
+    );
 
     assert.strictEqual(records.length == 0, false, 'Subsystem not found');
     return records.pop();

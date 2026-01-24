@@ -10,6 +10,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, string> {
   client_org: string;
   client_subsystem: string;
   service_locator: string;
+  upstream_url: string;
 }
 
 export interface SDXP2PProviderPatternData {
@@ -44,17 +45,17 @@ export const SDXP2PProviderPattern = {
   },
 
   eval: (inputs: Record<string, string>, data: SDXP2PProviderPatternData) => {
-    const nm = `sdx.p2p.p.${inputs.service_locator}`;
+    const serviceLocator = data.serviceCatalog.locators[0];
+    const serviceHost = data.serviceCatalog.subsystem.runtimeGroup.host;
+
+    const clientLocator = data.client.subsystem.locator;
 
     const providerGateway = data.serviceCatalog.subsystem.gateway.id;
 
-    const tags = [`ns.${providerGateway}.${inputs.service_locator}`];
+    const tags = [`ns.${providerGateway}.${serviceLocator}`];
+    const nm = `sdx.p2p.p.${serviceLocator}`;
 
-    const serviceHost = data.serviceCatalog.subsystem.runtimeGroup.host;
-
-    const clientLocator = `${inputs.client_org}-${inputs.client_subsystem}`;
-
-    const upstreamUrl = `https://httpbin.org`;
+    const upstreamUrl = inputs.upstream_url;
 
     return [
       {
@@ -65,7 +66,7 @@ export const SDXP2PProviderPattern = {
           {
             hosts: [serviceHost],
             snis: [serviceHost],
-            paths: [`/sdx-apsdev/${inputs.service_locator}`],
+            paths: [`/sdx/0/${serviceLocator}`],
             methods: ['GET', 'POST'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
@@ -78,7 +79,7 @@ export const SDXP2PProviderPattern = {
           {
             hosts: [serviceHost],
             snis: [serviceHost],
-            paths: [`/sdx-apsdev/${inputs.service_locator}/hello`],
+            paths: [`/sdx/0/${serviceLocator}/hello`],
             methods: ['GET', 'POST'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
@@ -101,11 +102,7 @@ export const SDXP2PProviderPattern = {
             ],
           },
         ],
-        tags: [
-          ...tags,
-          `service:${inputs.service_locator}`,
-          `client:${clientLocator}`,
-        ],
+        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
         url: upstreamUrl,
       },
     ] as any[];

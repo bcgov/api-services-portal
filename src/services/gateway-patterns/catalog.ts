@@ -1,5 +1,5 @@
 import { OpenApiSpec, Subsystem } from '../keystone/types';
-import { getRecords } from '../../batch/feed-worker';
+import { getRecord, getRecords } from '../../batch/feed-worker';
 import { BatchWhereClause } from '../keystone/batch-service';
 import { strict as assert } from 'assert';
 import { OrgNamespace } from '../org-groups/types';
@@ -8,6 +8,9 @@ import { assertAndRaiseValidateError } from './evaluator';
 import { RuntimeGroupService } from '../batch/runtime-group';
 import { Logger } from '../../logger';
 import { sub } from 'date-fns';
+import { parse } from 'path';
+import { SubsystemService } from '../batch/subsystem';
+import { OpenAPISpecService } from '../batch/oas-service';
 
 const logger = Logger('gateway-patterns.catalog');
 
@@ -15,13 +18,24 @@ const logger = Logger('gateway-patterns.catalog');
  * @tsoaModel
  *
  */
+export interface MemberOrganization {
+  memberClass: string;
+  memberId: string;
+}
+
+/**
+ * @tsoaModel
+ *
+ */
 export interface SubsystemEntry {
   name: string;
+  locator: string;
   organization?: {
     name: string;
     orgUnit?: string;
     trustJwksEndpoint?: string;
   };
+  member: MemberOrganization;
   gateway?: {
     id: string;
     permissions?: {
@@ -101,27 +115,43 @@ export async function GetCatalog(
     batchClause
   );
 
-  return records.map(
-    (c: OpenApiSpec) =>
-      ({
-        name: c.name,
-        title: c.title,
-        version: c.version,
-        summary: c.summary,
-        description: c.description,
-        spec: includeSpec ? c.spec : undefined,
-        subsystem: {
-          name: c.subsystem.name,
-          organization: {
-            name: c.organization.name,
-          },
-          gateway: {
-            id: c.namespace,
-          },
+  const specService = new OpenAPISpecService();
+
+  return records.map((c: OpenApiSpec) => {
+    logger.debug(`Processing catalog entry: ${c.name} %j`, c);
+
+    const member = parseOrganizationMemberDetails(
+      c.subsystem.organization.tags
+    );
+
+    const serviceName = specService.titleToServiceName(c.title);
+    const serviceVersion = specService.majorPart(c.version);
+
+    return {
+      name: c.name,
+      locators: [
+        `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`,
+        `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}.${serviceName}.${serviceVersion}`,
+      ],
+      title: c.title,
+      version: c.version,
+      summary: c.summary,
+      description: c.description,
+      spec: includeSpec ? c.spec : undefined,
+      subsystem: {
+        name: c.subsystem.name,
+        locator: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
+        organization: {
+          name: c.organization.name,
         },
-        operations: JSON.parse(c.operations || '{}'),
-      } as ServiceCatalogEntry)
-  );
+        member,
+        gateway: {
+          id: c.namespace,
+        },
+      },
+      operations: JSON.parse(c.operations || '{}'),
+    } as ServiceCatalogEntry;
+  });
 }
 
 export async function EnrichWithRuntimeGroup(
@@ -171,46 +201,56 @@ export async function GetServiceClient(
   org: string,
   subsystem: string
 ): Promise<ServiceClient> {
-  const batchClause = {
-    query: '$org: String, $subsystem: String',
-    clause: '{ name: $subsystem, organization: { name: $org } }',
-    variables: { org, subsystem },
-  };
+  const subsysService = new SubsystemService();
+  const c = await subsysService.findSubsystemByName(ctx, org, subsystem);
 
-  const records: Subsystem[] = await getRecords(
-    ctx,
-    'Subsystem',
-    'allSubsystems',
-    ['organization'],
-    batchClause
-  );
-
-  assertAndRaiseValidateError(
-    records.length === 1,
-    'Incomplete service client setup',
-    'inputs.client_locator',
-    'subsystem not found'
-  );
-
-  const c = records.pop();
-
-  // logger.info('[GetServiceClient] Retrieved client subsystem %j', c);
-  // assertAndRaiseValidateError(
-  //   c.slug === `${org}.${subsystem}`,
-  //   'Incomplete service client setup',
-  //   'inputs.client_locator',
-  //   'subsystem organization error'
-  // );
+  const member = parseOrganizationMemberDetails(c.organization.tags);
 
   return {
     subsystem: {
       name: c.name,
+      locator: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
       organization: {
         name: c.organization.name,
       },
+      member,
       gateway: {
         id: c.namespace,
       },
     },
+  };
+}
+
+function parseOrganizationMemberDetails(tagsStr: string): MemberOrganization {
+  assertAndRaiseValidateError(
+    tagsStr != null && Boolean(tagsStr),
+    'Incomplete organization details',
+    'organization',
+    'member information not found'
+  );
+
+  const tags = JSON.parse(tagsStr);
+  const member: { [key: string]: string } = {};
+
+  tags.forEach((part: string) => {
+    const kv = part.split(':');
+    if (kv.length === 2 && kv[0] === 'member_class') {
+      member['memberClass'] = kv[1];
+    }
+    if (kv.length === 2 && kv[0] === 'member_id') {
+      member['memberId'] = kv[1];
+    }
+  });
+
+  assertAndRaiseValidateError(
+    Boolean(member['memberClass']) && Boolean(member['memberId']),
+    'Incomplete organization details',
+    'organization',
+    'member information not found'
+  );
+
+  return {
+    memberClass: member['memberClass'],
+    memberId: member['memberId'],
   };
 }

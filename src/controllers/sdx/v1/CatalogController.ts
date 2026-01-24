@@ -54,8 +54,13 @@ export class CatalogController extends Controller {
         'This is a sample service defined by an OpenAPI specification.',
       subsystem: {
         name: 'sample-subsystem',
+        locator: 'LAB.GOV.123456789.sample-subsystem',
         organization: {
           name: 'sample-organization',
+        },
+        member: {
+          memberClass: 'GOV',
+          memberId: '123456789',
         },
       },
       operations: [

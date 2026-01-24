@@ -45,17 +45,18 @@ export const SDXP2PConsumerPattern = {
   },
 
   eval: (inputs: Record<string, string>, data: SDXP2PConsumerPatternData) => {
-    const nm = `sdx.p2p.c.${inputs.service_locator}`;
+    const serviceLocator = data.serviceCatalog.locators[0];
+    const serviceHost = data.serviceCatalog.subsystem.runtimeGroup.host;
+
+    const clientLocator = data.client.subsystem.locator;
+    const routeHostUrl = new URL(
+      data.client.subsystem.runtimeGroup.consumerEndpoint
+    );
 
     const consumerGateway = data.client.subsystem.gateway.id;
 
-    const routeHost = data.client.subsystem.runtimeGroup.host;
-
-    const tags = [`ns.${consumerGateway}.${inputs.service_locator}`];
-
-    const serviceHost = data.serviceCatalog.subsystem.runtimeGroup.host;
-
-    const clientLocator = `${inputs.client_org}-${inputs.client_subsystem}`;
+    const tags = [`ns.${consumerGateway}.${serviceLocator}`];
+    const nm = `sdx.p2p.c.${serviceLocator}`;
 
     return [
       {
@@ -65,22 +66,19 @@ export const SDXP2PConsumerPattern = {
         retries: 0,
         routes: [
           {
-            hosts: [routeHost],
-            snis: [routeHost],
-            paths: [`/sdx-apsdev/${inputs.service_locator}`],
+            hosts: [routeHostUrl.hostname],
+            snis: [routeHostUrl.hostname],
+            paths: [`/sdx/0/${serviceLocator}`],
             methods: ['GET', 'POST'],
             name: nm,
             strip_path: false,
-            protocols: ['https'],
+            protocols:
+              routeHostUrl.protocol === 'https:' ? ['https'] : ['http'],
             tags,
           },
         ],
-        tags: [
-          ...tags,
-          `service:${inputs.service_locator}`,
-          `client:${clientLocator}`,
-        ],
-        url: `https://${data.serviceCatalog.subsystem.runtimeGroup.sdxEndpoint}`,
+        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+        url: data.serviceCatalog.subsystem.runtimeGroup.sdxEndpoint,
         plugins: [
           {
             name: 'request-transformer',
