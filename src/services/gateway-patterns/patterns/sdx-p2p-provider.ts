@@ -147,7 +147,7 @@ function upgradeToTrustKMSSign(
     config: {
       operation: 'sign',
       keyid:
-        'arn:aws:kms:us-east-1:610924852170:key/a068e370-4ad7-4017-b676-14da9d0cd82e',
+        'arn:aws:kms:us-east-1:610924852170:key/38ace74c-048c-4689-8f1b-cc76c0d59110',
     },
   };
 }
