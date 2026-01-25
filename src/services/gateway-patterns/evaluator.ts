@@ -4,6 +4,7 @@ import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
 import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
 import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
 import { SDXKeyPattern } from './patterns/sdx-key';
+import { SDXCRTPattern } from './patterns/sdx-crt';
 
 interface PatternProcessor {
   id: string;
@@ -18,6 +19,7 @@ const PATTERNS: Record<string, PatternProcessor> = {
   [SDXP2PConsumerPattern.id]: SDXP2PConsumerPattern,
   [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
   [SDXKeyPattern.id]: SDXKeyPattern,
+  [SDXCRTPattern.id]: SDXCRTPattern,
 };
 
 export interface GatewayPatternConfig {

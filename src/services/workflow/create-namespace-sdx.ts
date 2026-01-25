@@ -22,6 +22,8 @@ export async function CreateNamespaceForSubsystem(
     args.runtimeGroupName
   );
 
+  const consumerEP = new URL(rg.consumerEndpoint);
+
   const resourceSet = await CreateNamespace(context, {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
@@ -29,7 +31,7 @@ export async function CreateNamespaceForSubsystem(
     orgEnabled: false,
     displayName: `SDX Subsystem ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
-    domains: [rg.host],
+    domains: [rg.host, consumerEP.hostname],
   });
 
   logger.debug(

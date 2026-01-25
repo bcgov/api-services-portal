@@ -115,6 +115,9 @@ export const SDXP2PProviderPattern = {
           ...(inputs.upgrades.includes('timestamp')
             ? [upgradeToTimestamp(tags, data)]
             : []),
+          ...(inputs.upgrades.includes('edge-sign')
+            ? [upgradeToTrustSign(tags, data)]
+            : []),
         ],
       },
     ] as any[];
@@ -156,6 +159,23 @@ function upgradeToTimestamp(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       endpoint_url: 'https://freetsa.org/tsr',
       policy_oid: '1.2.1.2.1',
+    },
+  };
+}
+
+function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceCatalog.subsystem.runtimeGroup.name}:edge`;
+  return {
+    name: 'trust-sign',
+    tags: tags,
+    config: {
+      direction: 'response',
+      signature_header_key: 'X-Edge-Token',
+      keyid: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      alg: 'ES256',
+      jwks_uri: 'https://sdx.gov.bc.ca/jwks',
+      hash_alg: 'sha256',
     },
   };
 }

@@ -63,7 +63,7 @@ export const SDXP2PConsumerPattern = {
       {
         kind: 'GatewayService',
         name: nm,
-        tls_verify: inputs.tls_verify === 'false' ? false : true,
+        tls_verify: inputs.tls_verify === 'true' ? true : false,
         retries: 0,
         routes: [
           {
@@ -77,7 +77,7 @@ export const SDXP2PConsumerPattern = {
             name: nm,
             strip_path: false,
             protocols:
-              routeHostUrl.protocol === 'https:' ? ['https'] : ['http'],
+              routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
             tags,
           },
         ],
@@ -99,6 +99,9 @@ export const SDXP2PConsumerPattern = {
           ...(inputs.upgrades.includes('edge-sign')
             ? [upgradeToTrustSign(tags, data)]
             : []),
+          ...(inputs.upgrades.includes('edge-verify')
+            ? [upgradeToTrustVerify(tags, data)]
+            : []),
         ],
       },
     ] as any[];
@@ -118,6 +121,19 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
       alg: 'ES256',
       jwks_uri: 'https://sdx.gov.bc.ca/jwks',
       hash_alg: 'sha256',
+    },
+  };
+}
+
+function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
+  return {
+    name: 'trust-verify-signature',
+    tags: tags,
+    config: {
+      direction: 'response',
+      signature_header_key: 'X-Edge-Token',
+      manifest_type: 'signature-only',
+      iss_key_grace_period: 300,
     },
   };
 }
