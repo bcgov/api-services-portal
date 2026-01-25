@@ -53,7 +53,7 @@ export const SDXP2PProviderPattern = {
 
     const providerGateway = data.serviceCatalog.subsystem.gateway.id;
 
-    const tags = [`ns.${providerGateway}.${serviceLocator}`];
+    const tags = [`ns.${providerGateway}.${serviceLocator}`, 'sdx'];
     const nm = `sdx.p2p.p.${serviceLocator}`;
 
     const upstreamUrl = inputs.upstream_url;

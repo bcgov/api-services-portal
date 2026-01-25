@@ -32,7 +32,7 @@ export const SDXRuntimeGroupPattern = {
     const runtimeGroupName = inputs.runtime_group_name;
     const routeHost = inputs.rg_host;
 
-    let tags = [`ns.${gw}.${nsQualifier}`];
+    let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 
     return [
       //

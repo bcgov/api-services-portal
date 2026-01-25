@@ -56,7 +56,7 @@ export const SDXP2PConsumerPattern = {
 
     const consumerGateway = data.client.subsystem.gateway.id;
 
-    const tags = [`ns.${consumerGateway}.${serviceLocator}`];
+    const tags = [`ns.${consumerGateway}.${serviceLocator}`, 'sdx'];
     const nm = `sdx.p2p.c.${serviceLocator}`;
 
     return [
