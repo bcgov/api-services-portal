@@ -18,24 +18,13 @@ const logger = Logger('gateway-patterns.catalog');
  * @tsoaModel
  *
  */
-export interface MemberOrganization {
-  memberClass: string;
-  memberId: string;
-}
-
-/**
- * @tsoaModel
- *
- */
 export interface SubsystemEntry {
   name: string;
-  locator: string;
   organization?: {
     name: string;
     orgUnit?: string;
     trustJwksEndpoint?: string;
   };
-  member: MemberOrganization;
   gateway?: {
     id: string;
     permissions?: {
@@ -77,7 +66,6 @@ export interface ServiceOperation {
  */
 export interface ServiceCatalogEntry {
   name: string;
-  locators?: string[];
   title: string;
   version: string;
   summary?: string;
@@ -120,19 +108,8 @@ export async function GetCatalog(
   return records.map((c: OpenApiSpec) => {
     logger.debug(`Processing catalog entry: ${c.name} %j`, c);
 
-    const member = parseOrganizationMemberDetails(
-      c.subsystem.organization.tags
-    );
-
-    const serviceName = specService.titleToServiceName(c.title);
-    const serviceVersion = specService.majorPart(c.version);
-
     return {
       name: c.name,
-      locators: [
-        `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`,
-        `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}.${serviceName}.${serviceVersion}`,
-      ],
       title: c.title,
       version: c.version,
       summary: c.summary,
@@ -140,11 +117,9 @@ export async function GetCatalog(
       spec: includeSpec ? c.spec : undefined,
       subsystem: {
         name: c.subsystem.name,
-        locator: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
         organization: {
           name: c.organization.name,
         },
-        member,
         gateway: {
           id: c.namespace,
         },
@@ -204,53 +179,15 @@ export async function GetServiceClient(
   const subsysService = new SubsystemService();
   const c = await subsysService.findSubsystemByName(ctx, org, subsystem);
 
-  const member = parseOrganizationMemberDetails(c.organization.tags);
-
   return {
     subsystem: {
       name: c.name,
-      locator: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
       organization: {
         name: c.organization.name,
       },
-      member,
       gateway: {
         id: c.namespace,
       },
     },
-  };
-}
-
-function parseOrganizationMemberDetails(tagsStr: string): MemberOrganization {
-  assertAndRaiseValidateError(
-    tagsStr != null && Boolean(tagsStr),
-    'Incomplete organization details',
-    'organization',
-    'member information not found'
-  );
-
-  const tags = JSON.parse(tagsStr);
-  const member: { [key: string]: string } = {};
-
-  tags.forEach((part: string) => {
-    const kv = part.split(':');
-    if (kv.length === 2 && kv[0] === 'member_class') {
-      member['memberClass'] = kv[1];
-    }
-    if (kv.length === 2 && kv[0] === 'member_id') {
-      member['memberId'] = kv[1];
-    }
-  });
-
-  assertAndRaiseValidateError(
-    Boolean(member['memberClass']) && Boolean(member['memberId']),
-    'Incomplete organization details',
-    'organization',
-    'member information not found'
-  );
-
-  return {
-    memberClass: member['memberClass'],
-    memberId: member['memberId'],
   };
 }
