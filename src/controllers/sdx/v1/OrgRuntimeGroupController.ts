@@ -28,6 +28,7 @@ import { RuntimeGroup } from '../../../services/batch/types';
 import { RuntimeGroupInput } from './types';
 import { assertEqual } from '../../ioc/assert';
 import { RuntimeGroupService } from '../../../services/batch/runtime-group';
+import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/create-namespace-sdx';
 
 @injectable()
 @Route('/organizations/{org}/runtime-groups')
@@ -109,5 +110,35 @@ export class RuntimeGroupController extends Controller {
     const service = new RuntimeGroupService();
 
     return service.deleteRuntimeGroup(context, org, name, force);
+  }
+
+  @Put('/{name}/gateway')
+  @OperationId('registerRuntimeGroupGateway')
+  @Security('jwt', ['System.Manage'])
+  public async registerRuntimeGroupGateway(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<{ gatewayId: string }> {
+    const context = this.keystone.createContext(request, true);
+
+    const service = new RuntimeGroupService();
+
+    // make sure it belongs to the org
+    const rg = await service.findRuntimeGroupByName(context, org, name);
+
+    const result = await CreateNamespaceForRuntimeGroup(context, {
+      organization: org,
+      runtimeGroupName: name,
+    });
+
+    assertEqual(
+      rg.namespace === result.name,
+      true,
+      'gatewayId',
+      'Gateway ID mismatch after creation'
+    );
+
+    return { gatewayId: rg.namespace };
   }
 }
