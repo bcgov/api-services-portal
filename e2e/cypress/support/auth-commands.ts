@@ -567,6 +567,10 @@ Cypress.Commands.add('setRequestBody', (body: any) => {
   requestBody = JSON.stringify(body)
 })
 
+Cypress.Commands.add('clearRequestBody', () => {
+  requestBody = undefined
+})
+
 Cypress.Commands.add('setRequestFormData', (body: FormData) => {
   requestBody = body
 })

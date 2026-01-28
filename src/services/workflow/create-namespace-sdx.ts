@@ -7,6 +7,42 @@ import { CreateNamespace } from './create-namespace';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
+export interface CreateNamespaceForRuntimeGroupArgs {
+  organization: string;
+  runtimeGroupName: string;
+}
+
+export async function CreateNamespaceForRuntimeGroup(
+  context: any,
+  args: CreateNamespaceForRuntimeGroupArgs
+): Promise<ResourceSet> {
+  const rgService = new RuntimeGroupService();
+  const rg = await rgService.findRuntimeGroupByUniqueName(
+    context,
+    args.runtimeGroupName
+  );
+
+  const consumerEP = new URL(rg.consumerEndpoint);
+
+  const resourceSet = await CreateNamespace(context, {
+    name: rg.namespace,
+    org: args.organization,
+    orgUnit: undefined,
+    orgEnabled: false,
+    displayName: `SDX Edge ${args.runtimeGroupName}`,
+    dataPlane: 'sdx-edge',
+    domains: [rg.host, consumerEP.hostname],
+  });
+
+  logger.debug(
+    '[CreateNamespaceForRuntimeGroup] Created Namespace %s for Runtime Group %s',
+    resourceSet.name,
+    args.runtimeGroupName
+  );
+
+  return resourceSet;
+}
+
 export interface CreateNamespaceForSubsystemArgs {
   subsystem: SubsystemEntry;
   runtimeGroupName: string;

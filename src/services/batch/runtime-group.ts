@@ -17,9 +17,9 @@ import { regExprValidation } from '../utils';
 class RuntimeGroupService {
   validateRuntimeGroup = (name: string): void => {
     regExprValidation(
-      '^[a-z0-9]{4,10}$',
+      '^[a-z0-9]{3,8}$',
       name,
-      'Runtime Group name must be between 4 and 10 lowercase alpha-numeric characters'
+      'Runtime Group name must be between 3 and 8 lowercase alpha-numeric characters'
     );
   };
 
@@ -29,6 +29,9 @@ class RuntimeGroupService {
   ): Promise<BatchResult> => {
     // host should be based on a standard format for edge servers
     body['host'] = `${body['name']}.servers.sdx`;
+    if (!body.hasOwnProperty('consumerEndpoint')) {
+      body['consumerEndpoint'] = `http://internal.${body['name']}.servers.sdx`;
+    }
 
     return await syncRecordsThrowErrors(
       context,

@@ -94,6 +94,8 @@ declare namespace Cypress {
 
     setRequestBody(requestBody: any): void
 
+    clearRequestBody(): void
+
     setQueryString(qs: any): void
 
     setRequestFormData(body: FormData): void
