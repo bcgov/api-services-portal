@@ -71,7 +71,21 @@ describe('SDX Runtime Groups', () => {
   })
 
   describe('Runtime Group Sad Paths', () => {
-    it('PUT /organizations/{org}/runtime-groups (invalid)', () => {
+    it('PUT /organizations/{org}/runtime-groups (missing name)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {}
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(422)
+          expect(body.code).to.be.equal('validation_error')
+          expect(body.fields['body.name'].message).to.be.equal("'name' is required")
+        }
+      )
+    })
+
+    it('PUT /organizations/{org}/runtime-groups (long name)', () => {
       const { org, gateway, dataset, runtimeGroupId, product } = workingData
 
       const payload = {
@@ -83,7 +97,7 @@ describe('SDX Runtime Groups', () => {
           expect(status).to.be.equal(400)
           expect(body.result).to.be.equal('create-failed')
           expect(body.reason).to.be.equal(
-            'Runtime Group name must be between 4 and 10 lowercase alpha-numeric characters'
+            'Runtime Group name must be between 3 and 8 lowercase alpha-numeric characters'
           )
         }
       )

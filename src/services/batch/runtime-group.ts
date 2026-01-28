@@ -17,9 +17,9 @@ import { regExprValidation } from '../utils';
 class RuntimeGroupService {
   validateRuntimeGroup = (name: string): void => {
     regExprValidation(
-      '^[a-z0-9]{4,10}$',
+      '^[a-z0-9]{3,8}$',
       name,
-      'Runtime Group name must be between 4 and 10 lowercase alpha-numeric characters'
+      'Runtime Group name must be between 3 and 8 lowercase alpha-numeric characters'
     );
   };
 
@@ -29,6 +29,12 @@ class RuntimeGroupService {
   ): Promise<BatchResult> => {
     // host should be based on a standard format for edge servers
     body['host'] = `${body['name']}.servers.sdx`;
+    if (!body.hasOwnProperty('sdxEndpoint')) {
+      body['sdxEndpoint'] = `https://${body['name']}.servers.sdx`;
+    }
+    if (!body.hasOwnProperty('consumerEndpoint')) {
+      body['consumerEndpoint'] = `http://internal.${body['name']}.servers.sdx`;
+    }
 
     return await syncRecordsThrowErrors(
       context,
@@ -62,6 +68,38 @@ class RuntimeGroupService {
       .map((o) => removeKeys(o, ['id']));
   };
 
+  listHostedRuntimeGroupsForOrganization = async (
+    context: Keystone,
+    org: string
+  ): Promise<RuntimeGroup[]> => {
+    const batchClause = {
+      query: '$org: String',
+      clause: '{ hostedOrganizations_some: { name: $org } }',
+      variables: { org },
+    };
+    const records: RuntimeGroup[] = await getRecords(
+      context,
+      'RuntimeGroup',
+      'allRuntimeGroups',
+      [],
+      batchClause
+    );
+
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['organization']))
+      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
+      .map((o) =>
+        removeKeys(o, [
+          'id',
+          'hostedOrganizations',
+          'sdxEndpoint',
+          'consumerEndpoint',
+          'gatewayId',
+        ])
+      );
+  };
+
   deleteRuntimeGroup = async (
     context: Keystone,
     org: string,
@@ -82,15 +120,50 @@ class RuntimeGroupService {
     org: string,
     name: string
   ): Promise<KeystoneRuntimeGroup> => {
+    const rg = await this.findRuntimeGroupByUniqueName(context, name);
+
+    assert.strictEqual(
+      rg.organization?.name === org,
+      true,
+      'Runtime Group not found'
+    );
+
+    return rg;
+  };
+
+  findRuntimeGroupByUniqueName = async (
+    context: Keystone,
+    name: string
+  ): Promise<KeystoneRuntimeGroup> => {
     const records = await getRecords(
       context,
       'RuntimeGroup',
       undefined,
       ['organization', 'hostedOrganizations'],
       {
-        query: '$org: String!, $name: String!',
-        clause: '{ organization: { name: $org }, name: $name }',
-        variables: { org, name },
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
+
+    assert.strictEqual(records.length == 0, false, 'Runtime Group not found');
+    return records.pop();
+  };
+
+  findRuntimeGroupByUniqueHost = async (
+    context: Keystone,
+    host: string
+  ): Promise<KeystoneRuntimeGroup> => {
+    const records = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$host: String!',
+        clause: '{ host: $host }',
+        variables: { host },
       }
     );
 

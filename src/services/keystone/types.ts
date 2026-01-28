@@ -5654,7 +5654,6 @@ export type OpenApiSpec = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
-  state?: Maybe<Scalars['String']>;
   version?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
@@ -5669,7 +5668,6 @@ export type OpenApiSpecCreateInput = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
-  state?: Maybe<Scalars['String']>;
   version?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
@@ -5681,7 +5679,6 @@ export type OpenApiSpecCreateInput = {
 
 export type OpenApiSpecUpdateInput = {
   organization?: Maybe<OrganizationRelateToOneInput>;
-  state?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
@@ -5755,10 +5752,6 @@ export type OpenApiSpecWhereInput = {
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
-  state?: Maybe<Scalars['String']>;
-  state_not?: Maybe<Scalars['String']>;
-  state_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  state_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   version?: Maybe<Scalars['String']>;
   version_not?: Maybe<Scalars['String']>;
   version_contains?: Maybe<Scalars['String']>;
@@ -7739,8 +7732,8 @@ export type RuntimeGroup = {
   host?: Maybe<Scalars['String']>;
   hostedOrganizations: Array<Organization>;
   _hostedOrganizationsMeta?: Maybe<_QueryMeta>;
-  publicEndpoint?: Maybe<Scalars['String']>;
-  privateEndpoint?: Maybe<Scalars['String']>;
+  sdxEndpoint?: Maybe<Scalars['String']>;
+  consumerEndpoint?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -7773,8 +7766,8 @@ export type RuntimeGroupCreateInput = {
   organization?: Maybe<OrganizationRelateToOneInput>;
   host?: Maybe<Scalars['String']>;
   hostedOrganizations?: Maybe<OrganizationRelateToManyInput>;
-  publicEndpoint?: Maybe<Scalars['String']>;
-  privateEndpoint?: Maybe<Scalars['String']>;
+  sdxEndpoint?: Maybe<Scalars['String']>;
+  consumerEndpoint?: Maybe<Scalars['String']>;
 };
 
 export type RuntimeGroupUpdateInput = {
@@ -7782,8 +7775,8 @@ export type RuntimeGroupUpdateInput = {
   organization?: Maybe<OrganizationRelateToOneInput>;
   host?: Maybe<Scalars['String']>;
   hostedOrganizations?: Maybe<OrganizationRelateToManyInput>;
-  publicEndpoint?: Maybe<Scalars['String']>;
-  privateEndpoint?: Maybe<Scalars['String']>;
+  sdxEndpoint?: Maybe<Scalars['String']>;
+  consumerEndpoint?: Maybe<Scalars['String']>;
 };
 
 export type RuntimeGroupWhereInput = {
@@ -7859,42 +7852,42 @@ export type RuntimeGroupWhereInput = {
   hostedOrganizations_some?: Maybe<OrganizationWhereInput>;
   /**  condition must be false for all nodes  */
   hostedOrganizations_none?: Maybe<OrganizationWhereInput>;
-  publicEndpoint?: Maybe<Scalars['String']>;
-  publicEndpoint_not?: Maybe<Scalars['String']>;
-  publicEndpoint_contains?: Maybe<Scalars['String']>;
-  publicEndpoint_not_contains?: Maybe<Scalars['String']>;
-  publicEndpoint_starts_with?: Maybe<Scalars['String']>;
-  publicEndpoint_not_starts_with?: Maybe<Scalars['String']>;
-  publicEndpoint_ends_with?: Maybe<Scalars['String']>;
-  publicEndpoint_not_ends_with?: Maybe<Scalars['String']>;
-  publicEndpoint_i?: Maybe<Scalars['String']>;
-  publicEndpoint_not_i?: Maybe<Scalars['String']>;
-  publicEndpoint_contains_i?: Maybe<Scalars['String']>;
-  publicEndpoint_not_contains_i?: Maybe<Scalars['String']>;
-  publicEndpoint_starts_with_i?: Maybe<Scalars['String']>;
-  publicEndpoint_not_starts_with_i?: Maybe<Scalars['String']>;
-  publicEndpoint_ends_with_i?: Maybe<Scalars['String']>;
-  publicEndpoint_not_ends_with_i?: Maybe<Scalars['String']>;
-  publicEndpoint_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  publicEndpoint_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  privateEndpoint?: Maybe<Scalars['String']>;
-  privateEndpoint_not?: Maybe<Scalars['String']>;
-  privateEndpoint_contains?: Maybe<Scalars['String']>;
-  privateEndpoint_not_contains?: Maybe<Scalars['String']>;
-  privateEndpoint_starts_with?: Maybe<Scalars['String']>;
-  privateEndpoint_not_starts_with?: Maybe<Scalars['String']>;
-  privateEndpoint_ends_with?: Maybe<Scalars['String']>;
-  privateEndpoint_not_ends_with?: Maybe<Scalars['String']>;
-  privateEndpoint_i?: Maybe<Scalars['String']>;
-  privateEndpoint_not_i?: Maybe<Scalars['String']>;
-  privateEndpoint_contains_i?: Maybe<Scalars['String']>;
-  privateEndpoint_not_contains_i?: Maybe<Scalars['String']>;
-  privateEndpoint_starts_with_i?: Maybe<Scalars['String']>;
-  privateEndpoint_not_starts_with_i?: Maybe<Scalars['String']>;
-  privateEndpoint_ends_with_i?: Maybe<Scalars['String']>;
-  privateEndpoint_not_ends_with_i?: Maybe<Scalars['String']>;
-  privateEndpoint_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  privateEndpoint_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  sdxEndpoint?: Maybe<Scalars['String']>;
+  sdxEndpoint_not?: Maybe<Scalars['String']>;
+  sdxEndpoint_contains?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_contains?: Maybe<Scalars['String']>;
+  sdxEndpoint_starts_with?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_starts_with?: Maybe<Scalars['String']>;
+  sdxEndpoint_ends_with?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_ends_with?: Maybe<Scalars['String']>;
+  sdxEndpoint_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_contains_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_contains_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_starts_with_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_starts_with_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_ends_with_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_not_ends_with_i?: Maybe<Scalars['String']>;
+  sdxEndpoint_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  sdxEndpoint_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumerEndpoint?: Maybe<Scalars['String']>;
+  consumerEndpoint_not?: Maybe<Scalars['String']>;
+  consumerEndpoint_contains?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_contains?: Maybe<Scalars['String']>;
+  consumerEndpoint_starts_with?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_starts_with?: Maybe<Scalars['String']>;
+  consumerEndpoint_ends_with?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_ends_with?: Maybe<Scalars['String']>;
+  consumerEndpoint_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_contains_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_contains_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_starts_with_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_starts_with_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_ends_with_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_not_ends_with_i?: Maybe<Scalars['String']>;
+  consumerEndpoint_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumerEndpoint_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -8662,8 +8655,6 @@ export enum SortOpenApiSpecsBy {
   NamespaceDesc = 'namespace_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
-  StateAsc = 'state_ASC',
-  StateDesc = 'state_DESC',
   VersionAsc = 'version_ASC',
   VersionDesc = 'version_DESC',
   TitleAsc = 'title_ASC',
@@ -8758,10 +8749,10 @@ export enum SortRuntimeGroupsBy {
   HostDesc = 'host_DESC',
   HostedOrganizationsAsc = 'hostedOrganizations_ASC',
   HostedOrganizationsDesc = 'hostedOrganizations_DESC',
-  PublicEndpointAsc = 'publicEndpoint_ASC',
-  PublicEndpointDesc = 'publicEndpoint_DESC',
-  PrivateEndpointAsc = 'privateEndpoint_ASC',
-  PrivateEndpointDesc = 'privateEndpoint_DESC',
+  SdxEndpointAsc = 'sdxEndpoint_ASC',
+  SdxEndpointDesc = 'sdxEndpoint_DESC',
+  ConsumerEndpointAsc = 'consumerEndpoint_ASC',
+  ConsumerEndpointDesc = 'consumerEndpoint_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',

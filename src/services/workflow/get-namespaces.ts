@@ -31,6 +31,8 @@ import {
 import getSubjectToken from '../../auth/auth-token';
 
 import { Logger } from '../../logger';
+import { NamespaceService } from '../org-groups';
+import { OrgNamespace } from '../org-groups/types';
 
 const logger = Logger('wf.getns');
 
@@ -221,6 +223,25 @@ export async function getResourceServerContext(
     usesUma2,
     uma2,
   };
+}
+
+export async function getNamespaceDetails(
+  context: any,
+  ns: string
+): Promise<OrgNamespace> {
+  const prodEnv = await lookupProductEnvironmentServicesBySlug(
+    context,
+    process.env.GWA_PROD_ENV_SLUG
+  );
+  const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, false);
+
+  const nsService = new NamespaceService(envCtx.issuerEnvConfig.issuerUrl);
+  await nsService.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+
+  return await nsService.getNamespaceOrganizationDetails(ns);
 }
 
 async function getProductEnvironmentIdBySlug(context: any, slug: string) {

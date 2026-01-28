@@ -18,6 +18,14 @@ import { SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
+import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
+import {
+  EnrichWithRuntimeGroup,
+  GetServiceClient,
+  ServiceClient,
+  SubsystemEntry,
+} from '../../../services/gateway-patterns/catalog';
+import { assertEqual } from '../../ioc/assert';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -65,6 +73,23 @@ export class OrgSubsystemController extends Controller {
     return new SubsystemService().listSubsystemsByOrganization(ctx, org);
   }
 
+  @Get('/{name}/client')
+  @OperationId('getSubsystem')
+  @Security('jwt', ['System.Manage'])
+  public async getSubsystem(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<SubsystemEntry> {
+    const context = this.keystone.createContext(request, true);
+
+    const subsystem = await GetServiceClient(context, org, name);
+
+    await EnrichWithRuntimeGroup(context, subsystem.subsystem);
+
+    return subsystem.subsystem;
+  }
+
   /**
    * A subsystem can be deleted if there are no services associated with it.
    * > `Required Scope:` System.Manage
@@ -87,5 +112,33 @@ export class OrgSubsystemController extends Controller {
     const context = this.keystone.createContext(request, true);
 
     return new SubsystemService().deleteSubsystem(context, org, name, force);
+  }
+
+  @Put('/{name}/gateway')
+  @OperationId('registerSubsystemGateway')
+  @Security('jwt', ['System.Manage'])
+  public async registerSubsystemGateway(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { runtimeGroupName: string },
+    @Request() request: any
+  ): Promise<{ gatewayId: string }> {
+    const context = this.keystone.createContext(request, true);
+
+    const client = await GetServiceClient(context, org, name);
+
+    const result = await CreateNamespaceForSubsystem(context, {
+      subsystem: client.subsystem,
+      runtimeGroupName: body.runtimeGroupName,
+    });
+
+    assertEqual(
+      client.subsystem.gateway.id === result.name,
+      true,
+      'gatewayId',
+      'Gateway ID mismatch after creation'
+    );
+
+    return { gatewayId: client.subsystem.gateway.id };
   }
 }

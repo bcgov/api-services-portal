@@ -43,7 +43,7 @@ module.exports = {
   hooks: {
     resolveInput: async function ({ operation, resolvedData }) {
       if (operation == 'create') {
-        resolvedData.namespace = `sdx-edge-${resolvedData['name']}`;
+        resolvedData.namespace = `sdx-rg-${resolvedData['name']}`;
       }
       return resolvedData;
     },
