@@ -106,7 +106,6 @@ export class RuntimeGroupController extends Controller {
    * @param filter - Filter type: 'owned' returns runtime groups owned by the org,
    *                 'available' returns runtime groups hosted/available to the org
    * @param request - HTTP request object for context creation
-   * @returns Promise resolving to array of RuntimeGroup objects
    */
   @Get()
   @OperationId('listRuntimeGroups')
@@ -141,8 +140,6 @@ export class RuntimeGroupController extends Controller {
    * @param name - Runtime group name to delete
    * @param force - If true, force deletion even if gateways are associated
    * @param request - HTTP request object for context creation
-   * @returns Promise resolving to BatchResult with deletion status
-   * @example force=false
    */
   @Delete('/{name}')
   @OperationId('deleteRuntimeGroup')
@@ -175,8 +172,6 @@ export class RuntimeGroupController extends Controller {
    * @param name - Runtime group name
    * @param request - HTTP request object for context creation
    * @returns Promise resolving to object containing the created gateway ID
-   * @throws Error if runtime group doesn't belong to the organization
-   * @throws Error if gateway ID mismatch occurs after creation
    */
   @Put('/{name}/gateway')
   @OperationId('registerRuntimeGroupGateway')
