@@ -7,23 +7,42 @@ import { CreateNamespace } from './create-namespace';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
+/**
+ * Arguments for creating a namespace for a runtime group.
+ */
 export interface CreateNamespaceForRuntimeGroupArgs {
+  /** The organization that owns the runtime group */
   organization: string;
+  /** The unique name identifying the runtime group */
   runtimeGroupName: string;
 }
 
+/**
+ * Creates a namespace for a runtime group in the SDX edge environment.
+ *
+ * This function retrieves the runtime group configuration and creates a corresponding
+ * namespace with appropriate domain settings for both the runtime group host and
+ * consumer endpoint.
+ *
+ * @param context - The request context
+ * @param args - Arguments containing organization and runtime group name
+ * @returns Promise resolving to the created ResourceSet
+ */
 export async function CreateNamespaceForRuntimeGroup(
   context: any,
   args: CreateNamespaceForRuntimeGroupArgs
 ): Promise<ResourceSet> {
+  // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
   const rg = await rgService.findRuntimeGroupByUniqueName(
     context,
     args.runtimeGroupName
   );
 
+  // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
+  // Create the namespace with SDX edge configuration
   const resourceSet = await CreateNamespace(context, {
     name: rg.namespace,
     org: args.organization,
@@ -43,23 +62,42 @@ export async function CreateNamespaceForRuntimeGroup(
   return resourceSet;
 }
 
+/**
+ * Arguments for creating a namespace for a subsystem.
+ */
 export interface CreateNamespaceForSubsystemArgs {
+  /** The subsystem configuration entry */
   subsystem: SubsystemEntry;
+  /** The runtime group name to associate with the subsystem */
   runtimeGroupName: string;
 }
 
+/**
+ * Creates a namespace for a subsystem within a runtime group in the SDX edge environment.
+ *
+ * This function creates a namespace specifically for a subsystem, using the subsystem's
+ * organization details and gateway configuration while associating it with the specified
+ * runtime group's domain settings.
+ *
+ * @param context - The request context
+ * @param args - Arguments containing subsystem entry and runtime group name
+ * @returns Promise resolving to the created ResourceSet
+ */
 export async function CreateNamespaceForSubsystem(
   context: any,
   args: CreateNamespaceForSubsystemArgs
 ): Promise<ResourceSet> {
+  // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
   const rg = await rgService.findRuntimeGroupByUniqueName(
     context,
     args.runtimeGroupName
   );
 
+  // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
+  // Create the namespace using subsystem organization and gateway details
   const resourceSet = await CreateNamespace(context, {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
