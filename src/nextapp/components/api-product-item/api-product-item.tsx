@@ -18,6 +18,7 @@ import { Dataset, Environment, Product } from '@/shared/types/query.types';
 
 export interface ApiEnvironment extends Environment {
   anonymous: boolean;
+  twoTieredHidden?: boolean;
 }
 
 export interface ApiProduct extends Product {
@@ -45,11 +46,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
   );
   const isTiered = data.environments.some((e) => e.anonymous);
 
-  const isTieredHidden = data.environments.some((e) =>
-    e.services.some((s) =>
-      s.plugins.some((p) => p.tags.includes('aps.two-tiered-hidden'))
-    )
-  );
+  const isTieredHidden = data.environments.some((e) => e.twoTieredHidden);
 
   return (
     <>
@@ -59,11 +56,11 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
             <Flex align="center" mb={2}>
               <Flex align="center" width={8}>
                 <Icon
-                  as={isPublic || isTiered ? RiEarthFill : FaLock}
+                  as={isPublic || isTiered && !isTieredHidden ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
                   data-testid={`product-icon-${kebabCase(data.name)}-${
-                    isPublic || isTiered ? 'RiEarthFill' : 'FaLock'
+                    isPublic || isTiered && !isTieredHidden ? 'RiEarthFill' : 'FaLock'
                   }`}
                 />
               </Flex>
