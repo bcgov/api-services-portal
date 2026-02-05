@@ -104,22 +104,22 @@
 | │   01-cli-commands.ts                                      | NA                                                             |
 | │   02-cli-generate-config-quick-start.ts                   | 16.1                                                           |
 | │   03-cli-generate-config-client-cred.ts                   | 1.1, 2.1 to 2.3, 15.1, 15.5. 16.1                              |
-| │   04-cli-gateway-create.ts                                | NA                                                             | 
+| │   04-cli-gateway-create.ts                                | NA                                                             |
 | 17-delete-application                                       |                                                                |
 | │   01-delete-application-without-access.cy.ts              | NA                                                             |
-| │   02-delete-application-with-pending-request.cy.ts        | 17.1 (CONFIRM: requires product, created in 01-api-key?)       |   
+| │   02-delete-application-with-pending-request.cy.ts        | 17.1 (CONFIRM: requires product, created in 01-api-key?)       |
 | │   03-delete-application-with-approved-request.cy.ts       | 17.1 to 17.2                                                   |
 | │   04-delete-namespace-gwa.ts                              | 17.1 to 17.3                                                   |
 | 18-scan-astra-result                                        |                                                                |
-| |   01-store-and-scan-astra-result.ts                       | NA                                                             |
+| │   01-store-and-scan-astra-result.ts                       | NA                                                             |
 | 19-api-v3                                                   |                                                                |
-| |   01-api-directory.cy.ts                                  | ?                                                              |
-| |   02-organization.cy.ts                                   | ?                                                              |
-| |   03-gateways.cy.ts                                       | ?                                                              |
-| |   04-products.cy.ts                                       | ?                                                              |
-| |   05-issuers.cy.ts                                        | ?                                                              |
-| |   06-identifiers.cy.ts                                    | ?                                                              |
-| |   07-endpoints.cy.ts                                      | ?                                                              |
+| │   01-api-directory.cy.ts                                  | ?                                                              |
+| │   02-organization.cy.ts                                   | ?                                                              |
+| │   03-gateways.cy.ts                                       | ?                                                              |
+| │   04-products.cy.ts                                       | ?                                                              |
+| │   05-issuers.cy.ts                                        | ?                                                              |
+| │   06-identifiers.cy.ts                                    | ?                                                              |
+| │   07-endpoints.cy.ts                                      | ?                                                              |
 | 20-gateways                                                 |                                                                |
-| |   01-list.cy.ts                                           | NA                                                             |
-| |   02-create.cy.ts                                         | NA                                                             |
+| │   01-list.cy.ts                                           | NA                                                             |
+| │   02-create.cy.ts                                         | NA                                                             |
