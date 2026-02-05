@@ -1,7 +1,7 @@
 | Test                                                        | Dependencies                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
 | 01-api-key                                                  |                                                                |
-| │   00-get-started.cy.ts                                    | Must run without existing namespaces|
+| │   00-get-started.cy.ts                                    | Must run without existing namespaces                           |
 | │   01-create-api.cy.ts                                     | NA                                                             |
 | │   02-team-access.cy.ts                                    | 1.1                                                            |
 | │   03-request-access-inactive-env.cy.ts                    | 1.1 to 1.2                                                     |
@@ -113,13 +113,9 @@
 | 18-scan-astra-result                                        |                                                                |
 | │   01-store-and-scan-astra-result.ts                       | NA                                                             |
 | 19-api-v3                                                   |                                                                |
-| │   01-api-directory.cy.ts                                  | ?                                                              |
-| │   02-organization.cy.ts                                   | ?                                                              |
-| │   03-gateways.cy.ts                                       | ?                                                              |
-| │   04-products.cy.ts                                       | ?                                                              |
-| │   05-issuers.cy.ts                                        | ?                                                              |
-| │   06-identifiers.cy.ts                                    | ?                                                              |
-| │   07-endpoints.cy.ts                                      | ?                                                              |
+| │   -- ALL TESTS ARE INDEPENDENT --                         | NA                                                             |
 | 20-gateways                                                 |                                                                |
 | │   01-list.cy.ts                                           | NA                                                             |
 | │   02-create.cy.ts                                         | NA                                                             |
+| 21-sdx-api/v1                                               |                                                                |
+| │   -- ALL TESTS ARE INDEPENDENT --                         | NA                                                             |
