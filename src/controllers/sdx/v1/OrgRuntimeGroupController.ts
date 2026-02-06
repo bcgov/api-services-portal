@@ -120,7 +120,7 @@ export class RuntimeGroupController extends Controller {
   }
 
   /**
-   * Delete a runtime group
+   * @summary Delete a runtime group
    *
    * A runtime group can be deleted if there are no gateways associated with it.
    * Use the force parameter to override and delete even if gateways exist (use with caution).
