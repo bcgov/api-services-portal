@@ -50,7 +50,7 @@ export class RuntimeGroupController extends Controller {
   }
 
   /**
-   * Create a new runtime group for an organization
+   * @summary Create or update a runtime group
    *
    * Creates or updates a runtime group configuration for the specified organization.
    * The runtime group defines settings for gateway instances including hosting details,
