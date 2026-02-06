@@ -151,7 +151,7 @@ export class RuntimeGroupController extends Controller {
   }
 
   /**
-   * Register a gateway for a runtime group
+   * @summary Register a gateway for a runtime group
    *
    * Creates a namespace and gateway configuration for the specified runtime group.
    * This operation sets up the necessary infrastructure for the runtime group to
