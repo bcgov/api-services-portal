@@ -13,6 +13,7 @@ const { Register } = require('./controllers/ioc/registry');
 const { UnauthorizedError } = require('express-jwt');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
+const { UserAssertionError } = require('./services/user-assert');
 
 class ApiOpenapiApp {
   constructor() {}
@@ -150,7 +151,10 @@ class ApiOpenapiApp {
           message: err?.message,
           fields: err?.fields,
         });
-      } else if (err instanceof AssertionError) {
+      } else if (
+        err instanceof AssertionError ||
+        err instanceof UserAssertionError
+      ) {
         // For some reason `message` is what the `stack` is normally
         // so just grab the first line and return that
         const response = {
@@ -158,6 +162,7 @@ class ApiOpenapiApp {
         };
         try {
           logger.warn('Error message %s', err.message);
+          // workaround until we get all AssertionError migrated to UserAssertionError
           response.message = err.message.split('\n')[0];
         } catch (e) {
           logger.warn('Failed to parse error message %s', e);
