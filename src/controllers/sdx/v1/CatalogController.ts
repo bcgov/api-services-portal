@@ -38,7 +38,9 @@ export class CatalogController extends Controller {
   }
 
   /**
-   * Retrieve the list of services available in the SDX service catalog.
+   * Retrieve a list of services available in the SDX service catalog.
+   *
+   * @summary List of services in catalog
    */
   @Get('/services')
   @OperationId('listServiceCatalog')
@@ -81,7 +83,8 @@ export class CatalogController extends Controller {
   }
 
   /**
-   * Retrieve the Service Details
+   * @summary Retrieve details for a service
+   * @param name - Service name
    */
   @Get('/services/{name}')
   @OperationId('getOASService')
@@ -96,6 +99,9 @@ export class CatalogController extends Controller {
 
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
+   *
+   * @summary Retrieve a Service OpenAPI Specification in JSON format
+   * @param name - Service name
    */
   @Get('/services/{name}/oas-spec')
   @OperationId('getOASServiceSpec')

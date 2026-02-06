@@ -44,8 +44,20 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * @summary Create a new OAS service
+   * Creates or updates an OAS service for the specified organization.
+   * The OAS service is defined by an OpenAPI specification file uploaded as part of the request.
+   *
+   * This endpoint processes the specification, creates necessary configurations, and registers
+   * the service within the SDX environment.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Create or update an OAS service
+   *
+   * @param org - Organization identifier
+   * @param subsystem - Subsystem name under which the service will be categorized
+   * @param configFile - OpenAPI specification file uploaded as part of the request
+   * @param request - HTTP request object for context creation
    */
   @Put()
   @OperationId('createOASService')
@@ -81,8 +93,14 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * @summary Retrieve a list of OAS services
+   * Retrieves a list of OAS services associated with the specified organization. Each service entry includes
+   * details such as its name, title, version, summary, description, and associated subsystem information.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve a list of OAS services
+   * @param org - Organization identifier
+   * @param request - HTTP request object for context creation
    */
   @Get()
   @OperationId('listOrganizationOASServices')
@@ -102,8 +120,14 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * @summary Retrieve an OAS service
+   * Retrieves the details of a specific OAS service associated with the specified organization.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve an OAS service
+   * @param org - Organization identifier
+   * @param name - OAS service name
+   * @param request - HTTP request object for context creation
    */
   @Get('/{name}')
   @OperationId('getOrganizationOASService')
@@ -127,8 +151,16 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * @summary Retrieve a Service OpenAPI Specification in JSON format
+   * Retrieves the OpenAPI specification of a specific OAS service in JSON format. This allows clients to
+   * obtain the full specification details for a service, which can be used for various purposes such as
+   * client generation, documentation, or analysis.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve a Service OpenAPI Specification in JSON format
+   * @param org - Organization identifier
+   * @param name - OAS service name
+   * @param request - HTTP request object for context creation
    */
   @Get('/{name}/oas-spec')
   @OperationId('getOrganizationServiceSpec')
@@ -153,10 +185,9 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * @summary Delete an OAS service
    * > `Required Scope:` System.Manage
    *
-   * @summary Delete an OAS Service
+   * @summary Delete an OAS service
    * @param org
    * @param name
    * @param request

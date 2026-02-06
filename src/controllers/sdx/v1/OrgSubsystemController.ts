@@ -37,13 +37,13 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * @summary Create or update asubsystem
-   *
    * Creates or updates a subsystem configuration for the specified organization.
    * The subsystem defines settings for gateway instances including hosting details,
    * endpoints, and network configuration.
    *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Create or update a subsystem
    *
    * @param org - Organization identifier
    * @param body - Subsystem configuration input
@@ -68,13 +68,13 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * @summary Retrieve a list of subsystems
-   *
    * Retrieves a list of subsystems associated with an organization.
    * Each subsystem entry includes details such as its name, associated gateway information,
    * and configuration settings.
    *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve a list of subsystems
    *
    * @param org - Organization identifier
    * @param request - HTTP request object for context creation
@@ -92,12 +92,12 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * @summary Retrieve a subsystem in catalog format
    * Retrieves the details of a specific subsystem in a format suitable for catalog display.
    * This includes enriched information such as associated runtime group details and gateway information.
    *
    * > `Required Scope:` System.Manage
    *
+   * @summary Retrieve a subsystem in catalog format
    * @param org - Organization identifier
    * @param name - Subsystem name
    * @param request - HTTP request object for context creation
@@ -120,8 +120,6 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * @summary Delete a subsystem
-   *
    * Deletes a subsystem from the specified organization. The subsystem can only be deleted
    * if there are no services associated with it.
    * If the `force` query parameter is set to true, the subsystem will be deleted along
@@ -130,6 +128,7 @@ export class OrgSubsystemController extends Controller {
    * > `Required Scope:` System.Manage
    *
    * @summary Delete a subsystem
+   *
    * @param org - Organization identifier
    * @param name - Subsystem name to delete
    * @param request - HTTP request object for context creation
@@ -151,8 +150,6 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * @summary Register a gateway for a subsystem
-   *
    * Creates a gateway for the specified subsystem. This involves creating necessary configurations
    * and infrastructure to enable the subsystem to be hosted on a runtime group.
    *
@@ -160,6 +157,8 @@ export class OrgSubsystemController extends Controller {
    * for the subsystem (such as incoming connections from clients and outbound connections to services
    *
    * > `Required Scope:` System.Manage
+   *
+   * @summary Register a gateway for a subsystem
    *
    * @param org - Organization identifier
    * @param name - Subsystem name
