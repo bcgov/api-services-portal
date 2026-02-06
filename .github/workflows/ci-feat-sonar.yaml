@@ -19,6 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install deps
+        run: |
+          sudo apt update
+
       - uses: actions/setup-node@v2
         with:
           node-version: '22'
@@ -44,7 +48,7 @@ jobs:
           docker compose down
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v6
+        uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
