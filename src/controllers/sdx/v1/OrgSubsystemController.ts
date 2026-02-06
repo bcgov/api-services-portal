@@ -37,8 +37,18 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * Create a new subsystem of an organization
+   * @summary Create or update asubsystem
+   *
+   * Creates or updates a subsystem configuration for the specified organization.
+   * The subsystem defines settings for gateway instances including hosting details,
+   * endpoints, and network configuration.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @param org - Organization identifier
+   * @param body - Subsystem configuration input
+   * @param request - HTTP request object for context creation
+   * @return Promise resolving to a BatchResult indicating the outcome of the operation
    */
   @Put()
   @OperationId('createSubsystem')
@@ -58,8 +68,17 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * Retrieve the list of subsystems associated with a gateway
+   * @summary Retrieve a list of subsystems
+   *
+   * Retrieves a list of subsystems associated with the specified organization.
+   * Each subsystem entry includes details such as its name, associated gateway information,
+   * and configuration settings.
+   *
    * > `Required Scope:` System.Manage
+   *
+   * @param org - Organization identifier
+   * @param request - HTTP request object for context creation
+   * @returns Promise resolving to an array of Subsystem objects
    */
   @Get()
   @OperationId('listSubsystems')
@@ -72,6 +91,17 @@ export class OrgSubsystemController extends Controller {
     return new SubsystemService().listSubsystemsByOrganization(ctx, org);
   }
 
+  /**
+   * @summary Retrieve a subsystem in catalog format
+   * Retrieves the details of a specific subsystem in a format suitable for catalog display.
+   * This includes enriched information such as associated runtime group details and gateway information.
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param request - HTTP request object for context creation
+   */
   @Get('/{name}/client')
   @OperationId('getSubsystem')
   @Security('jwt', ['System.Manage'])
@@ -90,13 +120,20 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * A subsystem can be deleted if there are no services associated with it.
+   * @summary Delete a subsystem
+   *
+   * Deletes a subsystem from the specified organization. The subsystem can only be deleted
+   * if there are no services associated with it.
+   * If the `force` query parameter is set to true, the subsystem will be deleted along
+   * with all associated services.
+   *
    * > `Required Scope:` System.Manage
    *
    * @summary Delete a subsystem
-   * @param org
-   * @param name
-   * @param request
+   * @param org - Organization identifier
+   * @param name - Subsystem name to delete
+   * @param request - HTTP request object for context creation
+   * @param force - If true, force deletion even if associated services exist (use with caution)
    * @example { force: false } body
    */
   @Delete('/{name}')
@@ -113,6 +150,22 @@ export class OrgSubsystemController extends Controller {
     return new SubsystemService().deleteSubsystem(context, org, name, force);
   }
 
+  /**
+   * @summary Register a gateway for a subsystem
+   *
+   * Creates a gateway for the specified subsystem. This involves creating necessary configurations
+   * and infrastructure to enable the subsystem to be hosted on a runtime group.
+   *
+   * The gateway is used to setup routing policies on the particular runtime group
+   * for the subsystem (such as incoming connections from clients and outbound connections to services
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param body - Object containing the runtime group name to host the subsystem gateway
+   * @param request - HTTP request object for context creation
+   */
   @Put('/{name}/gateway')
   @OperationId('registerSubsystemGateway')
   @Security('jwt', ['System.Manage'])

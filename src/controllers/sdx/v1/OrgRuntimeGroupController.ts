@@ -153,9 +153,10 @@ export class RuntimeGroupController extends Controller {
   /**
    * @summary Register a gateway for a runtime group
    *
-   * Creates a namespace and gateway configuration for the specified runtime group.
-   * This operation sets up the necessary infrastructure for the runtime group to
-   * handle API gateway traffic in the SDX edge environment.
+   * Creates a gateway for the specified runtime group. This involves creating necessary configurations
+   * and infrastructure to enable the runtime group gateway configuration to be hosted on its self.
+   *
+   * The gateway is used to setup default routing policies for the runtime group (such as a default DENY).
    *
    * > `Required Scope:` System.Manage
    *

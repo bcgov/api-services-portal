@@ -44,7 +44,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Create a new service for an organization
+   * @summary Create a new OAS service
    * > `Required Scope:` System.Manage
    */
   @Put()
@@ -81,7 +81,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Retrieve the list of oas-services associated with an organization
+   * @summary Retrieve a list of OAS services
    * > `Required Scope:` System.Manage
    */
   @Get()
@@ -102,7 +102,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Retrieve an oas-service associated with an organization
+   * @summary Retrieve an OAS service
    * > `Required Scope:` System.Manage
    */
   @Get('/{name}')
@@ -127,7 +127,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Retrieve the Service OpenAPI Specification in JSON format
+   * @summary Retrieve a Service OpenAPI Specification in JSON format
    * > `Required Scope:` System.Manage
    */
   @Get('/{name}/oas-spec')
@@ -153,7 +153,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Delete an OAS Service
+   * @summary Delete an OAS service
    * > `Required Scope:` System.Manage
    *
    * @summary Delete an OAS Service
