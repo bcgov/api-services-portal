@@ -29,10 +29,10 @@ class RuntimeGroupService {
   ): Promise<BatchResult> => {
     // host should be based on a standard format for edge servers
     body['host'] = `${body['name']}.servers.sdx`;
-    if (!body.hasOwnProperty('sdxEndpoint')) {
+    if (!body.sdxEndpoint) {
       body['sdxEndpoint'] = `https://${body['name']}.servers.sdx`;
     }
-    if (!body.hasOwnProperty('consumerEndpoint')) {
+    if (!body.consumerEndpoint) {
       body['consumerEndpoint'] = `http://internal.${body['name']}.servers.sdx`;
     }
 
