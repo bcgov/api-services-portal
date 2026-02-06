@@ -70,7 +70,7 @@ export class OrgSubsystemController extends Controller {
   /**
    * @summary Retrieve a list of subsystems
    *
-   * Retrieves a list of subsystems associated with the specified organization.
+   * Retrieves a list of subsystems associated with an organization.
    * Each subsystem entry includes details such as its name, associated gateway information,
    * and configuration settings.
    *
