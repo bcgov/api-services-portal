@@ -86,7 +86,7 @@ export class RuntimeGroupController extends Controller {
   }
 
   /**
-   * Retrieve the list of runtime groups associated with an organization
+   * @summary Retrieve a list of runtime groups
    *
    * Returns either runtime groups owned by the organization or runtime groups
    * available/hosted for the organization, depending on the filter parameter.
