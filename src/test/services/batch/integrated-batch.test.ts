@@ -13,7 +13,7 @@ import {
   getRecords,
 } from '../../../batch/feed-worker';
 import yaml from 'js-yaml';
-import { strict as assert } from 'assert';
+import assert from '../../../services/user-assert';
 
 import testdata from './testdata';
 import { Logger } from '../../../logger';
