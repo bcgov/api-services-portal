@@ -83,6 +83,8 @@ export class CatalogController extends Controller {
   }
 
   /**
+   * Retrieve details for a specific service in the catalog by name.
+   *
    * @summary Retrieve details for a service
    * @param name - Service name
    */
