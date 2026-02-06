@@ -5,282 +5,321 @@ import { slowCypressDown } from 'cypress-slow-down'
 slowCypressDown(100)
 
 describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Policy', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    before(() => {
-        cy.visit('/')
-        cy.deleteAllCookies()
-        cy.reload(true)
-    })
+  before(() => {
+    cy.visit('/')
+    cy.deleteAllCookies()
+    cy.reload(true)
+  })
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.fixture('common-testdata').as('common-testdata')
-        // cy.visit(login.path)
-    })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.fixture('common-testdata').as('common-testdata')
+    // cy.visit(login.path)
+  })
 
-    it('authenticates Mark (Access Manager)', () => {
-        cy.get('@access-manager').then(({ user }: any) => {
-            cy.get('@common-testdata').then(({ namespace }: any) => {
-                cy.login(user.credentials.username, user.credentials.password).then(() => {
-                    cy.activateGateway(namespace);
-                })
-            })
+  it('authenticates Mark (Access Manager)', () => {
+    cy.get('@access-manager').then(({ user }: any) => {
+      cy.get('@common-testdata').then(({ namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password).then(() => {
+          cy.activateGateway(namespace)
         })
+      })
     })
+  })
 
-    it('Navigate to Consumer page and filter the product', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.visit(consumers.path);
-            consumers.filterConsumerByTypeAndValue('Products', product.name)
-        })
+  it('Navigate to Consumer page and filter the product', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.visit(consumers.path)
+      consumers.filterConsumerByTypeAndValue('Products', product.name)
     })
+  })
 
-    it('Select the consumer from the list ', () => {
-        consumers.saveConsumerNumber()
-        consumers.clickOnTheFirstConsumerID()
-    })
+  it('Select the consumer from the list ', () => {
+    consumers.saveConsumerNumber()
+    consumers.clickOnTheFirstConsumerID()
+  })
 
-    it('set api rate limit as per the test config, Local Policy and Scope as Service', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            consumers.clearIPRestrictionControl()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer)
-        })
+  it('set api rate limit as per the test config, Local Policy and Scope as Service', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      consumers.clearIPRestrictionControl()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer)
     })
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                    expect(response.status).to.be.equal(429)
-                    expect(response.body.message).to.be.contain('API rate limit exceeded')
-                })
-            })                
-        })
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+          cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+            (response) => {
+              expect(response.status).to.be.equal(429)
+              expect(response.body.message).to.be.contain('API rate limit exceeded')
+            }
+          )
+        }
+      )
     })
+  })
 })
 
 describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.visit(login.path)
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.visit(login.path)
+  })
+  it('set api rate limit as per the test config, Local Policy and Scope as Route', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      cy.visit(consumers.path)
+      consumers.clickOnTheFirstConsumerID()
+      consumers.clearRateLimitControl()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Route')
     })
-    it('set api rate limit as per the test config, Local Policy and Scope as Route', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            consumers.clearRateLimitControl()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route")
-        })
-    })
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
-        })
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+        }
+      )
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(429)
+          expect(response.body.message).to.be.contain('API rate limit exceeded')
+        }
+      )
     })
+  })
 })
 
 describe('Manage Control-Rate Limiting Spec for Service as Scope and Redis Policy', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.visit(login.path)
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.visit(login.path)
+  })
+  it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      cy.visit(consumers.path)
+      consumers.clickOnTheFirstConsumerID()
+      consumers.clearRateLimitControl()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Service', 'Redis')
     })
-    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            consumers.clearRateLimitControl()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Service", "Redis")
-        })
-    })
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
-        })
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+        }
+      )
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(429)
+          expect(response.body.message).to.be.contain('API rate limit exceeded')
+        }
+      )
     })
+  })
 })
 
 describe('Manage Control-Rate Limiting Spec for Route as Scope and Redis Policy', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.visit(login.path)
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.visit(login.path)
+  })
+  it('set api rate limit as per the test config, Redis Policy and Scope as Route', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      cy.visit(consumers.path)
+      consumers.clickOnTheFirstConsumerID()
+      consumers.clearRateLimitControl()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Route', 'Redis')
     })
-    it('set api rate limit as per the test config, Redis Policy and Scope as Route', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            consumers.clearRateLimitControl()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route", "Redis")
-        })
-    })
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
-        })
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+        }
+      )
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(429)
+          expect(response.body.message).to.be.contain('API rate limit exceeded')
+        }
+      )
     })
+  })
 })
 
 describe('Manage Control-Apply Rate limiting to Global and Consumer at Service level ', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.visit(login.path)
-    })
-    
-    it('set api rate limit to global service level', () => {
-        cy.visit(consumers.path);
-        consumers.clickOnTheFirstConsumerID()
-        consumers.clearRateLimitControl()
-        cy.updateKongPlugin('services', 'rateLimiting').then((response) => {
-            expect(response.status).to.be.equal(201)
-        })
-    })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.visit(login.path)
+  })
 
-    it('Verify that Rate limiting is set at global service level', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(16, 18)
-            })
-        })
+  it('set api rate limit to global service level', () => {
+    cy.visit(consumers.path)
+    consumers.clickOnTheFirstConsumerID()
+    consumers.clearRateLimitControl()
+    cy.updateKongPlugin('services', 'rateLimiting').then((response) => {
+      expect(response.status).to.be.equal(201)
     })
+  })
 
-    it('Clear Redis rate limit keys before setting new rate limit', () => {
-        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
+  it('Verify that Rate limiting is set at global service level', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+          expect(parseInt(response.headers['x-ratelimit-remaining-hour'])).to.be.within(
+            16,
+            18
+          )
+        }
+      )
     })
+  })
 
-    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Service", "Redis")
-        })
-    })
+  it('Clear Redis rate limit keys before setting new rate limit', () => {
+    cy.exec(
+      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
+      { failOnNonZeroExit: false }
+    )
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
-        })
+  it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      cy.visit(consumers.path)
+      consumers.clickOnTheFirstConsumerID()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Service', 'Redis')
     })
+  })
+
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+        }
+      )
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(429)
+          expect(response.body.message).to.be.contain('API rate limit exceeded')
+        }
+      )
+    })
+  })
 })
 
 describe('Manage Control-Apply Rate limiting to Global and Consumer at Route level ', () => {
-    const login = new LoginPage()
-    const home = new HomePage()
-    const consumers = new ConsumersPage()
+  const login = new LoginPage()
+  const home = new HomePage()
+  const consumers = new ConsumersPage()
 
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('access-manager').as('access-manager')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-        cy.visit(login.path)
-    })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+    cy.visit(login.path)
+  })
 
-    it('set api rate limit to global service level', () => {
-        cy.visit(consumers.path);
-        consumers.clickOnTheFirstConsumerID()
-        consumers.clearRateLimitControl()
-        cy.updateKongPlugin('routes', 'rateLimiting').then((response) => {
-            expect(response.status).to.be.equal(201)
-        })
+  it('set api rate limit to global service level', () => {
+    cy.visit(consumers.path)
+    consumers.clickOnTheFirstConsumerID()
+    consumers.clearRateLimitControl()
+    cy.updateKongPlugin('routes', 'rateLimiting').then((response) => {
+      expect(response.status).to.be.equal(201)
     })
+  })
 
-    it('Verify that Rate limiting is set at global service level', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.wait(5000)
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-                expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(18)
-            })
-        })
+  it('Verify that Rate limiting is set at global service level', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.wait(5000)
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+          expect(parseInt(response.headers['x-ratelimit-remaining-hour'])).to.be.equal(18)
+        }
+      )
     })
-    
-    it('Clear Redis rate limit keys before setting new rate limit', () => {
-        cy.exec("docker exec redis-master sh -c \"export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern 'ratelimit*' | xargs -r redis-cli DEL\"", { failOnNonZeroExit: false })
-    })
+  })
 
-    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
-        cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-            cy.visit(consumers.path);
-            consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route", "Redis")
-        })
-    })
+  it('Clear Redis rate limit keys before setting new rate limit', () => {
+    cy.exec(
+      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
+      { failOnNonZeroExit: false }
+    )
+  })
 
-    it('verify rate limit error when the API calls beyond the limit', () => {
-        cy.get('@apiowner').then(({ product }: any) => {
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(200)
-            })
-            cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-                expect(response.status).to.be.equal(429)
-                expect(response.body.message).to.be.contain('API rate limit exceeded')
-            })
-        })
+  it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+    cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
+      cy.visit(consumers.path)
+      consumers.clickOnTheFirstConsumerID()
+      consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Route', 'Redis')
     })
+  })
 
-    after(() => {
-        cy.logout()
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(200)
+        }
+      )
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
+        (response) => {
+          expect(response.status).to.be.equal(429)
+          expect(response.body.message).to.be.contain('API rate limit exceeded')
+        }
+      )
     })
+  })
+
+  after(() => {
+    cy.logout()
+  })
 })

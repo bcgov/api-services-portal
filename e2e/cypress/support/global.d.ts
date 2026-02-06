@@ -26,6 +26,8 @@ declare namespace Cypress {
 
     makeKongRequest(serviceName: string, methodType: string, key?: string): Chainable<any>
 
+    makeKongProxyRequest(serviceName: string, methodType: string): Chainable<any>
+
     makeKongGatewayRequestUsingClientIDSecret(
       hostURL: string,
       methodType?: string
