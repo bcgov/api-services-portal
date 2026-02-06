@@ -3,8 +3,6 @@ import { Logger } from '../../logger';
 import YAML from 'yaml';
 import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
-import { ServiceOperation } from '../gateway-patterns/catalog';
-import { strict as assert } from 'assert';
 import { OpenAPISpecService } from '../batch/oas-service';
 
 const logger = Logger('wf.OASLoader');
@@ -22,6 +20,7 @@ export const LoadOpenAPISpec = async (
 ): Promise<OpenAPISpec> => {
   const specService = new OpenAPISpecService();
 
+  // KeystoneJS entity
   const outSpec: OpenAPISpec = {};
 
   const subsystemRecord: Subsystem = await new SubsystemService().findSubsystemByName(
@@ -70,7 +69,13 @@ function parseSpecOperations(spec: any) {
       });
     });
 
-  const flattenedOperations: ServiceOperation[] = [];
+  const flattenedOperations: {
+    operationId: string;
+    summary: string;
+    method: string;
+    path: string;
+    scopes?: string[];
+  }[] = [];
   if (operations) {
     for (const opList of operations) {
       for (const op of opList) {

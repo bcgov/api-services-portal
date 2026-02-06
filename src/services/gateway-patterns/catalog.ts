@@ -52,25 +52,19 @@ export interface ServiceClient {
  * @tsoaModel
  *
  */
-export interface ServiceOperation {
-  operationId: string;
-  summary: string;
-  method: string;
-  path: string;
-  scopes?: string[];
-}
-
-/**
- * @tsoaModel
- *
- */
 export interface ServiceCatalogEntry {
   name: string;
   title: string;
   version: string;
   summary?: string;
   description: string;
-  operations: ServiceOperation[];
+  operations: {
+    operationId: string;
+    summary: string;
+    method: string;
+    path: string;
+    scopes?: string[];
+  }[];
   spec?: string;
   subsystem: SubsystemEntry;
 }
