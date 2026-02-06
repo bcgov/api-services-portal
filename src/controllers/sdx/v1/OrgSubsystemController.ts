@@ -1,31 +1,30 @@
 import {
+  Body,
   Controller,
-  Request,
-  OperationId,
+  Delete,
   Get,
-  Put,
+  OperationId,
   Path,
+  Put,
+  Query,
+  Request,
   Route,
   Security,
-  Body,
   Tags,
-  Delete,
-  Query,
 } from 'tsoa';
-import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { SubsystemInput } from './types';
 import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
-import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
 import {
   EnrichWithRuntimeGroup,
   GetServiceClient,
-  ServiceClient,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
+import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
 import { assertEqual } from '../../ioc/assert';
+import { KeystoneService } from '../../ioc/keystoneInjector';
+import { SubsystemInput } from './types';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')

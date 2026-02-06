@@ -1,38 +1,37 @@
 import {
   Controller,
-  Request,
-  OperationId,
+  Delete,
+  FormField,
   Get,
-  Put,
+  OperationId,
   Path,
+  Put,
+  Request,
   Route,
   Security,
   Tags,
-  FormField,
   UploadedFile,
-  Delete,
-  Query,
 } from 'tsoa';
-import { assertEqual } from '../../ioc/assert';
-import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { BatchResult } from '../../../batch/types';
+import YAML from 'yaml';
 import {
   deleteRecordByInternalId,
   getRecordById,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
-import {
-  LoadOpenAPISpec,
-  OpenAPISpecInput,
-} from '../../../services/workflow/openapi-spec-loader';
+import { BatchResult } from '../../../batch/types';
+import { OpenAPISpecService } from '../../../services/batch/oas-service';
 import {
   GetCatalog,
   GetCatalogByName,
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
-import YAML from 'yaml';
-import { OpenAPISpecService } from '../../../services/batch/oas-service';
+import {
+  LoadOpenAPISpec,
+  OpenAPISpecInput,
+} from '../../../services/workflow/openapi-spec-loader';
+import { assertEqual } from '../../ioc/assert';
+import { KeystoneService } from '../../ioc/keystoneInjector';
 
 @injectable()
 @Route('/organizations/{org}/oas-services')

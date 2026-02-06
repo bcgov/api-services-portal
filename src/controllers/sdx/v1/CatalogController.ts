@@ -1,24 +1,24 @@
 import {
   Controller,
+  Example,
+  Get,
+  OperationId,
+  Path,
   Request,
   Response,
-  OperationId,
-  Get,
   Route,
   Security,
-  Tags,
-  Example,
   SuccessResponse,
-  Path,
+  Tags,
 } from 'tsoa';
-import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
+import YAML from 'yaml';
 import {
   GetCatalog,
   GetCatalogByName,
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
-import YAML from 'yaml';
+import { KeystoneService } from '../../ioc/keystoneInjector';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';

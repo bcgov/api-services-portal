@@ -5,36 +5,27 @@
  */
 
 import {
+  Body,
   Controller,
-  Request,
-  OperationId,
+  Delete,
   Get,
-  Put,
+  OperationId,
   Path,
+  Put,
+  Query,
+  Request,
   Route,
   Security,
-  Body,
   Tags,
-  Delete,
-  Query,
 } from 'tsoa';
-import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
-import {
-  deleteRecordByInternalId,
-  getRecords,
-  removeEmpty,
-  removeKeys,
-  replaceKey,
-  syncRecordsThrowErrors,
-  transformAllRefID,
-} from '../../../batch/feed-worker';
-import { RuntimeGroup } from '../../../services/batch/types';
-import { RuntimeGroupInput } from './types';
-import { assertEqual } from '../../ioc/assert';
 import { RuntimeGroupService } from '../../../services/batch/runtime-group';
+import { RuntimeGroup } from '../../../services/batch/types';
 import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/create-namespace-sdx';
+import { assertEqual } from '../../ioc/assert';
+import { KeystoneService } from '../../ioc/keystoneInjector';
+import { RuntimeGroupInput } from './types';
 
 /**
  * Runtime Group Controller
