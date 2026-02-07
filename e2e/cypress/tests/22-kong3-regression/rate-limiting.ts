@@ -59,7 +59,7 @@ describe('Kong 3 Regression', () => {
                     tags: ['ns.' + gateway.gatewayId + '.test-service'],
                     config: {
                       minute: 2,
-                      policy: 'local',
+                      policy: 'redis',
                     },
                   },
                 ],

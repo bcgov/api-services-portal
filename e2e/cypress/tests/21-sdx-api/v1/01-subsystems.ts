@@ -100,5 +100,24 @@ describe('SDX Subsystem', () => {
         expect(body.message).to.be.equal('Subsystem not found')
       })
     })
+
+    it('GET /organizations/{org}/subsystems/{name}/client (incomplete setup)', () => {
+      const { org, gateway, dataset, datasetId, product } = workingData
+
+      const payload = {
+        name: `SUBSYS-${datasetId.toUpperCase()}`,
+      }
+
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/subsystems/${payload.name}/client`,
+        'GET'
+      ).then(({ apiRes: { status, body } }: any) => {
+        // expect(JSON.stringify(body)).to.include(`abc`)
+        expect(body.message).to.be.equal('Incomplete subsystem setup')
+        expect(body.fields['inputs.service_locator'].message).to.be.equal(
+          'missing gateway details'
+        )
+      })
+    })
   })
 })

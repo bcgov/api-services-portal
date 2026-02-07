@@ -23,6 +23,22 @@ describe('SDX Runtime Groups', () => {
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
         ({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
+            'GET'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            const rg = body.find((rg: any) => rg.name === payload.name)
+            expect(rg).to.not.be.undefined
+            expect(rg.host).to.be.equal(`${payload.name}.servers.sdx`)
+            expect(rg.name).to.be.equal(`${payload.name}`)
+            expect(rg.sdxEndpoint).to.be.equal(`https://${payload.name}.servers.sdx`)
+            expect(rg.consumerEndpoint).to.be.equal(
+              `http://internal.${payload.name}.servers.sdx`
+            )
+            expect(rg).to.have.property('gatewayId')
+            expect(rg.organization).to.be.equal(org.name)
+          })
         }
       )
     })
