@@ -1,3 +1,5 @@
+import { parseOrganizationMemberDetails } from '@/services/keystone/organization';
+import { KongKeys } from '../../../services/kong/keys';
 import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
@@ -6,6 +8,9 @@ import {
   ServiceCatalogEntry,
   ServiceClient,
 } from '../catalog';
+import { Logger } from '../../../logger';
+
+const logger = Logger('sdx-p2p-provider-pattern');
 
 export interface SDXP2PProviderPatternConfig extends Record<string, string> {
   client_id: string;
@@ -18,6 +23,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, string> {
 export interface SDXP2PProviderPatternData {
   service: ServiceCatalogEntry;
   client: ServiceClient;
+  key: any;
 }
 
 /**
@@ -42,9 +48,16 @@ export const SDXP2PProviderPattern = {
     const service = await GetCatalogByName(ctx, inputs.service_id);
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
 
+    const member = service.subsystem.member;
+    const name = `sdx.crt.${service.subsystem.runtimeGroup.name}.${member.memberClass}.${member.memberId}`;
+
+    const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
+    const key = await keys.getKeyByName(name);
+
     return {
       client,
       service,
+      key,
     };
   },
 
@@ -118,7 +131,7 @@ export const SDXP2PProviderPattern = {
             ? [upgradeToTrustVerify(tags, data)]
             : []),
           ...(upgrades.includes('org-kms-sign')
-            ? [upgradeToTrustKMSSign(tags, data, inputs)]
+            ? [upgradeToTrustKMSSign(tags, data)]
             : []),
           ...(upgrades.includes('timestamp')
             ? [upgradeToTimestamp(tags, data)]
@@ -165,17 +178,17 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
 
 function upgradeToTrustKMSSign(
   tags: string[],
-  data: SDXP2PProviderPatternData,
-  inputs: Record<string, string>
+  data: SDXP2PProviderPatternData
 ) {
-  const keyid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:org:${data.service.subsystem.member.memberClass}.${data.service.subsystem.member.memberId}`;
-
+  if (data.key == null) {
+    logger.warn('Unable to configure trust KMS - no key found');
+  }
   return {
     name: 'trust-kms',
     tags: tags,
     config: {
       operation: 'sign',
-      keyid: inputs.kms_key_id,
+      key: data.key,
     },
   };
 }
