@@ -18,6 +18,8 @@ export class KongKeys {
   }
 
   public async getKeyByName(name: string): Promise<KongKey> {
+    logger.debug('[getKeyByName] Fetching key from Kong with name: ' + name);
+
     let response = await fetch(`${this.kongUrl}/keys/${name}`, {
       method: 'get',
       headers: {

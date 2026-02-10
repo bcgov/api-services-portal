@@ -49,7 +49,9 @@ export const SDXP2PProviderPattern = {
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
 
     const member = service.subsystem.member;
-    const name = `sdx.crt.${service.subsystem.runtimeGroup.name}.${member.memberClass}.${member.memberId}`;
+    const name = `sdx.crt.${service.subsystem.runtimeGroup.name.toUpperCase()}.${
+      member.memberClass
+    }.${member.memberId}:0`;
 
     const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
     const key = await keys.getKeyByName(name);
