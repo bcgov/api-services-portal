@@ -139,7 +139,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: 'ES256',
-      jwks_uri: 'https://sdx.gov.bc.ca/jwks',
+      jwks_uri: 'https://sdx.gov.bc.ca/.well-known/jwks.json',
       hash_alg: 'sha256',
     },
   };
