@@ -207,7 +207,7 @@ function upgradeToTokenExchange(
   data: SDXP2PProviderPatternData,
   inputs: Record<string, string>
 ) {
-  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
+  const kid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:edge`;
   return {
     name: 'token-exchange',
     tags: tags,

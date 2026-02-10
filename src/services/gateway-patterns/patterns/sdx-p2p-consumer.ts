@@ -73,10 +73,7 @@ export const SDXP2PConsumerPattern = {
         routes: [
           {
             hosts: [routeHostUrl.hostname],
-            snis:
-              routeHostUrl.protocol === 'https:'
-                ? [routeHostUrl.hostname]
-                : undefined,
+            snis: undefined,
             paths: [`/sdx/0/${serviceLocator}`],
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             name,
