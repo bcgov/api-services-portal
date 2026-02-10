@@ -188,7 +188,7 @@ function upgradeToTrustKMSSign(
     tags: tags,
     config: {
       operation: 'sign',
-      key: data.key,
+      key: data.key?.kid,
     },
   };
 }
