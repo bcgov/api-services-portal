@@ -25,3 +25,11 @@ export interface RuntimeGroupInput {
   consumerEndpoint?: string;
   hostedOrganizations?: string[];
 }
+
+/**
+ * @tsoaModel
+ *
+ */
+export interface CreateNewKeyInput {
+  runtimeGroupName: string;
+}
