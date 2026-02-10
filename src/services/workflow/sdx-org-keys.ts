@@ -35,7 +35,7 @@ export const CreateNewKey = async (
     serial_number: `LAB/${member.memberClass}/${rg.name.toUpperCase()}`,
     common_name: member.memberId,
     san: san,
-    requester_name: context.req?.user?.name || 'unknown',
+    requester_name: '', // context.req?.user?.name ||
     requester_email: context.req?.user?.email || 'unknown',
   };
 
