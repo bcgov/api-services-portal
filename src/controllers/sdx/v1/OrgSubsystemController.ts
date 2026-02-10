@@ -18,7 +18,7 @@ import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
 import {
   EnrichWithRuntimeGroup,
-  GetServiceClient,
+  GetServiceClientForSubsystem,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
@@ -112,11 +112,21 @@ export class OrgSubsystemController extends Controller {
   ): Promise<SubsystemEntry> {
     const context = this.keystone.createContext(request, true);
 
-    const subsystem = await GetServiceClient(context, org, name);
+    const subsysService = new SubsystemService();
+    const subsystem = await subsysService.findSubsystemByName(
+      context,
+      org,
+      name
+    );
 
-    await EnrichWithRuntimeGroup(context, subsystem.subsystem);
+    const subsystemEntry = await GetServiceClientForSubsystem(
+      context,
+      subsystem
+    );
 
-    return subsystem.subsystem;
+    await EnrichWithRuntimeGroup(context, subsystemEntry.subsystem);
+
+    return subsystemEntry.subsystem;
   }
 
   /**
@@ -176,7 +186,14 @@ export class OrgSubsystemController extends Controller {
   ): Promise<{ gatewayId: string }> {
     const context = this.keystone.createContext(request, true);
 
-    const client = await GetServiceClient(context, org, name);
+    const subsysService = new SubsystemService();
+    const subsystem = await subsysService.findSubsystemByName(
+      context,
+      org,
+      name
+    );
+
+    const client = await GetServiceClientForSubsystem(context, subsystem);
 
     const result = await CreateNamespaceForSubsystem(context, {
       subsystem: client.subsystem,

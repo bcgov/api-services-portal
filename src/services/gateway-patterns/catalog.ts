@@ -1,16 +1,14 @@
-import { OpenApiSpec, Subsystem } from '../keystone/types';
-import { getRecord, getRecords } from '../../batch/feed-worker';
-import { BatchWhereClause } from '../keystone/batch-service';
 import { strict as assert } from 'assert';
+import { getRecords } from '../../batch/feed-worker';
+import { Logger } from '../../logger';
+import { OpenAPISpecService } from '../batch/oas-service';
+import { RuntimeGroupService } from '../batch/runtime-group';
+import { BatchWhereClause } from '../keystone/batch-service';
+import { parseOrganizationMemberDetails } from '../keystone/organization';
+import { OpenApiSpec, Subsystem } from '../keystone/types';
 import { OrgNamespace } from '../org-groups/types';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { assertAndRaiseValidateError } from './evaluator';
-import { RuntimeGroupService } from '../batch/runtime-group';
-import { Logger } from '../../logger';
-import { sub } from 'date-fns';
-import { parse } from 'path';
-import { SubsystemService } from '../batch/subsystem';
-import { OpenAPISpecService } from '../batch/oas-service';
 
 const logger = Logger('gateway-patterns.catalog');
 
@@ -20,10 +18,13 @@ const logger = Logger('gateway-patterns.catalog');
  */
 export interface SubsystemEntry {
   name: string;
+  clientId: string;
   organization?: {
     name: string;
-    orgUnit?: string;
-    trustJwksEndpoint?: string;
+  };
+  member?: {
+    memberClass: string;
+    memberId: string;
   };
   gateway?: {
     id: string;
@@ -97,10 +98,12 @@ export async function GetCatalog(
     batchClause
   );
 
-  const specService = new OpenAPISpecService();
-
   return records.map((c: OpenApiSpec) => {
     logger.debug(`Processing catalog entry: ${c.name} %j`, c);
+
+    const member = parseOrganizationMemberDetails(
+      c.subsystem.organization.tags
+    );
 
     return {
       name: c.name,
@@ -111,8 +114,13 @@ export async function GetCatalog(
       spec: includeSpec ? c.spec : undefined,
       subsystem: {
         name: c.subsystem.name,
+        clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
         organization: {
           name: c.organization.name,
+        },
+        member: {
+          memberClass: member.memberClass,
+          memberId: member.memberId,
         },
         gateway: {
           id: c.namespace,
@@ -165,23 +173,56 @@ export async function EnrichWithRuntimeGroup(
   };
 }
 
-export async function GetServiceClient(
+export async function GetServiceClientForSubsystem(
   ctx: any,
-  org: string,
-  subsystem: string
+  c: Subsystem
 ): Promise<ServiceClient> {
-  const subsysService = new SubsystemService();
-  const c = await subsysService.findSubsystemByName(ctx, org, subsystem);
+  const member = parseOrganizationMemberDetails(c.organization.tags);
 
   return {
     subsystem: {
       name: c.name,
+      clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
       organization: {
         name: c.organization.name,
       },
       gateway: {
         id: c.namespace,
       },
+    },
+  };
+}
+
+export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
+  const specService = new OpenAPISpecService();
+
+  const serviceName = specService.titleToServiceName(oas.info?.title || '');
+
+  const serviceVersion = specService.majorPart(oas.info?.version);
+
+  const member = parseOrganizationMemberDetails(
+    subsystemRecord.organization.tags
+  );
+
+  return `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
+}
+
+export function ParseClientId(id: string): any {
+  const parts = id.split('.');
+  assertAndRaiseValidateError(
+    parts.length === 4 && parts[0] === 'LAB',
+    'Invalid client id format',
+    'inputs.client_id',
+    'client id should be in format LAB.{member_class}.{member_id}.{subsystem_name}'
+  );
+
+  return {
+    member: {
+      memberClass: parts[1],
+      memberId: parts[2],
+    },
+    subsystem: {
+      name: parts[3],
     },
   };
 }

@@ -3,7 +3,7 @@ import { Logger } from '../../logger';
 import YAML from 'yaml';
 import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
-import { OpenAPISpecService } from '../batch/oas-service';
+import { BuildServiceName } from '../gateway-patterns/catalog';
 
 const logger = Logger('wf.OASLoader');
 
@@ -18,8 +18,6 @@ export const LoadOpenAPISpec = async (
   context: any,
   spec: OpenAPISpecInput
 ): Promise<OpenAPISpec> => {
-  const specService = new OpenAPISpecService();
-
   // KeystoneJS entity
   const outSpec: OpenAPISpec = {};
 
@@ -31,12 +29,10 @@ export const LoadOpenAPISpec = async (
 
   const oas = YAML.parse(spec.spec);
 
-  const serviceName = specService.titleToServiceName(oas.info?.title || '');
+  const serviceName = BuildServiceName(subsystemRecord, oas);
 
   outSpec.spec = spec.spec;
-  outSpec.name = `${spec.organization}.${serviceName}.${specService.majorPart(
-    oas.info?.version
-  )}`;
+  outSpec.name = serviceName;
   (outSpec as any).namespace = subsystemRecord.namespace;
   outSpec.organization = spec.organization;
   outSpec.subsystem = spec.subsystem;

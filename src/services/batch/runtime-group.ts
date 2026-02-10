@@ -125,7 +125,7 @@ class RuntimeGroupService {
     assert.strictEqual(
       rg.organization?.name === org,
       true,
-      'Runtime Group not found'
+      'Runtime Group not found for organization'
     );
 
     return rg;
