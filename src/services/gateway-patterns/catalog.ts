@@ -21,6 +21,7 @@ export interface SubsystemEntry {
   clientId: string;
   organization?: {
     name: string;
+    orgUnit?: string;
   };
   member?: {
     memberClass: string;
