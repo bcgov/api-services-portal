@@ -189,7 +189,9 @@ function upgradeToTrustKMSSign(
     name: 'trust-kms',
     tags: tags,
     config: {
+      direction: 'response',
       operation: 'sign',
+      signature_header_key: 'X-Edge-Token',
       key_id: data.key?.kid,
     },
   };
