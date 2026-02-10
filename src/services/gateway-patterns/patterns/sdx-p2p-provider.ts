@@ -12,6 +12,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, string> {
   service_id: string;
   upstream_url: string;
   upgrades: string;
+  kms_key_id?: string;
 }
 
 export interface SDXP2PProviderPatternData {
@@ -117,7 +118,7 @@ export const SDXP2PProviderPattern = {
             ? [upgradeToTrustVerify(tags, data)]
             : []),
           ...(upgrades.includes('org-kms-sign')
-            ? [upgradeToTrustKMSSign(tags, data)]
+            ? [upgradeToTrustKMSSign(tags, data, inputs)]
             : []),
           ...(upgrades.includes('timestamp')
             ? [upgradeToTimestamp(tags, data)]
@@ -160,14 +161,15 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
 
 function upgradeToTrustKMSSign(
   tags: string[],
-  data: SDXP2PProviderPatternData
+  data: SDXP2PProviderPatternData,
+  input: Record<string, string>
 ) {
   return {
     name: 'trust-kms',
     tags: tags,
     config: {
       operation: 'sign',
-      keyid: 'tbd', // this should be the KMS key identifier, e.g. arn or resource name
+      keyid: input.kms_key_id,
     },
   };
 }
