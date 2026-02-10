@@ -115,7 +115,7 @@ export async function GetCatalog(
       spec: includeSpec ? c.spec : undefined,
       subsystem: {
         name: c.subsystem.name,
-        clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
+        clientId: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
         organization: {
           name: c.organization.name,
         },
