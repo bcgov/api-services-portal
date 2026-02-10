@@ -123,6 +123,10 @@ export const SDXP2PProviderPattern = {
           ...(upgrades.includes('timestamp')
             ? [upgradeToTimestamp(tags, data)]
             : []),
+          ...(upgrades.includes('ledger') ? [upgradeToLedger(tags, data)] : []),
+          ...(upgrades.includes('token-exchange')
+            ? [upgradeToTokenExchange(tags, data, inputs)]
+            : []),
         ],
       },
     ] as any[];
@@ -162,14 +166,16 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
 function upgradeToTrustKMSSign(
   tags: string[],
   data: SDXP2PProviderPatternData,
-  input: Record<string, string>
+  inputs: Record<string, string>
 ) {
+  const keyid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:org:${data.service.subsystem.member.memberClass}.${data.service.subsystem.member.memberId}`;
+
   return {
     name: 'trust-kms',
     tags: tags,
     config: {
       operation: 'sign',
-      keyid: input.kms_key_id,
+      keyid: inputs.kms_key_id,
     },
   };
 }
@@ -181,6 +187,37 @@ function upgradeToTimestamp(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       endpoint_url: 'https://freetsa.org/tsr',
       policy_oid: '1.2.1.2.1',
+    },
+  };
+}
+
+function upgradeToLedger(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'trust-ledger',
+    tags: tags,
+    config: {
+      endpoint_url: 'https://rekor.sigstore.dev',
+      provider: 'rekor',
+    },
+  };
+}
+
+function upgradeToTokenExchange(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: Record<string, string>
+) {
+  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
+  return {
+    name: 'token-exchange',
+    tags: tags,
+    config: {
+      token_endpoint: inputs.token_exchange_token_endpoint,
+      client_id: inputs.token_exchange_client_id,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      algorithm: 'ES256',
+      expiration: 60,
+      key_id: kid,
     },
   };
 }

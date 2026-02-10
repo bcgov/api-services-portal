@@ -96,9 +96,6 @@ export const SDXP2PConsumerPattern = {
           ...(upgrades.includes('edge-verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
-          ...(upgrades.includes('token-exchange')
-            ? [upgradeToTokenExchange(tags, data, inputs)]
-            : []),
         ],
       },
     ] as any[];
@@ -148,26 +145,6 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
       signature_header_key: 'X-Edge-Token',
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
-    },
-  };
-}
-
-function upgradeToTokenExchange(
-  tags: string[],
-  data: SDXP2PConsumerPatternData,
-  inputs: Record<string, string>
-) {
-  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
-  return {
-    name: 'token-exchange',
-    tags: tags,
-    config: {
-      token_endpoint: inputs.token_exchange_token_endpoint,
-      client_id: inputs.token_exchange_client_id,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      algorithm: 'ES256',
-      expiration: 60,
-      key_id: kid,
     },
   };
 }
