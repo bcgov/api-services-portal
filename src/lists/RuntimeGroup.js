@@ -47,7 +47,7 @@ module.exports = {
       }
       return resolvedData;
     },
-    validateInput: ({ resolvedData }) => {
+    validateInput: ({ operation, resolvedData }) => {
       if (operation == 'create') {
         new RuntimeGroupService().validateRuntimeGroup(resolvedData['name']);
       }
