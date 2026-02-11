@@ -1,6 +1,7 @@
 import { parseOrganizationMemberDetails } from '../../keystone/organization';
 import { RuntimeGroupService } from '../../batch/runtime-group';
 import { RuntimeGroup } from '../../keystone/types';
+import assert from 'assert';
 
 export interface SDXCRTConfig extends Record<string, string> {
   runtime_group_name?: string;
@@ -44,10 +45,17 @@ export const SDXCRTPattern = {
 
   inject: async (ctx: any, inputs: Record<string, string>) => {
     const rgService = new RuntimeGroupService();
-    const runtimeGroup = await rgService.findRuntimeGroupByName(
+    const runtimeGroup = await rgService.findRuntimeGroupByUniqueName(
       ctx,
-      inputs.organization,
       inputs.runtime_group_name
+    );
+
+    assert.strictEqual(
+      runtimeGroup.hostedOrganizations.filter(
+        (o) => o.name === inputs.organization
+      ).length > 0,
+      true,
+      'Runtime Group not allowed for organization'
     );
 
     return {

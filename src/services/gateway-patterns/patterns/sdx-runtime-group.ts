@@ -24,7 +24,7 @@ export const SDXRuntimeGroupPattern = {
   },
 
   eval: (inputs: Record<string, string>) => {
-    const gw = inputs.gateway_id;
+    const gw = inputs.rg_gateway_id;
     const nm = `sdx.rg.${inputs.runtime_group_name}`;
     const nsQualifier = `rg-${inputs.runtime_group_name}`;
 

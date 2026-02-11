@@ -56,6 +56,8 @@ export const SDXP2PProviderPattern = {
     const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
     const key = await keys.getKeyByName(name);
 
+    logger.info('Fetched key for KMS signing [%s] %j', name, key);
+
     return {
       client,
       service,
