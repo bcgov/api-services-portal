@@ -13,9 +13,17 @@ import { RuntimeGroup } from './types';
 import { RuntimeGroup as KeystoneRuntimeGroup } from '../keystone/types';
 import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
+import { Logger } from '../../logger';
+
+const logger = Logger('batch.runtime-group');
 
 class RuntimeGroupService {
   validateRuntimeGroup = (name: string): void => {
+    logger.debug(
+      '[validateRuntimeGroup] validating runtime group name: %s',
+      name
+    );
+
     regExprValidation(
       '^[a-z0-9]{3,8}$',
       name,
