@@ -32,6 +32,25 @@ export async function getOrganizations(context: any): Promise<Organization[]> {
   return result.data.allOrganizations;
 }
 
+export async function getOrganization(
+  context: any,
+  name: string
+): Promise<Organization[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetOrganizations($name: String!) {
+                    allOrganizations(where: { name: $name } ) {
+                        name
+                        title
+                        description
+                        tags
+                    }
+                }`,
+    variables: { name },
+  });
+  logger.debug('[getOrganization] result %j', result);
+  return result.data.allOrganizations[0];
+}
+
 export async function getOrganizationUnit(
   context: any,
   unit: string

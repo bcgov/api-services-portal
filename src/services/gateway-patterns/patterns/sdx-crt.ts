@@ -1,6 +1,9 @@
-import { parseOrganizationMemberDetails } from '../../keystone/organization';
+import {
+  getOrganization,
+  parseOrganizationMemberDetails,
+} from '../../keystone/organization';
 import { RuntimeGroupService } from '../../batch/runtime-group';
-import { RuntimeGroup } from '../../keystone/types';
+import { Organization, RuntimeGroup } from '../../keystone/types';
 import assert from 'assert';
 
 export interface SDXCRTConfig extends Record<string, string> {
@@ -15,6 +18,7 @@ export interface SDXCRTConfig extends Record<string, string> {
 
 export interface SDXCRTPatternData {
   runtimeGroup: RuntimeGroup;
+  org: Organization;
 }
 
 function splitCertificates(certs: string): string[] {
@@ -58,17 +62,18 @@ export const SDXCRTPattern = {
       'Runtime Group not allowed for organization'
     );
 
+    const org = await getOrganization(ctx, inputs.organization);
+
     return {
       runtimeGroup,
+      org,
     };
   },
 
   eval: (inputs: Record<string, string>, data: SDXCRTPatternData) => {
     const profile: any = {};
 
-    const member = parseOrganizationMemberDetails(
-      data.runtimeGroup.organization.tags
-    );
+    const member = parseOrganizationMemberDetails(data.org.tags);
 
     const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
     profile.name = `sdx.crt.${data.runtimeGroup.name.toUpperCase()}.${
