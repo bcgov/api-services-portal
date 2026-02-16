@@ -22,7 +22,7 @@ interface SDXKeysPatternData {
  */
 export const SDXKeysPattern = {
   id: 'sdx-keys.r1',
-  requiredParams: ['runtime_group_name', 'public_key_pem'],
+  requiredParams: ['organization', 'runtime_group_name'],
 
   inject: async (
     ctx: any,
@@ -84,26 +84,21 @@ export const SDXKeysPattern = {
 
     return [
       {
-        _format_version: '3.0',
-        key_sets: [
-          {
-            name: keySetName,
-            tags,
-          },
-        ],
-        keys: [
-          {
-            name: profile.name,
-            kid: profile.kid,
-            set: {
-              name: keySetName,
-            },
-            pem: {
-              public_key: `${publicKeyPem}`,
-            },
-            tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-          },
-        ],
+        kind: 'GatewayKeySet',
+        name: keySetName,
+        tags,
+      },
+      {
+        kind: 'GatewayKey',
+        name: profile.name,
+        kid: profile.kid,
+        set: {
+          name: keySetName,
+        },
+        pem: {
+          public_key: `${publicKeyPem}`,
+        },
+        tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
       },
     ];
   },

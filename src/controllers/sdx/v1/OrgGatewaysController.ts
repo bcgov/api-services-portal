@@ -139,18 +139,28 @@ export class OrgGatewaysController extends Controller {
 
     const gwaService = new GWAService(process.env.GWA_API_URL);
 
-    const artifacts: string[] = [];
+    const payload: any = {
+      services: [],
+      keys: [],
+      key_sets: [],
+    };
 
     config.documents.forEach((doc: any) => {
       if (doc.kind === 'GatewayService') {
         delete doc.kind;
-        artifacts.push(doc);
+        payload.services.push(doc);
+      } else if (doc.kind === 'GatewayKey') {
+        delete doc.kind;
+        payload.keys.push(doc);
+      } else if (doc.kind === 'GatewayKeySet') {
+        delete doc.kind;
+        payload.key_sets.push(doc);
       }
     });
 
-    logger.debug('Artifacts %j', artifacts);
+    logger.debug('Artifacts %j', payload);
 
-    const artifact = YAML.dump({ services: artifacts }, { noRefs: true });
+    const artifact = YAML.dump(payload, { noRefs: true });
 
     if (action === 'preview') {
       request.res?.header('Content-Type', 'application/yaml; charset=utf-8');

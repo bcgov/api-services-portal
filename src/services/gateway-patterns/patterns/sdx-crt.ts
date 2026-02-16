@@ -97,18 +97,14 @@ export const SDXCRTPattern = {
 
     return [
       {
-        _format_version: '3.0',
-        keys: [
-          {
-            name: profile.name,
-            kid: jwk.kid,
-            // pem: {
-            //   public_key: `${inputs.pub_key}`,
-            // },
-            jwk: JSON.stringify(jwk),
-            tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-          },
-        ],
+        kind: 'GatewayKey',
+        name: profile.name,
+        kid: jwk.kid,
+        // pem: {
+        //   public_key: `${inputs.pub_key}`,
+        // },
+        jwk: JSON.stringify(jwk),
+        tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
       },
     ];
   },
