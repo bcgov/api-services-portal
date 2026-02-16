@@ -9,6 +9,7 @@ import assert from 'assert';
 export interface SDXCRTConfig extends Record<string, string> {
   organization: string;
   runtime_group_name: string;
+  inputs: any;
   pub_key: string;
   jwk: string;
   csr: string;

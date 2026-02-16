@@ -54,10 +54,12 @@ export const SDXKeysPattern = {
       // Export the public key to a desired format (e.g., PEM, DER, JWK)
       // The 'type' can be 'pkcs1' (RSA only) or 'spki'
       // The 'format' can be 'pem', 'der', or 'jwk'
-      publicKeyPem = publicKey.export({
-        type: 'spki',
-        format: 'pem',
-      });
+      publicKeyPem = publicKey
+        .export({
+          type: 'spki',
+          format: 'pem',
+        })
+        .toString();
     }
 
     return {
