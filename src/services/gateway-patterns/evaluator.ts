@@ -4,13 +4,13 @@ import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
 import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
 import { SDXCRTPattern } from './patterns/sdx-crt';
 import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
-import { SDXKeyPattern } from './patterns/sdx-keys';
+import { SDXKeysPattern } from './patterns/sdx-keys';
 
 interface PatternProcessor {
   id: string;
   requiredParams: string[];
-  eval: (inputs: Record<string, string>, data?: any) => any[];
-  inject?: (ctx: any, inputs: Record<string, string>) => Promise<any>;
+  eval: (inputs: Record<string, any>, data?: any) => any[];
+  inject?: (ctx: any, inputs: Record<string, any>) => Promise<any>;
 }
 
 const PATTERNS: Record<string, PatternProcessor> = {
@@ -19,13 +19,13 @@ const PATTERNS: Record<string, PatternProcessor> = {
   [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
   [SDXCRTPattern.id]: SDXCRTPattern,
   [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
-  [SDXKeyPattern.id]: SDXKeyPattern,
+  [SDXKeysPattern.id]: SDXKeysPattern,
 };
 
 export interface GatewayPatternConfig {
   pattern: string;
   delete?: boolean;
-  parameters: Record<string, string>;
+  parameters: Record<string, any>;
 }
 
 export function assertAndRaiseValidateError(
@@ -80,7 +80,7 @@ export async function GetConfigUsingPattern(
 }
 
 function expectRequiredParams(
-  provided: Record<string, string>,
+  provided: Record<string, any>,
   required: string[]
 ) {
   const errors: FieldErrors = {};

@@ -126,7 +126,8 @@ export class OrgGatewaysController extends Controller {
   })
   public async generateConfigFromPattern(
     @Path() org: string,
-    @Query() action: 'preview' | 'apply' | 'diff',
+    @Query() action: 'preview' | 'apply' | 'remove',
+    @Query() dryRun: boolean,
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
@@ -157,10 +158,9 @@ export class OrgGatewaysController extends Controller {
       return '';
     }
 
-    const dryRun = action !== 'apply';
-
     // Validate the generated config to ensure it only contains allowed configurations for the organization
     const result = await gwaService.publishGatewayConfiguration(
+      action === 'remove' ? 'DELETE' : 'PUT',
       getSubjectToken(request),
       config._gateway_id,
       dryRun,

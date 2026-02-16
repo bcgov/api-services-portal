@@ -35,6 +35,7 @@ export class GWAService {
   }
 
   public async publishGatewayConfiguration(
+    method: 'DELETE' | 'PUT',
     subjectToken: string,
     ns: string,
     dryRun: boolean,
@@ -51,7 +52,7 @@ export class GWAService {
     };
 
     return await fetch(url, {
-      method: 'PUT',
+      method,
       body: JSON.stringify(body),
       headers: {
         'Content-Type': 'application/json',
