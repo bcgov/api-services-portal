@@ -126,6 +126,8 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
 
 function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
   const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
+  const keySetName = `sdx.edge.${data.client.subsystem.runtimeGroup.name}`;
+
   return {
     name: 'trust-sign',
     tags: tags,
@@ -135,7 +137,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: 'ES256',
-      jwks_uri: 'https://sdx.gov.bc.ca/.well-known/jwks.json',
+      jwks_uri: `https://sdx.gov.bc.ca/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
   };

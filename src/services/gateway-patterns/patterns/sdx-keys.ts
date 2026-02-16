@@ -80,7 +80,7 @@ export const SDXKeysPattern = {
 
     let publicKeyPem = data.public_key_pem;
 
-    const keySetName = `sdx.keyset.${inputs.runtime_group_name}.edge`;
+    const keySetName = `sdx.edge.${inputs.runtime_group_name}`;
 
     return [
       {
