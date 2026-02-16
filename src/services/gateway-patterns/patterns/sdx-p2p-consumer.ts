@@ -1,3 +1,4 @@
+import assert from '../../user-assert';
 import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
@@ -8,6 +9,7 @@ import {
 } from '../catalog';
 
 export interface SDXP2PConsumerPatternConfig extends Record<string, string> {
+  organization: string;
   client_id: string;
   service_id: string;
   upgrades: string;
@@ -27,7 +29,7 @@ export interface SDXP2PConsumerPatternData {
  */
 export const SDXP2PConsumerPattern = {
   id: 'sdx-p2p-consumer.r1',
-  requiredParams: ['client_id', 'service_id'],
+  requiredParams: ['organization', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: SDXP2PConsumerPatternConfig) => {
     // retrieve the catalog items for
@@ -37,6 +39,12 @@ export const SDXP2PConsumerPattern = {
       inputs.client_id
     );
 
+    assert.strictEqual(
+      subsystem.organization.name === inputs.organization,
+      true,
+      'Client subsystem does not belong to the specified organization'
+    );
+
     const client = await GetServiceClientForSubsystem(ctx, subsystem);
     await EnrichWithRuntimeGroup(ctx, client.subsystem);
 
@@ -44,6 +52,7 @@ export const SDXP2PConsumerPattern = {
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
 
     return {
+      gateway_id: client.subsystem.gateway.id,
       client,
       service,
     };
@@ -73,7 +82,6 @@ export const SDXP2PConsumerPattern = {
         routes: [
           {
             hosts: [routeHostUrl.hostname],
-            snis: undefined,
             paths: [`/sdx/0/${serviceLocator}`],
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             name,

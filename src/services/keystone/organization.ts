@@ -1,3 +1,4 @@
+import assert from '../user-assert';
 import { Logger } from '../../logger';
 import { assertAndRaiseValidateError } from '../gateway-patterns/evaluator';
 import { Organization } from './types';
@@ -35,7 +36,7 @@ export async function getOrganizations(context: any): Promise<Organization[]> {
 export async function getOrganization(
   context: any,
   name: string
-): Promise<Organization[]> {
+): Promise<Organization> {
   const result = await context.executeGraphQL({
     query: `query GetOrganizations($name: String!) {
                     allOrganizations(where: { name: $name } ) {
@@ -48,6 +49,13 @@ export async function getOrganization(
     variables: { name },
   });
   logger.debug('[getOrganization] result %j', result);
+
+  assert.strictEqual(
+    result.data.allOrganizations.length == 0,
+    false,
+    `Organization ${name} not found`
+  );
+
   return result.data.allOrganizations[0];
 }
 

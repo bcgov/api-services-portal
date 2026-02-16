@@ -1,11 +1,57 @@
+import { parse } from 'path';
 import { Logger } from '../../logger';
 import { RuntimeGroupService } from '../batch/runtime-group';
 import { SubsystemEntry } from '../gateway-patterns/catalog';
+import {
+  getOrganization,
+  parseOrganizationMemberDetails,
+} from '../keystone/organization';
 import { Subsystem } from '../keystone/types';
 import { ResourceSet } from '../uma2';
 import { CreateNamespace } from './create-namespace';
 
 const logger = Logger('wf.CreateNamespaceSDX');
+
+/**
+ * Arguments for creating a namespace for an organization.
+ */
+export interface CreateNamespaceForOrganizationArgs {
+  /** The organization that owns the runtime group */
+  organization: string;
+}
+
+export async function CreateNamespaceForOrganization(
+  context: any,
+  args: CreateNamespaceForOrganizationArgs
+): Promise<ResourceSet> {
+  const org = await getOrganization(context, args.organization);
+  if (!org) {
+    throw new Error(`Organization ${args.organization} not found`);
+  }
+
+  const member = parseOrganizationMemberDetails(org.tags);
+
+  const name = `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
+
+  // Create the namespace with SDX edge configuration
+  const resourceSet = await CreateNamespace(context, {
+    name: name,
+    org: args.organization,
+    orgUnit: undefined,
+    orgEnabled: false,
+    displayName: `SDX - LAB.${member.memberClass}.${member.memberId}`,
+    dataPlane: 'sdx-edge',
+    domains: [],
+  });
+
+  logger.debug(
+    '[CreateNamespaceForOrganization] Created Namespace %s for Organization %s',
+    resourceSet.name,
+    args.organization
+  );
+
+  return resourceSet;
+}
 
 /**
  * Arguments for creating a namespace for a runtime group.

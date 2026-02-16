@@ -63,7 +63,10 @@ export async function GetConfigUsingPattern(
     expectRequiredParams(inputs.parameters, pattern.requiredParams);
     if (pattern.inject) {
       const data = await pattern.inject(ctx, inputs.parameters);
-      return { documents: pattern.eval(inputs.parameters, data) };
+      return {
+        _gateway_id: data.gateway_id,
+        documents: pattern.eval(inputs.parameters, data),
+      };
     } else {
       return { documents: pattern.eval(inputs.parameters) };
     }

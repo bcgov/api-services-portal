@@ -33,4 +33,32 @@ export class GWAService {
       },
     }).then(checkStatus);
   }
+
+  public async publishGatewayConfiguration(
+    subjectToken: string,
+    ns: string,
+    dryRun: boolean,
+    config: string
+  ) {
+    const url = `${this.gwaUrl}/v2/namespaces/${ns}/gateway`;
+    logger.debug('[publishGatewayConfiguration] ns=%s', ns);
+
+    // perpare the request body using form data
+    const body = {
+      namespace: ns,
+      dryRun,
+      configFile: config,
+    };
+
+    return await fetch(url, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${subjectToken}`,
+      },
+    })
+      .then(checkStatus)
+      .then((res) => res.json());
+  }
 }

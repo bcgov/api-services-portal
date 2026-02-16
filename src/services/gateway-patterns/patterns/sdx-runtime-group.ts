@@ -1,6 +1,8 @@
 import { RuntimeGroupService } from '../../../services/batch/runtime-group';
+import assert from '../../user-assert';
 
 export interface SDXRuntimeGroupPatternConfig extends Record<string, string> {
+  organization: string;
   runtime_group_name: string;
 }
 
@@ -19,8 +21,19 @@ export const SDXRuntimeGroupPattern = {
       ctx,
       inputs.runtime_group_name
     );
+
+    assert.strictEqual(
+      rg.organization.name === inputs.organization,
+      true,
+      'Organization does not own this runtime group'
+    );
+
     inputs['rg_host'] = rg.host;
     inputs['rg_gateway_id'] = rg.namespace;
+
+    return {
+      gateway_id: rg.namespace,
+    };
   },
 
   eval: (inputs: Record<string, string>) => {

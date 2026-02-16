@@ -1,5 +1,6 @@
 import { parseOrganizationMemberDetails } from '@/services/keystone/organization';
-import { KongKeys } from '../../../services/kong/keys';
+import assert from '../../user-assert';
+import { KongKey, KongKeys } from '../../../services/kong/keys';
 import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
@@ -13,6 +14,7 @@ import { Logger } from '../../../logger';
 const logger = Logger('sdx-p2p-provider-pattern');
 
 export interface SDXP2PProviderPatternConfig extends Record<string, string> {
+  organization: string;
   client_id: string;
   service_id: string;
   upstream_url: string;
@@ -32,10 +34,12 @@ export interface SDXP2PProviderPatternData {
  */
 export const SDXP2PProviderPattern = {
   id: 'sdx-p2p-provider.r1',
-  requiredParams: ['client_id', 'service_id'],
+  requiredParams: ['organization', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: Record<string, string>) => {
     // retrieve the catalog items for
+    const upgrades = inputs.upgrades || '';
+
     const subsysService = new SubsystemService();
     const subsystem = await subsysService.findSubsystemByClientId(
       ctx,
@@ -48,17 +52,28 @@ export const SDXP2PProviderPattern = {
     const service = await GetCatalogByName(ctx, inputs.service_id);
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
 
+    assert.strictEqual(
+      service.subsystem.organization.name === inputs.organization,
+      true,
+      'Service subsystem does not belong to the specified organization'
+    );
+
     const member = service.subsystem.member;
     const name = `sdx.crt.${service.subsystem.runtimeGroup.name.toUpperCase()}.${
       member.memberClass
     }.${member.memberId}:0`;
 
-    const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
-    const key = await keys.getKeyByName(name);
+    let key: KongKey = undefined;
+    if (upgrades.includes('org-kms-sign')) {
+      const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
 
-    logger.info('Fetched key for KMS signing [%s] %j', name, key);
+      key = await keys.getKeyByName(name);
+
+      logger.info('Fetched key for KMS signing [%s] %j', name, key);
+    }
 
     return {
+      gateway_id: service.subsystem.gateway.id,
       client,
       service,
       key,

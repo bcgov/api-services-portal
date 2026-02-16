@@ -7,7 +7,8 @@ import { Organization, RuntimeGroup } from '../../keystone/types';
 import assert from 'assert';
 
 export interface SDXCRTConfig extends Record<string, string> {
-  runtime_group_name?: string;
+  organization: string;
+  runtime_group_name: string;
   pub_key: string;
   jwk: string;
   csr: string;
@@ -64,7 +65,10 @@ export const SDXCRTPattern = {
 
     const org = await getOrganization(ctx, inputs.organization);
 
+    const member = parseOrganizationMemberDetails(org.tags);
+
     return {
+      gateway_id: `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase(),
       runtimeGroup,
       org,
     };
