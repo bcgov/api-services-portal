@@ -143,7 +143,10 @@ export const SDXRuntimeGroupPattern = {
             name: `${nm}.JWKS`,
             tags,
             hosts: [consumerHost],
-            paths: ['/.well-known/jwks.json'],
+            paths: [
+              '/.well-known/jwks.json',
+              '~/ketsets/(?<key_set>.+)/.well-known/jwks.json',
+            ],
             methods: ['GET'],
             protocols: ['http', 'https'],
           },
