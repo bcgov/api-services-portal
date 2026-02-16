@@ -1,9 +1,15 @@
+import { RuntimeGroup } from '../../../services/keystone/types';
 import { RuntimeGroupService } from '../../../services/batch/runtime-group';
 import assert from '../../user-assert';
 
 export interface SDXRuntimeGroupPatternConfig extends Record<string, string> {
   organization: string;
   runtime_group_name: string;
+}
+
+interface SDXRuntimeGroupPatternData {
+  gateway_id: string;
+  runtime_group: RuntimeGroup;
 }
 
 /**
@@ -28,21 +34,22 @@ export const SDXRuntimeGroupPattern = {
       'Organization does not own this runtime group'
     );
 
-    inputs['rg_host'] = rg.host;
-    inputs['rg_gateway_id'] = rg.namespace;
-
     return {
       gateway_id: rg.namespace,
+      runtime_group: rg,
     };
   },
 
-  eval: (inputs: Record<string, string>) => {
-    const gw = inputs.rg_gateway_id;
+  eval: (inputs: Record<string, string>, data: SDXRuntimeGroupPatternData) => {
+    const gw = data.gateway_id;
     const nm = `sdx.rg.${inputs.runtime_group_name}`;
     const nsQualifier = `rg-${inputs.runtime_group_name}`;
 
     const runtimeGroupName = inputs.runtime_group_name;
-    const routeHost = inputs.rg_host;
+    const routeHost = data.runtime_group.host;
+
+    const consumerUrl = new URL(data.runtime_group.consumerEndpoint);
+    const consumerHost = consumerUrl.host;
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 
@@ -135,10 +142,10 @@ export const SDXRuntimeGroupPattern = {
           {
             name: `${nm}.JWKS`,
             tags,
-            hosts: [`internal.${routeHost}`],
+            hosts: [consumerHost],
             paths: ['/.well-known/jwks.json'],
             methods: ['GET'],
-            protocols: ['http'],
+            protocols: ['http', 'https'],
           },
         ],
         plugins: [
