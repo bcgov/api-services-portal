@@ -36,7 +36,7 @@ const logger = Logger('OrgGatewaysController');
  */
 interface GatewayPatternConfigRequest {
   pattern: string;
-  parameters: { [key: string]: string };
+  parameters: { [key: string]: any };
 }
 
 interface UnauthorizedJSON {
