@@ -13,13 +13,21 @@ import { Logger } from '../../../logger';
 
 const logger = Logger('sdx-p2p-provider-pattern');
 
-export interface SDXP2PProviderPatternConfig extends Record<string, string> {
+export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   organization: string;
   client_id: string;
   service_id: string;
   upstream_url: string;
   upgrades: string;
   kms_key_id?: string;
+  upgrade_config: {
+    token_exchange: {
+      token_endpoint: string;
+      client_id: string;
+      scopes: string[];
+      audience: string;
+    };
+  };
 }
 
 export interface SDXP2PProviderPatternData {
@@ -157,7 +165,13 @@ export const SDXP2PProviderPattern = {
             : []),
           ...(upgrades.includes('ledger') ? [upgradeToLedger(tags, data)] : []),
           ...(upgrades.includes('token-exchange')
-            ? [upgradeToTokenExchange(tags, data, inputs)]
+            ? [
+                upgradeToTokenExchange(
+                  tags,
+                  data,
+                  inputs as SDXP2PProviderPatternConfig
+                ),
+              ]
             : []),
         ],
       },
@@ -241,19 +255,21 @@ function upgradeToLedger(tags: string[], data: SDXP2PProviderPatternData) {
 function upgradeToTokenExchange(
   tags: string[],
   data: SDXP2PProviderPatternData,
-  inputs: Record<string, string>
+  inputs: SDXP2PProviderPatternConfig
 ) {
   const kid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:edge`;
   return {
     name: 'token-exchange',
     tags: tags,
     config: {
-      token_endpoint: inputs.token_exchange_token_endpoint,
-      client_id: inputs.token_exchange_client_id,
+      token_endpoint: inputs.upgrade_config?.token_exchange?.token_endpoint,
+      client_id: inputs.upgrade_config?.token_exchange?.client_id,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       algorithm: 'ES256',
       expiration: 60,
       key_id: kid,
+      scopes: inputs.upgrade_config?.token_exchange?.scopes,
+      audience: inputs.upgrade_config?.token_exchange?.audience,
     },
   };
 }
