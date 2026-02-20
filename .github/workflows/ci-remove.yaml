@@ -2,10 +2,10 @@ name: Delete Deployment
 
 on:
   delete:
-    branches: [dev, main, feature/*]
 
 jobs:
   delete:
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'refs/heads/feature/')
     runs-on: ubuntu-latest
     steps:
       - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
@@ -23,7 +23,7 @@ jobs:
       - name: Install oc
         uses: redhat-actions/oc-installer@v1
         with:
-          version: '4.6'
+          oc_version: '4.6'
 
       - name: Authenticate and set context
         uses: redhat-actions/oc-login@v1
@@ -41,11 +41,23 @@ jobs:
           curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
           tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
-      - name: 'Delete ALL'
+      - name: 'Delete DB (Postgres k8s resources)'
+        run: |
+          DEPLOY_ID="${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+          DB_NAME="proto-asp-${DEPLOY_ID}-db"
+          oc delete deployment "${DB_NAME}" --ignore-not-found=true
+          oc delete service "${DB_NAME}" --ignore-not-found=true
+          oc delete pvc "${DB_NAME}-data" --ignore-not-found=true
+          oc delete configmap "${DB_NAME}-init" "${DB_NAME}-keystone-schema" --ignore-not-found=true
+          oc delete job "${DB_NAME}-keystone-init" --ignore-not-found=true
+
+      - name: 'Delete ALL (Helm releases)'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
-          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
+          # for old MongoDB Helm releases
+          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --ignore-not-found
+
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder
