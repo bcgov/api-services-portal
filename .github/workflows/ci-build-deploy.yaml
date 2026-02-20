@@ -149,6 +149,12 @@ jobs:
                         mountPath: /var/lib/postgresql/data
                       - name: init
                         mountPath: /docker-entrypoint-initdb.d
+                    resources:
+                      requests:
+                        cpu: 50m
+                        memory: 128Mi
+                      limits:
+                        memory: 256Mi
                 volumes:
                   - name: data
                     persistentVolumeClaim:
