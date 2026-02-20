@@ -88,7 +88,7 @@ jobs:
           curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
           tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
-      - name: 'Deploy Database (Postgres 15)'
+      - name: 'Deploy Database'
         if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
