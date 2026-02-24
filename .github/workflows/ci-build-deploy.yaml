@@ -419,7 +419,7 @@ jobs:
             NEXT_PUBLIC_HELP_RELEASE_URL:
               value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/releases/'
             NEXT_PUBLIC_HELP_STATUS_URL:
-              value: 'https://uptime.com/s/bcgov-dss'
+              value: 'https://status.api.gov.bc.ca/'
             NEXT_PUBLIC_DEVELOPER_IDS:
               value: 'idir,bceid,bcsc,github'
             NEXT_PUBLIC_PROVIDER_IDS:
