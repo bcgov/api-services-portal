@@ -111,7 +111,7 @@ jobs:
             accessModes: [ReadWriteOnce]
             resources:
               requests:
-                storage: 1Gi
+                storage: ${{ startsWith(github.ref_name, 'feature/') && '1Gi' || '2Gi' }}
           EOF
 
           # Postgres 15 Deployment (public image)
