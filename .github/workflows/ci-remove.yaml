@@ -16,7 +16,7 @@ jobs:
           echo "full event: ${{ toJSON(github.event) }}"
   delete:
     name: Delete deployment
-    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'refs/heads/feature/')
+    if: github.event.ref_type == 'branch' && (startsWith(github.event.ref, 'refs/heads/feature/') || startsWith(github.event.ref, 'feature/'))
     runs-on: ubuntu-latest
     steps:
       - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
