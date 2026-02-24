@@ -111,7 +111,7 @@ jobs:
             accessModes: [ReadWriteOnce]
             resources:
               requests:
-                storage: 2Gi
+                storage: 1Gi
           EOF
 
           # Postgres 15 Deployment (public image)
