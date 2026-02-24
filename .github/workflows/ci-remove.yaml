@@ -4,7 +4,18 @@ on:
   delete:
 
 jobs:
+  debug-delete-event:
+    name: Debug delete event
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print GitHub event details
+        run: |
+          echo "event name: ${{ github.event_name }}"
+          echo "ref_type: ${{ github.event.ref_type }}"
+          echo "ref: ${{ github.event.ref }}"
+          echo "full event: ${{ toJSON(github.event) }}"
   delete:
+    name: Delete deployment
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'refs/heads/feature/')
     runs-on: ubuntu-latest
     steps:
