@@ -57,7 +57,7 @@ describe('Verify Gateway Service details', () => {
   })
 
   it('Verify the host details ', () => {
-    gs.verifyHostName('httpbin.org')
+    gs.verifyHostName('httpbun.com')
   })
 
   it('Verify the Tags details ', () => {

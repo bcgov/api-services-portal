@@ -1,6 +1,6 @@
 services:
 - name: a-service-for-newplatform
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.newplatform]
   port: 443
   protocol: https
@@ -19,7 +19,7 @@ services:
     path_handling: v0
     
 - name: a-service-for-newplatform-test
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.newplatform]
   port: 443
   protocol: https

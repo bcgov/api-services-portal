@@ -1,6 +1,6 @@
 services:
 - name: cc-service-for-platform
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.ccplatform]
   port: 443
   protocol: https

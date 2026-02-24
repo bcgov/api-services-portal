@@ -43,9 +43,41 @@ export class DirectoryController extends Controller {
     }
 
     return transform(
-      transformSetAnonymous(result.data.allDiscoverableProducts)
+      transformRemoveServices(
+        transformSetTwoTieredHidden(
+          transformSetAnonymous(result.data.allDiscoverableProducts)
+        )
+      )
     )[0];
   }
+}
+
+export function transformRemoveServices(products: Product[]) {
+  products.forEach((prod) => {
+    prod.environments.forEach((env) => {
+      removeKeys(env, ['services']);
+    });
+  });
+  return products;
+}
+
+export function transformSetTwoTieredHidden(products: Product[]) {
+  products.forEach((prod) => {
+    prod.environments.forEach((env) => {
+      env.services.forEach((svc) => {
+        svc.plugins?.forEach((plugin) => {
+          if (plugin.tags) {
+            // Tags come from GraphQL as JSON strings, need to parse them
+            const tags: string[] = JSON.parse(plugin.tags);
+            if (tags.includes('aps.two-tiered-hidden')) {
+              (env as any).twoTieredHidden = true;
+            }
+          }
+        });
+      });
+    });
+  });
+  return products;
 }
 
 export function transformSetAnonymous(products: Product[]) {

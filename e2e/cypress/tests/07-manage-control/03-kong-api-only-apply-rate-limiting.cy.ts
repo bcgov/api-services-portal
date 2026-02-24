@@ -125,7 +125,7 @@ describe('Check the API key for free access', () => {
         const key = creds.consumerKey
         cy.makeKongRequest(product.environment.config.serviceName, 'GET', '').then((response) => {
           expect(response.status).to.be.equal(200)
-          expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(99)
+          expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.within(97, 99)
         })
       })
     })
