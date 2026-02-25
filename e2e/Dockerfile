@@ -1,13 +1,12 @@
 FROM cypress/included:13.17.0
 
-ARG NPM_TOKEN
-RUN if [ -n "$NPM_TOKEN" ]; then npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN; fi
-
 # Copy of the source for code coverage analysis
 WORKDIR /app
 COPY src/. ./
 
-RUN npm install --legacy-peer-deps
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install --legacy-peer-deps
 
 RUN npx nyc instrument --compact=false . --in-place
 
@@ -17,7 +16,9 @@ WORKDIR /e2e
 RUN apt-get -y update; apt-get -y install curl
 COPY e2e/package.json /e2e
 COPY e2e/package-lock.json /e2e
-RUN npm install
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install
 
 COPY e2e/cypress.config.ts /e2e
 COPY e2e/tsconfig.json /e2e
