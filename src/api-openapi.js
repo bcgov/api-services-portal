@@ -118,10 +118,11 @@ class ApiOpenapiApp {
           err.message,
           err.fields
         );
-        logger.error('Validation Error', err);
+        logger.error('Validation Error: ', err);
         return res.status(422).json({
-          message: 'Validation Failed',
-          details: err?.fields,
+          code: 'validation_error',
+          message: err?.message,
+          fields: err?.fields,
         });
       } else if (err instanceof AssertionError) {
         // For some reason `message` is what the `stack` is normally

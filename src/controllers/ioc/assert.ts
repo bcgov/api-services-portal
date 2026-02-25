@@ -14,6 +14,6 @@ export function assertEqual(
     fieldErrors[field] = {
       message,
     };
-    throw new ValidateError(fieldErrors, '');
+    throw new ValidateError(fieldErrors, 'Validation Failed');
   }
 }

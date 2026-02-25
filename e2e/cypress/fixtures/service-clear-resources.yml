@@ -1,6 +1,6 @@
 services:
 - name: service-for-deleteplatform
-  host: httpbin.org
+  host: httpbun.com
   tags: [ns.deleteplatform]
   port: 443
   protocol: https

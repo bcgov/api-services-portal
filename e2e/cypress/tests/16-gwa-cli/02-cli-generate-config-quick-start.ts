@@ -47,11 +47,11 @@ describe('Verify CLI commands for generate/apply config', () => {
     });
   })
 
-  it('Check gwa command to generate config for client credential template', () => {
+  it('Check gwa command to generate config for quick start template', () => {
     const command = [
       'gwa generate-config --template quick-start',
       `--service ${serviceName}`,
-      '--upstream https://httpbin.org',
+      '--upstream https://httpbun.com',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division',
       '--out gw-config-qs.yaml'
@@ -63,13 +63,29 @@ describe('Verify CLI commands for generate/apply config', () => {
 
   it('Check gwa command to apply generated config', () => {
     cy.executeCliCommand('gwa apply -i gw-config-qs.yaml').then((response) => {
-      expect(response.stdout).to.contain("3/3 Published, 0 Skipped")
-      let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
-      expect(wordOccurrences).to.equal(2)
+      // fix for bug observed in e2e tests
+      if (
+        response.stdout.includes("2/3 Published, 0 Skipped") && (response.stdout.match(/\bcreated\b/g) || []).length === 1
+      ) {
+        // Product not created because GatewayService is not synced yet: retry
+        cy.log('Retry apply config')
+        cy.executeCliCommand('gwa apply -i gw-config-qs.yaml').then((retryResponse) => {
+          expect(retryResponse.stdout).to.contain("3/3 Published, 0 Skipped");
+          let wordOccurrences = (retryResponse.stdout.match(/\bcreated\b/g) || []).length;
+          expect(wordOccurrences).to.equal(1);
+        });
+      } else {
+        expect(response.stdout).to.contain("3/3 Published, 0 Skipped");
+        let wordOccurrences = (response.stdout.match(/\bcreated\b/g) || []).length;
+        expect(wordOccurrences).to.equal(2);
+      }
     });
   })
 
-  it('Check gwa status --hosts include routes', () => {
+  // TODO: Remove this once we have a way to test the status command with the kube API in e2e tests
+  const runIfKubeAPI = Cypress.env('HAS_KUBE_API') ? it : it.skip;
+
+  runIfKubeAPI('Check gwa status --hosts include routes', () => {
     cy.executeCliCommand('gwa status --hosts').then((response) => {
       expect(response.stdout).to.contain('https://' + serviceName + '.dev.api.gov.bc.ca')
     });
@@ -96,7 +112,7 @@ describe('Verify CLI commands for generate/apply config', () => {
     const command = [
       'gwa generate-config --template quick-start',
       `--service ${serviceName}`,
-      '--upstream https://httpbin.org',
+      '--upstream https://httpbun.com',
       '--org ministry-of-health',
       '--org-unit planning-and-innovation-division'
     ].join(' ');

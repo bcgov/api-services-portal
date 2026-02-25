@@ -184,8 +184,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start with a letter.',
@@ -206,8 +207,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
@@ -228,8 +230,9 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            message: 'Validation Failed',
-            details: {
+            code: 'validation_error',
+            message: 'Unable to create Gateway',
+            fields: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',

@@ -15,7 +15,10 @@ export default defineConfig({
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
       require('dotenv').config()
-      require('@cypress/code-coverage/task')(on, config)
+      // Only enable code coverage in CI or when explicitly enabled
+      if (process.env.CI || process.env.ENABLE_COVERAGE === 'true') {
+        require('@cypress/code-coverage/task')(on, config)
+      }
 
       // // It's IMPORTANT to return the config object
       // // with any changed environment variables
@@ -26,7 +29,7 @@ export default defineConfig({
         './cypress/tests/07-*/*.ts',
         './cypress/tests/03-*/*.ts',
         './cypress/tests/04-*/*.ts',
-        // './cypress/tests/05-*/*.ts',
+        './cypress/tests/05-*/*.ts',
         './cypress/tests/08-*/*.ts',
         './cypress/tests/09-*/*.ts',
         './cypress/tests/10-*/*.ts',
@@ -74,6 +77,10 @@ export default defineConfig({
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
       DEV_USERNAME: 'janis@idir',
       DEV_PASSWORD: 'awsummer',
+      HAS_KUBE_API: false,
+      // Pass CI flag to browser context for code coverage
+      CI: process.env.CI || false,
+      ENABLE_COVERAGE: process.env.ENABLE_COVERAGE || false,
     },
     retries: {
       runMode: 2,

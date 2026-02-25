@@ -16,6 +16,8 @@ env:
   GIT_COMMIT_AUTHOR: ${{ github.actor }}
   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   GIT_REPO_URL: ${{ github.repository }}
+  # Optional: avoids npm 403 from registry when multiple images run npm install in parallel
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   cypress-run:
@@ -23,7 +25,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git --branch v1.0.40
+          git clone https://github.com/bcgov/gwa-api.git --branch v1.0.47
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
