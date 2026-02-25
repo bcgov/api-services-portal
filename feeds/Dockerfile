@@ -3,6 +3,9 @@ FROM node:22.12.0-alpine3.21
 
 RUN apk add curl jq
 
+ARG NPM_TOKEN
+RUN if [ -n "$NPM_TOKEN" ]; then npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN; fi
+
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
 

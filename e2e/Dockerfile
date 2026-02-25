@@ -1,5 +1,8 @@
 FROM cypress/included:13.17.0
 
+ARG NPM_TOKEN
+RUN if [ -n "$NPM_TOKEN" ]; then npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN; fi
+
 # Copy of the source for code coverage analysis
 WORKDIR /app
 COPY src/. ./
