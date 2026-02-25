@@ -123,6 +123,26 @@ class RuntimeGroupService {
     return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
   };
 
+  checkRuntimeGroup = async (
+    context: Keystone,
+    org: string,
+    name: string
+  ): Promise<KeystoneRuntimeGroup> => {
+    const rg = await this.findRuntimeGroupByUniqueName(context, name, true);
+
+    if (rg == null) {
+      return null;
+    }
+
+    assert.strictEqual(
+      rg.organization?.name === org,
+      true,
+      'Runtime Group not owned by organization'
+    );
+
+    return rg;
+  };
+
   findRuntimeGroupByName = async (
     context: Keystone,
     org: string,
@@ -141,7 +161,34 @@ class RuntimeGroupService {
 
   findRuntimeGroupByUniqueName = async (
     context: Keystone,
-    name: string
+    name: string,
+    quiet: boolean = false
+  ): Promise<KeystoneRuntimeGroup> => {
+    const records = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
+
+    assert.strictEqual(
+      !quiet && records.length == 0,
+      false,
+      'Runtime Group not found'
+    );
+
+    return records.length == 0 ? null : records.pop();
+  };
+
+  checkRuntimeGroupByUniqueName = async (
+    context: Keystone,
+    name: string,
+    org: string
   ): Promise<KeystoneRuntimeGroup> => {
     const records = await getRecords(
       context,

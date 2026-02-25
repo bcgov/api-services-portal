@@ -43,7 +43,7 @@ class SubsystemService {
   listSubsystemsByOrganization = async (
     context: Keystone,
     org: string
-  ): Promise<Subsystem[]> => {
+  ): Promise<KeystoneSubsystem[]> => {
     const batchClause = {
       query: '$org: String',
       clause: '{ organization: { name: $org } }',
@@ -57,12 +57,7 @@ class SubsystemService {
       [],
       batchClause
     );
-
-    return records
-      .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['organization']))
-      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
-      .map((o) => removeKeys(o, ['id']));
+    return records;
   };
 
   deleteSubsystem = async (

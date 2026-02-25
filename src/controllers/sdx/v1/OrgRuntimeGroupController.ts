@@ -26,6 +26,7 @@ import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/creat
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { RuntimeGroupInput } from './types';
+import { context } from 'msw';
 
 /**
  * Runtime Group Controller
@@ -73,12 +74,16 @@ export class RuntimeGroupController extends Controller {
     // Create Keystone context for authentication and authorization
     const ctx = this.keystone.createContext(request);
 
+    const service = new RuntimeGroupService();
+
+    // Verify the runtime group belongs to the specified organization
+    // if it exists
+    await service.checkRuntimeGroup(ctx, org, body.name);
+
     // Prepare runtime group input with organization assignment
     let input: RuntimeGroup = {};
     Object.assign(input, body);
     input['organization'] = org;
-
-    const service = new RuntimeGroupService();
 
     // Create or update the runtime group
     return service.upsertRuntimeGroup(ctx, input);

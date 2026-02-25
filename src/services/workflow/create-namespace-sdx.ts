@@ -9,6 +9,7 @@ import {
 import { Subsystem } from '../keystone/types';
 import { ResourceSet } from '../uma2';
 import { CreateNamespace } from './create-namespace';
+import assert from '../user-assert';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
@@ -85,6 +86,13 @@ export async function CreateNamespaceForRuntimeGroup(
     args.runtimeGroupName
   );
 
+  assert.strictEqual(
+    rg.hostedOrganizations.filter((o) => o.name === args.organization).length >
+      0,
+    true,
+    'Runtime Group not allowed for organization'
+  );
+
   // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
@@ -94,7 +102,7 @@ export async function CreateNamespaceForRuntimeGroup(
     org: args.organization,
     orgUnit: undefined,
     orgEnabled: false,
-    displayName: `SDX Edge ${args.runtimeGroupName}`,
+    displayName: `SDX - Edge ${args.runtimeGroupName}`,
     dataPlane: 'sdx-edge',
     domains: [rg.host, consumerEP.hostname],
   });
@@ -140,6 +148,14 @@ export async function CreateNamespaceForSubsystem(
     args.runtimeGroupName
   );
 
+  assert.strictEqual(
+    rg.hostedOrganizations.filter(
+      (o) => o.name === args.subsystem.organization?.name
+    ).length > 0,
+    true,
+    'Runtime Group not allowed for organization'
+  );
+
   // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
@@ -149,7 +165,7 @@ export async function CreateNamespaceForSubsystem(
     org: args.subsystem.organization?.name,
     orgUnit: args.subsystem.organization?.orgUnit,
     orgEnabled: false,
-    displayName: `SDX Subsystem ${args.subsystem.name}`,
+    displayName: `SDX - ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
     domains: [rg.host, consumerEP.hostname],
   });

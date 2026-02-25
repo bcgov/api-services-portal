@@ -25,6 +25,12 @@ import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-n
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { SubsystemInput } from './types';
+import {
+  removeEmpty,
+  removeKeys,
+  replaceKey,
+  transformAllRefID,
+} from '../../../batch/feed-worker';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -88,45 +94,15 @@ export class OrgSubsystemController extends Controller {
     @Request() request: any
   ): Promise<Subsystem[]> {
     const ctx = this.keystone.createContext(request);
-    return new SubsystemService().listSubsystemsByOrganization(ctx, org);
-  }
-
-  /**
-   * Retrieves the details of a specific subsystem in a format suitable for catalog display.
-   * This includes enriched information such as associated runtime group details and gateway information.
-   *
-   * > `Required Scope:` System.Manage
-   *
-   * @summary Retrieve a subsystem in catalog format
-   * @param org - Organization identifier
-   * @param name - Subsystem name
-   * @param request - HTTP request object for context creation
-   */
-  @Get('/{name}/client')
-  @OperationId('getSubsystem')
-  @Security('jwt', ['System.Manage'])
-  public async getSubsystem(
-    @Path() org: string,
-    @Path() name: string,
-    @Request() request: any
-  ): Promise<SubsystemEntry> {
-    const context = this.keystone.createContext(request, true);
-
-    const subsysService = new SubsystemService();
-    const subsystem = await subsysService.findSubsystemByName(
-      context,
-      org,
-      name
+    const records = await new SubsystemService().listSubsystemsByOrganization(
+      ctx,
+      org
     );
-
-    const subsystemEntry = await GetServiceClientForSubsystem(
-      context,
-      subsystem
-    );
-
-    await EnrichWithRuntimeGroup(context, subsystemEntry.subsystem);
-
-    return subsystemEntry.subsystem;
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['organization']))
+      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
+      .map((o) => removeKeys(o, ['id']));
   }
 
   /**

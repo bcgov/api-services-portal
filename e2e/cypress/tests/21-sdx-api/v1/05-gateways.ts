@@ -89,7 +89,7 @@ describe('SDX Gateways', () => {
                 expect(body).to.have.property('gatewayId')
 
                 cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/client`,
+                  `ds/api/sdx/v1/organizations/${org.name}/clients/${subsystem.name}`,
                   'GET'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(body.runtimeGroup.name).to.be.equal(runtimeGroup.name)
