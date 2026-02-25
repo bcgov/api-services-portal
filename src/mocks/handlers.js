@@ -169,7 +169,7 @@ export const handlers = [
           helpSupportUrl: 'https://bcgov.github.io/aps-infra-platform/',
           helpReleaseUrl:
             'https://bcgov.github.io/aps-infra-platform/releases/2022-may/',
-          helpStatusUrl: 'https://uptime.com/s/bcgov-dss',
+          helpStatusUrl: 'https://status.api.gov.bc.ca/',
         },
       })
     );

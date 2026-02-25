@@ -92,65 +92,142 @@ jobs:
         if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
+          DEPLOY_ID="${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+          DB_NAME="proto-asp-${DEPLOY_ID}-db"
 
-          echo '
-          image:
-            registry: docker.pkg.github.com
-            repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 5.0-7a639fba
-            pullPolicy: IfNotPresent
-            pullSecrets:
-              - dev-github-read-packages-creds
+          # ConfigMap to create Keystone user and database on first Postgres start
+          oc create configmap "${DB_NAME}-init" --from-literal=1-init.sql="CREATE ROLE keystonejsuser WITH LOGIN PASSWORD 'keystonejsuser'; CREATE DATABASE keystonejs OWNER keystonejsuser;" --dry-run=client -o yaml | oc apply -f -
 
-          auth:
-              rootPassword: "s3cr3t"
+          # ConfigMap with Keystone schema (run by Job after Postgres is up)
+          oc create configmap "${DB_NAME}-keystone-schema" --from-file=keystone-init.sql=local/db/keystone-init.sql --dry-run=client -o yaml | oc apply -f -
 
-          serviceAccount:
-              create: false
-              name: asp-service-account
+          # PVC for Postgres data (persistence)
+          cat <<EOF | oc apply -f -
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: ${DB_NAME}-data
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: ${{ startsWith(github.ref_name, 'feature/') && '1Gi' || '2Gi' }}
+          EOF
 
-          arbiter:
-              enabled: false
+          # Postgres 15 Deployment (public image)
+          cat <<EOF | oc apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${DB_NAME}
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ${DB_NAME}
+            strategy:
+              type: Recreate
+            template:
+              metadata:
+                labels:
+                  app: ${DB_NAME}
+              spec:
+                containers:
+                  - name: postgres
+                    image: postgres:15
+                    ports:
+                      - containerPort: 5432
+                    env:
+                      - name: POSTGRES_USER
+                        value: postgres
+                      - name: POSTGRES_PASSWORD
+                        value: "s3cr3t"
+                      - name: PGDATA
+                        value: /var/lib/postgresql/data/pgdata
+                    volumeMounts:
+                      - name: data
+                        mountPath: /var/lib/postgresql/data
+                      - name: init
+                        mountPath: /docker-entrypoint-initdb.d
+                    resources:
+                      requests:
+                        cpu: 50m
+                        memory: 128Mi
+                      limits:
+                        memory: 256Mi
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: ${DB_NAME}-data
+                  - name: init
+                    configMap:
+                      name: ${DB_NAME}-init
+                readinessProbe:
+                  exec:
+                    command: [pg_isready, -U, postgres]
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                livenessProbe:
+                  exec:
+                    command: [pg_isready, -U, postgres]
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+          EOF
 
-          rbac:
-              create: true
+          # Service for Postgres
+          cat <<EOF | oc apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${DB_NAME}
+          spec:
+            ports:
+              - port: 5432
+                targetPort: 5432
+                name: postgres
+            selector:
+              app: ${DB_NAME}
+          EOF
 
-          updateStrategy:
-            type: RollingUpdate
-            rollingUpdate:
-              maxSurge: 0
-              maxUnavailable: 100%
-              
-          readinessProbe:
-            timeoutSeconds: 30
-            periodSeconds: 120
-            
-          livenessProbe:
-            timeoutSeconds: 30
-            periodSeconds: 120
-            
-          persistence:
-              enabled: true
-              size: 2Gi
+          # Wait for Postgres to be ready
+          oc rollout status deployment/${DB_NAME} --timeout=300s
 
-          resources:
-            requests:
-              cpu: 85m
-              memory: 480M
-            limits:
-              cpu: 300m
-              memory: 720M
+          # Run Keystone schema (Job)
+          cat <<EOF | oc apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: ${DB_NAME}-keystone-init
+          spec:
+            ttlSecondsAfterFinished: 300
+            backoffLimit: 5
+            template:
+              spec:
+                restartPolicy: OnFailure
+                containers:
+                  - name: run-schema
+                    image: postgres:15
+                    command:
+                      - /bin/sh
+                      - -c
+                      - |
+                        until PGPASSWORD=keystonejsuser psql -h ${DB_NAME} -U keystonejsuser -d keystonejs -c '\q' 2>/dev/null; do echo "Waiting for DB..."; sleep 2; done
+                        PGPASSWORD=keystonejsuser psql -h ${DB_NAME} -U keystonejsuser -d keystonejs -f /schema/keystone-init.sql
+                    env:
+                      - name: PGPASSWORD
+                        value: "keystonejsuser"
+                    volumeMounts:
+                      - name: schema
+                        mountPath: /schema
+                volumes:
+                  - name: schema
+                    configMap:
+                      name: ${DB_NAME}-keystone-schema
+          EOF
 
-          podSecurityContext:
-              enabled: true
-              fsGroup: ${{ secrets.RUNNING_UID_GID }}
-
-          containerSecurityContext:
-              enabled: true
-              runAsUser: ${{ secrets.RUNNING_UID_GID }}
-          ' > values.yaml
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 12.1.31 -f values.yaml --history-max 3 bitnami/mongodb
+          oc wait --for=condition=complete job/${DB_NAME}-keystone-init --timeout=300s
 
       - name: 'Deploy Backend'
         if: github.ref != 'refs/heads/dev'
@@ -296,14 +373,20 @@ jobs:
               value: Oauth2Proxy
             KONG_URL:
               value: '${{ secrets.KONG_URL_DEV}}'
-            MONGO_URL:
-              value: 'mongodb://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
-            MONGO_USER:
-              value: root
+            ADAPTER:
+              value: knex
+            KNEX_HOST:
+              value: 'proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db'
+            KNEX_PORT:
+              value: '5432'
+            KNEX_USER:
+              value: keystonejsuser
               secure: true
-            MONGO_PASSWORD:
-              value: s3cr3t
+            KNEX_PASSWORD:
+              value: keystonejsuser
               secure: true
+            KNEX_DATABASE:
+              value: keystonejs
             FEEDER_URL:
               value: 'http://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
             GITHUB_API_TOKEN:
@@ -336,7 +419,7 @@ jobs:
             NEXT_PUBLIC_HELP_RELEASE_URL:
               value: 'https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/reference/releases/'
             NEXT_PUBLIC_HELP_STATUS_URL:
-              value: 'https://uptime.com/s/bcgov-dss'
+              value: 'https://status.api.gov.bc.ca/'
             NEXT_PUBLIC_DEVELOPER_IDS:
               value: 'idir,bceid,bcsc,github'
             NEXT_PUBLIC_PROVIDER_IDS:
