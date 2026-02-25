@@ -5,6 +5,10 @@ x-common-variables: &common-variables
   KONG_PG_USER: konguser
   KONG_PG_PASSWORD: konguser
 
+secrets:
+  npm_token:
+    environment: "NPM_TOKEN"
+
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:15.1.1
@@ -64,6 +68,8 @@ services:
     build:
       context: .
       dockerfile: ./local/portal/Dockerfile.E2E
+      secrets:
+        - npm_token
     env_file:
       - .env.local
     ports:
@@ -80,6 +86,8 @@ services:
     build:
       context: ./feeds
       dockerfile: Dockerfile
+      secrets:
+        - npm_token
     env_file:
       - ./local/feeds/.env.local
     restart: on-failure
@@ -208,6 +216,8 @@ services:
     build:
       context: ./local/cypress-jwks-url
       dockerfile: Dockerfile
+      secrets:
+        - npm_token
     volumes:
       - ./local/cypress-jwks-url:/src
     command: npm start
@@ -237,6 +247,8 @@ services:
     build:
       context: .
       dockerfile: e2e/Dockerfile
+      secrets:
+        - npm_token
     volumes:
       - ./e2e/coverage:/e2e/coverage
       - ./e2e/results:/e2e/results
