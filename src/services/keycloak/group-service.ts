@@ -11,6 +11,8 @@ const MAX_GROUPS_RESULTS = 1000;
 
 export class KeycloakGroupService {
   private allGroups: any = undefined;
+  private subGroupsFullCache: Map<string, Promise<GroupRepresentation[]>> =
+    new Map();
   private kcAdminClient: KeycloakAdminClient;
 
   constructor(issuerUrl: string) {
@@ -200,6 +202,29 @@ export class KeycloakGroupService {
     });
   }
 
+  private getSubGroupsFull(
+    parentGroup: GroupRepresentation
+  ): Promise<GroupRepresentation[]> {
+    const key = parentGroup.id;
+    if (!this.subGroupsFullCache.has(key)) {
+      this.subGroupsFullCache.set(
+        key,
+        this.kcAdminClient.groups
+          .listSubGroups({
+            parentId: parentGroup.id,
+            first: 0,
+            max: MAX_GROUPS_RESULTS,
+            briefRepresentation: false,
+          })
+          .catch((err: any) => {
+            this.subGroupsFullCache.delete(key);
+            throw err;
+          })
+      );
+    }
+    return this.subGroupsFullCache.get(key);
+  }
+
   public async getGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
@@ -208,24 +233,24 @@ export class KeycloakGroupService {
       (group: GroupRepresentation) => group.name == parentGroupName
     );
     logger.debug('Groups = %j', groups);
-    const subGroups = await this.subGroups(groups.pop());
+    const parentGroup = groups[0];
+    if (!parentGroup) {
+      logger.error('[getGroup] Parent group MISSING %s', parentGroupName);
+      return null;
+    }
+    const subGroups = await this.getSubGroupsFull(parentGroup);
 
     logger.debug('SubGroups = %j', subGroups);
-    if (
-      subGroups.filter((group: GroupRepresentation) => group.name == groupName)
-        .length == 0
-    ) {
+    const grp = subGroups.find(
+      (group: GroupRepresentation) => group.name == groupName
+    );
+    if (!grp) {
       logger.error('[getGroup] MISSING %s', groupName);
       return null;
-    } else {
-      logger.debug('[getGroup] FOUND   %s', groupName);
-      const grp = subGroups.find(
-        (group: GroupRepresentation) => group.name == groupName
-      );
-      const group = await this.kcAdminClient.groups.findOne({ id: grp.id });
-      logger.debug('[getGroup] FOUND   %j', group);
-      return group;
     }
+    logger.debug('[getGroup] FOUND   %s', groupName);
+    logger.debug('[getGroup] FOUND   %j', grp);
+    return grp;
   }
 
   public async listMembers(id: string): Promise<UserRepresentation[]> {
