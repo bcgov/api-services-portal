@@ -17,7 +17,7 @@ const { deriveRoleFromIdP, scopesToRoles } = require('./scope-role-utils');
 const proxy = process.env.EXTERNAL_URL;
 const authLogoutUrl =
   process.env.OIDC_ISSUER +
-  '/protocol/openid-connect/logout?redirect_uri=' +
+  '/protocol/openid-connect/logout?post_logout_redirect_uri=' +
   querystring.escape(proxy + '/signout');
 
 const { Logger } = require('../logger');
