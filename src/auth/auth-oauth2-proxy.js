@@ -15,7 +15,7 @@ const jwksRsa = require('jwks-rsa');
 const { deriveRoleFromIdP, scopesToRoles } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
-const authLogoutUrl =
+const authLogoutUrlBase =
   process.env.OIDC_ISSUER +
   '/protocol/openid-connect/logout?post_logout_redirect_uri=' +
   querystring.escape(proxy + '/signout');
@@ -163,6 +163,15 @@ class Oauth2ProxyAuthStrategy {
     app.get('/admin/signout', async (req, res, next) => {
       if (req.user) {
         await this._sessionManager.endAuthedSession(req);
+      }
+      // Keycloak 26 RP-Initiated Logout requires id_token_hint (or client_id).
+      // OAuth2 Proxy can forward the ID token via X-Forwarded-Id-Token.
+      let authLogoutUrl = authLogoutUrlBase;
+      const idToken = req.headers['x-forwarded-id-token'];
+      if (idToken) {
+        authLogoutUrl += '&id_token_hint=' + querystring.escape(idToken);
+      } else if (process.env.OIDC_CLIENT_ID) {
+        authLogoutUrl += '&client_id=' + querystring.escape(process.env.OIDC_CLIENT_ID);
       }
       res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
     });
