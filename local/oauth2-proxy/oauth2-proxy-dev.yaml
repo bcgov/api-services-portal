@@ -14,9 +14,10 @@ injectRequestHeaders:
   - name: X-Forwarded-Access-Token
     values:
       - claim: access_token
+  # Keycloak 26 RP-Initiated Logout needs id_token_hint. Session key may be "id_token" or "IDToken" (try IDToken if id_token not set).
   - name: X-Forwarded-Id-Token
     values:
-      - claim: id_token
+      - claim: IDToken
 injectResponseHeaders:
   - name: X-Auth-Request-User
     values:

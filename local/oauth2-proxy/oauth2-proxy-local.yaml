@@ -16,7 +16,7 @@ injectRequestHeaders:
       - claim: access_token
   - name: X-Forwarded-Id-Token
     values:
-      - claim: id_token
+      - claim: IDToken
 injectResponseHeaders:
   - name: X-Auth-Request-User
     values:

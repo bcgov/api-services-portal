@@ -164,16 +164,21 @@ class Oauth2ProxyAuthStrategy {
       if (req.user) {
         await this._sessionManager.endAuthedSession(req);
       }
-      // Keycloak 26 RP-Initiated Logout requires id_token_hint (or client_id).
-      // OAuth2 Proxy can forward the ID token via X-Forwarded-Id-Token.
+      // Keycloak 26 RP-Initiated Logout requires id_token_hint. Prefer:
+      // 1) X-Forwarded-Id-Token from OAuth2 Proxy (claim: id_token or IDToken)
+      // 2) OAuth2 Proxy backend_logout_url (proxy calls Keycloak with {id_token})
+      const idToken =
+        req.headers['x-forwarded-id-token'] || req.headers['x-auth-request-id-token'];
       let authLogoutUrl = authLogoutUrlBase;
-      const idToken = req.headers['x-forwarded-id-token'];
       if (idToken) {
         authLogoutUrl += '&id_token_hint=' + querystring.escape(idToken);
-      } else if (process.env.OIDC_CLIENT_ID) {
-        authLogoutUrl += '&client_id=' + querystring.escape(process.env.OIDC_CLIENT_ID);
+        res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
+      } else {
+        // No id_token available: redirect to portal /signout and rely on
+        // OAuth2 Proxy backend_logout_url to call Keycloak with {id_token}.
+        const signoutRedirect = proxy + '/signout';
+        res.redirect('/oauth2/sign_out?rd=' + querystring.escape(signoutRedirect));
       }
-      res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
     });
 
     app.get(
