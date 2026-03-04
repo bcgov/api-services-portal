@@ -289,5 +289,17 @@ services:
     profiles:
       - testsuite
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025'  # SMTP port for receiving emails
+      - '8025:8025'  # Web UI for viewing emails
+    networks:
+      aps-net:
+        aliases:
+          - mailpit.localtest.me
+
 networks:
   aps-net: {}
