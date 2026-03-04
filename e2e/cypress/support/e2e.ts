@@ -3,6 +3,7 @@ import 'cypress-xpath'
 import './auth-commands'
 import './prep-commands'
 import './util-commands'
+import './mailpit-commands'
 import '@cypress/code-coverage/support'
 const _ = require('lodash')
 const YAML = require('yamljs')
