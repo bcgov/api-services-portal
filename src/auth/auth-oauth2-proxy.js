@@ -14,11 +14,13 @@ const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const { deriveRoleFromIdP, scopesToRoles } = require('./scope-role-utils');
 
-const proxy = process.env.EXTERNAL_URL;
+// Normalize base URL (no trailing slash) so post_logout_redirect_uri is exact for Keycloak
+const proxy = (process.env.EXTERNAL_URL || '').replace(/\/$/, '');
+const signoutUrl = proxy ? proxy + '/signout' : '/signout';
 const authLogoutUrlBase =
   process.env.OIDC_ISSUER +
   '/protocol/openid-connect/logout?post_logout_redirect_uri=' +
-  querystring.escape(proxy + '/signout');
+  querystring.escape(signoutUrl);
 
 const { Logger } = require('../logger');
 
@@ -174,10 +176,8 @@ class Oauth2ProxyAuthStrategy {
         authLogoutUrl += '&id_token_hint=' + querystring.escape(idToken);
         res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
       } else {
-        // No id_token available: redirect to portal /signout and rely on
-        // OAuth2 Proxy backend_logout_url to call Keycloak with {id_token}.
-        const signoutRedirect = proxy + '/signout';
-        res.redirect('/oauth2/sign_out?rd=' + querystring.escape(signoutRedirect));
+        // No id_token: redirect to portal /signout (proxy will redirect browser there).
+        res.redirect('/oauth2/sign_out?rd=' + querystring.escape(signoutUrl));
       }
     });
 
