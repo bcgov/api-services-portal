@@ -314,6 +314,8 @@ jobs:
               secure: true
             OIDC_ISSUER:  
               value: '${{ secrets.OIDC_ISSUER }}'
+            OIDC_CLIENT_ID:
+              value: '${{ secrets.OIDC_CLIENT_ID }}'
             JWKS_URL:
               value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
             EXTERNAL_URL:
