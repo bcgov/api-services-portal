@@ -12,6 +12,8 @@ import {
   Get,
   Tags,
   Post,
+  FieldErrors,
+  ValidateError,
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
@@ -24,6 +26,7 @@ import {
   transformAllRefID,
   syncRecordsThrowErrors,
   parseBlobString,
+  replaceKey,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
@@ -41,12 +44,13 @@ import {
 } from '../../services/org-groups/types';
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity, Organization } from './types';
+import { Activity, Gateway, Organization } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
 import { ActivitySummary } from '../../services/keystone/types';
-import { ActivityDetail } from './types-extra';
+import { ActivityDetail, GatewayAdd } from './types-extra';
 import { BatchResult } from '../../batch/types';
 import { assertEqual } from '../ioc/assert';
+import { gql } from 'graphql-request';
 
 @injectable()
 @Route('/organizations')
@@ -196,6 +200,41 @@ export class OrganizationController extends Controller {
   }
 
   /**
+   * Create a gateway
+   *
+   * @summary Create Gateway
+   * @param ns
+   * @param request
+   * @returns
+   */
+  @Post('{org}/gateways')
+  @OperationId('organization-create-gateway')
+  @Security('jwt', ['Namespace.Assign'])
+  public async createGateway(
+    @Path() org: string,
+    @Request() request: any,
+    @Body() vars: GatewayAdd
+  ): Promise<Gateway> {
+    const modifiedVars = replaceKey(vars, 'gatewayId', 'name');
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: createNS,
+      variables: modifiedVars,
+    });
+    if (result.errors) {
+      const errors: FieldErrors = {};
+      result.errors.forEach((err: any, ind: number) => {
+        errors[`d${ind}`] = { message: err.message };
+      });
+      throw new ValidateError(errors, 'Unable to create Gateway');
+    }
+    return {
+      gatewayId: result.data.createNamespace.name,
+      displayName: result.data.createNamespace.displayName
+    };
+  }
+
+  /**
    * > `Required Scope:` Gateway.Assign
    */
   @Put('{org}/{orgUnit}/gateways/{gatewayId}')
@@ -306,3 +345,12 @@ export class OrganizationController extends Controller {
       .map((o) => parseBlobString(o));
   }
 }
+
+const createNS = gql`
+  mutation CreateNamespace($name: String, $displayName: String, $org: String, $domains: String, $dataPlane: String) {
+    createNamespace(name: $name, displayName: $displayName, org: $org, domains: $domains, dataPlane: $dataPlane) {
+      name
+      displayName
+    }
+  }
+`;

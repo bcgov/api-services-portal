@@ -94,7 +94,12 @@ module.exports = {
         { value: 'client-secret', label: 'Client ID and Secret' },
         { value: 'client-jwt', label: 'Signed JWT' },
         { value: 'client-jwt-jwks-url', label: 'Signed JWT with JWKS URL' },
+        { value: 'client-certificate', label: 'Client Certificate' },
       ],
+    },
+    sdxIdentifier: {
+      type: Text,
+      isRequired: false,
     },
     clientMappers: {
       type: Text,

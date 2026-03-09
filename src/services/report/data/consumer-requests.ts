@@ -29,7 +29,7 @@ export async function getConsumerRequests(
 ): Promise<ReportOfConsumerRequest[]> {
   const dataPromises = namespaces.map(
     async (ns): Promise<ReportOfConsumerRequest[]> => {
-      const requests = await getAccessRequestsByNamespace(ksCtx, ns.name);
+      const requests = await getAccessRequestsByNamespace(ksCtx, [ ns.name ]);
 
       // services
       let data: ReportOfConsumerRequest[] = [];

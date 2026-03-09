@@ -221,7 +221,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
     .slice();
   response.push(md.refKey);
 
-  logger.debug('[buildQueryResponse] DRAFT (%s) %j', md.query, response);
+  logger.debug('[buildQueryResponse] DRAFT (%s) (%s) %j', children, md.query, response);
   if (children) {
     relationshipFields.forEach((field: string) => {
       // populate the fields as well
@@ -511,6 +511,7 @@ export const syncRecords = async function (
           const transformInfo = md.transformations[transformKey];
           if (transformInfo.syncFirst) {
             // handle these children independently first - return a list of IDs
+
             const allIds = await syncListOfRecords(
               context,
               transformInfo,

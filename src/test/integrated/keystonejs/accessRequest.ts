@@ -4,25 +4,74 @@ To run:
 npm run ts-build
 npm run ts-watch
 node dist/test/integrated/keystonejs/accessRequest.js
+
+
+NEEDS:
+
+kubectl port-forward -n 1d4461-prod service/patroni-spilo 15432:5432 &
+
+export ADAPTER=knex
+export KNEX_DATABASE=keystonejs
+export KNEX_HOST=localhost
+export KNEX_PORT=15432
+export KNEX_USER=keystonejsuser
+export KNEX_PASSWORD=
+
+
+export KONG_URL="https://kong-admin-api-1d4461-prod.apps.silver.devops.gov.bc.ca"
+
+kubectl port-forward -n 1d4461-prod service/bcgov-aps-portal-feeder-generic-api 6767:80 &
+
+export FEEDER_URL=http://localhost:6767
+
+
+// userId is needed for Legal
+// namespace has to match requesting product if not published
+
 */
 
 import InitKeystone from './init';
 import { o } from '../util';
-import { getOpenAccessRequestsByConsumer } from '../../../services/keystone/access-request';
+import {
+  addAccessRequest,
+  collectCredentials,
+  getAccessRequest,
+  getAccessRequestsByNamespace,
+} from '../../../services/keystone/access-request';
+import {
+  createApplication,
+  lookupApplicationsByNamespaces,
+} from '../../../services/keystone/application';
+import {
+  revokeAllConsumerAccess,
+  saveConsumerLabels,
+} from '../../../services/workflow';
+import {
+  getGwaProductEnvironment,
+  getOrgNamespaces,
+} from '../../../services/workflow/get-namespaces';
+import { deleteRecord, getRecords, replaceKey, syncRecordsThrowErrors } from '../../../batch/feed-worker';
+import { OrgAccessRequestCreate } from '../../../services/workflow/org-access-request';
+import { OrgAccessRequestCreateInput } from '../../../services/workflow/types';
+import { lookupServiceAccessesByNamespace } from '../../../services/keystone';
 
 (async () => {
   const keystone = await InitKeystone();
 
-  const ns = 'gw-0dcd7';
-  const skipAccessControl = false;
+//  const ns = 'gw-84b1f';
+  const ns = 'gw-31a33';
+  const skipAccessControl = true;
+
+  const userId = '12';
 
   const identity = {
     id: null,
     username: 'sample_username',
+    name: 'SampleF UserL',
     namespace: ns,
     roles: JSON.stringify(['api-owner']),
     scopes: [],
-    userId: null,
+    userId,
   } as any;
 
   const ctx = keystone.createContext({
@@ -30,14 +79,208 @@ import { getOpenAccessRequestsByConsumer } from '../../../services/keystone/acce
     authentication: { item: identity },
   });
 
-  // o(await getOrganizations(ctx));
+  if (true) {
+    const result = await lookupServiceAccessesByNamespace(ctx, ns);
+    o(result);
 
-  const serviceAccess = await getOpenAccessRequestsByConsumer(
-    ctx,
-    ns,
-    '653860ee26683257394cfe3c'
-  );
-  o(serviceAccess);
+
+
+    // const res = await deleteRecord(ctx, 'GatewayConsumer', 'b5f06ded-0c3d-4cb7-802a-ed3c03d5cbf8');
+    // o(res);
+    // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
+    // o(revoke);
+  }
+
+  if (true) {
+    const result = await ctx.executeGraphQL({
+      query: `
+          mutation OrgCreateAccessRequest ($data: OrgAccessRequestCreateInput) { 
+            orgCreateAccessRequest (data: $data) {
+              application {
+                appId
+              }
+              accessRequest {
+                id
+                name
+                status
+                productEnvironment {
+                  id
+                  name
+                  product {
+                    id
+                    name
+                    namespace
+                  }
+                }
+                application {
+                  id
+                  name  
+                  namespace
+                }
+                serviceAccess {
+                  id
+                  name
+                  consumer {
+                    id
+                    name
+                    namespace
+                  }
+                }
+              }
+            }
+          }
+      `,
+      variables: {
+        data: {
+          org: 'ministry-of-puppies-and-kittens',
+          orgMemberId: 'MIN/PUKI',
+          userId,
+          consumerProductEnvAppId: 'E7FEB796',
+          providerProductEnvAppId: '1400BE49',
+          businessProcess: 'Vet Services',
+          accessPointDN: 'CN=sdx.gov.bc.ca',
+          optionalClientScopes: ['user/Test2'],
+        } as OrgAccessRequestCreateInput,
+      },
+    });
+    o(result);
+
+    /*
+{
+  "org": "ministry-of-puppies-and-kittens",
+  "orgMemberId": "MIN/PUKI",
+  "userId": "12",
+  "consumerProductEnvAppId": "E7FEB796",
+  "providerProductEnvAppId": "1400BE49",
+  "businessProcess": "Vet Services",
+  "accessPointDN": "CN=sdx.gov.bc.ca",
+  "optionalClientScopes": [
+    "user/Test2"
+  ]
+}    
+    */
+
+  }
+
+  if (false) {
+    // 424C7EB5 SDX-WORKING-API (dev)
+    // 38D0FED9 SDX-SAMPLE-API (prod)
+    //
+    const result = await OrgAccessRequestCreate(
+      ctx,
+      'ministry-of-citizens-services',
+      'MIN/CITZ',
+      userId,
+      '424C7EB5',
+      '7A031F2A',
+      'SDX Onboarding',
+      'CN=abcd',
+      ['user/Test2']
+    );
+    o(result);
+  }
+
+  if (false) {
+    // o(await getOrganizations(ctx));
+    const app = await createApplication(ctx, {
+      name: 'App y ' + new Date().toISOString(),
+      description: 'App Desc',
+      ownerId: userId,
+      namespace: ns,
+    });
+
+    const controls = {
+      clientName: app.name,
+      subjectDn: 'CN=my-site',
+      //defaultClientScopes: [],
+      optionalClientScopes: ['user/Test1'],
+    };
+
+    const accessRequestData = {
+      acceptLegal: false,
+      additionalDetails: 'here is some additional details',
+      controls: JSON.stringify(controls),
+      name: 'Sampler API FOR Cope, Aidan CITZ:EX',
+      productEnvironmentId: '13',
+      requestor: userId,
+    } as any;
+
+    accessRequestData.applicationId = app.id;
+
+    const result = await addAccessRequest(ctx, accessRequestData);
+    o(result);
+
+    const creds = await collectCredentials(ctx, result.id);
+    const credDetails = JSON.parse(creds.credential);
+    o(credDetails);
+
+    const request = await getAccessRequest(ctx, result.id);
+    o(request);
+
+    const labels = [
+      { labelGroup: 'sdx-member', values: ['/MIN/CITZ'] },
+      { labelGroup: 'sdx-res-locator', values: ['/LAB/MIN/CITZ/MYSVC-API'] },
+      { labelGroup: 'application', values: [app.name] },
+    ];
+
+    await saveConsumerLabels(
+      ctx,
+      ns,
+      request.serviceAccess.consumer.id,
+      labels
+    );
+
+    // const revoke = await revokeAllConsumerAccess(ctx, ns, request.serviceAccess.id);
+    // o(revoke);
+
+    // const revoke = await deleteServiceAccess(ctx, request.serviceAccess.id);
+    // o(revoke);
+  }
+
+  if (false) {
+    const org = 'ministry-of-citizens-services';
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
+
+    const nsList = await getOrgNamespaces(org, prodEnv);
+    o(nsList);
+
+    const apps = await lookupApplicationsByNamespaces(ctx, [ns]);
+    o(apps);
+
+    const result = await getAccessRequestsByNamespace(
+      ctx,
+      nsList.map((n) => n.name)
+    );
+    const recs = result.map((o) => replaceKey(o, 'gatewayId', 'namespace'));
+    o(recs);
+
+    // const batchClause = {
+    //   query: '$org: String',
+    //   clause: '{ organization: { name: $org } }',
+    //   variables: { org },
+    // };
+
+    // const records = await getRecords(
+    //   ctx,
+    //   'Product',
+    //   undefined,
+    //   ['environments'],
+    //   batchClause
+    // );
+    // o(records);
+  }
+
+  if (false) {
+    const result = await getAccessRequestsByNamespace(ctx, [ns]);
+    o(result);
+  }
+
+  // const serviceAccess = await getOpenAccessRequestsByConsumer(
+  //   ctx,
+  //   ns,
+  //   '653860ee26683257394cfe3c'
+  // );
+  // o(serviceAccess);
 
   await keystone.disconnect();
 })();

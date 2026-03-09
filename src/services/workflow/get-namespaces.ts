@@ -31,6 +31,8 @@ import {
 import getSubjectToken from '../../auth/auth-token';
 
 import { Logger } from '../../logger';
+import { NamespaceService } from '../org-groups';
+import { OrgNamespace } from '../org-groups/types';
 
 const logger = Logger('wf.getns');
 
@@ -44,6 +46,17 @@ export async function getGwaProductEnvironment(
   );
 
   return getEnvironmentContext(context, prodEnvId, {}, withSubject);
+}
+
+export async function getOrgNamespaces(
+  org: string,
+  envCtx: EnvironmentContext
+): Promise<OrgNamespace[]> {
+  const envConfig = envCtx.issuerEnvConfig;
+
+  const svc = new NamespaceService(envConfig.issuerUrl);
+  await svc.login(envConfig.clientId, envConfig.clientSecret);
+  return svc.listAssignedNamespacesByOrg(org);
 }
 
 export async function getMyNamespaces(

@@ -41,3 +41,44 @@ export async function lookupMyApplicationsById(
   logger.debug('[lookupMyApplicationsById] result %j', result);
   return result.data.myApplications[0];
 }
+
+export async function lookupApplicationsByNamespaces(
+  context: any,
+  namespaces: string[]
+): Promise<Application[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetApplicationByNamespaces($namespaces: [String!]) {
+                    allApplications(where: {namespace_in: $namespaces}) {
+                        id
+                        appId
+                        name
+                    }
+                }`,
+    variables: { namespaces },
+  });
+  logger.debug('[lookupApplicationByNamespaces] result %j', result);
+  return result.data.allApplications;
+}
+
+
+export async function createApplication(
+  context: any,
+  data: { appId?: string, name: string, ownerId: string, description?: string, namespace?: string }
+): Promise<Application> {
+  logger.debug('[createApplication] %j', data);
+  const result = await context.executeGraphQL({
+    query: `mutation CreateApplication($appId: String, $name: String!, $description: String, $ownerId: ID!, $namespace: String) {
+                  createApplication(data: {appId: $appId, name: $name, owner: {connect: {id: $ownerId}}, description: $description, namespace: $namespace}) {
+                      id
+                      appId
+                      name
+                      owner {
+                        name
+                      }
+                  }
+              }`,
+    variables: data,
+  });
+  logger.debug('[createApplication] result %j', result);
+  return result.data.createApplication;
+}

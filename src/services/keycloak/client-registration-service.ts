@@ -7,6 +7,7 @@ import { headers } from './keycloak-api';
 import { strict as assert } from 'assert';
 
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
+import { clientTemplateClientCertificate } from './templates/client-template-client-certificate';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
 import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
@@ -32,12 +33,14 @@ export interface ClientRegistration {
   clientId: string;
   clientSecret?: string;
   enabled?: boolean;
+  attributes?: { [key: string]: string };
 }
 
 export enum ClientAuthenticator {
   ClientJWT = 'client-jwt',
   ClientJWTwithJWKS = 'client-jwt-jwks-url',
   ClientSecret = 'client-secret',
+  ClientCertificate = 'client-certificate',
   SharedIdP = 'shared-idp',
   SharedIdPWithAuthz = 'shared-idp-authz',
 }
@@ -69,8 +72,10 @@ export class KeycloakClientRegistrationService {
   public async clientRegistration(
     authenticator: ClientAuthenticator,
     clientId: string,
+    name: string,
     clientSecret: string,
     certificate: string,
+    subjectDn: string,
     jwksUrl: string,
     clientMappers: ClientMapper[],
     enabled: boolean = false,
@@ -81,6 +86,7 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.ClientSecret:
         body = Object.assign(JSON.parse(clientTemplateClientSecret), {
           enabled,
+          name,
           clientId,
           secret: clientSecret,
         });
@@ -88,15 +94,29 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.ClientJWT:
         body = Object.assign(JSON.parse(clientTemplateClientJwt), {
           enabled,
+          name,
           clientId,
           attributes: {
             'jwt.credential.public.key': certificate,
           },
         });
         break;
+      case ClientAuthenticator.ClientCertificate:
+        body = Object.assign(JSON.parse(clientTemplateClientCertificate), {
+          enabled,
+          name,
+          clientId,
+          consentRequired: true,
+          attributes: {
+            "x509.allow.regex.pattern.comparison": "false",
+            "x509.subjectdn": subjectDn,
+          }
+        });
+        break;
       case ClientAuthenticator.SharedIdP:
         body = Object.assign(JSON.parse(clientTemplateSharedIdP), {
           enabled,
+          name,
           clientId,
           baseUrl,
           attributes: {},
@@ -105,6 +125,7 @@ export class KeycloakClientRegistrationService {
       case ClientAuthenticator.SharedIdPWithAuthz:
         body = Object.assign(JSON.parse(clientTemplateSharedIdPAuthz), {
           enabled,
+          name,
           clientId,
           baseUrl,
           attributes: {},

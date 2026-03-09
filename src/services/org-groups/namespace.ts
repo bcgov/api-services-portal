@@ -156,11 +156,18 @@ export class NamespaceService {
     const matches = namespaceGroups
       .filter(
         (group) =>
-          'org' in group.attributes && group.attributes['org'][0] === org
+          'org' in group.attributes && group.attributes['org'][0] === org &&
+        !('decommissioned' in group.attributes)
       )
       .map((group) => ({
         name: group.name,
-        orgUnit: group.attributes['org-unit'][0],
+        orgUnit: 'org-unit' in group.attributes ? group.attributes['org-unit'][0] : null,
+        permDataPlane:
+          'perm-data-plane' in group.attributes
+            ? group.attributes['perm-data-plane'].pop() : '',
+        permDomains:
+          'perm-domains' in group.attributes
+            ? group.attributes['perm-domains'] : [],
         enabled:
           'org-enabled' in group.attributes
             ? group.attributes['org-enabled'][0] === 'true'
@@ -177,10 +184,16 @@ export class NamespaceService {
   async getNamespaceOrganizationDetails(ns: string): Promise<OrgNamespace> {
     const nsGroup = await this.groupService.findByName('ns', ns, false);
 
-    if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+    if ('org' in nsGroup.attributes) {
       return {
         name: nsGroup.attributes['org'].pop(),
-        orgUnit: nsGroup.attributes['org-unit'].pop(),
+        orgUnit: 'org-unit' in nsGroup.attributes ? nsGroup.attributes['org-unit'].pop() : '',
+        permDataPlane:
+          'perm-data-plane' in nsGroup.attributes
+            ? nsGroup.attributes['perm-data-plane'] : '',
+        permDomains:
+          'perm-domains' in nsGroup.attributes
+            ? nsGroup.attributes['perm-domains'] : [],
         enabled:
           'org-enabled' in nsGroup.attributes
             ? nsGroup.attributes['org-enabled'][0] === 'true'

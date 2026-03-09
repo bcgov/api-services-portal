@@ -204,6 +204,7 @@ export const generateCredential = async (
       tokenEndpoint: newClient.openid.token_endpoint,
       clientPublicKey: clientSigning.publicKey,
       clientPrivateKey: clientSigning.privateKey,
+      subjectDn: controls.subjectDn ? controls.subjectDn : null,
     } as NewCredential;
   }
   return null;

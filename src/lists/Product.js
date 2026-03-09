@@ -1,4 +1,4 @@
-const { Text, Relationship } = require('@keystonejs/fields');
+const { Text, Select, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const { newProductID, isProductID } = require('../services/identifiers');
 const {
@@ -19,11 +19,25 @@ module.exports = {
     appId: {
       type: Text,
       isRequired: true,
-      isUnique: false,
+      isUnique: true,
+      access: {
+        create: true,
+        update: false,
+      },      
     },
     name: {
       type: Text,
       isRequired: true,
+    },
+    type: {
+      type: Select,
+      emptyOption: false,
+      dataType: 'string',
+      defaultValue: 'service',
+      options: [
+        { value: 'service', label: 'Service' },
+        { value: 'app', label: 'Application' },
+      ]
     },
     namespace: {
       type: Text,
@@ -35,6 +49,11 @@ module.exports = {
       isMultiline: true,
       isRequired: false,
     },
+    // JSON structure: {label: '', version: '', blob: 'blod-reference'}
+    openapiSpecs: {
+      type: Text,
+      isRequired: false,
+    },    
     dataset: { type: Relationship, ref: 'Dataset' },
     organization: { type: Relationship, ref: 'Organization', many: false },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },

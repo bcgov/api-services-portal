@@ -1,3 +1,4 @@
+
 const metadata = {
   Organization: {
     query: 'allOrganizations',
@@ -18,6 +19,7 @@ const metadata = {
         name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
+        refKey: 'extForeignKey',
       },
     },
   },
@@ -387,7 +389,7 @@ const metadata = {
   Application: {
     query: 'allApplications',
     refKey: 'appId',
-    sync: ['name', 'description'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
       owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
       organization: {
@@ -408,19 +410,32 @@ const metadata = {
     query: 'allProducts',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'description', 'namespace'],
+    sync: ['name', 'type', 'description', 'namespace', 'organization', 'openapiSpecs'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
+      openapiSpecs: { name: "toStringDefaultArray" },
       environments: {
         name: 'connectExclusiveListCreate',
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
       },
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    validations: {
+      type: {
+        type: 'enum',
+        values: ['app', 'service'],
+      },
     },
     example: {
       name: 'my-new-product',
       appId: '000000000000',
+      type: 'service',
       environments: [
         {
           name: 'dev',
@@ -449,6 +464,9 @@ const metadata = {
         filterByNamespace: true,
       },
       legal: { name: 'connectOne', list: 'allLegals', refKey: 'reference' },
+      // exclude "spec" otherwise batch reading will automatically try to read it
+      // which we don't necessarily want
+      // spec: { name: 'connectOne', list: 'allBlobs', refKey: 'name' },
       credentialIssuer: {
         name: 'connectOne',
         list: 'allCredentialIssuers',
@@ -530,7 +548,7 @@ const metadata = {
       mode: { type: 'enum', values: ['auto'] },
       clientAuthenticator: {
         type: 'enum',
-        values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url'],
+        values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url', 'client-certificate'],
       },
       environmentDetails: {
         type: 'entityArray',

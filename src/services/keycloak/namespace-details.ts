@@ -17,6 +17,7 @@ import {
 } from '../../lists/extensions/Common';
 import { GWAService } from '../gwaapi';
 import { strict as assert } from 'assert';
+import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 
 const logger = Logger('kc.nsdetails');
 
@@ -79,6 +80,18 @@ export async function backfillGroupAttributes(
 
   assert.strictEqual(Boolean(nsPermissions), true, 'Invalid namespace');
 
+  return backfillGroupRepAttributes(nsPermissions, detail, defaultSettings);
+  
+}
+
+export async function backfillGroupRepAttributes(
+  nsPermissions: GroupRepresentation,
+  detail: any,
+  defaultSettings: any,
+): Promise<any> {
+
+  assert.strictEqual(Boolean(nsPermissions), true, 'Invalid namespace');
+
   transformSingleValueAttributes(nsPermissions.attributes, [
     'description',
     'perm-data-plane',
@@ -89,12 +102,6 @@ export async function backfillGroupAttributes(
     'org-notice-viewed',
     'org-updated-at',
   ]);
-
-  logger.debug(
-    '[backfillGroupAttributes] %s attributes %j',
-    ns,
-    nsPermissions.attributes
-  );
 
   const merged = {
     ...detail,
@@ -135,16 +142,20 @@ export async function transformOrgAndOrgUnit(
   merged: any,
   getOrgAdmins: boolean
 ): Promise<void> {
-  const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
+  const orgInfo = merged.orgUnit ? await getOrganizationUnit(context, merged.orgUnit) : undefined;
   if (orgInfo) {
     merged['org'] = { name: orgInfo.name, title: orgInfo.title };
-    merged['orgUnit'] = {
-      name: orgInfo.orgUnits[0].name,
-      title: orgInfo.orgUnits[0].title,
-    };
+    if (orgInfo.orgUnits) {
+      merged['orgUnit'] = {
+        name: orgInfo.orgUnits[0].name,
+        title: orgInfo.orgUnits[0].title,
+      };
+    }
   } else {
     merged['org'] = { name: merged.org, title: merged.org };
-    merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
+    if (merged.orgUnit) {
+      merged['orgUnit'] = { name: merged.orgUnit, title: merged.orgUnit };
+    }
   }
 
   // lookup org admins from

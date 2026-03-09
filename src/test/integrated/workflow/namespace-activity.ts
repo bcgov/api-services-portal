@@ -9,7 +9,9 @@ node dist/test/integrated/workflow/namespace-activity.js
 import InitKeystone from '../keystonejs/init';
 import { o } from '../util';
 import { getFilteredNamespaceActivity } from '../../../services/workflow';
-import { ActivityQueryFilter } from '@/services/workflow/types';
+import { ActivityQueryFilter } from '../../../services/workflow/types';
+import { getAllNamespaces } from '../../../services/keycloak/namespace-details';
+import { getGwaProductEnvironment, getOrgNamespaces } from '../../../services/workflow/get-namespaces';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -38,6 +40,11 @@ import { ActivityQueryFilter } from '@/services/workflow/types';
   };
   const a = await getFilteredNamespaceActivity(ctx, ns, 20, 0, filter);
   o(a);
+
+      const prodEnv = await getGwaProductEnvironment(ctx, false);
+  
+  const nsList = await getOrgNamespaces("ministry-of-citizens-services", prodEnv);
+  o(nsList);
 
   // 2022-09-13T16:47:09.367Z
   await keystone.disconnect();

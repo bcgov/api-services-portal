@@ -263,6 +263,7 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
+  gatewayId?: string;
   owner?: UserRefID;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
@@ -274,6 +275,7 @@ export interface Application {
  * @example {
  *   "name": "my-new-product",
  *   "appId": "000000000000",
+ *   "type": "service",
  *   "environments": [
  *     {
  *       "name": "dev",
@@ -288,10 +290,13 @@ export interface Application {
 export interface Product {
   appId?: string; // Primary Key
   name?: string;
+  type?: "app" | "service";
   description?: string;
   gatewayId?: string;
+  openapiSpecs?: string[];
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
 }
 
 
@@ -337,7 +342,7 @@ export interface CredentialIssuer {
   flow?: "client-credentials";
   mode?: "auto";
   authPlugin?: string;
-  clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url";
+  clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url" | "client-certificate";
   instruction?: string;
   environmentDetails?: IssuerEnvironmentConfig[];
   resourceType?: string;

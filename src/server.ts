@@ -176,6 +176,7 @@ for (const _list of [
   'CredentialIssuerExt',
   'Namespace',
   'NamespaceActivity',
+  'OrgAccessRequest',
   'OrganizationPolicy',
   'ServiceAccess',
   'ServiceAccount',

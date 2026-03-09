@@ -1,18 +1,149 @@
 import { gql } from 'graphql-request';
 import { Logger } from '../../logger';
-import { AccessRequest, AccessRequestUpdateInput } from './types';
+import {
+  AccessRequest,
+  AccessRequestCreateInput,
+  AccessRequestUpdateInput,
+  AccessRequestWhereInput,
+} from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.access-req');
 
+export async function addAccessRequest(
+  context: any,
+  data: any
+): Promise<AccessRequest> {
+  const query = gql`
+    mutation AddAccessRequest(
+      $name: String!
+      $controls: String
+      $requestor: ID!
+      $applicationId: ID!
+      $productEnvironmentId: ID!
+      $additionalDetails: String
+      $acceptLegal: Boolean!
+    ) {
+      acceptLegal(
+        productEnvironmentId: $productEnvironmentId
+        acceptLegal: $acceptLegal
+      ) {
+        legalsAgreed
+      }
+
+      createAccessRequest(
+        data: {
+          name: $name
+          controls: $controls
+          additionalDetails: $additionalDetails
+          requestor: { connect: { id: $requestor } }
+          application: { connect: { id: $applicationId } }
+          productEnvironment: { connect: { id: $productEnvironmentId } }
+        }
+      ) {
+        id
+      }
+    }
+  `;
+
+  logger.debug('Mutation [addAccessRequest] data %j', data);
+  const result = await context.executeGraphQL({
+    query,
+    variables: { ...data },
+  });
+
+  logger.debug('Mutation [addAccessRequest] result %j', result);
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    'Error adding access request'
+  );
+
+  return result.data.createAccessRequest;
+}
+
+export async function collectCredentials(context: any, id: string): Promise<AccessRequest> {
+  logger.debug('Collecting credentials for access request %s', id);
+  const query = gql`
+  mutation genCredential($id: ID!) {
+    updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+      credential
+    }
+  }`
+  const result = await context.executeGraphQL({
+    query,
+    variables: { id },
+  });
+  logger.debug('Mutation [collectCredentials] result %j', result);
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    'Error collecting credentials'
+  );
+  return result.data.updateAccessRequest;
+}
+
+export async function getAccessRequest(context: any, id: string): Promise<AccessRequest> {
+  const query = gql`
+    query GetAccessRequestById($id: ID!) {
+      AccessRequest(where: { id: $id }) {
+        id
+        name
+        isApproved
+        isIssued
+        isComplete
+        controls
+        productEnvironment {
+          id
+          name
+          appId
+          product {
+            namespace
+            openapiSpecs
+            name
+          }
+        }
+        requestor {
+          username
+        }
+        application {
+          id
+          appId
+          namespace
+          name
+        }
+        serviceAccess {
+          id
+          consumer {
+            id
+            username
+            tags
+          }
+        }
+      }
+    }
+  `;
+
+  const result = await context.executeGraphQL({
+    query,
+    variables: { id },
+  });
+  logger.debug('Query [getAccessRequest] result %j', result);
+  return result.data.AccessRequest;
+}
+
 export async function getAccessRequestsByNamespace(
   context: any,
-  ns: string
+  nsList: string[]
 ): Promise<AccessRequest[]> {
   const query = gql`
-    query GetNamespaceAccessRequests($ns: String!) {
+    query GetNamespaceAccessRequests($nsList: [String]!) {
       allAccessRequests(
-        where: { productEnvironment: { product: { namespace: $ns } } }
+        where: { OR: [
+          { productEnvironment: { product: { namespace_in: $nsList } } },
+          { application: { namespace_in: $nsList } }
+        ] }
       ) {
         id
         name
@@ -26,6 +157,7 @@ export async function getAccessRequestsByNamespace(
         application {
           name
           appId
+          namespace
         }
         requestor {
           username
@@ -35,6 +167,8 @@ export async function getAccessRequestsByNamespace(
           appId
           flow
           product {
+            namespace
+            openapiSpecs
             name
           }
         }
@@ -42,6 +176,7 @@ export async function getAccessRequestsByNamespace(
           id
           consumer {
             username
+            tags
           }
         }
         createdAt
@@ -49,7 +184,7 @@ export async function getAccessRequestsByNamespace(
     }
   `;
 
-  const result = await context.executeGraphQL({ query, variables: { ns } });
+  const result = await context.executeGraphQL({ query, variables: { nsList } });
   logger.debug('Query [getAccessRequestsByNamespace] result %j', result);
   return result.data.allAccessRequests;
 }

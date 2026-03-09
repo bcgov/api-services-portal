@@ -20,6 +20,7 @@ export interface NewCredential {
   apiKey?: string;
   clientPublicKey?: string;
   clientPrivateKey?: string;
+  subjectDn?: string; // Subject DN for the client certificate,
 }
 
 export interface CredentialReference {
@@ -44,13 +45,15 @@ export interface SubjectIdentity {
   email?: string;
 }
 export interface RequestControls {
+  clientName?: string;
   defaultClientScopes?: string[];
-  defaultOptionalScopes?: string[];
+  optionalClientScopes?: string[];
   roles?: string[];
   aclGroups?: string[];
   plugins?: ConsumerPlugin[];
   clientCertificate?: string;
   clientGenCertificate?: boolean;
+  subjectDn?: string; // Subject DN for the client certificate
   jwksUrl?: string;
   subject?: SubjectIdentity;
 }
@@ -213,4 +216,15 @@ export interface ActivitySummary {
   params: { [key: string]: string };
   activityAt: Scalars['DateTime'];
   blob?: any;
+}
+
+export interface OrgAccessRequestCreateInput {
+  org: string;
+  orgMemberId: string;
+  userId: string;
+  consumerProductEnvAppId: string;
+  providerProductEnvAppId: string;
+  businessProcess: string;
+  accessPointDN: string;
+  optionalClientScopes: string[];
 }

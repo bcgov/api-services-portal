@@ -758,6 +758,7 @@ export type Application = {
   id: Scalars['ID'];
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;

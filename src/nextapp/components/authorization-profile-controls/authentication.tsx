@@ -108,6 +108,9 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
                   <Radio name="clientAuthenticator" value="client-jwt-jwks-url">
                     Signed JWT with JWKS URL
                   </Radio>
+                  <Radio name="clientCertificate" value="client-jwt-jwks-url">
+                    Client Certificate (mTLS)
+                  </Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>

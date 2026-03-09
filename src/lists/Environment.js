@@ -87,6 +87,7 @@ module.exports = {
       many: false,
       access: { update: false },
     },
+    spec: { type: Relationship, ref: 'Blob', many: false, required: false },
   },
   access: EnforcementPoint,
   hooks: {

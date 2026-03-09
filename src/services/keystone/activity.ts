@@ -133,7 +133,7 @@ export async function recordActivity(
     ? productNamespace
     : context.authedItem.namespace;
   const name = `${action} ${type}[${refId}]`;
-  logger.debug('[recordActivity] userid=%s name=%s', userId, name);
+  logger.debug('[recordActivity] ns=%s userid=%s name=%s', namespace, userId, name);
 
   const variables: { [key: string]: any } = {
     name,

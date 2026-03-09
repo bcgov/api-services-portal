@@ -14,8 +14,10 @@ describe('Keycloak Service', function () {
       const result = await regsvc.clientRegistration(
         ClientAuthenticator.ClientSecret,
         'cid',
+        'nm',
         'csc',
         'cert',
+        'subdn',
         'jwks',
         [],
         true
@@ -32,8 +34,10 @@ describe('Keycloak Service', function () {
       const result = await regsvc.clientRegistration(
         ClientAuthenticator.ClientJWTwithJWKS,
         'cid',
+        'nm',
         'csc',
         'cert',
+        'subdn',
         'jwks',
         [],
         true
