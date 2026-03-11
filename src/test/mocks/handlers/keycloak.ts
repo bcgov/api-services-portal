@@ -14,7 +14,7 @@ const def = YAML.load(
     path.resolve('test/mocks/handlers/data/keycloak.yaml'),
     'utf8'
   )
-);
+) as any;
 
 const calls: any = {
   'https://provider/auth/realms/:realm/.well-known/openid-configuration':

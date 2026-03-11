@@ -18,7 +18,7 @@ const jwtCheck = jwksRsa.expressJwtSecret({
 const verifyJWT = jwt({
   secret: jwtCheck,
   algorithms: ['RS256'],
-  getToken: (req) => GetRequestAuthToken(req),
+  getToken: (req: any) => GetRequestAuthToken(req),
   credentialsRequired: true,
   requestProperty: 'oauth_user',
 });
