@@ -314,7 +314,7 @@ Cypress.Commands.add('logout', () => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
       cy.get('[id=kc-logout]').click({ force: true })
-      cy.get('[id=kc-info-message]').should('contain.text', 'You are logged out')
+      cy.contains('You have successfully logged out.', { timeout: 15000 }).should('be.visible')
     })
   })
   cy.log('> Logging out')
