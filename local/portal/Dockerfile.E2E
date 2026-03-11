@@ -16,8 +16,16 @@ COPY --chown=node src/*.json ./
 
 COPY --chown=node src/nyc.config.js ./
 
+<<<<<<< HEAD
 RUN npm install --legacy-peer-deps
 # --openssl-legacy-provider
+=======
+USER root
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install --legacy-peer-deps && chown -R node:node /app
+USER node
+>>>>>>> dev
 
 COPY --chown=node src ./
 

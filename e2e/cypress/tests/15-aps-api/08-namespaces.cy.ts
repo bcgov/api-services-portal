@@ -237,7 +237,7 @@ describe('API Tests for invalid namespace name', () => {
                         cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
                             expect(res.apiRes.status).to.be.equal(422)
                             cy.addToAstraScanIdList(res.astraRes.body.status)
-                            expect(res.apiRes.body.message).to.be.equal('Validation Failed')
+                            expect(res.apiRes.body.message).to.be.equal('Unable to create gateway')
                         })
                     })
                 })

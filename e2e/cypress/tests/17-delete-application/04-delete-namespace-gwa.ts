@@ -65,7 +65,7 @@ describe('Verify namespace delete using gwa command', () => {
             cy.executeCliCommand('gwa config set --gateway ' + namespace).then((response) => {
                 expect(response.stdout).to.contain("Config settings saved")
                 cy.executeCliCommand('gwa gateway destroy').then((response) => {
-                    expect(response.stderr).to.contain('Error: Validation Failed');
+                    expect(response.stderr).to.contain('Error: Unable to delete gateway');
                 });
             })
         })
@@ -73,7 +73,7 @@ describe('Verify namespace delete using gwa command', () => {
 
     it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
         cy.executeCliCommand('gwa gateway destroy --force').then((response) => {
-            expect(response.stderr).to.contain('Error: Validation Failed');
+            expect(response.stderr).to.contain('Error: Unable to delete gateway');
         });
     })
 

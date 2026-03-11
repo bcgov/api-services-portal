@@ -123,3 +123,5 @@
 | 20-gateways                                                 |                                                                |
 | |   01-list.cy.ts                                           | NA                                                             |
 | |   02-create.cy.ts                                         | NA                                                             |
+| 21-notifications                                            |                                                                |
+| |   01-namespace-assignment-notification.cy.ts              | NA                                                             |

@@ -81,7 +81,7 @@ export default {
         payload: {
           status: 400,
           result: 'update-failed',
-          reason: 'Failed updating children',
+          reason: 'Failed updating children\n\n1 !== 0\n',
           childResults: [
             {
               status: 400,
@@ -210,7 +210,7 @@ export default {
       data: {
         namespace: 'refactortime',
       },
-      expected: { exception: 'Missing value for key name' },
+      expected: { exception: 'Missing value for key name\n\nfalse !== true\n' },
     },
     {
       name: 'create a new product with lots of environments',
