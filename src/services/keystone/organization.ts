@@ -30,6 +30,10 @@ export async function getOrganizationUnit(
   context: any,
   unit: string
 ): Promise<Organization> {
+  if (!unit) {
+    logger.warn('[getOrganizationUnit] called with undefined unit, returning null');
+    return null;
+  }
   const result = await context.executeGraphQL({
     query: `query GetOrganizations($unit: String!) {
                     allOrganizations(where: { orgUnits_some: { name: $unit } } ) {
