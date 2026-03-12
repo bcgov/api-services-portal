@@ -810,5 +810,18 @@
       "username": "janis@github",
       "password": "awsummer"
     }
+  },
+  "apiCheckActivity": {
+    "Janis": {
+      "userName": "Janis Smith",
+      "email": "janis@testmail.com",
+      "accessRole": [
+        "CredentialIssuer.Admin",
+        "Gateway.Manage",
+        "Gateway.View",
+        "Access.Manage",
+        "GatewayConfig.Publish"
+      ]
+    }
   }
 }

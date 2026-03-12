@@ -1,4 +1,8 @@
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+
 describe('Gateways', () => {
+  const na = new NamespaceAccessPage()
+  let userSession: any
   let workingData: any
 
   before(() => {
@@ -9,6 +13,8 @@ describe('Gateways', () => {
 
   describe('Happy Paths', () => {
     it('POST /gateways', () => {
+      cy.fixture('apiowner').as('apiowner')
+
       const payload = {
         displayName: 'My ABC Gateway',
       }
@@ -21,6 +27,18 @@ describe('Gateways', () => {
 
           const gateway = body
 
+          // add Gateway.View scope via the UI
+          cy.get('@apiowner').then(({ user }: any) => {
+            cy.getUserSessionTokenValue(gateway.gatewayId, true).then((value) => {
+              userSession = value
+            })
+          })
+          cy.visit(na.path)
+          cy.get('@apiowner').then(({ apiCheckActivity }: any) => {
+            na.clickGrantUserAccessButton()
+            na.editPermission(apiCheckActivity.Janis)
+          })
+        
           cy.callAPI(`ds/api/v3/gateways/${gateway.gatewayId}`, 'GET').then(
             ({ apiRes: { body, status } }: any) => {
               expect(status).to.be.equal(200)
@@ -33,9 +51,9 @@ describe('Gateways', () => {
             ({ apiRes: { body, status } }: any) => {
               expect(status).to.be.equal(200)
               cy.log(JSON.stringify(body, null, 2))
-              expect(body.length).to.be.equal(1)
-              expect(body[0].message).to.be.equal('{actor} created {ns} namespace')
-              expect(body[0].params.ns).to.be.equal(gateway.gatewayId)
+              expect(body.length).to.be.equal(2)
+              expect(body[1].message).to.be.equal('{actor} created {ns} namespace')
+              expect(body[1].params.ns).to.be.equal(gateway.gatewayId)
             }
           )
         }
@@ -152,13 +170,27 @@ describe('Gateways', () => {
 
     it('GET /gateways/{gatewayId}/activity', () => {
       const { gateway } = workingData
+      cy.fixture('apiowner').as('apiowner')
+
+      // add Gateway.View scope via the UI
+      cy.get('@apiowner').then(({ user }: any) => {
+        cy.getUserSessionTokenValue(gateway.gatewayId, true).then((value) => {
+          userSession = value
+        })
+      })
+      cy.visit(na.path)
+      cy.get('@apiowner').then(({ apiCheckActivity }: any) => {
+        na.clickGrantUserAccessButton()
+        na.editPermission(apiCheckActivity.Janis)
+      })
+
       cy.callAPI(`ds/api/v3/gateways/${gateway.gatewayId}/activity`, 'GET').then(
         ({ apiRes: { body, status } }: any) => {
           expect(status).to.be.equal(200)
           cy.log(JSON.stringify(body, null, 2))
-          expect(body.length).to.be.equal(3)
-          expect(body[2].message).to.be.equal('{actor} created {ns} namespace')
-          expect(body[2].params.ns).to.be.equal(gateway.gatewayId)
+          expect(body.length).to.be.equal(4)
+          expect(body[3].message).to.be.equal('{actor} created {ns} namespace')
+          expect(body[3].params.ns).to.be.equal(gateway.gatewayId)
         }
       )
     })
@@ -184,9 +216,8 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            code: 'validation_error',
-            message: 'Unable to create Gateway',
-            fields: {
+            message: 'Validation Failed',
+            details: {
               d0: {
                 message:
                   'Gateway ID must be between 5 and 15 lowercase alpha-numeric characters and start with a letter.',
@@ -207,9 +238,8 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            code: 'validation_error',
-            message: 'Unable to create Gateway',
-            fields: {
+            message: 'Validation Failed',
+            details: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
@@ -230,9 +260,8 @@ describe('Gateways', () => {
       cy.callAPI('ds/api/v3/gateways', 'POST').then(
         ({ apiRes: { body, status } }: any) => {
           const match = {
-            code: 'validation_error',
-            message: 'Unable to create Gateway',
-            fields: {
+            message: 'Validation Failed',
+            details: {
               d0: {
                 message:
                   'Display name must be between 3 and 30 characters, starting with an alpha-numeric character, and can only use special characters "-()_ .\'/".',
