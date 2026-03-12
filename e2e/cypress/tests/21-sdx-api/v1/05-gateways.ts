@@ -13,6 +13,24 @@ describe('SDX Gateways', () => {
   })
 
   describe('Happy Paths', () => {
+    describe('Register Organization Gateway', () => {
+      it('PUT /organizations/{org}/gateway', () => {
+        const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+        const memberClass = org.tags[0].split(':')[1]
+        const memberId = org.tags[1].split(':')[1]
+        const expectedGatewayId = `sdx-o-${memberClass}-${memberId}`.toLowerCase()
+
+        cy.setRequestBody({})
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/gateway`, 'PUT').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.gatewayId).to.be.equal(expectedGatewayId)
+          }
+        )
+      })
+    })
+
     describe('Register Runtime Group Gateway', () => {
       it('PUT /organizations/{org}/runtime-groups/{rg}/gateway', () => {
         const { org, gateway, dataset, runtimeGroupId, product } = workingData
@@ -88,11 +106,20 @@ describe('SDX Gateways', () => {
                 expect(status).to.be.equal(200)
                 expect(body).to.have.property('gatewayId')
 
+                const gatewayId = body.gatewayId
+
                 cy.callAPI(
                   `ds/api/sdx/v1/organizations/${org.name}/clients/${subsystem.name}`,
                   'GET'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(body.runtimeGroup.name).to.be.equal(runtimeGroup.name)
+
+                  expect(status).to.be.equal(200)
+                  expect(body.name).to.be.equal(`SUBSYS-${datasetId.toUpperCase()}`)
+                  // expect(JSON.stringify(body)).to.be.equal('')
+                  expect(body).to.have.property('gateway')
+                  expect(body.gateway.id).to.be.equal(gatewayId)
+                  expect(body.organization.name).to.be.equal(org.name)
                 })
               })
             })
