@@ -1,6 +1,4 @@
-import { parseOrganizationMemberDetails } from '@/services/keystone/organization';
 import assert from '../../user-assert';
-import { KongKey, KongKeys } from '../../../services/kong/keys';
 import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
@@ -11,9 +9,9 @@ import {
 } from '../catalog';
 import { Logger } from '../../../logger';
 
-const logger = Logger('sdx-p2p-provider-pattern');
-
 // TODO: clean this up a bit!
+const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+
 const SDX_KONG_URL =
   process.env.SDX_KONG_URL || 'http://sdx-konghc-kong-admin:8001';
 
@@ -54,8 +52,6 @@ export const SDXP2PProviderPattern = {
 
   inject: async (ctx: any, inputs: Record<string, string>) => {
     // retrieve the catalog items for
-    const upgrades = inputs.upgrades || '';
-
     const subsysService = new SubsystemService();
     const subsystem = await subsysService.findSubsystemByClientId(
       ctx,
@@ -74,25 +70,10 @@ export const SDXP2PProviderPattern = {
       'Service subsystem does not belong to the specified organization'
     );
 
-    const member = service.subsystem.member;
-    const name = `sdx.crt.${service.subsystem.runtimeGroup.name.toUpperCase()}.${
-      member.memberClass
-    }.${member.memberId}:0`;
-
-    let key: KongKey = undefined;
-    if (upgrades.includes('org-kms-sign')) {
-      const keys = new KongKeys(SDX_KONG_URL);
-
-      key = await keys.getKeyByName(name);
-
-      logger.info('Fetched key for KMS signing [%s] %j', name, key);
-    }
-
     return {
       gateway_id: service.subsystem.gateway.id,
       client,
       service,
-      key,
     };
   },
 
@@ -193,7 +174,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: 'ES256',
-      jwks_uri: `https://sdx.gov.bc.ca/keysets/${keySetName}/.well-known/jwks.json`,
+      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
   };

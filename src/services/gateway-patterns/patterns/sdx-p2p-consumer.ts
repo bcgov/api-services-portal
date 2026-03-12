@@ -8,6 +8,9 @@ import {
   ServiceClient,
 } from '../catalog';
 
+// TODO: clean this up a bit!
+const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+
 interface ConsumerUpgrades {
   sign: {};
   verify: {};
@@ -144,7 +147,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: 'ES256',
-      jwks_uri: `https://sdx.gov.bc.ca/keysets/${keySetName}/.well-known/jwks.json`,
+      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
   };
