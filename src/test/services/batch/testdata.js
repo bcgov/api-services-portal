@@ -210,7 +210,7 @@ export default {
       data: {
         namespace: 'refactortime',
       },
-      expected: { exception: 'Missing value for key name\n\nfalse !== true\n' },
+      expected: { exception: 'Missing value for key name' },
     },
     {
       name: 'create a new product with lots of environments',
