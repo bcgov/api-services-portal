@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git --branch feature/kc-26
+          git clone https://github.com/bcgov/gwa-api.git --branch dev
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
 
