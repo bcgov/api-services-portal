@@ -75,7 +75,7 @@ export const SDXRuntimeGroupPattern = {
           {
             name: `${nm}.DENY-INT`,
             tags,
-            hosts: [`internal.${routeHost}`],
+            hosts: [`internal.${routeHost}`, consumerHost],
             paths: ['/'],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             protocols: ['http'],
@@ -106,7 +106,7 @@ export const SDXRuntimeGroupPattern = {
           {
             name: `${nm}.HELLO`,
             tags,
-            hosts: [`internal.${routeHost}`],
+            hosts: [`internal.${routeHost}`, consumerHost],
             paths: ['/hello'],
             methods: ['GET'],
             protocols: ['http'],
