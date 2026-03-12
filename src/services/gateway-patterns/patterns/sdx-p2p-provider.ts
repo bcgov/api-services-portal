@@ -15,10 +15,12 @@ const logger = Logger('sdx-p2p-provider-pattern');
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   organization: string;
+  conn_id: string;
   client_id: string;
   service_id: string;
   upstream_url: string;
   upgrades: string;
+  use_sni: string;
   kms_key_id?: string;
   upgrade_config: {
     token_exchange: {
@@ -96,8 +98,8 @@ export const SDXP2PProviderPattern = {
 
     const providerGateway = data.service.subsystem.gateway.id;
 
-    const tags = [`ns.${providerGateway}.${serviceLocator}`, 'sdx'];
-    const nm = `sdx.p2p.p.${serviceLocator}`;
+    const tags = [`ns.${providerGateway}.${inputs.conn_id}.p`, 'sdx'];
+    const name = `sdx.p2p.${inputs.conn_id}.p.${serviceLocator}`;
 
     const upstreamUrl = inputs.upstream_url;
 
@@ -106,32 +108,32 @@ export const SDXP2PProviderPattern = {
     return [
       {
         kind: 'GatewayService',
-        name: nm,
+        name,
         retries: 0,
         routes: [
           {
             hosts: [serviceHost],
-            snis: [serviceHost],
+            snis: inputs.use_sni === 'false' ? [] : [serviceHost],
             paths: [`/sdx/0/${serviceLocator}`],
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
             },
-            protocols: ['https'],
-            name: `${nm}.UPSTREAM`,
+            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            name: `${name}.UPSTREAM`,
             strip_path: true,
             tags,
           },
           {
             hosts: [serviceHost],
-            snis: [serviceHost],
+            snis: inputs.use_sni === 'false' ? [] : [serviceHost],
             paths: [`/sdx/0/${serviceLocator}/hello`],
             methods: ['GET'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
             },
-            protocols: ['https'],
-            name: `${nm}.HELLO`,
+            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            name: `${name}.HELLO`,
             tags,
             plugins: [
               {

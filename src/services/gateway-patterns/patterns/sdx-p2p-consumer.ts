@@ -10,6 +10,7 @@ import {
 
 export interface SDXP2PConsumerPatternConfig extends Record<string, string> {
   organization: string;
+  conn_id: string;
   client_id: string;
   service_id: string;
   upgrades: string;
@@ -68,42 +69,45 @@ export const SDXP2PConsumerPattern = {
 
     const consumerGateway = data.client.subsystem.gateway.id;
 
-    const tags = [`ns.${consumerGateway}.${serviceLocator}`, 'sdx'];
-    const name = `sdx.p2p.c.${serviceLocator}`;
+    const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
+    const name = `sdx.p2p.${inputs.conn_id}.c.${serviceLocator}`;
 
     const upgrades = inputs.upgrades || '';
 
-    return [
-      {
-        kind: 'GatewayService',
-        name,
-        tls_verify: inputs.tls_verify === 'false' ? false : true,
-        retries: 0,
-        routes: [
-          {
-            hosts: [routeHostUrl.hostname],
-            paths: [`/sdx/0/${serviceLocator}`],
-            methods: ['DELETE', 'GET', 'POST', 'PUT'],
-            name,
-            strip_path: false,
-            protocols:
-              routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
-            tags,
-          },
-        ],
-        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
-        url: data.service.subsystem.runtimeGroup.sdxEndpoint,
-        plugins: [
-          ...[transformer(tags, data)],
-          ...(upgrades.includes('edge-sign')
-            ? [upgradeToTrustSign(tags, data)]
-            : []),
-          ...(upgrades.includes('edge-verify')
-            ? [upgradeToTrustVerify(tags, data)]
-            : []),
-        ],
-      },
-    ] as any[];
+    const config1 = {
+      kind: 'GatewayService',
+      name,
+      retries: 0,
+      routes: [
+        {
+          hosts: [routeHostUrl.hostname],
+          paths: [`/sdx/0/${serviceLocator}`],
+          methods: ['DELETE', 'GET', 'POST', 'PUT'],
+          name,
+          strip_path: false,
+          protocols:
+            routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
+          tags,
+        },
+      ],
+      tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+      url: data.service.subsystem.runtimeGroup.sdxEndpoint,
+      plugins: [
+        ...[transformer(tags, data)],
+        ...(upgrades.includes('edge-sign')
+          ? [upgradeToTrustSign(tags, data)]
+          : []),
+        ...(upgrades.includes('edge-verify')
+          ? [upgradeToTrustVerify(tags, data)]
+          : []),
+      ],
+    } as any;
+
+    if (inputs.tls_verify) {
+      config1['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
+    }
+
+    return [config1] as any[];
   },
 };
 
