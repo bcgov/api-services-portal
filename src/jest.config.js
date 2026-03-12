@@ -12,6 +12,6 @@ module.exports = {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@keycloak|url-template|camelize-ts)/)',
+    'node_modules/(?!(@keycloak|url-template|camelize-ts|url-join|axios|axios-ntlm|soap)/)',
   ],
 };

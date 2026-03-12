@@ -117,7 +117,7 @@ export class KeycloakClientPolicyService {
   ): Promise<any> {
     logger.debug('[findPolicyById] c=%s t=%s p=%s', id, type, policyId);
 
-    const policy = (await (this.kcAdminClient.clients as any).findOnePolicyWithType({
+    const policy = (await (this.kcAdminClient.clients as any).findOnePolicy({
       id,
       type,
       policyId,
