@@ -26,7 +26,6 @@ import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/creat
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { RuntimeGroupInput } from './types';
-import { context } from 'msw';
 
 /**
  * Runtime Group Controller

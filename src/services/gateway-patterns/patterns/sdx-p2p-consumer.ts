@@ -8,15 +8,18 @@ import {
   ServiceClient,
 } from '../catalog';
 
-export interface SDXP2PConsumerPatternConfig extends Record<string, string> {
+interface ConsumerUpgrades {
+  sign: {};
+  verify: {};
+}
+
+export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
   organization: string;
   conn_id: string;
   client_id: string;
   service_id: string;
-  upgrades: string;
+  upgrades: ConsumerUpgrades;
   tls_verify?: string;
-  token_exchange_token_endpoint?: string;
-  token_exchange_client_id?: string;
 }
 
 export interface SDXP2PConsumerPatternData {
@@ -59,7 +62,7 @@ export const SDXP2PConsumerPattern = {
     };
   },
 
-  eval: (inputs: Record<string, string>, data: SDXP2PConsumerPatternData) => {
+  eval: (inputs: Record<string, any>, data: SDXP2PConsumerPatternData) => {
     const serviceLocator = data.service.name;
 
     const clientLocator = data.client.subsystem.clientId;
@@ -72,9 +75,9 @@ export const SDXP2PConsumerPattern = {
     const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
     const name = `sdx.p2p.${inputs.conn_id}.c.${serviceLocator}`;
 
-    const upgrades = inputs.upgrades || '';
+    const upgrades: ConsumerUpgrades = inputs.upgrades || {};
 
-    const config1 = {
+    const config = {
       kind: 'GatewayService',
       name,
       retries: 0,
@@ -94,20 +97,20 @@ export const SDXP2PConsumerPattern = {
       url: data.service.subsystem.runtimeGroup.sdxEndpoint,
       plugins: [
         ...[transformer(tags, data)],
-        ...(upgrades.includes('edge-sign')
+        ...(upgrades.hasOwnProperty('sign')
           ? [upgradeToTrustSign(tags, data)]
           : []),
-        ...(upgrades.includes('edge-verify')
+        ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
           : []),
       ],
     } as any;
 
     if (inputs.tls_verify) {
-      config1['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
+      config['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
     }
 
-    return [config1] as any[];
+    return [config] as any[];
   },
 };
 

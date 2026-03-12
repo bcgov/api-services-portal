@@ -148,7 +148,6 @@ for (const _list of [
   'Product',
   'RuntimeGroup',
   'ServiceAccess',
-  'ServiceConnection',
   'Subsystem',
   'TemporaryIdentity',
   'User',

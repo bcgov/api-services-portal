@@ -13,23 +13,29 @@ import { Logger } from '../../../logger';
 
 const logger = Logger('sdx-p2p-provider-pattern');
 
+// TODO: clean this up a bit!
+const SDX_KONG_URL =
+  process.env.SDX_KONG_URL || 'http://sdx-konghc-kong-admin:8001';
+
+interface ProviderUpgrades {
+  sign: {};
+  verify: {};
+  token_exchange: {
+    token_endpoint: string;
+    client_id: string;
+    scopes: string[];
+    audience: string;
+  };
+}
+
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   organization: string;
   conn_id: string;
   client_id: string;
   service_id: string;
   upstream_url: string;
-  upgrades: string;
+  upgrades: ProviderUpgrades;
   use_sni: string;
-  kms_key_id?: string;
-  upgrade_config: {
-    token_exchange: {
-      token_endpoint: string;
-      client_id: string;
-      scopes: string[];
-      audience: string;
-    };
-  };
 }
 
 export interface SDXP2PProviderPatternData {
@@ -75,7 +81,7 @@ export const SDXP2PProviderPattern = {
 
     let key: KongKey = undefined;
     if (upgrades.includes('org-kms-sign')) {
-      const keys = new KongKeys('http://sdx-konghc-kong-admin:8001');
+      const keys = new KongKeys(SDX_KONG_URL);
 
       key = await keys.getKeyByName(name);
 
@@ -90,7 +96,7 @@ export const SDXP2PProviderPattern = {
     };
   },
 
-  eval: (inputs: Record<string, string>, data: SDXP2PProviderPatternData) => {
+  eval: (inputs: Record<string, any>, data: SDXP2PProviderPatternData) => {
     const serviceLocator = data.service.name;
     const serviceHost = data.service.subsystem.runtimeGroup.host;
 
@@ -103,7 +109,7 @@ export const SDXP2PProviderPattern = {
 
     const upstreamUrl = inputs.upstream_url;
 
-    const upgrades = inputs.upgrades || '';
+    const upgrades: ProviderUpgrades = inputs.upgrades || {};
 
     return [
       {
@@ -153,20 +159,13 @@ export const SDXP2PProviderPattern = {
         tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
         url: upstreamUrl,
         plugins: [
-          ...(upgrades.includes('edge-sign')
+          ...(upgrades.hasOwnProperty('sign')
             ? [upgradeToTrustSign(tags, data)]
             : []),
-          ...(upgrades.includes('edge-verify')
+          ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
-          ...(upgrades.includes('org-kms-sign')
-            ? [upgradeToTrustKMSSign(tags, data)]
-            : []),
-          ...(upgrades.includes('timestamp')
-            ? [upgradeToTimestamp(tags, data)]
-            : []),
-          ...(upgrades.includes('ledger') ? [upgradeToLedger(tags, data)] : []),
-          ...(upgrades.includes('token-exchange')
+          ...(upgrades.hasOwnProperty('token_exchange')
             ? [
                 upgradeToTokenExchange(
                   tags,
@@ -213,65 +212,27 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
   };
 }
 
-function upgradeToTrustKMSSign(
-  tags: string[],
-  data: SDXP2PProviderPatternData
-) {
-  if (data.key == null) {
-    logger.warn('Unable to configure trust KMS - no key found');
-  }
-  return {
-    name: 'trust-kms',
-    tags: tags,
-    config: {
-      direction: 'response',
-      operation: 'sign',
-      signature_header_key: 'X-Edge-Token',
-      key_id: data.key?.kid,
-    },
-  };
-}
-
-function upgradeToTimestamp(tags: string[], data: SDXP2PProviderPatternData) {
-  return {
-    name: 'trust-timestamp',
-    tags: tags,
-    config: {
-      endpoint_url: 'https://freetsa.org/tsr',
-      policy_oid: '1.2.1.2.1',
-    },
-  };
-}
-
-function upgradeToLedger(tags: string[], data: SDXP2PProviderPatternData) {
-  return {
-    name: 'trust-ledger',
-    tags: tags,
-    config: {
-      endpoint_url: 'https://rekor.sigstore.dev',
-      provider: 'rekor',
-    },
-  };
-}
-
 function upgradeToTokenExchange(
   tags: string[],
   data: SDXP2PProviderPatternData,
   inputs: SDXP2PProviderPatternConfig
 ) {
+  const tokenExchangeConfig = inputs.upgrades.token_exchange;
+
   const kid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:edge`;
+
   return {
     name: 'token-exchange',
     tags: tags,
     config: {
-      token_endpoint: inputs.upgrade_config?.token_exchange?.token_endpoint,
-      client_id: inputs.upgrade_config?.token_exchange?.client_id,
+      client_id: tokenExchangeConfig?.client_id,
+      token_endpoint: tokenExchangeConfig?.token_endpoint,
+      scopes: tokenExchangeConfig?.scopes,
+      audience: tokenExchangeConfig?.audience,
+      key_id: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       algorithm: 'ES256',
       expiration: 60,
-      key_id: kid,
-      scopes: inputs.upgrade_config?.token_exchange?.scopes,
-      audience: inputs.upgrade_config?.token_exchange?.audience,
     },
   };
 }

@@ -19,11 +19,6 @@ const logger = Logger('batch.runtime-group');
 
 class RuntimeGroupService {
   validateRuntimeGroup = (name: string): void => {
-    logger.debug(
-      '[validateRuntimeGroup] validating runtime group name: %s',
-      name
-    );
-
     regExprValidation(
       '^[a-z0-9]{3,8}$',
       name,
