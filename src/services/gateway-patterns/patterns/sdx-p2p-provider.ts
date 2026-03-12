@@ -12,9 +12,6 @@ import { Logger } from '../../../logger';
 // TODO: clean this up a bit!
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
-const SDX_KONG_URL =
-  process.env.SDX_KONG_URL || 'http://sdx-konghc-kong-admin:8001';
-
 interface ProviderUpgrades {
   sign: {};
   verify: {};
