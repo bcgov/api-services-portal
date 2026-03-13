@@ -48,16 +48,21 @@ export class CatalogController extends Controller {
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
     {
-      name: 'oas-service-123',
+      name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
       title: 'Sample OAS Service',
       version: '1.0.0',
       summary: 'A sample OpenAPI service',
       description:
         'This is a sample service defined by an OpenAPI specification.',
       subsystem: {
-        name: 'sample-subsystem',
+        name: 'SAMPLE-SUBSYS',
+        clientId: 'LAB.MIN.CITZ.SAMPLE-SUBSYS',
         organization: {
           name: 'sample-organization',
+        },
+        member: {
+          memberClass: 'MIN',
+          memberId: 'CITZ',
         },
       },
       operations: [

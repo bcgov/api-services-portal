@@ -1,11 +1,58 @@
+import { parse } from 'path';
 import { Logger } from '../../logger';
 import { RuntimeGroupService } from '../batch/runtime-group';
 import { SubsystemEntry } from '../gateway-patterns/catalog';
+import {
+  getOrganization,
+  parseOrganizationMemberDetails,
+} from '../keystone/organization';
 import { Subsystem } from '../keystone/types';
 import { ResourceSet } from '../uma2';
 import { CreateNamespace } from './create-namespace';
+import assert from '../user-assert';
 
 const logger = Logger('wf.CreateNamespaceSDX');
+
+/**
+ * Arguments for creating a namespace for an organization.
+ */
+export interface CreateNamespaceForOrganizationArgs {
+  /** The organization that owns the runtime group */
+  organization: string;
+}
+
+export async function CreateNamespaceForOrganization(
+  context: any,
+  args: CreateNamespaceForOrganizationArgs
+): Promise<ResourceSet> {
+  const org = await getOrganization(context, args.organization);
+  if (!org) {
+    throw new Error(`Organization ${args.organization} not found`);
+  }
+
+  const member = parseOrganizationMemberDetails(org.tags);
+
+  const name = `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
+
+  // Create the namespace with SDX edge configuration
+  const resourceSet = await CreateNamespace(context, {
+    name: name,
+    org: args.organization,
+    orgUnit: undefined,
+    orgEnabled: false,
+    displayName: `SDX - LAB.${member.memberClass}.${member.memberId}`,
+    dataPlane: 'sdx-edge',
+    domains: [],
+  });
+
+  logger.debug(
+    '[CreateNamespaceForOrganization] Created Namespace %s for Organization %s',
+    resourceSet.name,
+    args.organization
+  );
+
+  return resourceSet;
+}
 
 /**
  * Arguments for creating a namespace for a runtime group.
@@ -39,6 +86,13 @@ export async function CreateNamespaceForRuntimeGroup(
     args.runtimeGroupName
   );
 
+  assert.strictEqual(
+    rg.hostedOrganizations.filter((o) => o.name === args.organization).length >
+      0,
+    true,
+    'Runtime Group not allowed for organization'
+  );
+
   // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
@@ -48,7 +102,7 @@ export async function CreateNamespaceForRuntimeGroup(
     org: args.organization,
     orgUnit: undefined,
     orgEnabled: false,
-    displayName: `SDX Edge ${args.runtimeGroupName}`,
+    displayName: `SDX - Edge ${args.runtimeGroupName}`,
     dataPlane: 'sdx-edge',
     domains: [rg.host, consumerEP.hostname],
   });
@@ -94,6 +148,14 @@ export async function CreateNamespaceForSubsystem(
     args.runtimeGroupName
   );
 
+  assert.strictEqual(
+    rg.hostedOrganizations.filter(
+      (o) => o.name === args.subsystem.organization?.name
+    ).length > 0,
+    true,
+    'Runtime Group not allowed for organization'
+  );
+
   // Extract the consumer endpoint hostname for domain configuration
   const consumerEP = new URL(rg.consumerEndpoint);
 
@@ -103,7 +165,7 @@ export async function CreateNamespaceForSubsystem(
     org: args.subsystem.organization?.name,
     orgUnit: args.subsystem.organization?.orgUnit,
     orgEnabled: false,
-    displayName: `SDX Subsystem ${args.subsystem.name}`,
+    displayName: `SDX - ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
     domains: [rg.host, consumerEP.hostname],
   });

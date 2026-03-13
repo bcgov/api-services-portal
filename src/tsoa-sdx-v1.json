@@ -46,6 +46,10 @@
         "description": "Discover all the great services available on BC's Secure Data Exchange"
       },
       {
+        "name": "Gateways",
+        "description": "Manage your routing policies on SDX"
+      },
+      {
         "name": "Runtime Groups",
         "description": "Manage SDX Edge Servers"
       },

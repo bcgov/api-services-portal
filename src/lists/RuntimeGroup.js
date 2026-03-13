@@ -18,11 +18,16 @@ module.exports = {
       isRequired: true,
       access: { update: false },
     },
-    organization: { type: Relationship, ref: 'Organization' },
+    organization: {
+      type: Relationship,
+      ref: 'Organization',
+      access: { update: false },
+    },
     host: {
       type: Text,
       isRequired: true,
       isUnique: true,
+      access: { update: false },
     },
     hostedOrganizations: {
       type: Relationship,
@@ -47,8 +52,10 @@ module.exports = {
       }
       return resolvedData;
     },
-    validateInput: ({ resolvedData }) => {
-      new RuntimeGroupService().validateRuntimeGroup(resolvedData['name']);
+    validateInput: ({ operation, resolvedData }) => {
+      if (operation == 'create') {
+        new RuntimeGroupService().validateRuntimeGroup(resolvedData['name']);
+      }
     },
   },
 };

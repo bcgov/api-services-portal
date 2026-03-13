@@ -1,21 +1,29 @@
 import { FieldErrors, ValidateError } from 'tsoa';
 import { SimpleServicePattern } from './patterns/simple-service';
+import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
+import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
+import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
+import { SDXKeysPattern } from './patterns/sdx-keys';
 
 interface PatternProcessor {
   id: string;
   requiredParams: string[];
-  eval: (inputs: Record<string, string>, data?: any) => any[];
-  inject?: (ctx: any, inputs: Record<string, string>) => Promise<any>;
+  eval: (inputs: Record<string, any>, data?: any) => any[];
+  inject?: (ctx: any, inputs: Record<string, any>) => Promise<any>;
 }
 
 const PATTERNS: Record<string, PatternProcessor> = {
   [SimpleServicePattern.id]: SimpleServicePattern,
+  [SDXP2PConsumerPattern.id]: SDXP2PConsumerPattern,
+  [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
+  [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
+  [SDXKeysPattern.id]: SDXKeysPattern,
 };
 
 export interface GatewayPatternConfig {
   pattern: string;
   delete?: boolean;
-  parameters: Record<string, string>;
+  parameters: Record<string, any>;
 }
 
 export function assertAndRaiseValidateError(
@@ -53,7 +61,10 @@ export async function GetConfigUsingPattern(
     expectRequiredParams(inputs.parameters, pattern.requiredParams);
     if (pattern.inject) {
       const data = await pattern.inject(ctx, inputs.parameters);
-      return { documents: pattern.eval(inputs.parameters, data) };
+      return {
+        _gateway_id: data.gateway_id,
+        documents: pattern.eval(inputs.parameters, data),
+      };
     } else {
       return { documents: pattern.eval(inputs.parameters) };
     }
@@ -67,7 +78,7 @@ export async function GetConfigUsingPattern(
 }
 
 function expectRequiredParams(
-  provided: Record<string, string>,
+  provided: Record<string, any>,
   required: string[]
 ) {
   const errors: FieldErrors = {};

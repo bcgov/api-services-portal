@@ -1,0 +1,167 @@
+import assert from '../../user-assert';
+import { SubsystemService } from '../../batch/subsystem';
+import {
+  EnrichWithRuntimeGroup,
+  GetCatalogByName,
+  GetServiceClientForSubsystem,
+  ServiceCatalogEntry,
+  ServiceClient,
+} from '../catalog';
+
+// TODO: clean this up a bit!
+const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+
+interface ConsumerUpgrades {
+  sign: {};
+  verify: {};
+}
+
+export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
+  organization: string;
+  conn_id: string;
+  client_id: string;
+  service_id: string;
+  upgrades: ConsumerUpgrades;
+  tls_verify?: string;
+}
+
+export interface SDXP2PConsumerPatternData {
+  service: ServiceCatalogEntry;
+  client: ServiceClient;
+}
+
+/**
+ * This pattern will provision the default route policies for a consumer of an SDX service
+ *
+ */
+export const SDXP2PConsumerPattern = {
+  id: 'sdx-p2p-consumer.r1',
+  requiredParams: ['organization', 'client_id', 'service_id'],
+
+  inject: async (ctx: any, inputs: SDXP2PConsumerPatternConfig) => {
+    // retrieve the catalog items for
+    const subsysService = new SubsystemService();
+    const subsystem = await subsysService.findSubsystemByClientId(
+      ctx,
+      inputs.client_id
+    );
+
+    assert.strictEqual(
+      subsystem.organization.name === inputs.organization,
+      true,
+      'Client subsystem does not belong to the specified organization'
+    );
+
+    const client = await GetServiceClientForSubsystem(ctx, subsystem);
+    await EnrichWithRuntimeGroup(ctx, client.subsystem);
+
+    const service = await GetCatalogByName(ctx, inputs.service_id);
+    await EnrichWithRuntimeGroup(ctx, service.subsystem);
+
+    return {
+      gateway_id: client.subsystem.gateway.id,
+      client,
+      service,
+    };
+  },
+
+  eval: (inputs: Record<string, any>, data: SDXP2PConsumerPatternData) => {
+    const serviceLocator = data.service.name;
+
+    const clientLocator = data.client.subsystem.clientId;
+    const routeHostUrl = new URL(
+      data.client.subsystem.runtimeGroup.consumerEndpoint
+    );
+
+    const consumerGateway = data.client.subsystem.gateway.id;
+
+    const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
+    const name = `sdx.p2p.${inputs.conn_id}.c.${serviceLocator}`;
+
+    const upgrades: ConsumerUpgrades = inputs.upgrades || {};
+
+    const config = {
+      kind: 'GatewayService',
+      name,
+      retries: 0,
+      routes: [
+        {
+          hosts: [routeHostUrl.hostname],
+          paths: [`/sdx/0/${serviceLocator}`],
+          methods: ['DELETE', 'GET', 'POST', 'PUT'],
+          name,
+          strip_path: false,
+          protocols:
+            routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
+          tags,
+        },
+      ],
+      tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+      url: data.service.subsystem.runtimeGroup.sdxEndpoint,
+      plugins: [
+        ...[transformer(tags, data)],
+        ...(upgrades.hasOwnProperty('sign')
+          ? [upgradeToTrustSign(tags, data)]
+          : []),
+        ...(upgrades.hasOwnProperty('verify')
+          ? [upgradeToTrustVerify(tags, data)]
+          : []),
+      ],
+    } as any;
+
+    if (inputs.tls_verify) {
+      config['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
+    }
+
+    return [config] as any[];
+  },
+};
+
+function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
+  const clientLocator = data.client.subsystem.clientId;
+  const serviceHost = data.service.subsystem.runtimeGroup.host;
+  return {
+    name: 'request-transformer',
+    tags,
+    config: {
+      add: {
+        headers: [`X-Client-Id:${clientLocator}`],
+      },
+      replace: {
+        headers: [`Host:${serviceHost}`],
+      },
+    },
+  };
+}
+
+function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
+  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
+  const keySetName = `sdx.edge.${data.client.subsystem.runtimeGroup.name}`;
+
+  return {
+    name: 'trust-sign',
+    tags: tags,
+    config: {
+      direction: 'request',
+      signature_header_key: 'X-Edge-Token',
+      keyid: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      alg: 'ES256',
+      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
+      hash_alg: 'sha256',
+    },
+  };
+}
+
+function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
+  return {
+    name: 'trust-verify-signature',
+    tags: tags,
+    config: {
+      direction: 'response',
+      signature_header_key: 'X-Edge-Token',
+      manifest_type: 'signature-only',
+      iss_key_grace_period: 300,
+    },
+  };
+}

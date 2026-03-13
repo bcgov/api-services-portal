@@ -64,6 +64,18 @@ describe('SDX Subsystem', () => {
         }
       )
     })
+
+    it('GET /organizations/{org}/clients', () => {
+      const { org, gateway, dataset, datasetId, product } = workingData
+
+      cy.setQueryString({})
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/clients`, 'GET').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(422)
+          expect(body.message).to.be.equal('Incomplete subsystem setup')
+        }
+      )
+    })
   })
 
   describe('Subsystem Sad Paths', () => {
@@ -101,7 +113,7 @@ describe('SDX Subsystem', () => {
       })
     })
 
-    it('GET /organizations/{org}/subsystems/{name}/client (incomplete setup)', () => {
+    it('GET /organizations/{org}/clients (incomplete setup)', () => {
       const { org, gateway, dataset, datasetId, product } = workingData
 
       const payload = {
@@ -109,7 +121,7 @@ describe('SDX Subsystem', () => {
       }
 
       cy.callAPI(
-        `ds/api/sdx/v1/organizations/${org.name}/subsystems/${payload.name}/client`,
+        `ds/api/sdx/v1/organizations/${org.name}/clients/${payload.name}`,
         'GET'
       ).then(({ apiRes: { status, body } }: any) => {
         // expect(JSON.stringify(body)).to.include(`abc`)

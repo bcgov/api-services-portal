@@ -13,6 +13,10 @@ import { strict as assert } from 'assert';
 import { Subsystem } from './types';
 import { Subsystem as KeystoneSubsystem } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
+import { ParseClientId } from '../gateway-patterns/catalog';
+import { Logger } from '../../logger';
+
+const logger = Logger('batch.subsystem');
 
 class SubsystemService {
   validateSubsystem = (name: string): void => {
@@ -39,7 +43,7 @@ class SubsystemService {
   listSubsystemsByOrganization = async (
     context: Keystone,
     org: string
-  ): Promise<Subsystem[]> => {
+  ): Promise<KeystoneSubsystem[]> => {
     const batchClause = {
       query: '$org: String',
       clause: '{ organization: { name: $org } }',
@@ -53,12 +57,7 @@ class SubsystemService {
       [],
       batchClause
     );
-
-    return records
-      .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['organization']))
-      .map((o) => replaceKey(o, 'namespace', 'gatewayId'))
-      .map((o) => removeKeys(o, ['id']));
+    return records;
   };
 
   deleteSubsystem = async (
@@ -86,6 +85,32 @@ class SubsystemService {
         query: '$org: String!, $name: String!',
         clause: '{ organization: { name: $org }, name: $name }',
         variables: { org, name },
+      }
+    );
+
+    assert.strictEqual(records.length == 0, false, 'Subsystem not found');
+    return records.pop();
+  };
+
+  findSubsystemByClientId = async (
+    context: Keystone,
+    clientId: string
+  ): Promise<KeystoneSubsystem> => {
+    const client = ParseClientId(clientId);
+
+    logger.info('Client = %j', client);
+    const records = await getRecords(
+      context,
+      'Subsystem',
+      undefined,
+      ['organization'],
+      {
+        query: '$name: String!, $tag: String!',
+        clause: '{ organization: { tags_some: $tag }, name: $name }',
+        variables: {
+          name: client.subsystem.name,
+          tag: `member_id:${client.member.memberId}`,
+        },
       }
     );
 

@@ -14,7 +14,7 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
       name: `ministry-of-kittens-${orgId}`,
       title: 'Some good title about kittens',
       description: 'Some good description about kittens',
-      tags: [],
+      tags: ['member_class:MIN', `member_id:${orgId}`],
       orgUnits: [
         {
           name: `division-of-toys-${orgId}`,
@@ -130,7 +130,7 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
                   organization: {
                     name: org.name,
                     title: 'Some good title about kittens',
-                    tags: [],
+                    tags: ['member_class:MIN', `member_id:${orgId}`],
                     description: 'Some good description about kittens',
                   },
                   organizationUnit: {
