@@ -4,6 +4,7 @@ import { Logger } from '../logger';
 import express from 'express';
 import Keycloak from 'keycloak-connect';
 import GetRequestAuthToken from './auth-token';
+import { ForbiddenError } from './forbidden-error';
 
 const logger = Logger('auth-tsoa');
 
@@ -17,7 +18,7 @@ const jwtCheck = jwksRsa.expressJwtSecret({
 const verifyJWT = jwt({
   secret: jwtCheck,
   algorithms: ['RS256'],
-  getToken: (req) => GetRequestAuthToken(req),
+  getToken: (req: any) => GetRequestAuthToken(req),
   credentialsRequired: true,
   requestProperty: 'oauth_user',
 });
@@ -83,14 +84,14 @@ export function expressAuthentication(
           {
             status: (s: number) => {
               logger.error(
-                'invalid_token (%d) [%j] for %j',
+                'permission_denied (%d) [%j] for %j',
                 s,
                 permissions,
                 request.oauth_user
               );
               reject(
-                new UnauthorizedError('invalid_token', {
-                  message: `Missing authorization scope. (${s})`,
+                new ForbiddenError('permission_denied', {
+                  message: `Missing required scope: ${permissions.join(', ')}`,
                 })
               );
             },
@@ -99,7 +100,7 @@ export function expressAuthentication(
           (authzerr: any) => {
             if (authzerr) {
               reject(
-                new UnauthorizedError('invalid_token', {
+                new ForbiddenError('permission_denied', {
                   message: 'Denied access to resource',
                 })
               );

@@ -8,4 +8,10 @@ module.exports = {
   coverageReporters: ['lcov', 'text-summary'],
   moduleDirectories: ['node_modules', 'nextapp/test', 'test'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@keycloak|url-template|camelize-ts|url-join|axios|axios-ntlm|soap)/)',
+  ],
 };

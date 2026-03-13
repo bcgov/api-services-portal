@@ -8,8 +8,8 @@ import { Environment } from '@/services/keystone/types';
 const logger = Logger('mocks.ks');
 console.log(path.resolve('test/mocks/handlers/data/ns-default.yaml'))
 const nsDefault = YAML.load(
-fs.readFileSync(path.resolve('test/mocks/handlers/data/ns-default.yaml'), 'utf8')
-);
+  fs.readFileSync(path.resolve('test/mocks/handlers/data/ns-default.yaml'), 'utf8')
+) as any;
 
 const scenarios: {
   [key: string]: { [queryName: string]: any };

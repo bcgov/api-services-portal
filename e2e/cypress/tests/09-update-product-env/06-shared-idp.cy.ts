@@ -1,13 +1,6 @@
-import ApiDirectoryPage from '../../pageObjects/apiDirectory'
-import ApplicationPage from '../../pageObjects/applications'
 import AuthorizationProfile from '../../pageObjects/authProfile'
-import ConsumersPage from '../../pageObjects/consumers'
 import HomePage from '../../pageObjects/home'
-import keycloakGroupPage from '../../pageObjects/keycloakGroup'
-import KeycloakUserGroupPage from '../../pageObjects/keycloakUserGroup'
 import LoginPage from '../../pageObjects/login'
-import MyAccessPage from '../../pageObjects/myAccess'
-import Products from '../../pageObjects/products'
 
 describe('Apply Shared IDP while creating Authorization Profile', () => {
   const login = new LoginPage()

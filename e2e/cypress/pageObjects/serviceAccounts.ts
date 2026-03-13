@@ -9,6 +9,7 @@ class ServiceAccountsPage {
   deleteServiceAcctConfirmationBtn: string = '[data-testid="confirm-delete-service-acct-btn"]'
 
   createServiceAccount(scopes: string[]): void {
+    cy.wait(3000)
     cy.get(this.newServiceAccountBtn).first().click()
     this.selectPermissions(scopes)
     cy.get(this.shareBtn).click()
