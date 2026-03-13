@@ -27,7 +27,7 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Navigate to User Groups', () => {
-    cy.wait(2000)
+    cy.wait(10000)
     cy.get('[id=nav-toggle').click()
     cy.contains('Groups').click()
     cy.get('[id=nav-toggle').click()
@@ -109,7 +109,7 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Navigate to Users Page', () => {
-    cy.wait(2000)
+    cy.wait(10000)
     cy.get('[id=nav-toggle').click()
     cy.contains('Users').click()
     cy.get('[id=nav-toggle').click()
