@@ -11,39 +11,52 @@ secrets:
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1
+    image: keycloak-quarkus:e2e
     container_name: keycloak
-    hostname: keycloak
+    build:
+      context: local/keycloak
+      dockerfile: Dockerfile
+      args:
+        - KC_VERSION=${KC_VERSION:-26.5.3}
     depends_on:
       kong-db:
         condition: service_healthy
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: local
+    # Keycloak 26 Hostname v2: --hostname accepts full URL (host + port + path).
     command:
       [
-        '-b',
-        '0.0.0.0',
-        '-Djboss.socket.binding.port-offset=1001',
-        '-Dkeycloak.migration.action=import',
-        '-Dkeycloak.migration.provider=singleFile',
-        '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
-        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
-        '-Dkeycloak.profile.feature.upload_scripts=enabled',
+        "start",
+        "--optimized",
+        "--hostname",
+        "http://keycloak.localtest.me:9081/auth",
+        "--db-url",
+        "jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}",
+        "--db-username",
+        "keycloakuser",
+        "--db-password",
+        "keycloakuser",
+        "--http-enabled",
+        "true",
+        "--http-port",
+        "9081",
+        "--import-realm",
       ]
-    ports:
-      - 9081:9081/tcp
-    environment:
-      #KEYCLOAK_USER: local
-      #KEYCLOAK_PASSWORD: local
-      DB_VENDOR: POSTGRES
-      DB_SCHEMA: public
-      DB_ADDR: kong-db:5432
-      DB_USER: keycloakuser
-      DB_PASSWORD: keycloakuser
     volumes:
-      - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
+      - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
+    ports:
+      - 9081:9081
+      - 9000:9000
     networks:
       aps-net:
         aliases:
           - keycloak.localtest.me
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/localhost/9081'
+      interval: 5s
+      timeout: 5s
+      retries: 5
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.8.1
     container_name: oauth2-proxy
@@ -62,7 +75,7 @@ services:
           - oauth2proxy.localtest.me
   apsportal:
     container_name: apsportal
-    image: apsportal:latest
+    image: apsportal:${APSPORTAL_TAG:-latest}
     depends_on:
       - keycloak
     build:
@@ -198,7 +211,7 @@ services:
         aliases:
           - redis-master
   gwa-api:
-    image: gwa-api:e2e
+    image: gwa-api:${GWA_API_TAG:-e2e}
     container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
@@ -288,6 +301,18 @@ services:
       - '8094:8094'
     profiles:
       - testsuite
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025'  # SMTP port for receiving emails
+      - '8025:8025'  # Web UI for viewing emails
+    networks:
+      aps-net:
+        aliases:
+          - mailpit.localtest.me
 
 networks:
   aps-net: {}

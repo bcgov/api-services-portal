@@ -2,9 +2,7 @@ import 'crypto';
 import FormData from 'form-data';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 import CertificateRepresentation from '@keycloak/keycloak-admin-client/lib/defs/certificateRepresentation';
 import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
@@ -20,7 +18,7 @@ export class KeycloakClientService {
     if (issuerUrl != null) {
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
-      this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+      this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
     }
   }
 
@@ -94,9 +92,8 @@ export class KeycloakClientService {
   }
 
   public async findResourceByName(id: string, name: string) {
-    const lkup = await (
-      await this.kcAdminClient.clients.listResources({ id, name })
-    ).filter((r) => r.name === name);
+    const lkup = (await this.kcAdminClient.clients.listResources({ id, name }))
+      .filter((r) => r.name === name);
     assert.strictEqual(lkup.length, 1, 'Resource not found ' + name);
     logger.debug('[findResourceByName] [%s] Found - %s', name, lkup[0]._id);
     logger.debug('[findResourceByName] [%s] Found - %j', name, lkup[0]);

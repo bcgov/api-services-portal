@@ -67,6 +67,7 @@ groups:
         attributes:
           org: ['ministry-of-citizens-services']
           'org-unit': ['databc']
+          'org-enabled': ['true']
 
   - id: 5978a996-c215-4c3f-a17e-a76396a9d6a4
     name: organization-admin

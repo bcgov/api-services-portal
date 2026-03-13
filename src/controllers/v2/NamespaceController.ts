@@ -219,6 +219,7 @@ export class NamespaceController extends Controller {
   @Get('/{ns}/activity')
   @OperationId('namespace-activity')
   @Security('jwt', ['Namespace.View'])
+  @Security('jwt', ['Namespace.Manage'])
   public async namespaceActivity(
     @Path() ns: string,
     @Query() first: number = 20,

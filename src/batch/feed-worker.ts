@@ -407,17 +407,12 @@ export const syncRecords = async function (
               );
               logger.debug('CHILDREN [%s] %j', transformKey, allIds);
               childResults.push(...allIds);
-              assert.strictEqual(
-                allIds.filter((record) => record.status != 200).length,
-                0,
-                'Failed updating children'
-              );
-              assert.strictEqual(
-                allIds.filter((record) => typeof record.ownedBy != 'undefined')
-                  .length,
-                0,
-                'There are some child records that have exclusive ownership already!'
-              );
+              if (allIds.filter((record) => record.status != 200).length !== 0) {
+                throw new Error('Failed updating children');
+              }
+              if (allIds.filter((record) => typeof record.ownedBy != 'undefined').length !== 0) {
+                throw new Error('There are some child records that have exclusive ownership already!');
+              }
               json[transformKey + '_ids'] = allIds.map((status) => status.id);
             }
           }
@@ -521,21 +516,17 @@ export const syncRecords = async function (
             logger.debug('CHILDREN [%s] %j', transformKey, allIds);
             childResults.push(...allIds);
 
-            assert.strictEqual(
-              allIds.filter((record) => record.status != 200).length,
-              0,
-              'Failed updating children'
-            );
+            if (allIds.filter((record) => record.status != 200).length !== 0) {
+              throw new Error('Failed updating children');
+            }
             logger.debug('%j', localRecord);
-            assert.strictEqual(
-              allIds.filter(
+            if (allIds.filter(
                 (record) =>
                   typeof record.ownedBy != 'undefined' &&
                   record.ownedBy != localRecord.id
-              ).length,
-              0,
-              'There are some child records that have ownership already (update not allowed)!'
-            );
+              ).length !== 0) {
+              throw new Error('There are some child records that have ownership already (update not allowed)!');
+            }
 
             json[transformKey + '_ids'] = allIds.map((status) => status.id);
           }
