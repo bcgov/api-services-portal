@@ -17,13 +17,14 @@ services:
       context: local/keycloak
       dockerfile: Dockerfile
       args:
-        - KC_VERSION=${KC_VERSION:-26.4.5}
+        - KC_VERSION=${KC_VERSION:-26.5.3}
     depends_on:
       kong-db:
         condition: service_healthy
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: local
+    # Keycloak 26 Hostname v2: --hostname accepts full URL (host + port + path).
     command:
       [
         "start",

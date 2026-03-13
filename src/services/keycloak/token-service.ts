@@ -44,10 +44,12 @@ export class KeycloakTokenService {
     clientSecret: string,
     grantType: string,
     username?: string,
-    password?: string
+    password?: string,
+    scope?: string
   ): Promise<string> {
+    const scopeKey = scope ?? '';
     if (grantType === 'client_credentials' && !username) {
-      const cacheKey = `${this.tokenUrl}:${clientId}`;
+      const cacheKey = `${this.tokenUrl}:${clientId}:${scopeKey}`;
       const cached = tokenCache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
         logger.debug(
@@ -65,6 +67,9 @@ export class KeycloakTokenService {
     if (username) {
       params.append('username', username);
       params.append('password', password);
+    }
+    if (scope) {
+      params.append('scope', scope);
     }
 
     logger.debug(
@@ -91,7 +96,7 @@ export class KeycloakTokenService {
     logger.debug('[getKeycloakSession] RESULT = %j', masked);
 
     if (grantType === 'client_credentials' && !username && response.expires_in) {
-      const cacheKey = `${this.tokenUrl}:${clientId}`;
+      const cacheKey = `${this.tokenUrl}:${clientId}:${scopeKey}`;
       tokenCache.set(cacheKey, {
         accessToken: response['access_token'],
         expiresAt: Date.now() + response.expires_in * 1000 - TOKEN_EXPIRY_BUFFER_MS,

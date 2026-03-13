@@ -32,9 +32,16 @@ interface GatewayPatternConfigRequest {
   parameters: { [key: string]: string };
 }
 
+/** 401: invalid or missing token */
 interface UnauthorizedJSON {
   code: 'invalid_token';
-  message: 'Missing authorization scope. (403)';
+  message: string;
+}
+
+/** 403: valid token but missing required scope */
+interface ForbiddenJSON {
+  code: 'permission_denied';
+  message: string;
 }
 
 interface ValidateErrorJSON {
@@ -73,7 +80,11 @@ export class GatewayConfigController extends Controller {
   })
   @Response<UnauthorizedJSON>(401, 'Unauthorized', {
     code: 'invalid_token',
-    message: 'Missing authorization scope. (403)',
+    message: 'Invalid or missing token',
+  })
+  @Response<ForbiddenJSON>(403, 'Forbidden', {
+    code: 'permission_denied',
+    message: 'Missing required scope',
   })
   @Response<ValidateErrorJSON>(422, 'Validation Failed', {
     code: 'validation_error',

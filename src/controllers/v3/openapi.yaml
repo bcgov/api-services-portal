@@ -182,6 +182,7 @@ components:
                 organization: ministry-of-citizens-services
                 organizationUnit: databc
         UnauthorizedJSON:
+            description: '401: invalid or missing token'
             properties:
                 code:
                     type: string
@@ -190,9 +191,21 @@ components:
                     nullable: false
                 message:
                     type: string
+            required:
+                - code
+                - message
+            type: object
+            additionalProperties: false
+        ForbiddenJSON:
+            description: '403: valid token but missing required scope'
+            properties:
+                code:
+                    type: string
                     enum:
-                        - 'Missing authorization scope. (403)'
+                        - permission_denied
                     nullable: false
+                message:
+                    type: string
             required:
                 - code
                 - message
@@ -943,7 +956,16 @@ paths:
                                 $ref: '#/components/schemas/UnauthorizedJSON'
                             examples:
                                 'Example 1':
-                                    value: {code: invalid_token, message: 'Missing authorization scope. (403)'}
+                                    value: {code: invalid_token, message: 'Invalid or missing token'}
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ForbiddenJSON'
+                            examples:
+                                'Example 1':
+                                    value: {code: permission_denied, message: 'Missing required scope'}
                 '422':
                     description: 'Validation Failed'
                     content:
@@ -1114,6 +1136,9 @@ paths:
                 -
                     jwt:
                         - Namespace.View
+                -
+                    jwt:
+                        - Namespace.Manage
             parameters:
                 -
                     in: path

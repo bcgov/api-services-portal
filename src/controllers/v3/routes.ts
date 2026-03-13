@@ -135,7 +135,16 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "code": {"dataType":"enum","enums":["invalid_token"],"required":true},
-            "message": {"dataType":"enum","enums":["Missing authorization scope. (403)"],"required":true},
+            "message": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ForbiddenJSON": {
+        "dataType": "refObject",
+        "properties": {
+            "code": {"dataType":"enum","enums":["permission_denied"],"required":true},
+            "message": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -882,7 +891,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v3/gateways/:gatewayId/activity',
-            authenticateMiddleware([{"jwt":["Namespace.View"]}]),
+            authenticateMiddleware([{"jwt":["Namespace.View"]},{"jwt":["Namespace.Manage"]}]),
 
             async function NamespaceController_namespaceActivity(request: any, response: any, next: any) {
             const args = {

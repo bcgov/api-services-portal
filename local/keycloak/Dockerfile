@@ -1,4 +1,4 @@
-ARG KC_VERSION="26.4.5"
+ARG KC_VERSION="26.5.3"
 FROM quay.io/keycloak/keycloak:${KC_VERSION} as builder
 
 ENV KC_HEALTH_ENABLED=true
