@@ -1,6 +1,6 @@
-import { kebabCase, snakeCase } from 'lodash';
+import { snakeCase } from 'lodash';
 import { Logger } from '../../logger';
-import { strict as assert } from 'assert';
+import assert from '../user-assert';
 
 const logger = Logger('ks.batch');
 

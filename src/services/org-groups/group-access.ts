@@ -1,5 +1,8 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
+import { Uma2WellKnown } from '../keycloak';
+import { convertToOrgGroup, leaf, parent, root } from './group-converter-utils';
+import { OrganizationGroup, OrgAuthzService, OrgGroupService } from './index';
 import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import {
   KeycloakClientPolicyService,
@@ -20,6 +23,8 @@ import { OrganizationGroup, OrgGroupService, OrgAuthzService } from './index';
 import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { NamespaceService } from './namespace';
+import { buildGroupAccess, buildUserReference } from './org-role';
+import { GroupAccess, GroupMember, GroupMembership, GroupRole } from './types';
 
 const logger = Logger('group-access');
 
@@ -109,71 +114,44 @@ export class GroupAccessService {
     orgUnit: string,
     orgEnabled: boolean
   ): Promise<boolean> {
-    if (
-      await this.namespaceService.assignNamespaceToOrganization(
-        namespace,
-        org,
-        orgUnit,
-        orgEnabled
-      )
-    ) {
-      if (orgUnit) {
-        // build the policies if they do not exist
-        await this.buildGroupHierarchyIfMissing(org, orgUnit);
+    const ok = await this.namespaceService.assignNamespaceToOrganization(
+      namespace,
+      org,
+      orgUnit,
+      orgEnabled
+    );
 
-        const access = buildGroupAccess(
-          orgUnit,
-          `/ca.bc.gov/${org}`,
-          'namespace',
-          namespace
-        );
-
-        for (const groupRole of access.roles) {
-          const parent = access.parent ? access.parent : '';
-          const orgGroup: OrganizationGroup = {
-            name: access.name,
-            parent: `/${groupRole.name}${parent}`,
-          };
-
-          for (const perm of groupRole.permissions) {
-            await this.orgGroupService.createOrUpdateGroupPermission(
-              orgGroup,
-              perm.resource,
-              perm.scopes
-            );
-          }
-        }
-      } else {
-        // build the policies if they do not exist
-        await this.buildGroupHierarchyIfMissing(org, orgUnit);
-
-        const access = buildGroupAccess(
-          orgUnit,
-          `/ca.bc.gov/${org}`,
-          'namespace',
-          namespace
-        );
-
-        for (const groupRole of access.roles) {
-          const parent = access.parent ? access.parent : '';
-          const orgGroup: OrganizationGroup = {
-            name: access.name,
-            parent: `/${groupRole.name}${parent}`,
-          };
-
-          for (const perm of groupRole.permissions) {
-            await this.orgGroupService.createOrUpdateGroupPermission(
-              orgGroup,
-              perm.resource,
-              perm.scopes
-            );
-          }
-        }
-      }
-      return true;
-    } else {
+    if (!ok) {
       return false;
     }
+
+    // build the policies if they do not exist
+    await this.buildGroupHierarchyIfMissing(org, orgUnit);
+
+    const access = buildGroupAccess(
+      orgUnit,
+      `/ca.bc.gov/${org}`,
+      'namespace',
+      namespace
+    );
+
+    // for each role, update the group permissions
+    for (const groupRole of access.roles) {
+      const parent = access.parent ? access.parent : '';
+      const orgGroup: OrganizationGroup = {
+        name: access.name,
+        parent: `/${groupRole.name}${parent}`,
+      };
+
+      for (const perm of groupRole.permissions) {
+        await this.orgGroupService.createOrUpdateGroupPermission(
+          orgGroup,
+          perm.resource,
+          perm.scopes
+        );
+      }
+    }
+    return true;
   }
 
   async buildGroupHierarchyIfMissing(org: string, orgUnit: string) {

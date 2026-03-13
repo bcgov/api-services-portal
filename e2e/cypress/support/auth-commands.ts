@@ -464,6 +464,20 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
+  'makeKongProxyRequest',
+  (serviceName: string, methodType: string, body: any = undefined) => {
+    let authorization
+    return cy.request({
+      url: Cypress.env('KONG_URL'),
+      method: methodType,
+      headers: { Host: `${serviceName}` + '.api.gov.bc.ca' },
+      body: body,
+      failOnStatusCode: false,
+    })
+  }
+)
+
+Cypress.Commands.add(
   'makeKongGatewayRequest',
   (endpoint: string, requestName: string, methodType: string) => {
     let body = {}
@@ -567,6 +581,10 @@ Cypress.Commands.add('setHeader', (key: string, value: string) => {
 
 Cypress.Commands.add('setRequestBody', (body: any) => {
   requestBody = JSON.stringify(body)
+})
+
+Cypress.Commands.add('clearRequestBody', () => {
+  requestBody = undefined
 })
 
 Cypress.Commands.add('setRequestFormData', (body: FormData) => {

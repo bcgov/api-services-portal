@@ -471,6 +471,41 @@ const metadata = {
       name: 'my-new-subsystem',
     },
   },
+  RuntimeGroup: {
+    query: 'allRuntimeGroups',
+    refKey: 'name',
+    sync: [
+      'host',
+      'sdxEndpoint',
+      'consumerEndpoint',
+      'organization',
+      'hostedOrganizations',
+      'namespace',
+    ],
+    transformations: {
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+      hostedOrganizations: {
+        name: 'connectMany',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    example: {
+      name: 'my-runtime-group',
+      gatewayId: 'gw-abc',
+      host: 'runtime-group.my-domain.sdx',
+      sdxEndpoint: '10.10.10.10:443',
+      consumerEndpoint: '10.0.0.11:6443',
+      hostedOrganizations: [
+        'ministry-of-citizens-services',
+        'ministry-of-health',
+      ],
+    },
+  },
   Product: {
     query: 'allProducts',
     refKey: 'appId',

@@ -1,24 +1,24 @@
 import {
   Controller,
+  Example,
+  Get,
+  OperationId,
+  Path,
   Request,
   Response,
-  OperationId,
-  Get,
   Route,
   Security,
-  Tags,
-  Example,
   SuccessResponse,
-  Path,
+  Tags,
 } from 'tsoa';
-import { KeystoneService } from '../../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
+import YAML from 'yaml';
 import {
   GetCatalog,
   GetCatalogByName,
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
-import YAML from 'yaml';
+import { KeystoneService } from '../../ioc/keystoneInjector';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -38,7 +38,9 @@ export class CatalogController extends Controller {
   }
 
   /**
-   * Retrieve the list of services available in the SDX service catalog.
+   * Retrieve a list of services available in the SDX service catalog.
+   *
+   * @summary List of services in catalog
    */
   @Get('/services')
   @OperationId('listServiceCatalog')
@@ -46,16 +48,21 @@ export class CatalogController extends Controller {
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
     {
-      name: 'oas-service-123',
+      name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
       title: 'Sample OAS Service',
       version: '1.0.0',
       summary: 'A sample OpenAPI service',
       description:
         'This is a sample service defined by an OpenAPI specification.',
       subsystem: {
-        name: 'sample-subsystem',
+        name: 'SAMPLE-SUBSYS',
+        clientId: 'LAB.MIN.CITZ.SAMPLE-SUBSYS',
         organization: {
           name: 'sample-organization',
+        },
+        member: {
+          memberClass: 'MIN',
+          memberId: 'CITZ',
         },
       },
       operations: [
@@ -81,7 +88,10 @@ export class CatalogController extends Controller {
   }
 
   /**
-   * Retrieve the Service Details
+   * Retrieve details for a specific service in the catalog by name.
+   *
+   * @summary Retrieve details for a service
+   * @param name - Service name
    */
   @Get('/services/{name}')
   @OperationId('getOASService')
@@ -96,6 +106,9 @@ export class CatalogController extends Controller {
 
   /**
    * Retrieve the Service OpenAPI Specification in JSON format
+   *
+   * @summary Retrieve a Service OpenAPI Specification in JSON format
+   * @param name - Service name
    */
   @Get('/services/{name}/oas-spec')
   @OperationId('getOASServiceSpec')
