@@ -22,8 +22,10 @@ export function Logger(category: string) {
         : winston.format.colorize(),
       winston.format.splat(),
       winston.format.printf(
-        ({ timestamp, level, message, stack }) =>
-          `${timestamp} ${level}: [${category}] ${message}`
+        (info) => {
+          const { timestamp, level, message, stack } = info as any;
+          return `${timestamp} ${level}: [${category}] ${message}`;
+        }
       )
     ),
     transports: [

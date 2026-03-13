@@ -218,29 +218,30 @@ describe('API Tests for Create Namespace', () => {
 })
 
 describe('API Tests for invalid namespace name', () => {
-  beforeEach(() => {
-    cy.fixture('api-v2').as('api')
-    cy.fixture('apiowner').as('apiowner')
-  })
 
-  it('Verify validation message in response when user creat namespace using invalid name', () => {
-    cy.get('@api').then(({ namespaces }: any) => {
-      cy.fixture('apiowner').then((testdata: any) => {
-        let namespaceName: Array<string> = testdata.invalid_namespace
-        testdata
-        namespaceName.forEach((name: any) => {
-          cy.setHeaders(namespaces.headers)
-          // cy.setRequestBody('{"name": "' + name + '","displayName": "Test for GWA test"}')
-          cy.updateJsonBoby(namespaces.inValidNamespace, 'name', name).then(
-            (updatedBody) => {
-              cy.setRequestBody(updatedBody)
-              cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res: any) => {
-                expect(res.apiRes.status).to.be.equal(422)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body.message).to.be.equal('Unable to create gateway')
-              })
-            }
-          )
+    beforeEach(() => {
+        cy.fixture('api-v2').as('api')
+        cy.fixture('apiowner').as('apiowner')
+    })
+
+    it('Verify validation message in response when user creat namespace using invalid name', () => {
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.fixture('apiowner').then((testdata: any) => {
+                let namespaceName: Array<string> = testdata.invalid_namespace
+                testdata
+                namespaceName.forEach((name: any) => {
+                    cy.setHeaders(namespaces.headers)
+                    // cy.setRequestBody('{"name": "' + name + '","displayName": "Test for GWA test"}')
+                    cy.updateJsonBoby(namespaces.inValidNamespace, 'name', name).then((updatedBody) => {
+                        cy.setRequestBody(updatedBody)
+                        cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
+                            expect(res.apiRes.status).to.be.equal(422)
+                            cy.addToAstraScanIdList(res.astraRes.body.status)
+                            expect(res.apiRes.body.message).to.be.equal('Unable to create gateway')
+                        })
+                    })
+                })
+            })
         })
       })
     })

@@ -323,6 +323,8 @@ Cypress.Commands.add('logout', () => {
       cy.wait(3000)
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
+      cy.get('[id=kc-logout]').click({ force: true })
+      cy.contains('You have successfully logged out.', { timeout: 15000 }).should('be.visible')
     })
   })
   cy.log('> Logging out')
@@ -330,8 +332,8 @@ Cypress.Commands.add('logout', () => {
 
 Cypress.Commands.add('keycloakLogout', () => {
   cy.log('< Logging out')
-  cy.get('.dropdown-toggle.ng-binding').click()
-  cy.contains('Sign Out').click()
+  cy.get('[data-testid=options-toggle]').click()
+  cy.contains('Sign out').click()
   cy.log('> Logging out')
 })
 

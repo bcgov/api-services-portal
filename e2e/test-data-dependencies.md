@@ -119,3 +119,5 @@
 | │   02-create.cy.ts                                         | NA                                                             |
 | 21-sdx-api/v1                                               |                                                                |
 | │   -- ALL TESTS ARE INDEPENDENT --                         | NA                                                             |
+| 21-notifications                                            |                                                                |
+| |   01-namespace-assignment-notification.cy.ts              | NA                                                             |

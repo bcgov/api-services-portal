@@ -15,6 +15,16 @@ export interface Uma2WellKnown {
   policy_endpoint: string; // Frontend URL
 }
 
+const DISCOVERY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+const openidCache = new Map<string, CacheEntry<OpenidWellKnown>>();
+const uma2Cache = new Map<string, CacheEntry<Uma2WellKnown>>();
+
 export function headers(accessToken: string): HeadersInit {
   const headers: HeadersInit = {
     Accept: 'application/json',
@@ -27,7 +37,12 @@ export function headers(accessToken: string): HeadersInit {
 export async function getOpenidFromIssuer(
   url: string
 ): Promise<OpenidWellKnown> {
-  return fetch(`${url}/.well-known/openid-configuration`, {
+  const cached = openidCache.get(url);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.value;
+  }
+
+  const result = await fetch(`${url}/.well-known/openid-configuration`, {
     method: 'get',
     headers: {
       Accept: 'application/json',
@@ -40,10 +55,23 @@ export async function getOpenidFromIssuer(
       logger.error('[getOpenidFromIssuer] %s failed %s', url, err);
       return null;
     });
+
+  if (result) {
+    openidCache.set(url, {
+      value: result,
+      expiresAt: Date.now() + DISCOVERY_CACHE_TTL_MS,
+    });
+  }
+  return result;
 }
 
 export async function getUma2FromIssuer(url: string): Promise<Uma2WellKnown> {
-  return fetch(`${url}/.well-known/uma2-configuration`, {
+  const cached = uma2Cache.get(url);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.value;
+  }
+
+  const result = await fetch(`${url}/.well-known/uma2-configuration`, {
     method: 'get',
     headers: {
       Accept: 'application/json',
@@ -56,6 +84,14 @@ export async function getUma2FromIssuer(url: string): Promise<Uma2WellKnown> {
       logger.error('[getUma2FromIssuer] %s failed %s', url, err);
       return null;
     });
+
+  if (result) {
+    uma2Cache.set(url, {
+      value: result,
+      expiresAt: Date.now() + DISCOVERY_CACHE_TTL_MS,
+    });
+  }
+  return result;
 }
 
 export async function getOpenidFromDiscovery(url: string) {

@@ -1,8 +1,5 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
 import {
   KeycloakClientPolicyService,
   KeycloakClientService,
@@ -16,7 +13,6 @@ import PolicyRepresentation, {
   Logic,
 } from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 
 import { root } from './group-converter-utils';
 import { User } from '../keystone/types';
@@ -94,6 +90,14 @@ export class OrgGroupService {
 
   public async backfillGroups(): Promise<void> {
     this.groups = await this.keycloakService.getAllGroups();
+    await this.traverseBackfill(this.groups);
+  }
+
+  private async traverseBackfill(groups: GroupRepresentation[]): Promise<void> {
+    for (const group of groups) {
+      await this.keycloakService.setSubGroups(group);
+      await this.traverseBackfill(group.subGroups);
+    }
   }
 
   public findGroup(id: string): string {

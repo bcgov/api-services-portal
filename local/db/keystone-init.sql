@@ -24,7 +24,7 @@ SET row_security = off;
 -- Name: public; Type: SCHEMA; Schema: -; Owner: keystonejsuser
 --
 -- extra line added to make it compitible for local docker run
-\c keystonejs;
+\connect keystonejs;
 
 DROP SCHEMA IF EXISTS public;
 

@@ -182,11 +182,9 @@ export class BatchService {
       const val = compositeKey.value;
       const key = compositeKey.key;
       const param = snakeCase(compositeKey.key);
-      assert.strictEqual(
-        typeof val != 'undefined' && val != null,
-        true,
-        `Missing value for key ${key}`
-      );
+      if (typeof val === 'undefined' || val === null) {
+        throw new Error(`Missing value for key ${key}`);
+      }
       // product { name: $pid }
       if (compositeKey.whereClause) {
         where.push(compositeKey.whereClause);
