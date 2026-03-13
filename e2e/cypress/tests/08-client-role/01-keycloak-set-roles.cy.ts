@@ -1,20 +1,7 @@
-import ApiDirectoryPage from '../../pageObjects/apiDirectory'
-import ApplicationPage from '../../pageObjects/applications'
-import AuthorizationProfile from '../../pageObjects/authProfile'
-import ConsumersPage from '../../pageObjects/consumers'
-import HomePage from '../../pageObjects/home'
 import keycloakClientsPage from '../../pageObjects/keycloakClients'
-import keycloakGroupPage from '../../pageObjects/keycloakGroup'
-import KeycloakUserGroupPage from '../../pageObjects/keycloakUserGroup'
-import LoginPage from '../../pageObjects/login'
-import MyAccessPage from '../../pageObjects/myAccess'
-import Products from '../../pageObjects/products'
-
 
 describe('Set roles in Keycloak auth client', () => {
   const clients = new keycloakClientsPage()
-  const groups = new keycloakGroupPage()
-
 
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
@@ -33,7 +20,6 @@ describe('Set roles in Keycloak auth client', () => {
 
   it('Authenticates Admin owner', () => {
     cy.get('@admin').then(({ user }: any) => {
-      cy.contains('Administration Console').click({force:true})
       cy.keycloakLogin(user.credentials.username, user.credentials.password)
     })
   })

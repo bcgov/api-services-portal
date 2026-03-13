@@ -37,7 +37,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   return (
     <Wrap {...group} spacing={2}>
       {options.map((option) => {
-        const radio = getRadioProps({ value: option.value });
+        const radio = getRadioProps({ value: option.value } as any);
         return (
           <WrapItem key={option.id}>
             <RadioCard {...radio} icon={option.icon}>

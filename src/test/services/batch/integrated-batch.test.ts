@@ -89,9 +89,11 @@ describe('Batch Tests', function () {
         }
       } catch (e) {
         logger.error(e.message);
+        logger.error('"%s" "%s"', test.expected?.exception, `${e.message}`);
+        // node 22+ assert includes the values used in the comparison
         if (
           !test.expected?.exception ||
-          test.expected?.exception != `${e.message}`
+          test.expected?.exception !== `${e.message}`
         ) {
           await keystone.disconnect();
 

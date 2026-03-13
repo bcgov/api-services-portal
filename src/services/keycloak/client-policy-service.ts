@@ -1,13 +1,11 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
-import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
+import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
 import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
+import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 import ScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/scopeRepresentation';
+import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
 
 //import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
@@ -25,7 +23,7 @@ export class KeycloakClientPolicyService {
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
       logger.debug('%s %s', baseUrl, realmName);
-      this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+      this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
     }
   }
 
@@ -56,7 +54,7 @@ export class KeycloakClientPolicyService {
   public async listPolicies(
     id: string,
     query?: PolicyQuery
-  ): Promise<PolicyRepresentation[]> {
+  ): Promise<'' | PolicyRepresentation[]> {
     logger.debug('[listPolicies] %s', id);
     return this.kcAdminClient.clients
       .listPolicies({ ...{ id, max: 1000 }, ...query })
@@ -70,7 +68,7 @@ export class KeycloakClientPolicyService {
     id: string,
     resourceId: string
   ): Promise<ResourceServerRepresentation[]> {
-    logger.debug('[listPermissionsByResource] %s %s', id, resourceId);
+    logger.debug('[listPermissionsByResource] cid=%s rid=%s', id, resourceId);
     const permissions: any = await this.kcAdminClient.clients
       .listPolicies({ id, resource: resourceId })
       .catch((e: any) => {
@@ -117,9 +115,9 @@ export class KeycloakClientPolicyService {
     type: string,
     policyId: string
   ): Promise<any> {
-    logger.debug('[findPolicyById] c=%s p=%s', id, policyId);
+    logger.debug('[findPolicyById] c=%s t=%s p=%s', id, type, policyId);
 
-    const policy = (await this.kcAdminClient.clients.findOnePolicy({
+    const policy = (await (this.kcAdminClient.clients as any).findOnePolicy({
       id,
       type,
       policyId,

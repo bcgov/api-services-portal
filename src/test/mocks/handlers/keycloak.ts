@@ -14,7 +14,7 @@ const def = YAML.load(
     path.resolve('test/mocks/handlers/data/keycloak.yaml'),
     'utf8'
   )
-);
+) as any;
 
 const calls: any = {
   'https://provider/auth/realms/:realm/.well-known/openid-configuration':
@@ -65,6 +65,28 @@ const calls: any = {
   'https://provider/admin/realms/abc/groups': (_: any, { search }: any) => {
     return search === 'test-2' ? [def.groups[0]] : def.groups;
   },
+  'https://provider/admin/realms/abc/groups/:group/children': (
+    { group }: any,
+    _: any
+  ) => {
+    // Return subGroups for the specified group (for listSubGroups pagination)
+    const parentGroup = def.groups.find((g: any) => g.id === group);
+    return parentGroup?.subGroups || [];
+  },
+  'https://provider/admin/realms/abc/groups/:group': ({ group }: any, _: any) => {
+    // Check in groupDetails first, then search in groups and their subGroups
+    const fromDetails = def.groupDetails.find((g: any) => g.id === group);
+    if (fromDetails) return fromDetails;
+    // Search in groups
+    const fromGroups = def.groups.find((g: any) => g.id === group);
+    if (fromGroups) return fromGroups;
+    // Search in subGroups
+    for (const g of def.groups) {
+      const subGroup = g.subGroups?.find((sg: any) => sg.id === group);
+      if (subGroup) return subGroup;
+    }
+    return null;
+  },
   'https://provider/auth/admin/realms/abc/groups': (
     _: any,
     { search }: any
@@ -84,6 +106,14 @@ const calls: any = {
     _: any
   ) => {
     return def.groupDetails.filter((g: any) => g.id === group).pop();
+  },
+  'https://provider/auth/admin/realms/abc/groups/:group/children': (
+    { group }: any,
+    _: any
+  ) => {
+    // Return subGroups for the specified group (for listSubGroups pagination)
+    const parentGroup = def.groups.find((g: any) => g.id === group);
+    return parentGroup?.subGroups || [];
   },
 
   'put https://provider/auth/admin/realms/abc/groups/:group': {},

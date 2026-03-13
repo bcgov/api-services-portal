@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
         </Box>
         <Grid as="section" mb={7} templateColumns="1fr 1fr" gap={6}>
           <GridItem>
-            <Text>You have succesfully logged out.</Text>
+            <Text>You have successfully logged out.</Text>
           </GridItem>
         </Grid>
         <NextLink passHref href="/login">

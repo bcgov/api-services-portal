@@ -138,7 +138,7 @@ describe('API Directory', () => {
               {
                 name: `my-product-on-${gateway.gatewayId}`,
                 environments: [
-                  { name: 'dev', active: true, flow: 'public', services: [] },
+                  { name: 'dev', active: true, flow: 'public' },
                 ],
               },
             ],

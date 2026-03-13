@@ -158,7 +158,7 @@ export class NamespaceService {
       'Unexpected data returned'
     );
 
-    const namespaceGroups = groups[0].subGroups;
+    const namespaceGroups = await this.groupService.setSubGroups(groups[0]);
 
     const matches = namespaceGroups
       .filter(

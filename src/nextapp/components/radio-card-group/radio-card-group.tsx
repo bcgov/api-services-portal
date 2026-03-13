@@ -44,7 +44,7 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
       sx={{ '& > *': { flex: 1 } }}
     >
       {options.map(({ description, title, value }) => {
-        const radio = getRadioProps({ value });
+        const radio = getRadioProps({ value } as any);
 
         return (
           <RadioCard

@@ -10,7 +10,11 @@ import {
 } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { transform, transformSetAnonymous } from './DirectoryController';
+import {
+  transform,
+  transformSetAnonymous,
+  transformSetTwoTieredHidden,
+} from './DirectoryController';
 import { gql } from 'graphql-request';
 import { strict as assert } from 'assert';
 
@@ -55,7 +59,9 @@ export class NamespaceDirectoryController extends Controller {
     );
 
     return transform(
-      transformSetAnonymous(result.data.allProductsByNamespace)
+      transformSetTwoTieredHidden(
+        transformSetAnonymous(result.data.allProductsByNamespace)
+      )
     )[0];
   }
 

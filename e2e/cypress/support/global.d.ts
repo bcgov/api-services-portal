@@ -203,5 +203,23 @@ declare namespace Cypress {
     makeAPIRequestForScanResult(scanID: string): Chainable<Cypress.Response<any>>
 
     buildOrgGatewayDatasetAndProduct(): Chainable<Cypress.Response<any>>
+
+    // Mailpit commands for email testing
+    mailpitGetMessages(): Chainable<any>
+
+    mailpitGetMessage(messageId: string): Chainable<any>
+
+    mailpitDeleteAllMessages(): Chainable<void>
+
+    mailpitSearchMessages(query: string): Chainable<any>
+
+    mailpitWaitForEmail(query: string, timeout?: number): Chainable<any>
+
+    mailpitAssertEmail(criteria: {
+      to?: string
+      from?: string
+      subject?: string
+      contains?: string
+    }): Chainable<any>
   }
 }

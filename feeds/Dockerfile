@@ -12,7 +12,9 @@ ENV APP_REVISION=${APP_REVISION}
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install
 
 COPY . ./
 

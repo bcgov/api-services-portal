@@ -1986,11 +1986,11 @@
             "id": "34e0a630-d6fa-499c-b7b7-bca8b6ef70f6",
             "name": "Default Policy",
             "description": "A policy that grants access only for users within this realm",
-            "type": "js",
+            "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "AFFIRMATIVE",
             "config": {
-              "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+              "roles": "[{\"id\":\"006ba659-502a-4f51-aff5-3aa1cbb13d02\",\"required\":false}]"
             }
           },
           {
@@ -2272,11 +2272,11 @@
             "id": "35dcd837-d215-4036-84fe-452605b0a065",
             "name": "Default Policy",
             "description": "A policy that grants access only for users within this realm",
-            "type": "js",
+            "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "AFFIRMATIVE",
             "config": {
-              "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+              "roles": "[{\"id\":\"006ba659-502a-4f51-aff5-3aa1cbb13d02\",\"required\":false}]"
             }
           },
           {

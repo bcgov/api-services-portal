@@ -19,6 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install deps
+        run: |
+          sudo apt update
+
       - uses: actions/setup-node@v2
         with:
           node-version: '22'
@@ -36,7 +40,7 @@ jobs:
 
           cd src
 
-          npm i
+          npm i --legacy-peer-deps
           npm run intg-build
           npm test
 
@@ -47,8 +51,8 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@v6
         with:
           args: >
-            -Dsonar.organization=bcgov-oss
-            -Dsonar.projectKey=aps-portal
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=bcgov_api-services-portal
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:

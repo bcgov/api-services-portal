@@ -95,7 +95,7 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      apiDir.checkProductIcon(product.name, 'RiEarthFill')
+      apiDir.checkProductIcon(product.name, 'FaLock')
       apiDir.checkTwoTieredHiddenButton()
     })
   })
@@ -106,7 +106,7 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      apiDir.checkProductIcon(product.name, 'RiEarthFill')
+      apiDir.checkProductIcon(product.name, 'FaLock')
       apiDir.checkTwoTieredHiddenButton()
     })
   })
@@ -122,18 +122,18 @@ describe('Verify Two Tiered Hidden', () => {
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      apiDir.checkProductIcon(product.name, 'RiEarthFill')
+      apiDir.checkProductIcon(product.name, 'FaLock')
       apiDir.checkTwoTieredHiddenButton()
     })
   })
-
+  
   it('Verify that product is formatted correctly in your products page', () => {
     cy.visit(apiDir.path)
     apiDir.navigateToYourProduct()
     cy.get('@apiowner').then(({ twoTieredHidden }: any) => {
       let product = twoTieredHidden.product
       apiDir.selectProduct(product.serviceName)
-      apiDir.checkProductIcon(product.name, 'RiEarthFill')
+      apiDir.checkProductIcon(product.name, 'FaLock')
       apiDir.checkTwoTieredHiddenButton()
     })
   })

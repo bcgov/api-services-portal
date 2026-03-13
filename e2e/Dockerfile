@@ -4,7 +4,9 @@ FROM cypress/included:13.17.0
 WORKDIR /app
 COPY src/. ./
 
-RUN npm install --legacy-peer-deps
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install --legacy-peer-deps
 
 RUN npx nyc instrument --compact=false . --in-place
 
@@ -14,7 +16,9 @@ WORKDIR /e2e
 RUN apt-get -y update; apt-get -y install curl
 COPY e2e/package.json /e2e
 COPY e2e/package-lock.json /e2e
-RUN npm install
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install
 
 COPY e2e/cypress.config.ts /e2e
 COPY e2e/tsconfig.json /e2e
@@ -22,7 +26,7 @@ COPY e2e/*.yml /e2e
 COPY e2e/entrypoint.sh /tmp
 ADD e2e/cypress /e2e/cypress
 
-RUN curl -v -L -O https://github.com/bcgov/gwa-cli/releases/download/v3.0.6/gwa_Linux_x86_64.tgz \
+RUN curl -v -L -O https://github.com/bcgov/gwa-cli/releases/latest/download/gwa_Linux_x86_64.tgz \
  && tar -xzf gwa_Linux_x86_64.tgz \
  && mv gwa /usr/local/bin/.
 
