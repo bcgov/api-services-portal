@@ -51,7 +51,7 @@ describe('Create API Spec', () => {
             let cc = JSON.parse(creds.credentials)
             cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
                 cy.get('@accessTokenResponse').then((token_res: any) => {
-                    expect(token_res.status).to.be.equal(400)
+                    expect(token_res.status).to.be.equal(401)
                     expect(token_res.body.error).to.contains("invalid_client")
                 })
             })

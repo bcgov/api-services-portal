@@ -13,6 +13,14 @@ export interface Token {
   scope: string;
 }
 
+interface CachedToken {
+  accessToken: string;
+  expiresAt: number;
+}
+
+const tokenCache = new Map<string, CachedToken>();
+const TOKEN_EXPIRY_BUFFER_MS = 30 * 1000; // refresh 30s before expiry
+
 export class KeycloakTokenService {
   private tokenUrl: string;
 
@@ -36,8 +44,22 @@ export class KeycloakTokenService {
     clientSecret: string,
     grantType: string,
     username?: string,
-    password?: string
+    password?: string,
+    scope?: string
   ): Promise<string> {
+    const scopeKey = scope ?? '';
+    if (grantType === 'client_credentials' && !username) {
+      const cacheKey = `${this.tokenUrl}:${clientId}:${scopeKey}`;
+      const cached = tokenCache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        logger.debug(
+          '[getKeycloakSession] Using cached token for %s',
+          clientId
+        );
+        return cached.accessToken;
+      }
+    }
+
     const params = new URLSearchParams();
     params.append('grant_type', grantType);
     params.append('client_id', clientId);
@@ -45,6 +67,9 @@ export class KeycloakTokenService {
     if (username) {
       params.append('username', username);
       params.append('password', password);
+    }
+    if (scope) {
+      params.append('scope', scope);
     }
 
     logger.debug(
@@ -69,6 +94,15 @@ export class KeycloakTokenService {
       ...{ access_token: '****', refresh_token: '****' },
     };
     logger.debug('[getKeycloakSession] RESULT = %j', masked);
+
+    if (grantType === 'client_credentials' && !username && response.expires_in) {
+      const cacheKey = `${this.tokenUrl}:${clientId}:${scopeKey}`;
+      tokenCache.set(cacheKey, {
+        accessToken: response['access_token'],
+        expiresAt: Date.now() + response.expires_in * 1000 - TOKEN_EXPIRY_BUFFER_MS,
+      });
+    }
+
     return response['access_token'];
   }
 

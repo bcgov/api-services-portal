@@ -5,6 +5,7 @@ import {
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   useMutation,
+  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -214,12 +215,12 @@ export const useRestApi = <T>(
 };
 
 export const useRestMutationApi = <T>(
-  queryOptions: UseQueryOptions<T> = { suspense: true }
+  mutationOptions: UseMutationOptions<T, Error, { url: string; options?: RequestInit }> = {}
 ): UseMutationResult<T> => {
   return useMutation(
     async (info: { url: string; options?: RequestInit }) =>
-      await restApi<any>(info.url, info.options),
-    queryOptions
+      await restApi<T>(info.url, info.options),
+    mutationOptions
   );
 };
 

@@ -6,7 +6,9 @@ COPY package*.json /
 
 EXPOSE 3500
 
-RUN npm install
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm install
 
 COPY . /
 

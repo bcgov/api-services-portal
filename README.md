@@ -72,7 +72,11 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 1. Start the OAuth2 Proxy locally:
 
 ```sh
+# mac
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
+
+# WSL
+hostip=$(hostname -I | awk '{print $1}')
 
 docker run -ti --rm --name proxy --net=host \
   --add-host portal.localtest.me:$hostip \

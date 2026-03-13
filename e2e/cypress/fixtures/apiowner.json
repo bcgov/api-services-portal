@@ -72,9 +72,21 @@
     },
     "Wendy": {
       "userName": "wendy",
+      "keycloakUsername": "wendy@idir",
       "email": "wendy@test.com",
       "accessRole": [
         "CredentialIssuer.Admin"
+      ]
+    },
+    "Janis": {
+      "userName": "Janis Smith",
+      "email": "janis@testmail.com",
+      "accessRole": [
+        "CredentialIssuer.Admin",
+        "Gateway.Manage",
+        "Gateway.View",
+        "GatewayConfig.Publish",
+        "Access.Manage"
       ]
     },
     "jwtKeyPair": {
@@ -552,7 +564,8 @@
       "email": "janis@testmail.com",
       "accessRole": [
         "CredentialIssuer.Admin",
-        "Gateway.Manage"
+        "Gateway.Manage",
+        "Gateway.View"
       ]
     },
     "OldUser": {

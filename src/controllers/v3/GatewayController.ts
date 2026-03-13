@@ -240,6 +240,7 @@ export class NamespaceController extends Controller {
   @Get('/{gatewayId}/activity')
   @OperationId('gateway-admin-activity')
   @Security('jwt', ['Namespace.View'])
+  @Security('jwt', ['Namespace.Manage'])
   public async namespaceActivity(
     @Path() gatewayId: string,
     @Query() first: number = 20,

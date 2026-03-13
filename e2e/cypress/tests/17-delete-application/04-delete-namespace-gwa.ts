@@ -62,21 +62,24 @@ describe('Verify namespace delete using gwa command', () => {
     })
   })
 
-  it('Check gwa gateway destroy command for the namespace associated with services', () => {
-    cy.get('@common-testdata').then(({ namespace }: any) => {
-      _namespace = namespace
-      cy.executeCliCommand('gwa config set --gateway ' + namespace).then((response) => {
-        expect(response.stdout).to.contain('Config settings saved')
-        cy.executeCliCommand('gwa gateway destroy').then((response) => {
-          expect(response.stderr).to.contain('Error: Unable to delete gateway')
+    it('Check gwa gateway destroy command for the namespace associated with services', () => {
+        cy.get('@common-testdata').then(({ namespace }: any) => {
+            _namespace = namespace
+            cy.executeCliCommand('gwa config set --gateway ' + namespace).then((response) => {
+                expect(response.stdout).to.contain("Config settings saved")
+                cy.executeCliCommand('gwa gateway destroy').then((response) => {
+                    expect(response.stderr).to.contain('Error: Unable to delete gateway');
+                });
+            })
         })
       })
     })
   })
 
-  it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
-    cy.executeCliCommand('gwa gateway destroy --force').then((response) => {
-      expect(response.stderr).to.contain('Error: Unable to delete gateway')
+    it('Check validation if any consumer is associated with namespace for hard deleting the namespace', () => {
+        cy.executeCliCommand('gwa gateway destroy --force').then((response) => {
+            expect(response.stderr).to.contain('Error: Unable to delete gateway');
+        });
     })
   })
 
