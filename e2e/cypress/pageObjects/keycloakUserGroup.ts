@@ -1,17 +1,8 @@
 class KeycloakUserGroupPage {
   path: string = '/'
 
-  editButton: string = '[id="editGroup"]'
-  groupTab: string = '[data-ng-controller="GroupTabCtrl"]'
+  attributeTab: string = '[data-testid="attributesTab"]'
 
-  selectTab(tabName: string){
-    cy.get(this.groupTab).contains('a',tabName).click()
-  }
-
-  clickOnEditButton()
-  {
-    cy.get(this.editButton).click()
-  }
 }
 
 export default KeycloakUserGroupPage

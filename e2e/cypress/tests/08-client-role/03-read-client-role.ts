@@ -6,7 +6,6 @@ import HomePage from '../../pageObjects/home'
 import ConsumersPage from '../../pageObjects/consumers'
 
 describe('Developer creates an access request for Client ID/Secret authenticator to verify read role', () => {
-  const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const ma = new MyAccessPage()
@@ -20,8 +19,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
-    
-    // cy.visit(login.path)
   })
 
   it('Developer logs in', () => {

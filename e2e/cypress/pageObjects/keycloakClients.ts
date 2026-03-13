@@ -1,23 +1,26 @@
 class keycloakClientsPage {
   path: string = '/'
 
-  clientTab: string = '[data-ng-controller="ClientTabCtrl"]'
-  roleNameTextField: string = '[id="name"]'
+  clientTabs: string = '[data-testid="client-tabs"]'
+  createRoleBtn: string = '[data-testid="create-role"]'
+  roleNameTextField: string = '[data-testid="name"]'
+  saveBtn: string = '[data-testid="save"]'
   addAttributeBtn: string = '[data-ng-click="addAttribute()"]'
 
   selectTab(tabName: string){
-    cy.get(this.clientTab).contains('a',tabName).click()
+    cy.get(this.clientTabs).contains('a',tabName).click({ force: true })
   }
 
   setRoles(roleName: string, clientName: string){
-    cy.wait(2000)
+    cy.get('[id=nav-toggle').click()
     cy.contains('Clients').click()
-    cy.contains(clientName).click()
+    cy.get('[id=nav-toggle').click()
+    cy.get('input[placeholder="Search for client"]').type(clientName).type('{enter}')
+    cy.get('a').contains(clientName).click({ force: true })
     this.selectTab('Roles')
-    cy.contains('Add Role').click()
+    cy.get(this.createRoleBtn).click()
     cy.get(this.roleNameTextField).type(roleName)
-    cy.contains('Save').click()
-    cy.wait(4000)
+    cy.get(this.saveBtn).click()
   }
 }
 

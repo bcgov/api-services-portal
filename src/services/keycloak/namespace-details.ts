@@ -21,7 +21,13 @@ import { strict as assert } from 'assert';
 const logger = Logger('kc.nsdetails');
 
 export async function getAllNamespaces(envCtx: EnvironmentContext) {
-  const resourceIds = await getNamespaceResourceSets(envCtx);
+  const resourceIdsPromise = getNamespaceResourceSets(envCtx);
+  const kcGroupServicePromise = getKeycloakGroupApi(envCtx.issuerEnvConfig);
+  const defaultSettingsPromise = new GWAService(
+    process.env.GWA_API_URL
+  ).getDefaultNamespaceSettings();
+
+  const resourceIds = await resourceIdsPromise;
   const resourcesApi = new UMAResourceRegistrationService(
     envCtx.uma2.resource_registration_endpoint,
     envCtx.accessToken
@@ -36,10 +42,10 @@ export async function getAllNamespaces(envCtx: EnvironmentContext) {
     prodEnvId: envCtx.prodEnv.id,
   }));
 
-  const kcGroupService = await getKeycloakGroupApi(envCtx.issuerEnvConfig);
-
-  const client = new GWAService(process.env.GWA_API_URL);
-  const defaultSettings = await client.getDefaultNamespaceSettings();
+  const [kcGroupService, defaultSettings] = await Promise.all([
+    kcGroupServicePromise,
+    defaultSettingsPromise,
+  ]);
 
   return (
     await Promise.all(

@@ -20,23 +20,25 @@ describe('Give a user org admin access at organization level', () => {
 
   it('Authenticates Admin owner', () => {
     cy.get('@admin').then(({ user }: any) => {
-      cy.contains('Administration Console').click({force:true})
       cy.keycloakLogin(user.credentials.username, user.credentials.password)
     })
   })
 
   it('Navigate to Users Page', () => {
+    cy.wait(500)
+    cy.get('[id=nav-toggle').click()
     cy.contains('Users').click()
+    cy.get('[id=nav-toggle').click()
   })
 
   it('Search Wendy (Credential Issuer) from the user list', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      user.editUser(clientCredentials.Wendy.email)
+      user.editUser(clientCredentials.Wendy.keycloakUsername)
     })
   })
 
   it('Navigate to Groups tab', () => {
-    user.selectTab('Groups')
+    cy.get(user.groupsTab).click({ force:true })
   })
 
   it('Set the user to the Organization Unit', () => {

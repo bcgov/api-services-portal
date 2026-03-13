@@ -6,7 +6,6 @@ import HomePage from '../../pageObjects/home'
 import ConsumersPage from '../../pageObjects/consumers'
 
 describe('Developer creates an access request for Client ID/Secret authenticator to verify write role', () => {
-  const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const ma = new MyAccessPage()
@@ -20,7 +19,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
-    // cy.visit(login.path)
   })
 
   it('Developer logs in', () => {
@@ -59,8 +57,6 @@ describe('Developer creates an access request for Client ID/Secret authenticator
 })
 
 describe('Access manager apply "Write" role and approves developer access request', () => {
-  const home = new HomePage()
-  const login = new LoginPage()
   const consumers = new ConsumersPage()
 
   before(() => {
@@ -72,7 +68,6 @@ describe('Access manager apply "Write" role and approves developer access reques
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('common-testdata').as('common-testdata')
-    // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
