@@ -3,25 +3,6 @@ import { Logger } from '../../logger';
 import { Uma2WellKnown } from '../keycloak';
 import { convertToOrgGroup, leaf, parent, root } from './group-converter-utils';
 import { OrganizationGroup, OrgAuthzService, OrgGroupService } from './index';
-import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
-import {
-  KeycloakClientPolicyService,
-  KeycloakClientService,
-  KeycloakGroupService,
-  Uma2WellKnown,
-} from '../keycloak';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
-import PolicyRepresentation, {
-  DecisionStrategy,
-  Logic,
-} from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
-import { GroupAccess, GroupMember, GroupMembership, GroupRole } from './types';
-import { OrganizationGroup, OrgGroupService, OrgAuthzService } from './index';
-import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
-import { buildGroupAccess, buildUserReference } from './org-role';
 import { NamespaceService } from './namespace';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { GroupAccess, GroupMember, GroupMembership, GroupRole } from './types';
