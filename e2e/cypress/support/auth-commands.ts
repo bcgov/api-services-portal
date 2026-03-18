@@ -123,9 +123,19 @@ query GetNamespaces {
   const currentNsQuery = `
   query GetCurrentNamespace {
     currentNamespace {
+      id
       name
+      displayName
+      scopes {
+        name
+      }
+      prodEnvId
       org
       orgUnit
+      orgUpdatedAt
+      orgEnabled
+      orgNoticeViewed
+      orgAdmins
     }
   }
 `
