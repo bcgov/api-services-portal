@@ -1,6 +1,8 @@
 /// <reference types="node" />
 /// <reference types="express" />
 import 'reflect-metadata';
+// Ensure Keycloak admin client can safely run its `payload instanceof FormData` checks.
+require('./services/keycloak/formdata-polyfill');
 const { formatError } = require('./services/keystone_overrides/formatError');
 const { Keystone } = require('@keystonejs/keystone');
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
