@@ -450,6 +450,7 @@ const query = gql`
   query GetNamespaces {
     allNamespaces {
       name
+      displayName
     }
   }
 `;
