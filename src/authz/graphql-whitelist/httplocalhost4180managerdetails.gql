@@ -1,7 +1,0 @@
-
-  query GetNamespaces {
-    allNamespaces {
-      name
-      displayName
-    }
-  }
