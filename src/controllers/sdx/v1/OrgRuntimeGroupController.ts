@@ -26,6 +26,10 @@ import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/creat
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { RuntimeGroupInput } from './types';
+import {
+  removeEmpty,
+  transformArrayKeyToString,
+} from '../../../batch/feed-worker';
 
 /**
  * Runtime Group Controller
@@ -116,9 +120,22 @@ export class RuntimeGroupController extends Controller {
 
     // Return filtered runtime groups based on the specified filter
     if (filter === 'available') {
-      return service.listHostedRuntimeGroupsForOrganization(ctx, org);
+      const records = await service.listHostedRuntimeGroupsForOrganization(
+        ctx,
+        org
+      );
+      return records
+        .map((o) => removeEmpty(o))
+        .map((o) =>
+          transformArrayKeyToString(o, 'hostedOrganizations', 'name')
+        );
     } else {
-      return service.listRuntimeGroupsByOrganization(ctx, org);
+      const records = await service.listRuntimeGroupsByOrganization(ctx, org);
+      return records
+        .map((o) => removeEmpty(o))
+        .map((o) =>
+          transformArrayKeyToString(o, 'hostedOrganizations', 'name')
+        );
     }
   }
 
