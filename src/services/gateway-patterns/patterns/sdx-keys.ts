@@ -2,14 +2,24 @@ import { RuntimeGroupService } from '../../../services/batch/runtime-group';
 import assert from '../../user-assert';
 import crypto from 'crypto';
 
+function splitCertificates(certs: string): string[] {
+  const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
+
+  return certArray
+    .map((cert) => Buffer.from(cert.trim()).toString('base64'))
+    .filter((cert) => cert.length > 0);
+}
+
 export interface SDXKeyConfig extends Record<string, string> {
   organization: string;
   runtime_group_name: string;
   public_key_pem?: string;
   certificate_pem?: string;
+  x5c?: string;
 }
 
 interface SDXKeysPatternData {
+  jwk: any;
   public_key_pem: string;
   gateway_id: string;
 }
@@ -41,6 +51,7 @@ export const SDXKeysPattern = {
       'Organization does not own this runtime group'
     );
 
+    let jwk: JsonWebKey & { x5c?: string[] } = null;
     let publicKeyPem = inputs.public_key_pem;
 
     // extract public key from certificate
@@ -54,15 +65,21 @@ export const SDXKeysPattern = {
       // Export the public key to a desired format (e.g., PEM, DER, JWK)
       // The 'type' can be 'pkcs1' (RSA only) or 'spki'
       // The 'format' can be 'pem', 'der', or 'jwk'
-      publicKeyPem = publicKey
-        .export({
-          type: 'spki',
-          format: 'pem',
-        })
-        .toString();
+      publicKeyPem = publicKey.export({
+        type: 'spki',
+        format: 'pem',
+      }) as string;
+
+      if (inputs.x5c) {
+        jwk = publicKey.export({
+          format: 'jwk',
+        });
+        jwk.x5c = splitCertificates(inputs.x5c);
+      }
     }
 
     return {
+      jwk,
       public_key_pem: publicKeyPem,
       gateway_id: rg.namespace,
     };
@@ -82,24 +99,33 @@ export const SDXKeysPattern = {
 
     const keySetName = `sdx.edge.${inputs.runtime_group_name}`;
 
+    const key = {
+      kind: 'GatewayKey',
+      name: profile.name,
+      kid: profile.kid,
+      set: {
+        name: keySetName,
+      },
+      pem: {
+        public_key: `${publicKeyPem}`,
+      },
+      jwk: data.jwk,
+      tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
+    };
+
+    if (data.jwk) {
+      delete key.pem;
+    } else {
+      delete key.jwk;
+    }
+
     return [
       {
         kind: 'GatewayKeySet',
         name: keySetName,
         tags,
       },
-      {
-        kind: 'GatewayKey',
-        name: profile.name,
-        kid: profile.kid,
-        set: {
-          name: keySetName,
-        },
-        pem: {
-          public_key: `${publicKeyPem}`,
-        },
-        tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-      },
+      key,
     ];
   },
 };

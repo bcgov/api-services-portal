@@ -168,7 +168,7 @@
     "@types/jest": "^26.0.24",
     "@types/lodash": "4.14.202",
     "@types/multer": "^1.4.5",
-    "@types/node": "^15.0.0",
+    "@types/node": "^22.19.15",
     "@types/nodemailer": "^6.4.1",
     "@types/numeral": "^2.0.2",
     "@types/react": "^17.0.0",
