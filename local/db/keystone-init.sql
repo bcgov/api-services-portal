@@ -2497,6 +2497,7 @@ CREATE TABLE public."Subsystem" (
     id integer NOT NULL,
     name text NOT NULL,
     namespace text NOT NULL,
+    description text,
     organization integer,
     slug text NOT NULL
 );

@@ -1,4 +1,5 @@
 const { Slug, Text, Relationship } = require('@keystonejs/fields');
+const { Markdown } = require('@keystonejs/fields-markdown');
 const { EnforcementPoint } = require('../authz/enforcement');
 const { StructuredActivityService } = require('../services/workflow');
 const { newNamespaceID } = require('../services/identifiers');
@@ -15,6 +16,11 @@ module.exports = {
       type: Text,
       isRequired: true,
       access: { update: false },
+    },
+    description: {
+      type: Markdown,
+      isMultiline: true,
+      isRequired: false,
     },
     organization: { type: Relationship, ref: 'Organization' },
     slug: {
