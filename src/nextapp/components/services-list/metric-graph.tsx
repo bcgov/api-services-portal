@@ -80,25 +80,27 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     color: 'gray.400',
     textTransform: 'none',
   };
-  const metrics =
+  const values: number[][] =
     data?.allGatewayServiceMetricsByNamespace
-      .slice(0, 5) ?? [];
+      .slice(0, 5)
+      .map((metric: Metric) => {
+        return JSON.parse(metric.values);
+      }) ?? [];
 
-  const dailies: DailyDatum[] = metrics.map((metric: Metric) => {
-    const value: number[][] = JSON.parse(metric.values);
-    const dayStart = new Date(`${metric.day}T00:00:00.000Z`);
-    const day = formatISO(dayStart, {
+  const dailies: DailyDatum[] = values.map((value: number[]) => {
+    const firstDateValue = new Date(value[0][0] * 1000);
+    const day = formatISO(firstDateValue, {
       representation: 'date',
     });
     const total: number = value.reduce((memo: number, v) => {
       return memo + Number(v[1]);
     }, 0);
-    const downtime = 24 - value.length;
-    const defaultPeakDate: number = dayStart.getTime();
-    const peak: [number, number] = value.reduce<[number, number]>(
+    const downtime = 24 - values.length;
+    const defaultPeakDate: number = firstDateValue.getTime();
+    const peak: number | [number, number] = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
-          return v as [number, number];
+          return v;
         }
         return memo;
       },
@@ -108,7 +110,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     const requests = [];
 
     times(24, (h) => {
-      const timestampKey = addHours(new Date(dayStart), h).getTime();
+      const timestampKey = addHours(new Date(firstDateValue), h).getTime();
       const request = value.find((v) => v[0] === timestampKey / 1000);
 
       if (request) {
@@ -120,8 +122,8 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     return {
       day,
-      date: dayStart,
-      dayFormatted: graphDate.format(dayStart),
+      date: firstDateValue,
+      dayFormatted: graphDate.format(firstDateValue),
       // TODO: possibly remove, just keep around incase
       // dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
