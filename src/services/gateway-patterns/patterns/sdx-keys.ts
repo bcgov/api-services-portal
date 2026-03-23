@@ -51,7 +51,7 @@ export const SDXKeysPattern = {
       'Organization does not own this runtime group'
     );
 
-    let jwk: JsonWebKey & { x5c?: string[] } = null;
+    let jwk: any = null;
     let publicKeyPem = inputs.public_key_pem;
 
     // extract public key from certificate
@@ -73,7 +73,7 @@ export const SDXKeysPattern = {
       if (inputs.x5c) {
         jwk = publicKey.export({
           format: 'jwk',
-        });
+        } as any);
         jwk.x5c = splitCertificates(inputs.x5c);
       }
     }
