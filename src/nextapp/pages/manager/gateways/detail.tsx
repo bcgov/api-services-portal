@@ -449,7 +449,11 @@ const mutation = gql`
 const query = gql`
   query GetNamespaces {
     allNamespaces {
+      id
       name
+      displayName
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;

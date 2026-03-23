@@ -17,15 +17,14 @@ import {
   useDisclosure,
   VStack,
   useToast,
-  Text,
   WrapItem,
   Wrap,
   Center,
 } from '@chakra-ui/react';
-import { FaPlusCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { useApi, useApiMutation } from '@/shared/services/api';
+import { useApiMutation } from '@/shared/services/api';
 import { Mutation } from '@/shared/types/query.types';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 interface ServiceAccountCreateProps {
   onCreate: (credentials: Record<string, string>) => void;
@@ -35,21 +34,29 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
   onCreate,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { data, isLoading, isSuccess } = useApi(
-    'currentNamespace',
-    { query },
-    {
-      enabled: isOpen,
-    }
-  );
+  const currentNamespace = useCurrentNamespace({ enabled: isOpen });
   const credentialGenerator = useApiMutation(mutation);
   const toast = useToast();
   const formRef = React.useRef<HTMLFormElement>();
+  const availableScopes = React.useMemo(() => {
+    return (
+      currentNamespace.data?.currentNamespace?.scopes
+        ?.map((s) => s?.name)
+        .filter((n): n is string => Boolean(n)) ?? []
+    );
+  }, [currentNamespace.data?.currentNamespace?.scopes]);
+  const hasNamespace = Boolean(currentNamespace.data?.currentNamespace?.id);
+  const isShareDisabled = !hasNamespace || credentialGenerator.isLoading;
+
   const handleCreate = React.useCallback(async () => {
     try {
+      const resourceId = currentNamespace.data?.currentNamespace?.id;
+      if (!resourceId) {
+        throw new Error('No active gateway/namespace found');
+      }
       const form = new FormData(formRef?.current);
       const res: Mutation = await credentialGenerator.mutateAsync({
-        resourceId: data?.currentNamespace.id,
+        resourceId,
         scopes: form.getAll('scopes'),
       });
 
@@ -73,7 +80,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
     }
   }, [
     credentialGenerator,
-    data?.currentNamespace.id,
+    currentNamespace.data?.currentNamespace.id,
     onClose,
     onCreate,
     toast,
@@ -103,22 +110,22 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
             Create New Service Account
           </ModalHeader>
           <ModalBody>
-            {isLoading && (
+            {currentNamespace.isLoading && (
               <Center minH="200px">
                 <CircularProgress isIndeterminate />
               </Center>
             )}
-            {isSuccess && (
+            {currentNamespace.isSuccess && (
               <form ref={formRef} onSubmit={handleSubmit}>
                 <VStack spacing={4}>
                   <FormControl>
                     <FormLabel mb={8}>Assign scopes</FormLabel>
                     <CheckboxGroup>
                       <VStack align="flex-start" spacing={4}>
-                        {data.currentNamespace?.scopes?.map((s) => (
-                          <WrapItem key={s.name}>
-                            <Checkbox value={s.name} name="scopes">
-                              {s.name.replace(/Namespace/g, 'Gateway')}
+                        {availableScopes.map((scopeName) => (
+                          <WrapItem key={scopeName}>
+                            <Checkbox value={scopeName} name="scopes">
+                              {scopeName.replace(/Namespace/g, 'Gateway')}
                             </Checkbox>
                           </WrapItem>
                         ))}
@@ -140,6 +147,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                 Cancel
               </Button>
               <Button
+                isDisabled={isShareDisabled}
                 isLoading={credentialGenerator.isLoading}
                 variant="primary"
                 onClick={handleCreate}
@@ -156,19 +164,6 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
 };
 
 export default ServiceAccountCreate;
-
-const query = gql`
-  query GetCurrentNamespace {
-    currentNamespace {
-      id
-      name
-      scopes {
-        name
-      }
-      prodEnvId
-    }
-  }
-`;
 
 const mutation = gql`
   mutation CreateServiceAccount($resourceId: String!, $scopes: [String]!) {
