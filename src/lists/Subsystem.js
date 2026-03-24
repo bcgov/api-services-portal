@@ -51,7 +51,9 @@ module.exports = {
       return resolvedData;
     },
     validateInput: ({ context, resolvedData, addValidationError }) => {
-      new SubsystemService().validateSubsystem(resolvedData['name']);
+      if (operation == 'create') {
+        new SubsystemService().validateSubsystem(resolvedData['name']);
+      }
     },
     afterDelete: async function ({ existingItem, context }) {
       await new StructuredActivityService(
