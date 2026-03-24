@@ -1333,6 +1333,9 @@ paths:
                 -
                     jwt:
                         - Namespace.View
+                -
+                    jwt:
+                        - Namespace.Manage
             parameters:
                 -
                     in: path

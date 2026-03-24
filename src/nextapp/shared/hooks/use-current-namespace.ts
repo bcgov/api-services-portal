@@ -14,6 +14,10 @@ const query = gql`
       id
       name
       displayName
+      scopes {
+        name
+      }
+      prodEnvId
       org
       orgUnit
       orgUpdatedAt
