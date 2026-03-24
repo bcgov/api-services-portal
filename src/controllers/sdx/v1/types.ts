@@ -4,6 +4,7 @@
  */
 export interface SubsystemInput {
   name: string;
+  description?: string;
 }
 
 /**

@@ -303,6 +303,7 @@ export interface OpenAPISpec {
  */  
 export interface Subsystem {
   name?: string;
+  description?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
 }
