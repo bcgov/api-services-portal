@@ -7772,8 +7772,6 @@ export type RuntimeGroupCreateInput = {
 
 export type RuntimeGroupUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  organization?: Maybe<OrganizationRelateToOneInput>;
-  host?: Maybe<Scalars['String']>;
   hostedOrganizations?: Maybe<OrganizationRelateToManyInput>;
   sdxEndpoint?: Maybe<Scalars['String']>;
   consumerEndpoint?: Maybe<Scalars['String']>;
@@ -8797,6 +8795,8 @@ export enum SortSubsystemsBy {
   NameDesc = 'name_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
+  DescriptionAsc = 'description_ASC',
+  DescriptionDesc = 'description_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   SlugAsc = 'slug_ASC',
@@ -8877,6 +8877,7 @@ export type Subsystem = {
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -8884,6 +8885,7 @@ export type Subsystem = {
 export type SubsystemCreateInput = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -8896,6 +8898,7 @@ export type SubsystemRelateToOneInput = {
 };
 
 export type SubsystemUpdateInput = {
+  description?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -8947,6 +8950,24 @@ export type SubsystemWhereInput = {
   namespace_not_ends_with_i?: Maybe<Scalars['String']>;
   namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  description?: Maybe<Scalars['String']>;
+  description_not?: Maybe<Scalars['String']>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_starts_with?: Maybe<Scalars['String']>;
+  description_not_starts_with?: Maybe<Scalars['String']>;
+  description_ends_with?: Maybe<Scalars['String']>;
+  description_not_ends_with?: Maybe<Scalars['String']>;
+  description_i?: Maybe<Scalars['String']>;
+  description_not_i?: Maybe<Scalars['String']>;
+  description_contains_i?: Maybe<Scalars['String']>;
+  description_not_contains_i?: Maybe<Scalars['String']>;
+  description_starts_with_i?: Maybe<Scalars['String']>;
+  description_not_starts_with_i?: Maybe<Scalars['String']>;
+  description_ends_with_i?: Maybe<Scalars['String']>;
+  description_not_ends_with_i?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   slug?: Maybe<Scalars['String']>;

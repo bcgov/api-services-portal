@@ -19,6 +19,11 @@ import {
   ServiceCatalogEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { KeystoneService } from '../../ioc/keystoneInjector';
+import { removeEmpty, removeKeys } from '../../../batch/feed-worker';
+import {
+  getOrganizationMemberDetails,
+  getOrganizations,
+} from '../../../services/keystone/organization';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -37,6 +42,21 @@ export class CatalogController extends Controller {
     this.keystone = _keystone;
   }
 
+  @Get('/organizations')
+  @OperationId('organization-list')
+  public async listOrganizations(): Promise<any[]> {
+    const orgs = await getOrganizations(this.keystone.sudo());
+    return orgs
+      .map((o) => ({
+        name: o.name,
+        title: o.title,
+        description: o.description,
+        member: getOrganizationMemberDetails(o.tags),
+      }))
+      .filter((o) => o.member !== undefined)
+      .map((o) => removeEmpty(o));
+  }
+
   /**
    * Retrieve a list of services available in the SDX service catalog.
    *
@@ -44,7 +64,6 @@ export class CatalogController extends Controller {
    */
   @Get('/services')
   @OperationId('listServiceCatalog')
-  @Security('jwt', [])
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
     {
@@ -56,6 +75,7 @@ export class CatalogController extends Controller {
         'This is a sample service defined by an OpenAPI specification.',
       subsystem: {
         name: 'SAMPLE-SUBSYS',
+        description: 'A sample subsystem for demonstration purposes',
         clientId: 'LAB.MIN.CITZ.SAMPLE-SUBSYS',
         organization: {
           name: 'sample-organization',
@@ -80,11 +100,11 @@ export class CatalogController extends Controller {
     code: 'credentials_required',
     message: 'No authorization token was found',
   })
-  public async listCatalog(
-    @Request() request: any
-  ): Promise<ServiceCatalogEntry[]> {
-    const ctx = this.keystone.createContext(request);
-    return await GetCatalog(ctx);
+  public async listCatalog(): Promise<ServiceCatalogEntry[]> {
+    const ctx = this.keystone.sudo();
+    const result = await GetCatalog(ctx);
+    result.map((o) => removeKeys(o, ['gateway']));
+    return result;
   }
 
   /**

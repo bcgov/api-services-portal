@@ -18,6 +18,7 @@ const logger = Logger('gateway-patterns.catalog');
  */
 export interface SubsystemEntry {
   name: string;
+  description?: string;
   clientId: string;
   organization?: {
     name: string;
@@ -115,6 +116,7 @@ export async function GetCatalog(
       spec: includeSpec ? c.spec : undefined,
       subsystem: {
         name: c.subsystem.name,
+        description: c.subsystem.description,
         clientId: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
         organization: {
           name: c.organization.name,

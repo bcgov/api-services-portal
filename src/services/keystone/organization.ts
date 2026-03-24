@@ -20,6 +20,7 @@ export async function getOrganizations(context: any): Promise<Organization[]> {
                     allOrganizations {
                         name
                         title
+                        tags
                         description
                         orgUnits {
                           name
@@ -68,7 +69,9 @@ export async function getOrganizationUnit(
   unit: string
 ): Promise<Organization> {
   if (!unit) {
-    logger.warn('[getOrganizationUnit] called with undefined unit, returning null');
+    logger.warn(
+      '[getOrganizationUnit] called with undefined unit, returning null'
+    );
     return null;
   }
   const result = await context.executeGraphQL({
@@ -97,35 +100,40 @@ export async function getOrganizationUnit(
 export function parseOrganizationMemberDetails(
   tagsStr: string
 ): MemberOrganization {
+  const member = getOrganizationMemberDetails(tagsStr);
+
   assertAndRaiseValidateError(
-    tagsStr != null && Boolean(tagsStr),
+    member !== undefined,
     'Incomplete organization details',
     'organization',
     'member information not found'
   );
+  return member;
+}
 
-  const tags = JSON.parse(tagsStr);
-  const member: { [key: string]: string } = {};
+export function getOrganizationMemberDetails(
+  tagsStr: string
+): MemberOrganization | undefined {
+  if (tagsStr) {
+    const tags = JSON.parse(tagsStr);
+    const member: { [key: string]: string } = {};
 
-  tags.forEach((part: string) => {
-    const kv = part.split(':');
-    if (kv.length === 2 && kv[0] === 'member_class') {
-      member['memberClass'] = kv[1];
+    tags.forEach((part: string) => {
+      const kv = part.split(':');
+      if (kv.length === 2 && kv[0] === 'member_class') {
+        member['memberClass'] = kv[1];
+      }
+      if (kv.length === 2 && kv[0] === 'member_id') {
+        member['memberId'] = kv[1];
+      }
+    });
+
+    if (Boolean(member['memberClass']) && Boolean(member['memberId'])) {
+      return {
+        memberClass: member['memberClass'],
+        memberId: member['memberId'],
+      };
     }
-    if (kv.length === 2 && kv[0] === 'member_id') {
-      member['memberId'] = kv[1];
-    }
-  });
-
-  assertAndRaiseValidateError(
-    Boolean(member['memberClass']) && Boolean(member['memberId']),
-    'Incomplete organization details',
-    'organization',
-    'member information not found'
-  );
-
-  return {
-    memberClass: member['memberClass'],
-    memberId: member['memberId'],
-  };
+  }
+  return undefined;
 }
