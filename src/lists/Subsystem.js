@@ -50,7 +50,7 @@ module.exports = {
       resolvedData.namespace = `sdx-${newNamespaceID()}`;
       return resolvedData;
     },
-    validateInput: ({ context, resolvedData, addValidationError }) => {
+    validateInput: ({ resolvedData, operation }) => {
       if (operation == 'create') {
         new SubsystemService().validateSubsystem(resolvedData['name']);
       }
