@@ -106,7 +106,7 @@ class SubsystemService {
       ['organization'],
       {
         query: '$name: String!, $tag: String!',
-        clause: '{ organization: { tags_some: $tag }, name: $name }',
+        clause: '{ organization: { tags_contains: $tag }, name: $name }',
         variables: {
           name: client.subsystem.name,
           tag: `member_id:${client.member.memberId}`,
@@ -115,6 +115,7 @@ class SubsystemService {
     );
 
     assert.strictEqual(records.length == 0, false, 'Subsystem not found');
+    assert.strictEqual(records.length > 1, false, 'Multiple subsystems found');
     return records.pop();
   };
 }
