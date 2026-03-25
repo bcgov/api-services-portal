@@ -176,28 +176,31 @@ export const SDXKeysPattern = {
 
     const keySetName = profile.keySetName;
 
-    const keys = data.jwk_list.map((jwk, index) => {
-      const key = {
+    const keys: any = data.jwk_list.map((jwk, index) => ({
+      kind: 'GatewayKey',
+      name: `${profile.name}:${index}`,
+      kid: `${profile.kid}:${index}`,
+      set: {
+        name: keySetName,
+      },
+      jwk: JSON.stringify(jwk),
+      tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
+    }));
+
+    if (publicKeyPem) {
+      keys.push({
         kind: 'GatewayKey',
-        name: `${profile.name}:${index}`,
-        kid: `${profile.kid}:${index}`,
+        name: `${profile.name}:${keys.length}`,
+        kid: `${profile.kid}:${keys.length}`,
         set: {
           name: keySetName,
         },
         pem: {
           public_key: `${publicKeyPem}`,
         },
-        jwk,
         tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-      };
-
-      if (jwk) {
-        delete key.pem;
-      } else {
-        delete key.jwk;
-      }
-      return key;
-    });
+      });
+    }
 
     return [
       ...[
