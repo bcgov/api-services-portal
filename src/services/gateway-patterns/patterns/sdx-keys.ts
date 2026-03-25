@@ -73,7 +73,7 @@ export const SDXKeysPattern = {
         'Organization does not own this runtime group'
       );
 
-      profile.keySetName = `sdx.e.${inputs.runtime_group_name}`;
+      profile.keySetName = `sdx.edge.${inputs.runtime_group_name}`;
       profile.name = `sdx.keys.${inputs.runtime_group_name}.edge`;
       profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtime_group_name}`;
       profile.qualifier = `key-${inputs.runtime_group_name}`;
@@ -94,7 +94,7 @@ export const SDXKeysPattern = {
         'Organization does not own this client subsystem'
       );
 
-      profile.keySetName = `sdx.c.${inputs.client_id.toLowerCase()}`;
+      profile.keySetName = `sdx.sys.${inputs.client_id.toLowerCase()}`;
       profile.name = `sdx.keys.${inputs.client_id}.client`;
       profile.kid = `urn:ca:bc:sdx:client:${inputs.client_id}`;
       profile.qualifier = `key-${inputs.client_id}`;
@@ -109,7 +109,7 @@ export const SDXKeysPattern = {
 
       const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
-      profile.keySetName = `sdx.o.${memberText}`;
+      profile.keySetName = `sdx.org.${memberText}`;
       profile.name = `sdx.keys.${memberText}.org`;
       profile.kid = `urn:ca:bc:sdx:org:${memberText}`;
       profile.qualifier = `key-${memberText}`;
