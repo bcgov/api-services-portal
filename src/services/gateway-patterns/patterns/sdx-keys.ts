@@ -94,10 +94,12 @@ export const SDXKeysPattern = {
         'Organization does not own this client subsystem'
       );
 
-      profile.keySetName = `sdx.sys.${inputs.client_id.toLowerCase()}`;
-      profile.name = `sdx.keys.${inputs.client_id}.client`;
-      profile.kid = `urn:ca:bc:sdx:client:${inputs.client_id}`;
-      profile.qualifier = `key-${inputs.client_id}`;
+      const id = inputs.client_id.toLowerCase();
+
+      profile.keySetName = `sdx.sys.${id}`;
+      profile.name = `sdx.keys.${id}.sys`;
+      profile.kid = `urn:ca:bc:sdx:sys:${id}`;
+      profile.qualifier = `key-${id}`;
       profile.type = 'client';
       profile.value = inputs.client_id;
       profile.gateway_id = subsystem.namespace;
