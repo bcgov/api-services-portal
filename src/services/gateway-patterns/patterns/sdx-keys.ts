@@ -123,7 +123,7 @@ export const SDXKeysPattern = {
 
     // extract public key from certificate
     if (inputs.certificate_pem) {
-      for (const certPem of inputs.certificate_pem) {
+      for (const [index, certPem] of inputs.certificate_pem.entries()) {
         // Create an X509Certificate instance
         const certs = splitCertificates(certPem, 'utf8');
 
@@ -154,6 +154,7 @@ export const SDXKeysPattern = {
             format: 'jwk',
           } as any);
           jwk.x5c = splitCertificates(fullChain.join('\n'), 'base64');
+          jwk.kid = `${profile.kid}:${index}`;
           jwkList.push(jwk);
         }
       }
@@ -179,7 +180,7 @@ export const SDXKeysPattern = {
     const keys: any = data.jwk_list.map((jwk, index) => ({
       kind: 'GatewayKey',
       name: `${profile.name}:${index}`,
-      kid: `${profile.kid}:${index}`,
+      kid: jwk.kid,
       set: {
         name: keySetName,
       },
@@ -187,11 +188,11 @@ export const SDXKeysPattern = {
       tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
     }));
 
-    if (publicKeyPem) {
+    if (keys.length === 0) {
       keys.push({
         kind: 'GatewayKey',
-        name: `${profile.name}:${keys.length}`,
-        kid: `${profile.kid}:${keys.length}`,
+        name: `${profile.name}:0`,
+        kid: `${profile.kid}:0`,
         set: {
           name: keySetName,
         },
