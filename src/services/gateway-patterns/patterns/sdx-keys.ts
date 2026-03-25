@@ -115,7 +115,7 @@ export const SDXKeysPattern = {
       profile.qualifier = `key-${memberText}`;
       profile.type = 'organization';
       profile.value = inputs.organization;
-      profile.gateway_id = `sdx-o-${memberText}`;
+      profile.gateway_id = `sdx-o-${member.memberClass}-${member.memberId}`.toLowerCase();
     }
 
     let jwkList: any[] = [];
