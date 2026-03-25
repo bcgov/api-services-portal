@@ -146,11 +146,11 @@ export const SDXKeysPattern = {
           const caCerts = splitCertificates(inputs.ca_certs, 'utf8');
           const fullChain = [...certs, ...caCerts];
           const result = verifyCertificateChain(fullChain);
-          if (!result.valid) {
-            throw new Error(
-              `Certificate chain verification failed: ${result.error}`
-            );
-          }
+          assert.strictEqual(
+            result.valid,
+            true,
+            'Certificate chain verification failed: ' + result.error
+          );
 
           const jwk: any = publicKey.export({
             format: 'jwk',
