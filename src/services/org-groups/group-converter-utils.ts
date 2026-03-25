@@ -8,7 +8,7 @@
  */
 import { OrganizationGroup } from './org-group-service';
 
-export function root(str: string) {
+export function root(str: string): string {
   const parts = str.split('/');
   return parts.length > 1 ? parts[1] : '';
 }

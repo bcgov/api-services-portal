@@ -49,6 +49,31 @@ export async function connectOne(
       compositeKeyValues,
       []
     );
+  } else if ('compositeRefKey' in transformInfo) {
+    const compositeKeyValues: CompositeKeyValue[] = [];
+    transformInfo.compositeRefKey.forEach(
+      (refKey: string | CompositeKeyValue) => {
+        if (typeof refKey === 'string') {
+          const value =
+            refKey === transformInfo['refKey']
+              ? dot(inputData, fieldKey)
+              : dot(inputData, refKey);
+          compositeKeyValues.push({ key: refKey, value });
+        } else {
+          const value = dot(inputData, refKey.key);
+          compositeKeyValues.push({
+            key: refKey.key,
+            value: value,
+            whereClause: refKey.whereClause,
+          });
+        }
+      }
+    );
+    lkup = await batchService.lookupUsingCompositeKey(
+      transformInfo['list'],
+      compositeKeyValues,
+      []
+    );
   } else {
     lkup = await batchService.lookup(
       transformInfo['list'],
@@ -60,7 +85,8 @@ export async function connectOne(
 
   if (lkup == null) {
     logger.error(
-      `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`
+      `Lookup failed for ${transformInfo['list']} %j`,
+      transformInfo
     );
     throw Error(`Record not found [${_fieldKey}] ${value}`);
   } else if (

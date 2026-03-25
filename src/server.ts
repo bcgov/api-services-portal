@@ -144,10 +144,13 @@ for (const _list of [
   'Label',
   'Legal',
   'Metric',
+  'OpenAPISpec',
   'Organization',
   'OrganizationUnit',
   'Product',
+  'RuntimeGroup',
   'ServiceAccess',
+  'Subsystem',
   'TemporaryIdentity',
   'User',
 ]) {

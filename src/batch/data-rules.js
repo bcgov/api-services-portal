@@ -404,6 +404,108 @@ const metadata = {
       },
     },
   },
+  OpenAPISpec: {
+    query: 'allOpenAPISpecs',
+    refKey: 'name',
+    compositeRefKey: [
+      'title',
+      'version',
+      {
+        key: 'organization',
+        whereClause: 'organization: { name: $organization }',
+      },
+    ],
+    sync: [
+      'ref',
+      'name',
+      'title',
+      'version',
+      'spec',
+      'summary',
+      'description',
+      'operations',
+      'namespace',
+      'organization',
+      'subsystem',
+    ],
+    transformations: {
+      subsystem: {
+        refKey: 'name',
+        name: 'connectOne',
+        list: 'allSubsystems',
+        compositeRefKey: ['name', 'namespace'],
+      },
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    example: {
+      ref: 'my-api-spec',
+      title: 'My API Spec',
+      description: 'Description of my API Spec',
+      version: '1.0.0',
+      operations: '{}',
+      spec: '{}',
+    },
+  },
+  Subsystem: {
+    query: 'allSubsystems',
+    compositeRefKey: [
+      'name',
+      {
+        key: 'organization',
+        whereClause: 'organization: { name: $organization }',
+      },
+    ],
+    sync: ['name', 'description', 'organization', 'namespace'],
+    transformations: {
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    example: {
+      name: 'my-new-subsystem',
+    },
+  },
+  RuntimeGroup: {
+    query: 'allRuntimeGroups',
+    refKey: 'name',
+    sync: [
+      'host',
+      'sdxEndpoint',
+      'consumerEndpoint',
+      'organization',
+      'hostedOrganizations',
+      'namespace',
+    ],
+    transformations: {
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+      hostedOrganizations: {
+        name: 'connectMany',
+        list: 'allOrganizations',
+        refKey: 'name',
+      },
+    },
+    example: {
+      name: 'my-runtime-group',
+      gatewayId: 'gw-abc',
+      host: 'runtime-group.my-domain.sdx',
+      sdxEndpoint: '10.10.10.10:443',
+      consumerEndpoint: '10.0.0.11:6443',
+      hostedOrganizations: [
+        'ministry-of-citizens-services',
+        'ministry-of-health',
+      ],
+    },
+  },
   Product: {
     query: 'allProducts',
     refKey: 'appId',

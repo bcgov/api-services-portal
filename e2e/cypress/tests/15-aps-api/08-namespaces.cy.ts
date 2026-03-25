@@ -1,220 +1,220 @@
-import HomePage from "../../pageObjects/home"
-import LoginPage from "../../pageObjects/login"
-let testData = require("../../fixtures/apiowner.json")
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+let testData = require('../../fixtures/apiowner.json')
 let userSession: any
 let nameSpace: string
 
 describe('Get the user session token to pass it as authorization token to make the API call ', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
 
-    const login = new LoginPage()
-    const home = new HomePage()
+  before(() => {
+    cy.visit('/')
+    cy.deleteAllCookies()
+    cy.reload()
+  })
 
-    before(() => {
-        cy.visit('/')
-        cy.deleteAllCookies()
-        cy.reload()
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
+    cy.visit(login.path)
+  })
+
+  it('authenticates Janis (api owner) to get the user session token', () => {
+    cy.get('@common-testdata').then(({ apiTest }: any) => {
+      cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+        userSession = value
+      })
+      nameSpace = apiTest.namespace
     })
-
-    beforeEach(() => {
-        cy.preserveCookies()
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('common-testdata').as('common-testdata')
-        cy.visit(login.path)
-    })
-
-    it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.get('@common-testdata').then(({ apiTest }: any) => {
-            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
-                userSession = value
-            })
-            nameSpace = apiTest.namespace
-        })
-    })
+  })
 })
 
 describe('API Tests for Namespace Report', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  var response: any
 
-    const login = new LoginPage()
-    const home = new HomePage()
-    var response: any
+  beforeEach(() => {
+    cy.fixture('api-v2').as('api')
+  })
 
-    beforeEach(() => {
-        cy.fixture('api-v2').as('api')
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
     })
+  })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
+  it('Get the resource and verify the success code in the response', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint + '/report', 'GET').then((response) => {
+        // expect(response.status).to.be.equal(200)
+      })
     })
-
-    it('Get the resource and verify the success code in the response', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint + "/report", 'GET').then((response) => {
-                // expect(response.status).to.be.equal(200)
-            })
-        })
-    })
+  })
 })
 
 describe('API Tests for Namespace List', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  var response: any
 
-    const login = new LoginPage()
-    const home = new HomePage()
-    var response: any
+  beforeEach(() => {
+    cy.fixture('api-v2').as('api')
+  })
 
-    beforeEach(() => {
-        cy.fixture('api-v2').as('api')
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
     })
+  })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
+  it('Get the resource and verify the success code in the response', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res: any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        cy.addToAstraScanIdList(res.astraRes.body.status)
+        response = res.apiRes.body
+      })
     })
+  })
 
-    it('Get the resource and verify the success code in the response', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                response = res.apiRes.body
-            })
-        })
-    })
-
-    it('Verify that the selected Namespace is displayed in the Response list in the response', () => {
-        expect(response).to.be.contain(nameSpace)
-    })
+  it('Verify that the selected Namespace is displayed in the Response list in the response', () => {
+    expect(response).to.be.contain(nameSpace)
+  })
 })
 
 describe('API Tests for Namespace Activities', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  var response: any
 
-    const login = new LoginPage()
-    const home = new HomePage()
-    var response: any
+  beforeEach(() => {
+    cy.fixture('api-v2').as('api')
+  })
 
-    beforeEach(() => {
-        cy.fixture('api-v2').as('api')
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
     })
+  })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
+  it('Get the resource and verify the success code in the response', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint + '/' + nameSpace + '/activity', 'GET').then(
+        (res: any) => {
+          expect(res.apiRes.status).to.be.equal(200)
+          cy.addToAstraScanIdList(res.astraRes.body.status)
+        }
+      )
     })
-
-    it('Get the resource and verify the success code in the response', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-            })
-        })
-    })
+  })
 })
 
 describe('API Tests for Namespace Summary', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  var response: any
 
-    const login = new LoginPage()
-    const home = new HomePage()
-    var response: any
+  beforeEach(() => {
+    cy.fixture('api-v2').as('api')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('common-testdata').as('common-testdata')
+  })
 
-    beforeEach(() => {
-        cy.fixture('api-v2').as('api')
-        cy.fixture('apiowner').as('apiowner')
-        cy.fixture('common-testdata').as('common-testdata')
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
     })
+  })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
+  it('Get the resource for namespace summary and verify the success code in the response', () => {
+    cy.get('@common-testdata').then(({ namespace }: any) => {
+      cy.get('@api').then(({ namespaces }: any) => {
+        cy.makeAPIRequest(namespaces.endPoint + '/' + namespace, 'GET').then(
+          (res: any) => {
+            expect(res.apiRes.status).to.be.equal(200)
+            cy.addToAstraScanIdList(res.astraRes.body.status)
+            response = res.apiRes.body.name
+          }
+        )
+      })
     })
+  })
 
-    it('Get the resource for namespace summary and verify the success code in the response', () => {
-        cy.get('@common-testdata').then(({ namespace }: any) => {
-            cy.get('@api').then(({ namespaces }: any) => {
-                cy.makeAPIRequest(namespaces.endPoint + "/" + namespace, 'GET').then((res:any) => {
-                    expect(res.apiRes.status).to.be.equal(200)
-                    cy.addToAstraScanIdList(res.astraRes.body.status)
-                    response = res.apiRes.body.name
-                })
-            })
-        })
+  it('Verify that expected namespace summary details are display in the response', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      // cy.compareJSONObjects(response, namespaces.activity)
     })
-
-    it('Verify that expected namespace summary details are display in the response', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            // cy.compareJSONObjects(response, namespaces.activity)
-        })
-    })
+  })
 })
 
 describe('API Tests for Create Namespace', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  var response: any
 
-    const login = new LoginPage()
-    const home = new HomePage()
-    var response: any
+  beforeEach(() => {
+    cy.fixture('api-v2').as('api')
+    cy.fixture('apiowner').as('apiowner')
+  })
 
-    beforeEach(() => {
-        cy.fixture('api-v2').as('api')
-        cy.fixture('apiowner').as('apiowner')
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setHeaders(namespaces.headers)
+      cy.setAuthorizationToken(userSession)
     })
+  })
 
-    it('Prepare the Request Specification for the API', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setHeaders(namespaces.headers)
-            cy.setAuthorizationToken(userSession)
-        })
+  it('Create system generated namespace when user does not specify namespace name', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res: any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        cy.addToAstraScanIdList(res.astraRes.body.status)
+        expect(res.apiRes.body.displayName).to.be.equal("janis's Gateway")
+        nameSpace = res.apiRes.body.name
+      })
     })
+  })
 
-    it('Create system generated namespace when user does not specify namespace name', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body.displayName).to.be.equal("janis's Gateway")
-                nameSpace = res.apiRes.body.name
-            })
-        })
+  it('Verify that the generated namespace is displayed in the namespace list', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res: any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        cy.addToAstraScanIdList(res.astraRes.body.status)
+        expect(res.apiRes.body).to.be.contain(nameSpace)
+      })
     })
+  })
 
-    it('Verify that the generated namespace is displayed in the namespace list', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body).to.be.contain(nameSpace)
-            })
-        })
+  it('Create users own namespace with its description', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.setRequestBody(namespaces.userDefinedNamespace)
+      cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res: any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        cy.addToAstraScanIdList(res.astraRes.body.status)
+        expect(res.apiRes.body.displayName).to.be.equal(
+          namespaces.userDefinedNamespace.displayName
+        )
+        nameSpace = res.apiRes.body.name
+      })
     })
+  })
 
-    it('Create users own namespace with its description', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.setRequestBody(namespaces.userDefinedNamespace)
-            cy.makeAPIRequest(namespaces.endPoint, 'POST').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body.displayName).to.be.equal(namespaces.userDefinedNamespace.displayName)
-                nameSpace = res.apiRes.body.name
-            })
-        })
+  it('Verify that the generated namespace is displayed in the namespace list', () => {
+    cy.get('@api').then(({ namespaces }: any) => {
+      cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res: any) => {
+        expect(res.apiRes.status).to.be.equal(200)
+        cy.addToAstraScanIdList(res.astraRes.body.status)
+        expect(res.apiRes.body).to.be.contain(nameSpace)
+      })
     })
-
-    it('Verify that the generated namespace is displayed in the namespace list', () => {
-        cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res:any) => {
-                expect(res.apiRes.status).to.be.equal(200)
-                cy.addToAstraScanIdList(res.astraRes.body.status)
-                expect(res.apiRes.body).to.be.contain(nameSpace)
-            })
-        })
-    })
+  })
 })
 
 describe('API Tests for invalid namespace name', () => {
@@ -243,14 +243,15 @@ describe('API Tests for invalid namespace name', () => {
                 })
             })
         })
+      })
     })
+  })
 })
 
 // describe('API Tests for Deleting Namespace', () => {
 
 //     const login = new LoginPage()
 //     const home = new HomePage()
-
 
 //     beforeEach(() => {
 //         cy.fixture('api-v2').as('api')

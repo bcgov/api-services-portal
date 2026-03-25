@@ -41,6 +41,16 @@ module.exports = {
           type: SchemaType.ListQuery,
         },
         {
+          gqlName: 'allSubsystemsByNamespace',
+          list: 'Subsystem',
+          type: SchemaType.ListQuery,
+        },
+        {
+          gqlName: 'allOpenAPISpecsByNamespace',
+          list: 'OpenAPISpec',
+          type: SchemaType.ListQuery,
+        },
+        {
           gqlName: 'allAccessRequestsByNamespace',
           list: 'AccessRequest',
           type: SchemaType.ListQuery,

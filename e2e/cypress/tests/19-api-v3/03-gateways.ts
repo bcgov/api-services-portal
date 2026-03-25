@@ -128,13 +128,14 @@ describe('Gateways', () => {
 
           // Look for the specific gateway in the response body
           const foundGateway = body.find(
-            (item: { gatewayId: string, displayName: string }) => 
-              item.gatewayId === gateway.gatewayId && item.displayName === gateway.displayName
-          );
+            (item: { gatewayId: string; displayName: string }) =>
+              item.gatewayId === gateway.gatewayId &&
+              item.displayName === gateway.displayName
+          )
 
           // Assert that the gateway was found
-          expect(foundGateway).to.not.be.undefined;
-          cy.log(`Found gateway: ${JSON.stringify(foundGateway, null, 2)}`);
+          expect(foundGateway).to.not.be.undefined
+          cy.log(`Found gateway: ${JSON.stringify(foundGateway, null, 2)}`)
         }
       )
     })

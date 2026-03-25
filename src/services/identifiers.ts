@@ -10,6 +10,10 @@ export function isEnvironmentID(id: string): boolean {
   return id.length == 8;
 }
 
+export function newID(len: number): string {
+  return uuidv4().replace(/-/g, '').toLowerCase().substring(0, len);
+}
+
 export function newProductID(): string {
   return uuidv4().replace(/-/g, '').toUpperCase().substring(0, 12);
 }

@@ -123,3 +123,6 @@ e2e/cypress/fixtures/state/*.pem
 e2e/cypress/fixtures/state/scanResult.json
 e2e/cypress/fixtures/state/scanID.json
 e2e/cypress/downloads/
+
+openapi.yaml
+routes.ts

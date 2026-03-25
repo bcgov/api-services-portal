@@ -36,7 +36,10 @@ export type DateTime = any;
     );
 
     const fields = [];
-    fields.push(`  ${md.refKey}?: string; // Primary Key`);
+
+    if (md.refKey) {
+      fields.push(`  ${md.refKey}?: string; // Primary Key`);
+    }
     md.sync
       .concat(md.read ? md.read : [])
       .filter((s) => !relationshipFields.includes(s))
@@ -157,7 +160,14 @@ fs.writeFile('controllers/v2/types.ts', buildContent(false), (err) => {
     return;
   }
   console.log('Updated file: controllers/v2/types.ts');
-  //file written successfully
+});
+
+fs.writeFile('services/batch/types.ts', buildContent(true), (err) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log('Updated file: services/batch/types.ts');
 });
 
 function commentedExample(obj) {

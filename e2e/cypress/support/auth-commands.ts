@@ -22,6 +22,7 @@ let headers: any
 const login = new LoginPage()
 
 let requestBody: any = {}
+let queryString: any = undefined
 interface formDataRequestOptions {
   method: string
   url: string
@@ -86,8 +87,9 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
   }
   cy.setHeaders({ 'Content-Type': 'application/json' })
   cy.setRequestBody(payload)
-  return cy.callAPI('ds/api/v3/gateways', 'POST').then(
-    ({ apiRes: { body, status } }: any) => {
+  return cy
+    .callAPI('ds/api/v3/gateways', 'POST')
+    .then(({ apiRes: { body, status } }: any) => {
       cy.log(JSON.stringify(body, null, 2))
       expect(status).to.be.equal(200)
       if (payload.gatewayId) {
@@ -97,8 +99,7 @@ Cypress.Commands.add('createGateway', (gatewayid?: string, displayname?: string)
         expect(body.displayName).to.be.equal(payload.displayName)
       }
       return cy.wrap(body)
-    }
-  )
+    })
 })
 
 Cypress.Commands.add('deleteGatewayCli', (gatewayid: string, force: boolean = false) => {
@@ -107,12 +108,15 @@ Cypress.Commands.add('deleteGatewayCli', (gatewayid: string, force: boolean = fa
       (response) => {
         console.log(response)
         expect(response.stdout).to.contain('Gateway destroyed: ' + gatewayid)
-    })
+      }
+    )
   })
 })
 
-Cypress.Commands.add('activateGateway', (gatewayId: string, checkNoNamespace: boolean = false) => {
-  const getAllNsQuery = `
+Cypress.Commands.add(
+  'activateGateway',
+  (gatewayId: string, checkNoNamespace: boolean = false) => {
+    const getAllNsQuery = `
 query GetNamespaces {
   allNamespaces {
     id
@@ -120,7 +124,7 @@ query GetNamespaces {
   }
 }
 `
-  const currentNsQuery = `
+    const currentNsQuery = `
   query GetCurrentNamespace {
     currentNamespace {
       id
@@ -139,33 +143,39 @@ query GetNamespaces {
     }
   }
 `
-  cy.log('< Activating namespace - ' + gatewayId)
-  // get the (true) id for the namespace
-  cy.setHeaders({ 'Content-Type': 'application/json' })
-  return cy.gqlQuery(getAllNsQuery).then((response) => {
-    const nsdata = response.apiRes.body.data.allNamespaces.find((ns: { name: string }) => ns.name === gatewayId)
-    if (nsdata) {
-      return nsdata.id
-    } else {
-      if (checkNoNamespace) {
-        return 'Namespace not found'
-      } else {
-        throw new Error('Namespace not found')
-      }
-    }
-  }).then((namespaceId) => {
-    if (namespaceId === 'Namespace not found') {
-      return namespaceId;
-    }    
-    // then activate the namespace
+    cy.log('< Activating namespace - ' + gatewayId)
+    // get the (true) id for the namespace
     cy.setHeaders({ 'Content-Type': 'application/json' })
-    cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')
-    return cy.gqlQuery(currentNsQuery).then((response) => {
-      const currentNs = response.apiRes.body.data.currentNamespace
-      expect(currentNs.name).to.eq(gatewayId)
-    })
-  })
-})
+    return cy
+      .gqlQuery(getAllNsQuery)
+      .then((response) => {
+        const nsdata = response.apiRes.body.data.allNamespaces.find(
+          (ns: { name: string }) => ns.name === gatewayId
+        )
+        if (nsdata) {
+          return nsdata.id
+        } else {
+          if (checkNoNamespace) {
+            return 'Namespace not found'
+          } else {
+            throw new Error('Namespace not found')
+          }
+        }
+      })
+      .then((namespaceId) => {
+        if (namespaceId === 'Namespace not found') {
+          return namespaceId
+        }
+        // then activate the namespace
+        cy.setHeaders({ 'Content-Type': 'application/json' })
+        cy.callAPI(`admin/switch/${namespaceId}`, 'PUT')
+        return cy.gqlQuery(currentNsQuery).then((response) => {
+          const currentNs = response.apiRes.body.data.currentNamespace
+          expect(currentNs.name).to.eq(gatewayId)
+        })
+      })
+  }
+)
 
 Cypress.Commands.add('getGateways', () => {
   const getAllNsQuery = `
@@ -464,6 +474,20 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
+  'makeKongProxyRequest',
+  (serviceName: string, methodType: string, body: any = undefined) => {
+    let authorization
+    return cy.request({
+      url: Cypress.env('KONG_URL'),
+      method: methodType,
+      headers: { Host: `${serviceName}` + '.api.gov.bc.ca' },
+      body: body,
+      failOnStatusCode: false,
+    })
+  }
+)
+
+Cypress.Commands.add(
   'makeKongGatewayRequest',
   (endpoint: string, requestName: string, methodType: string) => {
     let body = {}
@@ -561,42 +585,76 @@ Cypress.Commands.add('setHeaders', (headerValues: any) => {
   headers = headerValues
 })
 
+Cypress.Commands.add('setHeader', (key: string, value: string) => {
+  headers[key] = value
+})
+
 Cypress.Commands.add('setRequestBody', (body: any) => {
   requestBody = JSON.stringify(body)
+})
+
+Cypress.Commands.add('clearRequestBody', () => {
+  requestBody = undefined
+})
+
+Cypress.Commands.add('setRequestFormData', (body: FormData) => {
+  requestBody = body
+})
+
+Cypress.Commands.add('setQueryString', (qs: any) => {
+  queryString = qs
 })
 
 Cypress.Commands.add('setAuthorizationToken', (token: string) => {
   headers['Authorization'] = 'Bearer ' + token
 })
 
-Cypress.Commands.add('callAPI', (endPoint: string, methodType: string) => {
-  let body = '{}'
-  let requestData: any = {}
-  if (methodType.toUpperCase() === 'PUT' || methodType.toUpperCase() === 'POST') {
-    body = requestBody
-  }
-
-  requestData['appname'] = 'Test1'
-  requestData['url'] = Cypress.env('BASE_URL') + '/' + endPoint
-  requestData['headers'] = headers
-  requestData['body'] = ''
-  requestData['method'] = methodType
-
-  cy.request({
-    url: Cypress.env('BASE_URL') + '/' + endPoint,
-    method: methodType,
-    body,
-    headers,
-    failOnStatusCode: false,
-  }).then((apiResponse) => {
-    // You can also return data or use it in further tests
-    const responseData = {
-      apiRes: apiResponse,
+Cypress.Commands.add(
+  'callAPI',
+  (endPoint: string, methodType: string, formData?: boolean) => {
+    let body = '{}'
+    let requestData: any = {}
+    if (methodType.toUpperCase() === 'PUT' || methodType.toUpperCase() === 'POST') {
+      body = requestBody
     }
-    // cy.addToAstraScanIdList(response2.body.status)
-    return responseData
-  })
-})
+
+    requestData['appname'] = 'Test1'
+    requestData['url'] = Cypress.env('BASE_URL') + '/' + endPoint
+    requestData['headers'] = headers
+    requestData['body'] = ''
+    requestData['method'] = methodType
+
+    const newHeaders = {
+      ...headers,
+      ...(formData
+        ? { Accept: 'application/json', 'Content-Type': 'multipart/form-data' }
+        : {}),
+    }
+
+    cy.request({
+      url: Cypress.env('BASE_URL') + '/' + endPoint,
+      method: methodType,
+      body: body,
+      qs: queryString,
+      headers: newHeaders,
+      failOnStatusCode: false,
+    })
+      .then((res) => {
+        if (formData || res.body instanceof ArrayBuffer) {
+          res.body = JSON.parse(new TextDecoder().decode(res.body))
+        }
+        return res
+      })
+      .then((apiResponse) => {
+        // You can also return data or use it in further tests
+        const responseData = {
+          apiRes: apiResponse,
+        }
+        // cy.addToAstraScanIdList(response2.body.status)
+        return responseData
+      })
+  }
+)
 
 Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) => {
   let body = {}
@@ -625,6 +683,7 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
         url: Cypress.env('BASE_URL') + '/' + endPoint,
         method: methodType,
         body: body,
+        qs: queryString,
         headers: headers,
         failOnStatusCode: false,
       }).then((apiResponse) => {
@@ -656,25 +715,27 @@ Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) =>
 
 Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
   cy.loginByAuthAPI('', '').then((token_res: any) => {
-    cy.setHeaders({ 
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+    cy.setHeaders({
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     })
     cy.setAuthorizationToken(token_res.token)
-    return cy.request({
-      url: Cypress.env('BASE_URL') + '/gql/api',
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ query, variables }),
-      failOnStatusCode: false,
-    }).then((apiResponse) => {
-      // You can also return data or use it in further tests
-      const responseData = {
-        apiRes: apiResponse,
-      }
-      // cy.addToAstraScanIdList(response2.body.status)
-      return responseData
-    })
+    return cy
+      .request({
+        url: Cypress.env('BASE_URL') + '/gql/api',
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ query, variables }),
+        failOnStatusCode: false,
+      })
+      .then((apiResponse) => {
+        // You can also return data or use it in further tests
+        const responseData = {
+          apiRes: apiResponse,
+        }
+        // cy.addToAstraScanIdList(response2.body.status)
+        return responseData
+      })
   })
 })
 
@@ -690,9 +751,9 @@ Cypress.Commands.add('getUserSession', () => {
   cy.request({
     method: 'GET',
     url: Cypress.config('baseUrl') + '/admin/session',
-    failOnStatusCode: true
+    failOnStatusCode: true,
   }).as('login')
-});
+})
 
 Cypress.Commands.add('interceptUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')

@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert';
+import assert from '../services/user-assert';
 import {
   alwaysTrue,
   alwaysFalse,
@@ -132,12 +132,22 @@ export const deleteRecord = async function (
   if (localRecord == null) {
     return { status: 404, result: 'not-found' };
   } else {
-    const result = await batchService.remove(entity, localRecord.id);
-    if (result == null) {
-      return { status: 400, result: 'deletion-failed' };
-    }
-    return { status: 200, result: 'deleted', id: localRecord.id };
+    return await deleteRecordByInternalId(context, entity, localRecord.id);
   }
+};
+
+export const deleteRecordByInternalId = async function (
+  context: any,
+  entity: string,
+  dbid: string
+): Promise<BatchResult> {
+  const batchService = new BatchService(context);
+
+  const result = await batchService.remove(entity, dbid);
+  if (result == null) {
+    return { status: 400, result: 'deletion-failed' };
+  }
+  return { status: 200, result: 'deleted', id: dbid };
 };
 
 export const getFeedWorker = async (context: any, req: any, res: any) => {
@@ -240,6 +250,9 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
         response.push(
           `${field} { id, ${buildQueryResponse(mdRelField, children)} }`
         );
+        // } else if ('compositeRefKey' in md.transformations[field]) {
+        //   const compositeKeyFields = md.transformations[field].compositeRefKey;
+        //   response.push(`${field} { id, ${compositeKeyFields.join(', ')} }`);
       } else {
         const refKey =
           'refKey' in md.transformations[field]
@@ -268,7 +281,7 @@ export const getRecords = async function (
   children: string[] = undefined,
   where: BatchWhereClause = undefined,
   skip: number = 0,
-  first: number = 5000,
+  first: number = 5000
 ): Promise<any[]> {
   const md = (metadata as any)[feedEntity];
 
@@ -280,6 +293,24 @@ export const getRecords = async function (
     where,
     skip,
     first
+  );
+};
+
+export const getRecordById = async function (
+  context: any,
+  feedEntity: string,
+  id: string,
+  children: string[] = undefined
+): Promise<any> {
+  const md = (metadata as any)[feedEntity];
+
+  const batchService = new BatchService(context);
+
+  return await batchService.lookup(
+    md.query,
+    'id',
+    id,
+    buildQueryResponse(md, children)
   );
 };
 

@@ -25,6 +25,8 @@ import {
 } from '../../../services/keycloak';
 import { o } from '../util';
 import { GroupMembership } from '@/services/org-groups/types';
+import { remove } from 'lodash';
+import { removeKeys } from '../../../batch/feed-worker';
 
 (async () => {
   const uma2: Uma2WellKnown = await (
@@ -42,16 +44,12 @@ import { GroupMembership } from '@/services/org-groups/types';
 
   if (true) {
     const access: GroupMembership = {
-      name: 'databc',
-      parent: '/ca.bc.gov/ministry-of-citizens-services',
+      name: 'ministry-of-cats',
+      parent: '/ca.bc.gov',
       members: [
         {
-          member: { email: 'aidan.cope@gmail.com' },
-          roles: ['organization-admin'],
-        },
-        {
-          member: { email: 'apsowner@nowhere' },
-          roles: ['organization-admin'],
+          member: { email: 'janis@testmail.com' },
+          roles: ['organization-admin', 'system-owner'],
         },
       ],
     };
@@ -120,7 +118,7 @@ import { GroupMembership } from '@/services/org-groups/types';
     );
     await kc.createOrUpdateGroupAccess(access, ['idir']);
   }
-  if (true) {
+  if (false) {
     o(await kc.getGroupMembership('databc'));
     // await kc.assignNamespace(
     //   'ministry-of-citizens-services',
@@ -130,15 +128,23 @@ import { GroupMembership } from '@/services/org-groups/types';
   }
 
   if (false) {
-    await kc.unassignNamespace(
-      'ministry-of-citizens-services',
-      'databc',
-      'erx-demo'
+    await kc.unassignNamespace('gw-5fd72', 'ministry-of-cats', undefined);
+    await kc.assignNamespace(
+      'gw-5fd72',
+      'ministry-of-cats',
+      'technology',
+      false
     );
   }
 
-  // if (true) {
-  //   const access = await kc.getGroupAccess('databc');
-  //   console.log(JSON.stringify(access, null, 4));
-  // }
+  if (false) {
+    const access = await kc.getGroupAccess('ministry-of-cats');
+    console.log(JSON.stringify(access, null, 4));
+  }
+
+  if (true) {
+    const org = 'ministry-of-cats';
+    const out = await kc.getGroupMembership(org);
+    o(removeKeys(out, ['id', 'username']));
+  }
 })();
