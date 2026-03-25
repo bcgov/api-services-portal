@@ -3,9 +3,10 @@ import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
   GetCatalogByName,
-  GetServiceClientForSubsystem,
+  GetSubsystemEntryForSubsystem,
   ServiceCatalogEntry,
   ServiceClient,
+  SubsystemEntry,
 } from '../catalog';
 
 // TODO: clean this up a bit!
@@ -27,7 +28,7 @@ export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
 
 export interface SDXP2PConsumerPatternData {
   service: ServiceCatalogEntry;
-  client: ServiceClient;
+  client: SubsystemEntry;
 }
 
 /**
@@ -52,14 +53,14 @@ export const SDXP2PConsumerPattern = {
       'Client subsystem does not belong to the specified organization'
     );
 
-    const client = await GetServiceClientForSubsystem(ctx, subsystem);
-    await EnrichWithRuntimeGroup(ctx, client.subsystem);
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+    await EnrichWithRuntimeGroup(ctx, client);
 
     const service = await GetCatalogByName(ctx, inputs.service_id);
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
 
     return {
-      gateway_id: client.subsystem.gateway.id,
+      gateway_id: client.gateway.id,
       client,
       service,
     };
@@ -68,12 +69,10 @@ export const SDXP2PConsumerPattern = {
   eval: (inputs: Record<string, any>, data: SDXP2PConsumerPatternData) => {
     const serviceLocator = data.service.name;
 
-    const clientLocator = data.client.subsystem.clientId;
-    const routeHostUrl = new URL(
-      data.client.subsystem.runtimeGroup.consumerEndpoint
-    );
+    const clientLocator = data.client.clientId;
+    const routeHostUrl = new URL(data.client.runtimeGroup.consumerEndpoint);
 
-    const consumerGateway = data.client.subsystem.gateway.id;
+    const consumerGateway = data.client.gateway.id;
 
     const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
     const name = `sdx.p2p.${inputs.conn_id}.c.${serviceLocator}`;
@@ -118,7 +117,7 @@ export const SDXP2PConsumerPattern = {
 };
 
 function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
-  const clientLocator = data.client.subsystem.clientId;
+  const clientLocator = data.client.clientId;
   const serviceHost = data.service.subsystem.runtimeGroup.host;
   return {
     name: 'request-transformer',
@@ -135,8 +134,8 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
 }
 
 function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.client.subsystem.runtimeGroup.name}:edge`;
-  const keySetName = `sdx.edge.${data.client.subsystem.runtimeGroup.name}`;
+  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:edge`;
+  const keySetName = `sdx.edge.${data.client.runtimeGroup.name}`;
 
   return {
     name: 'trust-sign',

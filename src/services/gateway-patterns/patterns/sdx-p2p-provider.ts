@@ -3,9 +3,10 @@ import { SubsystemService } from '../../batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
   GetCatalogByName,
-  GetServiceClientForSubsystem,
+  GetSubsystemEntryForSubsystem,
   ServiceCatalogEntry,
   ServiceClient,
+  SubsystemEntry,
 } from '../catalog';
 
 // TODO: clean this up a bit!
@@ -34,7 +35,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
 
 export interface SDXP2PProviderPatternData {
   service: ServiceCatalogEntry;
-  client: ServiceClient;
+  client: SubsystemEntry;
   key: any;
 }
 
@@ -54,8 +55,8 @@ export const SDXP2PProviderPattern = {
       inputs.client_id
     );
 
-    const client = await GetServiceClientForSubsystem(ctx, subsystem);
-    await EnrichWithRuntimeGroup(ctx, client.subsystem);
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+    await EnrichWithRuntimeGroup(ctx, client);
 
     const service = await GetCatalogByName(ctx, inputs.service_id);
     await EnrichWithRuntimeGroup(ctx, service.subsystem);
@@ -77,7 +78,7 @@ export const SDXP2PProviderPattern = {
     const serviceLocator = data.service.name;
     const serviceHost = data.service.subsystem.runtimeGroup.host;
 
-    const clientLocator = data.client.subsystem.clientId;
+    const clientLocator = data.client.clientId;
 
     const providerGateway = data.service.subsystem.gateway.id;
 

@@ -12,7 +12,7 @@ import { inject, injectable } from 'tsyringe';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import {
   EnrichWithRuntimeGroup,
-  GetServiceClientForSubsystem,
+  GetSubsystemEntryForSubsystem,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { KeystoneService } from '../../ioc/keystoneInjector';
@@ -63,10 +63,10 @@ export class OrgSubsystemClientController extends Controller {
     const subsystemEntries: SubsystemEntry[] = [];
 
     for (const subsystem of subsystems) {
-      const subsystemEntry = await GetServiceClientForSubsystem(ctx, subsystem);
+      const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
-      await EnrichWithRuntimeGroup(ctx, subsystemEntry.subsystem);
-      subsystemEntries.push(subsystemEntry.subsystem);
+      await EnrichWithRuntimeGroup(ctx, subsystemEntry);
+      subsystemEntries.push(subsystemEntry);
     }
     return subsystemEntries;
   }
@@ -99,13 +99,10 @@ export class OrgSubsystemClientController extends Controller {
       name
     );
 
-    const subsystemEntry = await GetServiceClientForSubsystem(
-      context,
-      subsystem
-    );
+    const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
-    await EnrichWithRuntimeGroup(context, subsystemEntry.subsystem);
+    await EnrichWithRuntimeGroup(context, subsystemEntry);
 
-    return subsystemEntry.subsystem;
+    return subsystemEntry;
   }
 }

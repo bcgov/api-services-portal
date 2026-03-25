@@ -13,17 +13,20 @@ import {
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
+import { removeEmpty, removeKeys } from '../../../batch/feed-worker';
+import { SubsystemService } from '../../../services/batch/subsystem';
 import {
   GetCatalog,
   GetCatalogByName,
+  GetSubsystemEntryForSubsystem,
   ServiceCatalogEntry,
+  SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
-import { KeystoneService } from '../../ioc/keystoneInjector';
-import { removeEmpty, removeKeys } from '../../../batch/feed-worker';
 import {
   getOrganizationMemberDetails,
   getOrganizations,
 } from '../../../services/keystone/organization';
+import { KeystoneService } from '../../ioc/keystoneInjector';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -55,6 +58,24 @@ export class CatalogController extends Controller {
       }))
       .filter((o) => o.member !== undefined)
       .map((o) => removeEmpty(o));
+  }
+
+  /**
+   *
+   * @returns
+   */
+  @Get('/subsystems')
+  @OperationId('subsystems-list')
+  public async listSubsystems(): Promise<SubsystemEntry[]> {
+    const ctx = this.keystone.sudo();
+    const records = await new SubsystemService().listSubsystems(ctx);
+    const result = await Promise.all(
+      records.map(async (o) => GetSubsystemEntryForSubsystem(o))
+    );
+    return result
+      .map((o) => removeEmpty(o))
+      .map((o) => removeKeys(o, ['gateway']))
+      .map((o) => o as SubsystemEntry);
   }
 
   /**

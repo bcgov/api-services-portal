@@ -18,7 +18,7 @@ import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
 import {
   EnrichWithRuntimeGroup,
-  GetServiceClientForSubsystem,
+  GetSubsystemEntryForSubsystem,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
@@ -169,20 +169,20 @@ export class OrgSubsystemController extends Controller {
       name
     );
 
-    const client = await GetServiceClientForSubsystem(context, subsystem);
+    const client = GetSubsystemEntryForSubsystem(subsystem);
 
     const result = await CreateNamespaceForSubsystem(context, {
-      subsystem: client.subsystem,
+      subsystem: client,
       runtimeGroupName: body.runtimeGroupName,
     });
 
     assertEqual(
-      client.subsystem.gateway.id === result.name,
+      client.gateway.id === result.name,
       true,
       'gatewayId',
       'Gateway ID mismatch after creation'
     );
 
-    return { gatewayId: client.subsystem.gateway.id };
+    return { gatewayId: client.gateway.id };
   }
 }

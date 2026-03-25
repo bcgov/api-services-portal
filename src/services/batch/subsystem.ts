@@ -60,6 +60,16 @@ class SubsystemService {
     return records;
   };
 
+  listSubsystems = async (context: Keystone): Promise<KeystoneSubsystem[]> => {
+    const records: KeystoneSubsystem[] = await getRecords(
+      context,
+      'Subsystem',
+      'allSubsystems',
+      ['organization']
+    );
+    return records;
+  };
+
   deleteSubsystem = async (
     context: any,
     org: string,

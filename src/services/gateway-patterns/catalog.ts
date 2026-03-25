@@ -22,6 +22,8 @@ export interface SubsystemEntry {
   clientId: string;
   organization?: {
     name: string;
+    description?: string;
+    title?: string;
     orgUnit?: string;
   };
   member?: {
@@ -176,22 +178,21 @@ export async function EnrichWithRuntimeGroup(
   };
 }
 
-export async function GetServiceClientForSubsystem(
-  ctx: any,
-  c: Subsystem
-): Promise<ServiceClient> {
+export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
   const member = parseOrganizationMemberDetails(c.organization.tags);
 
   return {
-    subsystem: {
-      name: c.name,
-      clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
-      organization: {
-        name: c.organization.name,
-      },
-      gateway: {
-        id: c.namespace,
-      },
+    name: c.name,
+    description: c.description,
+    clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
+    organization: {
+      name: c.organization.name,
+      title: c.organization.title,
+      description: c.organization.description,
+    },
+    member: member,
+    gateway: {
+      id: c.namespace,
     },
   };
 }
