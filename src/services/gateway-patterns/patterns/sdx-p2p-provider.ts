@@ -159,7 +159,7 @@ export const SDXP2PProviderPattern = {
 };
 
 function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:edge`;
+  const kid = `urn:ca:bc:sdx:edge:${data.service.subsystem.runtimeGroup.name}:0`;
   const keySetName = `sdx.edge.${data.service.subsystem.runtimeGroup.name}`;
 
   return {

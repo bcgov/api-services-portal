@@ -134,7 +134,7 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
 }
 
 function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:edge`;
+  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:0`;
   const keySetName = `sdx.edge.${data.client.runtimeGroup.name}`;
 
   return {
