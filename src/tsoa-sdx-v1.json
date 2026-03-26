@@ -1,0 +1,75 @@
+{
+  "entryFile": "server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": [
+    "controllers/sdx/v1/*Controller.ts"
+  ],
+  "spec": {
+    "name": "SDX Member API",
+    "version": "1.0.0",
+    "description": "Secure Data Exchange (SDX) by the Government of the Province of BC",
+    "outputDirectory": "controllers/sdx/v1",
+    "specVersion": 3,
+    "basePath": "/ds/api/sdx/v1",
+    "specFileBaseName": "openapi",
+    "yaml": true,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "oauth2",
+        "description": "Authz Client Credential",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "flow": "application",
+        "tokenUrl": "https://token_endpoint",
+        "scopes": {
+          "Namespace.Manage": "Manage namespaces",
+          "GatewayConfig.Publish": "Publish gateway configurations",
+          "Namespace.Assign": "Organization-level scope for managing gateways",
+          "System.Manage": "System-level scope for managing organization system and services"
+        }
+      },
+      "portal": {
+        "type": "http",
+        "description": "Authz Portal Login",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "openid": {
+        "type": "openIdConnect",
+        "description": "OIDC Login",
+        "openIdConnectUrl": "https://well_known_endpoint"
+      }
+    },
+    "tags": [
+      {
+        "name": "Catalog",
+        "description": "Discover all the great services available on BC's Secure Data Exchange"
+      },
+      {
+        "name": "Gateways",
+        "description": "Manage your routing policies on SDX"
+      },
+      {
+        "name": "Runtime Groups",
+        "description": "Manage SDX Edge Servers"
+      },
+      {
+        "name": "Services",
+        "description": "Organization system services"
+      },
+      {
+        "name": "Subsystems",
+        "description": "Organization subsystems"
+      }
+    ]
+  },
+  "routes": {
+    "routesDir": "controllers/sdx/v1",
+    "basePath": "/ds/api/sdx/v1",
+    "iocModule": "controllers/ioc",
+    "authenticationModule": "./auth/auth-tsoa"
+  },
+  "ignore": [
+    "**/node_modules/**"
+  ]
+}

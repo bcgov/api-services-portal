@@ -30,6 +30,7 @@
     "@types/mochawesome": "^6.2.0",
     "@types/node": "^16.0.0",
     "@types/request": "^2.48.7",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "cypress": "^13.17.0",

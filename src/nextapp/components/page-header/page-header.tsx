@@ -31,6 +31,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {breadcrumb && (
           <Box as="hgroup" mb={2}>
             <Breadcrumb
+              data-testid="breadcrumb"
               fontSize="sm"
               color="bc-link"
               separator={<BsChevronRight color="bc-component" />}

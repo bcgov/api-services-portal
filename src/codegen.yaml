@@ -6,3 +6,6 @@ generates:
   ./apis/shared/types/query.types.ts:
     plugins:
       - typescript
+  ./services/keystone/types.ts:
+    plugins:
+      - typescript

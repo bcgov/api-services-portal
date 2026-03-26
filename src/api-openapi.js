@@ -14,6 +14,7 @@ const { UnauthorizedError } = require('express-jwt');
 const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
+const { UserAssertionError } = require('./services/user-assert');
 
 class ApiOpenapiApp {
   constructor() {}
@@ -88,6 +89,31 @@ class ApiOpenapiApp {
     );
   }
 
+  prepareSDXV1(app) {
+    const {
+      RegisterRoutes: SDXV1Register,
+    } = require('./controllers/sdx/v1/routes');
+    const specFile = fs.realpathSync('controllers/sdx/v1/openapi.yaml');
+    const specObject = YAML.load(fs.readFileSync(specFile));
+
+    specObject.components.securitySchemes.jwt.flows.clientCredentials.tokenUrl = `${process.env.OIDC_ISSUER}/protocol/openid-connect/token`;
+
+    specObject.components.securitySchemes.openid.openIdConnectUrl = `${process.env.OIDC_ISSUER}/.well-known/openid-configuration`;
+
+    SDXV1Register(app);
+
+    app.get('/ds/api/sdx/v1/openapi.yaml', (req, res) => {
+      res.setHeader('Content-Type', 'application/yaml');
+      res.send(YAML.dump(specObject));
+    });
+
+    app.use(
+      '/ds/api/sdx/v1/console',
+      swaggerUi.serveFiles(specObject, options),
+      swaggerUi.setup(specObject)
+    );
+  }
+
   prepareMiddleware({ keystone }) {
     const logger = Logger('dsapi');
 
@@ -99,6 +125,7 @@ class ApiOpenapiApp {
     this.prepareV3(app);
     this.prepareV2(app);
     this.prepareV1(app);
+    this.prepareSDXV1(app);
 
     // RFC 8631 service-desc link relation
     // https://datatracker.ietf.org/doc/html/rfc8631
@@ -130,7 +157,10 @@ class ApiOpenapiApp {
           message: err?.message,
           fields: err?.fields,
         });
-      } else if (err instanceof AssertionError) {
+      } else if (
+        err instanceof AssertionError ||
+        err instanceof UserAssertionError
+      ) {
         // For some reason `message` is what the `stack` is normally
         // so just grab the first line and return that
         const response = {
@@ -138,6 +168,7 @@ class ApiOpenapiApp {
         };
         try {
           logger.warn('Error message %s', err.message);
+          // workaround until we get all AssertionError migrated to UserAssertionError
           response.message = err.message.split('\n')[0];
         } catch (e) {
           logger.warn('Failed to parse error message %s', e);

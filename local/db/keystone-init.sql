@@ -2350,3 +2350,311 @@ CREATE INDEX credentialissuer_inheritfrom_index ON public."CredentialIssuer" USI
 
 ALTER TABLE ONLY public."CredentialIssuer"
     ADD CONSTRAINT credentialissuer_inheritfrom_foreign FOREIGN KEY ("inheritFrom") REFERENCES public."CredentialIssuer"(id);
+
+
+-- NEW SDX TABLES
+
+
+
+
+--
+-- Name: RuntimeGroup; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."RuntimeGroup" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    namespace text NOT NULL,
+    host text NOT NULL,
+    organization integer,
+    "sdxEndpoint" text,
+    "consumerEndpoint" text,
+    "updatedAt_utc" timestamp without time zone,
+    "updatedAt_offset" text,
+    "createdAt_utc" timestamp without time zone,
+    "createdAt_offset" text
+);
+
+
+ALTER TABLE public."RuntimeGroup" OWNER TO keystonejsuser;
+
+--
+-- Name: RuntimeGroup_hostedOrganizations_many; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."RuntimeGroup_hostedOrganizations_many" (
+    "RuntimeGroup_left_id" integer NOT NULL,
+    "Organization_right_id" integer NOT NULL
+);
+
+
+ALTER TABLE public."RuntimeGroup_hostedOrganizations_many" OWNER TO keystonejsuser;
+
+
+--
+-- Name: RuntimeGroup_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."RuntimeGroup_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."RuntimeGroup_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: RuntimeGroup_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."RuntimeGroup_id_seq" OWNED BY public."RuntimeGroup".id;
+
+--
+-- Name: RuntimeGroup id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup" ALTER COLUMN id SET DEFAULT nextval('public."RuntimeGroup_id_seq"'::regclass);
+
+--
+-- Name: RuntimeGroup RuntimeGroup_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup"
+    ADD CONSTRAINT "RuntimeGroup_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: RuntimeGroup runtimegroup_host_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup"
+    ADD CONSTRAINT runtimegroup_host_unique UNIQUE (host);
+
+--
+-- Name: RuntimeGroup runtimegroup_name_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup"
+    ADD CONSTRAINT runtimegroup_name_unique UNIQUE (name);
+
+
+
+--
+-- Name: runtimegroup_hostedorganizations_many_organization_right_id_ind; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX runtimegroup_hostedorganizations_many_organization_right_id_ind ON public."RuntimeGroup_hostedOrganizations_many" USING btree ("Organization_right_id");
+
+
+--
+-- Name: runtimegroup_hostedorganizations_many_runtimegroup_left_id_inde; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX runtimegroup_hostedorganizations_many_runtimegroup_left_id_inde ON public."RuntimeGroup_hostedOrganizations_many" USING btree ("RuntimeGroup_left_id");
+
+
+--
+-- Name: runtimegroup_organization_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX runtimegroup_organization_index ON public."RuntimeGroup" USING btree (organization);
+
+
+--
+-- Name: RuntimeGroup_hostedOrganizations_many runtimegroup_hostedorganizations_many_organization_right_id_for; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup_hostedOrganizations_many"
+    ADD CONSTRAINT runtimegroup_hostedorganizations_many_organization_right_id_for FOREIGN KEY ("Organization_right_id") REFERENCES public."Organization"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: RuntimeGroup_hostedOrganizations_many runtimegroup_hostedorganizations_many_runtimegroup_left_id_fore; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup_hostedOrganizations_many"
+    ADD CONSTRAINT runtimegroup_hostedorganizations_many_runtimegroup_left_id_fore FOREIGN KEY ("RuntimeGroup_left_id") REFERENCES public."RuntimeGroup"(id) ON DELETE CASCADE;
+
+
+
+--
+-- Name: RuntimeGroup runtimegroup_organization_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."RuntimeGroup"
+    ADD CONSTRAINT runtimegroup_organization_foreign FOREIGN KEY (organization) REFERENCES public."Organization"(id);
+
+
+
+
+
+
+
+CREATE TABLE public."Subsystem" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    namespace text NOT NULL,
+    description text,
+    organization integer,
+    slug text NOT NULL
+);
+
+
+ALTER TABLE public."Subsystem" OWNER TO keystonejsuser;
+
+--
+-- Name: Subsystem_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."Subsystem_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Subsystem_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: Subsystem_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."Subsystem_id_seq" OWNED BY public."Subsystem".id;
+
+
+--
+-- Name: Subsystem id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Subsystem" ALTER COLUMN id SET DEFAULT nextval('public."Subsystem_id_seq"'::regclass);
+
+--
+-- Name: Subsystem Subsystem_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Subsystem"
+    ADD CONSTRAINT "Subsystem_pkey" PRIMARY KEY (id);
+
+--
+-- Name: Subsystem subsystem_slug_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Subsystem"
+    ADD CONSTRAINT subsystem_slug_unique UNIQUE (slug);
+
+
+--
+-- Name: Subsystem subsystem_organization_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Subsystem"
+    ADD CONSTRAINT subsystem_organization_foreign FOREIGN KEY (organization) REFERENCES public."Organization"(id);
+
+
+--
+-- Name: subsystem_organization_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX subsystem_organization_index ON public."Subsystem" USING btree (organization);
+
+
+
+
+
+
+--
+-- Name: OpenAPISpec; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."OpenAPISpec" (
+    id integer NOT NULL,
+    ref text NOT NULL,
+    name text NOT NULL,
+    organization integer,
+    namespace text NOT NULL,
+    version text NOT NULL,
+    title text NOT NULL,
+    summary text,
+    description text NOT NULL,
+    operations text NOT NULL,
+    spec text NOT NULL,
+    subsystem integer
+);
+
+
+ALTER TABLE public."OpenAPISpec" OWNER TO keystonejsuser;
+
+--
+-- Name: OpenAPISpec_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."OpenAPISpec_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."OpenAPISpec_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: OpenAPISpec_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."OpenAPISpec_id_seq" OWNED BY public."OpenAPISpec".id;
+
+--
+-- Name: OpenAPISpec id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."OpenAPISpec" ALTER COLUMN id SET DEFAULT nextval('public."OpenAPISpec_id_seq"'::regclass);
+
+--
+-- Name: OpenAPISpec OpenAPISpec_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."OpenAPISpec"
+    ADD CONSTRAINT "OpenAPISpec_pkey" PRIMARY KEY (id);
+
+--
+-- Name: OpenAPISpec openapispec_ref_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."OpenAPISpec"
+    ADD CONSTRAINT openapispec_ref_unique UNIQUE (ref);
+
+--
+-- Name: openapispec_subsystem_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX openapispec_subsystem_index ON public."OpenAPISpec" USING btree (subsystem);
+
+--
+-- Name: Subsystem subsystem_organization_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."OpenAPISpec"
+    ADD CONSTRAINT openapispec_organization_foreign FOREIGN KEY (organization) REFERENCES public."Organization"(id);
+
+
+--
+-- Name: openapispec_organization_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX openapispec_organization_index ON public."OpenAPISpec" USING btree (organization);
+
+
+
+--
+-- Name: OpenAPISpec openapispec_subsystem_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."OpenAPISpec"
+    ADD CONSTRAINT openapispec_subsystem_foreign FOREIGN KEY (subsystem) REFERENCES public."Subsystem"(id);

@@ -17,6 +17,9 @@ import {
   GatewayConsumer,
   GatewayService,
   Product,
+  Subsystem,
+  // RuntimeGroup,
+  // OpenApiSpec,
   ServiceAccess,
   User,
 } from '../keystone/types';
@@ -31,6 +34,7 @@ export interface ActivityDataInput {
   productName?: string;
   credentialIssuer?: CredentialIssuer;
   serviceAccess?: ServiceAccess;
+  subsystem?: Subsystem;
   prodEnvAccessItem?: ConsumerProdEnvAccess;
   consumer?: GatewayConsumer;
   consumerUsername?: string;
@@ -72,6 +76,9 @@ export class StructuredActivityService {
           break;
         case 'consumer':
           params[key] = dataInput.consumer.username;
+          break;
+        case 'subsystem':
+          params[key] = dataInput.subsystem.name;
           break;
         case 'consumerUsername':
           params['consumer'] = dataInput.consumerUsername;

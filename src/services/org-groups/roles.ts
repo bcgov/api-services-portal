@@ -12,6 +12,19 @@ export const PredefinedRolePermissions = {
       },
     ],
   },
+  'system-owner': {
+    label: 'System Owner',
+    permissions: [
+      {
+        resourceType: 'organization',
+        scopes: ['System.Manage'],
+      },
+      {
+        resourceType: 'namespace',
+        scopes: ['Namespace.Manage'],
+      },
+    ],
+  },
 } as {
   [key: string]: {
     label: string;

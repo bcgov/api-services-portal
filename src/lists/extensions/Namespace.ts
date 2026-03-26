@@ -51,6 +51,7 @@ import {
   validateNamespaceName,
 } from '../../services/keycloak/namespace-details';
 import { newNamespaceID } from '../../services/identifiers';
+import { CreateNamespace } from '../../services/workflow/create-namespace';
 
 const logger = Logger('ext.Namespace');
 
@@ -468,112 +469,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const newNS = args.name ? args.name : newNamespaceID();
-
-              validateNamespaceName(newNS);
-
-              const displayName =
-                args.displayName || generateDisplayName(context, newNS);
-
-              validateDisplayName(displayName);
-
-              const noauthContext = context.createContext({
-                skipAccessControl: true,
-              });
-              const prodEnv = await lookupProductEnvironmentServicesBySlug(
-                noauthContext,
-                process.env.GWA_PROD_ENV_SLUG
-              );
-              const envCtx = await getEnvironmentContext(
-                context,
-                prodEnv.id,
-                access
-              );
-
-              const nsService = new NamespaceService(
-                envCtx.issuerEnvConfig.issuerUrl
-              );
-              await nsService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
-              await nsService.checkNamespaceAvailable(newNS);
-
-              // This function gets all resources but also sets the accessToken in envCtx
-              // which we need to create the resource set
-              await getResourceSets(envCtx);
-
-              const resourceApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-
-              const scopes: string[] = [
-                'Namespace.Manage',
-                'Namespace.View',
-                'GatewayConfig.Publish',
-                'Access.Manage',
-                'Content.Publish',
-                'CredentialIssuer.Admin',
-              ];
-              const res = <ResourceSetInput>{
-                name: newNS,
-                displayName,
-                type: 'namespace',
-                resource_scopes: scopes,
-                ownerManagedAccess: true,
-              };
-
-              const rset = await resourceApi.createResourceSet(res);
-
-              if (isUserBasedResourceOwners(envCtx) == false) {
-                const permissionApi = new KeycloakPermissionTicketService(
-                  envCtx.issuerEnvConfig.issuerUrl,
-                  envCtx.accessToken
-                );
-                for (const scope of [
-                  'Namespace.Manage',
-                  'CredentialIssuer.Admin',
-                  'GatewayConfig.Publish',
-                  'Access.Manage',
-                ]) {
-                  await permissionApi.createPermission(
-                    rset.id,
-                    envCtx.subjectUuid,
-                    true,
-                    scope
-                  );
-                }
-              }
-
-              const kcGroupService = new KeycloakGroupService(
-                envCtx.issuerEnvConfig.issuerUrl
-              );
-              await kcGroupService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
-
-              await kcGroupService.createIfMissing('ns', newNS);
-
-              await recordActivity(
-                context.sudo(),
-                'create',
-                'Namespace',
-                newNS,
-                `Created ${newNS} namespace`,
-                'success',
-                JSON.stringify({
-                  message: '{actor} created {ns} namespace',
-                  params: {
-                    actor: context.authedItem.name,
-                    ns: newNS,
-                  },
-                }),
-                newNS,
-                [`Namespace:${newNS}`, `actor:${context.authedItem.name}`]
-              );
-
+              const rset = await CreateNamespace(context, args);
               return rset;
             },
             access: EnforcementPoint,
