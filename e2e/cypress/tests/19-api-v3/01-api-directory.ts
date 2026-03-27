@@ -78,7 +78,7 @@ describe('API Directory', () => {
               organization: {
                 name: org.name,
                 title: 'Some good title about kittens',
-                tags: [],
+                tags: org.tags,
                 description: 'Some good description about kittens',
               },
               organizationUnit: {
@@ -176,7 +176,7 @@ describe('API Directory', () => {
           organization: {
             name: org.name,
             title: 'Some good title about kittens',
-            tags: [],
+            tags: org.tags,
             description: 'Some good description about kittens',
           },
           organizationUnit: {
