@@ -19,7 +19,7 @@ class keycloakUsersPage {
   setUserToOrganization(orgName: string) {
     cy.contains('Join Group').click()
     cy.get('input[placeholder="Search group"]').type(orgName).type('{enter}')
-    cy.get(`input[data-testid="${orgName}-check"]`).click()
+    cy.get(`input[data-testid="${orgName}-check"]`).first().click()
     cy.get('[data-testid="join-button"]').click()
   }
 
