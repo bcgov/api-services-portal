@@ -1,6 +1,6 @@
-import { kebabCase, snakeCase } from 'lodash';
+import { snakeCase } from 'lodash';
 import { Logger } from '../../logger';
-import { strict as assert } from 'assert';
+import assert from '../user-assert';
 
 const logger = Logger('ks.batch');
 
@@ -237,6 +237,12 @@ export class BatchService {
       typeof eid != 'undefined' && eid != null,
       true,
       'Invalid key'
+    );
+
+    assert.strictEqual(
+      typeof refKey != 'undefined' && refKey != null,
+      true,
+      'Undefined refKey'
     );
 
     const refKeys = refKey.split('.');

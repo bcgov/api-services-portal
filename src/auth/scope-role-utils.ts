@@ -19,6 +19,12 @@ export function scopesToRoles(
   if (scopes.includes('Access.Manage')) {
     _roles.push('access-manager');
   }
+  if (scopes.includes('System.Manage')) {
+    _roles.push('system-owner');
+  }
+  if (scopes.includes('GatewayConfig.Publish')) {
+    _roles.push('config-publisher');
+  }
 
   _roles.push('portal-user');
   _roles.push(deriveRoleFromIdP(identityProvider));

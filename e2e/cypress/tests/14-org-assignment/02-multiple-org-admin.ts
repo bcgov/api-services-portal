@@ -25,7 +25,7 @@ describe('Give a user org admin access at organization level', () => {
   })
 
   it('Navigate to Users Page', () => {
-    cy.wait(500)
+    cy.wait(10000)
     cy.get('[id=nav-toggle').click()
     cy.contains('Users').click()
     cy.get('[id=nav-toggle').click()

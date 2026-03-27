@@ -66,10 +66,13 @@ describe('Create API Spec', () => {
   })
 
   it('creates a new service account', () => {
+    let nsDisplayName: string = "janis's Gateway"
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
       cy.wait(6000)
+      cy.get('[data-testid="breadcrumb"]').should('not.contain.text', 'undefined')
+      cy.get('[data-testid="breadcrumb"]').should('contain.text', nsDisplayName)
     })
     sa.saveServiceAcctCreds()
   })

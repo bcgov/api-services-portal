@@ -3,6 +3,7 @@ export interface BatchResult {
   result: string;
   reason?: string;
   id?: string;
+  refKey?: string;
   ownedBy?: string;
   childResults?: BatchResult[];
 }

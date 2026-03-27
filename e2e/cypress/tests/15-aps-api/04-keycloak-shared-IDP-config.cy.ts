@@ -29,6 +29,7 @@ describe('Apply Shared IDP config at Keycloak user group', () => {
   })
 
   it('Navigate to User Groups', () => {
+    cy.wait(10000)
     cy.get('[id=nav-toggle').click()
     cy.contains('Groups').click()
   })

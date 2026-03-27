@@ -172,7 +172,10 @@ function getCkanDataProducer(xfer, keyFile, apiCall, outFolder) {
     }
     const item = data.data[index];
     index++;
-    return xfer.copy(apiCall + '?id=' + item, outFolder + item);
+    return xfer.copy(
+      apiCall + '?include_users=false&include_groups=true&id=' + item,
+      outFolder + item
+    );
   };
 }
 
@@ -188,7 +191,7 @@ function findAllChildren(xfer, parentName) {
 }
 
 function isThisAChildOfParent(data, parentName) {
-  if (data.groups.length > 0) {
+  if (data.groups?.length > 0) {
     for (grp of data.groups) {
       if (grp['name'] === parentName) {
         return true;
@@ -199,7 +202,7 @@ function isThisAChildOfParent(data, parentName) {
 }
 
 function isOrgUnit(data) {
-  return data.groups.length > 0;
+  return data.groups?.length > 0;
 }
 
 module.exports = {

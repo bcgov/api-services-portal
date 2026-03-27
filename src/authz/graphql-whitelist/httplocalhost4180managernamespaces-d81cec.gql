@@ -1,11 +1,18 @@
 
   query GetCurrentNamespace {
     currentNamespace {
+      id
       name
       org
       orgUnit
       orgUpdatedAt
       orgEnabled
+      orgNoticeViewed
       orgAdmins
+      displayName
+      scopes {
+        name
+      }
+      prodEnvId
     }
   }

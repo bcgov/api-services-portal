@@ -1151,7 +1151,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v2/namespaces/:ns/activity',
-            authenticateMiddleware([{"jwt":["Namespace.View"]}]),
+            authenticateMiddleware([{"jwt":["Namespace.View"]},{"jwt":["Namespace.Manage"]}]),
 
             async function NamespaceController_namespaceActivity(request: any, response: any, next: any) {
             const args = {

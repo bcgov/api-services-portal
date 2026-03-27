@@ -3,8 +3,8 @@
 
 declare namespace Cypress {
   interface Namespace {
-    id: string;
-    name: string;
+    id: string
+    name: string
   }
 
   interface Chainable<Subject> {
@@ -26,6 +26,8 @@ declare namespace Cypress {
 
     makeKongRequest(serviceName: string, methodType: string, key?: string): Chainable<any>
 
+    makeKongProxyRequest(serviceName: string, methodType: string): Chainable<any>
+
     makeKongGatewayRequestUsingClientIDSecret(
       hostURL: string,
       methodType?: string
@@ -33,10 +35,7 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
-    createGateway(
-      gatewayid?: string,
-      displayname?: string,
-    ): Chainable<any>
+    createGateway(gatewayid?: string, displayname?: string): Chainable<any>
 
     deleteGatewayCli(gatewayid: string, force: boolean): Chainable<any>
 
@@ -93,18 +92,30 @@ declare namespace Cypress {
 
     setHeaders(headerValues: any): void
 
+    setHeader(key: string, value: string): void
+
     setRequestBody(requestBody: any): void
 
+    clearRequestBody(): void
+
+    setQueryString(qs: any): void
+
+    setRequestFormData(body: FormData): void
+
     setAuthorizationToken(token: string): void
-    
+
     gqlQuery<T = any>(query: string, variables?: Record<string, any>): Chainable<T>
-        
-    callAPI(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
+
+    callAPI(
+      endPoint: string,
+      methodType: string,
+      formData?: boolean
+    ): Chainable<Cypress.Response<any>>
 
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     getUserSession(): Chainable<Cypress.Response<any>>
-    
+
     interceptUserSession(): Chainable<Cypress.Response<any>>
 
     compareJSONObjects(
