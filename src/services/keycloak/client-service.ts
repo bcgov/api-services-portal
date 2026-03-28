@@ -7,6 +7,7 @@ import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/
 import CertificateRepresentation from '@keycloak/keycloak-admin-client/lib/defs/certificateRepresentation';
 import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
 import ClientRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientRepresentation';
+import ProtocolMapperRepresentation from '@keycloak/keycloak-admin-client/lib/defs/protocolMapperRepresentation';
 
 const logger = Logger('kc.client');
 
@@ -203,5 +204,9 @@ export class KeycloakClientService {
       { id: consumerClient.id, client: rolesClient.id },
       roles
     );
+  }
+
+  public async updateClient (id: string, mapperId: string, payload: ProtocolMapperRepresentation) {
+    await this.kcAdminClient.clients.updateProtocolMapper({id, mapperId}, payload)
   }
 }

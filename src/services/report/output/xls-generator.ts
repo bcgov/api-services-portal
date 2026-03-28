@@ -10,25 +10,30 @@ function toText(field: any, value: any) {
   }
 }
 
+function getValueByPath(raw: any, path: string) {
+  return path.split('.').reduce((acc, key) => acc && acc[key], raw);
+}
+
 export function generateExcelWorkbook(data: any) {
   const workbook = new ExcelJS.Workbook();
 
   reportOrder.forEach((tab: string) => {
     const struct = reportStructure[tab];
-    const sheet = workbook.addWorksheet(struct.label);
-
-    sheet.columns = struct.fields.map((field: any) =>
-      Object.assign(field, {
-        style: { font: { bold: false, size: 12, name: 'Arial' } },
-      })
-    );
-
-    sheet.getRow(1).font = { bold: true, size: 12, name: 'Arial' };
 
     if (tab in data) {
-      data[tab].forEach((raw: any) => {
-        const row = struct.fields.map((field: any) =>
-          field.key in raw ? toText(field, raw[field.key]) : ''
+      const sheet = workbook.addWorksheet(struct.label);
+
+      sheet.columns = struct.fields.map((field: any) =>
+        Object.assign(field, {
+          style: { font: { bold: false, size: 12, name: 'Arial' } },
+        })
+      );
+
+      sheet.getRow(1).font = { bold: true, size: 12, name: 'Arial' };
+
+      data[tab]?.forEach((raw: any) => {
+        const row = struct.fields.map(
+          (field: any) => toText(field, getValueByPath(raw, field.key)) ?? ''
         );
         sheet.addRow(row);
       });

@@ -22,6 +22,7 @@ export async function getAccessRequestsByNamespace(
         requestor {
           name
           username
+          providerUsername
         }
         application {
           name

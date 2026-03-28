@@ -180,11 +180,20 @@ export async function lookupEnvironmentsByNS(
                         appId
                         name
                         flow
+                        active
                         additionalDetailsToRequest
                         approval
+                        services {
+                          name
+                        }
                         product {
                           id
                           name
+                          dataset {
+                            name
+                            title
+                            isInCatalog
+                          }
                         }
                         legal {
                           reference

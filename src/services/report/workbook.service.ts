@@ -17,6 +17,8 @@ import {
   getGatewayMetrics,
   ReportOfGatewayMetrics,
 } from './data';
+import { rollupFeatures } from './data/namespaces';
+import { getProducts } from './data/products';
 
 export class WorkbookService {
   keystone: Keystone;
@@ -42,6 +44,10 @@ export class WorkbookService {
     const serviceLookup: Map<string, ReportOfGatewayMetrics> = gatewayToMap(
       gateway_metrics
     );
+
+    const products = await getProducts(this.keystone, namespaces);
+
+    rollupFeatures(namespaces, gateway_metrics, products);
 
     const gateway_controls = await getGatewayControls(
       this.keystone,
@@ -79,6 +85,7 @@ export class WorkbookService {
     const data = {
       namespaces,
       ns_access,
+      products,
       gateway_metrics,
       gateway_controls,
       service_access,
