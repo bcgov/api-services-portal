@@ -1,6 +1,7 @@
 import './commands'
 import 'cypress-xpath'
 import './auth-commands'
+import './keycloak-commands'
 import './prep-commands'
 import './util-commands'
 import './mailpit-commands'

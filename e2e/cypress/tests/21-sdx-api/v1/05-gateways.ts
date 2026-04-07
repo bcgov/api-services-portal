@@ -120,6 +120,18 @@ describe('SDX Gateways', () => {
                   expect(body).to.have.property('gateway')
                   expect(body.gateway.id).to.be.equal(gatewayId)
                   expect(body.organization.name).to.be.equal(org.name)
+
+                  const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
+
+                  cy.getKeycloakGroupByName(runtimeGroup.name).then((group: any) => {
+                    cy.getKeycloakGroupDetails(group.id).then((groupDetails: any) => {
+                      expect(groupDetails.name).to.be.equal(runtimeGroup.name)
+                      expect(groupDetails.attributes).to.have.property('perm-route-paths')
+                      expect(groupDetails.attributes['perm-route-paths']).to.include(
+                        expectedRoutePathPrefix
+                      )
+                    })
+                  })
                 })
               })
             })
