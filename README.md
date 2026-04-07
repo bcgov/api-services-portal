@@ -37,6 +37,7 @@ To run the Cypress test automation suite, run
 docker compose --profile testsuite build
 docker compose --profile testsuite up
 ```
+Why?
 
 ### gwa CLI configuration
 
