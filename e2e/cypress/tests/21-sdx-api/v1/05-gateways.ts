@@ -76,9 +76,13 @@ describe('SDX Gateways', () => {
       it('PUT /organizations/{org}/subsystems/{subsystem}/gateway', () => {
         const { org, gateway, dataset, datasetId, runtimeGroupId, product } = workingData
 
+        const guidSuffix = Cypress._.random(1e5, 1e6 - 1).toString(16).slice(0, 5)
+
         const subsystem = {
-          name: `SUBSYS-${datasetId.toUpperCase()}`,
+          // name: `SUBSYS-${datasetId.toUpperCase()}-${guidSuffix}`,
+          name: `SUBSYS-${guidSuffix.toUpperCase()}`,
         }
+
         cy.setRequestBody(subsystem)
         cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
           ({ apiRes: { status, body } }: any) => {
@@ -94,7 +98,7 @@ describe('SDX Gateways', () => {
               `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
               'PUT'
             ).then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
+              expect(status, body.message).to.be.equal(200)
 
               cy.setRequestBody({
                 runtimeGroupName: runtimeGroup.name,
@@ -103,7 +107,7 @@ describe('SDX Gateways', () => {
                 `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/gateway`,
                 'PUT'
               ).then(({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(200)
+                expect(status, body.message).to.be.equal(200)
                 expect(body).to.have.property('gatewayId')
 
                 const gatewayId = body.gatewayId
@@ -112,20 +116,25 @@ describe('SDX Gateways', () => {
                   `ds/api/sdx/v1/organizations/${org.name}/clients/${subsystem.name}`,
                   'GET'
                 ).then(({ apiRes: { status, body } }: any) => {
+                  expect(status, body.message).to.be.equal(200)
                   expect(body.runtimeGroup.name).to.be.equal(runtimeGroup.name)
 
-                  expect(status).to.be.equal(200)
-                  expect(body.name).to.be.equal(`SUBSYS-${datasetId.toUpperCase()}`)
+                  expect(body.name).to.be.equal(subsystem.name)
                   // expect(JSON.stringify(body)).to.be.equal('')
                   expect(body).to.have.property('gateway')
                   expect(body.gateway.id).to.be.equal(gatewayId)
                   expect(body.organization.name).to.be.equal(org.name)
 
+                  const expectedgroupName = gatewayId
+
                   const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
 
-                  cy.getKeycloakGroupByName(runtimeGroup.name).then((group: any) => {
+                  cy.getKeycloakGroupByName(expectedgroupName).then((group: any) => {
                     cy.getKeycloakGroupDetails(group.id).then((groupDetails: any) => {
-                      expect(groupDetails.name).to.be.equal(runtimeGroup.name)
+                      expect(
+                        groupDetails.name,
+                        `groupDetails.name=${groupDetails.name}, expectedgroupName=${expectedgroupName}`
+                      ).to.be.equal(expectedgroupName)
                       expect(groupDetails.attributes).to.have.property('perm-route-paths')
                       expect(groupDetails.attributes['perm-route-paths']).to.include(
                         expectedRoutePathPrefix

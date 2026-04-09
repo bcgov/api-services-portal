@@ -41,8 +41,16 @@ Cypress.Commands.add('getKeycloakGroupByName', (groupName: string) => {
         },
       })
       .then(({ body }: any) => {
-        const match = (body || []).find((g: any) => g.name === groupName)
-        expect(match, `Keycloak group ${groupName} should exist`).to.exist
+        const flattenGroups = (groups: any[] = []): any[] =>
+          groups.flatMap((g: any) => [g, ...flattenGroups(g.subGroups || [])])
+
+        const match = flattenGroups(body || []).find((g: any) => g.name === groupName)
+
+        expect(
+          match,
+          `Keycloak group ${groupName} should exist. Response: ${JSON.stringify(body)}`
+        ).to.exist
+
         return match
       })
   })
