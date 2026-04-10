@@ -73,6 +73,7 @@ type Namespace {
     permDomains: [String],
     permDataPlane: String,
     permProtectedNs: String,
+    permRoutePaths: [String],
     org: JSON,
     orgUnit: JSON
     orgUpdatedAt: Float,

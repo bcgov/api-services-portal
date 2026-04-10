@@ -79,7 +79,6 @@ describe('SDX Gateways', () => {
         const guidSuffix = Cypress._.random(1e5, 1e6 - 1).toString(16).slice(0, 5)
 
         const subsystem = {
-          // name: `SUBSYS-${datasetId.toUpperCase()}-${guidSuffix}`,
           name: `SUBSYS-${guidSuffix.toUpperCase()}`,
         }
 
@@ -125,21 +124,14 @@ describe('SDX Gateways', () => {
                   expect(body.gateway.id).to.be.equal(gatewayId)
                   expect(body.organization.name).to.be.equal(org.name)
 
-                  const expectedgroupName = gatewayId
-
                   const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
 
-                  cy.getKeycloakGroupByName(expectedgroupName).then((group: any) => {
-                    cy.getKeycloakGroupDetails(group.id).then((groupDetails: any) => {
-                      expect(
-                        groupDetails.name,
-                        `groupDetails.name=${groupDetails.name}, expectedgroupName=${expectedgroupName}`
-                      ).to.be.equal(expectedgroupName)
-                      expect(groupDetails.attributes).to.have.property('perm-route-paths')
-                      expect(groupDetails.attributes['perm-route-paths']).to.include(
-                        expectedRoutePathPrefix
-                      )
-                    })
+                  cy.callAPI(
+                    `ds/api/v2/namespaces/${gatewayId}`,
+                    'GET'
+                  ).then(({ apiRes: { status, body } }: any) => {
+                    expect(status, body.message).to.be.equal(200)
+                    expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
                   })
                 })
               })
