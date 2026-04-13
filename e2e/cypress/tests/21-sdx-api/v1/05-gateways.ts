@@ -133,6 +133,14 @@ describe('SDX Gateways', () => {
                     expect(status, body.message).to.be.equal(200)
                     expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
                   })
+
+                  cy.callAPI(
+                    `ds/api/v3/gateways/${gatewayId}`,
+                    'GET'
+                  ).then(({ apiRes: { status, body } }: any) => {
+                    expect(status, body.message).to.be.equal(200)
+                    expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
+                  })
                 })
               })
             })
