@@ -14,6 +14,7 @@ import { RuntimeGroup as KeystoneRuntimeGroup } from '../keystone/types';
 import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
+import { StepTokenService } from '../certificate-authority/step-token';
 
 const logger = Logger('batch.runtime-group');
 
@@ -219,6 +220,34 @@ class RuntimeGroupService {
 
     assert.strictEqual(records.length == 0, false, 'Runtime Group not found');
     return records.pop();
+  };
+
+  requestOneTimeUseToken = async (
+    context: Keystone,
+    name: string
+  ): Promise<string> => {
+    const rg = await this.findRuntimeGroupByUniqueName(context, name);
+    const sdxEndpoint = new URL(rg.sdxEndpoint);
+
+    // The subject alternative names (SANs) for the certificate should include
+    // the runtime group's host and the SDX endpoint hostname (if different)
+    // to ensure the certificate is valid for both.
+    const san = [rg.host];
+    if (sdxEndpoint.hostname !== rg.host) {
+      san.push(sdxEndpoint.hostname);
+    }
+    const stepTokenService = new StepTokenService(process.env.STEP_TOKEN_URL);
+
+    logger.debug(
+      "Requesting token for runtime group '%s' with SANs: %o",
+      name,
+      san
+    );
+
+    return await stepTokenService.requestOneTimeUseToken({
+      subject: rg.host,
+      san,
+    });
   };
 }
 
