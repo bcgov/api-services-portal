@@ -124,6 +124,7 @@ export async function backfillGroupAttributes(
     'perm-domains',
     'perm-data-plane',
     'perm-protected-ns',
+    'perm-route-paths',
     'org',
     'org-unit',
     'org-updated-at',

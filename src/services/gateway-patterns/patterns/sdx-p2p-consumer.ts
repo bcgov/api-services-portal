@@ -8,6 +8,7 @@ import {
   ServiceClient,
   SubsystemEntry,
 } from '../catalog';
+import { getRoutePathPrefix } from '../../utils';
 
 // TODO: clean this up a bit!
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
@@ -79,6 +80,8 @@ export const SDXP2PConsumerPattern = {
 
     const upgrades: ConsumerUpgrades = inputs.upgrades || {};
 
+    const routePathPrefix = getRoutePathPrefix(serviceLocator);
+
     const config = {
       kind: 'GatewayService',
       name,
@@ -86,7 +89,7 @@ export const SDXP2PConsumerPattern = {
       routes: [
         {
           hosts: [routeHostUrl.hostname],
-          paths: [`/sdx/0/${serviceLocator}`],
+          paths: [routePathPrefix],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
           name,
           strip_path: false,
