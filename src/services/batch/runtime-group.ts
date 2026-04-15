@@ -222,7 +222,7 @@ class RuntimeGroupService {
     return records.pop();
   };
 
-  requestOneTimeUseToken = async (
+  generateCertSignRequestToken = async (
     context: Keystone,
     name: string
   ): Promise<string> => {

@@ -7,7 +7,7 @@ x-common-variables: &common-variables
 
 secrets:
   npm_token:
-    environment: "NPM_TOKEN"
+    environment: 'NPM_TOKEN'
 
 services:
   keycloak:
@@ -27,21 +27,21 @@ services:
     # Keycloak 26 Hostname v2: --hostname accepts full URL (host + port + path).
     command:
       [
-        "start",
-        "--optimized",
-        "--hostname",
-        "http://keycloak.localtest.me:9081/auth",
-        "--db-url",
-        "jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}",
-        "--db-username",
-        "keycloakuser",
-        "--db-password",
-        "keycloakuser",
-        "--http-enabled",
-        "true",
-        "--http-port",
-        "9081",
-        "--import-realm",
+        'start',
+        '--optimized',
+        '--hostname',
+        'http://keycloak.localtest.me:9081/auth',
+        '--db-url',
+        'jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}',
+        '--db-username',
+        'keycloakuser',
+        '--db-password',
+        'keycloakuser',
+        '--http-enabled',
+        'true',
+        '--http-port',
+        '9081',
+        '--import-realm',
       ]
     volumes:
       - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
@@ -136,7 +136,7 @@ services:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -307,12 +307,31 @@ services:
     container_name: mailpit
     restart: unless-stopped
     ports:
-      - '1025:1025'  # SMTP port for receiving emails
-      - '8025:8025'  # Web UI for viewing emails
+      - '1025:1025' # SMTP port for receiving emails
+      - '8025:8025' # Web UI for viewing emails
     networks:
       aps-net:
         aliases:
           - mailpit.localtest.me
+
+  mocks-step-token-api:
+    image: denoland/deno:2.7.12
+    container_name: mocks-step-token-api
+    command:
+      - deno
+      - run
+      - --allow-net=:2020,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+    ports:
+      - '2020:2020'
+    volumes:
+      - ./local/mocks/step-token-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - step-token-api.localtest.me
 
 networks:
   aps-net: {}

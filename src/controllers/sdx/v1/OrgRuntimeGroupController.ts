@@ -237,12 +237,12 @@ export class RuntimeGroupController extends Controller {
     @Path() name: string,
     @Request() request: any
   ): Promise<{ token: string }> {
-    // Create read-only Keystone context
+    // Create Keystone context with access control disabled
     const context = this.keystone.createContext(request, true);
 
     const service = new RuntimeGroupService();
 
-    const token = await service.requestOneTimeUseToken(context, name);
+    const token = await service.generateCertSignRequestToken(context, name);
 
     return { token };
   }
