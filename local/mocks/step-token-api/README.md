@@ -20,27 +20,16 @@
 ## Running
 
 ```sh
-docker run -ti --rm -p 9999:8000 --name step-token-api-mock \
+docker run -ti --rm -p 2020:2020 --name step-token-api-mock \
   -v `pwd`/main.ts:/app/main.ts \
   denoland/deno:2.7.12 \
-  --allow-env \
-  --allow-net=:8000,deno.land --allow-read --allow-write /app/main.ts
+  --allow-net=:2020,deno.land --allow-read --allow-write /app/main.ts
 
 ```
 
-## Deployment
+## Calling API
 
 ```sh
-helm upgrade --install data-usage-mock \
- --set fullnameOverride=data-usage-mock \
- -f chart.yaml \
- --set-file "config[0].contents=main.ts" \
-bcgov/generic-api
-```
-
-## Importing data
-
-```sh
-curl -v http://localhost:9999/token \
-  -d '{"name": "abc.servers.sdx", "san": ["abc.servers.sdx", "10.10.10.10"]}'
+curl -v http://localhost:2020/token \
+  -d '{"subject": "abc.servers.sdx", "san": ["abc.servers.sdx", "10.10.10.10"]}'
 ```
