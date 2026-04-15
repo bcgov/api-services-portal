@@ -13,7 +13,7 @@
 - do not use any environment variables
 - serve on port 8000
 - put database at `./data/sqlite.db`
-- use the `openapi.yaml` OpenAPI spec for details about the operations and the entity
+- use the `draft-openapi.yaml` OpenAPI spec for details about the operations and the entity
 - build the API rest endpoints, and the corresponding interaction with the database
 - only look at the files: openapi.yaml and main.ts (if it exists)
 
