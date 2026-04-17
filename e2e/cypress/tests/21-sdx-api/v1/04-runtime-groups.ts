@@ -149,5 +149,35 @@ describe('SDX Runtime Groups', () => {
         expect(body.message).to.be.equal('Runtime Group not found')
       })
     })
+
+    it('POST /organizations/{org}/runtime-groups/{name}/tokens (bad url)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}3`,
+        sdxEndpoint: 'invalid-url',
+      }
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('created')
+
+          const newRuntimeGroupId = payload.name
+
+          cy.clearRequestBody()
+          cy.setQueryString({})
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${newRuntimeGroupId}/tokens`,
+            'POST'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(422)
+            expect(body.message).to.be.equal(
+              'A valid SDX Endpoint URL is required for requesting a token'
+            )
+          })
+        }
+      )
+    })
   })
 })

@@ -242,7 +242,10 @@ export class RuntimeGroupController extends Controller {
 
     const service = new RuntimeGroupService();
 
-    const token = await service.generateCertSignRequestToken(context, name);
+    // Verify the runtime group belongs to the specified organization
+    const rg = await service.findRuntimeGroupByName(context, org, name);
+
+    const token = await service.generateCertSignRequestToken(rg);
 
     return { token };
   }

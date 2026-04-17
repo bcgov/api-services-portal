@@ -14,10 +14,10 @@ paths:
             schema:
               type: object
               required:
-                - name
+                - subject
                 - san
               properties:
-                name:
+                subject:
                   type: string
                 san:
                   type: array

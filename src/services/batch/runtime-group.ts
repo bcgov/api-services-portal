@@ -223,29 +223,41 @@ class RuntimeGroupService {
   };
 
   generateCertSignRequestToken = async (
-    context: Keystone,
-    name: string
+    runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
-    const rg = await this.findRuntimeGroupByUniqueName(context, name);
-    const sdxEndpoint = new URL(rg.sdxEndpoint);
+    let sdxEndpoint: URL;
+    try {
+      sdxEndpoint = new URL(runtimeGroup.sdxEndpoint);
+    } catch (err) {
+      logger.error(
+        "Invalid SDX endpoint URL '%s' for runtime group '%s'",
+        runtimeGroup.sdxEndpoint,
+        runtimeGroup.name
+      );
+    }
+    assert.strictEqual(
+      sdxEndpoint !== undefined,
+      true,
+      'A valid SDX Endpoint URL is required for requesting a token'
+    );
 
     // The subject alternative names (SANs) for the certificate should include
     // the runtime group's host and the SDX endpoint hostname (if different)
     // to ensure the certificate is valid for both.
-    const san = [rg.host];
-    if (sdxEndpoint.hostname !== rg.host) {
+    const san = [runtimeGroup.host];
+    if (sdxEndpoint.hostname !== runtimeGroup.host) {
       san.push(sdxEndpoint.hostname);
     }
     const stepTokenService = new StepTokenService(process.env.STEP_TOKEN_URL);
 
     logger.debug(
       "Requesting token for runtime group '%s' with SANs: %o",
-      name,
+      runtimeGroup.name,
       san
     );
 
     return await stepTokenService.requestOneTimeUseToken({
-      subject: rg.host,
+      subject: runtimeGroup.host,
       san,
     });
   };
