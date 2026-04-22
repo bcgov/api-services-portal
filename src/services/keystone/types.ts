@@ -1044,6 +1044,150 @@ export enum CacheControlScope {
   Private = 'PRIVATE'
 }
 
+/**  A keystone list  */
+export type ConnectionRequest = {
+  __typename?: 'ConnectionRequest';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the ConnectionRequest List config, or
+   *  2. As an alias to the field set on 'labelField' in the ConnectionRequest List config, or
+   *  3. As an alias to a 'name' field on the ConnectionRequest List (if one exists), or
+   *  4. As an alias to the 'id' field on the ConnectionRequest List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  clientId?: Maybe<Scalars['String']>;
+  serviceId?: Maybe<Scalars['String']>;
+  clientOrganization?: Maybe<Organization>;
+  serviceOrganization?: Maybe<Organization>;
+  isApproved?: Maybe<Scalars['Boolean']>;
+  isActive?: Maybe<Scalars['Boolean']>;
+  slug?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type ConnectionRequestCreateInput = {
+  clientId?: Maybe<Scalars['String']>;
+  serviceId?: Maybe<Scalars['String']>;
+  clientOrganization?: Maybe<OrganizationRelateToOneInput>;
+  serviceOrganization?: Maybe<OrganizationRelateToOneInput>;
+  isApproved?: Maybe<Scalars['Boolean']>;
+  isActive?: Maybe<Scalars['Boolean']>;
+  slug?: Maybe<Scalars['String']>;
+};
+
+export type ConnectionRequestUpdateInput = {
+  clientId?: Maybe<Scalars['String']>;
+  serviceId?: Maybe<Scalars['String']>;
+  isApproved?: Maybe<Scalars['Boolean']>;
+  isActive?: Maybe<Scalars['Boolean']>;
+};
+
+export type ConnectionRequestWhereInput = {
+  AND?: Maybe<Array<Maybe<ConnectionRequestWhereInput>>>;
+  OR?: Maybe<Array<Maybe<ConnectionRequestWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_lt?: Maybe<Scalars['ID']>;
+  id_lte?: Maybe<Scalars['ID']>;
+  id_gt?: Maybe<Scalars['ID']>;
+  id_gte?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  clientId?: Maybe<Scalars['String']>;
+  clientId_not?: Maybe<Scalars['String']>;
+  clientId_contains?: Maybe<Scalars['String']>;
+  clientId_not_contains?: Maybe<Scalars['String']>;
+  clientId_starts_with?: Maybe<Scalars['String']>;
+  clientId_not_starts_with?: Maybe<Scalars['String']>;
+  clientId_ends_with?: Maybe<Scalars['String']>;
+  clientId_not_ends_with?: Maybe<Scalars['String']>;
+  clientId_i?: Maybe<Scalars['String']>;
+  clientId_not_i?: Maybe<Scalars['String']>;
+  clientId_contains_i?: Maybe<Scalars['String']>;
+  clientId_not_contains_i?: Maybe<Scalars['String']>;
+  clientId_starts_with_i?: Maybe<Scalars['String']>;
+  clientId_not_starts_with_i?: Maybe<Scalars['String']>;
+  clientId_ends_with_i?: Maybe<Scalars['String']>;
+  clientId_not_ends_with_i?: Maybe<Scalars['String']>;
+  clientId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  serviceId?: Maybe<Scalars['String']>;
+  serviceId_not?: Maybe<Scalars['String']>;
+  serviceId_contains?: Maybe<Scalars['String']>;
+  serviceId_not_contains?: Maybe<Scalars['String']>;
+  serviceId_starts_with?: Maybe<Scalars['String']>;
+  serviceId_not_starts_with?: Maybe<Scalars['String']>;
+  serviceId_ends_with?: Maybe<Scalars['String']>;
+  serviceId_not_ends_with?: Maybe<Scalars['String']>;
+  serviceId_i?: Maybe<Scalars['String']>;
+  serviceId_not_i?: Maybe<Scalars['String']>;
+  serviceId_contains_i?: Maybe<Scalars['String']>;
+  serviceId_not_contains_i?: Maybe<Scalars['String']>;
+  serviceId_starts_with_i?: Maybe<Scalars['String']>;
+  serviceId_not_starts_with_i?: Maybe<Scalars['String']>;
+  serviceId_ends_with_i?: Maybe<Scalars['String']>;
+  serviceId_not_ends_with_i?: Maybe<Scalars['String']>;
+  serviceId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  serviceId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientOrganization?: Maybe<OrganizationWhereInput>;
+  clientOrganization_is_null?: Maybe<Scalars['Boolean']>;
+  serviceOrganization?: Maybe<OrganizationWhereInput>;
+  serviceOrganization_is_null?: Maybe<Scalars['Boolean']>;
+  isApproved?: Maybe<Scalars['Boolean']>;
+  isApproved_not?: Maybe<Scalars['Boolean']>;
+  isActive?: Maybe<Scalars['Boolean']>;
+  isActive_not?: Maybe<Scalars['Boolean']>;
+  slug?: Maybe<Scalars['String']>;
+  slug_not?: Maybe<Scalars['String']>;
+  slug_contains?: Maybe<Scalars['String']>;
+  slug_not_contains?: Maybe<Scalars['String']>;
+  slug_starts_with?: Maybe<Scalars['String']>;
+  slug_not_starts_with?: Maybe<Scalars['String']>;
+  slug_ends_with?: Maybe<Scalars['String']>;
+  slug_not_ends_with?: Maybe<Scalars['String']>;
+  slug_i?: Maybe<Scalars['String']>;
+  slug_not_i?: Maybe<Scalars['String']>;
+  slug_contains_i?: Maybe<Scalars['String']>;
+  slug_not_contains_i?: Maybe<Scalars['String']>;
+  slug_starts_with_i?: Maybe<Scalars['String']>;
+  slug_not_starts_with_i?: Maybe<Scalars['String']>;
+  slug_ends_with_i?: Maybe<Scalars['String']>;
+  slug_not_ends_with_i?: Maybe<Scalars['String']>;
+  slug_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  slug_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt_not?: Maybe<Scalars['DateTime']>;
+  updatedAt_lt?: Maybe<Scalars['DateTime']>;
+  updatedAt_lte?: Maybe<Scalars['DateTime']>;
+  updatedAt_gt?: Maybe<Scalars['DateTime']>;
+  updatedAt_gte?: Maybe<Scalars['DateTime']>;
+  updatedAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  updatedAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+  createdAt_not?: Maybe<Scalars['DateTime']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+};
+
+export type ConnectionRequestWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export type ConnectionRequestsCreateInput = {
+  data?: Maybe<ConnectionRequestCreateInput>;
+};
+
+export type ConnectionRequestsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<ConnectionRequestUpdateInput>;
+};
+
 export type ConsumerAccess = {
   __typename?: 'ConsumerAccess';
   consumer?: Maybe<GatewayConsumer>;
@@ -4360,6 +4504,18 @@ export type Mutation = {
   deleteContent?: Maybe<Content>;
   /**  Delete multiple Content items by ID.  */
   deleteContents?: Maybe<Array<Maybe<Content>>>;
+  /**  Create a single ConnectionRequest item.  */
+  createConnectionRequest?: Maybe<ConnectionRequest>;
+  /**  Create multiple ConnectionRequest items.  */
+  createConnectionRequests?: Maybe<Array<Maybe<ConnectionRequest>>>;
+  /**  Update a single ConnectionRequest item by ID.  */
+  updateConnectionRequest?: Maybe<ConnectionRequest>;
+  /**  Update multiple ConnectionRequest items by ID.  */
+  updateConnectionRequests?: Maybe<Array<Maybe<ConnectionRequest>>>;
+  /**  Delete a single ConnectionRequest item by ID.  */
+  deleteConnectionRequest?: Maybe<ConnectionRequest>;
+  /**  Delete multiple ConnectionRequest items by ID.  */
+  deleteConnectionRequests?: Maybe<Array<Maybe<ConnectionRequest>>>;
   /**  Create a single CredentialIssuer item.  */
   createCredentialIssuer?: Maybe<CredentialIssuer>;
   /**  Create multiple CredentialIssuer items.  */
@@ -4816,6 +4972,37 @@ export type MutationDeleteContentArgs = {
 
 
 export type MutationDeleteContentsArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationCreateConnectionRequestArgs = {
+  data?: Maybe<ConnectionRequestCreateInput>;
+};
+
+
+export type MutationCreateConnectionRequestsArgs = {
+  data?: Maybe<Array<Maybe<ConnectionRequestsCreateInput>>>;
+};
+
+
+export type MutationUpdateConnectionRequestArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<ConnectionRequestUpdateInput>;
+};
+
+
+export type MutationUpdateConnectionRequestsArgs = {
+  data?: Maybe<Array<Maybe<ConnectionRequestsUpdateInput>>>;
+};
+
+
+export type MutationDeleteConnectionRequestArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteConnectionRequestsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 
@@ -5625,6 +5812,7 @@ export type Namespace = {
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
   permDataPlane?: Maybe<Scalars['String']>;
   permProtectedNs?: Maybe<Scalars['String']>;
+  permRoutePaths?: Maybe<Array<Maybe<Scalars['String']>>>;
   org?: Maybe<Scalars['JSON']>;
   orgUnit?: Maybe<Scalars['JSON']>;
   orgUpdatedAt?: Maybe<Scalars['Float']>;
@@ -6598,6 +6786,14 @@ export type Query = {
   _allContentsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Content list.  */
   _ContentsMeta?: Maybe<_ListMeta>;
+  /**  Search for all ConnectionRequest items which match the where clause.  */
+  allConnectionRequests?: Maybe<Array<Maybe<ConnectionRequest>>>;
+  /**  Search for the ConnectionRequest item with the matching ID.  */
+  ConnectionRequest?: Maybe<ConnectionRequest>;
+  /**  Perform a meta-query on all ConnectionRequest items which match the where clause.  */
+  _allConnectionRequestsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the ConnectionRequest list.  */
+  _ConnectionRequestsMeta?: Maybe<_ListMeta>;
   /**  Search for all CredentialIssuer items which match the where clause.  */
   allCredentialIssuers?: Maybe<Array<Maybe<CredentialIssuer>>>;
   /**  Search for the CredentialIssuer item with the matching ID.  */
@@ -6953,6 +7149,31 @@ export type Query_AllContentsMetaArgs = {
   where?: Maybe<ContentWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortContentsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryAllConnectionRequestsArgs = {
+  where?: Maybe<ConnectionRequestWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortConnectionRequestsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryConnectionRequestArgs = {
+  where: ConnectionRequestWhereUniqueInput;
+};
+
+
+export type Query_AllConnectionRequestsMetaArgs = {
+  where?: Maybe<ConnectionRequestWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortConnectionRequestsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -8278,6 +8499,29 @@ export enum SortBlobsBy {
   TypeDesc = 'type_DESC',
   BlobAsc = 'blob_ASC',
   BlobDesc = 'blob_DESC'
+}
+
+export enum SortConnectionRequestsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  ClientIdAsc = 'clientId_ASC',
+  ClientIdDesc = 'clientId_DESC',
+  ServiceIdAsc = 'serviceId_ASC',
+  ServiceIdDesc = 'serviceId_DESC',
+  ClientOrganizationAsc = 'clientOrganization_ASC',
+  ClientOrganizationDesc = 'clientOrganization_DESC',
+  ServiceOrganizationAsc = 'serviceOrganization_ASC',
+  ServiceOrganizationDesc = 'serviceOrganization_DESC',
+  IsApprovedAsc = 'isApproved_ASC',
+  IsApprovedDesc = 'isApproved_DESC',
+  IsActiveAsc = 'isActive_ASC',
+  IsActiveDesc = 'isActive_DESC',
+  SlugAsc = 'slug_ASC',
+  SlugDesc = 'slug_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export enum SortContentsBy {

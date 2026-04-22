@@ -29,7 +29,7 @@ async function generateToken(payload: any): Promise<string> {
 Deno.serve({ port: 2020 }, async (req: Request) => {
   const url = new URL(req.url);
 
-  if (url.pathname === '/token' && req.method === 'POST') {
+  if (url.pathname === '/tokens' && req.method === 'POST') {
     let body: { subject?: string; san?: string[] };
     try {
       body = await req.json();

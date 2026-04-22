@@ -3,7 +3,7 @@ info:
   title: Step Token API
   version: 1.0.0
 paths:
-  /token:
+  /tokens:
     post:
       summary: Create a token
       operationId: createToken

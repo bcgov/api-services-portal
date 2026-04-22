@@ -1,3 +1,5 @@
+const { query } = require('express');
+
 const metadata = {
   Organization: {
     query: 'allOrganizations',
@@ -504,6 +506,19 @@ const metadata = {
         'ministry-of-citizens-services',
         'ministry-of-health',
       ],
+    },
+  },
+  ConnectionRequest: {
+    query: 'allConnectionRequests',
+    refKey: 'slug',
+    compositeRefKey: ['clientId', 'serviceId'],
+    sync: ['clientId', 'serviceId', 'isApproved', 'isActive'],
+    transformations: {},
+    example: {
+      clientId: 'client-123',
+      serviceId: 'service-456',
+      isApproved: false,
+      isActive: false,
     },
   },
   Product: {

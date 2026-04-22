@@ -19,7 +19,7 @@ export class StepTokenService {
   public async requestOneTimeUseToken(
     request: StepTokenRequest
   ): Promise<string> {
-    const url = `${this.stepTokenUrl}/token`;
+    const url = `${this.stepTokenUrl}/tokens`;
     logger.debug('[requestOneTimeUseToken]');
     return await fetch(url, {
       method: 'post',
