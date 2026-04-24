@@ -46,6 +46,12 @@ class ConnectionService {
       body.clientId,
       clientSubsystem
     );
+    assertEqual(
+      clientSubsystem.organization.name === org,
+      true,
+      'clientId',
+      'Only client subsystems can create connection requests for their own organization'
+    );
 
     // lookup the service spec
     const oasService = new OpenAPISpecService();
@@ -109,7 +115,7 @@ class ConnectionService {
     const batchClause = {
       query: '$org: String',
       clause:
-        '{ or: [{ clientOrganization: { name: $org } }, { providerOrganization: { name: $org } }] }',
+        '{ OR: [{ clientOrganization: { name: $org } }, { providerOrganization: { name: $org } }] }',
       variables: { org },
     };
 

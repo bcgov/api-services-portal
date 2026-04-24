@@ -37,20 +37,19 @@ describe('SDX OpenAPI Services', () => {
               fileResponse.body,
               'application/x-yaml'
             )
-            const formData = new FormData()
-            formData.append('configFile', blob, 'file.yaml')
-            formData.append('subsystem', payload.name)
-
-            cy.setRequestFormData(formData)
-            cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-              'PUT',
-              true
-            ).then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
-              expect(body.result).to.be.equal('created')
-              expect(typeof body.id).to.be.equal('string')
-              expect(body).has.property('refKey')
+            blob.text().then((text) => {
+              cy.setRequestBody(text)
+              cy.setHeader('Content-Type', 'application/x-yaml')
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+                'PUT',
+                false
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(200)
+                expect(body.result).to.be.equal('created')
+                expect(typeof body.id).to.be.equal('string')
+                expect(body).has.property('refKey')
+              })
             })
           })
         }
@@ -75,34 +74,33 @@ describe('SDX OpenAPI Services', () => {
               fileResponse.body,
               'application/x-yaml'
             )
-            const formData = new FormData()
-            formData.append('configFile', blob, 'file.yaml')
-            formData.append('subsystem', payload.name)
-
-            cy.setRequestFormData(formData)
-            cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-              'PUT',
-              true
-            ).then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
-
-              const specRefKey = body.refKey
-
+            blob.text().then((text) => {
+              cy.setRequestBody(text)
+              cy.setHeader('Content-Type', 'application/x-yaml')
               cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/oas-services/${specRefKey}`,
-                'GET'
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+                'PUT',
+                false
               ).then(({ apiRes: { status, body } }: any) => {
                 expect(status).to.be.equal(200)
 
-                const service = body
-                expect(service).to.have.property('name')
-                expect(service).to.have.property('title')
-                expect(service).to.have.property('version')
-                expect(service).to.have.property('title')
-                expect(service).to.have.property('description')
-                expect(service).to.have.property('subsystem')
-                expect(service).to.have.property('operations')
+                const specRefKey = body.refKey
+
+                cy.callAPI(
+                  `ds/api/sdx/v1/organizations/${org.name}/oas-services/${specRefKey}`,
+                  'GET'
+                ).then(({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(200)
+
+                  const service = body
+                  expect(service).to.have.property('name')
+                  expect(service).to.have.property('title')
+                  expect(service).to.have.property('version')
+                  expect(service).to.have.property('title')
+                  expect(service).to.have.property('description')
+                  expect(service).to.have.property('subsystem')
+                  expect(service).to.have.property('operations')
+                })
               })
             })
           })
@@ -128,27 +126,26 @@ describe('SDX OpenAPI Services', () => {
               fileResponse.body,
               'application/x-yaml'
             )
-            const formData = new FormData()
-            formData.append('configFile', blob, 'file.yaml')
-            formData.append('subsystem', payload.name)
-
-            cy.setRequestFormData(formData)
-            cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-              'PUT',
-              true
-            ).then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
-              expect(body).has.property('refKey')
-
-              cy.setRequestBody(undefined)
-              cy.setQueryString({ force: false })
+            blob.text().then((text) => {
+              cy.setRequestBody(text)
+              cy.setHeader('Content-Type', 'application/x-yaml')
               cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
-                'DELETE',
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+                'PUT',
                 false
               ).then(({ apiRes: { status, body } }: any) => {
                 expect(status).to.be.equal(200)
+                expect(body).has.property('refKey')
+
+                cy.setRequestBody(undefined)
+                cy.setQueryString({ force: false })
+                cy.callAPI(
+                  `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
+                  'DELETE',
+                  false
+                ).then(({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(200)
+                })
               })
             })
           })

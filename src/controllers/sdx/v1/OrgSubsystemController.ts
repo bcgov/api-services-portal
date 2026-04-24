@@ -17,7 +17,6 @@ import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import { Subsystem } from '../../../services/batch/types';
 import {
-  EnrichWithRuntimeGroup,
   GetSubsystemEntryForSubsystem,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
@@ -173,11 +172,11 @@ export class OrgSubsystemController extends Controller {
     const client = GetSubsystemEntryForSubsystem(subsystem);
 
     const routePathPrefix = getRoutePathPrefix(client.clientId);
-    
+
     const result = await CreateNamespaceForSubsystem(context, {
       subsystem: client,
       runtimeGroupName: body.runtimeGroupName,
-      routePaths: [routePathPrefix ]
+      routePaths: [routePathPrefix],
     });
 
     assertEqual(

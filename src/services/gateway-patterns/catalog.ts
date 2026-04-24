@@ -138,12 +138,17 @@ export async function GetCatalog(
 
 export async function EnrichWithRuntimeGroup(
   ctx: any,
-  subsystemEntry: SubsystemEntry
+  subsystemEntry: SubsystemEntry,
+  quiet: boolean = false
 ): Promise<void> {
   const orgNamespace: OrgNamespace = await getNamespaceDetails(
     ctx,
     subsystemEntry.gateway.id
   );
+
+  if (quiet && orgNamespace == null) {
+    return;
+  }
 
   assertAndRaiseValidateError(
     orgNamespace != null,

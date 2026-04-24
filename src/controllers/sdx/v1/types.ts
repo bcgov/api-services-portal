@@ -45,3 +45,5 @@ export interface ConnectionRequestInput {
   isApproved?: boolean;
   isActive?: boolean;
 }
+
+export interface ExpressRequest extends Express.Request {}
