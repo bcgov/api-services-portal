@@ -1,0 +1,127 @@
+openapi: 3.1.1
+info:
+  title: Toys
+  version: '1.0'
+  summary: This is a prototype API for the Toys service. It is intended for testing and development purposes only.
+  description: Description about the service and its purpose.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: API Programme Services Team
+    url: https://chat.developer.gov.bc.ca/channel/aps-ops
+servers:
+  - url: /DEV/MIN/PUKI/TOYS
+    description: DEV environment
+tags:
+  - name: Toys
+    description: All about Toys
+paths:
+  /v1/toys:
+    get:
+      tags:
+        - Toys
+      summary: Get a list of toys
+      operationId: toys_list
+      security:
+        - bearer_auth:
+            - openid
+      description: This endpoint retrieves a list of toys.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: PT001
+                    name:
+                      type: string
+                      example: Squeaky Rubber Ball
+                    category:
+                      type: string
+                      example: Interactive
+                    pet_type:
+                      type: string
+                      example: Dog
+                    price:
+                      type: number
+                      format: float
+                      example: 12.99
+                    material:
+                      type: string
+                      example: Natural Rubber
+        '401':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/not_found'
+        '500':
+          $ref: '#/components/responses/server_error'
+        default:
+          $ref: '#/components/responses/unexpected_error'
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+  schemas:
+    error:
+      type: object
+      properties:
+        id:
+          description: A short identifier corresponding to the HTTP status code returned. For  example, the ID for a response returning a 404 status code would be "not_found."
+          type: string
+          example: not_found
+        message:
+          description: A message providing additional information about the error, including  details to help resolve it when possible.
+          type: string
+          example: The resource you were accessing could not be found.
+        request_id:
+          description: Optionally, some endpoints may include a request ID that should be  provided when reporting bugs or opening support tickets to help  identify the issue.
+          type: string
+          example: 4d9d8375-3c56-4925-a3e7-eb137fed17e9
+      required:
+        - id
+        - message
+  responses:
+    unexpected_error:
+      description: There was an unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          example:
+            id: example_error
+            message: some error message
+    unauthorized:
+      description: Authentication failed due to invalid credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          example:
+            id: unauthorized
+            message: Unable to authenticate you.
+    not_found:
+      description: The resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          example:
+            id: not_found
+            message: The resource you requested could not be found.
+    server_error:
+      description: There was a server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          example:
+            id: server_error
+            message: Unexpected server-side error

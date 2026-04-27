@@ -80,6 +80,11 @@ export class GatewayServiceController extends Controller {
     logger.debug(
       `Received request to create/update OAS service for org ${org} and subsystem ${subsystem}`
     );
+    logger.debug(
+      'Raw request body (size %s) (truncated to 100 chars): %s',
+      rawBody.length,
+      rawBody.substring(0, 100)
+    );
 
     const input: OpenAPISpecInput = {
       organization: org,

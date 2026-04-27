@@ -26,7 +26,7 @@ COPY e2e/*.yml /e2e
 COPY e2e/entrypoint.sh /tmp
 ADD e2e/cypress /e2e/cypress
 
-RUN curl -v -L -O https://github.com/bcgov/gwa-cli/releases/latest/download/gwa_Linux_x86_64.tgz \
+RUN curl -v -L -O https://github.com/bcgov/gwa-cli/releases/download/v3.0.7/gwa_Linux_x86_64.tgz \
  && tar -xzf gwa_Linux_x86_64.tgz \
  && mv gwa /usr/local/bin/.
 
