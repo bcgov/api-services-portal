@@ -46,12 +46,6 @@ class ConnectionService {
       body.clientId,
       clientSubsystem
     );
-    assertEqual(
-      clientSubsystem.organization.name === org,
-      true,
-      'clientId',
-      'Only client subsystems can create connection requests for their own organization'
-    );
 
     // lookup the service spec
     const oasService = new OpenAPISpecService();
@@ -65,10 +59,17 @@ class ConnectionService {
 
     // if approving the connection, validate the client and service belong to the same organization
     assertEqual(
-      body.isApproved === true && serviceSpec.organization.name !== org,
-      false,
+      body.isApproved === true && serviceSpec.organization.name === org,
+      true,
       'isApproved',
       'Cannot approve connection request when service organization does not match the specified organization'
+    );
+
+    assertEqual(
+      body.isApproved == false && clientSubsystem.organization.name === org,
+      true,
+      'clientId',
+      'Only client subsystems can create connection requests for their own organization'
     );
 
     const result = await syncRecordsThrowErrors(

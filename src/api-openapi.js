@@ -121,7 +121,10 @@ class ApiOpenapiApp {
     const logger = Logger('dsapi');
 
     const app = express();
-    app.use(async (req, _res, next) => {
+
+    // This middleware causes the proxy middleware to block, so am going to limit it to just
+    // the APIs themselves.  This is really just for the sdx/v1 API for uploading a service
+    app.use('/ds/api/sdx/v1', async (req, _res, next) => {
       try {
         // Skip if there's no body or stream isn't readable
         if (!Readable.isReadable(req) || req.readableEnded) {

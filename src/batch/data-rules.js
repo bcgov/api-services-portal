@@ -1,5 +1,3 @@
-const { query } = require('express');
-
 const metadata = {
   Organization: {
     query: 'allOrganizations',
