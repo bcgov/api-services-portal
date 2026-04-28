@@ -65,40 +65,36 @@ describe('SDX OpenAPI Services', () => {
         ({ apiRes: { status } }: any) => {
           expect(status).to.be.equal(200)
 
-          cy.request({
-            url: 'https://bcgov.github.io/sdx-openapi/Toys.v1.yaml',
-          }).then((fileResponse) => {
-            const blob = Cypress.Blob.binaryStringToBlob(
-              fileResponse.body,
-              'application/x-yaml'
-            )
-            blob.text().then((text) => {
-              cy.setRequestBody(text)
-              cy.setHeader('Content-Type', 'application/x-yaml')
+          cy.get('@toys.v1').then((text: any) => {
+            expect(Cypress.Buffer.isBuffer(text)).to.be.true
+            const body = text.toString()
+            expect(body).to.include('openapi: 3.1.1')
+
+            cy.setRequestBodyRaw(body)
+            cy.setHeader('Content-Type', 'application/octet-stream')
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              'PUT',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+
+              const specRefKey = body.refKey
+
               cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
-                'PUT',
-                false
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services/${specRefKey}`,
+                'GET'
               ).then(({ apiRes: { status, body } }: any) => {
                 expect(status).to.be.equal(200)
 
-                const specRefKey = body.refKey
-
-                cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/oas-services/${specRefKey}`,
-                  'GET'
-                ).then(({ apiRes: { status, body } }: any) => {
-                  expect(status).to.be.equal(200)
-
-                  const service = body
-                  expect(service).to.have.property('name')
-                  expect(service).to.have.property('title')
-                  expect(service).to.have.property('version')
-                  expect(service).to.have.property('title')
-                  expect(service).to.have.property('description')
-                  expect(service).to.have.property('subsystem')
-                  expect(service).to.have.property('operations')
-                })
+                const service = body
+                expect(service).to.have.property('name')
+                expect(service).to.have.property('title')
+                expect(service).to.have.property('version')
+                expect(service).to.have.property('title')
+                expect(service).to.have.property('description')
+                expect(service).to.have.property('subsystem')
+                expect(service).to.have.property('operations')
               })
             })
           })
@@ -117,33 +113,29 @@ describe('SDX OpenAPI Services', () => {
         ({ apiRes: { status } }: any) => {
           expect(status).to.be.equal(200)
 
-          cy.request({
-            url: 'https://bcgov.github.io/sdx-openapi/Toys.v1.yaml',
-          }).then((fileResponse) => {
-            const blob = Cypress.Blob.binaryStringToBlob(
-              fileResponse.body,
-              'application/x-yaml'
-            )
-            blob.text().then((text) => {
-              cy.setRequestBody(text)
-              cy.setHeader('Content-Type', 'application/x-yaml')
+          cy.get('@toys.v1').then((text: any) => {
+            expect(Cypress.Buffer.isBuffer(text)).to.be.true
+            const body = text.toString()
+            expect(body).to.include('openapi: 3.1.1')
+
+            cy.setRequestBodyRaw(body)
+            cy.setHeader('Content-Type', 'application/octet-stream')
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              'PUT',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body).has.property('refKey')
+
+              cy.setRequestBody(undefined)
+              cy.setQueryString({ force: false })
               cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
-                'PUT',
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
+                'DELETE',
                 false
               ).then(({ apiRes: { status, body } }: any) => {
                 expect(status).to.be.equal(200)
-                expect(body).has.property('refKey')
-
-                cy.setRequestBody(undefined)
-                cy.setQueryString({ force: false })
-                cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
-                  'DELETE',
-                  false
-                ).then(({ apiRes: { status, body } }: any) => {
-                  expect(status).to.be.equal(200)
-                })
               })
             })
           })
