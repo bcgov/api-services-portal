@@ -58,19 +58,21 @@ class ConnectionService {
     }
 
     // if approving the connection, validate the client and service belong to the same organization
-    assertEqual(
-      body.isApproved === true && serviceSpec.organization.name === org,
-      true,
-      'isApproved',
-      'Cannot approve connection request when service organization does not match the specified organization'
-    );
-
-    assertEqual(
-      body.isApproved == false && clientSubsystem.organization.name === org,
-      true,
-      'clientId',
-      'Only client subsystems can create connection requests for their own organization'
-    );
+    if (body.isApproved) {
+      assertEqual(
+        serviceSpec.organization.name === org,
+        true,
+        'isApproved',
+        'Cannot approve connection request when service organization does not match the specified organization'
+      );
+    } else {
+      assertEqual(
+        clientSubsystem.organization.name === org,
+        true,
+        'clientId',
+        'Only client subsystems can create connection requests for their own organization'
+      );
+    }
 
     const result = await syncRecordsThrowErrors(
       context,

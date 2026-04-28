@@ -2658,3 +2658,101 @@ CREATE INDEX openapispec_organization_index ON public."OpenAPISpec" USING btree 
 
 ALTER TABLE ONLY public."OpenAPISpec"
     ADD CONSTRAINT openapispec_subsystem_foreign FOREIGN KEY (subsystem) REFERENCES public."Subsystem"(id);
+
+
+
+--
+-- Name: ConnectionRequest; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."ConnectionRequest" (
+    id integer NOT NULL,
+    "clientId" text NOT NULL,
+    "serviceId" text NOT NULL,
+    "clientOrganization" integer,
+    "serviceOrganization" integer,
+    "isApproved" boolean NOT NULL,
+    "isActive" boolean NOT NULL,
+    slug text,
+    "updatedAt_utc" timestamp without time zone,
+    "updatedAt_offset" text,
+    "createdAt_utc" timestamp without time zone,
+    "createdAt_offset" text
+);
+
+
+ALTER TABLE public."ConnectionRequest" OWNER TO keystonejsuser;
+
+--
+-- Name: ConnectionRequest_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."ConnectionRequest_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."ConnectionRequest_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: ConnectionRequest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."ConnectionRequest_id_seq" OWNED BY public."ConnectionRequest".id;
+
+--
+-- Name: ConnectionRequest id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ConnectionRequest" ALTER COLUMN id SET DEFAULT nextval('public."ConnectionRequest_id_seq"'::regclass);
+
+--
+-- Name: ConnectionRequest ConnectionRequest_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ConnectionRequest"
+    ADD CONSTRAINT "ConnectionRequest_pkey" PRIMARY KEY (id);
+
+--
+-- Name: ConnectionRequest connectionrequest_slug_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ConnectionRequest"
+    ADD CONSTRAINT connectionrequest_slug_unique UNIQUE (slug);
+
+
+--
+-- Name: connectionrequest_clientorganization_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX connectionrequest_clientorganization_index ON public."ConnectionRequest" USING btree ("clientOrganization");
+
+
+--
+-- Name: connectionrequest_serviceorganization_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX connectionrequest_serviceorganization_index ON public."ConnectionRequest" USING btree ("serviceOrganization");
+
+
+--
+-- Name: ConnectionRequest connectionrequest_clientorganization_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ConnectionRequest"
+    ADD CONSTRAINT connectionrequest_clientorganization_foreign FOREIGN KEY ("clientOrganization") REFERENCES public."Organization"(id);
+
+
+--
+-- Name: ConnectionRequest connectionrequest_serviceorganization_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ConnectionRequest"
+    ADD CONSTRAINT connectionrequest_serviceorganization_foreign FOREIGN KEY ("serviceOrganization") REFERENCES public."Organization"(id);
+
+
+

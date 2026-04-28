@@ -5,7 +5,7 @@
  * @param subsystemName
  * @param next
  */
-function new_service(org: any, subsystemName: string, next: any) {
+export function new_service(org: any, subsystemName: string, next: any) {
   const payload = {
     name: subsystemName,
   }
