@@ -11,7 +11,7 @@ info:
     name: API Programme Services Team
     url: https://chat.developer.gov.bc.ca/channel/aps-ops
 servers:
-  - url: /DEV/MIN/PUKI/TOYS
+  - url: /
     description: DEV environment
 tags:
   - name: Toys
