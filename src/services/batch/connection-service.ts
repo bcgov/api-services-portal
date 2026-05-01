@@ -88,7 +88,7 @@ class ConnectionService {
     id: string
   ): Promise<KeystoneConnectionRequest> => {
     const batchClause = {
-      query: '$id: String',
+      query: '$id: ID',
       clause: '{ id: $id}',
       variables: { id },
     };
@@ -118,7 +118,7 @@ class ConnectionService {
     const batchClause = {
       query: '$org: String',
       clause:
-        '{ OR: [{ clientOrganization: { name: $org } }, { providerOrganization: { name: $org } }] }',
+        '{ OR: [{ clientOrganization: { name: $org } }, { serviceOrganization: { name: $org } }] }',
       variables: { org },
     };
 

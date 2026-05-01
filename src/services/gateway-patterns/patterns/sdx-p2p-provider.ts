@@ -47,7 +47,7 @@ export interface SDXP2PProviderPatternData {
  */
 export const SDXP2PProviderPattern = {
   id: 'sdx-p2p-provider.r1',
-  requiredParams: ['organization', 'client_id', 'service_id'],
+  requiredParams: ['organization', 'conn_id', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: Record<string, string>) => {
     const connService = new ConnectionService();

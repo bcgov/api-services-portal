@@ -518,6 +518,10 @@ const metadata = {
       isApproved: false,
       isActive: false,
     },
+    validations: {
+      isApproved: { type: 'boolean' },
+      isActive: { type: 'boolean' },
+    },
   },
   Product: {
     query: 'allProducts',

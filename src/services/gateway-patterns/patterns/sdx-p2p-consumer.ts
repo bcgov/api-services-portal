@@ -39,7 +39,7 @@ export interface SDXP2PConsumerPatternData {
  */
 export const SDXP2PConsumerPattern = {
   id: 'sdx-p2p-consumer.r1',
-  requiredParams: ['organization', 'client_id', 'service_id'],
+  requiredParams: ['organization', 'conn_id', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: SDXP2PConsumerPatternConfig) => {
     const connService = new ConnectionService();

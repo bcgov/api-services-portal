@@ -66,6 +66,8 @@ export class OrgSubsystemClientController extends Controller {
     for (const subsystem of subsystems) {
       const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
+      // Not amazing, but the gateway_id is predefined, so have to check if the
+      // gateway has been created or not; only include the subsystem if it has
       await EnrichWithRuntimeGroup(ctx, subsystemEntry, true);
       if (subsystemEntry.runtimeGroup) {
         subsystemEntries.push(subsystemEntry);

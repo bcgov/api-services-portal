@@ -347,8 +347,8 @@ export interface ConnectionRequest {
   slug?: string; // Primary Key
   clientId?: string;
   serviceId?: string;
-  isApproved?: string;
-  isActive?: string;
+  isApproved?: boolean;
+  isActive?: boolean;
 }
 
 

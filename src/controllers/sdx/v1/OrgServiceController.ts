@@ -86,6 +86,13 @@ export class GatewayServiceController extends Controller {
       rawBody.substring(0, 100)
     );
 
+    assertEqual(
+      rawBody.length > 0,
+      true,
+      'body',
+      'No body content found in request'
+    );
+
     const input: OpenAPISpecInput = {
       organization: org,
       subsystem,
