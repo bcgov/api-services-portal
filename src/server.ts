@@ -133,6 +133,7 @@ for (const _list of [
   'Application',
   'Blob',
   'Content',
+  'ConnectionRequest',
   'CredentialIssuer',
   'Dataset',
   'Environment',

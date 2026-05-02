@@ -9,6 +9,7 @@ import {
   SubsystemEntry,
 } from '../catalog';
 import { getRoutePathPrefix } from '../../utils';
+import { ConnectionService } from '../../batch/connection-service';
 
 // TODO: clean this up a bit!
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
@@ -46,9 +47,32 @@ export interface SDXP2PProviderPatternData {
  */
 export const SDXP2PProviderPattern = {
   id: 'sdx-p2p-provider.r1',
-  requiredParams: ['organization', 'client_id', 'service_id'],
+  requiredParams: ['organization', 'conn_id', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: Record<string, string>) => {
+    const connService = new ConnectionService();
+
+    const conn = await connService.getConnectionById(ctx, inputs.conn_id); // validate the connection request exists
+
+    assert.strictEqual(
+      conn.clientId === inputs.client_id,
+      true,
+      'Connection request clientId does not match the specified client_id'
+    );
+
+    assert.strictEqual(
+      conn.serviceId === inputs.service_id,
+      true,
+      'Connection request serviceId does not match the specified service_id'
+    );
+
+    assert.strictEqual(conn.isActive, true, 'Connection request is not active');
+    assert.strictEqual(
+      conn.isApproved,
+      true,
+      'Connection request is not approved'
+    );
+
     // retrieve the catalog items for
     const subsysService = new SubsystemService();
     const subsystem = await subsysService.findSubsystemByClientId(
@@ -89,7 +113,7 @@ export const SDXP2PProviderPattern = {
     const upstreamUrl = inputs.upstream_url;
 
     const upgrades: ProviderUpgrades = inputs.upgrades || {};
-    
+
     const routePathPrefix = getRoutePathPrefix(serviceLocator);
 
     return [

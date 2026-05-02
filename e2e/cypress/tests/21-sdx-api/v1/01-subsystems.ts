@@ -71,8 +71,10 @@ describe('SDX Subsystem', () => {
       cy.setQueryString({})
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/clients`, 'GET').then(
         ({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(422)
-          expect(body.message).to.be.equal('Incomplete subsystem setup')
+          expect(status).to.be.equal(200)
+          // empty list because subsystems have to be configured with a runtime group
+          // before they can be considered clients
+          expect(body.length).to.be.equal(0)
         }
       )
     })
