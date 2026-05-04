@@ -1,6 +1,7 @@
 import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import {
+  deleteRecordByInternalId,
   getRecords,
   removeKeys,
   syncRecordsThrowErrors,
@@ -176,6 +177,37 @@ class ConnectionService {
       clientConfigCount: clientConfig.length,
       serviceConfigCount: serviceConfig.length,
     };
+  };
+
+  deleteConnection = async (
+    context: Keystone,
+    id: string
+  ): Promise<BatchResult> => {
+    const status = await this.getConnectionDeleteStatus(context, id);
+
+    const remainingConfigMessages: string[] = [];
+
+    if (status.clientConfigCount > 0) {
+      remainingConfigMessages.push(
+        `client gateway configuration still exists for tag ${status.clientTag}`
+      );
+    }
+
+    if (status.serviceConfigCount > 0) {
+      remainingConfigMessages.push(
+        `service gateway configuration still exists for tag ${status.serviceTag}`
+      );
+    }
+
+    assert.strictEqual(
+      remainingConfigMessages.length === 0,
+      true,
+      `Connection request cannot be deleted because ${remainingConfigMessages.join(
+        ' and '
+      )}`
+    );
+
+    return await deleteRecordByInternalId(context, 'ConnectionRequest', id);
   };
 
   listConnectionsByOrganization = async (
