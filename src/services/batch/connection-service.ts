@@ -103,7 +103,7 @@ class ConnectionService {
       context,
       'ConnectionRequest',
       'allConnectionRequests',
-      [],
+      ['clientOrganization', 'serviceOrganization'],
       batchClause
     );
     assert.strictEqual(

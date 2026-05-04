@@ -143,6 +143,48 @@ describe('SDX Connection Requests', () => {
         })
       })
     })
+
+    it('DELETE /organizations/{org}/connections/{id}', () => {
+      const { org, datasetId } = workingData
+
+      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
+        const clientId = service.subsystem.clientId
+        const serviceId = service.name
+        const payload: any = {
+          clientId: `${clientId}`,
+          serviceId: `${serviceId}`,
+          isApproved: true,
+        }
+
+        cy.setRequestBody(payload)
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.result).to.be.equal('created')
+            expect(typeof body.id).to.be.equal('string')
+
+            const connectionId = body.id
+
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}`,
+              'DELETE'
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body.result).to.be.equal('deleted')
+              expect(body.id).to.be.equal(connectionId)
+
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/connections`,
+                'GET'
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(200)
+                expect(body.length).to.be.equal(0)
+              })
+            })
+          }
+        )
+      })
+    })
   })
 
   describe('Connection Requests Sad Paths', () => {
