@@ -46,11 +46,33 @@ const ContactPage: React.FC = () => {
           </ListItem>
           <ListItem>
             <Link
-              href={data?.helpLinks.helpChatUrl}
+              href={data?.helpLinks.helpTeamsAlertsUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Chat with us in Rocket Chat
+              Microsoft Teams: API-ProgramServices-alerts (incidents, outages,
+              maintenance, releases, breaking changes)
+              <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+            </Link>
+          </ListItem>
+          <ListItem>
+            <Link
+              href={data?.helpLinks.helpTeamsOperationsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Microsoft Teams: API-ProgramServices-operations (questions and
+              usage guidance)
+              <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+            </Link>
+          </ListItem>
+          <ListItem>
+            <Link
+              href={data?.helpLinks.helpTeamsAccessRequestUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Request access to Microsoft Teams channels (external clients)
               <Icon as={BiLinkExternal} boxSize="4" ml={2} />
             </Link>
           </ListItem>

@@ -591,7 +591,9 @@ app.use('/about', (_, res) => {
     cluster: 'feature-silver',
     helpLinks: {
       helpDeskUrl: 'http://url.com/helpDeskUrl',
-      helpChatUrl: 'http://url.com/helpChatUrl',
+      helpTeamsAlertsUrl: 'http://url.com/helpTeamsAlertsUrl',
+      helpTeamsOperationsUrl: 'http://url.com/helpTeamsOperationsUrl',
+      helpTeamsAccessRequestUrl: 'http://url.com/helpTeamsAccessRequestUrl',
       helpIssueUrl: 'http://url.com/helpIssueUrl',
       helpApiDocsUrl: 'http://url.com/helpApiDocsUrl',
       helpSupportUrl: 'http://url.com/helpSupportUrl',
