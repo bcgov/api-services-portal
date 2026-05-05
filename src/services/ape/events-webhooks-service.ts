@@ -28,7 +28,7 @@ export class EventsWebhooksService {
   public async upsertWebhook(
     webhook: WebhookRequest
   ): Promise<WebhookResponse> {
-    const url = `${this.webhookAdminUrl}/webhooks/${webhook.connId}`;
+    const url = `${this.webhookAdminUrl}/webhooks`;
     return await fetch(url, {
       method: 'put',
       headers: {
