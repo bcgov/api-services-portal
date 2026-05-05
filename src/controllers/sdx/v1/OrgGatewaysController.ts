@@ -190,7 +190,7 @@ export class OrgGatewaysController extends Controller {
     // - RegoPolicy
     // - PolicyDataSource
     const apeResult = dryRun
-      ? { message: 'Dry run not supported for APE' }
+      ? [{ message: 'Dry run not supported for APE' }]
       : await publishAPEConfig(action, config.documents);
 
     request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
