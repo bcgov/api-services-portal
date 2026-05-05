@@ -10,6 +10,7 @@ import {
 } from '../catalog';
 import { getRoutePathPrefix } from '../../utils';
 import { ConnectionService } from '../../batch/connection-service';
+import { APEConfig } from '../../ape/config';
 
 // TODO: clean this up a bit!
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
@@ -17,6 +18,9 @@ const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 interface ProviderUpgrades {
   sign: {};
   verify: {};
+  pep: {
+    policy_name: string;
+  };
   token_exchange: {
     token_endpoint: string;
     client_id: string;
@@ -38,7 +42,6 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
 export interface SDXP2PProviderPatternData {
   service: ServiceCatalogEntry;
   client: SubsystemEntry;
-  key: any;
 }
 
 /**
@@ -170,6 +173,15 @@ export const SDXP2PProviderPattern = {
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
+          ...(upgrades.hasOwnProperty('pep')
+            ? [
+                upgradeToPolicyEnforcement(
+                  tags,
+                  data,
+                  inputs as SDXP2PProviderPatternConfig
+                ),
+              ]
+            : []),
           ...(upgrades.hasOwnProperty('token_exchange')
             ? [
                 upgradeToTokenExchange(
@@ -238,6 +250,31 @@ function upgradeToTokenExchange(
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       algorithm: 'ES256',
       expiration: 60,
+    },
+  };
+}
+
+function upgradeToPolicyEnforcement(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
+  const service = data.service;
+
+  const policyName = inputs.upgrades.pep.policy_name;
+
+  const packageName = `${service.subsystem.clientId.replace(
+    /\.|-/g,
+    '_'
+  )}/${policyName}`;
+
+  return {
+    name: 'openid-authzen',
+    tags: tags,
+    config: {
+      target_url: `${APEConfig.opal_client_url}/v1/data/${packageName}`,
+      json_locator: ['result'],
+      result_type: 'decision',
     },
   };
 }

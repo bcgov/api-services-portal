@@ -418,6 +418,7 @@ const metadata = {
     sync: [
       'ref',
       'name',
+      'specVersion',
       'title',
       'version',
       'spec',
@@ -443,6 +444,7 @@ const metadata = {
     },
     example: {
       ref: 'my-api-spec',
+      specVersion: 'openapi-3.1.0',
       title: 'My API Spec',
       description: 'Description of my API Spec',
       version: '1.0.0',

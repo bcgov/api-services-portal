@@ -273,6 +273,7 @@ export interface Application {
  * @tsoaModel
  * @example {
  *   "ref": "my-api-spec",
+ *   "specVersion": "openapi-3.1.0",
  *   "title": "My API Spec",
  *   "description": "Description of my API Spec",
  *   "version": "1.0.0",
@@ -283,6 +284,7 @@ export interface Application {
 export interface OpenAPISpec {
   name?: string; // Primary Key
   ref?: string;
+  specVersion?: string;
   title?: string;
   version?: string;
   spec?: string;
