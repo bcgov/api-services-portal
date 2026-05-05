@@ -163,23 +163,27 @@ export class OrgGatewaysController extends Controller {
         delete doc.kind;
         payload.key_sets.push(doc);
       }
-      // Webhook
-      // RegoPolicy
-      // PolicyDataSource
     });
 
     logger.debug('Artifacts %j', payload);
 
     const artifact = YAML.dump(payload, { noRefs: true });
 
-    // Validate the generated config to ensure it only contains allowed configurations for the organization
-    const result = await gwaService.publishGatewayConfiguration(
-      action === 'remove' ? 'DELETE' : 'PUT',
-      getSubjectToken(request),
-      config._gateway_id,
-      dryRun,
-      artifact
-    );
+    let result;
+    if (
+      payload.services.length > 0 ||
+      payload.keys.length > 0 ||
+      payload.key_sets.length > 0
+    ) {
+      // Validate the generated config to ensure it only contains allowed configurations for the organization
+      result = await gwaService.publishGatewayConfiguration(
+        action === 'remove' ? 'DELETE' : 'PUT',
+        getSubjectToken(request),
+        config._gateway_id,
+        dryRun,
+        artifact
+      );
+    }
 
     // Handle the processing of these (dryRun not supported atm)
     // - Webhook
@@ -191,7 +195,15 @@ export class OrgGatewaysController extends Controller {
 
     request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
     request.res?.send(
-      YAML.dump({ gateway: result, ape: apeResult }, { noRefs: true })
+      YAML.dump(
+        [
+          ...(result
+            ? [{ resource: 'GatewayResources', response: result }]
+            : []),
+          ...apeResult,
+        ],
+        { noRefs: true }
+      )
     );
     return '';
   }

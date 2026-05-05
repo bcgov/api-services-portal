@@ -41,13 +41,15 @@ async function applyAPEConfig(documents: any[]): Promise<any> {
           const webhookService = new EventsWebhooksService(
             APEConfig.webhook_admin_url
           );
-          results.push(
-            await webhookService.upsertWebhook({
+          results.push({
+            resource: 'Webhook',
+            result: 'success',
+            response: await webhookService.upsertWebhook({
               connId: doc.conn_id,
               topic: doc.topic,
               webhookUrl: doc.webhook_url,
-            })
-          );
+            }),
+          });
           break;
 
         case 'RegoPolicy':
@@ -55,26 +57,30 @@ async function applyAPEConfig(documents: any[]): Promise<any> {
           const policyService = new OpalPoliciesService(
             APEConfig.opal_policy_url
           );
-          results.push(
-            await policyService.upsertPolicy({
+          results.push({
+            resource: 'RegoPolicy',
+            result: 'success',
+            response: await policyService.upsertPolicy({
               package: doc.package,
               policy: doc.policy,
-            })
-          );
+            }),
+          });
           break;
 
         case 'PolicyDataSource':
           const dataSourceService = new OpalPIPCatalogService(
             APEConfig.opal_pip_catalog_url
           );
-          results.push(
-            await dataSourceService.upsertDataSource({
+          results.push({
+            resource: 'PolicyDataSource',
+            result: 'success',
+            response: await dataSourceService.upsertDataSource({
               name: doc.name,
               url: doc.url,
               topics: doc.topics,
               dst_path: doc.dst_path,
-            })
-          );
+            }),
+          });
           break;
 
         default:
