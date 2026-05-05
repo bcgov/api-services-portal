@@ -4,18 +4,18 @@
 import { checkStatus } from '../checkStatus';
 import { Logger } from '../../logger';
 
-const logger = Logger('ape.OpalPoliciesService');
+const logger = Logger('ape.EventsWebhooksService');
 
 export interface WebhookRequest {
-  connId: string;
+  conn_id: string;
   topic: string;
-  webhookUrl: string;
+  webhook_url: string;
 }
 
 export interface WebhookResponse {
-  connId: string;
+  conn_id: string;
   topic: string;
-  webhookUrl: string;
+  webhook_url: string;
 }
 
 export class EventsWebhooksService {

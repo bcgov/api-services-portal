@@ -45,9 +45,9 @@ async function applyAPEConfig(documents: any[]): Promise<any> {
             resource: 'Webhook',
             result: 'success',
             response: await webhookService.upsertWebhook({
-              connId: doc.conn_id,
+              conn_id: doc.conn_id,
               topic: doc.topic,
-              webhookUrl: doc.webhook_url,
+              webhook_url: doc.webhook_url,
             }),
           });
           break;
