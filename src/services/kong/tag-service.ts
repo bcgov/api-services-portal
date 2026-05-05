@@ -13,17 +13,20 @@ export class KongTagService {
   }
 
   public async listTaggedConfig(tag: string): Promise<unknown[]> {
-    const response = (await fetch(
-      `${this.kongUrl}/tags/${encodeURIComponent(tag)}`,
-      {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then(checkStatus)
-      .then((res) => res.json())) as KongTaggedConfigResponse;
+    const res = await fetch(`${this.kongUrl}/tags/${encodeURIComponent(tag)}`, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.status === 404) {
+      return [];
+    }
+
+    const response = (await checkStatus(res).then((r) =>
+      r.json()
+    )) as KongTaggedConfigResponse;
 
     return response.data ?? [];
   }

@@ -79,10 +79,11 @@ export class OrgConnectionController extends Controller {
     const ctx = this.keystone.createContext(request, true);
     const service = new ConnectionService();
     const connection = await service.getConnectionById(ctx, id);
+    const organizationMemberId = org.split('-').pop();
 
     assertEqual(
-      connection.clientOrganization.name === org ||
-        connection.serviceOrganization.name === org,
+      connection.clientId.includes(`.${organizationMemberId}.`) ||
+        connection.serviceId.includes(`.${organizationMemberId}.`),
       true,
       'organization',
       'Not authorized to access this connection request'
