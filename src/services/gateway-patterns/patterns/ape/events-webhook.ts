@@ -17,6 +17,8 @@ import {
 } from '../../catalog';
 import { getRoutePathPrefix } from '../../../utils';
 import { ConnectionService } from '../../../batch/connection-service';
+import cyrpto from 'crypto';
+import { randomBytes } from 'crypto';
 
 export interface EventsWebhookPatternConfig extends Record<string, any> {
   organization: string;
@@ -103,18 +105,114 @@ export const EventsWebhookPattern = {
 
     const consumerGateway = data.client.gateway.id;
 
+    const nameWH = `sdx.evt.webhook.${inputs.conn_id}.c.${clientLocator}`;
+
+    // sha256 hash of clientServiceLocator to ensure the path is not too long for the gateway
+    // output has hex string format
+    const clientServiceShaHash = cyrpto
+      .createHash('sha256')
+      .update(nameWH)
+      .digest('hex')
+      .substring(0, 24);
+
     const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
-    const name = `sdx.evt.webhook.${inputs.conn_id}.c.${serviceLocator}`;
+    const nameC = `sdx.evt.webhook.${inputs.conn_id}.c.${clientLocator}`;
+    const nameP = `sdx.evt.webhook.${inputs.conn_id}.p.${clientLocator}`;
+
+    // webhook is the consumer, but as far as data flow it is:
+    // pubsub-webhook -> pubsub runtime group -> client runtime group -> webhook_url
+    // This means that the webhook_url that is passed in, is not the same webhook url
+    // that is registered with the Webhook service.
+    //
+    // Consumer gateway needs to be able to configure routes on the pubsub edge server
+    // so that the full route can be established.
+    //
+    // webhook url: https://internal.pubsub.servers.sdx/${clientServiceLocator}
+    // route on pubsub edge: /${clientServiceLocator} -> ${client.runtimeGroup.host}
+    // route on client runtime group: /${serviceLocator} -> ${service.subsystem.runtimeGroup.host}
+    const routeHostUrl = new URL(data.client.runtimeGroup.consumerEndpoint);
+    const routePathPrefix = `/sdx/1/${clientServiceShaHash}`;
+
+    const newWebhookUrl = `${routeHostUrl.protocol}//${routeHostUrl.host}/sdx/1/${clientServiceShaHash}`;
+
+    const clientServiceLocator = `${clientLocator}.webhook`;
+
+    const webhookRouteC = {
+      kind: 'GatewayService',
+      name: nameC,
+      retries: 0,
+      routes: [
+        {
+          hosts: [routeHostUrl.hostname],
+          paths: [routePathPrefix],
+          methods: ['POST'],
+          name: nameC,
+          strip_path: false,
+          protocols:
+            routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
+          tags,
+        },
+      ],
+      tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+      url: data.service.subsystem.runtimeGroup.sdxEndpoint,
+      plugins: [...[transformer(tags, data, clientServiceLocator)]],
+    } as any;
+
+    const clientServiceHost = data.client.runtimeGroup.host;
+
+    const webhookRouteP = {
+      kind: 'GatewayService',
+      name: nameP,
+      retries: 0,
+      routes: [
+        {
+          hosts: [clientServiceHost],
+          snis: [clientServiceHost],
+          paths: [routePathPrefix],
+          methods: ['POST'],
+          headers: {
+            'X-Client-Id': [`${clientServiceLocator}`],
+          },
+          protocols: ['https'],
+          name: `${nameP}.UPSTREAM`,
+          strip_path: true,
+          tags,
+        },
+      ],
+      tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+      url: inputs.webhook_url,
+      plugins: [] as any[],
+    };
 
     const config = {
       kind: 'Webhook',
-      name,
+      name: nameWH,
       conn_id: inputs.conn_id,
       topic: `Event-${serviceLocator}`,
-      url: inputs.webhook_url,
+      url: newWebhookUrl,
       tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
     } as any;
 
-    return [config] as any[];
+    return [webhookRouteC, webhookRouteP, config] as any[];
   },
 };
+
+function transformer(
+  tags: string[],
+  data: EventsWebhookPatternData,
+  clientServiceLocator: string
+) {
+  const serviceHost = data.client.runtimeGroup.host;
+  return {
+    name: 'request-transformer',
+    tags,
+    config: {
+      add: {
+        headers: [`X-Client-Id:${clientServiceLocator}`],
+      },
+      replace: {
+        headers: [`Host:${serviceHost}`],
+      },
+    },
+  };
+}
