@@ -113,7 +113,7 @@ class SubsystemService {
       context,
       'Subsystem',
       undefined,
-      ['organization'],
+      ['organization', 'namespace'],
       {
         query: '$name: String!, $tag: String!',
         clause: '{ organization: { tags_contains: $tag }, name: $name }',
