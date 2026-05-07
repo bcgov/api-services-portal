@@ -1,5 +1,5 @@
 export const APEConfig = {
-  events_url: 'https://sdx-events.api.gov.bc.ca',
+  events_url: 'http:/internal.share0.servers.sdx',
 
   events_publisher_url: 'http://pubsub-kafka',
 

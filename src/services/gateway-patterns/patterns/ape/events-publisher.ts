@@ -67,8 +67,7 @@ export const EventsPublisherPattern = {
           methods: ['POST'],
           name,
           strip_path: true,
-          protocols:
-            routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
+          protocols: ['https', 'http'],
           tags,
         },
       ],
