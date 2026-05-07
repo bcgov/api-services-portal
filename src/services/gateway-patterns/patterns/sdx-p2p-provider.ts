@@ -20,6 +20,7 @@ interface ProviderUpgrades {
   verify: {};
   pep: {
     policy_name: string;
+    json_locator: string[];
   };
   token_exchange: {
     token_endpoint: string;
@@ -273,7 +274,7 @@ function upgradeToPolicyEnforcement(
     tags: tags,
     config: {
       target_url: `${APEConfig.opal_client_url}/v1/data/${packageName}`,
-      json_locator: ['result'],
+      json_locator: inputs.upgrades.pep.json_locator,
       result_type: 'decision',
     },
   };
