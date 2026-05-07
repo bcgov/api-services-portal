@@ -170,6 +170,9 @@ export const SDXP2PProviderPattern = {
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
+          ...(upgrades.hasOwnProperty('co-sign')
+            ? [upgradeToTrustKMS(tags, data)]
+            : []),
           ...(upgrades.hasOwnProperty('token_exchange')
             ? [
                 upgradeToTokenExchange(
@@ -238,6 +241,24 @@ function upgradeToTokenExchange(
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       algorithm: 'ES256',
       expiration: 60,
+    },
+  };
+}
+
+function upgradeToTrustKMS(tags: string[], data: SDXP2PProviderPatternData) {
+  const member = data.service.subsystem.member;
+  const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
+
+  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+
+  return {
+    name: 'trust-kms',
+    tags: tags,
+    config: {
+      direction: 'response',
+      operation: 'sign',
+      signature_header_key: 'X-Edge-Token',
+      key_id,
     },
   };
 }

@@ -159,6 +159,40 @@ export const SDXRuntimeGroupPattern = {
           },
         ],
       },
+
+      //
+      // Trust KMS key creation and CSR generation
+      //
+      {
+        kind: 'GatewayService',
+        name: `${nm}.KMS`,
+        url: 'https://10.0.0.1', // dummy URL
+        tags,
+        tls_verify: false,
+        routes: [
+          {
+            name: `${nm}.KMS`,
+            tags,
+            hosts: [routeHost],
+            snis: [routeHost],
+            headers: {
+              'X-Client-Id': [`SDX-OPERATOR`],
+            },
+            paths: ['/csr'],
+            methods: ['POST'],
+            protocols: ['https', 'http'],
+          },
+        ],
+        plugins: [
+          {
+            name: 'trust-kms',
+            tags,
+            config: {
+              operation: 'create_key',
+            },
+          },
+        ],
+      },
     ];
   },
 };

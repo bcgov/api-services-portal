@@ -132,6 +132,9 @@ export const SDXP2PConsumerPattern = {
         ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
           : []),
+        ...(upgrades.hasOwnProperty('co-sign')
+          ? [upgradeToTrustKMS(tags, data)]
+          : []),
       ],
     } as any;
 
@@ -188,6 +191,24 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
       signature_header_key: 'X-Edge-Token',
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
+    },
+  };
+}
+
+function upgradeToTrustKMS(tags: string[], data: SDXP2PConsumerPatternData) {
+  const member = data.client.member;
+  const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
+
+  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+
+  return {
+    name: 'trust-kms',
+    tags: tags,
+    config: {
+      direction: 'request',
+      operation: 'sign',
+      signature_header_key: 'X-Edge-Token',
+      key_id,
     },
   };
 }
