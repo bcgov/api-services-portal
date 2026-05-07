@@ -53,7 +53,9 @@ export const EventsPublisherPattern = {
     const tags = [`ns.${data.gateway_id}.${serviceLocator}.pub`, 'sdx'];
     const name = `sdx.evt.pub.${serviceLocator}`;
 
-    const routeHostUrl = new URL(APEConfig.events_url);
+    const routeHostUrl = new URL(
+      data.service.subsystem.runtimeGroup.consumerEndpoint
+    );
     const routePathPrefix = getRoutePathPrefix(serviceLocator);
 
     const config = {

@@ -131,13 +131,15 @@ export const EventsWebhookPattern = {
     // webhook url: https://internal.pubsub.servers.sdx/${clientServiceLocator}
     // route on pubsub edge: /${clientServiceLocator} -> ${client.runtimeGroup.host}
     // route on client runtime group: /${serviceLocator} -> ${service.subsystem.runtimeGroup.host}
-    const routeHostUrl = new URL(APEConfig.events_url);
+    //    const routeHostUrl = new URL(APEConfig.events_url);
     const routePathPrefix = `/sdx/1/${clientServiceShaHash}`;
 
     const clientServiceLocator = `${clientLocator}.webhook`;
 
     // client is always the pubsub-webhook system
     // so will be routing through the internal endpoint for its edge server
+    // TODO: Gateway needs permission to use this events_url endpoint!
+    //
     const webhookRouteC = {
       kind: 'GatewayService',
       name: nameC,
@@ -185,7 +187,7 @@ export const EventsWebhookPattern = {
       plugins: [] as any[],
     };
 
-    const newWebhookUrl = `${routeHostUrl.protocol}//${routeHostUrl.host}/sdx/1/${clientServiceShaHash}`;
+    const newWebhookUrl = `${APEConfig.pubsub_dispatch_url}/sdx/1/${clientServiceShaHash}`;
 
     const config = {
       kind: 'Webhook',
