@@ -19,6 +19,7 @@ import { getRoutePathPrefix } from '../../../utils';
 import { ConnectionService } from '../../../batch/connection-service';
 import cyrpto from 'crypto';
 import { randomBytes } from 'crypto';
+import { APEConfig } from '../../../ape/config';
 
 export interface EventsWebhookPatternConfig extends Record<string, any> {
   organization: string;
@@ -130,13 +131,13 @@ export const EventsWebhookPattern = {
     // webhook url: https://internal.pubsub.servers.sdx/${clientServiceLocator}
     // route on pubsub edge: /${clientServiceLocator} -> ${client.runtimeGroup.host}
     // route on client runtime group: /${serviceLocator} -> ${service.subsystem.runtimeGroup.host}
-    const routeHostUrl = new URL(data.client.runtimeGroup.consumerEndpoint);
+    const routeHostUrl = new URL(APEConfig.events_url);
     const routePathPrefix = `/sdx/1/${clientServiceShaHash}`;
-
-    const newWebhookUrl = `${routeHostUrl.protocol}//${routeHostUrl.host}/sdx/1/${clientServiceShaHash}`;
 
     const clientServiceLocator = `${clientLocator}.webhook`;
 
+    // client is always the pubsub-webhook system
+    // so will be routing through the internal endpoint for its edge server
     const webhookRouteC = {
       kind: 'GatewayService',
       name: nameC,
@@ -183,6 +184,8 @@ export const EventsWebhookPattern = {
       url: inputs.webhook_url,
       plugins: [] as any[],
     };
+
+    const newWebhookUrl = `${routeHostUrl.protocol}//${routeHostUrl.host}/sdx/1/${clientServiceShaHash}`;
 
     const config = {
       kind: 'Webhook',
