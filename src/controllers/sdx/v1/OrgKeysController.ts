@@ -17,7 +17,7 @@ import { CreateNewKey } from '../../../services/workflow/sdx-org-keys';
 
 @injectable()
 @Route('/organizations/{org}/keys')
-@Tags('Runtime Groups')
+@Tags('Subsystems')
 export class OrgKeysController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {

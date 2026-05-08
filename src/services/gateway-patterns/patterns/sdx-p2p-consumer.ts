@@ -17,6 +17,7 @@ const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 interface ConsumerUpgrades {
   sign: {};
   verify: {};
+  counter_sign: {};
 }
 
 export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
@@ -132,7 +133,7 @@ export const SDXP2PConsumerPattern = {
         ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
           : []),
-        ...(upgrades.hasOwnProperty('co-sign')
+        ...(upgrades.hasOwnProperty('counter_sign')
           ? [upgradeToTrustKMS(tags, data)]
           : []),
       ],

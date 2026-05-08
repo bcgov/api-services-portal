@@ -17,6 +17,7 @@ const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 interface ProviderUpgrades {
   sign: {};
   verify: {};
+  counter_sign: {};
   token_exchange: {
     token_endpoint: string;
     client_id: string;
@@ -170,7 +171,7 @@ export const SDXP2PProviderPattern = {
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
-          ...(upgrades.hasOwnProperty('co-sign')
+          ...(upgrades.hasOwnProperty('counter_sign')
             ? [upgradeToTrustKMS(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('token_exchange')
