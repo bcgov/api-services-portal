@@ -131,7 +131,7 @@ export const EventsWebhookPattern = {
     // webhook url: https://internal.pubsub.servers.sdx/${clientServiceLocator}
     // route on pubsub edge: /${clientServiceLocator} -> ${client.runtimeGroup.host}
     // route on client runtime group: /${serviceLocator} -> ${service.subsystem.runtimeGroup.host}
-    //    const routeHostUrl = new URL(APEConfig.events_url);
+    const routeHostUrl = new URL(APEConfig.pubsub_dispatch_url);
     const routePathPrefix = `/sdx/1/${clientServiceShaHash}`;
 
     const clientServiceLocator = `${clientLocator}.webhook`;
