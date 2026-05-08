@@ -303,8 +303,52 @@ export interface OpenAPISpec {
  */  
 export interface Subsystem {
   name?: string;
+  description?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "name": "my-runtime-group",
+ *   "gatewayId": "gw-abc",
+ *   "host": "runtime-group.my-domain.sdx",
+ *   "sdxEndpoint": "10.10.10.10:443",
+ *   "consumerEndpoint": "10.0.0.11:6443",
+ *   "hostedOrganizations": [
+ *     "ministry-of-citizens-services",
+ *     "ministry-of-health"
+ *   ]
+ * }
+ */  
+export interface RuntimeGroup {
+  name?: string; // Primary Key
+  host?: string;
+  sdxEndpoint?: string;
+  consumerEndpoint?: string;
+  gatewayId?: string;
+  organization?: OrganizationRefID;
+  hostedOrganizations?: OrganizationRefID[];
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "clientId": "client-123",
+ *   "serviceId": "service-456",
+ *   "isApproved": false,
+ *   "isActive": false
+ * }
+ */  
+export interface ConnectionRequest {
+  slug?: string; // Primary Key
+  clientId?: string;
+  serviceId?: string;
+  isApproved?: boolean;
+  isActive?: boolean;
 }
 
 
