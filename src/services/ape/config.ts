@@ -1,8 +1,15 @@
 export const APEConfig = {
-  events_url: 'https://sdx-events-api-gov-bc-ca.dev.api.gov.bc.ca',
-  pubsub_dispatch_url: 'http:/internal.share0.servers.sdx',
+  // used by the webhook for sending messages to the RS via SDX
+  pubsub_dispatch_url: 'http://sdx-edge-share0',
 
+  // SDX exchange
+  pubsub_forward_url: 'http://share0.servers.sdx',
+  pubsub_dispatch_ip: '142.34.229.4',
+
+  // publish destination
   events_publisher_url: 'http://pubsub-kafka',
+
+  // These are for administration, not for runtime routes/plugins
 
   webhook_admin_url: 'http://pubsub-webhook',
 

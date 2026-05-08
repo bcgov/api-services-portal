@@ -22,6 +22,10 @@ interface ProviderUpgrades {
     policy_name: string;
     json_locator: string[];
   };
+  policy_list: {
+    policy_name: string;
+    json_locator: string[];
+  };
   token_exchange: {
     token_endpoint: string;
     client_id: string;
@@ -183,6 +187,15 @@ export const SDXP2PProviderPattern = {
                 ),
               ]
             : []),
+          ...(upgrades.hasOwnProperty('policy_list')
+            ? [
+                upgradeToPolicyList(
+                  tags,
+                  data,
+                  inputs as SDXP2PProviderPatternConfig
+                ),
+              ]
+            : []),
           ...(upgrades.hasOwnProperty('token_exchange')
             ? [
                 upgradeToTokenExchange(
@@ -276,6 +289,31 @@ function upgradeToPolicyEnforcement(
       target_url: `${APEConfig.opal_client_url}/v1/data/${packageName}`,
       json_locator: inputs.upgrades.pep.json_locator,
       result_type: 'decision',
+    },
+  };
+}
+
+function upgradeToPolicyList(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
+  const service = data.service;
+
+  const policyName = inputs.upgrades.policy_list.policy_name;
+
+  const packageName = `${service.subsystem.clientId.replace(
+    /\.|-/g,
+    '_'
+  )}/${policyName}`;
+
+  return {
+    name: 'openid-authzen',
+    tags: tags,
+    config: {
+      target_url: `${APEConfig.opal_client_url}/v1/data/${packageName}`,
+      json_locator: inputs.upgrades.policy_list.json_locator,
+      result_type: 'table',
     },
   };
 }
