@@ -430,7 +430,10 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
               >
                 API-ProgramServices-alerts
               </Link>
-              . These channels are for BC Public Service employees by default;
+              .
+              <br />
+              <br />
+              These channels are for BC Public Service employees by default;
               external clients can{' '}
               <Link
                 href={HelpTeamsAccessRequestURL}
@@ -440,7 +443,10 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
               >
                 request access via the Data Systems and Services request system
               </Link>
-              . Alternatively,{' '}
+              .
+              <br />
+              <br />
+              Alternatively,{' '}
               <Link
                 href={HelpDeskURL}
                 target="_blank"
