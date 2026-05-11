@@ -21,7 +21,6 @@ import {
   removeKeys,
   transformAllRefID,
 } from '../../../batch/feed-worker';
-import { assertEqual } from '../../ioc/assert';
 import { ConnectionService } from '../../../services/batch/connection-service';
 
 @injectable()
@@ -78,17 +77,7 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
     const service = new ConnectionService();
-    const connection = await service.getConnectionById(ctx, id);
-    const organizationMemberId = org.split('-').pop();
 
-    assertEqual(
-      connection.clientId.includes(`.${organizationMemberId}.`) ||
-        connection.serviceId.includes(`.${organizationMemberId}.`),
-      true,
-      'organization',
-      'Not authorized to access this connection request'
-    );
-
-    return await service.deleteConnection(ctx, id);
+    return await service.deleteConnection(ctx, org, id);
   }
 }

@@ -140,23 +140,10 @@ class ConnectionService {
   };
 
   getConnectionDeleteStatus = async (
-    context: Keystone,
-    id: string
+    connection: KeystoneConnectionRequest,
+    clientSubsystem: KeystoneSubsystem,
+    serviceSpec: KeystoneOpenApiSpec
   ): Promise<ConnectionRequestDeleteStatus> => {
-    const connection = await this.getConnectionById(context, id);
-
-    const subsystemService = new SubsystemService();
-    const clientSubsystem = await subsystemService.findSubsystemByClientId(
-      context,
-      connection.clientId
-    );
-
-    const oasService = new OpenAPISpecService();
-    const serviceSpec = await oasService.findOpenAPISpecByName(
-      context,
-      connection.serviceId
-    );
-
     const { clientTag, serviceTag } = this.buildConnectionConfigTags(
       connection,
       clientSubsystem,
@@ -181,9 +168,35 @@ class ConnectionService {
 
   deleteConnection = async (
     context: Keystone,
+    org: string,
     id: string
   ): Promise<BatchResult> => {
-    const status = await this.getConnectionDeleteStatus(context, id);
+    const connection = await this.getConnectionById(context, id);
+
+    const subsystemService = new SubsystemService();
+    const clientSubsystem = await subsystemService.findSubsystemByClientId(
+      context,
+      connection.clientId
+    );
+
+    assertEqual(
+      clientSubsystem.organization.name === org,
+      true,
+      'organization',
+      'Not authorized to access this connection request'
+    );
+
+    const oasService = new OpenAPISpecService();
+    const serviceSpec = await oasService.findOpenAPISpecByName(
+      context,
+      connection.serviceId
+    );
+
+    const status = await this.getConnectionDeleteStatus(
+      connection,
+      clientSubsystem,
+      serviceSpec
+    );
 
     const remainingConfigMessages: string[] = [];
 
