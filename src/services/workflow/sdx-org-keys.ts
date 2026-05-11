@@ -1,5 +1,8 @@
 import { RuntimeGroupService } from '../batch/runtime-group';
-import { parseOrganizationMemberDetails } from '../keystone/organization';
+import {
+  getOrganization,
+  parseOrganizationMemberDetails,
+} from '../keystone/organization';
 import assert from '../user-assert';
 import https from 'https';
 import fs from 'fs';
@@ -11,7 +14,7 @@ const logger = Logger('workflow.sdx-org-keys');
 
 export const CreateNewKey = async (
   context: any,
-  org: string,
+  orgName: string,
   runtimeGroupName: string
 ) => {
   const service = new RuntimeGroupService();
@@ -22,19 +25,21 @@ export const CreateNewKey = async (
     runtimeGroupName
   );
   assert.strictEqual(
-    rg.hostedOrganizations?.filter((o) => o.name === org).length == 1,
+    rg.hostedOrganizations?.filter((o) => o.name === orgName).length == 1,
     true,
     'Not permitted to host on this runtime group'
   );
 
-  const member = parseOrganizationMemberDetails(rg.organization.tags);
+  const org = await getOrganization(context, orgName);
+
+  const member = parseOrganizationMemberDetails(org.tags);
 
   const san =
     `LAB-${member.memberClass}-${member.memberId}.${rg.name}.servers.sdx`.toLocaleLowerCase();
 
   const body = {
     country: 'CA',
-    org_name: rg.organization.title,
+    org_name: org.title,
     serial_number: `LAB/${member.memberClass}/${rg.name.toUpperCase()}`,
     common_name: member.memberId,
     san: san,
