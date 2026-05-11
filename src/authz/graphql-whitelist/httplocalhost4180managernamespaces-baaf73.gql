@@ -1,6 +1,6 @@
 
   query ListOrganizationUnits($org: String!) {
-    allOrganizations(where: { name: $org }) {
+    allOrganizations(where: { name: $org, extSource: "ckan" }) {
       orgUnits {
         name
         title

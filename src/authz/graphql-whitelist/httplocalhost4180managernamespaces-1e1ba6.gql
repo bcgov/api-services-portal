@@ -1,6 +1,6 @@
 
   query ListOrganizations {
-    allOrganizations(sortBy: title_ASC) {
+    allOrganizations(where: { extSource: "ckan" }, sortBy: title_ASC) {
       name
       title
     }

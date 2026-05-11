@@ -490,6 +490,8 @@ components:
                     type: string
                 description:
                     type: string
+                publicBodyId:
+                    type: string
                 extSource:
                     type: string
                 extRecordHash:
@@ -1439,7 +1441,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
-            description: "Create Organization\n> `Required Scope:` GroupAccess.Manage"
+            description: "Create or update Organizations.\n\nThe body may optionally carry a `publicBodyId` to link the\nOrganization to a Public Body from the authoritative data registry\n(FOIPPA).  This field is unique across all Organizations; multiple\nOrganizations may omit the value entirely, but a given\n`publicBodyId` MUST not be reused across Organizations.\n\n> `Required Scope:` GroupAccess.Manage"
             summary: 'Create Organizations'
             tags:
                 - Organizations

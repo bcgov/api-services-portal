@@ -70,7 +70,14 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * Create Organization
+   * Create or update Organizations.
+   *
+   * The body may optionally carry a `publicBodyId` to link the
+   * Organization to a Public Body from the authoritative data registry
+   * (FOIPPA).  This field is unique across all Organizations; multiple
+   * Organizations may omit the value entirely, but a given
+   * `publicBodyId` MUST not be reused across Organizations.
+   *
    * > `Required Scope:` GroupAccess.Manage
    *
    * @summary Create Organizations

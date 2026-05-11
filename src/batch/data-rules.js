@@ -8,6 +8,7 @@ const metadata = {
       'title',
       'tags',
       'description',
+      'publicBodyId',
       'orgUnits',
       'extSource',
       'extRecordHash',
