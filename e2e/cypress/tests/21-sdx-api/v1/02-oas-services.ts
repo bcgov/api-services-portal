@@ -1,3 +1,60 @@
+function createSubsystemAndOASService(org: any, subsystemName: string, next: any) {
+  const subsystem = {
+    name: subsystemName,
+  }
+
+  cy.setRequestBody(subsystem)
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
+    ({ apiRes: { status } }: any) => {
+      expect(status).to.be.equal(200)
+
+      cy.get('@toys.v1').then((text: any) => {
+        expect(Cypress.Buffer.isBuffer(text)).to.be.true
+        const body = text.toString()
+        expect(body).to.include('openapi: 3.1.1')
+
+        cy.setRequestBodyRaw(body)
+        cy.setHeader('Content-Type', 'application/octet-stream')
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+          'PUT',
+          false
+        ).then(({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('created')
+          expect(body).has.property('refKey')
+
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
+            'GET',
+            false
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            next(body)
+          })
+        })
+      })
+    }
+  )
+}
+
+function createConnection(org: any, service: any, next: any) {
+  const payload = {
+    clientId: service.subsystem.clientId,
+    serviceId: service.name,
+  }
+
+  cy.setRequestBody(payload)
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+    ({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+      expect(body.result).to.be.equal('created')
+      expect(typeof body.id).to.be.equal('string')
+      next(body.id)
+    }
+  )
+}
+
 describe('SDX OpenAPI Services', () => {
   let workingData: any
 
@@ -136,7 +193,67 @@ describe('SDX OpenAPI Services', () => {
                 false
               ).then(({ apiRes: { status, body } }: any) => {
                 expect(status).to.be.equal(200)
+                expect(body.result).to.be.equal('deleted')
               })
+            })
+          })
+        }
+      )
+    })
+
+    it('DELETE /organizations/{org}/oas-services/{id} - name can be reused after delete', () => {
+      const { org, datasetId } = workingData
+
+      const subsystemName = `SUBSYS-${datasetId.toUpperCase()}`
+      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+        cy.setRequestBody(undefined)
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
+          'DELETE',
+          false
+        ).then(({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('deleted')
+
+          cy.get('@toys.v1').then((text: any) => {
+            const body = text.toString()
+
+            cy.setRequestBodyRaw(body)
+            cy.setHeader('Content-Type', 'application/octet-stream')
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+              'PUT',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body.result).to.be.equal('created')
+              expect(body).has.property('refKey')
+            })
+          })
+        })
+      })
+    })
+  })
+
+  describe('OpenAPI Services Sad Paths', () => {
+    it('DELETE /organizations/{org}/oas-services/{id} - active connection request exists', () => {
+      const { org, datasetId } = workingData
+
+      createSubsystemAndOASService(
+        org,
+        `SUBSYS-${datasetId.toUpperCase()}`,
+        (service: any) => {
+          createConnection(org, service, () => {
+            cy.setRequestBody(undefined)
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
+              'DELETE',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.message).to.be.equal(
+                'OAS service cannot be deleted because it has active connection requests'
+              )
             })
           })
         }

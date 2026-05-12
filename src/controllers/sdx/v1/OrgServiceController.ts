@@ -17,7 +17,6 @@ import {
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
 import {
-  deleteRecordByInternalId,
   getRecordById,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
@@ -226,17 +225,6 @@ export class GatewayServiceController extends Controller {
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    const entry = await new OpenAPISpecService().findOpenAPISpecByName(
-      context,
-      name
-    );
-    assertEqual(
-      entry && entry.subsystem.organization.name === org,
-      true,
-      'organization',
-      'Not authorized to access this service'
-    );
-
-    return await deleteRecordByInternalId(context, 'OpenAPISpec', entry.id);
+    return await new OpenAPISpecService().deleteOASService(context, org, name);
   }
 }
