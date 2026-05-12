@@ -59,8 +59,8 @@ const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Microsoft Teams: API-ProgramServices-alerts (incidents, outages,
-                maintenance, releases, breaking changes)
+                Microsoft Teams: API-ProgramServices-alerts (incidents,
+                maintenance, releases)
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </Link>
             </ListItem>
