@@ -1,25 +1,24 @@
 import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import {
+  deleteRecordByInternalId,
   getRecords,
-  removeEmpty,
   removeKeys,
   syncRecordsThrowErrors,
 } from '../../batch/feed-worker';
-import { ConnectionRequest, OpenAPISpec, Subsystem } from './types';
 import { BatchResult } from 'batch/types';
 import {
   ConnectionRequestUpdateInput,
   ConnectionRequest as KeystoneConnectionRequest,
   Subsystem as KeystoneSubsystem,
   OpenApiSpec as KeystoneOpenApiSpec,
-  ConnectionRequestsUpdateInput,
 } from '../keystone/types';
 import { ConnectionRequestInput } from '../../controllers/sdx/v1/types';
 import { SubsystemService } from './subsystem';
 import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
+import { KongTagService } from '../kong/tag-service';
 
 const logger = Logger('batch.connection');
 
@@ -27,6 +26,13 @@ export interface ConnectionRequestUpdateParams {
   client: KeystoneSubsystem;
   service: KeystoneOpenApiSpec;
   request: ConnectionRequestInput;
+}
+
+export interface ConnectionRequestDeleteStatus {
+  clientTag: string;
+  serviceTag: string;
+  clientConfigCount: number;
+  serviceConfigCount: number;
 }
 
 class ConnectionService {
@@ -97,7 +103,7 @@ class ConnectionService {
       context,
       'ConnectionRequest',
       'allConnectionRequests',
-      [],
+      ['clientOrganization', 'serviceOrganization'],
       batchClause
     );
     assert.strictEqual(
@@ -109,6 +115,112 @@ class ConnectionService {
     records.forEach((o) => removeKeys(o, ['slug']));
 
     return records.pop();
+  };
+
+  buildConnectionConfigTags = (
+    connection: KeystoneConnectionRequest,
+    clientSubsystem: KeystoneSubsystem,
+    serviceSpec: KeystoneOpenApiSpec
+  ): { clientTag: string; serviceTag: string } => {
+    assert.strictEqual(
+      Boolean(clientSubsystem.namespace),
+      true,
+      'Client subsystem gateway not found'
+    );
+    assert.strictEqual(
+      Boolean(serviceSpec.subsystem?.namespace),
+      true,
+      'Service subsystem gateway not found'
+    );
+
+    return {
+      clientTag: `ns.${clientSubsystem.namespace}.${connection.id}.c`,
+      serviceTag: `ns.${serviceSpec.subsystem.namespace}.${connection.id}.p`,
+    };
+  };
+
+  getConnectionDeleteStatus = async (
+    connection: KeystoneConnectionRequest,
+    clientSubsystem: KeystoneSubsystem,
+    serviceSpec: KeystoneOpenApiSpec
+  ): Promise<ConnectionRequestDeleteStatus> => {
+    const { clientTag, serviceTag } = this.buildConnectionConfigTags(
+      connection,
+      clientSubsystem,
+      serviceSpec
+    );
+
+    assert.strictEqual(Boolean(process.env.KONG_URL), true, 'KONG_URL not set');
+
+    const kongTagService = new KongTagService(process.env.KONG_URL);
+    const [clientConfig, serviceConfig] = await Promise.all([
+      kongTagService.listTaggedConfig(clientTag),
+      kongTagService.listTaggedConfig(serviceTag),
+    ]);
+
+    return {
+      clientTag,
+      serviceTag,
+      clientConfigCount: clientConfig.length,
+      serviceConfigCount: serviceConfig.length,
+    };
+  };
+
+  deleteConnection = async (
+    context: Keystone,
+    org: string,
+    id: string
+  ): Promise<BatchResult> => {
+    const connection = await this.getConnectionById(context, id);
+
+    const subsystemService = new SubsystemService();
+    const clientSubsystem = await subsystemService.findSubsystemByClientId(
+      context,
+      connection.clientId
+    );
+
+    assertEqual(
+      clientSubsystem.organization.name === org,
+      true,
+      'organization',
+      'Not authorized to access this connection request'
+    );
+
+    const oasService = new OpenAPISpecService();
+    const serviceSpec = await oasService.findOpenAPISpecByName(
+      context,
+      connection.serviceId
+    );
+
+    const status = await this.getConnectionDeleteStatus(
+      connection,
+      clientSubsystem,
+      serviceSpec
+    );
+
+    const remainingConfigMessages: string[] = [];
+
+    if (status.clientConfigCount > 0) {
+      remainingConfigMessages.push(
+        `client gateway configuration still exists for tag ${status.clientTag}`
+      );
+    }
+
+    if (status.serviceConfigCount > 0) {
+      remainingConfigMessages.push(
+        `service gateway configuration still exists for tag ${status.serviceTag}`
+      );
+    }
+
+    assert.strictEqual(
+      remainingConfigMessages.length === 0,
+      true,
+      `Connection request cannot be deleted because ${remainingConfigMessages.join(
+        ' and '
+      )}`
+    );
+
+    return await deleteRecordByInternalId(context, 'ConnectionRequest', id);
   };
 
   listConnectionsByOrganization = async (
