@@ -18,6 +18,7 @@ import {
   FaLock,
   FaSearch
 } from 'react-icons/fa';
+import { buildTeamsAccessRequestUrl } from '@/shared/build-teams-access-request-url';
 import { useGlobal } from '@/shared/services/global';
 
 interface GatewayGetStartedProps {
@@ -59,7 +60,9 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
   const HelpDeskURL = global?.helpLinks.helpDeskUrl
   const HelpTeamsAlertsURL = global?.helpLinks.helpTeamsAlertsUrl
   const HelpTeamsOperationsURL = global?.helpLinks.helpTeamsOperationsUrl
-  const HelpTeamsAccessRequestURL = global?.helpLinks.helpTeamsAccessRequestUrl
+  const HelpTeamsAccessRequestURL = buildTeamsAccessRequestUrl(
+    global?.helpLinks.helpTeamsAccessRequestUrl
+  )
   const apiRootUrl = global?.apiRootUrl
   const configHost = apiRootUrl ? apiRootUrl.replace('https://', '').replace('http://', '') : ''
 
@@ -409,26 +412,25 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
           title='Contact us'
           description={
             <>
-              Join{' '}
+              Join the{' '}
               <Link
                 href={HelpTeamsOperationsURL}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
               >
-                API-ProgramServices-operations
+                MS Teams: Support channel
               </Link>
               {' '}
-              on Microsoft Teams for questions and usage guidance. For
-              time-sensitive notices (incidents, maintenance, releases)
-              , follow{' '}
+              for questions and usage guidance. For incidents, maintenance, and
+              other notices, follow the{' '}
               <Link
                 href={HelpTeamsAlertsURL}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
               >
-                API-ProgramServices-alerts
+                MS Teams: Alerts and notices channel
               </Link>
               .
               <br />

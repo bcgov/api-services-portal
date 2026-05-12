@@ -14,6 +14,7 @@ import {
   Link,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
+import { buildTeamsAccessRequestUrl } from '@/shared/build-teams-access-request-url';
 import { useGlobal } from '@/shared/services/global';
 
 interface SupportLinksProps {
@@ -23,6 +24,9 @@ interface SupportLinksProps {
 
 const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
   const data = useGlobal();
+  const teamsAccessUrl = buildTeamsAccessRequestUrl(
+    data?.helpLinks.helpTeamsAccessRequestUrl
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -55,29 +59,27 @@ const SupportLinks: React.FC<SupportLinksProps> = ({ isOpen, onClose }) => {
             </ListItem>
             <ListItem>
               <Link
-                href={data?.helpLinks.helpTeamsAlertsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Microsoft Teams: API-ProgramServices-alerts (incidents,
-                maintenance, releases)
-                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link
                 href={data?.helpLinks.helpTeamsOperationsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Microsoft Teams: API-ProgramServices-operations (questions and
-                usage guidance)
+                MS Teams: Support channel
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </Link>
             </ListItem>
             <ListItem>
               <Link
-                href={data?.helpLinks.helpTeamsAccessRequestUrl}
+                href={data?.helpLinks.helpTeamsAlertsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                MS Teams: Alerts and notices channel
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link
+                href={teamsAccessUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
