@@ -867,6 +867,7 @@ CREATE TABLE public."Organization" (
     title text NOT NULL,
     tags text NOT NULL,
     description text,
+    "publicBodyId" text,
     "extSource" text NOT NULL,
     "extForeignKey" text NOT NULL,
     "extRecordHash" text NOT NULL
@@ -1616,6 +1617,19 @@ ALTER TABLE ONLY public."Legal"
 
 ALTER TABLE ONLY public."Organization"
     ADD CONSTRAINT organization_extforeignkey_unique UNIQUE ("extForeignKey");
+
+
+--
+-- Name: organization_publicbodyid_unique; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+-- Partial unique index: a publicBodyId, when set, must be unique across all
+-- Organizations.  NULL values are excluded so that multiple Organizations
+-- may omit the public-body reference entirely.
+--
+
+CREATE UNIQUE INDEX organization_publicbodyid_unique
+    ON public."Organization" ("publicBodyId")
+    WHERE "publicBodyId" IS NOT NULL;
 
 
 --
