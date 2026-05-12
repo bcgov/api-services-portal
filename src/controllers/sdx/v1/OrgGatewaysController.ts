@@ -140,15 +140,19 @@ export class OrgGatewaysController extends Controller {
     const gwaService = new GWAService(process.env.GWA_API_URL);
 
     const payload: any = {
-      services: [],
       keys: [],
       key_sets: [],
+      services: [],
     };
 
     config.documents.forEach((doc: any) => {
       if (doc.kind === 'GatewayService') {
         delete doc.kind;
         payload.services.push(doc);
+      } else if (doc.kind === 'GatewayConsumer') {
+        delete doc.kind;
+        payload.consumers = (payload.consumers as any[]) || [];
+        payload.consumers.push(doc);
       } else if (doc.kind === 'GatewayKey') {
         delete doc.kind;
         payload.keys.push(doc);

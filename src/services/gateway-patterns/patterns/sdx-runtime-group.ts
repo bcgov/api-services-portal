@@ -10,6 +10,7 @@ export interface SDXRuntimeGroupPatternConfig extends Record<string, string> {
 interface SDXRuntimeGroupPatternData {
   gateway_id: string;
   runtime_group: RuntimeGroup;
+  operator_runtime_group: RuntimeGroup;
 }
 
 /**
@@ -34,9 +35,15 @@ export const SDXRuntimeGroupPattern = {
       'Organization does not own this runtime group'
     );
 
+    const operatorEdge = await rgService.findRuntimeGroupByUniqueName(
+      ctx,
+      process.env.SDX_OPERATOR_EDGE!
+    );
+
     return {
       gateway_id: rg.namespace,
       runtime_group: rg,
+      operator_runtime_group: operatorEdge,
     };
   },
 
@@ -50,6 +57,8 @@ export const SDXRuntimeGroupPattern = {
 
     const consumerUrl = new URL(data.runtime_group.consumerEndpoint);
     const consumerHost = consumerUrl.host;
+
+    const routeHostUrl = new URL(data.operator_runtime_group.consumerEndpoint);
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 
@@ -193,6 +202,44 @@ export const SDXRuntimeGroupPattern = {
           },
         ],
       },
+
+      // Have a route from SDX_OPERATOR_EDGE
+      // so that the SDX internal operations from the Portal can call it
+      {
+        kind: 'GatewayService',
+        name: `ops.c.${nm}.KMS`,
+        url: `${data.runtime_group.sdxEndpoint}/csr`,
+        tags,
+        tls_verify: true,
+        routes: [
+          {
+            name: `ops.c.${nm}.KMS`,
+            paths: [`/edge/${data.runtime_group.name}/csr`],
+            strip_path: true,
+            tags,
+            hosts: [routeHostUrl.hostname],
+            methods: ['POST'],
+            protocols: ['https', 'http'],
+          },
+        ],
+        plugins: [...[transformer(tags, data)]],
+      },
     ];
   },
 };
+
+function transformer(tags: string[], data: SDXRuntimeGroupPatternData) {
+  const serviceHost = data.runtime_group.host;
+  return {
+    name: 'request-transformer',
+    tags,
+    config: {
+      add: {
+        headers: [`X-Client-Id:SDX-OPERATOR`],
+      },
+      replace: {
+        headers: [`Host:${serviceHost}`],
+      },
+    },
+  };
+}

@@ -132,9 +132,13 @@ export const SDXP2PProviderPattern = {
       {
         kind: 'GatewayService',
         name,
+        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+        url: upstreamUrl,
         retries: 0,
         routes: [
           {
+            name: `${name}.UPSTREAM`,
+            tags,
             hosts: [serviceHost],
             snis: inputs.use_sni === 'false' ? [] : [serviceHost],
             paths: [routePathPrefix],
@@ -143,11 +147,11 @@ export const SDXP2PProviderPattern = {
               'X-Client-Id': [`${clientLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
-            name: `${name}.UPSTREAM`,
             strip_path: true,
-            tags,
           },
           {
+            name: `${name}.HELLO`,
+            tags,
             hosts: [serviceHost],
             snis: inputs.use_sni === 'false' ? [] : [serviceHost],
             paths: [`${routePathPrefix}/hello`],
@@ -156,8 +160,6 @@ export const SDXP2PProviderPattern = {
               'X-Client-Id': [`${clientLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
-            name: `${name}.HELLO`,
-            tags,
             plugins: [
               {
                 name: 'request-termination',
@@ -173,8 +175,6 @@ export const SDXP2PProviderPattern = {
             ],
           },
         ],
-        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
-        url: upstreamUrl,
         plugins: [
           ...(upgrades.hasOwnProperty('mtls_auth')
             ? [upgradeToMTLSAuth(tags, data)]
