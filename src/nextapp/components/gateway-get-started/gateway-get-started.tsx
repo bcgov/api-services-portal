@@ -420,8 +420,8 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
               </Link>
               {' '}
               on Microsoft Teams for questions and usage guidance. For
-              time-sensitive notices (incidents, outages, maintenance, releases,
-              and breaking changes), follow{' '}
+              time-sensitive notices (incidents, maintenance, releases)
+              , follow{' '}
               <Link
                 href={HelpTeamsAlertsURL}
                 target="_blank"
