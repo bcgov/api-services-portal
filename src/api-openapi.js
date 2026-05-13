@@ -3,7 +3,10 @@ const express = require('express');
 const YAML = require('js-yaml');
 const { ValidateError } = require('tsoa');
 const swaggerUi = require('swagger-ui-express');
+const getRawBody = require('raw-body');
 const { Logger } = require('./logger');
+
+const { Readable } = require('stream');
 
 var options = {
   explorer: false,
@@ -118,6 +121,30 @@ class ApiOpenapiApp {
     const logger = Logger('dsapi');
 
     const app = express();
+
+    // This middleware causes the proxy middleware to block, so am going to limit it to just
+    // the APIs themselves.  This is really just for the sdx/v1 API for uploading a service
+    app.use('/ds/api/sdx/v1', async (req, _res, next) => {
+      try {
+        // Skip if there's no body or stream isn't readable
+        if (!Readable.isReadable(req) || req.readableEnded) {
+          return next();
+        }
+
+        const buf = await getRawBody(req, {
+          length: req.headers['content-length'],
+        });
+        req.rawBody = buf;
+        // re-push the data back so body-parser can still read it
+        req.push(buf);
+        req.push(null);
+        next();
+      } catch (err) {
+        logger.error('Error in raw body parsing middleware: ', err);
+        next(err);
+      }
+    });
+
     app.use(express.json());
 
     Register(keystone);

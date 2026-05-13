@@ -51,15 +51,14 @@ export class GWAService {
       configFile: config,
     };
 
-    return await fetch(url, {
+    const result = await fetch(url, {
       method,
       body: JSON.stringify(body),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${subjectToken}`,
       },
-    })
-      .then(checkStatus)
-      .then((res) => res.json());
+    }).then(checkStatus);
+    return method === 'DELETE' ? {} : await result.json();
   }
 }

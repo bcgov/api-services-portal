@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   FormField,
@@ -6,6 +7,7 @@ import {
   OperationId,
   Path,
   Put,
+  Query,
   Request,
   Route,
   Security,
@@ -32,6 +34,10 @@ import {
 } from '../../../services/workflow/openapi-spec-loader';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
+import { Logger } from '../../../logger';
+import { ExpressRequest } from './types';
+
+const logger = Logger('controller.gateway-service');
 
 @injectable()
 @Route('/organizations/{org}/oas-services')
@@ -56,7 +62,6 @@ export class GatewayServiceController extends Controller {
    *
    * @param org - Organization identifier
    * @param subsystem - Subsystem name under which the service will be categorized
-   * @param configFile - OpenAPI specification file uploaded as part of the request
    * @param request - HTTP request object for context creation
    */
   @Put()
@@ -64,16 +69,34 @@ export class GatewayServiceController extends Controller {
   @Security('jwt', ['System.Manage'])
   public async createOASService(
     @Path() org: string,
-    @FormField() subsystem: string,
-    @UploadedFile() configFile: Express.Multer.File,
-    @Request() request: any
+    @Query() subsystem: string,
+    @Body() body: any,
+    @Request() request: ExpressRequest & { rawBody: Buffer }
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request);
+
+    const rawBody = request.rawBody?.toString('utf-8') || '';
+
+    logger.debug(
+      `Received request to create/update OAS service for org ${org} and subsystem ${subsystem}`
+    );
+    logger.debug(
+      'Raw request body (size %s) (truncated to 100 chars): %s',
+      rawBody.length,
+      rawBody.substring(0, 100)
+    );
+
+    assertEqual(
+      rawBody.length > 0,
+      true,
+      'body',
+      'No body content found in request'
+    );
 
     const input: OpenAPISpecInput = {
       organization: org,
       subsystem,
-      spec: configFile.buffer.toString('utf-8'),
+      spec: rawBody,
       state: 'active',
     };
 

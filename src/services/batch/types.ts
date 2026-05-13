@@ -337,6 +337,24 @@ export interface RuntimeGroup {
 /**
  * @tsoaModel
  * @example {
+ *   "clientId": "client-123",
+ *   "serviceId": "service-456",
+ *   "isApproved": false,
+ *   "isActive": false
+ * }
+ */  
+export interface ConnectionRequest {
+  slug?: string; // Primary Key
+  clientId?: string;
+  serviceId?: string;
+  isApproved?: boolean;
+  isActive?: boolean;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
  *   "name": "my-new-product",
  *   "appId": "000000000000",
  *   "environments": [

@@ -76,6 +76,7 @@ export default defineConfig({
       KONG_CONFIG_URL: 'http://kong.localtest.me:8001',
       BASE_URL: 'http://oauth2proxy.localtest.me:4180',
       KEYCLOAK_URL: 'http://keycloak.localtest.me:9081',
+      KEYCLOAK_REALM: 'master',
       WEBAPP_URL: 'http://html-sample-app.localtest.me:4242',
       DEV_USERNAME: 'janis@idir',
       DEV_PASSWORD: 'awsummer',

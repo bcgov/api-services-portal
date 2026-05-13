@@ -34,3 +34,16 @@ export interface RuntimeGroupInput {
 export interface CreateNewKeyInput {
   runtimeGroupName: string;
 }
+
+/**
+ * @tsoaModel
+ *
+ */
+export interface ConnectionRequestInput {
+  clientId: string;
+  serviceId: string;
+  isApproved?: boolean;
+  isActive?: boolean;
+}
+
+export interface ExpressRequest extends Express.Request {}

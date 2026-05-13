@@ -79,3 +79,7 @@ export async function fetchWithTimeout(resource: string, options: any = {}) {
 export function alphanumericNoSpaces(str: string) {
   return str.replace(/[^A-Za-z0-9 :-]/gim, '').replace(/[ :]/gim, '-');
 }
+
+export function getRoutePathPrefix(clientId: string) {
+  return `/sdx/0/${clientId}`;
+}
