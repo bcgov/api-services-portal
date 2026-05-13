@@ -138,12 +138,17 @@ export async function GetCatalog(
 
 export async function EnrichWithRuntimeGroup(
   ctx: any,
-  subsystemEntry: SubsystemEntry
+  subsystemEntry: SubsystemEntry,
+  quiet: boolean = false
 ): Promise<void> {
   const orgNamespace: OrgNamespace = await getNamespaceDetails(
     ctx,
     subsystemEntry.gateway.id
   );
+
+  if (quiet && orgNamespace == null) {
+    return;
+  }
 
   assertAndRaiseValidateError(
     orgNamespace != null,
@@ -209,6 +214,18 @@ export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
   );
 
   return `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
+}
+
+export function ExtractClientIdFromServiceId(serviceId: string): string {
+  const parts = serviceId.split('.');
+  assertAndRaiseValidateError(
+    parts.length >= 5 && parts.length <= 6,
+    'Invalid service id format',
+    'inputs.service_id',
+    'service id should be in format {env}.{member_class}.{member_id}.{subsystem_name}.{service_name}(.{version})'
+  );
+
+  return `${parts[0]}.${parts[1]}.${parts[2]}.${parts[3]}`;
 }
 
 export function ParseClientId(id: string): any {

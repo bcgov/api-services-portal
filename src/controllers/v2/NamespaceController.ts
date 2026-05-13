@@ -260,6 +260,7 @@ const item = gql`
       permDomains
       permDataPlane
       permProtectedNs
+      permRoutePaths
       org
       orgUnit
       orgUpdatedAt

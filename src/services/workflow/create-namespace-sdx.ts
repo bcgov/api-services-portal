@@ -124,6 +124,8 @@ export interface CreateNamespaceForSubsystemArgs {
   subsystem: SubsystemEntry;
   /** The runtime group name to associate with the subsystem */
   runtimeGroupName: string;
+  /** The route paths for the namespace */
+  routePaths?: string[];
 }
 
 /**
@@ -168,6 +170,7 @@ export async function CreateNamespaceForSubsystem(
     displayName: `SDX - ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
     domains: [rg.host, consumerEP.hostname],
+    routePaths: args.routePaths,
   });
 
   logger.debug(

@@ -11,6 +11,7 @@ import {
   Get,
   OperationId,
   Path,
+  Post,
   Put,
   Query,
   Request,
@@ -215,5 +216,37 @@ export class RuntimeGroupController extends Controller {
     );
 
     return { gatewayId: rg.namespace };
+  }
+
+  /**
+   * Generates a one-time-use token for a new certificate during a CSR
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Generate a one-time-use token for a runtime group
+   *
+   * @param org - Organization identifier
+   * @param name - Runtime group name
+   * @param request - HTTP request object for context creation
+   */
+  @Post('/{name}/tokens')
+  @OperationId('generateOneTimeUseToken')
+  @Security('jwt', ['System.Manage'])
+  public async generateOneTimeUseToken(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<{ token: string }> {
+    // Create Keystone context with access control disabled
+    const context = this.keystone.createContext(request, true);
+
+    const service = new RuntimeGroupService();
+
+    // Verify the runtime group belongs to the specified organization
+    const rg = await service.findRuntimeGroupByName(context, org, name);
+
+    const token = await service.generateCertSignRequestToken(rg);
+
+    return { token };
   }
 }

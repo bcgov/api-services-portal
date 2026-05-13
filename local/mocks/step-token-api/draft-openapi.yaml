@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: Step Token API
+  version: 1.0.0
+paths:
+  /tokens:
+    post:
+      summary: Create a token
+      operationId: createToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subject
+                - san
+              properties:
+                subject:
+                  type: string
+                san:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string

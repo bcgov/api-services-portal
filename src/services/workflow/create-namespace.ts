@@ -35,6 +35,7 @@ export interface CreateNamespaceArgs {
   displayName?: string;
   dataPlane?: string;
   domains?: string[];
+  routePaths?: string[];
 }
 
 export async function CreateNamespace(
@@ -138,6 +139,9 @@ export async function CreateNamespace(
     }
     if (args.domains) {
       gwGroup.attributes['perm-domains'] = args.domains;
+    }
+    if (args.routePaths) {
+      gwGroup.attributes['perm-route-paths'] = args.routePaths;
     }
     await kcGroupService.updateGroup(gwGroup);
   }

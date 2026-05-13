@@ -163,7 +163,12 @@ export const handlers = [
         helpLinks: {
           helpDeskUrl:
             'https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2',
-          helpChatUrl: 'https://chat.developer.gov.bc.ca/channel/aps-ops',
+          helpTeamsAlertsUrl:
+            'https://teams.microsoft.com/l/channel/19%3A9e361a77b63442ea9726ca560738205c%40thread.tacv2/API-ProgramServices-alerts?groupId=a80418da-c27b-406e-89ab-7695b61924d8&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc',
+          helpTeamsOperationsUrl:
+            'https://teams.microsoft.com/l/channel/19%3Ac81bf553c07647cebeb2aeb034ec0d25%40thread.tacv2/API-ProgramServices-operations?groupId=a80418da-c27b-406e-89ab-7695b61924d8&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc',
+          helpTeamsAccessRequestUrl:
+            'https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/5',
           helpIssueUrl: 'https://github.com/bcgov/api-services-portal/issues',
           helpApiDocsUrl: '/ds/api/v2/console/',
           helpSupportUrl: 'https://bcgov.github.io/aps-infra-platform/',

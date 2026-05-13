@@ -8,10 +8,14 @@ import {
 import { BiLinkExternal } from 'react-icons/bi';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
+import { buildTeamsAccessRequestUrl } from '@/shared/build-teams-access-request-url';
 import { useGlobal } from '@/shared/services/global';
 
 const ContactPage: React.FC = () => {
   const data = useGlobal();
+  const teamsAccessUrl = buildTeamsAccessRequestUrl(
+    data?.helpLinks.helpTeamsAccessRequestUrl
+  );
 
   return (
     <>
@@ -46,11 +50,31 @@ const ContactPage: React.FC = () => {
           </ListItem>
           <ListItem>
             <Link
-              href={data?.helpLinks.helpChatUrl}
+              href={data?.helpLinks.helpTeamsOperationsUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Chat with us in Rocket Chat
+              MS Teams: Support channel
+              <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+            </Link>
+          </ListItem>
+          <ListItem>
+            <Link
+              href={data?.helpLinks.helpTeamsAlertsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MS Teams: Alerts and notices channel
+              <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+            </Link>
+          </ListItem>
+          <ListItem>
+            <Link
+              href={teamsAccessUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Request access to Microsoft Teams channels (external clients)
               <Icon as={BiLinkExternal} boxSize="4" ml={2} />
             </Link>
           </ListItem>

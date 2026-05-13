@@ -334,7 +334,9 @@ Cypress.Commands.add('logout', () => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.get('[data-testid=auth-menu-signout-btn]').click({ force: true })
       cy.get('[id=kc-logout]').click({ force: true })
-      cy.contains('You have successfully logged out.', { timeout: 15000 }).should('be.visible')
+      cy.contains('You have successfully logged out.', { timeout: 15000 }).should(
+        'be.visible'
+      )
     })
   })
   cy.log('> Logging out')
@@ -591,6 +593,11 @@ Cypress.Commands.add('setHeader', (key: string, value: string) => {
 
 Cypress.Commands.add('setRequestBody', (body: any) => {
   requestBody = JSON.stringify(body)
+  headers['Content-Type'] = 'application/json'
+})
+
+Cypress.Commands.add('setRequestBodyRaw', (body: any) => {
+  requestBody = body
 })
 
 Cypress.Commands.add('clearRequestBody', () => {

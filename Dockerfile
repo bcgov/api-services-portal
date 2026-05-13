@@ -1,5 +1,5 @@
 #FROM node:lts-alpine3.17
-FROM node:22.12.0-alpine3.21
+FROM node:22.22.2-alpine3.22
 
 ARG APP_VERSION
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}

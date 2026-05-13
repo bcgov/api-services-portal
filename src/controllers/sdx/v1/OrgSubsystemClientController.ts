@@ -17,6 +17,9 @@ import {
 } from '../../../services/gateway-patterns/catalog';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { getOrganization } from '../../../services/keystone/organization';
+import { Logger } from '../../../logger';
+
+const logger = Logger('controller.org-subsystem-client');
 
 @injectable()
 @Route('/organizations/{org}/clients')
@@ -52,10 +55,8 @@ export class OrgSubsystemClientController extends Controller {
 
     const organization = await getOrganization(ctx, org);
 
-    const subsystems = await new SubsystemService().listSubsystemsByOrganization(
-      ctx,
-      org
-    );
+    const subsystems =
+      await new SubsystemService().listSubsystemsByOrganization(ctx, org);
     subsystems.forEach((subsystem) => {
       subsystem.organization = organization;
     });
@@ -65,8 +66,12 @@ export class OrgSubsystemClientController extends Controller {
     for (const subsystem of subsystems) {
       const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
-      await EnrichWithRuntimeGroup(ctx, subsystemEntry);
-      subsystemEntries.push(subsystemEntry);
+      // Not amazing, but the gateway_id is predefined, so have to check if the
+      // gateway has been created or not; only include the subsystem if it has
+      await EnrichWithRuntimeGroup(ctx, subsystemEntry, true);
+      if (subsystemEntry.runtimeGroup) {
+        subsystemEntries.push(subsystemEntry);
+      }
     }
     return subsystemEntries;
   }
