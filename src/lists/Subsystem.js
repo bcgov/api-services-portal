@@ -22,6 +22,11 @@ module.exports = {
       isMultiline: true,
       isRequired: false,
     },
+    integrationId: {
+      type: Text,
+      isRequired: false,
+      access: { update: false },
+    },
     organization: { type: Relationship, ref: 'Organization' },
     slug: {
       type: Slug,

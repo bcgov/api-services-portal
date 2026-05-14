@@ -459,7 +459,7 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace'],
+    sync: ['name', 'description', 'organization', 'namespace', 'integrationId'],
     transformations: {
       organization: {
         name: 'connectOne',
@@ -469,6 +469,7 @@ const metadata = {
     },
     example: {
       name: 'my-new-subsystem',
+      integrationId: 'integration-123',
     },
   },
   RuntimeGroup: {

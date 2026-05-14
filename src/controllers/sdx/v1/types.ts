@@ -5,6 +5,7 @@
 export interface SubsystemInput {
   name: string;
   description?: string;
+  integrationId?: string;
 }
 
 /**

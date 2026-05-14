@@ -9041,6 +9041,8 @@ export enum SortSubsystemsBy {
   NamespaceDesc = 'namespace_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  IntegrationIdAsc = 'integrationId_ASC',
+  IntegrationIdDesc = 'integrationId_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   SlugAsc = 'slug_ASC',
@@ -9122,6 +9124,7 @@ export type Subsystem = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  integrationId?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -9130,6 +9133,7 @@ export type SubsystemCreateInput = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  integrationId?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -9212,6 +9216,24 @@ export type SubsystemWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  integrationId?: Maybe<Scalars['String']>;
+  integrationId_not?: Maybe<Scalars['String']>;
+  integrationId_contains?: Maybe<Scalars['String']>;
+  integrationId_not_contains?: Maybe<Scalars['String']>;
+  integrationId_starts_with?: Maybe<Scalars['String']>;
+  integrationId_not_starts_with?: Maybe<Scalars['String']>;
+  integrationId_ends_with?: Maybe<Scalars['String']>;
+  integrationId_not_ends_with?: Maybe<Scalars['String']>;
+  integrationId_i?: Maybe<Scalars['String']>;
+  integrationId_not_i?: Maybe<Scalars['String']>;
+  integrationId_contains_i?: Maybe<Scalars['String']>;
+  integrationId_not_contains_i?: Maybe<Scalars['String']>;
+  integrationId_starts_with_i?: Maybe<Scalars['String']>;
+  integrationId_not_starts_with_i?: Maybe<Scalars['String']>;
+  integrationId_ends_with_i?: Maybe<Scalars['String']>;
+  integrationId_not_ends_with_i?: Maybe<Scalars['String']>;
+  integrationId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  integrationId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   slug?: Maybe<Scalars['String']>;
