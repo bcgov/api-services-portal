@@ -25,7 +25,6 @@ module.exports = {
     integrationId: {
       type: Text,
       isRequired: false,
-      access: { update: false },
     },
     organization: { type: Relationship, ref: 'Organization' },
     slug: {
@@ -55,9 +54,21 @@ module.exports = {
       resolvedData.namespace = `sdx-${newNamespaceID()}`;
       return resolvedData;
     },
-    validateInput: ({ resolvedData, operation }) => {
+    validateInput: ({ resolvedData, operation, existingItem }) => {
       if (operation == 'create') {
         new SubsystemService().validateSubsystem(resolvedData['name']);
+      }
+      if (operation == 'update') {
+        // if the "integrationId" existingItem is already set, it should not be updated
+        if (
+          'integrationId' in resolvedData &&
+          existingItem.integrationId &&
+          resolvedData.integrationId !== existingItem.integrationId
+        ) {
+          throw new Error(
+            'Integration ID cannot be updated once set. Please contact support if you need to change the integration ID.'
+          );
+        }
       }
     },
     afterDelete: async function ({ existingItem, context }) {
