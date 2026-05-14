@@ -41,4 +41,47 @@ describe('SDX Organization Signing', () => {
       )
     })
   })
+
+  describe('Runtime Group Sad Paths', () => {
+    it('PUT /organizations/{org}/runtime-groups (invalid runtime group)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      // call the /keys endpoint to get a CSR
+      cy.setRequestBody({
+        runtimeGroupName: 'BLAH',
+      })
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
+        ({ apiRes: { status, body, headers } }: any) => {
+          expect(status).to.be.equal(422)
+          expect(body.message).to.equal('Runtime Group not found')
+        }
+      )
+    })
+
+    it('PUT /organizations/{org}/runtime-groups (not hosted on rg)', () => {
+      const { org, gateway, dataset, runtimeGroupId, product } = workingData
+
+      const payload = {
+        name: `${runtimeGroupId}`,
+        hostedOrganizations: [],
+      }
+      cy.setRequestBody(payload)
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+
+          // call the /keys endpoint to get a CSR
+          cy.setRequestBody({
+            runtimeGroupName: payload.name,
+          })
+          cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
+            ({ apiRes: { status, body, headers } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.message).to.equal('Not permitted to use this runtime group')
+            }
+          )
+        }
+      )
+    })
+  })
 })

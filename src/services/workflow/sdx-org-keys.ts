@@ -27,7 +27,7 @@ export const CreateNewKey = async (
   assert.strictEqual(
     rg.hostedOrganizations?.filter((o) => o.name === orgName).length == 1,
     true,
-    'Not permitted to host on this runtime group'
+    'Not permitted to use this runtime group'
   );
 
   const org = await getOrganization(context, orgName);
