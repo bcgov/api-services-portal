@@ -276,7 +276,7 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.token_exchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:edge`;
+  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:0`;
 
   return {
     name: 'token-exchange',
