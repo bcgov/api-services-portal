@@ -26,10 +26,10 @@ export class OrgKeysController extends Controller {
   }
 
   /**
-   * Create a new key for an organization on a runtime group.
+   * Create a new key and CSR for an organization on a runtime group.
    * This will be used to sign messages that are transmitted through the runtime group.
    *
-   * @summary Create a new key for an organization on a runtime group
+   * @summary Create a new key and CSR for an organization on a runtime group
    *
    * @param org
    * @param body
