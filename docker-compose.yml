@@ -324,8 +324,6 @@ services:
       - --allow-write
       - --allow-read
       - /app/main.ts
-    ports:
-      - '2020:2020'
     volumes:
       - ./local/mocks/step-token-api/main.ts:/app/main.ts
     networks:
@@ -333,5 +331,21 @@ services:
         aliases:
           - step-token-api.localtest.me
 
+  mocks-sdx-edge-api:
+    image: denoland/deno:2.7.12
+    container_name: mocks-sdx-edge-api
+    command:
+      - deno
+      - run
+      - --allow-net=:2021,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+    volumes:
+      - ./local/mocks/sdx-edge-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - sdx-edge-api.localtest.me
 networks:
   aps-net: {}

@@ -47,7 +47,7 @@ export const CreateNewKey = async (
     requester_email: context.req?.user?.email || 'unknown',
   };
 
-  const routeUrl = `http://sdx-edge-${process.env.SDX_OPERATOR_EDGE}/edge/${rg.name}/csr`;
+  const routeUrl = `${process.env.SDX_OPERATOR_EDGE_URL}/edge/${rg.name}/csr`;
 
   logger.debug('Requesting new key with body: %j', body);
   logger.debug('To: %s', routeUrl);
