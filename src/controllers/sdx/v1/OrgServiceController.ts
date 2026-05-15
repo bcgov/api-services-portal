@@ -207,8 +207,7 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
-   * Deletes an OAS service when it belongs to the specified organization and
-   * has no active connection requests.
+   * Deletes an OAS service.  Must have no active connection requests.
    *
    * > `Required Scope:` System.Manage
    *
