@@ -106,10 +106,9 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * Deletes a subsystem from the specified organization. The subsystem can only be deleted
-   * if there are no services associated with it.
-   * If the `force` query parameter is set to true, the subsystem will be deleted along
-   * with all associated services.
+   * Deletes a subsystem from the specified organization. The subsystem can only
+   * be deleted when it has no active connection requests and no gateway
+   * configuration. Related OAS services are deleted with the subsystem.
    *
    * > `Required Scope:` System.Manage
    *
@@ -118,8 +117,7 @@ export class OrgSubsystemController extends Controller {
    * @param org - Organization identifier
    * @param name - Subsystem name to delete
    * @param request - HTTP request object for context creation
-   * @param force - If true, force deletion even if associated services exist (use with caution)
-   * @example { force: false } body
+   * @param force - Reserved for compatibility; deletion still requires no active connections or gateway configuration
    */
   @Delete('/{name}')
   @OperationId('deleteSubsystem')

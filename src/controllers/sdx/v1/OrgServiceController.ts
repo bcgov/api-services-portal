@@ -207,13 +207,15 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
+   * Deletes an OAS service when it belongs to the specified organization and
+   * has no active connection requests.
+   *
    * > `Required Scope:` System.Manage
    *
    * @summary Delete an OAS service
-   * @param org
-   * @param name
-   * @param request
-   * @example { force: false } body
+   * @param org - Organization identifier
+   * @param name - OAS service name to delete
+   * @param request - HTTP request object for context creation
    */
   @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')

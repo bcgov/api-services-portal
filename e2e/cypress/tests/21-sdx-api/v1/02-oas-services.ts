@@ -1,59 +1,7 @@
-function createSubsystemAndOASService(org: any, subsystemName: string, next: any) {
-  const subsystem = {
-    name: subsystemName,
-  }
-
-  cy.setRequestBody(subsystem)
-  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
-    ({ apiRes: { status } }: any) => {
-      expect(status).to.be.equal(200)
-
-      cy.get('@toys.v1').then((text: any) => {
-        expect(Cypress.Buffer.isBuffer(text)).to.be.true
-        const body = text.toString()
-        expect(body).to.include('openapi: 3.1.1')
-
-        cy.setRequestBodyRaw(body)
-        cy.setHeader('Content-Type', 'application/octet-stream')
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
-          'PUT',
-          false
-        ).then(({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(200)
-          expect(body.result).to.be.equal('created')
-          expect(body).has.property('refKey')
-
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/oas-services/${body.refKey}`,
-            'GET',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            next(body)
-          })
-        })
-      })
-    }
-  )
-}
-
-function createConnection(org: any, service: any, next: any) {
-  const payload = {
-    clientId: service.subsystem.clientId,
-    serviceId: service.name,
-  }
-
-  cy.setRequestBody(payload)
-  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-    ({ apiRes: { status, body } }: any) => {
-      expect(status).to.be.equal(200)
-      expect(body.result).to.be.equal('created')
-      expect(typeof body.id).to.be.equal('string')
-      next(body.id)
-    }
-  )
-}
+import {
+  createConnection,
+  createSubsystemAndOASService,
+} from '../../../support/sdx-commands'
 
 describe('SDX OpenAPI Services', () => {
   let workingData: any
@@ -243,7 +191,7 @@ describe('SDX OpenAPI Services', () => {
         org,
         `SUBSYS-${datasetId.toUpperCase()}`,
         (service: any) => {
-          createConnection(org, service, () => {
+          createConnection(org, service.subsystem.clientId, service.name, () => {
             cy.setRequestBody(undefined)
             cy.callAPI(
               `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
