@@ -11,10 +11,18 @@ import {
 import { regExprValidation } from '../utils';
 import { strict as assert } from 'assert';
 import { Subsystem } from './types';
-import { Subsystem as KeystoneSubsystem } from '../keystone/types';
+import {
+  ConnectionRequest as KeystoneConnectionRequest,
+  Subsystem as KeystoneSubsystem,
+} from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
-import { ParseClientId } from '../gateway-patterns/catalog';
+import {
+  GetSubsystemEntryForSubsystem,
+  ParseClientId,
+} from '../gateway-patterns/catalog';
 import { Logger } from '../../logger';
+import { OpenAPISpecService } from './oas-service';
+import { getNamespaceDetails } from '../workflow/get-namespaces';
 
 const logger = Logger('batch.subsystem');
 
@@ -70,6 +78,36 @@ class SubsystemService {
     return records;
   };
 
+  listActiveConnectionsByClientId = async (
+    context: Keystone,
+    clientId: string
+  ): Promise<KeystoneConnectionRequest[]> => {
+    return await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      {
+        query: '$clientId: String!',
+        clause: '{ clientId: $clientId, isActive: true }',
+        variables: { clientId },
+      }
+    );
+  };
+
+  subsystemGatewayExists = async (
+    context: Keystone,
+    subsystem: KeystoneSubsystem
+  ): Promise<boolean> => {
+    if (!subsystem.namespace) {
+      return false;
+    }
+
+    const gatewayDetails = await getNamespaceDetails(context, subsystem.namespace);
+
+    return gatewayDetails != null;
+  };
+
   deleteSubsystem = async (
     context: any,
     org: string,
@@ -77,8 +115,65 @@ class SubsystemService {
     force: boolean = false
   ): Promise<BatchResult> => {
     const subsystem = await this.findSubsystemByName(context, org, name);
+    const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
-    return await deleteRecordByInternalId(context, 'Subsystem', subsystem.id);
+    const activeClientConnections = await this.listActiveConnectionsByClientId(
+      context,
+      subsystemEntry.clientId
+    );
+
+    assert.strictEqual(
+      activeClientConnections.length === 0,
+      true,
+      'Subsystem cannot be deleted because it has active connection requests as a client'
+    );
+
+    const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
+
+    assert.strictEqual(
+      gatewayExists,
+      false,
+      'Subsystem cannot be deleted because gateway configuration exists'
+    );
+
+    const oasService = new OpenAPISpecService();
+    const serviceSpecs = await oasService.listOpenAPISpecsBySubsystemId(
+      context,
+      subsystem.id
+    );
+
+    const activeProviderConnections: KeystoneConnectionRequest[] = [];
+    for (const serviceSpec of serviceSpecs) {
+      const activeConnections =
+        await oasService.listActiveConnectionsByServiceId(
+          context,
+          serviceSpec.name
+        );
+      activeProviderConnections.push(...activeConnections);
+    }
+
+    assert.strictEqual(
+      activeProviderConnections.length === 0,
+      true,
+      'Subsystem cannot be deleted because it has active connection requests as a service provider'
+    );
+
+    const childResults: BatchResult[] = [];
+    for (const serviceSpec of serviceSpecs) {
+      childResults.push(
+        await deleteRecordByInternalId(context, 'OpenAPISpec', serviceSpec.id)
+      );
+    }
+
+    const result = await deleteRecordByInternalId(
+      context,
+      'Subsystem',
+      subsystem.id
+    );
+
+    result.childResults = [...(result.childResults || []), ...childResults];
+
+    return result;
   };
 
   findSubsystemByName = async (

@@ -17,7 +17,6 @@ import {
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
 import {
-  deleteRecordByInternalId,
   getRecordById,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
@@ -208,13 +207,14 @@ export class GatewayServiceController extends Controller {
   }
 
   /**
+   * Deletes an OAS service.  Must have no active connection requests.
+   *
    * > `Required Scope:` System.Manage
    *
    * @summary Delete an OAS service
-   * @param org
-   * @param name
-   * @param request
-   * @example { force: false } body
+   * @param org - Organization identifier
+   * @param name - OAS service name to delete
+   * @param request - HTTP request object for context creation
    */
   @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')
@@ -226,17 +226,6 @@ export class GatewayServiceController extends Controller {
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    const entry = await new OpenAPISpecService().findOpenAPISpecByName(
-      context,
-      name
-    );
-    assertEqual(
-      entry && entry.subsystem.organization.name === org,
-      true,
-      'organization',
-      'Not authorized to access this service'
-    );
-
-    return await deleteRecordByInternalId(context, 'OpenAPISpec', entry.id);
+    return await new OpenAPISpecService().deleteOASService(context, org, name);
   }
 }
