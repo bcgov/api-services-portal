@@ -324,6 +324,9 @@ services:
       - --allow-write
       - --allow-read
       - /app/main.ts
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2020:2020
     volumes:
       - ./local/mocks/step-token-api/main.ts:/app/main.ts
     networks:
@@ -341,6 +344,9 @@ services:
       - --allow-write
       - --allow-read
       - /app/main.ts
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2021:2021
     volumes:
       - ./local/mocks/sdx-edge-api/main.ts:/app/main.ts
     networks:

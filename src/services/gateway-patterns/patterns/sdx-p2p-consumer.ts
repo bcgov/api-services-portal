@@ -40,7 +40,6 @@ export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
   conn_id: string;
   client_id: string;
   service_id: string;
-  source_runtime_group: 'subsystem' | 'pzgw';
   upgrades: ConsumerUpgrades;
   tls_verify?: string;
 }
@@ -56,13 +55,7 @@ export interface SDXP2PConsumerPatternData {
  */
 export const SDXP2PConsumerPattern = {
   id: 'sdx-p2p-consumer.r1',
-  requiredParams: [
-    'organization',
-    'conn_id',
-    'client_id',
-    'service_id',
-    'source_runtime_group',
-  ],
+  requiredParams: ['organization', 'conn_id', 'client_id', 'service_id'],
 
   inject: async (ctx: any, inputs: SDXP2PConsumerPatternConfig) => {
     const connService = new ConnectionService();

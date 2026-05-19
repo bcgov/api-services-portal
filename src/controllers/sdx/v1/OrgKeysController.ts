@@ -48,6 +48,8 @@ export class OrgKeysController extends Controller {
     // call the Edge Server endpoint for generating a new key pair
     const result = await CreateNewKey(context, org, body.runtimeGroupName);
 
+    // Unusual way to return data, but this is due to the version of tsoa
+    // being used and the need to return raw text instead of JSON
     request.res?.header('Content-Type', 'text/plain; charset=utf-8');
     request.res?.send(YAML.stringify(result));
     return '';
