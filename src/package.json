@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@bcgov/bc-sans": "^1.0.1",
+    "@cedar-policy/cedar-wasm": "^4.11.0",
     "@chakra-ui/react": "^1.6.0",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",

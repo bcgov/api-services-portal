@@ -1,0 +1,79 @@
+
+namespace SDX {
+    entity User;
+
+    entity ConnectionRequest;
+
+    action SubmitConnectionRequest
+        appliesTo {
+            principal: User,
+            resource: ConnectionRequest,
+            context: {
+                clientId: String,
+                serviceId: String,
+                isApproved: Bool,
+                policy_release?: String,
+                environment?: String,
+            }
+        };
+
+    entity ConsumerPattern;
+
+    action ApplyConsumerPattern
+        appliesTo {
+            principal: User,
+            resource: ConsumerPattern,
+            context: {
+                conn_id: String,
+                client_id: String,
+                service_id: String,
+                tls_verify?: Bool,
+                upgrades?: {
+                    sign?: {},
+                    verify?: {},
+                    counter_sign?: {},
+                    token?: {
+                        allowed_aud: String,
+                        allowed_iss: String,
+                        scope?: String,
+                        consumer_match?: Bool,
+                        consumer_match_claim?: String,
+                        consumer_match_claim_custom_id?: Bool,
+                        consumer_match_ignore_not_found?: Bool
+                    },
+                    token_exchange?: {
+                        client_id: String,
+                        token_endpoint: String,
+
+                    }
+                }
+            }
+        };
+
+    entity ProviderPattern;
+
+    action ApplyProviderPattern
+        appliesTo {
+            principal: User,
+            resource: ProviderPattern,
+            context: {
+                conn_id: String,
+                client_id: String,
+                service_id: String,
+                upgrades?: {
+                    sign?: {},
+                    verify?: {},
+                    token?: {
+                        allowed_aud: String,
+                        allowed_iss: String,
+                        scope?: String,
+                        consumer_match?: Bool,
+                        consumer_match_claim?: String,
+                        consumer_match_claim_custom_id?: Bool,
+                        consumer_match_ignore_not_found?: Bool
+                    },
+                    dpop?: {}
+                }
+            }
+        };
+}
