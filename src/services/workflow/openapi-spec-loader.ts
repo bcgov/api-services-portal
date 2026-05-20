@@ -21,13 +21,33 @@ export const LoadOpenAPISpec = async (
   // KeystoneJS entity
   const outSpec: OpenAPISpec = {};
 
-  const subsystemRecord: Subsystem = await new SubsystemService().findSubsystemByName(
-    context,
-    spec.organization,
-    spec.subsystem
-  );
+  const subsystemRecord: Subsystem =
+    await new SubsystemService().findSubsystemByName(
+      context,
+      spec.organization,
+      spec.subsystem
+    );
 
-  const oas = YAML.parse(spec.spec);
+  let oas;
+
+  // try parsing YAML, if it fails, try parsing as JSON
+  try {
+    oas = YAML.parse(spec.spec);
+  } catch (yamlError) {
+    logger.warn(
+      `Failed to parse spec as YAML for subsystem ${spec.subsystem} in organization ${spec.organization}. Attempting to parse as JSON. Error: ${yamlError}`
+    );
+    try {
+      oas = JSON.parse(spec.spec);
+    } catch (jsonError) {
+      logger.error(
+        `Failed to parse spec as JSON for subsystem ${spec.subsystem} in organization ${spec.organization}. Error: ${jsonError}`
+      );
+      throw new Error(
+        `Invalid OpenAPI specification format. Spec must be valid YAML or JSON.`
+      );
+    }
+  }
 
   const serviceName = BuildServiceName(subsystemRecord, oas);
 

@@ -17,6 +17,22 @@ const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 interface ConsumerUpgrades {
   sign: {};
   verify: {};
+  token: {
+    allowed_aud: string;
+    allowed_iss: string[];
+    scope?: string;
+    consumer_match?: boolean;
+    consumer_match_claim?: string;
+    consumer_match_claim_custom_id?: boolean;
+    consumer_match_ignore_not_found?: boolean;
+  };
+  counter_sign: {};
+  token_exchange: {
+    token_endpoint: string;
+    client_id: string;
+    scopes: string[];
+    audience: string;
+  };
 }
 
 export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
@@ -126,11 +142,33 @@ export const SDXP2PConsumerPattern = {
       url: data.service.subsystem.runtimeGroup.sdxEndpoint,
       plugins: [
         ...[transformer(tags, data)],
+        ...(upgrades.hasOwnProperty('dpop') ? [upgradeToDPoP(tags, data)] : []),
+        ...(upgrades.hasOwnProperty('token')
+          ? [
+              upgradeToJWTKeycloak(
+                tags,
+                data,
+                inputs as SDXP2PConsumerPatternConfig
+              ),
+            ]
+          : []),
         ...(upgrades.hasOwnProperty('sign')
           ? [upgradeToTrustSign(tags, data)]
           : []),
         ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
+          : []),
+        ...(upgrades.hasOwnProperty('counter_sign')
+          ? [upgradeToTrustKMS(tags, data)]
+          : []),
+        ...(upgrades.hasOwnProperty('token_exchange')
+          ? [
+              upgradeToTokenExchange(
+                tags,
+                data,
+                inputs as SDXP2PConsumerPatternConfig
+              ),
+            ]
           : []),
       ],
     } as any;
@@ -157,6 +195,38 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
         headers: [`Host:${serviceHost}`],
       },
     },
+  };
+}
+
+function upgradeToJWTKeycloak(
+  tags: string[],
+  data: SDXP2PConsumerPatternData,
+  inputs: SDXP2PConsumerPatternConfig
+) {
+  const jwtKeycloakConfig = inputs.upgrades.token;
+
+  return {
+    name: 'jwt-keycloak',
+    tags,
+    config: {
+      allowed_aud: jwtKeycloakConfig?.allowed_aud,
+      allowed_iss: jwtKeycloakConfig?.allowed_iss,
+      scope: jwtKeycloakConfig?.scope,
+      consumer_match: jwtKeycloakConfig?.consumer_match || false,
+      consumer_match_claim: jwtKeycloakConfig?.consumer_match_claim || 'azp',
+      consumer_match_claim_custom_id:
+        jwtKeycloakConfig?.consumer_match_claim_custom_id || false,
+      consumer_match_ignore_not_found:
+        jwtKeycloakConfig?.consumer_match_ignore_not_found || false,
+    },
+  };
+}
+
+function upgradeToDPoP(tags: string[], data: SDXP2PConsumerPatternData) {
+  return {
+    name: 'dpop',
+    tags,
+    config: {},
   };
 }
 
@@ -188,6 +258,49 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
       signature_header_key: 'X-Edge-Token',
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
+    },
+  };
+}
+
+function upgradeToTokenExchange(
+  tags: string[],
+  data: SDXP2PConsumerPatternData,
+  inputs: SDXP2PConsumerPatternConfig
+) {
+  const tokenExchangeConfig = inputs.upgrades.token_exchange;
+
+  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:0`;
+
+  return {
+    name: 'token-exchange',
+    tags: tags,
+    config: {
+      client_id: tokenExchangeConfig?.client_id,
+      token_endpoint: tokenExchangeConfig?.token_endpoint,
+      scopes: tokenExchangeConfig?.scopes,
+      audience: tokenExchangeConfig?.audience,
+      key_id: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      algorithm: 'ES256',
+      expiration: 60,
+    },
+  };
+}
+
+function upgradeToTrustKMS(tags: string[], data: SDXP2PConsumerPatternData) {
+  const member = data.client.member;
+  const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
+
+  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+
+  return {
+    name: 'trust-kms',
+    tags: tags,
+    config: {
+      direction: 'request',
+      operation: 'sign',
+      signature_header_key: 'X-Edge-Token',
+      key_id,
     },
   };
 }
