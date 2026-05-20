@@ -298,13 +298,15 @@ export interface OpenAPISpec {
 /**
  * @tsoaModel
  * @example {
- *   "name": "my-new-subsystem"
+ *   "name": "my-new-subsystem",
+ *   "integrationId": "integration-123"
  * }
  */  
 export interface Subsystem {
   name?: string;
   description?: string;
   gatewayId?: string;
+  integrationId?: string;
   organization?: OrganizationRefID;
 }
 

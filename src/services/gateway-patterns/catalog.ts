@@ -43,6 +43,7 @@ export interface SubsystemEntry {
     sdxEndpoint?: string;
     consumerEndpoint?: string;
   };
+  integrationId?: string;
 }
 
 /**
@@ -130,6 +131,7 @@ export async function GetCatalog(
         gateway: {
           id: c.namespace,
         },
+        integrationId: c.subsystem.integrationId || undefined,
       },
       operations: JSON.parse(c.operations || '{}'),
     } as ServiceCatalogEntry;
@@ -199,6 +201,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     gateway: {
       id: c.namespace,
     },
+    integrationId: c.integrationId || undefined,
   };
 }
 
