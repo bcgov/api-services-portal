@@ -218,7 +218,11 @@ class RuntimeGroupService {
       }
     );
 
-    assert.strictEqual(records.length == 0, false, 'Runtime Group not found');
+    assert.strictEqual(
+      records.length == 0,
+      false,
+      `Runtime Group with host '${host}' not found`
+    );
     return records.pop();
   };
 

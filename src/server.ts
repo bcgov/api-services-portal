@@ -16,6 +16,7 @@ const { ApiHealthApp } = require('./api-health');
 const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
+const { JsonHandlerApp } = require('./api-json-handler');
 
 const { OpsMetrics } = require('./services/report/ops-metrics');
 
@@ -279,6 +280,7 @@ const apps = [
     pages: pages,
     enableDefaultRoute: false,
   }),
+  new JsonHandlerApp(),
   new NextApp({ dir: 'nextapp' }),
 ];
 

@@ -18,6 +18,9 @@ const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
 const { UserAssertionError } = require('./services/user-assert');
+const { IssuerMisconfigError } = require('./services/issuerMisconfigError');
+
+const logger = Logger('dsapi');
 
 class ApiOpenapiApp {
   constructor() {}
@@ -118,8 +121,7 @@ class ApiOpenapiApp {
   }
 
   prepareMiddleware({ keystone }) {
-    const logger = Logger('dsapi');
-
+    logger.debug('Preparing API OpenAPI Middleware');
     const app = express();
 
     // This middleware causes the proxy middleware to block, so am going to limit it to just
@@ -172,6 +174,18 @@ class ApiOpenapiApp {
           code: err.code,
           message: err.message,
         });
+      } else if (err instanceof IssuerMisconfigError) {
+        logger.warn(
+          `Caught Misconfig Error for ${req.path}:`,
+          err.statusCode,
+          err.status,
+          err.reason,
+          err.description
+        );
+        return res.status(500).json({
+          code: 'misconfig_error',
+          message: `[${err?.statusCode}] ${err?.reason} (${err?.description})`,
+        });
       } else if (err instanceof ValidateError) {
         logger.warn(
           `Caught Validation Error for ${req.path}:`,
@@ -218,7 +232,6 @@ class ApiOpenapiApp {
           message: 'Internal Server Error',
         });
       }
-
       next();
     });
 
