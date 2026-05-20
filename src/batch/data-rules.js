@@ -19,6 +19,7 @@ const metadata = {
         name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
+        refKey: 'extForeignKey',
       },
     },
   },

@@ -1593,7 +1593,7 @@ paths:
                                 required:
                                     - result
                                 type: object
-            description: '> `Required Scope:` Gateway.Assign'
+            description: "Assign a Gateway to an Organization Unit.\n\nOnly Organizations sourced from the BC Data Catalogue\n(`extSource: \"ckan\"`) may be assigned to a Gateway.  Organizations\nsourced from SDX or created as \"custom\" entries are intentionally\nrejected so that gateway-to-organization mappings stay aligned with\nthe authoritative public-body data registry.  This mirrors the\nfilter applied to the _Add Organization_ dropdown in the UI so\ndirect API callers cannot bypass it.\n\n> `Required Scope:` Gateway.Assign"
             tags:
                 - Organizations
             security:

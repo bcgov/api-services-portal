@@ -37,7 +37,11 @@ import {
   GroupMembership,
   OrgNamespace,
 } from '../../services/org-groups/types';
-import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
+import {
+  getOrganization,
+  getOrganizations,
+  getOrganizationUnit,
+} from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
@@ -161,6 +165,16 @@ export class OrganizationController extends Controller {
   }
 
   /**
+   * Assign a Namespace to an Organization Unit.
+   *
+   * Only Organizations sourced from the BC Data Catalogue
+   * (`extSource: "ckan"`) may be assigned to a Namespace.  Organizations
+   * sourced from SDX or created as "custom" entries are intentionally
+   * rejected so that namespace-to-organization mappings stay aligned
+   * with the authoritative public-body data registry.  This mirrors the
+   * filter applied to the _Add Organization_ dropdown in the UI so
+   * direct API callers cannot bypass it.
+   *
    * > `Required Scope:` Namespace.Assign
    */
   @Put('{org}/{orgUnit}/namespaces/{ns}')
@@ -179,6 +193,14 @@ export class OrganizationController extends Controller {
       true,
       'org',
       'Invalid Organization'
+    );
+
+    const parentOrg = await getOrganization(ctx, org);
+    assertEqual(
+      parentOrg.extSource === 'ckan',
+      true,
+      'org',
+      'Only ckan-sourced Organizations may be assigned to a namespace'
     );
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
