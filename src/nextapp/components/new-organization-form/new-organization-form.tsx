@@ -160,9 +160,14 @@ const NewOrganizationForm: React.FC = () => {
 
 export default NewOrganizationForm;
 
+// Only CKAN-sourced organizations (those from the authoritative
+// BC Data Catalogue) can be assigned to a gateway.  Organizations
+// sourced from SDX or created as "custom" entries are intentionally
+// excluded so that gateway-to-organization mappings stay aligned with
+// the public-body data registry.
 const query = gql`
   query ListOrganizations {
-    allOrganizations(sortBy: title_ASC) {
+    allOrganizations(where: { extSource: "ckan" }, sortBy: title_ASC) {
       name
       title
     }
@@ -171,7 +176,7 @@ const query = gql`
 
 const queryUnits = gql`
   query ListOrganizationUnits($org: String!) {
-    allOrganizations(where: { name: $org }) {
+    allOrganizations(where: { name: $org, extSource: "ckan" }) {
       orgUnits {
         name
         title

@@ -17,6 +17,7 @@ export interface Organization {
   sector?: string;
   title?: string;
   description?: string;
+  publicBodyId?: string;
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];

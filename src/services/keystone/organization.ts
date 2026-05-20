@@ -22,6 +22,8 @@ export async function getOrganizations(context: any): Promise<Organization[]> {
                         title
                         tags
                         description
+                        publicBodyId
+                        extSource
                         orgUnits {
                           name
                           title
@@ -49,6 +51,8 @@ export async function getOrganization(
                         title
                         description
                         tags
+                        publicBodyId
+                        extSource
                     }
                 }`,
     variables: { name },

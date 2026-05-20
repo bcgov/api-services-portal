@@ -53,11 +53,12 @@ describe('Notification Service - Namespace Assignment Emails', () => {
             description: 'Division for testing notification emails',
             tags: [],
             extForeignKey: `division-of-testing-${datasetId}`,
-            extSource: 'internal',
+            // Must match catalogue-sourced filter on gateway org assignment UI.
+            extSource: 'ckan',
             extRecordHash: '',
           },
         ],
-        extSource: 'internal',
+        extSource: 'ckan',
         extRecordHash: '',
       }
 

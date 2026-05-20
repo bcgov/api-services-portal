@@ -39,7 +39,11 @@ import {
   GroupMembership,
   OrgNamespace,
 } from '../../services/org-groups/types';
-import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
+import {
+  getOrganization,
+  getOrganizations,
+  getOrganizationUnit,
+} from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity, Organization } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
@@ -70,7 +74,14 @@ export class OrganizationController extends Controller {
   }
 
   /**
-   * Create Organization
+   * Create or update Organizations.
+   *
+   * The body may optionally carry a `publicBodyId` to link the
+   * Organization to a Public Body from the authoritative data registry
+   * (FOIPPA).  This field is unique across all Organizations; multiple
+   * Organizations may omit the value entirely, but a given
+   * `publicBodyId` MUST not be reused across Organizations.
+   *
    * > `Required Scope:` GroupAccess.Manage
    *
    * @summary Create Organizations
@@ -196,6 +207,16 @@ export class OrganizationController extends Controller {
   }
 
   /**
+   * Assign a Gateway to an Organization Unit.
+   *
+   * Only Organizations sourced from the BC Data Catalogue
+   * (`extSource: "ckan"`) may be assigned to a Gateway.  Organizations
+   * sourced from SDX or created as "custom" entries are intentionally
+   * rejected so that gateway-to-organization mappings stay aligned with
+   * the authoritative public-body data registry.  This mirrors the
+   * filter applied to the _Add Organization_ dropdown in the UI so
+   * direct API callers cannot bypass it.
+   *
    * > `Required Scope:` Gateway.Assign
    */
   @Put('{org}/{orgUnit}/gateways/{gatewayId}')
@@ -215,6 +236,14 @@ export class OrganizationController extends Controller {
       true,
       'org',
       'Invalid Organization'
+    );
+
+    const parentOrg = await getOrganization(ctx, org);
+    assertEqual(
+      parentOrg.extSource === 'ckan',
+      true,
+      'org',
+      'Only ckan-sourced Organizations may be assigned to a gateway'
     );
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
