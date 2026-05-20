@@ -9,6 +9,11 @@ module.exports = {
       isUnique: true,
       access: { update: false },
     },
+    specVersion: {
+      type: Text,
+      isRequired: true,
+      access: { update: false },
+    },
     name: {
       type: Text,
       isRequired: true,

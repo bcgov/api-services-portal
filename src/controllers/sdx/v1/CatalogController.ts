@@ -88,6 +88,7 @@ export class CatalogController extends Controller {
   @SuccessResponse('200', 'OK')
   @Example<ServiceCatalogEntry[]>([
     {
+      specVersion: 'openapi-3.1.0',
       name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
       title: 'Sample OAS Service',
       version: '1.0.0',

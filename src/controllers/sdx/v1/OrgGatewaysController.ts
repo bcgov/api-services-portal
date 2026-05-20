@@ -21,6 +21,7 @@ import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
+import { publishAPEConfig } from '../../../services/ape/publish-config';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -137,6 +138,12 @@ export class OrgGatewaysController extends Controller {
 
     const config = await GetConfigUsingPattern(ctx, body);
 
+    if (action === 'preview') {
+      request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
+      request.res?.send(YAML.dump(config.documents, { noRefs: true }));
+      return '';
+    }
+
     const gwaService = new GWAService(process.env.GWA_API_URL);
 
     const payload: any = {
@@ -162,23 +169,42 @@ export class OrgGatewaysController extends Controller {
 
     const artifact = YAML.dump(payload, { noRefs: true });
 
-    if (action === 'preview') {
-      request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-      request.res?.send(artifact);
-      return '';
+    let result;
+    if (
+      payload.services.length > 0 ||
+      payload.keys.length > 0 ||
+      payload.key_sets.length > 0
+    ) {
+      // Validate the generated config to ensure it only contains allowed configurations for the organization
+      result = await gwaService.publishGatewayConfiguration(
+        action === 'remove' ? 'DELETE' : 'PUT',
+        getSubjectToken(request),
+        config._gateway_id,
+        dryRun,
+        artifact
+      );
     }
 
-    // Validate the generated config to ensure it only contains allowed configurations for the organization
-    const result = await gwaService.publishGatewayConfiguration(
-      action === 'remove' ? 'DELETE' : 'PUT',
-      getSubjectToken(request),
-      config._gateway_id,
-      dryRun,
-      artifact
-    );
+    // Handle the processing of these (dryRun not supported atm)
+    // - Webhook
+    // - RegoPolicy
+    // - PolicyDataSource
+    const apeResult = dryRun
+      ? [{ message: 'Dry run not supported for APE' }]
+      : await publishAPEConfig(action, config.documents);
 
     request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-    request.res?.send(YAML.dump(result, { noRefs: true }));
+    request.res?.send(
+      YAML.dump(
+        [
+          ...(result
+            ? [{ resource: 'GatewayResources', response: result }]
+            : []),
+          ...apeResult,
+        ],
+        { noRefs: true }
+      )
+    );
     return '';
   }
 }

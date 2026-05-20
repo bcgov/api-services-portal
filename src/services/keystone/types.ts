@@ -5839,6 +5839,7 @@ export type OpenApiSpec = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   ref?: Maybe<Scalars['String']>;
+  specVersion?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
@@ -5853,6 +5854,7 @@ export type OpenApiSpec = {
 
 export type OpenApiSpecCreateInput = {
   ref?: Maybe<Scalars['String']>;
+  specVersion?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
@@ -5902,6 +5904,24 @@ export type OpenApiSpecWhereInput = {
   ref_not_ends_with_i?: Maybe<Scalars['String']>;
   ref_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   ref_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  specVersion?: Maybe<Scalars['String']>;
+  specVersion_not?: Maybe<Scalars['String']>;
+  specVersion_contains?: Maybe<Scalars['String']>;
+  specVersion_not_contains?: Maybe<Scalars['String']>;
+  specVersion_starts_with?: Maybe<Scalars['String']>;
+  specVersion_not_starts_with?: Maybe<Scalars['String']>;
+  specVersion_ends_with?: Maybe<Scalars['String']>;
+  specVersion_not_ends_with?: Maybe<Scalars['String']>;
+  specVersion_i?: Maybe<Scalars['String']>;
+  specVersion_not_i?: Maybe<Scalars['String']>;
+  specVersion_contains_i?: Maybe<Scalars['String']>;
+  specVersion_not_contains_i?: Maybe<Scalars['String']>;
+  specVersion_starts_with_i?: Maybe<Scalars['String']>;
+  specVersion_not_starts_with_i?: Maybe<Scalars['String']>;
+  specVersion_ends_with_i?: Maybe<Scalars['String']>;
+  specVersion_not_ends_with_i?: Maybe<Scalars['String']>;
+  specVersion_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  specVersion_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -8891,6 +8911,8 @@ export enum SortOpenApiSpecsBy {
   IdDesc = 'id_DESC',
   RefAsc = 'ref_ASC',
   RefDesc = 'ref_DESC',
+  SpecVersionAsc = 'specVersion_ASC',
+  SpecVersionDesc = 'specVersion_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   NamespaceAsc = 'namespace_ASC',
