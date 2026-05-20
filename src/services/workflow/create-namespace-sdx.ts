@@ -32,7 +32,8 @@ export async function CreateNamespaceForOrganization(
 
   const member = parseOrganizationMemberDetails(org.tags);
 
-  const name = `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
+  const name =
+    `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
 
   // Create the namespace with SDX edge configuration
   const resourceSet = await CreateNamespace(context, {
@@ -104,7 +105,13 @@ export async function CreateNamespaceForRuntimeGroup(
     orgEnabled: false,
     displayName: `SDX - Edge ${args.runtimeGroupName}`,
     dataPlane: 'sdx-edge',
-    domains: [rg.host, consumerEP.hostname],
+    domains: [
+      rg.host,
+      consumerEP.hostname,
+      ...(process.env.SDX_RESERVED_DOMAINS
+        ? process.env.SDX_RESERVED_DOMAINS.split(',')
+        : ['pzgw.api.gov.bc.ca']),
+    ],
   });
 
   logger.debug(
@@ -162,6 +169,9 @@ export async function CreateNamespaceForSubsystem(
   const consumerEP = new URL(rg.consumerEndpoint);
 
   // Create the namespace using subsystem organization and gateway details
+  // pzgw.api.gov.bc.ca : required for allowing API calls from PZGW to the subsystem in the SDX edge environment
+  // In the p2p-consumer pattern, the consumer routes can be setup on the consumer's runtime group, or
+  // due to the token exchange, a central gateway for handling consumer requests.
   const resourceSet = await CreateNamespace(context, {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
@@ -169,7 +179,13 @@ export async function CreateNamespaceForSubsystem(
     orgEnabled: false,
     displayName: `SDX - ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
-    domains: [rg.host, consumerEP.hostname],
+    domains: [
+      rg.host,
+      consumerEP.hostname,
+      ...(process.env.SDX_RESERVED_DOMAINS
+        ? process.env.SDX_RESERVED_DOMAINS.split(',')
+        : ['pzgw.api.gov.bc.ca']),
+    ],
     routePaths: args.routePaths,
   });
 

@@ -6,7 +6,6 @@ import {
   OperationId,
   Path,
   Put,
-  Query,
   Request,
   Route,
   Security,
@@ -14,38 +13,22 @@ import {
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
-import { SubsystemService } from '../../../services/batch/subsystem';
-import { ConnectionRequest, Subsystem } from '../../../services/batch/types';
-import {
-  EnrichWithRuntimeGroup,
-  GetSubsystemEntryForSubsystem,
-  SubsystemEntry,
-} from '../../../services/gateway-patterns/catalog';
-import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
-import { assertEqual } from '../../ioc/assert';
+import { ConnectionRequest } from '../../../services/batch/types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
-import { ConnectionRequestInput, SubsystemInput } from './types';
+import { ConnectionRequestInput } from './types';
 import {
   removeEmpty,
   removeKeys,
-  replaceKey,
   transformAllRefID,
 } from '../../../batch/feed-worker';
-import { getRoutePathPrefix } from '../../../services/utils';
-import {
-  ConnectionRequestUpdateParams,
-  ConnectionService,
-} from '../../../services/batch/connection-service';
-import { Logger } from '../../../logger';
-import { OpenAPISpecService } from '../../../services/batch/oas-service';
-
-const logger = Logger('controller.org-connection');
+import { ConnectionService } from '../../../services/batch/connection-service';
 
 @injectable()
 @Route('/organizations/{org}/connections')
 @Tags('Connections')
 export class OrgConnectionController extends Controller {
   private keystone: KeystoneService;
+
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
@@ -82,5 +65,19 @@ export class OrgConnectionController extends Controller {
         transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
       )
       .map((o) => removeKeys(o, ['slug']));
+  }
+
+  @Delete('/{id}')
+  @OperationId('deleteConnection')
+  @Security('jwt', ['System.Manage'])
+  public async deleteConnection(
+    @Path() org: string,
+    @Path('id') id: string,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+    const service = new ConnectionService();
+
+    return await service.deleteConnection(ctx, org, id);
   }
 }

@@ -18,6 +18,7 @@ import {
   FaLock,
   FaSearch
 } from 'react-icons/fa';
+import { buildTeamsAccessRequestUrl } from '@/shared/build-teams-access-request-url';
 import { useGlobal } from '@/shared/services/global';
 
 interface GatewayGetStartedProps {
@@ -57,7 +58,11 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
   const GwaInstallUrl = global?.helpLinks.helpSupportUrl + 'how-to/gwa-install'
   const GwaCommandsUrl = global?.helpLinks.helpSupportUrl + 'reference/gwa-commands'
   const HelpDeskURL = global?.helpLinks.helpDeskUrl
-  const HelpChatURL = global?.helpLinks.helpChatUrl
+  const HelpTeamsAlertsURL = global?.helpLinks.helpTeamsAlertsUrl
+  const HelpTeamsOperationsURL = global?.helpLinks.helpTeamsOperationsUrl
+  const HelpTeamsAccessRequestURL = buildTeamsAccessRequestUrl(
+    global?.helpLinks.helpTeamsAccessRequestUrl
+  )
   const apiRootUrl = global?.apiRootUrl
   const configHost = apiRootUrl ? apiRootUrl.replace('https://', '').replace('http://', '') : ''
 
@@ -408,22 +413,52 @@ const GatewayGetStarted: React.FC<GatewayGetStartedProps> = ({
           description={
             <>
               Join the{' '}
-            <Link
-                href={HelpChatURL}
+              <Link
+                href={HelpTeamsOperationsURL}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-              >#aps-ops channel</Link>
-              {' '} on Rocket.Chat to connect with our team and user community.
-              Alternatively, {' '}
-            <Link
+              >
+                MS Teams: Support channel
+              </Link>
+              {' '}
+              for questions and usage guidance. For incidents, maintenance, and
+              other notices, follow the{' '}
+              <Link
+                href={HelpTeamsAlertsURL}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >
+                MS Teams: Alerts and notices channel
+              </Link>
+              .
+              <br />
+              <br />
+              These channels are for BC Public Service employees by default;
+              external clients can{' '}
+              <Link
+                href={HelpTeamsAccessRequestURL}
+                target="_blank"
+                color="bc-link"
+                textDecor="underline"
+              >
+                request access via the Data Systems and Services request system
+              </Link>
+              .
+              <br />
+              <br />
+              Alternatively,{' '}
+              <Link
                 href={HelpDeskURL}
                 target="_blank"
                 color="bc-link"
                 textDecor="underline"
-              >open a support ticket</Link>
-              {' '} and we'll get back to you via email in 3-5 business days.
-              Either way, our team is here to answer your questions. 
+              >
+                open a support ticket
+              </Link>
+              {' '}
+              and we will get back to you via email in 3-5 business days.
             </>
           }
           command='' 
