@@ -490,6 +490,8 @@ components:
                     type: string
                 description:
                     type: string
+                publicBodyId:
+                    type: string
                 extSource:
                     type: string
                 extRecordHash:
@@ -1439,7 +1441,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
-            description: "Create Organization\n> `Required Scope:` GroupAccess.Manage"
+            description: "Create or update Organizations.\n\nThe body may optionally carry a `publicBodyId` to link the\nOrganization to a Public Body from the authoritative data registry\n(FOIPPA).  This field is unique across all Organizations; multiple\nOrganizations may omit the value entirely, but a given\n`publicBodyId` MUST not be reused across Organizations.\n\n> `Required Scope:` GroupAccess.Manage"
             summary: 'Create Organizations'
             tags:
                 - Organizations
@@ -1591,7 +1593,7 @@ paths:
                                 required:
                                     - result
                                 type: object
-            description: '> `Required Scope:` Gateway.Assign'
+            description: "Assign a Gateway to an Organization Unit.\n\nOnly Organizations sourced from the BC Data Catalogue\n(`extSource: \"ckan\"`) may be assigned to a Gateway.  Organizations\nsourced from SDX or created as \"custom\" entries are intentionally\nrejected so that gateway-to-organization mappings stay aligned with\nthe authoritative public-body data registry.  This mirrors the\nfilter applied to the _Add Organization_ dropdown in the UI so\ndirect API callers cannot bypass it.\n\n> `Required Scope:` Gateway.Assign"
             tags:
                 - Organizations
             security:

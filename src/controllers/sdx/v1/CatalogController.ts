@@ -54,6 +54,7 @@ export class CatalogController extends Controller {
         name: o.name,
         title: o.title,
         description: o.description,
+        publicBodyId: o.publicBodyId,
         member: getOrganizationMemberDetails(o.tags),
       }))
       .filter((o) => o.member !== undefined)

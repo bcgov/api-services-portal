@@ -310,6 +310,7 @@ const models: TsoaRoute.Models = {
             "sector": {"dataType":"string"},
             "title": {"dataType":"string"},
             "description": {"dataType":"string"},
+            "publicBodyId": {"dataType":"string"},
             "extSource": {"dataType":"string"},
             "extRecordHash": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},

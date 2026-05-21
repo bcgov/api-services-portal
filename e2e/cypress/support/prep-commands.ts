@@ -22,11 +22,13 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
           description: 'Some good description about how we manage our toys',
           tags: [],
           extForeignKey: `division-of-toys-${orgId}`,
-          extSource: 'internal',
+          // "ckan" so the org is eligible for gateway assignment in the UI
+          // (Add Organization filters on extSource === "ckan").
+          extSource: 'ckan',
           extRecordHash: '',
         },
       ],
-      extSource: 'internal',
+      extSource: 'ckan',
       extRecordHash: '',
     }
 
