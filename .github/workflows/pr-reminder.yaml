@@ -7,6 +7,11 @@ jobs:
   remind:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
       - name: Run PR reviewer reminder
         uses: bcgov/aps-devops/pr-reminder@dev
         with:

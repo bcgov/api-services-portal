@@ -8,12 +8,17 @@ on:
 jobs:
   comment:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Set KEBAB_CASE_BRANCH
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           # Convert github.head_ref to kebab case
-          kebab_case=$(echo "${{ github.head_ref }}" | sed 's/_/-/g; s/\//-/g')
-          echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
+          kebab_case=$(echo "$HEAD_REF" | sed 's/_/-/g; s/\//-/g')
+          echo "KEBAB_CASE_BRANCH=${kebab_case}" >> "$GITHUB_OUTPUT"
         id: set-branch-id
 
       - name: Check the KEBAB_CASE_BRANCH output
@@ -21,8 +26,23 @@ jobs:
 
       - name: PR Description
         if: startsWith(github.head_ref, 'feature/') == true
-        uses: bcgov-nr/action-pr-description-add@v1.1.1
+        uses: actions/github-script@v8
+        env:
+          DEPLOYMENT_URL: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
         with:
-          add_markdown: |
-            ---
-            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
+          script: |
+            const deploymentUrl = process.env.DEPLOYMENT_URL;
+            const markdown = ['---', `🚀 Feature branch deployment: ${deploymentUrl}`].join('\n');
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const { data: pull } = await github.rest.pulls.get({ owner, repo, pull_number });
+            const body = pull.body || '';
+
+            if (!body.includes(deploymentUrl)) {
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number,
+                body: body ? `${body}\n\n${markdown}` : markdown,
+              });
+            }
