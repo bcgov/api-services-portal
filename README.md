@@ -69,17 +69,25 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Turn off the docker compose Portal and OAuth2 Proxy: `docker stop apsportal oauth2-proxy`
 
-1. Start the OAuth2 Proxy locally:
+1. Start the OAuth2 Proxy locally (from the repo root):
 
 ```sh
 # mac
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
 
-# WSL
-hostip=$(hostname -I | awk '{print $1}')
-
 docker run -ti --rm --name proxy --net=host \
   --add-host portal.localtest.me:$hostip \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.yaml:/oauth2.yaml \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
+  quay.io/oauth2-proxy/oauth2-proxy:v7.8.1 \
+  --alpha-config /oauth2.yaml --config /oauth2.config
+```
+
+```sh
+# WSL (use port mapping so Windows browsers can reach localhost:4180)
+docker run -ti --rm --name proxy -p 4180:4180 \
+  --add-host portal.localtest.me:host-gateway \
+  --add-host keycloak.localtest.me:host-gateway \
   -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.yaml:/oauth2.yaml \
   -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
   quay.io/oauth2-proxy/oauth2-proxy:v7.8.1 \
