@@ -1,8 +1,5 @@
 import { Keystone } from '@keystonejs/keystone';
-import {
-  deleteRecordByInternalId,
-  getRecords,
-} from '../../batch/feed-worker';
+import { deleteRecordByInternalId, getRecords } from '../../batch/feed-worker';
 import { BatchResult } from '../../batch/types';
 import { strict as assert } from 'assert';
 import {
@@ -112,7 +109,11 @@ class OpenAPISpecService {
       'OAS service cannot be deleted because it has active connection requests'
     );
 
-    return await deleteRecordByInternalId(context, 'OpenAPISpec', serviceSpec.id);
+    return await deleteRecordByInternalId(
+      context,
+      'OpenAPISpec',
+      serviceSpec.id
+    );
   };
 }
 

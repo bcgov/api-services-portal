@@ -14,6 +14,14 @@ export interface OpenAPISpecInput {
   state?: string;
 }
 
+export interface SpecOperations {
+  operationId: string;
+  summary: string;
+  method: string;
+  path: string;
+  scopes?: string[];
+}
+
 export const LoadOpenAPISpec = async (
   context: any,
   spec: OpenAPISpecInput

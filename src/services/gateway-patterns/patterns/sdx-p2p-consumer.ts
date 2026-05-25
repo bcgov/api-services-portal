@@ -14,7 +14,17 @@ import { ConnectionService } from '../../batch/connection-service';
 // TODO: clean this up a bit!
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
-interface ConsumerUpgrades {
+export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
+  organization: string;
+  conn_id: string;
+  client_id: string;
+  service_id: string;
+  upgrades: ConsumerUpgrades;
+  tls_verify?: string;
+  strip_path: boolean;
+}
+
+export interface ConsumerUpgrades {
   sign: {};
   verify: {};
   token: {
@@ -33,15 +43,6 @@ interface ConsumerUpgrades {
     scopes: string[];
     audience: string;
   };
-}
-
-export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
-  organization: string;
-  conn_id: string;
-  client_id: string;
-  service_id: string;
-  upgrades: ConsumerUpgrades;
-  tls_verify?: string;
 }
 
 export interface SDXP2PConsumerPatternData {
@@ -132,7 +133,7 @@ export const SDXP2PConsumerPattern = {
           paths: [routePathPrefix],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
           name,
-          strip_path: false,
+          strip_path: inputs.strip_path,
           protocols:
             routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
           tags,
@@ -183,13 +184,17 @@ export const SDXP2PConsumerPattern = {
 
 function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
   const clientLocator = data.client.clientId;
+  const serviceLocator = data.service.name;
   const serviceHost = data.service.subsystem.runtimeGroup.host;
   return {
     name: 'request-transformer',
     tags,
     config: {
       add: {
-        headers: [`X-Client-Id:${clientLocator}`],
+        headers: [
+          `X-Client-Id:${clientLocator}`,
+          `X-Service-Id:${serviceLocator}`,
+        ],
       },
       replace: {
         headers: [`Host:${serviceHost}`],

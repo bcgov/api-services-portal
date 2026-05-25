@@ -133,7 +133,7 @@ export async function GetCatalog(
         },
         integrationId: c.subsystem.integrationId || undefined,
       },
-      operations: JSON.parse(c.operations || '{}'),
+      operations: JSON.parse(c.operations || '[]'),
     } as ServiceCatalogEntry;
   });
 }
