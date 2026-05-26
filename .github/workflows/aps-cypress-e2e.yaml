@@ -30,7 +30,7 @@ jobs:
           docker build -t gwa-api:e2e .
 
       - name: Checkout Portal
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -70,21 +70,21 @@ jobs:
 
       - name: Upload E2E Test Results HTML Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
       - name: Upload E2E Test Results JSON Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-json
           path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
 
       - name: Upload E2E Code Coverage Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
@@ -101,7 +101,7 @@ jobs:
 
       - name: SonarCloud Scan
         if: always()
-        uses: sonarsource/sonarqube-scan-action@v3.1.0
+        uses: sonarsource/sonarqube-scan-action@v7
         with:
           args: >
             -Dsonar.organization=bcgov-oss
@@ -116,7 +116,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload Astra scan results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: astra-scan-results
           path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
@@ -146,7 +146,7 @@ jobs:
 
       - name: Set up Python 3.9
         if: failure()
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
           python-version: '3.9'
           architecture: 'x64'

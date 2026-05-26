@@ -3,10 +3,20 @@ on:
   schedule:
     - cron: '30 13 * * 1,2,3,4,5' # Scheduled to run at 5:30 AM PST, weekdays
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   remind:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
       - name: Run PR reviewer reminder
         uses: bcgov/aps-devops/pr-reminder@dev
         with:
