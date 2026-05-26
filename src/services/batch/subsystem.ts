@@ -14,6 +14,8 @@ import { Subsystem } from './types';
 import {
   ConnectionRequest as KeystoneConnectionRequest,
   Subsystem as KeystoneSubsystem,
+  Product as KeystoneProduct,
+  Application as KeystoneApplication,
 } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
 import {
@@ -95,6 +97,44 @@ class SubsystemService {
     );
   };
 
+  findProduct = async (
+    context: Keystone,
+    organization: string,
+    subsystemName: string
+  ): Promise<KeystoneProduct> => {
+    const records = await getRecords(
+      context,
+      'Product',
+      'allProducts',
+      ['environments'],
+      {
+        query: '$organization: String!',
+        clause: '{ organization: { name: $organization } }',
+        variables: { organization },
+      }
+    );
+    return records.find((r: KeystoneProduct) => r.name === subsystemName);
+  };
+
+  findApplication = async (
+    context: Keystone,
+    organization: string,
+    subsystemName: string
+  ): Promise<KeystoneApplication> => {
+    const records = await getRecords(
+      context,
+      'Application',
+      'allApplications',
+      [],
+      {
+        query: '$organization: String!',
+        clause: '{ organization: { name: $organization } }',
+        variables: { organization },
+      }
+    );
+    return records.find((r: KeystoneApplication) => r.name === subsystemName);
+  };
+
   subsystemGatewayExists = async (
     context: Keystone,
     subsystem: KeystoneSubsystem
@@ -103,7 +143,10 @@ class SubsystemService {
       return false;
     }
 
-    const gatewayDetails = await getNamespaceDetails(context, subsystem.namespace);
+    const gatewayDetails = await getNamespaceDetails(
+      context,
+      subsystem.namespace
+    );
 
     return gatewayDetails != null;
   };
