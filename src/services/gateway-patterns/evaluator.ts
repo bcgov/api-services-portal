@@ -6,6 +6,11 @@ import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
 import { SDXKeysPattern } from './patterns/sdx-keys';
 import { SDXSubsystemsPattern } from './patterns/sdx-subsystem';
 
+export interface PatternOutput {
+  documents: any[];
+  _gateway_id?: string;
+}
+
 interface PatternProcessor {
   id: string;
   requiredParams: string[];
@@ -57,7 +62,7 @@ export function raiseValidateError(
 export async function GetConfigUsingPattern(
   ctx: any,
   inputs: GatewayPatternConfig
-): Promise<any> {
+): Promise<PatternOutput> {
   if (PATTERNS[inputs.pattern]) {
     const pattern = PATTERNS[inputs.pattern];
     expectRequiredParams(inputs.parameters, pattern.requiredParams);

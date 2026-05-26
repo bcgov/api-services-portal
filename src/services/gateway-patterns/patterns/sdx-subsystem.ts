@@ -190,7 +190,31 @@ export const SDXSubsystemsPattern = {
         ],
       };
     });
-    return [...serviceRoutes];
+
+    const apsBridgeEntities = [
+      {
+        kind: 'Application',
+        name: data.subsystem.name,
+        organization: data.subsystem.organization.name,
+        description: data.subsystem.description,
+        tags,
+      },
+      {
+        kind: 'Product',
+        name: data.subsystem.name,
+        organization: data.subsystem.organization.name,
+        description: data.subsystem.description,
+        tags,
+        namespace: data.subsystem.gateway.id,
+        environments: [
+          {
+            name: 'dev',
+            flow: 'protected-externally',
+          },
+        ] as any[],
+      },
+    ];
+    return [...serviceRoutes, ...apsBridgeEntities];
   },
 };
 

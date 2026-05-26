@@ -263,7 +263,6 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
-  owner?: UserRefID;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }
@@ -377,6 +376,7 @@ export interface Product {
   gatewayId?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
 }
 
 

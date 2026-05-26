@@ -21,6 +21,7 @@ import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
+import { ApplyResources } from '../../../services/workflow/sdx-apply-resources';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -137,45 +138,7 @@ export class OrgGatewaysController extends Controller {
 
     const config = await GetConfigUsingPattern(ctx, body);
 
-    const gwaService = new GWAService(process.env.GWA_API_URL);
-
-    const payload: any = {
-      services: [],
-      keys: [],
-      key_sets: [],
-    };
-
-    config.documents.forEach((doc: any) => {
-      if (doc.kind === 'GatewayService') {
-        delete doc.kind;
-        payload.services.push(doc);
-      } else if (doc.kind === 'GatewayKey') {
-        delete doc.kind;
-        payload.keys.push(doc);
-      } else if (doc.kind === 'GatewayKeySet') {
-        delete doc.kind;
-        payload.key_sets.push(doc);
-      }
-    });
-
-    logger.debug('Artifacts %j', payload);
-
-    const artifact = YAML.dump(payload, { noRefs: true });
-
-    if (action === 'preview') {
-      request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-      request.res?.send(artifact);
-      return '';
-    }
-
-    // Validate the generated config to ensure it only contains allowed configurations for the organization
-    const result = await gwaService.publishGatewayConfiguration(
-      action === 'remove' ? 'DELETE' : 'PUT',
-      getSubjectToken(request),
-      config._gateway_id,
-      dryRun,
-      artifact
-    );
+    const result = await ApplyResources(ctx, request, action, dryRun, config);
 
     request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
     request.res?.send(YAML.dump(result, { noRefs: true }));

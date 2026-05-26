@@ -175,16 +175,17 @@ class ApiOpenapiApp {
           message: err.message,
         });
       } else if (err instanceof IssuerMisconfigError) {
+        const errmsg = JSON.parse(err.message);
         logger.warn(
           `Caught Misconfig Error for ${req.path}:`,
-          err.statusCode,
-          err.status,
-          err.reason,
-          err.description
+          errmsg.statusCode,
+          errmsg.status,
+          errmsg.reason,
+          errmsg.description
         );
         return res.status(500).json({
           code: 'misconfig_error',
-          message: `[${err?.statusCode}] ${err?.reason} (${err?.description})`,
+          message: `[${errmsg?.statusCode}] ${errmsg?.reason} (${errmsg?.description})`,
         });
       } else if (err instanceof ValidateError) {
         logger.warn(

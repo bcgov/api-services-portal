@@ -19,7 +19,7 @@ module.exports = {
     appId: {
       type: Text,
       isRequired: true,
-      isUnique: false,
+      isUnique: true,
     },
     name: {
       type: Text,
@@ -58,21 +58,37 @@ module.exports = {
           resolvedData['appId'] = newProductID();
         }
         if (context['authedItem'] && 'namespace' in context['authedItem']) {
+          if (
+            'namespace' in resolvedData &&
+            resolvedData['namespace'] !== context['authedItem']['namespace']
+          ) {
+            logger.error(
+              '[List.Product] Namespace %s does not match authenticated user namespace %s',
+              resolvedData['namespace'],
+              context['authedItem']['namespace']
+            );
+            throw new Error('Namespace must match authenticated user');
+          }
+
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
       }
       logger.debug('[List.Product] Resolved %j', resolvedData);
       return resolvedData;
     },
-    validateInput: ({ resolvedData, addValidationError }) => {
+    validateInput: ({ resolvedData, addValidationError, context }) => {
       try {
         regExprValidation(
-          '^[a-zA-Z0-9 ()&-]{3,100}$',
+          '^[a-zA-Z0-9 ()&-.]{3,100}$',
           resolvedData['name'],
-          "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' ()&-')"
+          "Product name must be between 3 and 100 alpha-numeric characters (including special characters ' ()&-.')"
         );
       } catch (ex) {
         if (ex instanceof AssertionError) {
+          logger.error(
+            'Validation error validating product name: %s',
+            ex.message
+          );
           addValidationError(ex.message);
         } else {
           throw ex;

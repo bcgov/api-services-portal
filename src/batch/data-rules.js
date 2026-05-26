@@ -384,15 +384,40 @@ const metadata = {
       },
     },
   },
+  // Application: {
+  //   query: 'allApplications',
+  //   refKey: 'appId',
+  //   sync: ['name', 'description'],
+  //   transformations: {
+  //     owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+  //     organization: {
+  //       name: 'connectOne',
+  //       key: 'org',
+  //       list: 'allOrganizations',
+  //       refKey: 'name',
+  //     },
+  //     organizationUnit: {
+  //       name: 'connectOne',
+  //       key: 'sub_org',
+  //       list: 'allOrganizationUnits',
+  //       refKey: 'name',
+  //     },
+  //   },
+  // },
   Application: {
     query: 'allApplications',
     refKey: 'appId',
+    compositeRefKey: [
+      'name',
+      {
+        key: 'organization',
+        whereClause: 'organization: { name: $organization }',
+      },
+    ],
     sync: ['name', 'description'],
     transformations: {
-      owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
       organization: {
         name: 'connectOne',
-        key: 'org',
         list: 'allOrganizations',
         refKey: 'name',
       },
@@ -536,6 +561,11 @@ const metadata = {
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
+      },
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
       },
     },
     example: {
