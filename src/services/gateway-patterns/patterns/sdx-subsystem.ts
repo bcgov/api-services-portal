@@ -10,6 +10,11 @@ import {
 import { OpenAPISpecService } from '../../batch/oas-service';
 import { OpenApiSpec } from '../../keystone/types';
 import { SpecOperations } from '../../workflow/openapi-spec-loader';
+import {
+  convertPath,
+  convertPaths,
+  convertOpenApiSpec,
+} from '../../../services/kong/openapi-to-kong/openapi-to-kong-paths';
 
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
@@ -120,7 +125,7 @@ export const SDXSubsystemsPattern = {
             ],
             hosts: [serviceHost],
             snis: inputs.use_sni === 'false' ? [] : [serviceHost],
-            paths: [op.path], // path needs mapping from OpenAPI spec format to Kong regexpr format
+            paths: [convertPath(op.path).kongPath],
             methods: [op.method],
             headers: {
               'X-Service-Id': [serviceLocator],
