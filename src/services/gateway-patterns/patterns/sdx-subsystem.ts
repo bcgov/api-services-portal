@@ -191,7 +191,7 @@ export const SDXSubsystemsPattern = {
       };
     });
 
-    const apsBridgeEntities = [
+    const apsResources = [
       {
         kind: 'Application',
         name: data.subsystem.name,
@@ -211,10 +211,19 @@ export const SDXSubsystemsPattern = {
             name: 'dev',
             flow: 'protected-externally',
           },
+          {
+            name: 'test',
+            flow: 'protected-externally',
+          },
+          {
+            name: 'prod',
+            flow: 'protected-externally',
+          },
         ] as any[],
       },
     ];
-    return [...serviceRoutes, ...apsBridgeEntities];
+
+    return [...serviceRoutes, ...apsResources];
   },
 };
 

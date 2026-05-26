@@ -132,7 +132,7 @@ export class OrgGatewaysController extends Controller {
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.createContext(request, true);
 
     body.parameters['organization'] = org; // inject org into parameters for pattern evaluation
 
