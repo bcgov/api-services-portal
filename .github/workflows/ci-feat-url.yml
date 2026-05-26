@@ -26,23 +26,8 @@ jobs:
 
       - name: PR Description
         if: startsWith(github.head_ref, 'feature/') == true
-        uses: actions/github-script@v8
-        env:
-          DEPLOYMENT_URL: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca
+        uses: bcgov-nr/action-pr-description-add@v2.0.1
         with:
-          script: |
-            const deploymentUrl = process.env.DEPLOYMENT_URL;
-            const markdown = ['---', `🚀 Feature branch deployment: ${deploymentUrl}`].join('\n');
-            const { owner, repo } = context.repo;
-            const pull_number = context.payload.pull_request.number;
-            const { data: pull } = await github.rest.pulls.get({ owner, repo, pull_number });
-            const body = pull.body || '';
-
-            if (!body.includes(deploymentUrl)) {
-              await github.rest.pulls.update({
-                owner,
-                repo,
-                pull_number,
-                body: body ? `${body}\n\n${markdown}` : markdown,
-              });
-            }
+          add_markdown: |
+            ---
+            🚀 Feature branch deployment: https://api-services-portal-${{ steps.set-branch-id.outputs.KEBAB_CASE_BRANCH }}.apps.silver.devops.gov.bc.ca

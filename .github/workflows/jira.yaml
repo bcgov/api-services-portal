@@ -18,38 +18,10 @@ jobs:
       contents: read
     steps:
       - name: Delete workflow runs
-        uses: actions/github-script@v8
+        uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
-          script: |
-            const retainDays = 1;
-            const keepMinimumRuns = 5;
-            const workflowPattern = 'jira.yaml';
-            const cutoff = Date.now() - retainDays * 24 * 60 * 60 * 1000;
-            const { owner, repo } = context.repo;
-            const workflows = await github.paginate(github.rest.actions.listRepoWorkflows, {
-              owner,
-              repo,
-              per_page: 100,
-            });
-            const matches = workflows.filter((workflow) =>
-              workflow.path?.includes(workflowPattern) || workflow.name?.includes(workflowPattern)
-            );
-
-            for (const workflow of matches) {
-              const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
-                owner,
-                repo,
-                workflow_id: workflow.id,
-                per_page: 100,
-              });
-              const deletableRuns = runs.filter((run, index) =>
-                index >= keepMinimumRuns &&
-                run.id !== context.runId &&
-                new Date(run.created_at).getTime() < cutoff
-              );
-
-              for (const run of deletableRuns) {
-                await github.rest.actions.deleteWorkflowRun({ owner, repo, run_id: run.id });
-                core.info(`Deleted ${workflow.path} run ${run.id}`);
-              }
-            }
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 5
+          delete_workflow_pattern: jira.yaml
