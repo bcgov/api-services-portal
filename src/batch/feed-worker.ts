@@ -21,6 +21,7 @@ import {
   CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
+import { logOrganizationProfileChangeFromRecords } from '../services/workflow/org-activity';
 
 const { metadata } = require('./data-rules');
 
@@ -617,6 +618,15 @@ export const syncRecords = async function (
           childResults,
         };
       } else {
+        if (entity === 'Organization' && localRecord?.name) {
+          const after = { ...localRecord, ...data };
+          await logOrganizationProfileChangeFromRecords(
+            context,
+            localRecord.name,
+            localRecord,
+            after
+          );
+        }
         return {
           status: 200,
           result: 'updated',

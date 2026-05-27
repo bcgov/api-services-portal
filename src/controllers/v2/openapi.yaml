@@ -16,6 +16,8 @@ components:
                     type: string
                 id:
                     type: string
+                refKey:
+                    type: string
                 ownedBy:
                     type: string
                 childResults:
@@ -449,6 +451,8 @@ components:
                     $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 org:
                     $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
+                permRoutePaths:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
                 permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
@@ -579,6 +583,12 @@ components:
                     type: string
                 enabled:
                     type: boolean
+                permDataPlane:
+                    type: string
+                permDomains:
+                    items:
+                        type: string
+                    type: array
                 updatedAt:
                     type: number
                     format: double

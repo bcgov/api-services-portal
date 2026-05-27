@@ -796,7 +796,15 @@ const metadata = {
     validations: {
       action: {
         type: 'enum',
-        values: ['add', 'update', 'create', 'delete', 'validate', 'publish'],
+        values: [
+          'add',
+          'update',
+          'create',
+          'delete',
+          'validate',
+          'publish',
+          'published',
+        ],
       },
       result: {
         type: 'enum',

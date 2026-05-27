@@ -1,56 +1,54 @@
 import {
-  Controller,
-  Request,
-  Delete,
-  OperationId,
-  Put,
-  Path,
-  Route,
-  Query,
-  Security,
   Body,
+  Controller,
+  Delete,
   Get,
-  Tags,
-  Post,
+  OperationId,
+  Path,
+  Put,
+  Query,
+  Request,
+  Route,
+  Security,
+  Tags
 } from 'tsoa';
-import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
-  getRecords,
+  parseBlobString,
   parseJsonString,
   removeEmpty,
   removeKeys,
-  transformAllRefID,
-  syncRecordsThrowErrors,
-  parseBlobString,
+  syncRecordsThrowErrors
 } from '../../batch/feed-worker';
-import {
-  GroupAccessService,
-  leaf,
-  NamespaceService,
-} from '../../services/org-groups';
-import {
-  getGwaProductEnvironment,
-  transformActivity,
-} from '../../services/workflow';
-import {
-  GroupAccess,
-  GroupMembership,
-  OrgNamespace,
-} from '../../services/org-groups/types';
+import { BatchResult } from '../../batch/types';
+import { Logger } from '../../logger';
 import {
   getOrganization,
   getOrganizations,
   getOrganizationUnit,
 } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity, Organization } from './types';
+import {
+  GroupAccessService,
+  NamespaceService
+} from '../../services/org-groups';
 import { isParent } from '../../services/org-groups/group-converter-utils';
-import { ActivitySummary } from '../../services/keystone/types';
-import { ActivityDetail } from './types-extra';
-import { BatchResult } from '../../batch/types';
+import {
+  GroupAccess,
+  GroupMembership,
+  OrgNamespace,
+} from '../../services/org-groups/types';
+import {
+  getGwaProductEnvironment,
+  transformActivity,
+} from '../../services/workflow';
+import { OrgActivityService } from '../../services/workflow/org-activity';
 import { assertEqual } from '../ioc/assert';
+import { KeystoneService } from '../ioc/keystoneInjector';
+import { Organization } from './types';
+import { ActivityDetail } from './types-extra';
+
+const logger = Logger('v3.OrganizationController');
 
 @injectable()
 @Route('/organizations')
@@ -103,12 +101,29 @@ export class OrganizationController extends Controller {
       'org',
       'Only root level is allowed to do this operation'
     );
-    return await syncRecordsThrowErrors(
-      this.keystone.createContext(request, true),
+    const ctx = this.keystone.createContext(request, true);
+    const sudoCtx = this.keystone.sudo();
+    const existing = (await getOrganizations(sudoCtx)).find(
+      (o) => o.name === body['name']
+    );
+
+    const result = await syncRecordsThrowErrors(
+      ctx,
       'Organization',
       body['name'],
       body
     );
+
+    // Profile updates are logged from feed-worker after syncRecords updates.
+    if (!existing && result.result?.startsWith('created')) {
+      await new OrgActivityService(ctx, body['name'])
+        .logOrganizationEstablished(true)
+        .catch((e) =>
+          logger.error('[OrgActivity] organization established %s', e)
+        );
+    }
+
+    return result;
   }
 
   @Get('{org}')
@@ -188,7 +203,69 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
+    const changes = await groupAccessService.createOrUpdateGroupAccess(body, [
+      'idir',
+    ]);
+
+    const ctx = this.keystone.sudo();
+    const orgActivity = new OrgActivityService(ctx, org);
+
+    const newRolesByEmail = new Map<string, string[]>();
+    for (const member of body.members || []) {
+      if (!member?.member?.email) continue;
+      newRolesByEmail.set(member.member.email, member.roles);
+    }
+
+    const grantedEmails = new Set(Object.keys(changes.granted || {}));
+    const revokedEmails = new Set(Object.keys(changes.revoked || {}));
+    const updatedEmails = new Set(
+      [...grantedEmails].filter((email) => revokedEmails.has(email))
+    );
+
+    for (const email of updatedEmails) {
+      const roles = (newRolesByEmail.get(email) ?? []).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'updated',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access update %s', e)
+        );
+    }
+
+    for (const email of grantedEmails) {
+      if (updatedEmails.has(email)) continue;
+      const roles = (
+        newRolesByEmail.get(email) ??
+        changes.granted[email] ??
+        []
+      ).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'granted',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access grant %s', e)
+        );
+    }
+
+    for (const email of revokedEmails) {
+      if (updatedEmails.has(email)) continue;
+      const roles = (changes.revoked[email] ?? []).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'revoked',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access revoke %s', e)
+        );
+    }
   }
 
   /**
@@ -226,7 +303,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Path() orgUnit: string,
     @Path() gatewayId: string,
-    @Query() enable: boolean = true
+    @Query() enable = true
   ): Promise<{ result: string }> {
     const ns = gatewayId;
     const ctx = this.keystone.sudo();
@@ -307,8 +384,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
+    @Query() first = 20,
+    @Query() skip = 0
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     //const org = await getOrganizationUnit(ctx, orgUnit);

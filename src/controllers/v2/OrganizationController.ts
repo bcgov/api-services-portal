@@ -1,6 +1,5 @@
 import {
   Controller,
-  Request,
   Delete,
   OperationId,
   Put,
@@ -16,16 +15,13 @@ import { KeystoneService } from '../ioc/keystoneInjector';
 import { assertEqual } from '../ioc/assert';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
-  getRecords,
   parseJsonString,
   removeEmpty,
   removeKeys,
-  transformAllRefID,
+  parseBlobString,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
-  leaf,
   NamespaceService,
 } from '../../services/org-groups';
 import {
@@ -43,10 +39,12 @@ import {
   getOrganizationUnit,
 } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity } from './types';
+import { OrgActivityService } from '../../services/workflow/org-activity';
+import { Logger } from '../../logger';
 import { isParent } from '../../services/org-groups/group-converter-utils';
-import { ActivitySummary } from '../../services/keystone/types';
 import { ActivityDetail } from './types-extra';
+
+const logger = Logger('v2.OrganizationController');
 
 @injectable()
 @Route('/organizations')
@@ -146,7 +144,69 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
+    const changes = await groupAccessService.createOrUpdateGroupAccess(body, [
+      'idir',
+    ]);
+
+    const ctx = this.keystone.sudo();
+    const orgActivity = new OrgActivityService(ctx, org);
+
+    const newRolesByEmail = new Map<string, string[]>();
+    for (const member of body.members || []) {
+      if (!member?.member?.email) continue;
+      newRolesByEmail.set(member.member.email, member.roles);
+    }
+
+    const grantedEmails = new Set(Object.keys(changes.granted || {}));
+    const revokedEmails = new Set(Object.keys(changes.revoked || {}));
+    const updatedEmails = new Set(
+      [...grantedEmails].filter((email) => revokedEmails.has(email))
+    );
+
+    for (const email of updatedEmails) {
+      const roles = (newRolesByEmail.get(email) ?? []).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'updated',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access update %s', e)
+        );
+    }
+
+    for (const email of grantedEmails) {
+      if (updatedEmails.has(email)) continue;
+      const roles = (
+        newRolesByEmail.get(email) ??
+        changes.granted[email] ??
+        []
+      ).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'granted',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access grant %s', e)
+        );
+    }
+
+    for (const email of revokedEmails) {
+      if (updatedEmails.has(email)) continue;
+      const roles = (changes.revoked[email] ?? []).join(',');
+      await orgActivity
+        .logUpdateOrganizationAccess(true, {
+          username: email,
+          roles,
+          accessAction: 'revoked',
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] organization access revoke %s', e)
+        );
+    }
   }
 
   /**
@@ -184,7 +244,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Path() orgUnit: string,
     @Path() ns: string,
-    @Query() enable: boolean = true
+    @Query() enable = true
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
@@ -263,8 +323,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
+    @Query() first = 20,
+    @Query() skip = 0
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     //const org = await getOrganizationUnit(ctx, orgUnit);
@@ -285,8 +345,9 @@ export class OrganizationController extends Controller {
     );
 
     return transformActivity(records)
+      .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']));
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
   }
 }
