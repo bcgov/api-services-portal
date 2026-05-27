@@ -229,6 +229,11 @@ export class OrgActivityService {
       true,
       'Must be at least one id and no more than 4'
     );
+    assert.strictEqual(
+      ids[0],
+      `org:${this.orgName}`,
+      'First id must be org:{orgName} (stored as filterKey1 for org activity queries)'
+    );
 
     const activityContext = JSON.stringify({
       message,
