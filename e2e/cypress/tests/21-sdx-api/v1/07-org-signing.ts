@@ -23,7 +23,7 @@ describe('SDX Organization Signing', () => {
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
         ({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(200)
+          expect(status).to.be.equal(200999) // this is to cause a failure to demo the workflow change
 
           // call the /keys endpoint to get a CSR
           cy.setRequestBody({
