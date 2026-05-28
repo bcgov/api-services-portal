@@ -187,7 +187,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['GroupAccess.Manage'])
   public async put(
     @Path() org: string,
-    @Body() body: GroupMembership
+    @Body() body: GroupMembership,
+    @Request() request: any
   ): Promise<void> {
     // must match either the 'name' or one of the parent nodes
     assertEqual(
@@ -207,8 +208,8 @@ export class OrganizationController extends Controller {
       'idir',
     ]);
 
-    const ctx = this.keystone.sudo();
-    const orgActivity = new OrgActivityService(ctx, org);
+    const activityCtx = this.keystone.createContext(request, true);
+    const orgActivity = new OrgActivityService(activityCtx, org);
 
     const newRolesByEmail = new Map<string, string[]>();
     for (const member of body.members || []) {

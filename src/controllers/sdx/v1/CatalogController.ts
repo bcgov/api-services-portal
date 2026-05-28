@@ -63,7 +63,7 @@ export class CatalogController extends Controller {
    * @param skip Records to skip for pagination
    */
   @Get('/activity')
-  @OperationId('listPublicOrgActivity')
+  @OperationId('listPublicActivity')
   public async listOrgActivity(
     @Query() organization?: string,
     @Query() first: number = 20,

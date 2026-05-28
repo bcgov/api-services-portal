@@ -618,7 +618,7 @@ export const syncRecords = async function (
           childResults,
         };
       } else {
-        if (entity === 'Organization' && localRecord?.name) {
+        if (entity === 'Organization') {
           const after = { ...localRecord, ...data };
           await logOrganizationProfileChangeFromRecords(
             context,

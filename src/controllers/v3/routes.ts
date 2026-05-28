@@ -1348,6 +1348,7 @@ export function RegisterRoutes(app: express.Router) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"GroupMembership"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
