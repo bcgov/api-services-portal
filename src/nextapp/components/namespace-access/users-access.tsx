@@ -13,7 +13,6 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
-import get from 'lodash/get';
 import { gql } from 'graphql-request';
 import groupBy from 'lodash/groupBy';
 import NamespaceAccessDialog from './namespace-access-dialog';
@@ -76,11 +75,8 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       );
       const result = Object.keys(groupedByRequester).map((r) => {
         const requesterName = r.split('|')[1];
-        const requesterEmail = get(
-          groupedByRequester[r],
-          '[0].requesterEmail',
-          requesterName
-        );
+        const requesterEmail =
+          groupedByRequester[r][0]?.requesterEmail ?? undefined;
         return {
           requesterName,
           requesterEmail,
@@ -100,8 +96,18 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   }, [data, isSuccess, search]);
 
   const handleGrantAccess = async (form: FormData) => {
-    const email = form.get('email') as string;
+    const email = (form.get('email') as string)?.trim();
     const scopes = form.getAll('scopes') as string[];
+
+    if (!email) {
+      toast({
+        status: 'error',
+        title: 'Unable to grant user access',
+        description: 'Email is required.',
+        isClosable: true,
+      });
+      return;
+    }
 
     try {
       await grant.mutateAsync({
@@ -128,8 +134,18 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     }
   };
   const handleUpdateAccess = async (form: FormData) => {
-    const email = form.get('email') as string;
+    const email = (form.get('email') as string)?.trim();
     const scopes = form.getAll('scopes') as string[];
+
+    if (!email) {
+      toast({
+        status: 'error',
+        title: 'Unable to update user access',
+        description: 'Email is required. Reload the page and try again.',
+        isClosable: true,
+      });
+      return;
+    }
 
     try {
       await update.mutateAsync({
