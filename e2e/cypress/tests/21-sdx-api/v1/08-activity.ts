@@ -157,7 +157,7 @@ dQIDAQAB
             a.params?.action === 'grant'
         )
         expect(entry?.params?.entity).to.equal('OrganizationAccess')
-        expect(entry?.params?.subject).to.equal.('benny@idir')
+        expect(entry?.params?.subject).to.equal('benny@idir')
         expect(entry?.params?.subject_email).to.be.undefined
         expect(entry?.params?.action).to.equal('grant')
         expect(entry?.params?.accessAction).to.equal('granted')
