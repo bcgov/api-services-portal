@@ -30,7 +30,6 @@ export async function createUmaPolicy(
     context.authedItem['namespace']
   ).logNamespaceAccess(
     true,
-    'granted',
     'namespace access',
     'client',
     policy.name,
@@ -73,17 +72,10 @@ export async function updateUmaPolicy(
   await new StructuredActivityService(
     context.sudo(),
     context.authedItem['namespace']
-  ).logNamespaceAccess(
-    true,
-    'updated',
-    'namespace access',
-    'client',
-    policy.name,
-    [
-      ...addedScopes.map((s) => `[+] ${s}`),
-      ...deletedScopes.map((s) => `[-] ${s}`),
-    ]
-  );
+  ).logNamespaceAccess(true, 'namespace access', 'client', policy.name, [
+    ...addedScopes.map((s) => `[+] ${s}`),
+    ...deletedScopes.map((s) => `[-] ${s}`),
+  ]);
 
   return policy;
 }
@@ -113,7 +105,6 @@ export async function revokeUmaPolicy(
     context.authedItem['namespace']
   ).logNamespaceAccess(
     true,
-    'revoked',
     'namespace access',
     'client',
     policy.name,

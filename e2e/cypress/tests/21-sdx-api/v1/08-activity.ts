@@ -154,14 +154,13 @@ dQIDAQAB
           (a: any) =>
             a.params?.entity === 'OrganizationAccess' &&
             a.params?.subject === 'benny@idir' &&
-            a.params?.action === 'grant'
+            a.params?.action === 'updated'
         )
         expect(entry?.params?.entity).to.equal('OrganizationAccess')
         expect(entry?.params?.subject).to.equal('benny@idir')
         expect(entry?.params?.subject_email).to.be.undefined
-        expect(entry?.params?.action).to.equal('grant')
-        expect(entry?.params?.accessAction).to.equal('granted')
-        expect(entry?.params?.roles).to.include('organization-admin')
+        expect(entry?.params?.action).to.equal('updated')
+        expect(entry?.params?.roles).to.include('[+] organization-admin')
         expect(entry?.result).to.equal('success')
       })
     })

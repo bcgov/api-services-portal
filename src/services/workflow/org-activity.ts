@@ -144,22 +144,19 @@ export class OrgActivityService {
       subject_email: string;
       subject: string;
       roles: string;
-      accessAction: 'granted' | 'revoked' | 'updated';
     }
   ): Promise<void> {
-    const action = data.accessAction === 'revoked' ? 'revoke' : 'grant';
     return this.recordOrgActivity(
       success,
-      '{actor} {accessAction} organization access for {subject} ({roles}) on {organization}',
+      '{actor} {action} {subject} organization access on {organization}: {roles}',
       {
-        action,
+        action: 'updated',
         entity: 'OrganizationAccess',
         actor: this.getActorName(),
         organization: this.orgName,
         subject_email: data.subject_email,
         subject: data.subject,
         roles: data.roles,
-        accessAction: data.accessAction,
       },
       [`org:${this.orgName}`, `user:${data.subject_email}`]
     );
@@ -311,54 +308,34 @@ export async function buildOrgAccessDisplayNameResolver(
   };
 }
 
+function signRoleDelta(added: string[], removed: string[]): string {
+  return [
+    ...added.map((role) => `[+] ${role}`),
+    ...removed.map((role) => `[-] ${role}`),
+  ].join(', ');
+}
+
 export async function logOrganizationAccessChanges(
   orgActivity: OrgActivityService,
   changes: {
     granted: Record<string, string[]>;
     revoked: Record<string, string[]>;
   },
-  newRolesByEmail: Map<string, string[]>,
   resolveDisplayName: (email: string) => Promise<string>
 ): Promise<void> {
-  const grantedEmails = new Set(Object.keys(changes.granted || {}));
-  const revokedEmails = new Set(Object.keys(changes.revoked || {}));
-  const updatedEmails = new Set(
-    [...grantedEmails].filter((email) => revokedEmails.has(email))
-  );
+  const emails = new Set([
+    ...Object.keys(changes.granted || {}),
+    ...Object.keys(changes.revoked || {}),
+  ]);
 
-  for (const email of updatedEmails) {
-    const roles = (newRolesByEmail.get(email) ?? []).join(',');
+  for (const email of emails) {
     await orgActivity.logUpdateOrganizationAccess(true, {
       subject_email: email,
       subject: await resolveDisplayName(email),
-      roles,
-      accessAction: 'updated',
-    });
-  }
-
-  for (const email of grantedEmails) {
-    if (updatedEmails.has(email)) continue;
-    const roles = (
-      newRolesByEmail.get(email) ??
-      changes.granted[email] ??
-      []
-    ).join(',');
-    await orgActivity.logUpdateOrganizationAccess(true, {
-      subject_email: email,
-      subject: await resolveDisplayName(email),
-      roles,
-      accessAction: 'granted',
-    });
-  }
-
-  for (const email of revokedEmails) {
-    if (updatedEmails.has(email)) continue;
-    const roles = (changes.revoked[email] ?? []).join(',');
-    await orgActivity.logUpdateOrganizationAccess(true, {
-      subject_email: email,
-      subject: await resolveDisplayName(email),
-      roles,
-      accessAction: 'revoked',
+      roles: signRoleDelta(
+        changes.granted[email] ?? [],
+        changes.revoked[email] ?? []
+      ),
     });
   }
 }

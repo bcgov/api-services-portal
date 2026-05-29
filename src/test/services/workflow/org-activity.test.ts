@@ -1,6 +1,7 @@
 import {
   diffOrganizationProfileFields,
   OrgActivityService,
+  logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
 } from '../../../services/workflow/org-activity';
 import * as activityModule from '../../../services/keystone/activity';
@@ -180,30 +181,26 @@ describe('OrgActivityService', function () {
     expect(recordActivityMock.mock.calls[0][8]).toContain('actor:system');
   });
 
-  it('maps revoked access to revoke action and granted to grant', async function () {
+  it('always records access changes as "updated" with the signed delta', async function () {
     const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
 
     await service.logUpdateOrganizationAccess(true, {
       subject_email: 'user1@local',
       subject: 'User One',
-      roles: 'org-admin',
-      accessAction: 'revoked',
+      roles: '[-] organization-admin',
     });
-    expect(recordActivityMock.mock.calls[0][1]).toBe('revoke');
-    const revokedContext = JSON.parse(recordActivityMock.mock.calls[0][6]);
-    expect(revokedContext.params.subject_email).toBe('user1@local');
-    expect(revokedContext.params.subject).toBe('User One');
-    expect(revokedContext.message).toContain('{subject}');
-
-    recordActivityMock.mockClear();
-    await service.logUpdateOrganizationAccess(true, {
-      subject_email: 'user1@local',
-      subject: 'User One',
-      roles: 'org-admin',
-      accessAction: 'granted',
-    });
-    expect(recordActivityMock.mock.calls[0][1]).toBe('grant');
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    const ctx = JSON.parse(recordActivityMock.mock.calls[0][6]);
+    expect(ctx.params.subject_email).toBe('user1@local');
+    expect(ctx.params.subject).toBe('User One');
+    expect(ctx.params.accessAction).toBeUndefined();
+    expect(ctx.message).toBe(
+      '{actor} {action} {subject} organization access on {organization}: {roles}'
+    );
     expect(recordActivityMock.mock.calls[0][8]).toContain('user:user1@local');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin updated User One organization access on my-org: [-] organization-admin'
+    );
   });
 
   it('records one activity per key in logOrganizationPatternPublish', async function () {
@@ -226,6 +223,72 @@ describe('OrgActivityService', function () {
       .logOrganizationCSR(true, { keyName: 'signing-key' });
 
     expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:my-org');
+  });
+});
+
+describe('logOrganizationAccessChanges', function () {
+  const resolveDisplayName = async (email: string) =>
+    email === 'aidan@idir' ? 'Cope, Aidan CITZ:EX' : email;
+
+  function buildService() {
+    return new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+  }
+
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+  });
+
+  it('records "updated" with only the added role delta on a pure grant (not the full role set)', async function () {
+    await logOrganizationAccessChanges(
+      buildService(),
+      {
+        granted: { 'aidan@idir': ['system-owner'] },
+        revoked: {},
+      },
+      resolveDisplayName
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    const message = recordActivityMock.mock.calls[0][4];
+    expect(message).toBe(
+      'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [+] system-owner'
+    );
+    expect(message).not.toContain('organization-admin');
+  });
+
+  it('records a single "updated" entry with signed delta when a role is added and removed together', async function () {
+    await logOrganizationAccessChanges(
+      buildService(),
+      {
+        granted: { 'aidan@idir': ['system-owner'] },
+        revoked: { 'aidan@idir': ['organization-admin'] },
+      },
+      resolveDisplayName
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [+] system-owner, [-] organization-admin'
+    );
+  });
+
+  it('records "updated" with the removed role delta on a pure revoke', async function () {
+    await logOrganizationAccessChanges(
+      buildService(),
+      {
+        granted: {},
+        revoked: { 'aidan@idir': ['system-owner'] },
+      },
+      resolveDisplayName
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [-] system-owner'
+    );
   });
 });
 

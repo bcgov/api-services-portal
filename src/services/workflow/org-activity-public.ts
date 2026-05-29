@@ -4,8 +4,7 @@ export const PUBLIC_ORG_ACTIVITY: ReadonlyArray<{
 }> = [
   { action: 'register', type: 'Organization' },
   { action: 'update', type: 'OrganizationProfile' },
-  { action: 'grant', type: 'OrganizationAccess' },
-  { action: 'revoke', type: 'OrganizationAccess' },
+  { action: 'updated', type: 'OrganizationAccess' },
   { action: 'request', type: 'OrganizationCertificate' },
   { action: 'add', type: 'OrganizationKey' },
   { action: 'rotate', type: 'OrganizationKey' },

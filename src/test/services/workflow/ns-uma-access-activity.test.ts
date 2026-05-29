@@ -74,9 +74,9 @@ beforeEach(() => {
   getResourceSetsMock.mockResolvedValue([RESOURCE_ID]);
 });
 
-describe('gateway namespace access activity is signed with [+]/[-]', function () {
+describe('gateway namespace access activity always uses "updated" and is signed with [+]/[-]', function () {
   describe('user permissions (UMA permission tickets)', function () {
-    it('grant for a new user records "granted" with [+] markers', async function () {
+    it('grant for a new user records "updated" with [+] markers', async function () {
       UserServiceMock.mockImplementation(() => ({
         login: jest.fn().mockResolvedValue({}),
         lookupUserByEmail: jest
@@ -102,9 +102,9 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       );
 
       const { action, message } = lastActivity();
-      expect(action).toBe('granted');
+      expect(action).toBe('updated');
       expect(message).toBe(
-        'Janis Smith granted Wendy permissions: [+] Namespace.Manage'
+        'Janis Smith updated Wendy permissions: [+] Namespace.Manage'
       );
     });
 
@@ -142,7 +142,7 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       );
     });
 
-    it('revoke records "revoked" with [-] markers', async function () {
+    it('revoke records "updated" with [-] markers', async function () {
       PermissionTicketServiceMock.mockImplementation(() => ({
         listPermissions: jest.fn().mockResolvedValue([
           { id: 'perm-1', scopeName: 'Namespace.Manage', requester: 'user-1' },
@@ -162,15 +162,15 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       ]);
 
       const { action, message } = lastActivity();
-      expect(action).toBe('revoked');
+      expect(action).toBe('updated');
       expect(message).toBe(
-        'Janis Smith revoked Wendy permissions: [-] Namespace.Manage'
+        'Janis Smith updated Wendy permissions: [-] Namespace.Manage'
       );
     });
   });
 
   describe('client policies (UMA policies)', function () {
-    it('create records "granted" with [+] markers', async function () {
+    it('create records "updated" with [+] markers', async function () {
       PolicyServiceMock.mockImplementation(() => ({
         createUmaPolicy: jest.fn().mockResolvedValue({ id: 'pol-1' }),
       }));
@@ -181,9 +181,9 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       } as any);
 
       const { action, message } = lastActivity();
-      expect(action).toBe('granted');
+      expect(action).toBe('updated');
       expect(message).toBe(
-        'Janis Smith granted service-account-1 permissions: [+] Content.Publish, [+] Namespace.Manage'
+        'Janis Smith updated service-account-1 permissions: [+] Content.Publish, [+] Namespace.Manage'
       );
     });
 
@@ -211,7 +211,7 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       );
     });
 
-    it('revoke records "revoked" with [-] markers', async function () {
+    it('revoke records "updated" with [-] markers', async function () {
       PolicyServiceMock.mockImplementation(() => ({
         findPolicyByResource: jest.fn().mockResolvedValue({
           name: 'service-account-1',
@@ -223,9 +223,9 @@ describe('gateway namespace access activity is signed with [+]/[-]', function ()
       await revokeUmaPolicy(buildContext(), policyEnvCtx, RESOURCE_ID, 'pol-1');
 
       const { action, message } = lastActivity();
-      expect(action).toBe('revoked');
+      expect(action).toBe('updated');
       expect(message).toBe(
-        'Janis Smith revoked service-account-1 permissions: [-] Content.Publish'
+        'Janis Smith updated service-account-1 permissions: [-] Content.Publish'
       );
     });
   });

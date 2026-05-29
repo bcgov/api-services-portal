@@ -157,12 +157,6 @@ export class OrganizationController extends Controller {
     const activityCtx = this.keystone.createContext(request, true);
     const orgActivity = new OrgActivityService(activityCtx, org);
 
-    const newRolesByEmail = new Map<string, string[]>();
-    for (const member of body.members || []) {
-      if (!member?.member?.email) continue;
-      newRolesByEmail.set(member.member.email, member.roles);
-    }
-
     const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
       envConfig.issuerUrl,
       envConfig.clientId,
@@ -172,7 +166,6 @@ export class OrganizationController extends Controller {
     await logOrganizationAccessChanges(
       orgActivity,
       changes,
-      newRolesByEmail,
       resolveDisplayName
     ).catch((e) =>
       logger.error('[OrgActivity] organization access changes %s', e)
