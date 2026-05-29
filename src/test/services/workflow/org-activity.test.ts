@@ -184,19 +184,26 @@ describe('OrgActivityService', function () {
     const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
 
     await service.logUpdateOrganizationAccess(true, {
-      username: 'user1',
+      subject_email: 'user1@local',
+      subject: 'User One',
       roles: 'org-admin',
       accessAction: 'revoked',
     });
     expect(recordActivityMock.mock.calls[0][1]).toBe('revoke');
+    const revokedContext = JSON.parse(recordActivityMock.mock.calls[0][6]);
+    expect(revokedContext.params.subject_email).toBe('user1@local');
+    expect(revokedContext.params.subject).toBe('User One');
+    expect(revokedContext.message).toContain('{subject}');
 
     recordActivityMock.mockClear();
     await service.logUpdateOrganizationAccess(true, {
-      username: 'user1',
+      subject_email: 'user1@local',
+      subject: 'User One',
       roles: 'org-admin',
       accessAction: 'granted',
     });
     expect(recordActivityMock.mock.calls[0][1]).toBe('grant');
+    expect(recordActivityMock.mock.calls[0][8]).toContain('user:user1@local');
   });
 
   it('records one activity per key in logOrganizationPatternPublish', async function () {

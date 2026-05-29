@@ -1,6 +1,8 @@
 import { strict as assert } from 'assert';
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import { Logger } from '../../logger';
 import { format, recordActivity } from '../keystone/activity';
+import { KeycloakUserService } from '../keycloak/user-service';
 
 const logger = Logger('wf.OrgActivity');
 
@@ -139,7 +141,8 @@ export class OrgActivityService {
   async logUpdateOrganizationAccess(
     success: boolean,
     data: {
-      username: string;
+      subject_email: string;
+      subject: string;
       roles: string;
       accessAction: 'granted' | 'revoked' | 'updated';
     }
@@ -147,17 +150,18 @@ export class OrgActivityService {
     const action = data.accessAction === 'revoked' ? 'revoke' : 'grant';
     return this.recordOrgActivity(
       success,
-      '{actor} {accessAction} organization access for {username} ({roles}) on {organization}',
+      '{actor} {accessAction} organization access for {subject} ({roles}) on {organization}',
       {
         action,
         entity: 'OrganizationAccess',
         actor: this.getActorName(),
         organization: this.orgName,
-        username: data.username,
+        subject_email: data.subject_email,
+        subject: data.subject,
         roles: data.roles,
         accessAction: data.accessAction,
       },
-      [`org:${this.orgName}`, `user:${data.username}`]
+      [`org:${this.orgName}`, `user:${data.subject_email}`]
     );
   }
 
@@ -257,6 +261,105 @@ export class OrgActivityService {
     if (result.errors) {
       logger.error('[OrgActivity] %s %j %j', message, params, result);
     }
+  }
+}
+
+export function keycloakUserDisplayName(user: UserRepresentation): string {
+  const fromAttr = user.attributes?.display_name?.[0];
+  if (fromAttr) {
+    return fromAttr;
+  }
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName) {
+    return fullName;
+  }
+  return user.email || 'unknown';
+}
+
+export async function buildOrgAccessDisplayNameResolver(
+  issuerUrl: string,
+  clientId: string,
+  clientSecret: string,
+  identityProviders: string[] = ['idir']
+): Promise<(email: string) => Promise<string>> {
+  const userApi = new KeycloakUserService(issuerUrl);
+  await userApi.login(clientId, clientSecret);
+  const cache = new Map<string, string>();
+
+  return async (email: string) => {
+    if (cache.has(email)) {
+      return cache.get(email)!;
+    }
+    try {
+      const user = await userApi.lookupUserByEmail(
+        email,
+        false,
+        identityProviders
+      );
+      const displayName = keycloakUserDisplayName(user);
+      cache.set(email, displayName);
+      return displayName;
+    } catch (e) {
+      logger.warn(
+        '[OrgActivity] display name lookup failed for %s: %s',
+        email,
+        e
+      );
+      cache.set(email, email);
+      return email;
+    }
+  };
+}
+
+export async function logOrganizationAccessChanges(
+  orgActivity: OrgActivityService,
+  changes: {
+    granted: Record<string, string[]>;
+    revoked: Record<string, string[]>;
+  },
+  newRolesByEmail: Map<string, string[]>,
+  resolveDisplayName: (email: string) => Promise<string>
+): Promise<void> {
+  const grantedEmails = new Set(Object.keys(changes.granted || {}));
+  const revokedEmails = new Set(Object.keys(changes.revoked || {}));
+  const updatedEmails = new Set(
+    [...grantedEmails].filter((email) => revokedEmails.has(email))
+  );
+
+  for (const email of updatedEmails) {
+    const roles = (newRolesByEmail.get(email) ?? []).join(',');
+    await orgActivity.logUpdateOrganizationAccess(true, {
+      subject_email: email,
+      subject: await resolveDisplayName(email),
+      roles,
+      accessAction: 'updated',
+    });
+  }
+
+  for (const email of grantedEmails) {
+    if (updatedEmails.has(email)) continue;
+    const roles = (
+      newRolesByEmail.get(email) ??
+      changes.granted[email] ??
+      []
+    ).join(',');
+    await orgActivity.logUpdateOrganizationAccess(true, {
+      subject_email: email,
+      subject: await resolveDisplayName(email),
+      roles,
+      accessAction: 'granted',
+    });
+  }
+
+  for (const email of revokedEmails) {
+    if (updatedEmails.has(email)) continue;
+    const roles = (changes.revoked[email] ?? []).join(',');
+    await orgActivity.logUpdateOrganizationAccess(true, {
+      subject_email: email,
+      subject: await resolveDisplayName(email),
+      roles,
+      accessAction: 'revoked',
+    });
   }
 }
 

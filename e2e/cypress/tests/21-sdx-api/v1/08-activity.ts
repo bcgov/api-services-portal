@@ -153,11 +153,12 @@ dQIDAQAB
         const entry = activities.find(
           (a: any) =>
             a.params?.entity === 'OrganizationAccess' &&
-            a.params?.username === 'benny@test.com' &&
+            a.params?.subject === 'benny@idir' &&
             a.params?.action === 'grant'
         )
         expect(entry?.params?.entity).to.equal('OrganizationAccess')
-        expect(entry?.params?.username).to.equal('benny@test.com')
+        expect(entry?.params?.subject).to.equal.('benny@idir')
+        expect(entry?.params?.subject_email).to.be.undefined
         expect(entry?.params?.action).to.equal('grant')
         expect(entry?.params?.accessAction).to.equal('granted')
         expect(entry?.params?.roles).to.include('organization-admin')

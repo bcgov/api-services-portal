@@ -42,7 +42,11 @@ import {
   getGwaProductEnvironment,
   transformActivity,
 } from '../../services/workflow';
-import { OrgActivityService } from '../../services/workflow/org-activity';
+import {
+  buildOrgAccessDisplayNameResolver,
+  logOrganizationAccessChanges,
+  OrgActivityService,
+} from '../../services/workflow/org-activity';
 import { assertEqual } from '../ioc/assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { Organization } from './types';
@@ -217,56 +221,20 @@ export class OrganizationController extends Controller {
       newRolesByEmail.set(member.member.email, member.roles);
     }
 
-    const grantedEmails = new Set(Object.keys(changes.granted || {}));
-    const revokedEmails = new Set(Object.keys(changes.revoked || {}));
-    const updatedEmails = new Set(
-      [...grantedEmails].filter((email) => revokedEmails.has(email))
+    const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
+      envConfig.issuerUrl,
+      envConfig.clientId,
+      envConfig.clientSecret
     );
 
-    for (const email of updatedEmails) {
-      const roles = (newRolesByEmail.get(email) ?? []).join(',');
-      await orgActivity
-        .logUpdateOrganizationAccess(true, {
-          username: email,
-          roles,
-          accessAction: 'updated',
-        })
-        .catch((e) =>
-          logger.error('[OrgActivity] organization access update %s', e)
-        );
-    }
-
-    for (const email of grantedEmails) {
-      if (updatedEmails.has(email)) continue;
-      const roles = (
-        newRolesByEmail.get(email) ??
-        changes.granted[email] ??
-        []
-      ).join(',');
-      await orgActivity
-        .logUpdateOrganizationAccess(true, {
-          username: email,
-          roles,
-          accessAction: 'granted',
-        })
-        .catch((e) =>
-          logger.error('[OrgActivity] organization access grant %s', e)
-        );
-    }
-
-    for (const email of revokedEmails) {
-      if (updatedEmails.has(email)) continue;
-      const roles = (changes.revoked[email] ?? []).join(',');
-      await orgActivity
-        .logUpdateOrganizationAccess(true, {
-          username: email,
-          roles,
-          accessAction: 'revoked',
-        })
-        .catch((e) =>
-          logger.error('[OrgActivity] organization access revoke %s', e)
-        );
-    }
+    await logOrganizationAccessChanges(
+      orgActivity,
+      changes,
+      newRolesByEmail,
+      resolveDisplayName
+    ).catch((e) =>
+      logger.error('[OrgActivity] organization access changes %s', e)
+    );
   }
 
   /**

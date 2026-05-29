@@ -79,7 +79,9 @@ export class CatalogController extends Controller {
     );
 
     return transformActivity(records)
-      .map((o) => removeKeys(o, ['id', 'namespace']))
+      .map((o) =>
+        removeKeys(o, ['id', 'namespace', 'subject_email'])
+      )
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
