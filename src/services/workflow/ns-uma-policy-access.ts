@@ -34,7 +34,7 @@ export async function createUmaPolicy(
     'namespace access',
     'client',
     policy.name,
-    policy.scopes
+    policy.scopes.map((s) => `[+] ${s}`)
   );
 
   return umaPolicy;
@@ -117,6 +117,6 @@ export async function revokeUmaPolicy(
     'namespace access',
     'client',
     policy.name,
-    policy.scopes
+    policy.scopes.map((s) => `[-] ${s}`)
   );
 }

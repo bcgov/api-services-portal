@@ -143,7 +143,7 @@ export async function revokePermissions(
     'namespace access',
     'user',
     displayName,
-    deletedScopes
+    deletedScopes.map((s) => `[-] ${s}`)
   );
 
   return { userId: user.id };
