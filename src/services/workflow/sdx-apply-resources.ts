@@ -71,7 +71,6 @@ export const ApplyResources = async (
 
   return [
     ...(result ? [{ resource: 'GatewayResources', response: result }] : []),
-    ,
     ...otherResults,
   ];
 };

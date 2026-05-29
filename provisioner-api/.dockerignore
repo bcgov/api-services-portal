@@ -1,0 +1,15 @@
+node_modules
+dist
+npm-debug.log
+.npm
+.env
+.env.*
+*.log
+.git
+.gitignore
+.DS_Store
+Dockerfile
+.dockerignore
+openapi.json
+openapi.yaml
+README.md
