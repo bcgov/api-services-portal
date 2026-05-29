@@ -66,19 +66,17 @@ export class KeycloakUserService {
     identityProviders: string[]
   ): Promise<UserRepresentation> {
     const matchingUsers = await this.lookupActiveUsersByEmail(email, verified);
-    const user = matchingUsers
-      .filter((user) =>
-        identityProviders.includes(
-          this.getOneAttributeValue(user, 'identity_provider')
-        )
+    const usersForIdentityProviders = matchingUsers.filter((user) =>
+      identityProviders.includes(
+        this.getOneAttributeValue(user, 'identity_provider')
       )
-      .pop();
-    assert.strictEqual(
-      Boolean(user),
-      true,
-      `No suitable match for ${identityProviders.join(',')} : ${email}`
     );
-    return user;
+    assert.strictEqual(
+      usersForIdentityProviders.length,
+      1,
+      `Expected exactly one ${identityProviders.join(',')} user for ${email}, found ${usersForIdentityProviders.length}`
+    );
+    return usersForIdentityProviders[0];
   }
 
   public async lookupActiveUsersByEmail(

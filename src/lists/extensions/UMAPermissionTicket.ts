@@ -133,6 +133,31 @@ module.exports = {
                 perm.requesterName = user?.name || perm.requesterName;
                 perm.requesterEmail = user?.email;
               });
+
+              const permissionsWithoutEmail = permissions.filter(
+                (p) => !p.requesterEmail
+              );
+              if (permissionsWithoutEmail.length > 0) {
+                const userApi = new KeycloakUserService(envCtx.openid.issuer);
+                await userApi.login(
+                  envCtx.issuerEnvConfig.clientId,
+                  envCtx.issuerEnvConfig.clientSecret
+                );
+                const requesterIds = [
+                  ...new Set(
+                    permissionsWithoutEmail.map((p) => p.requester)
+                  ),
+                ];
+                for (const requesterId of requesterIds) {
+                  const kcUser = await userApi.lookupUserById(requesterId);
+                  permissions.forEach((perm) => {
+                    if (perm.requester === requesterId && !perm.requesterEmail) {
+                      perm.requesterEmail = kcUser.email;
+                    }
+                  });
+                }
+              }
+
               return permissions;
             },
             access: EnforcementPoint,
