@@ -31,7 +31,13 @@ export class GroupAccessService {
     groupMembership: GroupMembership,
     validIdentityProviders: string[] = [],
     syncMembers: boolean = true
-  ): Promise<void> {
+  ): Promise<{
+    granted: Record<string, string[]>;
+    revoked: Record<string, string[]>;
+  }> {
+    const granted: Record<string, Set<string>> = {};
+    const revoked: Record<string, Set<string>> = {};
+
     const access = buildGroupAccess(
       groupMembership.name,
       groupMembership.parent,
@@ -73,11 +79,21 @@ export class GroupAccessService {
       }
 
       if (syncMembers) {
-        await this.orgGroupService.syncMembers(
+        const diff = await this.orgGroupService.syncMembers(
           orgGroup,
           buildUserReference(groupRole.name, groupMembership.members),
           validIdentityProviders
         );
+        for (const add of diff.additions) {
+          if (!add.email) continue;
+          granted[add.email] = granted[add.email] ?? new Set<string>();
+          granted[add.email].add(groupRole.name);
+        }
+        for (const del of diff.deletions) {
+          if (!del.email) continue;
+          revoked[del.email] = revoked[del.email] ?? new Set<string>();
+          revoked[del.email].add(groupRole.name);
+        }
       }
 
       // TODO: Delete any Permissions that are no longer specified for the Policy
@@ -87,6 +103,22 @@ export class GroupAccessService {
     }
 
     // TODO: Delete any Policies and Permissions that exist for Roles that were not defined
+    return {
+      granted: Object.keys(granted).reduce(
+        (acc: Record<string, string[]>, email: string) => {
+          acc[email] = [...granted[email]];
+          return acc;
+        },
+        {}
+      ),
+      revoked: Object.keys(revoked).reduce(
+        (acc: Record<string, string[]>, email: string) => {
+          acc[email] = [...revoked[email]];
+          return acc;
+        },
+        {}
+      ),
+    };
   }
 
   async assignNamespace(

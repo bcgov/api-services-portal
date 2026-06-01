@@ -294,7 +294,6 @@ export class StructuredActivityService {
 
   public async logNamespaceAccess(
     success: boolean,
-    grantRevoke: 'granted' | 'updated' | 'revoked',
     entity: string,
     subjectType: 'user' | 'client',
     subject: string,
@@ -303,7 +302,7 @@ export class StructuredActivityService {
     const { actor } = this;
     const params = {
       actor: actor.name,
-      action: grantRevoke,
+      action: 'updated',
       entity,
       subject,
       permissions: scopes.join(', '),

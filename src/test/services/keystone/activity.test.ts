@@ -1,5 +1,37 @@
-import { format } from '../../../services/keystone/activity';
-import { lookupUsersByUsernames } from '../../../services/keystone';
+import { format, getOrgActivity } from '../../../services/keystone/activity';
+import { getPublicOrgActivityWhereClause } from '../../../services/workflow/org-activity-public';
+
+const sampleActivities = [
+  {
+    id: 'act-1',
+    type: 'Organization',
+    name: 'register Organization[ministry-of-health]',
+    namespace: 'platform',
+    action: 'register',
+    refId: 'ministry-of-health',
+    result: 'success',
+    message: 'Org registered',
+    context: '',
+    actor: { name: 'Harley' },
+    blob: null as { type: string; blob: string } | null,
+    filterKey1: 'org:ministry-of-health',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+  },
+];
+
+function mockOrgActivityContext(
+  activities: typeof sampleActivities = sampleActivities
+): any {
+  return {
+    executeGraphQL: jest.fn(({ query, variables }: any) => {
+      if (!query.includes('OrgActivities')) {
+        return { errors: [{ message: 'Unexpected query' }] };
+      }
+      return { data: { allActivities: activities } };
+    }),
+  };
+}
 
 describe('Activity Message Formatting', function () {
   it('it should format a successfull message', async function () {
@@ -108,5 +140,73 @@ describe('Activity Message Formatting', function () {
       const output = format(test.message, test.params);
       expect(output).toBe(test.result);
     });
+  });
+});
+
+describe('getOrgActivity', function () {
+  it('queries OrgActivities and returns allActivities', async function () {
+    const ctx = mockOrgActivityContext();
+    const result = await getOrgActivity(ctx, 'ministry-of-health');
+
+    expect(ctx.executeGraphQL).toHaveBeenCalledTimes(1);
+    expect(ctx.executeGraphQL.mock.calls[0][0].query).toContain(
+      'OrgActivities'
+    );
+    expect(result).toEqual(sampleActivities);
+  });
+
+  it('filters by org name when orgName is provided', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, 'ministry-of-health');
+
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
+      filterKey1: 'org:ministry-of-health',
+    });
+  });
+
+  it('filters all org activities when orgName is omitted', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx);
+
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
+      filterKey1_starts_with: 'org:',
+    });
+  });
+
+  it('adds public activity OR clause when publicOnly is true', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, 'ministry-of-health', 20, 0, true);
+
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
+      AND: [
+        { filterKey1: 'org:ministry-of-health' },
+        { OR: getPublicOrgActivityWhereClause() },
+      ],
+    });
+  });
+
+  it('does not add public filter when publicOnly is false', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, 'ministry-of-health', 20, 0, false);
+
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
+      filterKey1: 'org:ministry-of-health',
+    });
+  });
+
+  it('caps first at 100', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, 'ministry-of-health', 500);
+
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables.first).toBe(100);
+  });
+
+  it('passes first and skip to GraphQL', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, 'ministry-of-health', 15, 30);
+
+    const { first, skip } = ctx.executeGraphQL.mock.calls[0][0].variables;
+    expect(first).toBe(15);
+    expect(skip).toBe(30);
   });
 });

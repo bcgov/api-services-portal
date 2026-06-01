@@ -16,7 +16,14 @@ import {
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
+import {
+  diffGatewayKeys,
+  GatewayKeyDocument,
+  getPublishedGatewayKeysFromActivity,
+  isGatewayKeyInScopes,
+} from '../../../services/gateway-patterns/gateway-key-diff';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
+import { OrgActivityService } from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -168,14 +175,64 @@ export class OrgGatewaysController extends Controller {
       return '';
     }
 
+    const subjectToken = getSubjectToken(request);
+    const incomingKeys = payload.keys as GatewayKeyDocument[];
+    const orgKeyScopes = ['organization'] as const;
+    let keysBeforePublish: GatewayKeyDocument[] = [];
+    if (
+      body.pattern === 'sdx-keys.r1' &&
+      !dryRun &&
+      !body.parameters.runtime_group_name &&
+      !body.parameters.client_id &&
+      action !== 'remove'
+    ) {
+      const readCtx = this.keystone.createContext(request, true);
+      keysBeforePublish = await getPublishedGatewayKeysFromActivity(
+        readCtx,
+        config._gateway_id
+      );
+      if (keysBeforePublish.length === 0) {
+        logger.warn(
+          '[generateConfigFromPattern] no published GatewayConfig activity for %s; key changes will be classified as add only',
+          config._gateway_id
+        );
+      }
+    }
+
     // Validate the generated config to ensure it only contains allowed configurations for the organization
     const result = await gwaService.publishGatewayConfiguration(
       action === 'remove' ? 'DELETE' : 'PUT',
-      getSubjectToken(request),
+      subjectToken,
       config._gateway_id,
       dryRun,
       artifact
     );
+
+    if (
+      body.pattern === 'sdx-keys.r1' &&
+      !dryRun &&
+      !body.parameters.runtime_group_name &&
+      !body.parameters.client_id
+    ) {
+      const keyDiff =
+        action === 'remove'
+          ? {
+              keysAdded: [] as string[],
+              keysRotated: [] as string[],
+              keysRemoved: incomingKeys
+                .filter((key) =>
+                  isGatewayKeyInScopes(key, orgKeyScopes)
+                )
+                .map((key) => key.name),
+            }
+          : diffGatewayKeys(keysBeforePublish, incomingKeys, orgKeyScopes);
+
+      await new OrgActivityService(ctx, org)
+        .logOrganizationPatternPublish(true, keyDiff)
+        .catch((e) =>
+          logger.error('[OrgActivity] organization pattern keys %s', e)
+        );
+    }
 
     request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
     request.res?.send(YAML.dump(result, { noRefs: true }));

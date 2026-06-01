@@ -94,6 +94,8 @@ components:
                     type: string
                 id:
                     type: string
+                refKey:
+                    type: string
                 ownedBy:
                     type: string
                 childResults:
@@ -586,6 +588,12 @@ components:
                     type: string
                 enabled:
                     type: boolean
+                permDataPlane:
+                    type: string
+                permDomains:
+                    items:
+                        type: string
+                    type: array
                 updatedAt:
                     type: number
                     format: double
