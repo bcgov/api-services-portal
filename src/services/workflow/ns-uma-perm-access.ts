@@ -92,10 +92,17 @@ export async function updatePermissions(
     await new StructuredActivityService(
       context.sudo(),
       context.authedItem['namespace']
-    ).logNamespaceAccess(true, 'namespace access', 'user', displayName, [
-      ...addedScopes.map((s) => `[+] ${s}`),
-      ...deletedScopes.map((s) => `[-] ${s}`),
-    ]);
+    ).logNamespaceAccess(
+      true,
+      'updated',
+      'namespace access',
+      'user',
+      displayName,
+      [
+        ...addedScopes.map((s) => `[+] ${s}`),
+        ...deletedScopes.map((s) => `[-] ${s}`),
+      ]
+    );
   }
 
   return { userId: user.id, result };
@@ -148,6 +155,7 @@ export async function revokePermissions(
     context.authedItem['namespace']
   ).logNamespaceAccess(
     true,
+    'updated',
     'namespace access',
     'user',
     displayName,
