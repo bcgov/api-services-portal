@@ -94,7 +94,6 @@ export async function updatePermissions(
       context.authedItem['namespace']
     ).logNamespaceAccess(
       true,
-      'updated',
       'namespace access',
       'user',
       displayName,
@@ -155,7 +154,6 @@ export async function revokePermissions(
     context.authedItem['namespace']
   ).logNamespaceAccess(
     true,
-    'updated',
     'namespace access',
     'user',
     displayName,
