@@ -1,10 +1,21 @@
 import { strict as assert } from 'assert';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import { Logger } from '../../logger';
-import { format, recordActivity } from '../keystone/activity';
+import { format, getActivity, getOrgActivity, recordActivity } from '../keystone/activity';
+import { Activity } from '../keystone/types';
 import { KeycloakUserService } from '../keycloak/user-service';
+import { NamespaceService } from '../org-groups';
+import { getGwaProductEnvironment } from './get-namespaces';
 
 const logger = Logger('wf.OrgActivity');
+
+const KEY_ACTION_PAST: Record<'add' | 'rotate' | 'delete', string> = {
+  add: 'added',
+  rotate: 'rotated',
+  delete: 'deleted',
+};
+
+const SUBSYSTEM_PROFILE_FIELDS = ['description'] as const;
 
 const ORG_PROFILE_FIELDS = [
   'title',
@@ -60,6 +71,29 @@ function normalizeOptionalScalar(value: unknown): string | null {
     return null;
   }
   return String(value);
+}
+
+async function lookupOrganizationNameById(
+  context: any,
+  orgId: string
+): Promise<string | undefined> {
+  const result = await context.executeGraphQL({
+    query: `query OrganizationNameById($id: ID!) {
+      allOrganizations(where: { id: $id }, first: 1) { name }
+    }`,
+    variables: { id: orgId },
+  });
+  return result.data?.allOrganizations?.[0]?.name;
+}
+
+export function diffSubsystemProfileFields(
+  before: Record<string, any>,
+  after: Record<string, any>
+): string[] {
+  return SUBSYSTEM_PROFILE_FIELDS.filter((field) => {
+    return normalizeOptionalScalar(before[field]) !==
+      normalizeOptionalScalar(after[field]);
+  });
 }
 
 export function diffOrganizationProfileFields(
@@ -204,18 +238,74 @@ export class OrgActivityService {
     keyAction: 'add' | 'rotate' | 'delete',
     keyName: string
   ): Promise<void> {
+    const keyActionPast = KEY_ACTION_PAST[keyAction];
     return this.recordOrgActivity(
       success,
       '{actor} {keyAction} organization key {keyName} on {organization}',
       {
-        action: keyAction,
+        action: keyActionPast,
         entity: 'OrganizationKey',
         actor: this.getActorName(),
         organization: this.orgName,
         keyName,
-        keyAction,
+        keyAction: keyActionPast,
       },
       [`org:${this.orgName}`, `key:${keyName}`]
+    );
+  }
+
+  async logSubsystemCreated(
+    success: boolean,
+    data: { subsystemName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} created subsystem {subsystemName} on {organization}',
+      {
+        action: 'created',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+      },
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`]
+    );
+  }
+
+  async logSubsystemDeleted(
+    success: boolean,
+    data: { subsystemName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} deleted subsystem {subsystemName} on {organization}',
+      {
+        action: 'deleted',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+      },
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`]
+    );
+  }
+
+  async logSubsystemProfileChange(
+    success: boolean,
+    data: { subsystemName: string; changedFields: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} updated subsystem profile ({changedFields}) for {subsystemName} on {organization}',
+      {
+        action: 'updated',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+        changedFields: data.changedFields,
+      },
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`]
     );
   }
 
@@ -355,4 +445,92 @@ export async function logOrganizationProfileChangeFromRecords(
       changedFields: changedFields.join(','),
     })
     .catch((e) => logger.error('[OrgActivity] profile change %s', e));
+}
+
+export async function logSubsystemActivityFromHook(
+  context: any,
+  operation: 'create' | 'update' | 'delete',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>
+): Promise<void> {
+  const item = updatedItem ?? existingItem;
+  const subsystemName = item?.name;
+  assert.strictEqual(
+    typeof subsystemName === 'string' && subsystemName.length > 0,
+    true,
+    'Subsystem name is required for activity logging'
+  );
+
+  const orgId = item?.organization;
+  assert.strictEqual(
+    orgId != null && orgId !== '',
+    true,
+    'Subsystem organization id is required for activity logging'
+  );
+  const orgName = await lookupOrganizationNameById(context, String(orgId));
+  assert.strictEqual(
+    typeof orgName === 'string' && orgName.length > 0,
+    true,
+    `Unable to resolve organization name for subsystem ${subsystemName}`
+  );
+  const orgActivity = new OrgActivityService(context, orgName);
+
+  if (operation === 'delete') {
+    await orgActivity.logSubsystemDeleted(true, { subsystemName });
+    return;
+  }
+  if (operation === 'create') {
+    await orgActivity.logSubsystemCreated(true, { subsystemName });
+    return;
+  }
+
+  const changedFields = diffSubsystemProfileFields(existingItem ?? {}, updatedItem);
+  if (changedFields.length === 0) {
+    return;
+  }
+  await orgActivity.logSubsystemProfileChange(true, {
+    subsystemName,
+    changedFields: changedFields.join(','),
+  });
+}
+
+export async function getCombinedOrganizationActivity(
+  context: any,
+  org: string,
+  first: number = 20,
+  skip: number = 0
+): Promise<Activity[]> {
+  const cappedFirst = first > 100 ? 100 : first;
+  const fetchLimit = Math.min(cappedFirst + skip, 100);
+
+  const orgRecords = await getOrgActivity(
+    context,
+    org,
+    fetchLimit,
+    0,
+    false
+  );
+
+  const prodEnv = await getGwaProductEnvironment(context, false);
+  const envConfig = prodEnv.issuerEnvConfig;
+  const svc = new NamespaceService(envConfig.issuerUrl);
+  await svc.login(envConfig.clientId, envConfig.clientSecret);
+  const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org);
+  const gatewayRecords =
+    assignedNamespaces.length > 0
+      ? await getActivity(
+          context,
+          assignedNamespaces.map((n) => n.name),
+          undefined,
+          fetchLimit,
+          0
+        )
+      : [];
+
+  return [...orgRecords, ...gatewayRecords]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .slice(skip, skip + cappedFirst);
 }

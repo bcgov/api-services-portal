@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { createSubsystem, uniqueSubsystemName } from '../../../support/sdx-commands'
 
 describe('SDX Organization Activity', () => {
   let workingData: any
@@ -235,11 +236,11 @@ dQIDAQAB
           (a: any) =>
             a.params?.entity === 'OrganizationKey' &&
             a.params?.keyName === orgKeyName &&
-            a.params?.keyAction === 'add'
+            a.params?.keyAction === 'added'
         )
         expect(entry?.params?.entity).to.equal('OrganizationKey')
         expect(entry?.params?.keyName).to.equal(orgKeyName)
-        expect(entry?.params?.keyAction).to.equal('add')
+        expect(entry?.params?.keyAction).to.equal('added')
         expect(entry?.result).to.equal('success')
       })
     })
@@ -260,11 +261,11 @@ dQIDAQAB
               (a: any) =>
                 a.params?.entity === 'OrganizationKey' &&
                 a.params?.keyName === orgKeyName &&
-                a.params?.keyAction === 'rotate'
+                a.params?.keyAction === 'rotated'
             )
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.keyName).to.equal(orgKeyName)
-            expect(entry?.params?.keyAction).to.equal('rotate')
+            expect(entry?.params?.keyAction).to.equal('rotated')
             expect(entry?.result).to.equal('success')
           })
         }
@@ -287,15 +288,82 @@ dQIDAQAB
               (a: any) =>
                 a.params?.entity === 'OrganizationKey' &&
                 a.params?.keyName === orgKeyName &&
-                a.params?.keyAction === 'delete'
+                a.params?.keyAction === 'deleted'
             )
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.keyName).to.equal(orgKeyName)
-            expect(entry?.params?.keyAction).to.equal('delete')
+            expect(entry?.params?.keyAction).to.equal('deleted')
             expect(entry?.result).to.equal('success')
           })
         }
       )
+    })
+  })
+
+  it.only('records subsystem lifecycle in public catalog and organization activity', () => {
+    const { org } = workingData
+    const subsystemName = uniqueSubsystemName()
+
+    createSubsystem(org, subsystemName, ({ result }: any) => {
+      expect(result).to.be.equal('created')
+
+      cy.callAPI(
+        `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'Subsystem' &&
+            a.params?.action === 'created' &&
+            a.params?.subsystemName === subsystemName &&
+            a.params?.organization === org.name
+        )
+        expect(entry?.params?.entity).to.equal('Subsystem')
+        expect(entry?.params?.action).to.equal('created')
+        expect(entry?.params?.subsystemName).to.equal(subsystemName)
+        expect(entry?.result).to.equal('success')
+      })
+
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'Subsystem' &&
+            a.params?.action === 'created' &&
+            a.params?.subsystemName === subsystemName
+        )
+        expect(entry?.params?.entity).to.equal('Subsystem')
+        expect(entry?.params?.action).to.equal('created')
+        expect(entry?.result).to.equal('success')
+      })
+
+      cy.setQueryString({ force: false })
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
+        'DELETE'
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        expect(body.result).to.be.equal('deleted')
+
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'Subsystem' &&
+              a.params?.action === 'deleted' &&
+              a.params?.subsystemName === subsystemName
+          )
+          expect(entry?.params?.action).to.equal('deleted')
+          expect(entry?.result).to.equal('success')
+        })
+      })
     })
   })
 

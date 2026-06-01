@@ -6,9 +6,12 @@ export const PUBLIC_ORG_ACTIVITY: ReadonlyArray<{
   { action: 'update', type: 'OrganizationProfile' },
   { action: 'updated', type: 'OrganizationAccess' },
   { action: 'request', type: 'OrganizationCertificate' },
-  { action: 'add', type: 'OrganizationKey' },
-  { action: 'rotate', type: 'OrganizationKey' },
-  { action: 'delete', type: 'OrganizationKey' },
+  { action: 'added', type: 'OrganizationKey' },
+  { action: 'rotated', type: 'OrganizationKey' },
+  { action: 'deleted', type: 'OrganizationKey' },
+  { action: 'created', type: 'Subsystem' },
+  { action: 'updated', type: 'Subsystem' },
+  { action: 'deleted', type: 'Subsystem' },
 ];
 
 export function getPublicOrgActivityWhereClause(): Array<{

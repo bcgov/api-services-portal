@@ -1,8 +1,10 @@
 import {
   diffOrganizationProfileFields,
-  OrgActivityService,
+  diffSubsystemProfileFields,
   logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
+  logSubsystemActivityFromHook,
+  OrgActivityService,
 } from '../../../services/workflow/org-activity';
 import * as activityModule from '../../../services/keystone/activity';
 
@@ -213,7 +215,7 @@ describe('OrgActivityService', function () {
 
     expect(recordActivityMock).toHaveBeenCalledTimes(3);
     const actions = recordActivityMock.mock.calls.map((c) => c[1]);
-    expect(actions).toEqual(['add', 'rotate', 'delete']);
+    expect(actions).toEqual(['added', 'rotated', 'deleted']);
     const keyIds = recordActivityMock.mock.calls.map((c) => c[8][1]);
     expect(keyIds).toEqual(['key:key-a', 'key:key-b', 'key:key-c']);
   });
@@ -223,6 +225,147 @@ describe('OrgActivityService', function () {
       .logOrganizationCSR(true, { keyName: 'signing-key' });
 
     expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:my-org');
+  });
+
+  it('records organization key actions in past tense', async function () {
+    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    await service.logOrganizationKey(true, 'add', 'key-a');
+
+    expect(recordActivityMock.mock.calls[0][1]).toBe('added');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin added organization key key-a on my-org'
+    );
+    const activityContext = JSON.parse(recordActivityMock.mock.calls[0][6]);
+    expect(activityContext.params.keyAction).toBe('added');
+  });
+
+  it('records subsystem create with org and subsystem filter keys', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logSubsystemCreated(true, { subsystemName: 'MY-SUBSYS' });
+
+    expect(recordActivityMock.mock.calls[0][1]).toBe('created');
+    expect(recordActivityMock.mock.calls[0][2]).toBe('Subsystem');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin created subsystem MY-SUBSYS on my-org'
+    );
+    expect(recordActivityMock.mock.calls[0][8]).toEqual([
+      'org:my-org',
+      'subsystem:MY-SUBSYS',
+      'actor:Admin',
+    ]);
+  });
+
+  it('records subsystem profile updates with changed fields', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logSubsystemProfileChange(true, {
+        subsystemName: 'MY-SUBSYS',
+        changedFields: 'description',
+      });
+
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin updated subsystem profile (description) for MY-SUBSYS on my-org'
+    );
+  });
+});
+
+describe('diffSubsystemProfileFields', function () {
+  it('detects description changes only', function () {
+    expect(
+      diffSubsystemProfileFields(
+        { description: 'before' },
+        { description: 'after' }
+      )
+    ).toEqual(['description']);
+    expect(
+      diffSubsystemProfileFields(
+        { description: 'same' },
+        { description: 'same' }
+      )
+    ).toEqual([]);
+  });
+});
+
+describe('logSubsystemActivityFromHook', function () {
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+  });
+
+  it('records create activity from subsystem hook data', async function () {
+    await logSubsystemActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'ca.bc.gov.my-org' }] },
+        }),
+      },
+      'create',
+      null,
+      {
+        name: 'MY-SUBSYS',
+        organization: '3',
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('created');
+    expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:ca.bc.gov.my-org');
+  });
+
+  it('throws when organization id cannot be resolved to a name', async function () {
+    await expect(
+      logSubsystemActivityFromHook(
+        {
+          authedItem: { name: 'Admin' },
+          executeGraphQL: jest.fn().mockResolvedValue({
+            data: { allOrganizations: [] },
+          }),
+        },
+        'create',
+        null,
+        { name: 'MY-SUBSYS', organization: '999' }
+      )
+    ).rejects.toThrow(/Unable to resolve organization name/);
+  });
+
+  it('records delete activity from subsystem hook data', async function () {
+    const ctx = {
+      authedItem: { name: 'Admin' },
+      executeGraphQL: jest.fn().mockResolvedValue({
+        data: { allOrganizations: [{ name: 'ca.bc.gov.my-org' }] },
+      }),
+    };
+    await logSubsystemActivityFromHook(
+      ctx,
+      'delete',
+      {
+        name: 'MY-SUBSYS',
+        organization: '3',
+      },
+      {
+        name: 'MY-SUBSYS',
+        organization: '3',
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('deleted');
+  });
+
+  it('skips update activity when profile is unchanged', async function () {
+    await logSubsystemActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'ca.bc.gov.my-org' }] },
+        }),
+      },
+      'update',
+      { description: 'same', name: 'MY-SUBSYS', organization: '3' },
+      { description: 'same', name: 'MY-SUBSYS', organization: '3' }
+    );
+
+    expect(recordActivityMock).not.toHaveBeenCalled();
   });
 });
 
