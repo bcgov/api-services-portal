@@ -62,13 +62,19 @@ services:
     container_name: oauth2-proxy
     command: --alpha-config /oauth2-proxy.yaml --config /oauth2-proxy.cfg
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     ports:
       - 4180:4180/tcp
     volumes:
       - ./local/oauth2-proxy/oauth2-proxy-local.yaml:/oauth2-proxy.yaml
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/localhost/4180'
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       aps-net:
         aliases:

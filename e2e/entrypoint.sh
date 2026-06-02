@@ -7,6 +7,18 @@ while true; do
     echo "$keycloakstatus"
     if [[ "$keycloakstatus" == "200" ]]; then
         echo  "Keycloak is up"
+        break
+    else
+        echo  "Waiting for Keycloak....."
+        sleep 10s
+    fi
+done
+
+while true; do
+    proxystatus=$(curl -o /dev/null -sw '%{http_code}\n' --connect-timeout 5 http://oauth2proxy.localtest.me:4180/ 2>/dev/null || echo "000")
+    echo "$proxystatus"
+    if [[ "$proxystatus" != "000" ]]; then
+        echo "OAuth2 Proxy is up"
         cd /e2e
         # added sleep to wait for initial data seeding
         sleep 1m
@@ -17,7 +29,7 @@ while true; do
         fi
         break
     else
-        echo  "Waiting for Keycloak....."
+        echo  "Waiting for OAuth2 Proxy....."
         sleep 10s
     fi
 done
