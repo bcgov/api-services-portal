@@ -3,7 +3,7 @@
 cd /tmp
 
 while true; do
-    keycloakstatus=$(curl -o /dev/null -sw '%{http_code}\n' http://keycloak.localtest.me:9081/auth/realms/master)
+    keycloakstatus=$(curl -o /dev/null -sw '%{http_code}' http://keycloak.localtest.me:9081/auth/realms/master)
     echo "$keycloakstatus"
     if [[ "$keycloakstatus" == "200" ]]; then
         echo  "Keycloak is up"
@@ -14,19 +14,15 @@ while true; do
     fi
 done
 
+cd /e2e
+# added sleep to wait for initial data seeding
+sleep 1m
+
 while true; do
-    proxystatus=$(curl -o /dev/null -sw '%{http_code}\n' --connect-timeout 5 http://oauth2proxy.localtest.me:4180/ 2>/dev/null || echo "000")
+    proxystatus=$(curl -o /dev/null -s --connect-timeout 5 -w '%{http_code}' http://oauth2proxy.localtest.me:4180/ 2>/dev/null)
     echo "$proxystatus"
-    if [[ "$proxystatus" != "000" ]]; then
+    if [[ "$proxystatus" =~ ^[1-9][0-9]{2}$ ]]; then
         echo "OAuth2 Proxy is up"
-        cd /e2e
-        # added sleep to wait for initial data seeding
-        sleep 1m
-        if [[ "$RUN_ENV" == "prod" ]]; then
-            npm run cy:run:rcd:html
-        else
-            npm run cy:run:html
-        fi
         break
     else
         echo  "Waiting for OAuth2 Proxy....."
@@ -34,4 +30,8 @@ while true; do
     fi
 done
 
-
+if [[ "$RUN_ENV" == "prod" ]]; then
+    npm run cy:run:rcd:html
+else
+    npm run cy:run:html
+fi
