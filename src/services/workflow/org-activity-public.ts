@@ -12,6 +12,8 @@ export const PUBLIC_ORG_ACTIVITY: ReadonlyArray<{
   { action: 'created', type: 'Subsystem' },
   { action: 'updated', type: 'Subsystem' },
   { action: 'deleted', type: 'Subsystem' },
+  { action: 'published', type: 'Service' },
+  { action: 'removed', type: 'Service' },
 ];
 
 export function getPublicOrgActivityWhereClause(): Array<{

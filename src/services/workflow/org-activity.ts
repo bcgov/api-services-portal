@@ -309,6 +309,42 @@ export class OrgActivityService {
     );
   }
 
+  async logServicePublished(
+    success: boolean,
+    data: { serviceName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} published service {serviceName} on {organization}',
+      {
+        action: 'published',
+        entity: 'Service',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        serviceName: data.serviceName,
+      },
+      [`org:${this.orgName}`, `service:${data.serviceName}`]
+    );
+  }
+
+  async logServiceRemoved(
+    success: boolean,
+    data: { serviceName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} removed service {serviceName} from {organization}',
+      {
+        action: 'removed',
+        entity: 'Service',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        serviceName: data.serviceName,
+      },
+      [`org:${this.orgName}`, `service:${data.serviceName}`]
+    );
+  }
+
   private async recordOrgActivity(
     success: boolean,
     message: string,
@@ -492,6 +528,41 @@ export async function logSubsystemActivityFromHook(
     subsystemName,
     changedFields: changedFields.join(','),
   });
+}
+
+export async function logOpenAPISpecActivityFromHook(
+  context: any,
+  operation: 'create' | 'delete',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>
+): Promise<void> {
+  const item = updatedItem ?? existingItem;
+  const serviceName = item?.name;
+  assert.strictEqual(
+    typeof serviceName === 'string' && serviceName.length > 0,
+    true,
+    'Service name is required for activity logging'
+  );
+
+  const orgId = item?.organization;
+  assert.strictEqual(
+    orgId != null && orgId !== '',
+    true,
+    'OpenAPISpec organization id is required for activity logging'
+  );
+  const orgName = await lookupOrganizationNameById(context, String(orgId));
+  assert.strictEqual(
+    typeof orgName === 'string' && orgName.length > 0,
+    true,
+    `Unable to resolve organization name for service ${serviceName}`
+  );
+  const orgActivity = new OrgActivityService(context, orgName);
+
+  if (operation === 'delete') {
+    await orgActivity.logServiceRemoved(true, { serviceName });
+    return;
+  }
+  await orgActivity.logServicePublished(true, { serviceName });
 }
 
 export async function getCombinedOrganizationActivity(

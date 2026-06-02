@@ -1,5 +1,9 @@
 import { v4 as uuidv4 } from 'uuid'
-import { createSubsystem, uniqueSubsystemName } from '../../../support/sdx-commands'
+import {
+  createOASService,
+  createSubsystem,
+  uniqueSubsystemName,
+} from '../../../support/sdx-commands'
 
 describe('SDX Organization Activity', () => {
   let workingData: any
@@ -206,6 +210,136 @@ dQIDAQAB
     )
   })
 
+  it('records subsystem lifecycle in public catalog and organization activity', () => {
+    const { org } = workingData
+    const subsystemName = uniqueSubsystemName()
+
+    createSubsystem(org, subsystemName, ({ result }: any) => {
+      expect(result).to.be.equal('created')
+
+      cy.callAPI(
+        `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'Subsystem' &&
+            a.params?.action === 'created' &&
+            a.params?.subsystemName === subsystemName &&
+            a.params?.organization === org.name
+        )
+        expect(entry?.params?.entity).to.equal('Subsystem')
+        expect(entry?.params?.action).to.equal('created')
+        expect(entry?.params?.subsystemName).to.equal(subsystemName)
+        expect(entry?.result).to.equal('success')
+      })
+
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'Subsystem' &&
+            a.params?.action === 'created' &&
+            a.params?.subsystemName === subsystemName
+        )
+        expect(entry?.params?.entity).to.equal('Subsystem')
+        expect(entry?.params?.action).to.equal('created')
+        expect(entry?.result).to.equal('success')
+      })
+
+      cy.setQueryString({ force: false })
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
+        'DELETE'
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        expect(body.result).to.be.equal('deleted')
+
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'Subsystem' &&
+              a.params?.action === 'deleted' &&
+              a.params?.subsystemName === subsystemName
+          )
+          expect(entry?.params?.action).to.equal('deleted')
+          expect(entry?.result).to.equal('success')
+        })
+      })
+    })
+  })
+
+  it('records service publish and remove in public catalog activity', () => {
+    const { org } = workingData
+    const subsystemName = uniqueSubsystemName()
+
+    createSubsystem(org, subsystemName, () => {
+      createOASService(org, subsystemName, (service: any) => {
+        const serviceName = service.name
+
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'Service' &&
+              a.params?.action === 'published' &&
+              a.params?.serviceName === serviceName &&
+              a.params?.organization === org.name
+          )
+          expect(entry?.params?.entity).to.equal('Service')
+          expect(entry?.params?.action).to.equal('published')
+          expect(entry?.params?.serviceName).to.equal(serviceName)
+          expect(entry?.result).to.equal('success')
+        })
+
+        // cy.callAPI(
+        //   `ds/api/sdx/v1/organizations/${org.name}/oas-services/${serviceName}`,
+        //   'DELETE'
+        // ).then(({ apiRes: { status, body } }: any) => {
+        //   expect(status).to.be.equal(200)
+        //   expect(body.result).to.be.equal('deleted')
+
+        //   cy.callAPI(
+        //     `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+        //     'GET'
+        //   ).then(({ apiRes: { status, body: activities } }: any) => {
+        //     expect(status).to.be.equal(200)
+        //     const entry = activities.find(
+        //       (a: any) =>
+        //         a.params?.entity === 'Service' &&
+        //         a.params?.action === 'removed' &&
+        //         a.params?.serviceName === serviceName
+        //     )
+        //     expect(entry?.params?.action).to.equal('removed')
+        //     expect(entry?.params?.serviceName).to.equal(serviceName)
+        //     expect(entry?.result).to.equal('success')
+        //   })
+        // })
+      })
+    })
+  })
+
+  it('keeps v3 organization gateway activity endpoint working', () => {
+    cy.callAPI(
+      `ds/api/v3/organizations/${workingData.org.name}/activity`,
+      'GET'
+    ).then(({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+      expect(body).to.be.an('array')
+    })
+  })
+
   describe('Organization public key lifecycle in catalog activity', () => {
     // Runs in order: register gateway, apply key A, then rotate/remove tests build on that state.
     let orgKeyName: string
@@ -299,81 +433,5 @@ dQIDAQAB
       )
     })
   })
-
-  it.only('records subsystem lifecycle in public catalog and organization activity', () => {
-    const { org } = workingData
-    const subsystemName = uniqueSubsystemName()
-
-    createSubsystem(org, subsystemName, ({ result }: any) => {
-      expect(result).to.be.equal('created')
-
-      cy.callAPI(
-        `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
-        'GET'
-      ).then(({ apiRes: { status, body: activities } }: any) => {
-        expect(status).to.be.equal(200)
-        const entry = activities.find(
-          (a: any) =>
-            a.params?.entity === 'Subsystem' &&
-            a.params?.action === 'created' &&
-            a.params?.subsystemName === subsystemName &&
-            a.params?.organization === org.name
-        )
-        expect(entry?.params?.entity).to.equal('Subsystem')
-        expect(entry?.params?.action).to.equal('created')
-        expect(entry?.params?.subsystemName).to.equal(subsystemName)
-        expect(entry?.result).to.equal('success')
-      })
-
-      cy.callAPI(
-        `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
-        'GET'
-      ).then(({ apiRes: { status, body: activities } }: any) => {
-        expect(status).to.be.equal(200)
-        const entry = activities.find(
-          (a: any) =>
-            a.params?.entity === 'Subsystem' &&
-            a.params?.action === 'created' &&
-            a.params?.subsystemName === subsystemName
-        )
-        expect(entry?.params?.entity).to.equal('Subsystem')
-        expect(entry?.params?.action).to.equal('created')
-        expect(entry?.result).to.equal('success')
-      })
-
-      cy.setQueryString({ force: false })
-      cy.callAPI(
-        `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
-        'DELETE'
-      ).then(({ apiRes: { status, body } }: any) => {
-        expect(status).to.be.equal(200)
-        expect(body.result).to.be.equal('deleted')
-
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/activity?first=100`,
-          'GET'
-        ).then(({ apiRes: { status, body: activities } }: any) => {
-          expect(status).to.be.equal(200)
-          const entry = activities.find(
-            (a: any) =>
-              a.params?.entity === 'Subsystem' &&
-              a.params?.action === 'deleted' &&
-              a.params?.subsystemName === subsystemName
-          )
-          expect(entry?.params?.action).to.equal('deleted')
-          expect(entry?.result).to.equal('success')
-        })
-      })
-    })
-  })
-
-  it('keeps v3 organization gateway activity endpoint working', () => {
-    cy.callAPI(
-      `ds/api/v3/organizations/${workingData.org.name}/activity`,
-      'GET'
-    ).then(({ apiRes: { status, body } }: any) => {
-      expect(status).to.be.equal(200)
-      expect(body).to.be.an('array')
-    })
-  })
+  
 })
