@@ -61,15 +61,50 @@ jobs:
           docker logs -f cypress-e2e 2>&1 &
           LOG_PID=$!
 
+          dump_diagnostics() {
+            # Capture diagnostics BEFORE teardown so oauth2-proxy startup
+            # failures are visible (the cypress log alone does not show them).
+            echo "::group::Container status (docker ps -a)"
+            docker ps -a
+            echo "::endgroup::"
+            for svc in oauth2-proxy keycloak redis-master apsportal; do
+              echo "::group::Logs: $svc"
+              docker logs "$svc" 2>&1 | tail -150 || echo "no container named $svc"
+              echo "::endgroup::"
+            done
+          }
+
+          # Bail out early ONLY on the known hang: oauth2-proxy never binds
+          # :4180. A passing test suite can run for tens of minutes, so we do
+          # not cap total runtime - we only cap how long we wait for the proxy
+          # to come up. Once it's up, we wait indefinitely for tests to finish.
+          ELAPSED=0
+          PROXY_MAX_WAIT=600 # 10 minutes for oauth2-proxy to bind, then give up
+          PROXY_UP=0
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               echo "Cypress tests completed."
-              # cleanup
+              dump_diagnostics
               docker compose down
               break
-            else
-              sleep 30s
             fi
+
+            if [ "$PROXY_UP" -eq 0 ]; then
+              # 4180 is published on the runner host
+              code=$(curl -o /dev/null -s --connect-timeout 5 -w '%{http_code}' http://localhost:4180/ || echo 000)
+              if [[ "$code" =~ ^[1-9][0-9]{2}$ ]]; then
+                echo "oauth2-proxy is up (HTTP $code); waiting for tests to finish..."
+                PROXY_UP=1
+              elif [ "$ELAPSED" -ge "$PROXY_MAX_WAIT" ]; then
+                echo "::error::oauth2-proxy did not bind :4180 within ${PROXY_MAX_WAIT}s."
+                dump_diagnostics
+                docker compose down
+                exit 1
+              fi
+            fi
+
+            sleep 30s
+            ELAPSED=$((ELAPSED + 30))
           done
 
       - name: Upload E2E Test Results HTML Report
