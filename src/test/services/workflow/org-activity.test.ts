@@ -252,13 +252,17 @@ describe('OrgActivityService', function () {
     );
   });
 
-  it('records one activity per key in logOrganizationPatternPublish', async function () {
+  it('records one activity per key in logGatewayKeyPatternPublish for organization keys', async function () {
     const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
-    await service.logOrganizationPatternPublish(true, {
-      keysAdded: ['key-a'],
-      keysRotated: ['key-b'],
-      keysRemoved: ['key-c'],
-    });
+    await service.logGatewayKeyPatternPublish(
+      true,
+      { entity: 'OrganizationKey' },
+      {
+        keysAdded: ['key-a'],
+        keysRotated: ['key-b'],
+        keysRemoved: ['key-c'],
+      }
+    );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(3);
     const calls = recordedActivityCalls();
@@ -277,9 +281,13 @@ describe('OrgActivityService', function () {
     expect(recordedActivityCallAt(0).ids[0]).toBe('org:my-org');
   });
 
-  it('records organization key actions in past tense', async function () {
+  it('records organization gateway key actions in past tense', async function () {
     const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
-    await service.logOrganizationKey(true, 'add', 'key-a');
+    await service.logGatewayKeyPatternPublish(
+      true,
+      { entity: 'OrganizationKey' },
+      { keysAdded: ['key-a'] }
+    );
 
     const recorded = recordedActivityCallAt(0);
     expect(recorded.action).toBe('added');
@@ -289,6 +297,59 @@ describe('OrgActivityService', function () {
     const activityContext = parseRecordedActivityContext(
       recorded.activityContext
     );
+    expect(activityContext.params.keyAction).toBe('added');
+  });
+
+  it('records subsystem gateway key pattern publish with add, rotate, and delete', async function () {
+    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    await service.logGatewayKeyPatternPublish(
+      true,
+      { entity: 'SubsystemKey', subsystemName: 'MY-SUBSYS' },
+      {
+        keysAdded: ['key-a'],
+        keysRotated: ['key-b'],
+        keysRemoved: ['key-c'],
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(3);
+    const calls = recordedActivityCalls();
+    expect(calls.map((c) => c.action)).toEqual(['added', 'rotated', 'deleted']);
+    expect(calls.map((c) => c.type)).toEqual([
+      'SubsystemKey',
+      'SubsystemKey',
+      'SubsystemKey',
+    ]);
+    expect(calls.map((c) => c.ids[1])).toEqual([
+      'subsystem:MY-SUBSYS',
+      'subsystem:MY-SUBSYS',
+      'subsystem:MY-SUBSYS',
+    ]);
+    expect(calls.map((c) => c.ids[2])).toEqual([
+      'key:key-a',
+      'key:key-b',
+      'key:key-c',
+    ]);
+  });
+
+  it('records subsystem gateway key actions in past tense', async function () {
+    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    await service.logGatewayKeyPatternPublish(
+      true,
+      { entity: 'SubsystemKey', subsystemName: 'MY-SUBSYS' },
+      { keysAdded: ['key-a'] }
+    );
+
+    const recorded = recordedActivityCallAt(0);
+    expect(recorded.action).toBe('added');
+    expect(recorded.type).toBe('SubsystemKey');
+    expect(recorded.message).toBe(
+      'Admin added subsystem key key-a for subsystem MY-SUBSYS on my-org'
+    );
+    const activityContext = parseRecordedActivityContext(
+      recorded.activityContext
+    );
+    expect(activityContext.params.subsystemName).toBe('MY-SUBSYS');
     expect(activityContext.params.keyAction).toBe('added');
   });
 

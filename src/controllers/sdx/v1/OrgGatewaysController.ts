@@ -22,8 +22,12 @@ import {
   getPublishedGatewayKeysFromActivity,
   isGatewayKeyInScopes,
 } from '../../../services/gateway-patterns/gateway-key-diff';
+import { ParseClientId } from '../../../services/gateway-patterns/catalog';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
-import { OrgActivityService } from '../../../services/workflow/org-activity';
+import {
+  GatewayKeyActivityTarget,
+  OrgActivityService,
+} from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -178,12 +182,19 @@ export class OrgGatewaysController extends Controller {
     const subjectToken = getSubjectToken(request);
     const incomingKeys = payload.keys as GatewayKeyDocument[];
     const orgKeyScopes = ['organization'] as const;
+    const subsystemKeyScopes = ['client'] as const;
+    const isSdxKeysPattern = body.pattern === 'sdx-keys.r1' && !dryRun;
+    const isOrgKeysPattern =
+      isSdxKeysPattern &&
+      !body.parameters.runtime_group_name &&
+      !body.parameters.client_id;
+    const isSubsystemKeysPattern =
+      isSdxKeysPattern &&
+      !body.parameters.runtime_group_name &&
+      Boolean(body.parameters.client_id);
     let keysBeforePublish: GatewayKeyDocument[] = [];
     if (
-      body.pattern === 'sdx-keys.r1' &&
-      !dryRun &&
-      !body.parameters.runtime_group_name &&
-      !body.parameters.client_id &&
+      (isOrgKeysPattern || isSubsystemKeysPattern) &&
       action !== 'remove'
     ) {
       const readCtx = this.keystone.createContext(request, true);
@@ -208,29 +219,40 @@ export class OrgGatewaysController extends Controller {
       artifact
     );
 
-    if (
-      body.pattern === 'sdx-keys.r1' &&
-      !dryRun &&
-      !body.parameters.runtime_group_name &&
-      !body.parameters.client_id
-    ) {
+    const keysActivityTarget: GatewayKeyActivityTarget | null = isOrgKeysPattern
+      ? { entity: 'OrganizationKey' }
+      : isSubsystemKeysPattern
+        ? {
+            entity: 'SubsystemKey',
+            subsystemName: ParseClientId(String(body.parameters.client_id))
+              .subsystem.name,
+          }
+        : null;
+
+    if (keysActivityTarget) {
+      const scopes =
+        keysActivityTarget.entity === 'OrganizationKey'
+          ? orgKeyScopes
+          : subsystemKeyScopes;
       const keyDiff =
         action === 'remove'
           ? {
               keysAdded: [] as string[],
               keysRotated: [] as string[],
               keysRemoved: incomingKeys
-                .filter((key) =>
-                  isGatewayKeyInScopes(key, orgKeyScopes)
-                )
+                .filter((key) => isGatewayKeyInScopes(key, scopes))
                 .map((key) => key.name),
             }
-          : diffGatewayKeys(keysBeforePublish, incomingKeys, orgKeyScopes);
+          : diffGatewayKeys(keysBeforePublish, incomingKeys, scopes);
 
       await new OrgActivityService(ctx, org)
-        .logOrganizationPatternPublish(true, keyDiff)
+        .logGatewayKeyPatternPublish(true, keysActivityTarget, keyDiff)
         .catch((e) =>
-          logger.error('[OrgActivity] organization pattern keys %s', e)
+          logger.error(
+            '[OrgActivity] %s gateway pattern keys %s',
+            keysActivityTarget.entity,
+            e
+          )
         );
     }
 

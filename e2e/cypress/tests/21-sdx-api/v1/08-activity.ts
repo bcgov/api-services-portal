@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import {
+  clientIdForSubsystem,
   createOASService,
   createSubsystem,
   uniqueSubsystemName,
@@ -28,6 +29,27 @@ describe('SDX Organization Activity', () => {
       pattern: 'sdx-keys.r1',
       parameters: {
         organization: orgName,
+        public_key_pem: publicKeyPem,
+      },
+    })
+    cy.setQueryString({ action, dryRun: 'false' })
+    return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/pattern`, 'PUT')
+  }
+
+  const subsystemGatewayKeyName = (clientId: string) =>
+    `sdx.keys.${clientId.toLowerCase()}.sys:0`
+
+  const applySubsystemPublicKeyPattern = (
+    orgName: string,
+    clientId: string,
+    publicKeyPem: string,
+    action: 'apply' | 'remove' = 'apply'
+  ) => {
+    cy.setRequestBody({
+      pattern: 'sdx-keys.r1',
+      parameters: {
+        organization: orgName,
+        client_id: clientId,
         public_key_pem: publicKeyPem,
       },
     })
@@ -435,5 +457,130 @@ dQIDAQAB
       )
     })
   })
-  
+
+  describe('Subsystem public key lifecycle in catalog activity', () => {
+    let subsystemName: string
+    let clientId: string
+    let subsystemKeyName: string
+    const runtimeGroupSuffix = () =>
+      uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6).toLowerCase()
+
+    before(() => {
+      const { org } = workingData
+      subsystemName = uniqueSubsystemName()
+      clientId = clientIdForSubsystem(org, subsystemName)
+      subsystemKeyName = subsystemGatewayKeyName(clientId)
+
+      createSubsystem(org, subsystemName, () => {
+        const runtimeGroupName = runtimeGroupSuffix()
+        cy.setRequestBody({
+          name: runtimeGroupName,
+          hostedOrganizations: [org.name],
+          consumerEndpoint: `http://internal.${runtimeGroupName}.servers.sdx`,
+        })
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
+          'PUT'
+        ).then(({ apiRes: { status } }: any) => {
+          expect(status).to.be.equal(200)
+
+          cy.setRequestBody({ runtimeGroupName })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
+            'PUT'
+          ).then(({ apiRes: { status: gatewayStatus } }: any) => {
+            expect(gatewayStatus).to.be.equal(200)
+
+            applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemA).then(
+              ({ apiRes: { status: applyStatus } }: any) => {
+                expect(applyStatus).to.be.equal(200)
+              }
+            )
+          })
+        })
+      })
+    })
+
+    it('records add on initial subsystem public key apply', () => {
+      const { org } = workingData
+
+      cy.callAPI(
+        `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'SubsystemKey' &&
+            a.params?.keyName === subsystemKeyName &&
+            a.params?.subsystemName === subsystemName &&
+            a.params?.keyAction === 'added'
+        )
+        expect(entry?.params?.entity).to.equal('SubsystemKey')
+        expect(entry?.params?.keyName).to.equal(subsystemKeyName)
+        expect(entry?.params?.subsystemName).to.equal(subsystemName)
+        expect(entry?.params?.keyAction).to.equal('added')
+        expect(entry?.result).to.equal('success')
+      })
+    })
+
+    it('records rotate when subsystem public key material changes', () => {
+      const { org } = workingData
+
+      applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemB).then(
+        ({ apiRes: { status } }: any) => {
+          expect(status).to.be.equal(200)
+
+          cy.callAPI(
+            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+            'GET'
+          ).then(({ apiRes: { status, body: activities } }: any) => {
+            expect(status).to.be.equal(200)
+            const entry = activities.find(
+              (a: any) =>
+                a.params?.entity === 'SubsystemKey' &&
+                a.params?.keyName === subsystemKeyName &&
+                a.params?.subsystemName === subsystemName &&
+                a.params?.keyAction === 'rotated'
+            )
+            expect(entry?.params?.entity).to.equal('SubsystemKey')
+            expect(entry?.params?.keyName).to.equal(subsystemKeyName)
+            expect(entry?.params?.subsystemName).to.equal(subsystemName)
+            expect(entry?.params?.keyAction).to.equal('rotated')
+            expect(entry?.result).to.equal('success')
+          })
+        }
+      )
+    })
+
+    it('records delete when subsystem public key is removed', () => {
+      const { org } = workingData
+
+      applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemB, 'remove').then(
+        ({ apiRes: { status } }: any) => {
+          expect(status).to.be.equal(200)
+
+          cy.callAPI(
+            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+            'GET'
+          ).then(({ apiRes: { status, body: activities } }: any) => {
+            expect(status).to.be.equal(200)
+            const entry = activities.find(
+              (a: any) =>
+                a.params?.entity === 'SubsystemKey' &&
+                a.params?.keyName === subsystemKeyName &&
+                a.params?.subsystemName === subsystemName &&
+                a.params?.keyAction === 'deleted'
+            )
+            expect(entry?.params?.entity).to.equal('SubsystemKey')
+            expect(entry?.params?.keyName).to.equal(subsystemKeyName)
+            expect(entry?.params?.subsystemName).to.equal(subsystemName)
+            expect(entry?.params?.keyAction).to.equal('deleted')
+            expect(entry?.result).to.equal('success')
+          })
+        }
+      )
+    })
+  })
+
 })

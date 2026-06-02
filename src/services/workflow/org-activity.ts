@@ -15,6 +15,16 @@ const KEY_ACTION_PAST: Record<'add' | 'rotate' | 'delete', string> = {
   delete: 'deleted',
 };
 
+export type GatewayKeyActivityTarget =
+  | { entity: 'OrganizationKey' }
+  | { entity: 'SubsystemKey'; subsystemName: string };
+
+export type GatewayKeyDiff = {
+  keysAdded?: string[];
+  keysRotated?: string[];
+  keysRemoved?: string[];
+};
+
 const SUBSYSTEM_PROFILE_FIELDS = ['description'] as const;
 
 const ORG_PROFILE_FIELDS = [
@@ -214,43 +224,63 @@ export class OrgActivityService {
     );
   }
 
-  async logOrganizationPatternPublish(
+  async logGatewayKeyPatternPublish(
     success: boolean,
-    data: {
-      keysAdded?: string[];
-      keysRotated?: string[];
-      keysRemoved?: string[];
-    }
+    target: GatewayKeyActivityTarget,
+    diff: GatewayKeyDiff
   ): Promise<void> {
-    for (const keyName of data.keysAdded ?? []) {
-      await this.logOrganizationKey(success, 'add', keyName);
+    for (const keyName of diff.keysAdded ?? []) {
+      await this.logGatewayKeyChange(success, 'add', target, keyName);
     }
-    for (const keyName of data.keysRotated ?? []) {
-      await this.logOrganizationKey(success, 'rotate', keyName);
+    for (const keyName of diff.keysRotated ?? []) {
+      await this.logGatewayKeyChange(success, 'rotate', target, keyName);
     }
-    for (const keyName of data.keysRemoved ?? []) {
-      await this.logOrganizationKey(success, 'delete', keyName);
+    for (const keyName of diff.keysRemoved ?? []) {
+      await this.logGatewayKeyChange(success, 'delete', target, keyName);
     }
   }
 
-  async logOrganizationKey(
+  private async logGatewayKeyChange(
     success: boolean,
     keyAction: 'add' | 'rotate' | 'delete',
+    target: GatewayKeyActivityTarget,
     keyName: string
   ): Promise<void> {
     const keyActionPast = KEY_ACTION_PAST[keyAction];
+
+    if (target.entity === 'OrganizationKey') {
+      return this.recordOrgActivity(
+        success,
+        '{actor} {keyAction} organization key {keyName} on {organization}',
+        {
+          action: keyActionPast,
+          entity: 'OrganizationKey',
+          actor: this.getActorName(),
+          organization: this.orgName,
+          keyName,
+          keyAction: keyActionPast,
+        },
+        [`org:${this.orgName}`, `key:${keyName}`]
+      );
+    }
+
     return this.recordOrgActivity(
       success,
-      '{actor} {keyAction} organization key {keyName} on {organization}',
+      '{actor} {keyAction} subsystem key {keyName} for subsystem {subsystemName} on {organization}',
       {
         action: keyActionPast,
-        entity: 'OrganizationKey',
+        entity: 'SubsystemKey',
         actor: this.getActorName(),
         organization: this.orgName,
+        subsystemName: target.subsystemName,
         keyName,
         keyAction: keyActionPast,
       },
-      [`org:${this.orgName}`, `key:${keyName}`]
+      [
+        `org:${this.orgName}`,
+        `subsystem:${target.subsystemName}`,
+        `key:${keyName}`,
+      ]
     );
   }
 
