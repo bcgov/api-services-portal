@@ -70,7 +70,10 @@ services:
     container_name: oauth2-proxy
     command: --alpha-config /oauth2-proxy.yaml --config /oauth2-proxy.cfg
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - 4180:4180/tcp
     volumes:
@@ -210,13 +213,18 @@ services:
           - kong.localtest.me
     restart: on-failure:5
   redis:
-    image: bitnami/redis:latest
+    image: bitnamilegacy/redis:7.4
     container_name: redis-master
     environment:
       - REDIS_PASSWORD=s3cr3t
     restart: on-failure
     ports:
       - 6379:6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 's3cr3t', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       aps-net:
         aliases:
