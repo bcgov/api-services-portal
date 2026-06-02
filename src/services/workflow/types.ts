@@ -214,34 +214,3 @@ export interface ActivitySummary {
   activityAt: Scalars['DateTime'];
   blob?: any;
 }
-
-export interface IntegrationProfile {
-  integrationId?: string;
-  clientId: string;
-  privacyZone: string;
-}
-
-/**
- * See ConnectionRequest
- */
-export interface ConnectionRequestorDetails {
-  submissionId: string;
-  requestor: string;
-  client: IntegrationProfile;
-  service: IntegrationProfile;
-}
-
-export interface clientResources {
-  gatewayPatterns?: {
-    pattern: string;
-    parameters: Record<string, any>;
-  }[];
-}
-
-export interface ServiceResources {
-  subsystemId: string;
-  gatewayPatterns?: {
-    pattern: string;
-    parameters: Record<string, any>;
-  }[];
-}

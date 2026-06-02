@@ -10,7 +10,7 @@ import {
   extractParams,
   isParameterized,
   ConversionResult,
-} from './openapi-to-kong-paths';
+} from './openapi-to-kong-paths.js';
 
 // ---------------------------------------------------------------------------
 // Tiny test runner

@@ -1,6 +1,6 @@
 import type { FastifyBaseLogger } from 'fastify';
 import * as oauth from 'oauth4webapi';
-import { loadJwsKeyFromJks } from './jks.js';
+import { loadJwsKeyFromJwk } from './jwk.js';
 
 const REFRESH_BUFFER_SECONDS = 30;
 
@@ -27,9 +27,8 @@ interface CommonConfig {
 }
 
 export interface SignedJwtConfig extends CommonConfig {
-  keystorePath: string;
-  keystorePassword: string;
-  keyAlias?: string;
+  /** Path to a standard JWK JSON file holding the private signing key. */
+  jwkPath: string;
   keyAlg?: oauth.JWSAlgorithm;
   kid?: string;
 }
@@ -44,19 +43,15 @@ interface TokenCache {
 }
 
 export function createSignedJwtClient(config: SignedJwtConfig): OAuthClient {
-  const keyAlg = config.keyAlg ?? 'RS256';
-  let keyPromise: Promise<oauth.CryptoKey> | null = null;
-  const loadKey = (): Promise<oauth.CryptoKey> =>
-    (keyPromise ??= loadJwsKeyFromJks(
-      config.keystorePath,
-      config.keystorePassword,
-      keyAlg,
-      config.keyAlias
-    ).then((r) => r.key));
+  let keyPromise: Promise<{ key: oauth.CryptoKey; kid?: string }> | null = null;
+  const loadKey = (): Promise<{ key: oauth.CryptoKey; kid?: string }> =>
+    (keyPromise ??= loadJwsKeyFromJwk(config.jwkPath, config.keyAlg).then(
+      (r) => ({ key: r.key, kid: config.kid ?? r.kid })
+    ));
 
   const refresh = async (): Promise<TokenCache> => {
-    const key = await loadKey();
-    const clientAuth = oauth.PrivateKeyJwt({ key, kid: config.kid });
+    const { key, kid } = await loadKey();
+    const clientAuth = oauth.PrivateKeyJwt({ key, kid });
     return runClientCredentials(config, clientAuth);
   };
 

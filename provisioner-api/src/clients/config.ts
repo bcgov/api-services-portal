@@ -34,14 +34,9 @@ export function loadSignedJwtConfig(
   const baseUrl = require_(`${prefix}_BASE_URL`, process.env[`${prefix}_BASE_URL`], missing);
   const tokenUrl = require_(`${prefix}_TOKEN_URL`, process.env[`${prefix}_TOKEN_URL`], missing);
   const clientId = require_(`${prefix}_CLIENT_ID`, process.env[`${prefix}_CLIENT_ID`], missing);
-  const keystorePath = require_(
-    `${prefix}_KEYSTORE_PATH`,
-    process.env[`${prefix}_KEYSTORE_PATH`],
-    missing
-  );
-  const keystorePassword = require_(
-    `${prefix}_KEYSTORE_PASSWORD`,
-    process.env[`${prefix}_KEYSTORE_PASSWORD`],
+  const jwkPath = require_(
+    `${prefix}_JWK_PATH`,
+    process.env[`${prefix}_JWK_PATH`],
     missing
   );
   if (missing.missing.length > 0) return { ok: false, missing: missing.missing };
@@ -52,10 +47,8 @@ export function loadSignedJwtConfig(
       baseUrl: baseUrl!,
       tokenUrl: tokenUrl!,
       clientId: clientId!,
-      keystorePath: keystorePath!,
-      keystorePassword: keystorePassword!,
-      keyAlias: process.env[`${prefix}_KEY_ALIAS`],
-      keyAlg: (process.env[`${prefix}_KEY_ALG`] as SignedJwtConfig['keyAlg']) ?? 'RS256',
+      jwkPath: jwkPath!,
+      keyAlg: process.env[`${prefix}_KEY_ALG`] as SignedJwtConfig['keyAlg'],
       kid: process.env[`${prefix}_KID`],
       scope: process.env[`${prefix}_SCOPE`],
       audience: process.env[`${prefix}_AUDIENCE`],

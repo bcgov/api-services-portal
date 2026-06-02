@@ -97,10 +97,10 @@ Built on [`oauth4webapi`](https://github.com/panva/oauth4webapi) + [`jose`](http
 
 See `.env.example` for the full env-var contract. Each prefix needs `*_BASE_URL`, `*_TOKEN_URL`, `*_CLIENT_ID`, plus either:
 
-- **signed-JWT clients (APS/SDX/GWA):** `*_KEYSTORE_PATH` and `*_KEYSTORE_PASSWORD`. The file must be a Sun-format JKS keystore (e.g. produced by `keytool -genkeypair -storetype JKS ...`). If the JKS holds more than one private-key entry, set `*_KEY_ALIAS` to choose one. Optional: `*_KEY_ALG` (default `RS256`), `*_KID`, `*_SCOPE`, `*_AUDIENCE`.
+- **signed-JWT clients (APS/SDX/GWA):** `*_JWK_PATH` pointing at a standard JWK JSON file holding the private signing key. Optional: `*_KEY_ALG` (defaults to the JWK's `alg`, then `RS256`), `*_KID` (defaults to the JWK's `kid`), `*_SCOPE`, `*_AUDIENCE`.
 - **client-secret client (CSS):** `*_CLIENT_SECRET`. Optional: `*_SCOPE`, `*_AUDIENCE`.
 
-The JKS file is parsed inline (Sun proprietary format: `0xFEEDFEED` magic, EncryptedPrivateKeyInfo entries protected with the JKS key-protector OID `1.3.6.1.4.1.42.2.17.1.1`). Only JKS is supported — JCEKS and PKCS#12 will be rejected with a clear error.
+The JWK file is a standard JSON Web Key containing a private key (it must include the `d` parameter); symmetric keys are rejected. A matching public JWK is registered with the authorization server for `private_key_jwt` verification.
 
 Usage in a route:
 
