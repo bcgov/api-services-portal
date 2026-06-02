@@ -23,6 +23,7 @@ import {
 import { Logger } from '../../logger';
 import { OpenAPISpecService } from './oas-service';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
+import { logServiceRemovedForOrg } from '../workflow/org-activity';
 
 const logger = Logger('batch.subsystem');
 
@@ -160,9 +161,20 @@ class SubsystemService {
 
     const childResults: BatchResult[] = [];
     for (const serviceSpec of serviceSpecs) {
-      childResults.push(
-        await deleteRecordByInternalId(context, 'OpenAPISpec', serviceSpec.id)
+      const serviceDeleteResult = await deleteRecordByInternalId(
+        context,
+        'OpenAPISpec',
+        serviceSpec.id
       );
+      childResults.push(serviceDeleteResult);
+      if (serviceDeleteResult.result === 'deleted') {
+        await logServiceRemovedForOrg(
+          context,
+          org,
+          serviceSpec.name,
+          subsystem.name
+        );
+      }
     }
 
     const result = await deleteRecordByInternalId(

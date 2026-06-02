@@ -3,7 +3,6 @@ import {
   diffSubsystemProfileFields,
   logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
-  logOpenAPISpecActivityFromHook,
   logSubsystemActivityFromHook,
   OrgActivityService,
 } from '../../../services/workflow/org-activity';
@@ -324,32 +323,49 @@ describe('OrgActivityService', function () {
     );
   });
 
-  it('records service publish with org and service filter keys', async function () {
+  it('records service publish with org, subsystem, and service filter keys', async function () {
     await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logServicePublished(true, { serviceName: 'MY-SERVICE' });
+      .logServicePublished(true, {
+        serviceName: 'MY-SERVICE',
+        subsystemName: 'MY-SUBSYS',
+      });
 
     const recorded = recordedActivityCallAt(0);
     expect(recorded.action).toBe('published');
     expect(recorded.type).toBe('Service');
     expect(recorded.message).toBe(
-      'Admin published service MY-SERVICE on my-org'
+      'Admin published service MY-SERVICE on subsystem MY-SUBSYS in my-org'
     );
     expect(recorded.ids).toEqual([
       'org:my-org',
+      'subsystem:MY-SUBSYS',
       'service:MY-SERVICE',
       'actor:Admin',
     ]);
+    const activityContext = parseRecordedActivityContext(
+      recorded.activityContext
+    );
+    expect(activityContext.params.subsystemName).toBe('MY-SUBSYS');
   });
 
   it('records service remove in past tense', async function () {
     await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logServiceRemoved(true, { serviceName: 'MY-SERVICE' });
+      .logServiceRemoved(true, {
+        serviceName: 'MY-SERVICE',
+        subsystemName: 'MY-SUBSYS',
+      });
 
     const recorded = recordedActivityCallAt(0);
     expect(recorded.action).toBe('removed');
     expect(recorded.message).toBe(
-      'Admin removed service MY-SERVICE from my-org'
+      'Admin removed service MY-SERVICE from subsystem MY-SUBSYS in my-org'
     );
+    expect(recorded.ids).toEqual([
+      'org:my-org',
+      'subsystem:MY-SUBSYS',
+      'service:MY-SERVICE',
+      'actor:Admin',
+    ]);
   });
 });
 
@@ -451,57 +467,6 @@ describe('logSubsystemActivityFromHook', function () {
     );
 
     expect(recordActivityMock).not.toHaveBeenCalled();
-  });
-});
-
-describe('logOpenAPISpecActivityFromHook', function () {
-  beforeEach(() => {
-    recordActivityMock.mockClear();
-  });
-
-  it('records publish activity from OpenAPISpec hook data', async function () {
-    await logOpenAPISpecActivityFromHook(
-      {
-        authedItem: { name: 'Admin' },
-        executeGraphQL: jest.fn().mockResolvedValue({
-          data: { allOrganizations: [{ name: 'ca.bc.gov.my-org' }] },
-        }),
-      },
-      'create',
-      null,
-      {
-        name: 'MY-SERVICE',
-        organization: '3',
-      }
-    );
-
-    expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const recorded = recordedActivityCallAt(0);
-    expect(recorded.action).toBe('published');
-    expect(recorded.ids[0]).toBe('org:ca.bc.gov.my-org');
-  });
-
-  it('records remove activity from OpenAPISpec hook data', async function () {
-    await logOpenAPISpecActivityFromHook(
-      {
-        authedItem: { name: 'Admin' },
-        executeGraphQL: jest.fn().mockResolvedValue({
-          data: { allOrganizations: [{ name: 'ca.bc.gov.my-org' }] },
-        }),
-      },
-      'delete',
-      {
-        name: 'MY-SERVICE',
-        organization: '3',
-      },
-      {
-        name: 'MY-SERVICE',
-        organization: '3',
-      }
-    );
-
-    expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    expect(recordedActivityCallAt(0).action).toBe('removed');
   });
 });
 

@@ -294,38 +294,40 @@ dQIDAQAB
             (a: any) =>
               a.params?.entity === 'Service' &&
               a.params?.action === 'published' &&
-              a.params?.serviceName === serviceName &&
-              a.params?.organization === org.name
+              a.params?.serviceName === serviceName
           )
           expect(entry?.params?.entity).to.equal('Service')
           expect(entry?.params?.action).to.equal('published')
           expect(entry?.params?.serviceName).to.equal(serviceName)
+          expect(entry?.params?.subsystemName).to.equal(subsystemName)
           expect(entry?.result).to.equal('success')
         })
 
-        // cy.callAPI(
-        //   `ds/api/sdx/v1/organizations/${org.name}/oas-services/${serviceName}`,
-        //   'DELETE'
-        // ).then(({ apiRes: { status, body } }: any) => {
-        //   expect(status).to.be.equal(200)
-        //   expect(body.result).to.be.equal('deleted')
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/oas-services/${serviceName}`,
+          'DELETE'
+        ).then(({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('deleted')
 
-        //   cy.callAPI(
-        //     `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
-        //     'GET'
-        //   ).then(({ apiRes: { status, body: activities } }: any) => {
-        //     expect(status).to.be.equal(200)
-        //     const entry = activities.find(
-        //       (a: any) =>
-        //         a.params?.entity === 'Service' &&
-        //         a.params?.action === 'removed' &&
-        //         a.params?.serviceName === serviceName
-        //     )
-        //     expect(entry?.params?.action).to.equal('removed')
-        //     expect(entry?.params?.serviceName).to.equal(serviceName)
-        //     expect(entry?.result).to.equal('success')
-        //   })
-        // })
+          cy.callAPI(
+            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+            'GET'
+          ).then(({ apiRes: { status, body: activities } }: any) => {
+            expect(status).to.be.equal(200)
+            const entry = activities.find(
+              (a: any) =>
+                a.params?.entity === 'Service' &&
+                a.params?.action === 'removed' &&
+                a.params?.serviceName === serviceName
+            )
+            expect(entry?.params?.entity).to.equal('Service')
+            expect(entry?.params?.action).to.equal('removed')
+            expect(entry?.params?.serviceName).to.equal(serviceName)
+            expect(entry?.params?.subsystemName).to.equal(subsystemName)
+            expect(entry?.result).to.equal('success')
+          })
+        })
       })
     })
   })

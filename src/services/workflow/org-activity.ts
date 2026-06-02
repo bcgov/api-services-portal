@@ -311,37 +311,47 @@ export class OrgActivityService {
 
   async logServicePublished(
     success: boolean,
-    data: { serviceName: string }
+    data: { serviceName: string; subsystemName: string }
   ): Promise<void> {
     return this.recordOrgActivity(
       success,
-      '{actor} published service {serviceName} on {organization}',
+      '{actor} published service {serviceName} on subsystem {subsystemName} in {organization}',
       {
         action: 'published',
         entity: 'Service',
         actor: this.getActorName(),
         organization: this.orgName,
+        subsystemName: data.subsystemName,
         serviceName: data.serviceName,
       },
-      [`org:${this.orgName}`, `service:${data.serviceName}`]
+      [
+        `org:${this.orgName}`,
+        `subsystem:${data.subsystemName}`,
+        `service:${data.serviceName}`,
+      ]
     );
   }
 
   async logServiceRemoved(
     success: boolean,
-    data: { serviceName: string }
+    data: { serviceName: string; subsystemName: string }
   ): Promise<void> {
     return this.recordOrgActivity(
       success,
-      '{actor} removed service {serviceName} from {organization}',
+      '{actor} removed service {serviceName} from subsystem {subsystemName} in {organization}',
       {
         action: 'removed',
         entity: 'Service',
         actor: this.getActorName(),
         organization: this.orgName,
+        subsystemName: data.subsystemName,
         serviceName: data.serviceName,
       },
-      [`org:${this.orgName}`, `service:${data.serviceName}`]
+      [
+        `org:${this.orgName}`,
+        `subsystem:${data.subsystemName}`,
+        `service:${data.serviceName}`,
+      ]
     );
   }
 
@@ -530,39 +540,15 @@ export async function logSubsystemActivityFromHook(
   });
 }
 
-export async function logOpenAPISpecActivityFromHook(
+export async function logServiceRemovedForOrg(
   context: any,
-  operation: 'create' | 'delete',
-  existingItem: Record<string, any> | null | undefined,
-  updatedItem: Record<string, any>
+  orgName: string,
+  serviceName: string,
+  subsystemName: string
 ): Promise<void> {
-  const item = updatedItem ?? existingItem;
-  const serviceName = item?.name;
-  assert.strictEqual(
-    typeof serviceName === 'string' && serviceName.length > 0,
-    true,
-    'Service name is required for activity logging'
-  );
-
-  const orgId = item?.organization;
-  assert.strictEqual(
-    orgId != null && orgId !== '',
-    true,
-    'OpenAPISpec organization id is required for activity logging'
-  );
-  const orgName = await lookupOrganizationNameById(context, String(orgId));
-  assert.strictEqual(
-    typeof orgName === 'string' && orgName.length > 0,
-    true,
-    `Unable to resolve organization name for service ${serviceName}`
-  );
-  const orgActivity = new OrgActivityService(context, orgName);
-
-  if (operation === 'delete') {
-    await orgActivity.logServiceRemoved(true, { serviceName });
-    return;
-  }
-  await orgActivity.logServicePublished(true, { serviceName });
+  await new OrgActivityService(context, orgName)
+    .logServiceRemoved(true, { serviceName, subsystemName })
+    .catch((e) => logger.error('[OrgActivity] service remove %s', e));
 }
 
 export async function getCombinedOrganizationActivity(
