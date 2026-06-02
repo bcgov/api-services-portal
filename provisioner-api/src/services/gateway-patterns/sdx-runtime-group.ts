@@ -1,6 +1,6 @@
-import { RuntimeGroup } from '../../../services/keystone/types';
-import { RuntimeGroupService } from '../../../services/batch/runtime-group';
-import assert from '../../user-assert';
+import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
+import { assert } from './utils.js';
 
 export interface SDXRuntimeGroupPatternConfig extends Record<string, string> {
   organization: string;
@@ -19,31 +19,39 @@ interface SDXRuntimeGroupPatternData {
  */
 export const SDXRuntimeGroupPattern = {
   id: 'sdx-runtime-group.r1',
-  requiredParams: ['runtime_group_name'],
+  requiredParams: ['organization', 'runtime_group_name'],
 
-  inject: async (ctx: any, inputs: Record<string, string>) => {
-    // retrieve the runtime group details
-    const rgService = new RuntimeGroupService();
-    const rg = await rgService.findRuntimeGroupByUniqueName(
-      ctx,
-      inputs.runtime_group_name
-    );
+  inject: async (api: SdxMemberApiClient, inputs: Record<string, string>) => {
+    // retrieve the runtime groups owned by the organization
+    const owned = await api.listRuntimeGroups(inputs.organization, {
+      filter: 'owned',
+    });
+    const rg = owned.find((g) => g.name === inputs.runtime_group_name);
 
     assert.strictEqual(
-      rg.organization.name === inputs.organization,
+      Boolean(rg),
       true,
       'Organization does not own this runtime group'
     );
 
-    const operatorEdge = await rgService.findRuntimeGroupByUniqueName(
-      ctx,
-      process.env.SDX_OPERATOR_EDGE!
+    // the operator edge may be owned by, or merely available to, this org
+    const available = await api.listRuntimeGroups(inputs.organization, {
+      filter: 'available',
+    });
+    const operatorEdge = [...owned, ...available].find(
+      (g) => g.name === process.env.SDX_OPERATOR_EDGE
+    );
+
+    assert.strictEqual(
+      Boolean(operatorEdge),
+      true,
+      'Operator edge runtime group not found'
     );
 
     return {
-      gateway_id: rg.namespace,
-      runtime_group: rg,
-      operator_runtime_group: operatorEdge,
+      gateway_id: rg!.gatewayId,
+      runtime_group: rg!,
+      operator_runtime_group: operatorEdge!,
     };
   },
 
@@ -53,12 +61,12 @@ export const SDXRuntimeGroupPattern = {
     const nsQualifier = `rg-${inputs.runtime_group_name}`;
 
     const runtimeGroupName = inputs.runtime_group_name;
-    const routeHost = data.runtime_group.host;
+    const routeHost = data.runtime_group.host!;
 
-    const consumerUrl = new URL(data.runtime_group.consumerEndpoint);
+    const consumerUrl = new URL(data.runtime_group.consumerEndpoint!);
     const consumerHost = consumerUrl.host;
 
-    const routeHostUrl = new URL(data.operator_runtime_group.consumerEndpoint);
+    const routeHostUrl = new URL(data.operator_runtime_group.consumerEndpoint!);
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 

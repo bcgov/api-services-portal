@@ -77,21 +77,52 @@ export const LoadOpenAPISpec = async (
 function parseSpecOperations(spec: any) {
   const operations =
     spec?.paths &&
-    Object.keys(spec.paths).map((path) => {
-      return Object.keys(spec.paths[path]).map((method) => {
-        const op = spec.paths[path][method];
-        return {
-          operationId: op.operationId,
-          method: method.toUpperCase(),
-          path,
-          summary: op.summary || '',
-          scopes:
-            op.security && op.security[0] && op.security[0]['bearer_auth']
-              ? op.security[0]['bearer_auth']
-              : [],
-        };
+    Object.keys(spec.paths)
+      .filter((path) => !['summary', 'description'].includes(path))
+      .map((path) => {
+        const pathItem = spec.paths[path];
+
+        // include all the standard operations
+        const stdOperations = Object.keys(pathItem).map((method) => {
+          const op = pathItem[method];
+          return {
+            operationId: op.operationId,
+            method: method.toUpperCase(),
+            path,
+            summary: op.summary || '',
+            scopes:
+              op.security && op.security[0] && op.security[0]['bearer_auth']
+                ? op.security[0]['bearer_auth']
+                : [],
+          };
+        });
+
+        // if there is a "callback" then add that as an event
+        if (pathItem.callback) {
+          Object.keys(pathItem.callback).forEach((cbName) => {
+            Object.keys(pathItem.callback[cbName]).forEach((callbackPath) => {
+              Object.keys(pathItem.callback[cbName][callbackPath]).forEach(
+                (method) => {
+                  const op = pathItem.callback[cbName][callbackPath][method];
+                  stdOperations.push({
+                    operationId: `callback:${cbName}`,
+                    method,
+                    path: callbackPath,
+                    summary: op.summary,
+                    scopes:
+                      op.security &&
+                      op.security[0] &&
+                      op.security[0]['bearer_auth']
+                        ? op.security[0]['bearer_auth']
+                        : [],
+                  });
+                }
+              );
+            });
+          });
+        }
+        return [...stdOperations];
       });
-    });
 
   const flattenedOperations: {
     operationId: string;

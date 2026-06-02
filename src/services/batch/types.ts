@@ -289,6 +289,7 @@ export interface OpenAPISpec {
   description?: string;
   operations?: string;
   gatewayId?: string;
+  environments?: string[];
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
 }
@@ -298,14 +299,17 @@ export interface OpenAPISpec {
  * @tsoaModel
  * @example {
  *   "name": "my-new-subsystem",
- *   "integrationId": "integration-123"
+ *   "environments": [
+ *     "dev",
+ *     "test"
+ *   ]
  * }
  */  
 export interface Subsystem {
   name?: string;
   description?: string;
   gatewayId?: string;
-  integrationId?: string;
+  environments?: string[];
   organization?: OrganizationRefID;
 }
 
@@ -350,6 +354,12 @@ export interface ConnectionRequest {
   serviceId?: string;
   isApproved?: boolean;
   isActive?: boolean;
+  scopes?: string;
+  policyVersion?: string;
+  environment?: string;
+  requesterDetails?: any; // toString
+  clientResources?: any; // toString
+  serviceResources?: any; // toString
 }
 
 

@@ -9,6 +9,8 @@
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    // "allowImportingTsExtensions": true,
+    // "emitDeclarationOnly": false,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "declaration": false,

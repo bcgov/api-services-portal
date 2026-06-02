@@ -1,3 +1,4 @@
+import type { FastifyBaseLogger } from 'fastify';
 import {
   createClientSecretClient,
   createSignedJwtClient,
@@ -13,7 +14,18 @@ export interface Clients {
   css: OAuthClient;
 }
 
-function buildJwtClient(name: string, prefix: string): OAuthClient {
+function childLogger(
+  parent: FastifyBaseLogger | undefined,
+  name: string
+): FastifyBaseLogger | undefined {
+  return parent?.child({ component: 'oauth-client', client: name });
+}
+
+function buildJwtClient(
+  name: string,
+  prefix: string,
+  parent: FastifyBaseLogger | undefined
+): OAuthClient {
   const result = loadSignedJwtConfig(name, prefix);
   if (!result.ok) {
     return createUnconfiguredClient(
@@ -21,10 +33,17 @@ function buildJwtClient(name: string, prefix: string): OAuthClient {
       `missing ${result.missing.join(', ')}`
     );
   }
-  return createSignedJwtClient(result.config);
+  return createSignedJwtClient({
+    ...result.config,
+    logger: childLogger(parent, name),
+  });
 }
 
-function buildSecretClient(name: string, prefix: string): OAuthClient {
+function buildSecretClient(
+  name: string,
+  prefix: string,
+  parent: FastifyBaseLogger | undefined
+): OAuthClient {
   const result = loadClientSecretConfig(name, prefix);
   if (!result.ok) {
     return createUnconfiguredClient(
@@ -32,14 +51,17 @@ function buildSecretClient(name: string, prefix: string): OAuthClient {
       `missing ${result.missing.join(', ')}`
     );
   }
-  return createClientSecretClient(result.config);
+  return createClientSecretClient({
+    ...result.config,
+    logger: childLogger(parent, name),
+  });
 }
 
-export function buildClients(): Clients {
+export function buildClients(logger?: FastifyBaseLogger): Clients {
   return {
-    aps: buildJwtClient('aps', 'APS'),
-    sdx: buildJwtClient('sdx', 'SDX'),
-    gwa: buildJwtClient('gwa', 'GWA'),
-    css: buildSecretClient('css', 'CSS'),
+    aps: buildJwtClient('aps', 'APS', logger),
+    sdx: buildJwtClient('sdx', 'SDX', logger),
+    gwa: buildJwtClient('gwa', 'GWA', logger),
+    css: buildSecretClient('css', 'CSS', logger),
   };
 }

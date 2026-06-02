@@ -2,10 +2,7 @@ import cedar, {
   AuthorizationCall,
   EntityUid,
 } from '@cedar-policy/cedar-wasm/nodejs';
-import { Logger } from '../../logger';
-import { SDXPolicy as SDX_R0_00_Policy } from './policies/SDX.R0.00';
-
-const logger = Logger('gateway-patterns.policy');
+import { SDXPolicy as SDX_R0_00_Policy } from './SDX.R0.00/index.js';
 
 const POLICY_REGISTRY: Record<
   string,
@@ -50,8 +47,6 @@ function EvaluatePolicy(
   resource: EntityUid,
   context: Record<string, CedarValueJson>
 ): PolicyResult {
-  logger.info(`Cedar version: ${cedar.getCedarVersion()}`);
-
   const call: AuthorizationCall = {
     principal,
     action,

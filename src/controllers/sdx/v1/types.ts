@@ -5,7 +5,7 @@
 export interface SubsystemInput {
   name: string;
   description?: string;
-  integrationId?: string;
+  environments?: string[];
 }
 
 /**
@@ -15,6 +15,7 @@ export interface SubsystemInput {
 export interface OpenAPISpecInput {
   spec: string;
   subsystem: string;
+  environments?: string[];
 }
 
 /**
@@ -45,6 +46,9 @@ export interface ConnectionRequestInput {
   serviceId: string;
   isApproved?: boolean;
   isActive?: boolean;
+  requesterDetails?: any;
+  clientResources?: any;
+  serviceResources?: any;
 }
 
 export interface ExpressRequest extends Express.Request {}

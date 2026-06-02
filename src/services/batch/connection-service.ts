@@ -243,6 +243,26 @@ class ConnectionService {
     );
     return records;
   };
+
+  listConnectionsByClientId = async (
+    context: Keystone,
+    clientId: string
+  ): Promise<KeystoneConnectionRequest[]> => {
+    const batchClause = {
+      query: '$clientId: String',
+      clause: '{ clientId: $clientId }',
+      variables: { clientId },
+    };
+
+    const records: KeystoneConnectionRequest[] = await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      batchClause
+    );
+    return records;
+  };
 }
 
 export { ConnectionService };

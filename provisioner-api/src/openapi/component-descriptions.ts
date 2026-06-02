@@ -22,4 +22,27 @@ export const componentSchemaDescriptions: Record<
     description:
       'Acknowledgement of a submitted integration access request, with per-resource queue results.',
   },
+  Resource: {
+    description:
+      'A single resource in a submitted set; the `kind` selects the provider that applies it.',
+  },
+  ApplyResourcesRequest: {
+    description:
+      'A set of resources to dispatch to their owning providers.',
+  },
+  ApplyResourcesResponse: {
+    description:
+      'Per-resource outcome of dispatching a submitted resource set to its providers.',
+  },
+  ConnectionChangeRequest: {
+    description:
+      'Connection change to apply to SDX; mirrors the SDX Member create-connection input.',
+  },
+  ConnectionChangeResponse: {
+    description: 'Outcome of applying a connection change to SDX.',
+  },
+  ApplyPatternRequest: {
+    description:
+      'Parameters for evaluating a gateway pattern whose resources are then dispatched.',
+  },
 };

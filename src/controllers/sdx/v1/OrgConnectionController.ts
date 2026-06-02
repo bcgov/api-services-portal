@@ -17,6 +17,7 @@ import { ConnectionRequest } from '../../../services/batch/types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ConnectionRequestInput } from './types';
 import {
+  parseJsonString,
   removeEmpty,
   removeKeys,
   transformAllRefID,
@@ -64,6 +65,16 @@ export class OrgConnectionController extends Controller {
       .map((o) =>
         transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
       )
+      .map((o) =>
+        parseJsonString(o, [
+          'scopes',
+          'requesterDetails',
+          'clientResources',
+          'serviceResources',
+        ])
+      )
+      .map((o) => parseJsonString(o, ['requesterDetails']))
+      .map((o) => parseJsonString(o, ['serviceResources']))
       .map((o) => removeKeys(o, ['slug']));
   }
 

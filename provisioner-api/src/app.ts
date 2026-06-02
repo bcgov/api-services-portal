@@ -7,7 +7,16 @@ import clientsPlugin from './plugins/clients.js';
 import servicesPlugin from './plugins/services.js';
 import controllersPlugin from './plugins/controllers.js';
 import { registerSubsystemsRoutes } from './routes/subsystems.js';
+import { registerResourcesRoutes } from './routes/resources.js';
+import { registerPatternsRoutes } from './routes/patterns.js';
 import { sdxSchemas } from './schemas/sdx.js';
+import { resourceSchemas } from './schemas/resources.js';
+import { ProblemSchema } from './errors/problem.js';
+import {
+  ERROR_RESPONSE_REFS,
+  problemResponses,
+} from './openapi/error-responses.js';
+import errorHandlerPlugin from './plugins/error-handler.js';
 import { pathSummaries } from './openapi/path-summaries.js';
 import { callbackSummaries } from './openapi/callback-summaries.js';
 import { componentSchemaDescriptions } from './openapi/component-descriptions.js';
@@ -16,9 +25,13 @@ import { decorateOpenApi } from './openapi/decorate.js';
 const API_PREFIX = '/v1';
 
 export async function buildApp(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
+  const app = Fastify({
+    logger: { level: process.env.LOG_LEVEL ?? 'info' },
+  }).withTypeProvider<TypeBoxTypeProvider>();
 
   for (const schema of sdxSchemas) app.addSchema(schema);
+  for (const schema of resourceSchemas) app.addSchema(schema);
+  app.addSchema(ProblemSchema);
 
   await app.register(swagger, {
     refResolver: {
@@ -44,6 +57,16 @@ export async function buildApp(): Promise<FastifyInstance> {
         },
       ],
       tags: [
+        {
+          name: 'Patterns',
+          description:
+            'Evaluate gateway patterns into resources and dispatch them to their owning providers.',
+        },
+        {
+          name: 'Resources',
+          description:
+            'Apply multi-document resource files; each resource is dispatched to the provider (APS, SDX, GWA, or CSS) that owns its kind.',
+        },
         {
           name: 'Subsystems',
           description:
@@ -84,6 +107,7 @@ export async function buildApp(): Promise<FastifyInstance> {
             openIdConnectUrl: 'https://well_known_endpoint',
           },
         },
+        responses: problemResponses,
       },
     },
     transformObject: (doc) =>
@@ -92,6 +116,7 @@ export async function buildApp(): Promise<FastifyInstance> {
             pathSummaries,
             callbackSummaries,
             componentSchemaDescriptions,
+            errorResponseRefs: ERROR_RESPONSE_REFS,
           })
         : doc.swaggerObject,
   });
@@ -108,10 +133,13 @@ export async function buildApp(): Promise<FastifyInstance> {
     },
   });
 
+  await app.register(errorHandlerPlugin);
   await app.register(clientsPlugin);
   await app.register(servicesPlugin);
   await app.register(controllersPlugin);
   await app.register(registerSubsystemsRoutes, { prefix: API_PREFIX });
+  await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
+  await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
 
   return app;
 }

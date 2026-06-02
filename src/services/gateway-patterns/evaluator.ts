@@ -1,10 +1,5 @@
 import { FieldErrors, ValidateError } from 'tsoa';
 import { SimpleServicePattern } from './patterns/simple-service';
-import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
-import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
-import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
-import { SDXKeysPattern } from './patterns/sdx-keys';
-import { SDXSubsystemsPattern } from './patterns/sdx-subsystem';
 
 export interface PatternOutput {
   documents: any[];
@@ -20,11 +15,6 @@ interface PatternProcessor {
 
 const PATTERNS: Record<string, PatternProcessor> = {
   [SimpleServicePattern.id]: SimpleServicePattern,
-  [SDXP2PConsumerPattern.id]: SDXP2PConsumerPattern,
-  [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
-  [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
-  [SDXKeysPattern.id]: SDXKeysPattern,
-  [SDXSubsystemsPattern.id]: SDXSubsystemsPattern,
 };
 
 export interface GatewayPatternConfig {

@@ -31,6 +31,12 @@ export const ApplyResources = async (
     key_sets: [],
   };
 
+  /**
+   * 3 provisioners
+   * - aps : API Services Portal (Product, Application)
+   * - sdx : Secure Data Exchange (GatewayService, GatewayKey, GatewayKeySet)
+   * - css : Common SSO (Integration)
+   */
   config.documents.forEach((doc: any) => {
     if (doc.kind === 'GatewayService') {
       delete doc.kind;

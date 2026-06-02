@@ -215,16 +215,15 @@ const syncListOfRecords = async function (
 // }
 
 function buildQueryResponse(md: any, children: string[] = undefined): string[] {
-  const relationshipFields = Object.keys(
-    md.transformations
-  ).filter((tranField: any) =>
-    [
-      'byKey',
-      'connectOne',
-      'connectExclusiveList',
-      'connectExclusiveListCreate',
-      'connectMany',
-    ].includes(md.transformations[tranField].name)
+  const relationshipFields = Object.keys(md.transformations).filter(
+    (tranField: any) =>
+      [
+        'byKey',
+        'connectOne',
+        'connectExclusiveList',
+        'connectExclusiveListCreate',
+        'connectMany',
+      ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
     .filter((s: string) => !relationshipFields.includes(s))
@@ -438,11 +437,18 @@ export const syncRecords = async function (
               );
               logger.debug('CHILDREN [%s] %j', transformKey, allIds);
               childResults.push(...allIds);
-              if (allIds.filter((record) => record.status != 200).length !== 0) {
+              if (
+                allIds.filter((record) => record.status != 200).length !== 0
+              ) {
                 throw new Error('Failed updating children');
               }
-              if (allIds.filter((record) => typeof record.ownedBy != 'undefined').length !== 0) {
-                throw new Error('There are some child records that have exclusive ownership already!');
+              if (
+                allIds.filter((record) => typeof record.ownedBy != 'undefined')
+                  .length !== 0
+              ) {
+                throw new Error(
+                  'There are some child records that have exclusive ownership already!'
+                );
               }
               json[transformKey + '_ids'] = allIds.map((status) => status.id);
             }
@@ -551,12 +557,16 @@ export const syncRecords = async function (
               throw new Error('Failed updating children');
             }
             logger.debug('%j', localRecord);
-            if (allIds.filter(
+            if (
+              allIds.filter(
                 (record) =>
                   typeof record.ownedBy != 'undefined' &&
                   record.ownedBy != localRecord.id
-              ).length !== 0) {
-              throw new Error('There are some child records that have ownership already (update not allowed)!');
+              ).length !== 0
+            ) {
+              throw new Error(
+                'There are some child records that have ownership already (update not allowed)!'
+              );
             }
 
             json[transformKey + '_ids'] = allIds.map((status) => status.id);
@@ -747,9 +757,10 @@ export const removeAllButKeys = (obj: object, keys: string[]) => {
 
 export const parseJsonString = (obj: any, keys: string[]) => {
   Object.entries(obj).forEach(
-    ([key, val]) =>
-      (val && typeof val === 'object' && parseJsonString(val, keys)) ||
-      (keys.includes(key) && (obj[key] = JSON.parse(obj[key])))
+    ([key, val]) => val && typeof val === 'object' && parseJsonString(val, keys)
+  );
+  Object.entries(obj).forEach(
+    ([key, val]) => keys.includes(key) && (obj[key] = JSON.parse(obj[key]))
   );
   return obj;
 };

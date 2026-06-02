@@ -12,6 +12,7 @@ const {
 const { logger } = require('../logger');
 const { OpenAPISpecService } = require('../services/batch/oas-service');
 const { ConnectionService } = require('../services/batch/connection-service');
+const { type } = require('node:os');
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -37,6 +38,21 @@ module.exports = {
       ref: 'Organization',
       access: { update: false },
     },
+    scopes: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '[]',
+    },
+    policyVersion: {
+      type: Text,
+      isRequired: true,
+      access: FieldEnforcementPoint,
+    },
+    environment: {
+      type: Text,
+      isRequired: true,
+      access: FieldEnforcementPoint,
+    },
     isApproved: {
       type: Checkbox,
       isRequired: true,
@@ -48,6 +64,21 @@ module.exports = {
       isRequired: true,
       defaultValue: true,
       access: FieldEnforcementPoint,
+    },
+    requesterDetails: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
+    },
+    clientResources: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
+    },
+    serviceResources: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
     },
     slug: {
       type: Slug,

@@ -38,6 +38,10 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    environments: {
+      type: Text,
+      isRequired: true,
+    },
     operations: {
       type: Text,
       isRequired: true,

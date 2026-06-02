@@ -43,28 +43,25 @@ const SubsystemsListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
   ],
 });
 
-const AllowedServicesResponse = Type.Array(
-  Type.Ref(IntegrationAccessRequest),
-  {
-    description:
-      'Allowed-service grants currently provisioned for the subsystem.',
-    examples: [
-      [
-        {
-          submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-          integrationId: 'integration-42',
-          resourceServers: [
-            {
-              id: 'claims',
-              environment: 'dev',
-              services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
-            },
-          ],
-        },
-      ],
+const AllowedServicesResponse = Type.Array(Type.Ref(IntegrationAccessRequest), {
+  description:
+    'Allowed-service grants currently provisioned for the subsystem.',
+  examples: [
+    [
+      {
+        submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+        integrationId: 'integration-42',
+        resourceServers: [
+          {
+            id: 'claims',
+            environment: 'dev',
+            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+          },
+        ],
+      },
     ],
-  }
-);
+  ],
+});
 
 const security = [{ jwt: [] }];
 
@@ -129,7 +126,7 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
           }),
         }),
         querystring: Type.Object({
-          integrationId: Type.Optional(
+          integrationId: Type.Required(
             Type.String({
               description: INTEGRATION_ID_DESC,
               examples: ['integration-42'],

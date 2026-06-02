@@ -1,14 +1,6 @@
-import { SubsystemService } from '../../../services/batch/subsystem';
-import { RuntimeGroupService } from '../../../services/batch/runtime-group';
-import assert from '../../user-assert';
 import crypto, { X509Certificate } from 'crypto';
-import {
-  getOrganization,
-  parseOrganizationMemberDetails,
-} from '../../../services/keystone/organization';
-import { Logger } from '../../../logger';
-
-const logger = Logger('sdx-keys-pattern');
+import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import { assert } from './utils.js';
 
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
@@ -18,8 +10,8 @@ function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
     .filter((cert) => cert.length > 0);
 }
 
-export interface SDXKeyConfig extends Record<string, any> {
-  organization: string;
+export interface SDXKeyConfig {
+  organization?: string;
   runtime_group_name?: string;
   client_id?: string;
   public_key_pem?: string;
@@ -51,24 +43,23 @@ interface SDXKeysPatternData {
  */
 export const SDXKeysPattern = {
   id: 'sdx-keys.r1',
-  requiredParams: ['organization'],
+  requiredParams: [],
 
   inject: async (
-    ctx: any,
+    api: SdxMemberApiClient,
     inputs: Record<string, any>
   ): Promise<SDXKeysPatternData> => {
     const profile: any = {};
 
     if (inputs.runtime_group_name) {
-      // retrieve the runtime group details
-      const rgService = new RuntimeGroupService();
-      const rg = await rgService.findRuntimeGroupByUniqueName(
-        ctx,
-        inputs.runtime_group_name
-      );
+      // retrieve the runtime group details owned by the organization
+      const owned = await api.listRuntimeGroups(inputs.organization, {
+        filter: 'owned',
+      });
+      const rg = owned.find((g) => g.name === inputs.runtime_group_name);
 
       assert.strictEqual(
-        rg.organization.name === inputs.organization,
+        Boolean(rg),
         true,
         'Organization does not own this runtime group'
       );
@@ -79,19 +70,14 @@ export const SDXKeysPattern = {
       profile.qualifier = `key-${inputs.runtime_group_name}`;
       profile.type = 'runtime-group';
       profile.value = inputs.runtime_group_name;
-      profile.gateway_id = rg.namespace;
+      profile.gateway_id = rg!.gatewayId;
     } else if (inputs.client_id) {
       // retrieve the subsystem details for the client_id
-      const subsysService = new SubsystemService();
-      const subsystem = await subsysService.findSubsystemByClientId(
-        ctx,
-        inputs.client_id
-      );
+      const subsystem = await api.getCatalogSubsystem(inputs.client_id);
 
-      assert.strictEqual(
-        subsystem.organization.name === inputs.organization,
-        true,
-        'Organization does not own this client subsystem'
+      const orgSubsystem = await api.getSubsystemClient(
+        subsystem.organization?.name!,
+        subsystem.name
       );
 
       const id = inputs.client_id.toLowerCase();
@@ -102,14 +88,25 @@ export const SDXKeysPattern = {
       profile.qualifier = `key-${id}`;
       profile.type = 'client';
       profile.value = inputs.client_id;
-      profile.gateway_id = subsystem.namespace;
+      profile.gateway_id = orgSubsystem.gateway?.id;
     } else {
-      // assume organization
-      const org = await getOrganization(ctx, inputs.organization);
+      // assume organization — resolve the member details from any subsystem
+      // belonging to the organization in the catalog.
+      const organizations: any = await api.listOrganizations();
+      const orgMember = organizations.find(
+        (s: any) => s.name === inputs.organization && s.member
+      );
 
-      const member = parseOrganizationMemberDetails(org.tags);
+      assert.strictEqual(
+        Boolean(orgMember),
+        true,
+        'Organization member details not found'
+      );
 
-      const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
+      const member = orgMember!.member!;
+
+      const memberText =
+        `${member.memberClass}.${member.memberId}`.toLowerCase();
 
       profile.keySetName = `sdx.org.${memberText}`;
       profile.name = `sdx.keys.${memberText}.org`;
@@ -117,7 +114,8 @@ export const SDXKeysPattern = {
       profile.qualifier = `key-${memberText}`;
       profile.type = 'organization';
       profile.value = inputs.organization;
-      profile.gateway_id = `sdx-o-${member.memberClass}-${member.memberId}`.toLowerCase();
+      profile.gateway_id =
+        `sdx-o-${member.memberClass}-${member.memberId}`.toLowerCase();
     }
 
     let jwkList: any[] = [];
@@ -162,12 +160,18 @@ export const SDXKeysPattern = {
       }
     }
 
+    // assert.strictEqual(
+    //   profile.gateway_id !== undefined,
+    //   true,
+    //   'Missing key information to construct gateway_id'
+    // );
+
     return {
       profile,
       jwk_list: jwkList,
       public_key_pem: publicKeyPem,
       gateway_id: profile.gateway_id,
-    };
+    } as SDXKeysPatternData;
   },
 
   eval: (_inputs: Record<string, string>, data: SDXKeysPatternData) => {
@@ -218,14 +222,10 @@ export const SDXKeysPattern = {
   },
 };
 
-function verifyCertificateChain(
-  chainPems: string[]
-): { valid: boolean; error?: string } {
-  logger.info(
-    'Verifying certificate chain with %d certificates',
-    chainPems.length
-  );
-
+function verifyCertificateChain(chainPems: string[]): {
+  valid: boolean;
+  error?: string;
+} {
   try {
     const certs = chainPems.map((pem) => new X509Certificate(pem));
 
@@ -233,7 +233,6 @@ function verifyCertificateChain(
       const subject = certs[i];
       const issuer = certs[i + 1];
 
-      logger.info('Eval %j', subject.subject);
       // Check issuer name matches
       if (subject.issuer !== issuer.subject) {
         return {

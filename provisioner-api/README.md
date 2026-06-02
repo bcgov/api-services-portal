@@ -62,8 +62,9 @@ docker run --rm -p 3000:3000 --env-file .env provisioner-api:dev
 ## Run from source (local dev)
 
 ```bash
+set -a; source .env; set +a;
 npm install
-npm run dev
+npm run dev | npx pino-pretty
 ```
 
 ## Endpoints
@@ -85,22 +86,27 @@ Docs and spec:
 
 Four authenticated HTTP clients are available on `app.clients`:
 
-|Client|Auth|Env-var prefix|
-|---|---|---|
-|`aps`|OIDC client-credentials with `private_key_jwt`|`APS_`|
-|`sdx`|OIDC client-credentials with `private_key_jwt`|`SDX_`|
-|`gwa`|OIDC client-credentials with `private_key_jwt`|`GWA_`|
-|`css`|OIDC client-credentials with `client_secret_basic`|`CSS_`|
+| Client | Auth                                               | Env-var prefix |
+| ------ | -------------------------------------------------- | -------------- |
+| `aps`  | OIDC client-credentials with `private_key_jwt`     | `APS_`         |
+| `sdx`  | OIDC client-credentials with `private_key_jwt`     | `SDX_`         |
+| `gwa`  | OIDC client-credentials with `private_key_jwt`     | `GWA_`         |
+| `css`  | OIDC client-credentials with `client_secret_basic` | `CSS_`         |
 
 Built on [`oauth4webapi`](https://github.com/panva/oauth4webapi) + [`jose`](https://github.com/panva/jose) (web-standard fetch, no legacy deps). Tokens are cached in-memory until 30 seconds before `expires_in`, with single-flight refresh.
 
-See `.env.example` for the full env-var contract. Each prefix needs `*_BASE_URL`, `*_TOKEN_URL`, `*_CLIENT_ID`, plus `*_PRIVATE_KEY_PATH` (signed JWT) or `*_CLIENT_SECRET` (CSS). Optional: `*_SCOPE`, `*_AUDIENCE`, and for signed JWT `*_KEY_ALG` (default `RS256`) and `*_KID`. The private key file must be PEM-encoded PKCS#8.
+See `.env.example` for the full env-var contract. Each prefix needs `*_BASE_URL`, `*_TOKEN_URL`, `*_CLIENT_ID`, plus either:
+
+- **signed-JWT clients (APS/SDX/GWA):** `*_KEYSTORE_PATH` and `*_KEYSTORE_PASSWORD`. The file must be a Sun-format JKS keystore (e.g. produced by `keytool -genkeypair -storetype JKS ...`). If the JKS holds more than one private-key entry, set `*_KEY_ALIAS` to choose one. Optional: `*_KEY_ALG` (default `RS256`), `*_KID`, `*_SCOPE`, `*_AUDIENCE`.
+- **client-secret client (CSS):** `*_CLIENT_SECRET`. Optional: `*_SCOPE`, `*_AUDIENCE`.
+
+The JKS file is parsed inline (Sun proprietary format: `0xFEEDFEED` magic, EncryptedPrivateKeyInfo entries protected with the JKS key-protector OID `1.3.6.1.4.1.42.2.17.1.1`). Only JKS is supported — JCEKS and PKCS#12 will be rejected with a clear error.
 
 Usage in a route:
 
 ```ts
-const res = await app.clients.aps.fetch('/products')
-const products = await res.json()
+const res = await app.clients.aps.fetch('/products');
+const products = await res.json();
 ```
 
 If env vars are missing for a given client, the app still starts; calls to that client throw a clear `not configured: missing X, Y` error.

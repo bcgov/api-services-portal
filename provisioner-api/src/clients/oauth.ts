@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises';
+import type { FastifyBaseLogger } from 'fastify';
 import * as oauth from 'oauth4webapi';
-import { importPKCS8 } from 'jose';
+import { loadJwsKeyFromJks } from './jks.js';
 
 const REFRESH_BUFFER_SECONDS = 30;
 
@@ -18,10 +18,18 @@ interface CommonConfig {
   clientId: string;
   scope?: string;
   audience?: string;
+  /**
+   * Permit non-HTTPS token endpoints. For local development only — never set
+   * this in a deployed environment.
+   */
+  allowInsecure?: boolean;
+  logger?: FastifyBaseLogger;
 }
 
 export interface SignedJwtConfig extends CommonConfig {
-  privateKeyPath: string;
+  keystorePath: string;
+  keystorePassword: string;
+  keyAlias?: string;
   keyAlg?: oauth.JWSAlgorithm;
   kid?: string;
 }
@@ -39,9 +47,12 @@ export function createSignedJwtClient(config: SignedJwtConfig): OAuthClient {
   const keyAlg = config.keyAlg ?? 'RS256';
   let keyPromise: Promise<oauth.CryptoKey> | null = null;
   const loadKey = (): Promise<oauth.CryptoKey> =>
-    (keyPromise ??= readFile(config.privateKeyPath, 'utf8').then((pem) =>
-      importPKCS8(pem, keyAlg)
-    ));
+    (keyPromise ??= loadJwsKeyFromJks(
+      config.keystorePath,
+      config.keystorePassword,
+      keyAlg,
+      config.keyAlias
+    ).then((r) => r.key));
 
   const refresh = async (): Promise<TokenCache> => {
     const key = await loadKey();
@@ -74,11 +85,15 @@ async function runClientCredentials(
   if (config.scope) params.set('scope', config.scope);
   if (config.audience) params.set('audience', config.audience);
 
+  const options: oauth.ClientCredentialsGrantRequestOptions | undefined =
+    config.allowInsecure ? { [oauth.allowInsecureRequests]: true } : undefined;
+
   const response = await oauth.clientCredentialsGrantRequest(
     as,
     client,
     clientAuth,
-    params
+    params,
+    options
   );
   const tokens = await oauth.processClientCredentialsResponse(
     as,
@@ -87,11 +102,26 @@ async function runClientCredentials(
   );
   const expiresIn =
     typeof tokens.expires_in === 'number' ? tokens.expires_in : 300;
+  config.logger?.info(
+    {
+      tokenUrl: config.tokenUrl,
+      tokenType: tokens.token_type,
+      expiresIn: tokens.expires_in,
+      scope: tokens.scope,
+      accessToken: redactToken(tokens.access_token),
+    },
+    'client credentials token issued'
+  );
   return {
     accessToken: tokens.access_token,
     expiresAt:
       Math.floor(Date.now() / 1000) + expiresIn - REFRESH_BUFFER_SECONDS,
   };
+}
+
+function redactToken(token: string): string {
+  if (token.length <= 12) return `${'*'.repeat(token.length)} (len=${token.length})`;
+  return `${token.slice(0, 6)}…${token.slice(-4)} (len=${token.length})`;
 }
 
 function buildClient(
@@ -100,6 +130,13 @@ function buildClient(
 ): OAuthClient {
   let cache: TokenCache | null = null;
   let inflight: Promise<TokenCache> | null = null;
+
+  if (config.allowInsecure) {
+    config.logger?.warn(
+      { tokenUrl: config.tokenUrl },
+      'insecure (non-HTTPS) token requests are enabled — development only'
+    );
+  }
 
   const getToken = async (): Promise<string> => {
     const now = Math.floor(Date.now() / 1000);
@@ -116,6 +153,10 @@ function buildClient(
     const url = new URL(path, config.baseUrl + '/').toString();
     const headers = new Headers(init.headers);
     headers.set('authorization', `Bearer ${token}`);
+    config.logger?.debug(
+      { method: init.method ?? 'GET', baseUrl: config.baseUrl, path, url },
+      'upstream fetch'
+    );
     return fetch(url, { ...init, headers });
   };
 

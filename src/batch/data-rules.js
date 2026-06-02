@@ -448,6 +448,7 @@ const metadata = {
       'spec',
       'summary',
       'description',
+      'environments',
       'operations',
       'namespace',
       'organization',
@@ -464,6 +465,9 @@ const metadata = {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
+      },
+      environments: {
+        name: 'toStringDefaultArray',
       },
     },
     example: {
@@ -484,17 +488,20 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace', 'integrationId'],
+    sync: ['name', 'description', 'organization', 'namespace', 'environments'],
     transformations: {
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
       },
+      environments: {
+        name: 'toStringDefaultArray',
+      },
     },
     example: {
       name: 'my-new-subsystem',
-      integrationId: 'integration-123',
+      environments: ['dev', 'test'],
     },
   },
   RuntimeGroup: {
@@ -536,8 +543,23 @@ const metadata = {
     query: 'allConnectionRequests',
     refKey: 'slug',
     compositeRefKey: ['clientId', 'serviceId'],
-    sync: ['clientId', 'serviceId', 'isApproved', 'isActive'],
-    transformations: {},
+    sync: [
+      'clientId',
+      'serviceId',
+      'isApproved',
+      'isActive',
+      'scopes',
+      'policyVersion',
+      'environment',
+      'requesterDetails',
+      'clientResources',
+      'serviceResources',
+    ],
+    transformations: {
+      requesterDetails: { name: 'toString' },
+      clientResources: { name: 'toString' },
+      serviceResources: { name: 'toString' },
+    },
     example: {
       clientId: 'client-123',
       serviceId: 'service-456',

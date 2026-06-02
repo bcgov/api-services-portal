@@ -79,6 +79,22 @@ export class CatalogController extends Controller {
   }
 
   /**
+   *
+   * @returns
+   */
+  @Get('/subsystems/{name}')
+  @OperationId('get-subsystem')
+  public async getSubsystem(
+    @Path('name') name: string
+  ): Promise<SubsystemEntry> {
+    const subsystemService = new SubsystemService();
+    const ctx = this.keystone.sudo();
+    const subsystem = await subsystemService.findSubsystemByClientId(ctx, name);
+    const result = await GetSubsystemEntryForSubsystem(subsystem);
+    return removeKeys(removeEmpty(result), ['gateway']) as SubsystemEntry;
+  }
+
+  /**
    * Retrieve a list of services available in the SDX service catalog.
    *
    * @summary List of services in catalog

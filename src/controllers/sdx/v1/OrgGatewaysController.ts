@@ -21,7 +21,6 @@ import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
-import { ApplyResources } from '../../../services/workflow/sdx-apply-resources';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -86,62 +85,5 @@ export class OrgGatewaysController extends Controller {
     });
 
     return { gatewayId: result.name };
-  }
-
-  /**
-   * Create a new gateway for an organization
-   * PUT /gateway
-   */
-
-  /**
-   * > `Required Scope:` System.Manage
-   *
-   * @summary Generate gateway config from pre-defined patterns
-   * @produces application/yaml
-   */
-  @Put('/pattern')
-  @OperationId('generateConfigFromPattern')
-  @Security('jwt', ['System.Manage'])
-  @SuccessResponse('200', 'OK')
-  @Example<any>({
-    documents: [
-      {
-        kind: 'GatewayService',
-        name: 'sdx.my-service',
-        routes: [],
-      },
-    ],
-  })
-  @Response<UnauthorizedJSON>(401, 'Unauthorized', {
-    code: 'invalid_token',
-    message: 'Missing authorization scope. (403)',
-  })
-  @Response<ValidateErrorJSON>(422, 'Validation Failed', {
-    code: 'validation_error',
-    message: 'Invalid input',
-    fields: {
-      pattern: {
-        message: 'unsupported pattern',
-      },
-    },
-  })
-  public async generateConfigFromPattern(
-    @Path() org: string,
-    @Query() action: 'preview' | 'apply' | 'remove',
-    @Query() dryRun: boolean,
-    @Body() body: GatewayPatternConfigRequest,
-    @Request() request: any
-  ): Promise<any> {
-    const ctx = this.keystone.createContext(request, true);
-
-    body.parameters['organization'] = org; // inject org into parameters for pattern evaluation
-
-    const config = await GetConfigUsingPattern(ctx, body);
-
-    const result = await ApplyResources(ctx, request, action, dryRun, config);
-
-    request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-    request.res?.send(YAML.dump(result, { noRefs: true }));
-    return '';
   }
 }

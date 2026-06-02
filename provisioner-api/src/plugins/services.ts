@@ -8,5 +8,5 @@ declare module 'fastify' {
 }
 
 export default fp(async (app) => {
-  app.decorate('services', buildServices(app.clients));
+  app.decorate('services', buildServices(app.clients, app.log));
 });

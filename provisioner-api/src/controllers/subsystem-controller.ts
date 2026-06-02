@@ -5,6 +5,7 @@ import type {
   TNewIntegrationAccessRequestResponse,
   TSubsystemEnvironment,
 } from '../schemas/sdx.js';
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
 export interface GetSubsystemsInput {
   subjectToken?: string;
@@ -14,7 +15,7 @@ export interface GetSubsystemsInput {
 
 export interface GetSubsystemAllowedServicesInput {
   subsystemId: string;
-  integrationId?: string;
+  integrationId: string;
 }
 
 export interface CreateSubsystemAccessRequestInput {
@@ -23,32 +24,40 @@ export interface CreateSubsystemAccessRequestInput {
 }
 
 export class SubsystemController {
-  constructor(private readonly services: Services) {}
+  constructor(
+    private readonly services: Services,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
 
   async getSubsystems(
-    _input: GetSubsystemsInput
+    input: GetSubsystemsInput
   ): Promise<TSubsystemEnvironment[]> {
-    await this.services.sdxMember.getHello();
-    return [];
+    return await this.services.sdxMember.getSubsystems(
+      input.environment,
+      input.resourceServersOnly,
+      input.subjectToken
+    );
   }
 
   async getSubsystemAllowedServices(
-    _input: GetSubsystemAllowedServicesInput
+    input: GetSubsystemAllowedServicesInput
   ): Promise<TIntegrationAccessRequest[]> {
-    await this.services.sdxMember.getHello();
-    return [];
+    return this.services.sdxMember.getIntegrationAllowedServices(
+      input.subsystemId,
+      input.integrationId,
+      'SDX.R1.00'
+    );
   }
 
   async createSubsystemAccessRequest(
     input: CreateSubsystemAccessRequestInput
   ): Promise<TNewIntegrationAccessRequestResponse> {
-    await this.services.directory.getHello();
-    await this.services.sdxMember.getHello();
-    await this.services.gatewayAdmin.getHello();
-    await this.services.commonSso.getHello();
-    return {
-      submissionId: '00000000-0000-0000-0000-000000000000',
-      results: { [input.subsystemId]: 'queued' },
-    };
+    // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
+    const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    return await this.services.sdxMember.submitIntegrationAccessRequest(
+      submissionId,
+      input.subsystemId,
+      input.request
+    );
   }
 }

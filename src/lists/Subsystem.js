@@ -22,9 +22,9 @@ module.exports = {
       isMultiline: true,
       isRequired: false,
     },
-    integrationId: {
+    environments: {
       type: Text,
-      isRequired: false,
+      isRequired: true,
     },
     organization: { type: Relationship, ref: 'Organization' },
     slug: {

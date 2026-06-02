@@ -8,7 +8,7 @@ declare module 'fastify' {
 }
 
 export default fp(async (app) => {
-  const clients = buildClients();
+  const clients = buildClients(app.log);
   app.decorate('clients', clients);
   app.log.info(
     {

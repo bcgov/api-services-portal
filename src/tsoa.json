@@ -1,7 +1,9 @@
 {
   "entryFile": "server.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
-  "controllerPathGlobs": ["**/v1/*Controller.ts"],
+  "controllerPathGlobs": [
+    "controllers/v1/*Controller.ts"
+  ],
   "spec": {
     "outputDirectory": "controllers/v1",
     "specVersion": 3,
@@ -25,5 +27,7 @@
     "iocModule": "controllers/ioc",
     "authenticationModule": "./auth/auth-tsoa"
   },
-  "ignore": ["**/node_modules/**"]
+  "ignore": [
+    "**/node_modules/**"
+  ]
 }

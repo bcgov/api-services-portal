@@ -2,7 +2,7 @@ import { Type, type Static } from '@sinclair/typebox';
 
 const SubsystemService = Type.Object(
   {
-    description: Type.String({ examples: ['Read-only access to claim data.'] }),
+    summary: Type.String({ examples: ['Read-only access to claim data.'] }),
     scopes: Type.Record(Type.String(), Type.String(), {
       examples: [{ 'Claims.Read': 'Read claim records' }],
     }),
@@ -13,7 +13,7 @@ const SubsystemService = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        description: 'Read-only access to claim data.',
+        summary: 'Read-only access to claim data.',
         scopes: { 'Claims.Read': 'Read claim records' },
         title: 'Claims Service',
         name: 'claims-svc',
@@ -45,7 +45,7 @@ export const SubsystemEnvironment = Type.Object(
         description: 'Authoritative source for benefit claim records.',
         services: [
           {
-            description: 'Read-only access to claim data.',
+            summary: 'Read-only access to claim data.',
             scopes: { 'Claims.Read': 'Read claim records' },
             title: 'Claims Service',
             name: 'claims-svc',

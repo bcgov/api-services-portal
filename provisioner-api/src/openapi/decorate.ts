@@ -17,6 +17,7 @@ interface DecorateOptions {
   pathSummaries: Record<string, PathMeta>;
   callbackSummaries?: Record<string, CallbackMeta>;
   componentSchemaDescriptions?: Record<string, SchemaMeta>;
+  errorResponseRefs?: Record<string, { $ref: string }>;
 }
 
 type AnyDoc = Record<string, any>;
@@ -41,6 +42,7 @@ export function decorateOpenApi<T extends AnyDoc>(
     pathSummaries,
     callbackSummaries = {},
     componentSchemaDescriptions = {},
+    errorResponseRefs = {},
   }: DecorateOptions
 ): T {
   promoteExamplesDeep(doc);
@@ -65,6 +67,7 @@ export function decorateOpenApi<T extends AnyDoc>(
         if (meta.description) item.description ??= meta.description;
       }
       for (const op of operationsOf(item)) {
+        attachErrorResponses(op, errorResponseRefs);
         decorateOperation(op, callbackSummaries);
       }
     }
@@ -86,6 +89,16 @@ function decorateOperation(
   decorateResponses(op.responses);
   decorateRequestBody(op.requestBody);
   decorateCallbacks(op.callbacks, callbackSummaries);
+}
+
+function attachErrorResponses(
+  op: AnyDoc,
+  refs: Record<string, { $ref: string }>
+): void {
+  op.responses ??= {};
+  for (const [status, ref] of Object.entries(refs)) {
+    op.responses[status] ??= ref;
+  }
 }
 
 function decorateResponses(responses: Record<string, AnyDoc> | undefined): void {

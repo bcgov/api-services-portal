@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cedar-policy/cedar-wasm": "^4.11.0",
     "@fastify/swagger": "^9.4.0",
     "@fastify/type-provider-typebox": "^5.1.0",
     "@scalar/fastify-api-reference": "^1.57.5",
@@ -33,6 +34,6 @@
     "typescript": "^5.7.0"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   }
 }
