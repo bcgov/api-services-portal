@@ -7,7 +7,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && copyfiles -u 1 \"src/**/*.{cedar,cedarschema}\" dist",
     "start": "node dist/server.js",
     "spec": "tsx src/print-spec.ts",
     "spec:yaml": "tsx src/print-spec.ts --yaml --out openapi.yaml",
@@ -30,6 +30,7 @@
     "@stoplight/spectral-cli": "^6.11.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
+    "copyfiles": "^2.4.1",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   },
