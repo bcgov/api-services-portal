@@ -27,20 +27,39 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - name: Build GWA API Image
-        run: |
-          git clone https://github.com/bcgov/gwa-api.git --branch dev
-          cd gwa-api/microservices/gatewayApi
-          docker build -t gwa-api:e2e .
-
       - name: Checkout Portal
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
+      - name: Clone GWA API
+        run: git clone https://github.com/bcgov/gwa-api.git --branch dev
+
+      - name: Restore Docker build cache
+        uses: actions/cache@v5
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-e2e-buildx-${{ hashFiles('src/package-lock.json', 'e2e/package-lock.json', 'feeds/package-lock.json', 'docker-compose.yml', 'e2e/Dockerfile', 'local/portal/Dockerfile.E2E', 'feeds/Dockerfile', 'local/keycloak/Dockerfile', 'local/kong/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-e2e-buildx-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build GWA API Image
+        uses: docker/build-push-action@v7
+        with:
+          context: gwa-api/microservices/gatewayApi
+          load: true
+          tags: gwa-api:e2e
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+
       - name: Build Docker Images
-        run: |
-          docker compose --profile testsuite build
+        env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
+        run: docker compose --profile testsuite build
 
       - name: Spin up API Services Portal and Run E2E Tests
         run: |

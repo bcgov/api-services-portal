@@ -5,6 +5,13 @@ x-common-variables: &common-variables
   KONG_PG_USER: konguser
   KONG_PG_PASSWORD: konguser
 
+# Used by CI (aps-cypress-e2e) via BuildKit; missing cache dir is a no-op locally.
+x-e2e-build-cache: &e2e-build-cache
+  cache_from:
+    - type=local,src=/tmp/.buildx-cache
+  cache_to:
+    - type=local,dest=/tmp/.buildx-cache,mode=max
+
 secrets:
   npm_token:
     environment: 'NPM_TOKEN'
@@ -18,6 +25,7 @@ services:
       dockerfile: Dockerfile
       args:
         - KC_VERSION=${KC_VERSION:-26.5.3}
+      <<: *e2e-build-cache
     depends_on:
       kong-db:
         condition: service_healthy
@@ -83,6 +91,7 @@ services:
       dockerfile: ./local/portal/Dockerfile.E2E
       secrets:
         - npm_token
+      <<: *e2e-build-cache
     env_file:
       - .env.local
     ports:
@@ -101,6 +110,7 @@ services:
       dockerfile: Dockerfile
       secrets:
         - npm_token
+      <<: *e2e-build-cache
     env_file:
       - ./local/feeds/.env.local
     restart: on-failure
@@ -157,6 +167,7 @@ services:
     build:
       context: local/kong
       dockerfile: Dockerfile
+      <<: *e2e-build-cache
   kong-migrations-up:
     image: kong:kong-local
     command: kong migrations up && kong migrations finish
@@ -231,6 +242,7 @@ services:
       dockerfile: Dockerfile
       secrets:
         - npm_token
+      <<: *e2e-build-cache
     volumes:
       - ./local/cypress-jwks-url:/src
     command: npm start
@@ -262,6 +274,7 @@ services:
       dockerfile: e2e/Dockerfile
       secrets:
         - npm_token
+      <<: *e2e-build-cache
     volumes:
       - ./e2e/coverage:/e2e/coverage
       - ./e2e/results:/e2e/results
@@ -285,6 +298,7 @@ services:
   astra-gui:
     build:
       context: local/astra
+      <<: *e2e-build-cache
     container_name: astra-gui
     restart: always
     environment:
