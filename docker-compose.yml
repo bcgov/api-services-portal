@@ -311,7 +311,7 @@ services:
       - testsuite
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.30
     container_name: mailpit
     restart: unless-stopped
     ports:
