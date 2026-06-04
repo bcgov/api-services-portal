@@ -1,18 +1,20 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { Clients } from '../clients/index.js';
 import { DirectoryService } from './directory-service.js';
-import { SdxMemberService } from './sdx-member-service.js';
+import { SdxMemberService } from './subsystems-service.js';
 import { GatewayAdminService } from './gateway-admin-service.js';
 import { CommonSsoService } from './common-sso-service.js';
 import { PolicyService } from './policy-service.js';
-import { GatewayPatternEvaluatorService } from './gateway-pattern-evaluator.js';
+import { PatternsEvaluatorService } from './patterns-evaluator.js';
+import { IntegrationAccessService } from './integration-access-service.js';
+import { ResourceDispatcher } from './resource-dispatcher.js';
 
 export {
   DirectoryService,
   SdxMemberService,
   GatewayAdminService,
   CommonSsoService,
-  GatewayPatternEvaluatorService,
+  PatternsEvaluatorService,
 };
 
 export interface Services {
@@ -20,8 +22,10 @@ export interface Services {
   sdxMember: SdxMemberService;
   gatewayAdmin: GatewayAdminService;
   commonSso: CommonSsoService;
+  integrationAccess: IntegrationAccessService;
   policyEngine: PolicyService;
-  patternEvaluator: GatewayPatternEvaluatorService;
+  patternsEvaluator: PatternsEvaluatorService;
+  resourceDispatcher: ResourceDispatcher;
 }
 
 function child(
@@ -43,10 +47,35 @@ export function buildServices(
       child(logger, 'gatewayAdmin')
     ),
     commonSso: new CommonSsoService(clients.css, child(logger, 'commonSso')),
-    policyEngine: new PolicyService(clients.aps, child(logger, 'policyEngine')),
-    patternEvaluator: new GatewayPatternEvaluatorService(
+    integrationAccess: new IntegrationAccessService(
       clients.sdx,
-      child(logger, 'patternEvaluator')
+      child(logger, 'integrationAccess')
+    ),
+    policyEngine: new PolicyService(child(logger, 'policyEngine')),
+    patternsEvaluator: new PatternsEvaluatorService(
+      clients.sdx,
+      child(logger, 'patternsEvaluator')
+    ),
+    resourceDispatcher: new ResourceDispatcher(
+      {
+        directory: new DirectoryService(
+          clients.aps,
+          child(logger, 'directory')
+        ),
+        sdxMember: new SdxMemberService(
+          clients.sdx,
+          child(logger, 'sdxMember')
+        ),
+        gatewayAdmin: new GatewayAdminService(
+          clients.gwa,
+          child(logger, 'gatewayAdmin')
+        ),
+        commonSso: new CommonSsoService(
+          clients.css,
+          child(logger, 'commonSso')
+        ),
+      },
+      child(logger, 'resourceDispatcher')
     ),
   };
 }

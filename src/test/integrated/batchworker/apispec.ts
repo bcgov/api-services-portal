@@ -44,6 +44,7 @@ import { LoadOpenAPISpec } from '../../../services/workflow/openapi-spec-loader'
       organization: 'ministry-of-citizens-services',
       subsystem: 'MY-SVC',
       state: 'active',
+      environment: 'lab',
     };
 
     const data = await LoadOpenAPISpec(ctx, { ...json });

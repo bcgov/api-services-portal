@@ -38,7 +38,7 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
-    environments: {
+    environment: {
       type: Text,
       isRequired: true,
     },

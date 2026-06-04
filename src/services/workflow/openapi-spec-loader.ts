@@ -10,6 +10,7 @@ const logger = Logger('wf.OASLoader');
 export interface OpenAPISpecInput {
   organization: string;
   subsystem: string;
+  environment: string;
   spec: string;
   state?: string;
 }
@@ -57,13 +58,14 @@ export const LoadOpenAPISpec = async (
     }
   }
 
-  const serviceName = BuildServiceName(subsystemRecord, oas);
+  const serviceName = BuildServiceName(subsystemRecord, spec.environment, oas);
 
   outSpec.spec = spec.spec;
   outSpec.name = serviceName;
   (outSpec as any).namespace = subsystemRecord.namespace;
   outSpec.organization = spec.organization;
   outSpec.subsystem = spec.subsystem;
+  outSpec.environment = spec.environment;
   outSpec.title = oas.info?.title;
   outSpec.summary = oas.info?.summary;
   outSpec.version = oas.info?.version;

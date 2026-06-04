@@ -2,8 +2,6 @@ import { Type } from '@sinclair/typebox';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 import {
-  ApplyResourcesRequest,
-  ApplyResourcesResponse,
   ConnectionChangeRequest,
   ConnectionChangeResponse,
 } from '../schemas/resources.js';
@@ -14,29 +12,34 @@ export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
   app
 ) => {
   app.post(
-    '/resources/connection-change',
+    '/connections/:id',
     {
       schema: {
-        tags: ['Resources'],
-        summary: 'Apply a connection change',
+        tags: ['Resource Patterns'],
+        summary: 'Evaluate connection request',
         operationId: 'connectionChange',
         description:
-          'Applies a connection change (create or update) using the same ' +
-          'input as the SDX Member create-connection operation. The owning ' +
-          'organization is resolved from the service catalog and the change ' +
-          'is forwarded to SDX.',
+          'Evaluate the SDX patterns relevant to the connection request and dispatch them to the providers that own each kind. Returns the per-provider apply outcomes.',
         security,
         body: Type.Ref(ConnectionChangeRequest),
-        querystring: Type.Object({
-          action: Type.Union([Type.Literal('preview'), Type.Literal('apply')], {
-            description: 'The type of connection change to apply.',
+        params: Type.Object({
+          id: Type.String({
+            description: 'Connection request identifier to evaluate.',
+            examples: ['10'],
           }),
         }),
+        querystring: Type.Object({
+          action: Type.Union([Type.Literal('preview'), Type.Literal('apply')], {
+            description:
+              'The action to perform on the generated resources (preview, apply).',
+          }),
+        }),
+
         response: { 200: Type.Ref(ConnectionChangeResponse) },
       },
     },
     async (req) =>
-      app.controllers.resource.onConnectionRequestChange(
+      app.controllers.connections.onConnectionRequestChange(
         req.body,
         req.query.action
       )

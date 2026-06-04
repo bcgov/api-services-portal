@@ -1,3 +1,6 @@
+const { transform } = require('lodash');
+const { type } = require('os');
+
 const metadata = {
   Organization: {
     query: 'allOrganizations',
@@ -448,7 +451,7 @@ const metadata = {
       'spec',
       'summary',
       'description',
-      'environments',
+      'environment',
       'operations',
       'namespace',
       'organization',
@@ -465,9 +468,6 @@ const metadata = {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
-      },
-      environments: {
-        name: 'toStringDefaultArray',
       },
     },
     example: {
@@ -488,15 +488,12 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace', 'environments'],
+    sync: ['name', 'description', 'organization', 'namespace'],
     transformations: {
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
-      },
-      environments: {
-        name: 'toStringDefaultArray',
       },
     },
     example: {
@@ -541,7 +538,7 @@ const metadata = {
   },
   ConnectionRequest: {
     query: 'allConnectionRequests',
-    refKey: 'slug',
+    refKey: 'id',
     compositeRefKey: ['clientId', 'serviceId'],
     sync: [
       'clientId',
@@ -554,11 +551,13 @@ const metadata = {
       'requesterDetails',
       'clientResources',
       'serviceResources',
+      'provisionerStatus',
     ],
     transformations: {
       requesterDetails: { name: 'toString' },
       clientResources: { name: 'toString' },
       serviceResources: { name: 'toString' },
+      provisionerStatus: { name: 'toString' },
     },
     example: {
       clientId: 'client-123',
@@ -569,6 +568,16 @@ const metadata = {
     validations: {
       isApproved: { type: 'boolean' },
       isActive: { type: 'boolean' },
+      provisionerStatus: { type: 'entity', entity: 'ProvisionerStatus' },
+    },
+  },
+  ProvisionerStatus: {
+    transient: true,
+    refKey: 'name',
+    sync: ['message', 'status'],
+    transformations: {},
+    validations: {
+      status: { type: 'enum', values: ['pending', 'provisioned', 'failed'] },
     },
   },
   Product: {

@@ -159,7 +159,7 @@ const NewIntegrationAccessResourceServer = Type.Object(
 export const NewIntegrationAccessRequest = Type.Object(
   {
     integrationId: Type.String({ examples: ['integration-42'] }),
-    requestor: Type.String({ examples: ['user@example.gov.bc.ca'] }),
+    requester: Type.String({ examples: ['user@example.gov.bc.ca'] }),
     clientId: Type.String({ examples: ['partner-app'] }),
     privacyZone: Type.String({ examples: ['public'] }),
     resourceServers: Type.Array(NewIntegrationAccessResourceServer),
@@ -170,7 +170,7 @@ export const NewIntegrationAccessRequest = Type.Object(
     examples: [
       {
         integrationId: 'integration-42',
-        requestor: 'user@example.gov.bc.ca',
+        requester: 'user@example.gov.bc.ca',
         clientId: 'partner-app',
         privacyZone: 'public',
         resourceServers: [

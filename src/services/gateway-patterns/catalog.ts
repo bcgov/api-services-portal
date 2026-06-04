@@ -113,6 +113,7 @@ export async function GetCatalog(
       name: c.name,
       title: c.title,
       version: c.version,
+      environment: c.environment,
       summary: c.summary,
       description: c.description,
       spec: includeSpec ? c.spec : undefined,
@@ -189,7 +190,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
   return {
     name: c.name,
     description: c.description,
-    clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
+    clientId: `${member.memberClass}.${member.memberId}.${c.name}`,
     organization: {
       name: c.organization.name,
       title: c.organization.title,
@@ -202,7 +203,11 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
   };
 }
 
-export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
+export function BuildServiceName(
+  subsystemRecord: Subsystem,
+  environment: string,
+  oas: any
+): string {
   const specService = new OpenAPISpecService();
 
   const serviceName = specService.titleToServiceName(oas.info?.title || '');
@@ -213,37 +218,27 @@ export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
     subsystemRecord.organization.tags
   );
 
-  return `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
-}
+  const env = environment.toLocaleUpperCase();
 
-export function ExtractClientIdFromServiceId(serviceId: string): string {
-  const parts = serviceId.split('.');
-  assertAndRaiseValidateError(
-    parts.length >= 5 && parts.length <= 6,
-    'Invalid service id format',
-    'inputs.service_id',
-    'service id should be in format {env}.{member_class}.{member_id}.{subsystem_name}.{service_name}(.{version})'
-  );
-
-  return `${parts[0]}.${parts[1]}.${parts[2]}.${parts[3]}`;
+  return `${env}.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
 }
 
 export function ParseClientId(id: string): any {
   const parts = id.split('.');
   assertAndRaiseValidateError(
-    parts.length === 4 && parts[0] === 'LAB',
+    parts.length === 3,
     'Invalid client id format',
     'inputs.client_id',
-    'client id should be in format LAB.{member_class}.{member_id}.{subsystem_name}'
+    'client id should be in format {member_class}.{member_id}.{subsystem_name}'
   );
 
   return {
     member: {
-      memberClass: parts[1],
-      memberId: parts[2],
+      memberClass: parts[0],
+      memberId: parts[1],
     },
     subsystem: {
-      name: parts[3],
+      name: parts[2],
     },
   };
 }

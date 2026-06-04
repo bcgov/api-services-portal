@@ -156,7 +156,7 @@ export class OrgGroupService {
         permission.policies[0].id
       );
 
-      const groupIds: string[] = policy.groups.map((g: any) => g.id);
+      const groupIds: string[] = policy.groups?.map((g: any) => g.id) || [];
 
       const members = await this.listMembersOfGroups(groupIds);
 
@@ -226,13 +226,11 @@ export class OrgGroupService {
           if (groupMatch.length == 1) {
             rootGroup = groupMatch[0];
           } else {
-            const {
-              created,
-              id,
-            } = await this.keycloakService.createIfMissingForParentGroup(
-              rootGroup,
-              parts[i]
-            );
+            const { created, id } =
+              await this.keycloakService.createIfMissingForParentGroup(
+                rootGroup,
+                parts[i]
+              );
             created && (await this.backfillGroups());
             rootGroup = await this.keycloakService.getGroupById(id);
           }
@@ -319,10 +317,8 @@ export class OrgGroupService {
     // Assume that the client we are authenticating with is the Resource Server
     const cid = (await clientService.findByClientId(this.clientId)).id;
 
-    const permissionPolicies: PolicyRepresentation[] = await clientPolicyService.findPermissionsByName(
-      cid,
-      permissionName
-    );
+    const permissionPolicies: PolicyRepresentation[] =
+      await clientPolicyService.findPermissionsByName(cid, permissionName);
     const permissionPolicy =
       permissionPolicies.length == 0 ? undefined : permissionPolicies[0];
 
@@ -383,8 +379,9 @@ export class OrgGroupService {
         permissionPolicy.id,
         permission
       );
-      const existingPolicyId = (permissionPolicy.config
-        .policies[0] as PolicyRepresentation).id;
+      const existingPolicyId = (
+        permissionPolicy.config.policies[0] as PolicyRepresentation
+      ).id;
 
       assert.strictEqual(
         existingPolicyId,

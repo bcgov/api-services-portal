@@ -12,7 +12,7 @@ export interface ConnectionRequest_SDX_R1_00 {
 
 export interface RequesterDetails {
   submissionId: string;
-  requestor: string;
+  requester: string;
   client: {
     integrationId?: string;
     clientId: string;

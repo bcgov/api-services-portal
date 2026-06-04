@@ -1060,7 +1060,6 @@ export type ConnectionRequest = {
   serviceId?: Maybe<Scalars['String']>;
   clientOrganization?: Maybe<Organization>;
   serviceOrganization?: Maybe<Organization>;
-  scopes?: Maybe<Scalars['String']>;
   policyVersion?: Maybe<Scalars['String']>;
   environment?: Maybe<Scalars['String']>;
   isApproved?: Maybe<Scalars['Boolean']>;
@@ -1068,6 +1067,7 @@ export type ConnectionRequest = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  provisionerStatus?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -1078,7 +1078,6 @@ export type ConnectionRequestCreateInput = {
   serviceId?: Maybe<Scalars['String']>;
   clientOrganization?: Maybe<OrganizationRelateToOneInput>;
   serviceOrganization?: Maybe<OrganizationRelateToOneInput>;
-  scopes?: Maybe<Scalars['String']>;
   policyVersion?: Maybe<Scalars['String']>;
   environment?: Maybe<Scalars['String']>;
   isApproved?: Maybe<Scalars['Boolean']>;
@@ -1086,13 +1085,13 @@ export type ConnectionRequestCreateInput = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  provisionerStatus?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
 };
 
 export type ConnectionRequestUpdateInput = {
   clientId?: Maybe<Scalars['String']>;
   serviceId?: Maybe<Scalars['String']>;
-  scopes?: Maybe<Scalars['String']>;
   policyVersion?: Maybe<Scalars['String']>;
   environment?: Maybe<Scalars['String']>;
   isApproved?: Maybe<Scalars['Boolean']>;
@@ -1100,6 +1099,7 @@ export type ConnectionRequestUpdateInput = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  provisionerStatus?: Maybe<Scalars['String']>;
 };
 
 export type ConnectionRequestWhereInput = {
@@ -1153,24 +1153,6 @@ export type ConnectionRequestWhereInput = {
   clientOrganization_is_null?: Maybe<Scalars['Boolean']>;
   serviceOrganization?: Maybe<OrganizationWhereInput>;
   serviceOrganization_is_null?: Maybe<Scalars['Boolean']>;
-  scopes?: Maybe<Scalars['String']>;
-  scopes_not?: Maybe<Scalars['String']>;
-  scopes_contains?: Maybe<Scalars['String']>;
-  scopes_not_contains?: Maybe<Scalars['String']>;
-  scopes_starts_with?: Maybe<Scalars['String']>;
-  scopes_not_starts_with?: Maybe<Scalars['String']>;
-  scopes_ends_with?: Maybe<Scalars['String']>;
-  scopes_not_ends_with?: Maybe<Scalars['String']>;
-  scopes_i?: Maybe<Scalars['String']>;
-  scopes_not_i?: Maybe<Scalars['String']>;
-  scopes_contains_i?: Maybe<Scalars['String']>;
-  scopes_not_contains_i?: Maybe<Scalars['String']>;
-  scopes_starts_with_i?: Maybe<Scalars['String']>;
-  scopes_not_starts_with_i?: Maybe<Scalars['String']>;
-  scopes_ends_with_i?: Maybe<Scalars['String']>;
-  scopes_not_ends_with_i?: Maybe<Scalars['String']>;
-  scopes_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  scopes_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   policyVersion?: Maybe<Scalars['String']>;
   policyVersion_not?: Maybe<Scalars['String']>;
   policyVersion_contains?: Maybe<Scalars['String']>;
@@ -1265,6 +1247,24 @@ export type ConnectionRequestWhereInput = {
   serviceResources_not_ends_with_i?: Maybe<Scalars['String']>;
   serviceResources_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   serviceResources_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provisionerStatus?: Maybe<Scalars['String']>;
+  provisionerStatus_not?: Maybe<Scalars['String']>;
+  provisionerStatus_contains?: Maybe<Scalars['String']>;
+  provisionerStatus_not_contains?: Maybe<Scalars['String']>;
+  provisionerStatus_starts_with?: Maybe<Scalars['String']>;
+  provisionerStatus_not_starts_with?: Maybe<Scalars['String']>;
+  provisionerStatus_ends_with?: Maybe<Scalars['String']>;
+  provisionerStatus_not_ends_with?: Maybe<Scalars['String']>;
+  provisionerStatus_i?: Maybe<Scalars['String']>;
+  provisionerStatus_not_i?: Maybe<Scalars['String']>;
+  provisionerStatus_contains_i?: Maybe<Scalars['String']>;
+  provisionerStatus_not_contains_i?: Maybe<Scalars['String']>;
+  provisionerStatus_starts_with_i?: Maybe<Scalars['String']>;
+  provisionerStatus_not_starts_with_i?: Maybe<Scalars['String']>;
+  provisionerStatus_ends_with_i?: Maybe<Scalars['String']>;
+  provisionerStatus_not_ends_with_i?: Maybe<Scalars['String']>;
+  provisionerStatus_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provisionerStatus_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   slug?: Maybe<Scalars['String']>;
   slug_not?: Maybe<Scalars['String']>;
   slug_contains?: Maybe<Scalars['String']>;
@@ -5972,7 +5972,7 @@ export type OpenApiSpec = {
   title?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
   subsystem?: Maybe<Subsystem>;
@@ -5987,7 +5987,7 @@ export type OpenApiSpecCreateInput = {
   title?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
   subsystem?: Maybe<SubsystemRelateToOneInput>;
@@ -5997,7 +5997,7 @@ export type OpenApiSpecUpdateInput = {
   organization?: Maybe<OrganizationRelateToOneInput>;
   summary?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
 };
@@ -6141,24 +6141,24 @@ export type OpenApiSpecWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  environments?: Maybe<Scalars['String']>;
-  environments_not?: Maybe<Scalars['String']>;
-  environments_contains?: Maybe<Scalars['String']>;
-  environments_not_contains?: Maybe<Scalars['String']>;
-  environments_starts_with?: Maybe<Scalars['String']>;
-  environments_not_starts_with?: Maybe<Scalars['String']>;
-  environments_ends_with?: Maybe<Scalars['String']>;
-  environments_not_ends_with?: Maybe<Scalars['String']>;
-  environments_i?: Maybe<Scalars['String']>;
-  environments_not_i?: Maybe<Scalars['String']>;
-  environments_contains_i?: Maybe<Scalars['String']>;
-  environments_not_contains_i?: Maybe<Scalars['String']>;
-  environments_starts_with_i?: Maybe<Scalars['String']>;
-  environments_not_starts_with_i?: Maybe<Scalars['String']>;
-  environments_ends_with_i?: Maybe<Scalars['String']>;
-  environments_not_ends_with_i?: Maybe<Scalars['String']>;
-  environments_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  environments_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environment?: Maybe<Scalars['String']>;
+  environment_not?: Maybe<Scalars['String']>;
+  environment_contains?: Maybe<Scalars['String']>;
+  environment_not_contains?: Maybe<Scalars['String']>;
+  environment_starts_with?: Maybe<Scalars['String']>;
+  environment_not_starts_with?: Maybe<Scalars['String']>;
+  environment_ends_with?: Maybe<Scalars['String']>;
+  environment_not_ends_with?: Maybe<Scalars['String']>;
+  environment_i?: Maybe<Scalars['String']>;
+  environment_not_i?: Maybe<Scalars['String']>;
+  environment_contains_i?: Maybe<Scalars['String']>;
+  environment_not_contains_i?: Maybe<Scalars['String']>;
+  environment_starts_with_i?: Maybe<Scalars['String']>;
+  environment_not_starts_with_i?: Maybe<Scalars['String']>;
+  environment_ends_with_i?: Maybe<Scalars['String']>;
+  environment_not_ends_with_i?: Maybe<Scalars['String']>;
+  environment_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environment_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   operations?: Maybe<Scalars['String']>;
   operations_not?: Maybe<Scalars['String']>;
   operations_contains?: Maybe<Scalars['String']>;
@@ -8659,8 +8659,6 @@ export enum SortConnectionRequestsBy {
   ClientOrganizationDesc = 'clientOrganization_DESC',
   ServiceOrganizationAsc = 'serviceOrganization_ASC',
   ServiceOrganizationDesc = 'serviceOrganization_DESC',
-  ScopesAsc = 'scopes_ASC',
-  ScopesDesc = 'scopes_DESC',
   PolicyVersionAsc = 'policyVersion_ASC',
   PolicyVersionDesc = 'policyVersion_DESC',
   EnvironmentAsc = 'environment_ASC',
@@ -8675,6 +8673,8 @@ export enum SortConnectionRequestsBy {
   ClientResourcesDesc = 'clientResources_DESC',
   ServiceResourcesAsc = 'serviceResources_ASC',
   ServiceResourcesDesc = 'serviceResources_DESC',
+  ProvisionerStatusAsc = 'provisionerStatus_ASC',
+  ProvisionerStatusDesc = 'provisionerStatus_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
@@ -9064,8 +9064,8 @@ export enum SortOpenApiSpecsBy {
   SummaryDesc = 'summary_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
-  EnvironmentsAsc = 'environments_ASC',
-  EnvironmentsDesc = 'environments_DESC',
+  EnvironmentAsc = 'environment_ASC',
+  EnvironmentDesc = 'environment_DESC',
   OperationsAsc = 'operations_ASC',
   OperationsDesc = 'operations_DESC',
   SpecAsc = 'spec_ASC',
@@ -9202,8 +9202,6 @@ export enum SortSubsystemsBy {
   NamespaceDesc = 'namespace_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
-  EnvironmentsAsc = 'environments_ASC',
-  EnvironmentsDesc = 'environments_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   SlugAsc = 'slug_ASC',
@@ -9285,7 +9283,6 @@ export type Subsystem = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -9294,7 +9291,6 @@ export type SubsystemCreateInput = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -9308,7 +9304,6 @@ export type SubsystemRelateToOneInput = {
 
 export type SubsystemUpdateInput = {
   description?: Maybe<Scalars['String']>;
-  environments?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -9378,24 +9373,6 @@ export type SubsystemWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  environments?: Maybe<Scalars['String']>;
-  environments_not?: Maybe<Scalars['String']>;
-  environments_contains?: Maybe<Scalars['String']>;
-  environments_not_contains?: Maybe<Scalars['String']>;
-  environments_starts_with?: Maybe<Scalars['String']>;
-  environments_not_starts_with?: Maybe<Scalars['String']>;
-  environments_ends_with?: Maybe<Scalars['String']>;
-  environments_not_ends_with?: Maybe<Scalars['String']>;
-  environments_i?: Maybe<Scalars['String']>;
-  environments_not_i?: Maybe<Scalars['String']>;
-  environments_contains_i?: Maybe<Scalars['String']>;
-  environments_not_contains_i?: Maybe<Scalars['String']>;
-  environments_starts_with_i?: Maybe<Scalars['String']>;
-  environments_not_starts_with_i?: Maybe<Scalars['String']>;
-  environments_ends_with_i?: Maybe<Scalars['String']>;
-  environments_not_ends_with_i?: Maybe<Scalars['String']>;
-  environments_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  environments_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   slug?: Maybe<Scalars['String']>;

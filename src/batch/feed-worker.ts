@@ -757,10 +757,9 @@ export const removeAllButKeys = (obj: object, keys: string[]) => {
 
 export const parseJsonString = (obj: any, keys: string[]) => {
   Object.entries(obj).forEach(
-    ([key, val]) => val && typeof val === 'object' && parseJsonString(val, keys)
-  );
-  Object.entries(obj).forEach(
-    ([key, val]) => keys.includes(key) && (obj[key] = JSON.parse(obj[key]))
+    ([key, val]) =>
+      (val && keys.includes(key) && (obj[key] = JSON.parse(val as string))) ||
+      (val && typeof val === 'object' && parseJsonString(val, keys))
   );
   return obj;
 };

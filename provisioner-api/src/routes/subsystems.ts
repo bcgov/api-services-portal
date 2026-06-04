@@ -73,10 +73,10 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
     {
       schema: {
         tags: ['Subsystems'],
-        summary: 'List visible subsystem environments',
+        summary: 'List subsystems',
         operationId: 'getSubsystems',
         description:
-          'Returns the subsystem environments the calling partner service is permitted to see, optionally filtered by subject token, resource-server scope, or environment.',
+          'Returns the list of SDX subsystems, optionally filtered by subject token, service provider flag, or environment.',
         security,
         querystring: Type.Object({
           subjectToken: Type.Optional(
@@ -106,91 +106,6 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
         subjectToken: req.query.subjectToken,
         resourceServersOnly: req.query.resourceServersOnly,
         environment: req.query.environment,
-      })
-  );
-
-  app.get(
-    '/subsystems/:id/allowed-services',
-    {
-      schema: {
-        tags: ['Subsystems'],
-        summary: 'List allowed-service grants for a subsystem',
-        operationId: 'getSubsystemAllowedServices',
-        description:
-          'Returns the integration access requests currently granting access to the subsystem, optionally filtered by integration identifier.',
-        security,
-        params: Type.Object({
-          id: Type.String({
-            description: SUBSYSTEM_ID_DESC,
-            examples: ['claims'],
-          }),
-        }),
-        querystring: Type.Object({
-          integrationId: Type.Required(
-            Type.String({
-              description: INTEGRATION_ID_DESC,
-              examples: ['integration-42'],
-            })
-          ),
-        }),
-        response: { 200: AllowedServicesResponse },
-      },
-    },
-    async (req) =>
-      app.controllers.subsystem.getSubsystemAllowedServices({
-        subsystemId: req.params.id,
-        integrationId: req.query.integrationId,
-      })
-  );
-
-  app.post(
-    '/subsystems/:id/access-requests',
-    {
-      schema: {
-        tags: ['Subsystems'],
-        summary: 'Submit a new integration access request',
-        operationId: 'createSubsystemAccessRequest',
-        description:
-          'Submits a new access request for a partner integration against the subsystem. Approval triggers the `provisionAllowedServices` callback to the partner.',
-        security,
-        params: Type.Object({
-          id: Type.String({
-            description: SUBSYSTEM_ID_DESC,
-            examples: ['claims'],
-          }),
-        }),
-        body: Type.Ref(NewIntegrationAccessRequest),
-        response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
-        callbacks: {
-          provisionAllowedServices: {
-            '/integrations/{$request.body#/integrationId}/allowed-services': {
-              put: {
-                requestBody: {
-                  required: true,
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/IntegrationAccessRequest',
-                      },
-                    },
-                  },
-                },
-                responses: {
-                  '200': {
-                    description:
-                      'Partner acknowledged receipt of the provisioning instruction.',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    async (req) =>
-      app.controllers.subsystem.createSubsystemAccessRequest({
-        subsystemId: req.params.id,
-        request: req.body,
       })
   );
 };

@@ -287,9 +287,9 @@ export interface OpenAPISpec {
   spec?: string;
   summary?: string;
   description?: string;
+  environment?: string;
   operations?: string;
   gatewayId?: string;
-  environments?: string[];
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
 }
@@ -309,7 +309,6 @@ export interface Subsystem {
   name?: string;
   description?: string;
   gatewayId?: string;
-  environments?: string[];
   organization?: OrganizationRefID;
 }
 
@@ -349,7 +348,7 @@ export interface RuntimeGroup {
  * }
  */  
 export interface ConnectionRequest {
-  slug?: string; // Primary Key
+  id?: string; // Primary Key
   clientId?: string;
   serviceId?: string;
   isApproved?: boolean;
@@ -357,9 +356,21 @@ export interface ConnectionRequest {
   scopes?: string;
   policyVersion?: string;
   environment?: string;
+  provisionerStatus?: ProvisionerStatus;
   requesterDetails?: any; // toString
   clientResources?: any; // toString
   serviceResources?: any; // toString
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface ProvisionerStatus {
+  name?: string; // Primary Key
+  message?: string;
+  status?: "pending" | "provisioned" | "failed";
 }
 
 

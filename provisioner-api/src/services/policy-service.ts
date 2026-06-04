@@ -7,10 +7,7 @@ import { OAuthClient } from '../clients/oauth.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
 export class PolicyService {
-  constructor(
-    client: OAuthClient,
-    private readonly logger?: FastifyBaseLogger
-  ) {}
+  constructor(private readonly logger?: FastifyBaseLogger) {}
 
   /**
    * Validate a Connection Request.

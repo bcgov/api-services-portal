@@ -214,7 +214,7 @@ export function EnforcementPoint(params: any) {
         if (matches.length == 0) {
           return 'NA';
         }
-        logger.debug('Evaluating Rule: %j : %j', ruleConditionState, rule);
+        //logger.debug('Evaluating Rule: %j : %j', ruleConditionState, rule);
         if (ruleConditionState && rule.result === RuleResult.Allow) {
           if (rule.filters != null) {
             const filters = [] as any[];

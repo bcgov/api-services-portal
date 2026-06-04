@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   OperationId,
+  Patch,
   Path,
   Put,
   Request,
@@ -23,6 +24,9 @@ import {
   transformAllRefID,
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
+import { Logger } from '../../../logger';
+
+const logger = Logger('controller.org-connection');
 
 @injectable()
 @Route('/organizations/{org}/connections')
@@ -35,7 +39,7 @@ export class OrgConnectionController extends Controller {
     this.keystone = _keystone;
   }
 
-  @Put()
+  @Patch()
   @OperationId('upsertConnection')
   @Security('jwt', ['System.Manage'])
   public async upsertConnection(
@@ -60,22 +64,21 @@ export class OrgConnectionController extends Controller {
       ctx,
       org
     );
+
     return records
       .map((o) => removeEmpty(o))
-      .map((o) =>
-        transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
-      )
+      .map((o) => removeKeys(o, ['slug']))
       .map((o) =>
         parseJsonString(o, [
-          'scopes',
           'requesterDetails',
           'clientResources',
           'serviceResources',
+          'provisionerStatus',
         ])
       )
-      .map((o) => parseJsonString(o, ['requesterDetails']))
-      .map((o) => parseJsonString(o, ['serviceResources']))
-      .map((o) => removeKeys(o, ['slug']));
+      .map((o) =>
+        transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
+      );
   }
 
   @Delete('/{id}')

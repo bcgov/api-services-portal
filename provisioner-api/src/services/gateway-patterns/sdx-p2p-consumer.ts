@@ -1,4 +1,7 @@
-import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import type {
+  ConnectionRequest,
+  SdxMemberApiClient,
+} from '../../clients/sdx-member/index.js';
 import {
   assert,
   getRoutePathPrefix,
@@ -43,6 +46,7 @@ export interface SDXP2PConsumerPatternData {
   service: EnrichedServiceCatalogEntry;
   client: EnrichedSubsystemEntry;
   serviceSubsystem: EnrichedSubsystemEntry;
+  connections: ConnectionRequest[];
 }
 
 /**
@@ -109,6 +113,7 @@ export const SDXP2PConsumerPattern = {
       client: orgClient,
       service: subsystemService,
       serviceSubsystem: serviceSubsystem,
+      connections,
     };
   },
 
@@ -182,7 +187,10 @@ export const SDXP2PConsumerPattern = {
       config['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
     }
 
-    return [config] as any[];
+    return [
+      config,
+      buildIntegrationAllowAccess(inputs as SDXP2PConsumerPatternConfig, data),
+    ] as any[];
   },
 };
 
@@ -311,5 +319,18 @@ function upgradeToTrustKMS(tags: string[], data: SDXP2PConsumerPatternData) {
       signature_header_key: 'X-Edge-Token',
       key_id,
     },
+  };
+}
+
+function buildIntegrationAllowAccess(
+  inputs: SDXP2PConsumerPatternConfig,
+  data: SDXP2PConsumerPatternData
+) {
+  const serviceLocator = data.service.name;
+  const clientLocator = data.client.clientId;
+
+  //const allowAccessDocument = getIntegrationAllowedServices
+  return {
+    kind: 'IntegrationAllowAccess',
   };
 }

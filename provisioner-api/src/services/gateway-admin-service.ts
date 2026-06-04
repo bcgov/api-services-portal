@@ -48,29 +48,24 @@ export class GatewayAdminService {
     );
 
     let gatewayResources = false;
-    const payload: any = {
-      services: [],
-      keys: [],
-      key_sets: [],
-      consumers: [],
-    };
+    const payload: any = {};
 
     resources.forEach((doc: any) => {
       if (doc.kind === 'GatewayService') {
         delete doc.kind;
-        payload.services.push(doc);
+        (payload.services ??= []).push(doc);
         gatewayResources = true;
       } else if (doc.kind === 'GatewayKey') {
         delete doc.kind;
-        payload.keys.push(doc);
+        (payload.keys ??= []).push(doc);
         gatewayResources = true;
       } else if (doc.kind === 'GatewayKeySet') {
         delete doc.kind;
-        payload.key_sets.push(doc);
+        (payload.key_sets ??= []).push(doc);
         gatewayResources = true;
       } else if (doc.kind === 'GatewayConsumer') {
         delete doc.kind;
-        payload.consumers.push(doc);
+        (payload.consumers ??= []).push(doc);
         gatewayResources = true;
       } else {
         this.logger?.error({ kind: doc.kind }, 'Unsupported resource kind');

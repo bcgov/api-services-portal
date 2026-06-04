@@ -38,11 +38,6 @@ module.exports = {
       ref: 'Organization',
       access: { update: false },
     },
-    scopes: {
-      type: Text,
-      isRequired: true,
-      defaultValue: '[]',
-    },
     policyVersion: {
       type: Text,
       isRequired: true,
@@ -76,6 +71,11 @@ module.exports = {
       defaultValue: '{}',
     },
     serviceResources: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
+    },
+    provisionerStatus: {
       type: Text,
       isRequired: true,
       defaultValue: '{}',

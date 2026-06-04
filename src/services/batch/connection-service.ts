@@ -39,7 +39,7 @@ class ConnectionService {
   upsertConnection = async (
     context: Keystone,
     org: string,
-    body: ConnectionRequestUpdateInput
+    body: ConnectionRequestInput
   ): Promise<BatchResult> => {
     // lookup the client subsystem
     const service = new SubsystemService();
@@ -61,6 +61,12 @@ class ConnectionService {
     );
     if (!serviceSpec) {
       throw new Error('Invalid serviceId');
+    }
+
+    if (body.environment && serviceSpec.environment !== body.environment) {
+      throw new Error(
+        `Service environment '${serviceSpec.environment}' does not match requested connection environment '${body.environment}'`
+      );
     }
 
     // if approving the connection, validate the client and service belong to the same organization

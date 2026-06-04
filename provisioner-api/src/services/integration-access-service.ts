@@ -1,151 +1,31 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
-import {
-  SdxMemberApiClient,
-  SubsystemEntry,
-  type BatchResult,
-  type ConnectionRequestInput,
-} from '../clients/sdx-member/index.js';
-import { CreateSubsystemAccessRequestInput } from '../controllers/subsystem-controller.js';
+import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
 import {
   TIntegrationAccessRequest,
   TNewIntegrationAccessRequest,
   TNewIntegrationAccessRequestResponse,
-  TSubsystemEnvironment,
 } from '../schemas/sdx.js';
+import { PolicyService } from './policy-service.js';
 
 /**
  * Getting subsystem details
  * and getting allowed access
  * and raising Connection Requests
  */
-export class SdxMemberService {
+export class IntegrationAccessService {
   /** Typed client for the SDX Member API. */
   readonly api: SdxMemberApiClient;
+  readonly policyService: PolicyService;
+  //readonly resourceDispatcher: ResourceDispatcher;
 
   constructor(
     client: OAuthClient,
     private readonly logger?: FastifyBaseLogger
   ) {
     this.api = new SdxMemberApiClient(client, logger);
-  }
-
-  /**
-   *
-   * @param environment
-   * @param resourceServersOnly
-   * @param subjectToken
-   * @returns TSubsystemEnvironment[]
-   */
-  async getSubsystems(
-    environment?: string,
-    resourceServersOnly?: boolean,
-    subjectToken?: string
-  ): Promise<TSubsystemEnvironment[]> {
-    const services = await this.api.listServiceCatalog();
-
-    if (environment && resourceServersOnly === false) {
-      const records = await this.api.listCatalogSubsystems();
-
-      return records.map((o) => ({
-        id: o.clientId,
-        name: o.name,
-        organization: o.organization?.name || 'unknown',
-        environment: environment,
-        description: o.description || '',
-        services: services
-          .filter((s) => s.subsystem.clientId === o.clientId)
-          .map((s) => ({
-            name: s.name,
-            title: s.title,
-            scopes: s.operations.reduce(
-              (acc: { [name: string]: string }, op) => {
-                op.scopes?.forEach((scope) => {
-                  acc[scope] = '';
-                });
-                return acc;
-              },
-              {}
-            ),
-            summary: s.summary || '',
-          })),
-      }));
-    } else if (environment && resourceServersOnly === true) {
-      // get unique subsystem entries from the catalog
-      const subsystemsMap: Record<string, SubsystemEntry> = {};
-      services.forEach((r) => {
-        if (!subsystemsMap[r.subsystem.clientId]) {
-          subsystemsMap[r.subsystem.clientId] = r.subsystem;
-        }
-      });
-
-      return Object.values(subsystemsMap).map((o) => ({
-        id: o.clientId,
-        name: o.name,
-        organization: o.organization?.name || 'unknown',
-        environment: environment,
-        description: o.description || '',
-        services: services
-          .filter((s) => s.subsystem.clientId === o.clientId)
-          .map((s) => ({
-            name: s.name,
-            title: s.title,
-            scopes: s.operations.reduce(
-              (acc: { [name: string]: string }, op) => {
-                op.scopes?.forEach((scope) => {
-                  acc[scope] = '';
-                });
-                return acc;
-              },
-              {}
-            ),
-            summary: s.summary || '',
-          })),
-      }));
-    } else if (subjectToken) {
-      // check subjectToken JWT is valid
-      // do a search in authz for `provider_user_guid` attribute
-      // matching on the `idir_user_guid` claim (or `sub` although that is ending @azureidir)
-      // lookup all the resource sets that the user has access to
-      // use that to get the list of organizations and from that the list of subsystems
-      //
-      throw new BadRequestError('Not implemented');
-    } else {
-      throw new BadRequestError(
-        'Must provide either subjectToken or (resourceServersOnly and environment) query parameter'
-      );
-    }
-  }
-
-  /**
-   * Applies a connection change (create or update) to SDX. The owning
-   * organization is resolved from the service catalog using the connection's
-   * `serviceId`, then forwarded to the SDX create-connection (upsert) API.
-   */
-  async onConnectionRequestChange(
-    connection: ConnectionRequestInput,
-    action: 'preview' | 'apply'
-  ): Promise<BatchResult> {
-    const service = await this.api.getOASService(connection.serviceId);
-    const orgName = service.subsystem.organization?.name;
-    if (!orgName) {
-      throw new NotFoundError(
-        `Organization for service '${connection.serviceId}' not found`
-      );
-    }
-
-    this.logger?.debug(
-      { serviceId: connection.serviceId, org: orgName },
-      'SdxMemberService.onConnectionRequestChange'
-    );
-
-    // run the policy check
-
-    // if passes, do the gateway patterns to get the resources,
-    // and dispatch the resources
-
-    return this.api.upsertConnection(orgName, connection);
+    this.policyService = new PolicyService(logger);
   }
 
   /**
@@ -185,28 +65,35 @@ export class SdxMemberService {
     };
 
     // evaluate each resource server (RS)
-    const allPromises = input.resourceServers.map(
+    const allConnectionUpserts = input.resourceServers.map(
       async (requestedResourceServer) => {
-        const requesterDetails = {
-          // submissionId,
-          // requestor: accessRequest.requestor,
-          // client: {
-          //   integrationId: accessRequest.integrationId,
-          //   clientId: accessRequest.clientId,
-          //   privacyZone: accessRequest.privacyZone,
-          // },
-          // service: {
-          //   clientId: requestedResourceServer.clientId,
-          //   privacyZone: requestedResourceServer.privacyZone,
-          // },
-        };
-
         // evaluate each service in the RS
         const servicePromises = requestedResourceServer.services.map(
           async (requestedService) => {
+            const requesterDetails = {
+              submissionId,
+              requester: input.requester,
+              scopes: requestedService.scopes,
+              client: {
+                integrationId: input.integrationId,
+                clientId: input.clientId,
+                privacyZone: input.privacyZone,
+              },
+              service: {
+                clientId: requestedResourceServer.clientId,
+                privacyZone: requestedResourceServer.privacyZone,
+              },
+            };
+
             // check that the scopes requested are part of the OpenAPI/AsyncAPI specification
             const spec = await this.api.getOASService(requestedService.name);
 
+            // make sure the environments are valid
+            if (spec.environment !== requestedResourceServer.environment) {
+              throw new BadRequestError(
+                `Requested service '${requestedService.name}' environment '${spec.environment}' does not match requested resource server environment '${requestedResourceServer.environment}'`
+              );
+            }
             // make sure requested scopes exist in the specification for the service
             requestedService.scopes.forEach((scope) => {
               const operations = spec.operations || [];
@@ -215,14 +102,15 @@ export class SdxMemberService {
                 return opScopes.includes(scope);
               });
               if (!scopeExists) {
-                throw new NotFoundError(
+                throw new BadRequestError(
                   `Requested scope '${scope}' does not exist in the specification for service '${requestedService.name}'`
                 );
               }
             });
 
             const serviceResources = {
-              // subsystemId: spec.subsystem.clientId,
+              subsystemId: spec.subsystem.clientId,
+              gatewayResources: {},
             };
 
             // check if there is an existing connection for this service
@@ -231,8 +119,8 @@ export class SdxMemberService {
             );
             if (existingConnection) {
               // if there is an existing connection, check if the scopes have changed
-              const existingScopes = (existingConnection.scopes ||
-                []) as string[];
+              const existingScopes = (existingConnection.requesterDetails
+                ?.scopes || []) as string[];
 
               const requestedScopes = requestedService.scopes || [];
 
@@ -252,12 +140,18 @@ export class SdxMemberService {
               if (scopesHaveChanged) {
                 // if scopes have changed, mark the existing request as 'isApproved=false' and update its
                 // scopes and requesterDetails
+                requesterDetails.scopes = uniqueRequestedScopes;
+
                 this.api.upsertConnection(subsystemOrgName, {
-                  ...{ clientId: '', serviceId: '' },
+                  ...{
+                    clientId: '',
+                    serviceId: '',
+                    clientResources: {},
+                    serviceResources: {},
+                  },
                   ...existingConnection,
                   isApproved: false,
-                  scopes: JSON.stringify(uniqueRequestedScopes),
-                  requesterDetails: JSON.stringify(requesterDetails),
+                  requesterDetails,
                 });
 
                 submission.results[requestedService.name] =
@@ -273,16 +167,16 @@ export class SdxMemberService {
                 }
               }
             } else {
+              this.logger?.debug('Version = %s', policyVersion);
               // if there is no existing connection, create a new one
-              const result = this.api.upsertConnection(subsystemOrgName, {
+              const result = await this.api.upsertConnection(subsystemOrgName, {
                 clientId: subsystem.clientId,
                 serviceId: requestedService.name,
                 policyVersion,
                 environment: requestedResourceServer.environment,
-                scopes: JSON.stringify(requestedService.scopes || []),
-                requesterDetails: JSON.stringify(requesterDetails),
-                clientResources: JSON.stringify({}),
-                serviceResources: JSON.stringify(serviceResources),
+                requesterDetails: requesterDetails,
+                clientResources: {},
+                serviceResources: serviceResources,
               });
 
               this.logger?.debug(
@@ -292,14 +186,15 @@ export class SdxMemberService {
               );
               submission.results[requestedService.name] =
                 'submitted approval request';
+              return result;
             }
           }
         );
-        await Promise.all(servicePromises);
+        return await Promise.all(servicePromises);
       }
     );
 
-    await Promise.all(allPromises);
+    const outcomes = await Promise.all(allConnectionUpserts);
 
     return submission;
   }
@@ -310,14 +205,14 @@ export class SdxMemberService {
    * @param integrationId
    * @returns
    */
-  async getIntegrationAllowedServices(
+  async buildIntegrationAllowedServices(
     subsystemId: string,
-    integrationId: string,
-    policyVersion: string
+    policyVersion: string,
+    integrationId?: string
   ): Promise<TIntegrationAccessRequest[]> {
     const subsystem = await this.api.getCatalogSubsystem(subsystemId);
     if (!subsystem) {
-      throw new NotFoundError(
+      throw new BadRequestError(
         `Subsystem with clientId ${subsystemId} not found`
       );
     }
@@ -365,21 +260,23 @@ export class SdxMemberService {
       integrationAllowedServices.push(
         ...services
           .filter(
-            (s) => s.requesterDetails.client.integrationId === integrationId
+            (s) =>
+              integrationId === undefined ||
+              s.requesterDetails.client.integrationId === integrationId
           )
           .map((s) => ({
-            integrationId,
+            integrationId: s.requesterDetails.client.integrationId,
             submissionId: s.requesterDetails.submissionId,
             resourceServers: [
               {
                 id: subsystemDetail.clientId,
                 name: subsystemDetail.name,
-                environment: s.environment || '',
+                environment: s.environment!,
                 organization: orgName,
                 services: [
                   {
-                    name: s.serviceId || '',
-                    scopes: (s.scopes || []) as string[],
+                    name: s.serviceId!,
+                    scopes: (s.requesterDetails?.scopes || []) as string[],
                   },
                 ],
               },

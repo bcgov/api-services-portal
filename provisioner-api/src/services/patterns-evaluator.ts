@@ -1,12 +1,21 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
-import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
+import {
+  ConnectionRequestInput,
+  SdxMemberApiClient,
+} from '../clients/sdx-member/index.js';
 import { SDXP2PConsumerPattern } from './gateway-patterns/sdx-p2p-consumer.js';
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
 import { SDXSubsystemsPattern } from './gateway-patterns/sdx-subsystem.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
+import {
+  BadRequestError,
+  NotFoundError,
+  withDetails,
+} from '../errors/api-errors.js';
+import { PolicyService } from './policy-service.js';
 
 export interface PatternOutput {
   documents: any[];
@@ -47,17 +56,75 @@ export interface GatewayPatternConfig {
  * Evaluates gateway patterns against the SDX Member API. Construct one per
  * request from the authenticated `sdx` OAuth client.
  */
-export class GatewayPatternEvaluatorService {
+export class PatternsEvaluatorService {
   private readonly api: SdxMemberApiClient;
+  readonly policyService: PolicyService;
 
   constructor(
     client: OAuthClient,
     private readonly logger?: FastifyBaseLogger
   ) {
     this.api = new SdxMemberApiClient(client, logger);
+    this.policyService = new PolicyService(logger);
   }
 
-  async GetConfigUsingPattern(
+  /**
+   * Takes a ConnectionRequestChange event and gets the integrationId
+   * and builds an IntegrationAccessRequest that will be forwarded
+   * to CSS for provisioning
+   */
+  async buildResourcesUsingConnectionRequest(
+    connection: ConnectionRequestInput,
+    action: 'preview' | 'apply'
+  ): Promise<PatternOutput[]> {
+    const service = await this.api.getOASService(connection.serviceId);
+    const orgName = service.subsystem.organization?.name;
+    if (!orgName) {
+      throw new NotFoundError(
+        `Organization for service '${connection.serviceId}' not found`
+      );
+    }
+
+    this.logger?.debug(
+      { serviceId: connection.serviceId, org: orgName },
+      'SdxMemberService.onConnectionRequestChange'
+    );
+
+    // run the policy check
+    const policyResult = this.policyService.validateConnectionRequest(
+      connection as unknown as Record<string, any>
+    );
+
+    if (!policyResult.allowed) {
+      this.logger?.error('Policy check failed: %j', policyResult);
+      throw withDetails(
+        new BadRequestError('Connection request change not allowed by policy'),
+        {
+          reason: policyResult,
+        }
+      );
+    }
+
+    // use the gateway patterns to create the resources
+    const gatewayPatterns = [
+      ...(connection.clientResources?.gatewayPatterns as any[]),
+      ...(connection.serviceResources?.gatewayPatterns as any[]),
+    ];
+
+    const results = [];
+    for (const pattern of gatewayPatterns) {
+      const patternResult = await this.buildResourcesUsingPattern({
+        pattern: pattern,
+        action,
+        parameters: gatewayPatterns[pattern],
+      });
+      results.push(patternResult);
+    }
+
+    return results;
+  }
+
+  async buildResourcesUsingPattern(
     inputs: GatewayPatternConfig
   ): Promise<PatternOutput> {
     const pattern = PATTERNS[inputs.pattern];

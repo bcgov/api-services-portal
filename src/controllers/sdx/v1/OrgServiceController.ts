@@ -69,6 +69,7 @@ export class GatewayServiceController extends Controller {
   public async createOASService(
     @Path() org: string,
     @Query() subsystem: string,
+    @Query() environment: string,
     @Body() body: any,
     @Request() request: ExpressRequest & { rawBody: Buffer }
   ): Promise<BatchResult> {
@@ -97,6 +98,7 @@ export class GatewayServiceController extends Controller {
       subsystem,
       spec: rawBody,
       state: 'active',
+      environment,
     };
 
     const final = await LoadOpenAPISpec(context, input);

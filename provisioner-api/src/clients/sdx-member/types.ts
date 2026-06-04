@@ -49,6 +49,7 @@ export interface ServiceCatalogEntry {
   version: string;
   summary?: string;
   description: string;
+  environment: string;
   operations: ServiceCatalogOperation[];
   spec?: string;
   subsystem: SubsystemEntry;
@@ -65,6 +66,7 @@ export interface BatchResult {
   childResults?: BatchResult[];
 }
 
+// modified from what the OpenAPI spec has
 export interface ConnectionRequestInput {
   clientId: string;
   serviceId: string;
@@ -72,7 +74,6 @@ export interface ConnectionRequestInput {
   isActive?: boolean;
   environment?: string;
   policyVersion?: string;
-  scopes?: string;
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
@@ -84,7 +85,6 @@ export interface ConnectionRequest {
   serviceId?: string;
   isApproved?: boolean;
   isActive?: boolean;
-  scopes?: string;
   policyVersion?: string;
   environment?: string;
   requesterDetails?: any;

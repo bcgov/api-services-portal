@@ -25,7 +25,7 @@ export interface ApplyPatternInput {
   action: 'preview' | 'apply' | 'diff' | 'delete';
 }
 
-export class ResourceController {
+export class PatternsController {
   private readonly dispatcher: ResourceDispatcher;
 
   constructor(
@@ -35,30 +35,17 @@ export class ResourceController {
     this.dispatcher = new ResourceDispatcher(services, logger);
   }
 
-  async onConnectionRequestChange(
-    connectionRequest: TConnectionChangeRequest,
-    action: 'preview' | 'apply'
-  ): Promise<TConnectionChangeResponse> {
-    return this.services.sdxMember.onConnectionRequestChange(
-      connectionRequest,
-      action
-    );
-  }
-
   /**
    * Evaluates a gateway pattern into a set of resources and dispatches them to
    * the providers that own each kind.
    */
-  async applyPattern(
-    input: ApplyPatternInput
-  ): Promise<TApplyResourcesResponse> {
-    const output = await this.services.patternEvaluator.GetConfigUsingPattern({
-      pattern: input.pattern,
-      parameters: input.parameters,
-      action: input.action,
-    });
+  async process(input: ApplyPatternInput): Promise<TApplyResourcesResponse> {
+    const output =
+      await this.services.patternsEvaluator.buildResourcesUsingPattern(input);
 
-    if (input.action === 'preview') {
+    const action = input.action;
+
+    if (action === 'preview') {
       return {
         applied: 0,
         failed: 0,
@@ -71,7 +58,7 @@ export class ResourceController {
     const results = await this.dispatcher.dispatch(
       output._gateway_id!,
       resources,
-      input.action
+      action
     );
 
     return {

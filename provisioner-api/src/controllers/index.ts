@@ -1,13 +1,13 @@
 import type { Services } from '../services/index.js';
 import { SubsystemController } from './subsystem-controller.js';
-import { ResourceController } from './resource-controller.js';
+import { PatternsController } from './patterns-controller.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-
-export { SubsystemController, ResourceController };
+import { ConnectionsController } from './connections-controller.js';
 
 export interface Controllers {
   subsystem: SubsystemController;
-  resource: ResourceController;
+  patterns: PatternsController;
+  connections: ConnectionsController;
 }
 
 export function buildControllers(
@@ -16,6 +16,7 @@ export function buildControllers(
 ): Controllers {
   return {
     subsystem: new SubsystemController(services, logger),
-    resource: new ResourceController(services, logger),
+    patterns: new PatternsController(services, logger),
+    connections: new ConnectionsController(services, logger),
   };
 }

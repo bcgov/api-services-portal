@@ -111,10 +111,12 @@ export const ConnectionChangeRequest = Type.Object(
     isActive: Type.Optional(Type.Boolean({ examples: [false] })),
     environment: Type.Optional(Type.String({ examples: ['dev'] })),
     policyVersion: Type.Optional(Type.String({ examples: ['SDX.R0.00'] })),
-    scopes: Type.Optional(Type.String({ examples: ['["Claims.Read"]'] })),
-    requesterDetails: Type.Optional(Type.Unknown()),
-    clientResources: Type.Optional(Type.Unknown()),
-    serviceResources: Type.Optional(Type.Unknown()),
+    scopes: Type.Optional(
+      Type.Array(Type.String({ examples: ['Claims.Read'] }))
+    ),
+    requesterDetails: Type.Optional(Type.Any()),
+    clientResources: Type.Optional(Type.Any()),
+    serviceResources: Type.Optional(Type.Any()),
   },
   {
     $id: 'ConnectionChangeRequest',
@@ -125,25 +127,9 @@ export const ConnectionChangeRequest = Type.Object(
         serviceId: 'LAB.MIN.FOOD.CASE-MANAGEMENT.v1',
         isApproved: false,
         environment: 'dev',
-        scopes: '["Claims.Read"]',
+        scopes: ['Claims.Read'],
       },
     ],
-  }
-);
-
-export const ConnectionChangeResponse = Type.Object(
-  {
-    status: Type.Number({ examples: [200] }),
-    result: Type.String({ examples: ['updated'] }),
-    reason: Type.Optional(Type.String()),
-    id: Type.Optional(Type.String()),
-  },
-  {
-    $id: 'ConnectionChangeResponse',
-    // Allow the upstream BatchResult's extra fields (refKey, ownedBy,
-    // childResults) to pass through.
-    additionalProperties: true,
-    examples: [{ status: 200, result: 'updated' }],
   }
 );
 
@@ -173,6 +159,39 @@ const ResourceResult = Type.Object(
     details: Type.Optional(Type.Unknown(), true),
   },
   { additionalProperties: true }
+);
+
+export const ConnectionChangeResponse = Type.Object(
+  {
+    applied: Type.Integer({
+      description: 'Number of resources successfully applied.',
+      examples: [2],
+    }),
+    failed: Type.Integer({
+      description: 'Number of resources that failed to apply.',
+      examples: [0],
+    }),
+    results: Type.Array(ResourceResult),
+    preview: Type.Optional(Type.Array(Type.Unknown()), true),
+  },
+  {
+    $id: 'ConnectionChangeResponse',
+    additionalProperties: false,
+    examples: [
+      {
+        applied: 1,
+        failed: 0,
+        results: [
+          {
+            kind: 'Product',
+            name: 'claims-product',
+            provider: 'aps',
+            status: 'applied',
+          },
+        ],
+      },
+    ],
+  }
 );
 
 export const ApplyResourcesResponse = Type.Object(

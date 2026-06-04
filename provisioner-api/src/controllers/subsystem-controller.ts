@@ -15,7 +15,7 @@ export interface GetSubsystemsInput {
 
 export interface GetSubsystemAllowedServicesInput {
   subsystemId: string;
-  integrationId: string;
+  integrationId?: string;
 }
 
 export interface CreateSubsystemAccessRequestInput {
@@ -42,10 +42,10 @@ export class SubsystemController {
   async getSubsystemAllowedServices(
     input: GetSubsystemAllowedServicesInput
   ): Promise<TIntegrationAccessRequest[]> {
-    return this.services.sdxMember.getIntegrationAllowedServices(
+    return this.services.integrationAccess.buildIntegrationAllowedServices(
       input.subsystemId,
-      input.integrationId,
-      'SDX.R1.00'
+      'SDX.R1.00',
+      input.integrationId
     );
   }
 
@@ -54,7 +54,7 @@ export class SubsystemController {
   ): Promise<TNewIntegrationAccessRequestResponse> {
     // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
     const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    return await this.services.sdxMember.submitIntegrationAccessRequest(
+    return await this.services.integrationAccess.submitIntegrationAccessRequest(
       submissionId,
       input.subsystemId,
       input.request

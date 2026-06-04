@@ -32,7 +32,12 @@ export class ResourceDispatcher {
   private readonly kindProvider: Record<ResourceKind, string>;
 
   constructor(
-    services: Services,
+    services: {
+      directory: Services['directory'];
+      sdxMember: Services['sdxMember'];
+      gatewayAdmin: Services['gatewayAdmin'];
+      commonSso: Services['commonSso'];
+    },
     private readonly logger?: FastifyBaseLogger
   ) {
     this.providers = {

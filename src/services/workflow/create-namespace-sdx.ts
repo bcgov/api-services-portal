@@ -6,10 +6,13 @@ import {
   getOrganization,
   parseOrganizationMemberDetails,
 } from '../keystone/organization';
-import { Subsystem } from '../keystone/types';
-import { ResourceSet } from '../uma2';
-import { CreateNamespace } from './create-namespace';
+import { Subsystem, UmaPolicyInput } from '../keystone/types';
+import { Policy, ResourceSet } from '../uma2';
+import { CreateNamespace, CreateNamespaceArgs } from './create-namespace';
 import assert from '../user-assert';
+import { getEnvironmentContext } from './get-namespaces';
+import { lookupProductEnvironmentServicesBySlug } from '../keystone';
+import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
@@ -36,7 +39,7 @@ export async function CreateNamespaceForOrganization(
     `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
 
   // Create the namespace with SDX edge configuration
-  const resourceSet = await CreateNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, {
     name: name,
     org: args.organization,
     orgUnit: undefined,
@@ -98,7 +101,7 @@ export async function CreateNamespaceForRuntimeGroup(
   const consumerEP = new URL(rg.consumerEndpoint);
 
   // Create the namespace with SDX edge configuration
-  const resourceSet = await CreateNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, {
     name: rg.namespace,
     org: args.organization,
     orgUnit: undefined,
@@ -172,7 +175,7 @@ export async function CreateNamespaceForSubsystem(
   // pzgw.api.gov.bc.ca : required for allowing API calls from PZGW to the subsystem in the SDX edge environment
   // In the p2p-consumer pattern, the consumer routes can be setup on the consumer's runtime group, or
   // due to the token exchange, a central gateway for handling consumer requests.
-  const resourceSet = await CreateNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
     orgUnit: args.subsystem.organization?.orgUnit,
@@ -193,6 +196,55 @@ export async function CreateNamespaceForSubsystem(
     '[CreateNamespaceForSubsystem] Created Namespace %s for Subsystem %s',
     resourceSet.name,
     args.subsystem.name
+  );
+
+  return resourceSet;
+}
+
+async function createSDXNamespace(
+  context: any,
+  args: CreateNamespaceArgs
+): Promise<ResourceSet> {
+  const resourceSet = await CreateNamespace(context, args);
+
+  const noauthContext = context.createContext({
+    skipAccessControl: true,
+  });
+  const prodEnv = await lookupProductEnvironmentServicesBySlug(
+    noauthContext,
+    process.env.GWA_PROD_ENV_SLUG
+  );
+  const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, true);
+
+  const name = 'sdx-provisioner';
+
+  const umaPolicy: Policy = {
+    name: `${name} access to ${resourceSet.name}`,
+    description: `Service Acct ${name}`,
+    clients: [name],
+    scopes: ['GatewayConfig.Publish', 'Namespace.Manage'],
+  };
+
+  const umaUpdate = await createUmaPolicy(
+    context,
+    envCtx,
+    resourceSet.id,
+    umaPolicy
+  );
+
+  //   const umaUpdate = await updateUmaPolicy(
+  //   context,
+  //   envCtx,
+  //   resourceSet.id,
+  //   'sdx-provisioner',
+  //   ['GatewayConfig.Publish', 'Namespace.Manage']
+  // );
+
+  logger.debug(
+    "Updated UMA policy for namespace '%s' with ID '%s': %o",
+    resourceSet.name,
+    resourceSet.id,
+    umaUpdate
   );
 
   return resourceSet;

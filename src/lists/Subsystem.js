@@ -22,10 +22,6 @@ module.exports = {
       isMultiline: true,
       isRequired: false,
     },
-    environments: {
-      type: Text,
-      isRequired: true,
-    },
     organization: { type: Relationship, ref: 'Organization' },
     slug: {
       type: Slug,
