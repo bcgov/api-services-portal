@@ -14,29 +14,37 @@ export class ConnectionsController {
   ) {}
 
   async onConnectionRequestChange(
+    id: string,
     connectionRequest: TConnectionChangeRequest,
-    action: 'preview' | 'apply'
+    action: 'preview' | 'apply' | 'diff'
   ): Promise<TConnectionChangeResponse> {
-    if (!connectionRequest.scopes) {
-      throw new BadRequestError(
-        'Scopes are required for connection request changes'
-      );
-    }
     const resourceSets =
       await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
-        connectionRequest,
-        action
+        id,
+        connectionRequest
       );
 
     const results: TResourceResult[] = [];
 
-    for (const resource of resourceSets) {
-      const result = await this.services.resourceDispatcher.dispatch(
-        resource._gateway_id!,
-        resource.documents,
-        action === 'preview' ? 'diff' : 'apply'
-      );
-      results.push(...result);
+    if (action === 'preview') {
+      // For preview, we return the generated resources without applying them
+      return {
+        applied: 0,
+        failed: 0,
+        results,
+        preview: resourceSets.flatMap((resourceSet) =>
+          resourceSet.documents.map((doc) => doc)
+        ),
+      };
+    } else {
+      for (const resource of resourceSets) {
+        const result = await this.services.resourceDispatcher.dispatch(
+          resource._gateway_id!,
+          resource.documents,
+          action
+        );
+        results.push(...result);
+      }
     }
 
     return {

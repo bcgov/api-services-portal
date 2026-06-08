@@ -26,11 +26,11 @@ export interface CreateNamespaceForOrganizationArgs {
 
 export async function CreateNamespaceForOrganization(
   context: any,
-  args: CreateNamespaceForOrganizationArgs
+  { organization }: CreateNamespaceForOrganizationArgs
 ): Promise<ResourceSet> {
-  const org = await getOrganization(context, args.organization);
+  const org = await getOrganization(context, organization);
   if (!org) {
-    throw new Error(`Organization ${args.organization} not found`);
+    throw new Error(`Organization ${organization} not found`);
   }
 
   const member = parseOrganizationMemberDetails(org.tags);
@@ -41,18 +41,18 @@ export async function CreateNamespaceForOrganization(
   // Create the namespace with SDX edge configuration
   const resourceSet = await createSDXNamespace(context, {
     name: name,
-    org: args.organization,
+    org: organization,
     orgUnit: undefined,
     orgEnabled: false,
-    displayName: `SDX - LAB.${member.memberClass}.${member.memberId}`,
-    dataPlane: 'sdx-edge',
+    displayName: `SDX - ${member.memberClass}.${member.memberId}`,
+    dataPlane: `sdx-edge`,
     domains: [],
   });
 
   logger.debug(
     '[CreateNamespaceForOrganization] Created Namespace %s for Organization %s',
     resourceSet.name,
-    args.organization
+    organization
   );
 
   return resourceSet;
@@ -225,26 +225,18 @@ async function createSDXNamespace(
     scopes: ['GatewayConfig.Publish', 'Namespace.Manage'],
   };
 
-  const umaUpdate = await createUmaPolicy(
+  const umaResult = await createUmaPolicy(
     context,
     envCtx,
     resourceSet.id,
     umaPolicy
   );
 
-  //   const umaUpdate = await updateUmaPolicy(
-  //   context,
-  //   envCtx,
-  //   resourceSet.id,
-  //   'sdx-provisioner',
-  //   ['GatewayConfig.Publish', 'Namespace.Manage']
-  // );
-
   logger.debug(
-    "Updated UMA policy for namespace '%s' with ID '%s': %o",
+    "Created UMA policy for namespace '%s' with ID '%s': %o",
     resourceSet.name,
     resourceSet.id,
-    umaUpdate
+    umaResult
   );
 
   return resourceSet;

@@ -36,7 +36,7 @@ export class IntegrationAccessService {
     subsystemId: string,
     input: TNewIntegrationAccessRequest
   ): Promise<TNewIntegrationAccessRequestResponse> {
-    const policyVersion = 'SDX.R0.00';
+    const policyVersion = 'SDX.R1.00';
 
     const subsystem = await this.api.getCatalogSubsystem(subsystemId);
     if (!subsystem) {
@@ -108,9 +108,13 @@ export class IntegrationAccessService {
               }
             });
 
+            const clientResources = {
+              gatewayPatterns: {},
+            };
+
             const serviceResources = {
               subsystemId: spec.subsystem.clientId,
-              gatewayResources: {},
+              gatewayPatterns: {},
             };
 
             // check if there is an existing connection for this service
@@ -146,8 +150,8 @@ export class IntegrationAccessService {
                   ...{
                     clientId: '',
                     serviceId: '',
-                    clientResources: {},
-                    serviceResources: {},
+                    clientResources,
+                    serviceResources,
                   },
                   ...existingConnection,
                   isApproved: false,
@@ -174,9 +178,9 @@ export class IntegrationAccessService {
                 serviceId: requestedService.name,
                 policyVersion,
                 environment: requestedResourceServer.environment,
-                requesterDetails: requesterDetails,
-                clientResources: {},
-                serviceResources: serviceResources,
+                requesterDetails,
+                clientResources,
+                serviceResources,
               });
 
               this.logger?.debug(

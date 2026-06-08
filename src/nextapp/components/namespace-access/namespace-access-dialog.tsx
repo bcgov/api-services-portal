@@ -128,7 +128,8 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                   <Input
                     readOnly={isEditing}
                     defaultValue={
-                      accessItem?.requesterEmail ?? serviceAccount?.name
+                      accessItem?.requesterEmail ??
+                      serviceAccount?.clients.join(', ')
                     }
                     name="email"
                     type="text"

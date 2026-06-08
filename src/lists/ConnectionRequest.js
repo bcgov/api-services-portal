@@ -12,6 +12,9 @@ const {
 const { logger } = require('../logger');
 const { OpenAPISpecService } = require('../services/batch/oas-service');
 const { ConnectionService } = require('../services/batch/connection-service');
+const {
+  ProvisionerService,
+} = require('../services/provisioner/provisioner-service');
 const { type } = require('node:os');
 
 /*
@@ -149,6 +152,18 @@ module.exports = {
         ? Number(serviceSpec.organization.id)
         : null;
       return resolvedData;
+    },
+
+    afterChange: async function ({ operation, updatedItem }) {
+      logger.debug(
+        'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',
+        operation,
+        updatedItem
+      );
+      const provisionerService = new ProvisionerService(
+        process.env.PROVISIONER_URL
+      );
+      await provisionerService.postConnectionRequestChangeEvent(updatedItem);
     },
   },
 };

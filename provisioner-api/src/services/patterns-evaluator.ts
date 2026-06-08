@@ -48,7 +48,7 @@ const PATTERNS: Record<string, PatternProcessor> = {
 
 export interface GatewayPatternConfig {
   pattern: string;
-  action?: 'preview' | 'apply' | 'diff' | 'delete';
+  //action?: 'preview' | 'apply' | 'diff' | 'delete';
   parameters: Record<string, any>;
 }
 
@@ -74,8 +74,8 @@ export class PatternsEvaluatorService {
    * to CSS for provisioning
    */
   async buildResourcesUsingConnectionRequest(
-    connection: ConnectionRequestInput,
-    action: 'preview' | 'apply'
+    id: string,
+    connection: ConnectionRequestInput
   ): Promise<PatternOutput[]> {
     const service = await this.api.getOASService(connection.serviceId);
     const orgName = service.subsystem.organization?.name;
@@ -92,31 +92,40 @@ export class PatternsEvaluatorService {
 
     // run the policy check
     const policyResult = this.policyService.validateConnectionRequest(
+      connection.policyVersion || '',
       connection as unknown as Record<string, any>
     );
 
     if (!policyResult.allowed) {
       this.logger?.error('Policy check failed: %j', policyResult);
       throw withDetails(
-        new BadRequestError('Connection request change not allowed by policy'),
+        new BadRequestError(
+          `Connection request change not allowed by '${connection.policyVersion}' policy`
+        ),
         {
           reason: policyResult,
         }
       );
     }
 
+    this.logger?.debug('Policy check passed: %j', policyResult);
+
     // use the gateway patterns to create the resources
-    const gatewayPatterns = [
-      ...(connection.clientResources?.gatewayPatterns as any[]),
-      ...(connection.serviceResources?.gatewayPatterns as any[]),
-    ];
+    const gatewayPatterns = {
+      ...(connection.clientResources?.gatewayPatterns as any),
+      ...(connection.serviceResources?.gatewayPatterns as any),
+    };
 
     const results = [];
-    for (const pattern of gatewayPatterns) {
+    for (const pattern of Object.keys(gatewayPatterns)) {
       const patternResult = await this.buildResourcesUsingPattern({
         pattern: pattern,
-        action,
-        parameters: gatewayPatterns[pattern],
+        parameters: {
+          ...{
+            conn_id: id,
+          },
+          ...gatewayPatterns[pattern],
+        },
       });
       results.push(patternResult);
     }

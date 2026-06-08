@@ -111,9 +111,6 @@ export const ConnectionChangeRequest = Type.Object(
     isActive: Type.Optional(Type.Boolean({ examples: [false] })),
     environment: Type.Optional(Type.String({ examples: ['dev'] })),
     policyVersion: Type.Optional(Type.String({ examples: ['SDX.R0.00'] })),
-    scopes: Type.Optional(
-      Type.Array(Type.String({ examples: ['Claims.Read'] }))
-    ),
     requesterDetails: Type.Optional(Type.Any()),
     clientResources: Type.Optional(Type.Any()),
     serviceResources: Type.Optional(Type.Any()),

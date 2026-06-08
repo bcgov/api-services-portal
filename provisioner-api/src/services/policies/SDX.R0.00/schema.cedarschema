@@ -14,6 +14,16 @@ namespace SDX {
                 isApproved: Bool,
                 policy_release?: String,
                 environment?: String,
+                requesterDetails?: {},
+                clientResources?: {
+                    gatewayPatterns?: {}
+                },
+                serviceResources?: {
+                    subsystemId?: String,
+                    gatewayPatterns?: {}
+
+                }
+
             }
         };
 

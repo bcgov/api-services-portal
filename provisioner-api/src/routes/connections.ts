@@ -29,10 +29,17 @@ export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
           }),
         }),
         querystring: Type.Object({
-          action: Type.Union([Type.Literal('preview'), Type.Literal('apply')], {
-            description:
-              'The action to perform on the generated resources (preview, apply).',
-          }),
+          action: Type.Union(
+            [
+              Type.Literal('preview'),
+              Type.Literal('diff'),
+              Type.Literal('apply'),
+            ],
+            {
+              description:
+                'The action to perform on the generated resources (preview, diff, apply).',
+            }
+          ),
         }),
 
         response: { 200: Type.Ref(ConnectionChangeResponse) },
@@ -40,6 +47,7 @@ export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
     },
     async (req) =>
       app.controllers.connections.onConnectionRequestChange(
+        req.params.id,
         req.body,
         req.query.action
       )

@@ -3,8 +3,10 @@ import cedar, {
   EntityUid,
 } from '@cedar-policy/cedar-wasm/nodejs';
 import { SDXPolicy as SDX_R0_00_Policy } from './policies/SDX.R0.00/index.js';
+import { SDXPolicy as SDX_R1_00_Policy } from './policies/SDX.R1.00/index.js';
 import { OAuthClient } from '../clients/oauth.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
+import { BadRequestError } from '../errors/api-errors.js';
 
 export class PolicyService {
   constructor(private readonly logger?: FastifyBaseLogger) {}
@@ -12,9 +14,12 @@ export class PolicyService {
   /**
    * Validate a Connection Request.
    */
-  validateConnectionRequest(ctx: Record<string, CedarValueJson>): PolicyResult {
+  validateConnectionRequest(
+    policy: string,
+    ctx: Record<string, CedarValueJson>
+  ): PolicyResult {
     return EvaluatePolicy(
-      'SDX.R0.00',
+      policy,
       { type: 'SDX::User', id: 'system' },
       { type: 'SDX::Action', id: 'SubmitConnectionRequest' },
       {
@@ -32,11 +37,12 @@ export class PolicyService {
    * @returns PolicyResult
    */
   validateConsumerPolicy(
+    policy: string,
     pattern: string,
     ctx: Record<string, CedarValueJson>
   ): PolicyResult {
     return EvaluatePolicy(
-      'SDX.R0.00',
+      policy,
       { type: 'SDX::User', id: 'system' },
       { type: 'SDX::Action', id: 'ApplyConsumerPattern' },
       { type: 'SDX::ConsumerPattern', id: `${pattern}` },
@@ -51,11 +57,12 @@ export class PolicyService {
    * @returns PolicyResult
    */
   validateProviderPolicy(
+    policy: string,
     pattern: string,
     ctx: Record<string, CedarValueJson>
   ): PolicyResult {
     return EvaluatePolicy(
-      'SDX.R0.00',
+      policy,
       { type: 'SDX::User', id: 'system' },
       { type: 'SDX::Action', id: 'ApplyProviderPattern' },
       { type: 'SDX::ProviderPattern', id: `${pattern}` },
@@ -69,6 +76,7 @@ const POLICY_REGISTRY: Record<
   { schema: string; policies: Record<string, string> }
 > = {
   'SDX.R0.00': SDX_R0_00_Policy,
+  'SDX.R1.00': SDX_R1_00_Policy,
 };
 
 export interface PolicyResult {
@@ -107,6 +115,9 @@ function EvaluatePolicy(
   resource: EntityUid,
   context: Record<string, CedarValueJson>
 ): PolicyResult {
+  if (!POLICY_REGISTRY[policy]) {
+    throw new BadRequestError(`Policy ${policy} not found in registry`);
+  }
   const call: AuthorizationCall = {
     principal,
     action,

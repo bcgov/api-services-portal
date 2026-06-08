@@ -120,7 +120,7 @@ export async function GetCatalog(
       subsystem: {
         name: c.subsystem.name,
         description: c.subsystem.description,
-        clientId: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
+        clientId: `${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
         organization: {
           name: c.organization.name,
         },

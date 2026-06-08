@@ -1,7 +1,9 @@
 import fetch from 'node-fetch';
 import { checkStatus } from '../checkStatus';
 import { ConnectionRequest } from '../keystone/types';
-import { ConnectionRequestInput } from '@/controllers/sdx/v1/types';
+import { Logger } from '../../logger';
+
+const logger = Logger('services.provisioner');
 
 type ConnectionRequestChangeEventResponse = {
   applied: number;
@@ -18,18 +20,36 @@ export class ProvisionerService {
   }
 
   public async postConnectionRequestChangeEvent(
-    connection: ConnectionRequestInput
+    connection: ConnectionRequest
   ): Promise<ConnectionRequestChangeEventResponse> {
     // credentials will be using the gwa admin
 
+    const action = 'diff';
+
+    const payload = {
+      clientId: connection.clientId,
+      serviceId: connection.serviceId,
+      policyVersion: connection.policyVersion,
+      environment: connection.environment,
+      isApproved: connection.isApproved,
+      requesterDetails: JSON.parse(connection.requesterDetails),
+      clientResources: JSON.parse(connection.clientResources),
+      serviceResources: JSON.parse(connection.serviceResources),
+    };
+
+    logger.debug(
+      'Calling %s',
+      `${this.provisionerUrl}/connections/${connection.id}?action=${action}`
+    );
+
     const res = await fetch(
-      `${this.provisionerUrl}/connections/${connection}`,
+      `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(connection),
+        body: JSON.stringify(payload),
       }
     )
       .then(checkStatus)
