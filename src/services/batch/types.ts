@@ -298,11 +298,7 @@ export interface OpenAPISpec {
 /**
  * @tsoaModel
  * @example {
- *   "name": "my-new-subsystem",
- *   "environments": [
- *     "dev",
- *     "test"
- *   ]
+ *   "name": "my-new-subsystem"
  * }
  */  
 export interface Subsystem {

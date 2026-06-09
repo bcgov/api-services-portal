@@ -498,7 +498,6 @@ const metadata = {
     },
     example: {
       name: 'my-new-subsystem',
-      environments: ['dev', 'test'],
     },
   },
   RuntimeGroup: {

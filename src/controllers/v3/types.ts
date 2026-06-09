@@ -263,7 +263,6 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
-  owner?: UserRefID;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }
@@ -288,6 +287,7 @@ export interface OpenAPISpec {
   spec?: string;
   summary?: string;
   description?: string;
+  environment?: string;
   operations?: string;
   gatewayId?: string;
   subsystem?: SubsystemRefID;
@@ -344,11 +344,29 @@ export interface RuntimeGroup {
  * }
  */  
 export interface ConnectionRequest {
-  slug?: string; // Primary Key
+  id?: string; // Primary Key
   clientId?: string;
   serviceId?: string;
   isApproved?: boolean;
   isActive?: boolean;
+  scopes?: string;
+  policyVersion?: string;
+  environment?: string;
+  provisionerStatus?: ProvisionerStatus;
+  requesterDetails?: any; // toString
+  clientResources?: any; // toString
+  serviceResources?: any; // toString
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface ProvisionerStatus {
+  name?: string; // Primary Key
+  message?: string;
+  status?: "pending" | "provisioned" | "failed";
 }
 
 
@@ -375,6 +393,7 @@ export interface Product {
   gatewayId?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
 }
 
 

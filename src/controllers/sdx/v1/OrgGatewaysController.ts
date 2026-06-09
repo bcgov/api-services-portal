@@ -21,6 +21,8 @@ import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
+import { ProvisionerService } from '../../../services/provisioner';
+import { PostPatternsResponse } from '../../../services/provisioner/provisioner-service';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -58,6 +60,60 @@ export class OrgGatewaysController extends Controller {
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
+  }
+
+  /**
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Provision gateway config from pre-defined patterns
+   * @produces application/yaml
+   */
+  @Put('/pattern')
+  @OperationId('provisionConfigFromPattern')
+  @Security('jwt', ['System.Manage'])
+  @SuccessResponse('200', 'OK')
+  @Example<any>({
+    documents: [
+      {
+        kind: 'GatewayService',
+        name: 'sdx.my-service',
+        routes: [],
+      },
+    ],
+  })
+  @Response<UnauthorizedJSON>(401, 'Unauthorized', {
+    code: 'invalid_token',
+    message: 'Missing authorization scope. (403)',
+  })
+  @Response<ValidateErrorJSON>(422, 'Validation Failed', {
+    code: 'validation_error',
+    message: 'Invalid input',
+    fields: {
+      pattern: {
+        message: 'unsupported pattern',
+      },
+    },
+  })
+  public async generateConfigFromPattern(
+    @Path() org: string,
+    @Query() action: 'preview' | 'apply' | 'diff' | 'delete',
+    @Body() body: GatewayPatternConfigRequest,
+    @Request() request: any
+  ): Promise<any> {
+    const ctx = this.keystone.createContext(request);
+
+    const provisionerService = new ProvisionerService(
+      process.env.PROVISIONER_URL || 'http://localhost:8080'
+    );
+
+    body.parameters['organization'] = org; // inject org into parameters for pattern evaluation
+
+    const result: PostPatternsResponse = await provisionerService.postPatterns(
+      body.pattern,
+      body.parameters,
+      action
+    );
+    return result;
   }
 
   /**
