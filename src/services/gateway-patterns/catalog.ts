@@ -60,6 +60,7 @@ export interface ServiceClient {
 export interface ServiceCatalogEntry {
   name: string;
   title: string;
+  specVersion: string;
   version: string;
   summary?: string;
   description: string;
@@ -110,6 +111,7 @@ export async function GetCatalog(
     );
 
     return {
+      specVersion: c.specVersion,
       name: c.name,
       title: c.title,
       version: c.version,

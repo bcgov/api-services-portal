@@ -4,6 +4,10 @@ import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
 import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
 import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
 import { SDXKeysPattern } from './patterns/sdx-keys';
+import { EventsPublisherPattern } from './patterns/ape/events-publisher';
+import { OPALPolicyPattern } from './patterns/ape/opal-policy';
+import { EventsWebhookPattern } from './patterns/ape/events-webhook';
+import { OPALDataPattern } from './patterns/ape/opal-data-source';
 
 interface PatternProcessor {
   id: string;
@@ -18,6 +22,10 @@ const PATTERNS: Record<string, PatternProcessor> = {
   [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
   [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
   [SDXKeysPattern.id]: SDXKeysPattern,
+  [EventsPublisherPattern.id]: EventsPublisherPattern,
+  [EventsWebhookPattern.id]: EventsWebhookPattern,
+  [OPALDataPattern.id]: OPALDataPattern,
+  [OPALPolicyPattern.id]: OPALPolicyPattern,
 };
 
 export interface GatewayPatternConfig {
