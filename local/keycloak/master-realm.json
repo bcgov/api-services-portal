@@ -1415,6 +1415,18 @@
       "groups": []
     },
     {
+      "id": "e0d511ab-0711-4634-94e6-7d7f4e473113",
+      "username": "service-account-sdx-provisioner",
+      "emailVerified": false,
+      "enabled": true,
+      "createdTimestamp": 1781066628919,
+      "totp": false,
+      "serviceAccountClientId": "sdx-provisioner",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "notBefore": 0
+    },
+    {
       "id": "106ae49e-2334-4147-9f59-cd1ef50dab3b",
       "createdTimestamp": 1645047852963,
       "username": "wendy@idir",
@@ -2357,6 +2369,17 @@
             }
           },
           {
+            "id": "f2e764aa-c355-4e81-a5e6-e76ffb860100",
+            "name": "sdx-provisioner",
+            "description": "",
+            "type": "client",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "clients": "[\"sdx-provisioner\"]"
+            }
+          },
+          {
             "id": "65f0c0a4-e2ac-4364-800d-ebd4e11ce393",
             "name": "janis full access",
             "type": "scope",
@@ -2425,6 +2448,18 @@
               "resources": "[\"platform\"]",
               "scopes": "[\"Namespace.View\"]",
               "applyPolicies": "[\"group-organization-admin-ca.bc.gov-ministry-of-health-planning-and-innovation-division-policy\"]"
+            }
+          },
+          {
+            "id": "f2e764aa-c355-4e81-a5e6-e76ffb860000",
+            "name": "sdx-provisioner System.Manage",
+            "description": "",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "scopes": "[\"System.Manage\"]",
+              "applyPolicies": "[\"sdx-provisioner\"]"
             }
           }
         ],
@@ -2863,6 +2898,71 @@
       ],
       "defaultClientScopes": [],
       "optionalClientScopes": []
+    },
+    {
+      "id": "3d2de300-3078-4f20-bde3-fb621c9cfc2e",
+      "clientId": "sdx-provisioner",
+      "name": "SDX Provisioner",
+      "description": "",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-jwt",
+      "secret": "**********",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "logout.confirmation.enabled": "false",
+        "jwks.string": "{\n  \"keys\": [\n    {\n      \"kty\": \"RSA\",\n      \"n\": \"y5dRkcSHXOXdoI9mbvR0Cqo4h3P3EfnprStWjhh4nezNPPz1TYDoa5JaC_sYBJxDCuRjDXxMH4TGGg5XOj-GZ-AFdAHYbQz-zQ4_s-cxBzdmmJ14rF1KSEzkTyYQSs5jpDfPhxEhBCIgzf-nS3yUHVSou6P4eO1AgJqSj26AG2pW8E0YnB9oFsnKMCyiqyAE7PiOqcB0UzSj19gpRdSkm5ndwpFOwLT1INEaWOq3iYpvBwClLX2rzbRXDpCi9dbfRPRXBQ63KW5bysmKPPro8rY3-zWBasbyk-lxjR8N0BsGNFz6Ozo-rbhS2hAS7qkKz6aYUxDTA-97OEwxEqgndQ\",\n      \"e\": \"AQAB\",\n      \"alg\": \"RS256\",\n      \"use\": \"sig\"\n    }\n  ]\n}",
+        "client.secret.creation.time": "1781066628",
+        "standard.token.exchange.enabled": "false",
+        "frontchannel.logout.session.required": "true",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "use.jwks.string": "true",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "dpop.bound.access.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "service_account",
+        "web-origins",
+        "acr",
+        "Namespace.Create",
+        "Namespace.Admin",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     },
     {
       "id": "5c797848-2f03-4085-a03a-e4f7c22d0050",

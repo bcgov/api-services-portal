@@ -1,3 +1,5 @@
+import { env } from 'process'
+
 /**
  * Builds a new subsystem and service
  *
@@ -22,7 +24,7 @@ export function new_service(org: any, subsystemName: string, next: any) {
         cy.setRequestBodyRaw(body)
         cy.setHeader('Content-Type', 'application/octet-stream')
         cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+          `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
           'PUT',
           false
         ).then(({ apiRes: { status, body } }: any) => {
@@ -51,6 +53,8 @@ function createConnection(org: any, service: any, isApproved: boolean, next: any
   const payload: any = {
     clientId: `${clientId}`,
     serviceId: `${serviceId}`,
+    policyVersion: 'SDX.R0.00',
+    environment: 'lab',
   }
 
   if (isApproved) {
@@ -126,6 +130,8 @@ describe('SDX Connection Requests', () => {
         const payload = {
           clientId: `${clientId}`,
           serviceId: `${serviceId}`,
+          policyVersion: 'SDX.R0.00',
+          environment: 'lab',
         }
         cy.setRequestBody(payload)
         cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
@@ -155,6 +161,8 @@ describe('SDX Connection Requests', () => {
           const payload: any = {
             clientId: `${clientId}`,
             serviceId: `${serviceId}`,
+            policyVersion: 'SDX.R0.00',
+            environment: 'lab',
           }
           // first expect no changes
           cy.setRequestBody(payload)
@@ -164,6 +172,12 @@ describe('SDX Connection Requests', () => {
               expect(body.result).to.be.equal('created')
               expect(typeof body.id).to.be.equal('string')
 
+              const payload: any = {
+                clientId: `${clientId}`,
+                serviceId: `${serviceId}`,
+              }
+
+              cy.setRequestBody(payload)
               cy.callAPI(
                 `ds/api/sdx/v1/organizations/${org.name}/connections`,
                 'PUT'
@@ -173,7 +187,11 @@ describe('SDX Connection Requests', () => {
                 expect(typeof body.id).to.be.equal('string')
 
                 // then mark it approved and expect an updated record
-                payload.isApproved = true
+                const payload: any = {
+                  clientId: `${clientId}`,
+                  serviceId: `${serviceId}`,
+                  isApproved: true,
+                }
 
                 cy.setRequestBody(payload)
                 cy.callAPI(
@@ -200,6 +218,8 @@ describe('SDX Connection Requests', () => {
         const payload: any = {
           clientId: `${clientId}`,
           serviceId: `${serviceId}`,
+          policyVersion: 'SDX.R0.00',
+          environment: 'lab',
           isApproved: true,
         }
 
@@ -241,6 +261,8 @@ describe('SDX Connection Requests', () => {
       const payload = {
         clientId: `some-client-id`,
         serviceId: `some-service-id`,
+        policyVersion: 'SDX.R0.00',
+        environment: 'lab',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
@@ -255,8 +277,10 @@ describe('SDX Connection Requests', () => {
       const { org } = workingData
 
       const payload = {
-        clientId: `LAB.MIN.ABCD.MY-SYSTEM`,
+        clientId: `MIN.ABCD.MY-SYSTEM`,
         serviceId: `LAB.MIN.ABCD.SERVICE.v1`,
+        policyVersion: 'SDX.R0.00',
+        environment: 'lab',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
@@ -290,6 +314,8 @@ describe('SDX Connection Requests', () => {
             const payload = {
               clientId: `${diffClientId}`,
               serviceId: `${serviceId}`,
+              policyVersion: 'SDX.R0.00',
+              environment: 'lab',
             }
             cy.setRequestBody(payload)
             cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
@@ -328,6 +354,8 @@ describe('SDX Connection Requests', () => {
             const payload: any = {
               clientId: `${clientId}`,
               serviceId: `${diffServiceId}`,
+              policyVersion: 'SDX.R0.00',
+              environment: 'lab',
             }
             cy.setRequestBody(payload)
             cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(

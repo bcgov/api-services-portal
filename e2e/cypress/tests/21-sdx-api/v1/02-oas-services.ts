@@ -45,7 +45,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setHeader('Content-Type', 'application/octet-stream')
 
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=lab`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -78,7 +78,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=lab`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -126,7 +126,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=lab`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -169,7 +169,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {

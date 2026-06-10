@@ -24,8 +24,18 @@ import { saveConsumerLabels } from './consumer-management';
 import { StructuredActivityService } from './namespace-activity';
 import { Logger } from '../../logger';
 import { AddClientConsumer } from './add-client-consumer';
+import { assertEqual } from '../../controllers/ioc/assert';
+import { ApplicationService } from '../batch/application-service';
 
 const logger = Logger('sdx-consumer');
+
+export interface SetupServiceAccessForConsumerProps {
+  connId: string;
+  clientId: string;
+  azpClientId: string;
+  serviceId: string;
+  env: 'dev' | 'test' | 'prod';
+}
 
 export const AddConsumerIfNotExists = async (
   context: any,
@@ -56,17 +66,27 @@ export const AddConsumerIfNotExists = async (
   const app = {
     name: subsystemEntry.name,
     description: subsystemEntry.description,
-    organization: {
-      name: subsystemEntry.organization.name,
-    },
-  } as Application;
+    organization: subsystemEntry.organization.name,
+  };
+
+  // create the app if it isn't already created
+  const appService = new ApplicationService();
+
+  const appResult = await appService.upsertApplication(context, app);
+  logger.debug(
+    "Created application for subsystem '%s' %j",
+    subsystemEntry.name,
+    appResult
+  );
+
+  const newApp = await appService.lookupApplication(context, appResult.id);
 
   const kongConsumerSerivce = new KongConsumerService(process.env.SDX_KONG_URL);
 
   const consumer = await kongConsumerSerivce.createOrGetConsumer(
     consumerUsername,
     null,
-    app
+    newApp
   );
 
   let consumerPK;
@@ -108,11 +128,13 @@ export const AddConsumerIfNotExists = async (
  */
 export const SetupServiceAccessForConsumer = async (
   context: any,
-  connId: string,
-  clientId: string,
-  azpClientId: string,
-  serviceId: string,
-  env: 'dev' | 'test' | 'prod'
+  {
+    connId,
+    clientId,
+    azpClientId,
+    serviceId,
+    env,
+  }: SetupServiceAccessForConsumerProps
 ): Promise<string> => {
   const subsystemService = new SubsystemService();
 
@@ -121,16 +143,20 @@ export const SetupServiceAccessForConsumer = async (
     clientId
   );
 
-  const service = await GetCatalogByName(context, serviceId, false);
-
   // get the productEnvironment and application for the subsystem
   const application = await subsystemService.findApplication(
     context,
     client.organization.name,
     client.name
   );
+  assertEqual(
+    Boolean(application),
+    true,
+    'clientId',
+    `Application not found for subsystem ${client.name} in org ${client.organization.name}`
+  );
 
-  const consumer = await lookupKongConsumerByUsername(context, azpClientId);
+  const service = await GetCatalogByName(context, serviceId, false);
 
   const product = await subsystemService.findProduct(
     context,
@@ -140,8 +166,10 @@ export const SetupServiceAccessForConsumer = async (
   const productEnvironment = product.environments.find((e) => e.name === env);
 
   const aclEnabled = false;
-  const credentialReference = JSON.stringify({});
+  const credentialReference = {};
   const consumerType = 'client';
+
+  const consumer = await lookupKongConsumerByUsername(context, azpClientId);
 
   const serviceAccessId = await addServiceAccess(
     context,

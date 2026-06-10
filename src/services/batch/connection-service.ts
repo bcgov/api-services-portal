@@ -67,6 +67,8 @@ class ConnectionService {
       throw new Error(
         `Service environment '${serviceSpec.environment}' does not match requested connection environment '${body.environment}'`
       );
+    } else {
+      body.environment = serviceSpec.environment as any;
     }
 
     // if approving the connection, validate the client and service belong to the same organization

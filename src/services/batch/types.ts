@@ -285,6 +285,7 @@ export interface OpenAPISpec {
   title?: string;
   version?: string;
   spec?: string;
+  specVersion?: string;
   summary?: string;
   description?: string;
   environment?: string;

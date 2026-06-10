@@ -6,7 +6,7 @@ export function clientIdForSubsystem(org: any, subsystemName: string): string {
   const memberClass = org.tags[0].split(':')[1]
   const memberId = org.tags[1].split(':')[1]
 
-  return `LAB.${memberClass}.${memberId}.${subsystemName}`
+  return `${memberClass}.${memberId}.${subsystemName}`
 }
 
 export function createSubsystem(org: any, subsystemName: string, next: any) {
@@ -16,9 +16,29 @@ export function createSubsystem(org: any, subsystemName: string, next: any) {
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
       expect(status, body.reason || body.message).to.be.equal(200)
+
       next(body)
     }
   )
+}
+
+export function createSubsystemGateway(
+  org: any,
+  runtimeGroupName: string,
+  subsystemName: string,
+  next: any
+) {
+  cy.setRequestBody({
+    runtimeGroupName,
+  })
+  cy.callAPI(
+    `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
+    'PUT'
+  ).then(({ apiRes: { status, body } }: any) => {
+    expect(status, body.message).to.be.equal(200)
+    expect(body).to.have.property('gatewayId')
+    next(body)
+  })
 }
 
 export function createOASService(org: any, subsystemName: string, next: any) {
@@ -33,7 +53,7 @@ export function createOASService(org: any, subsystemName: string, next: any) {
     cy.setRequestBodyRaw(body)
     cy.setHeader('Content-Type', 'application/octet-stream')
     cy.callAPI(
-      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
       'PUT',
       false
     ).then(({ apiRes: { status, body } }: any) => {
@@ -68,6 +88,8 @@ export function createConnection(
   cy.setRequestBody({
     clientId,
     serviceId,
+    policyVersion: 'SDX.R0.00',
+    environment: 'lab',
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {

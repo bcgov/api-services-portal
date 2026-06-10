@@ -60,6 +60,8 @@ export const LoadOpenAPISpec = async (
 
   const serviceName = BuildServiceName(subsystemRecord, spec.environment, oas);
 
+  outSpec.specVersion =
+    'openapi' in oas ? `openapi=${oas.openapi}` : `asyncapi=${oas.asyncapi}`;
   outSpec.spec = spec.spec;
   outSpec.name = serviceName;
   (outSpec as any).namespace = subsystemRecord.namespace;

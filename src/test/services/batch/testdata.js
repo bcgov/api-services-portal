@@ -563,8 +563,7 @@ export default {
       data: {
         reference: 'terms-of-use-for-api-gateway-1',
         title: 'Terms of Use for API Gateway',
-        link:
-          'https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information',
+        link: 'https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information',
         document: 'terms-of-use',
         version: 1,
       },

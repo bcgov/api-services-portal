@@ -110,6 +110,27 @@ services:
       aps-net:
         aliases:
           - feeder.localtest.me
+  provisioner:
+    container_name: provisioner
+    image: provisioner:latest
+    build:
+      context: ./provisioner-api
+      dockerfile: Dockerfile
+      secrets:
+        - npm_token
+    env_file:
+      - ./local/provisioner/.env.local
+    environment:
+      NODE_ENV: test # Needed for allowing non-secure connection to Keycloak
+    restart: on-failure
+    volumes:
+      - ./local/provisioner/key.json:/secrets/key.json
+    ports:
+      - 3030:3000
+    networks:
+      aps-net:
+        aliases:
+          - provisioner-api.localtest.me
   feeder-seeding:
     container_name: feeder-seeding
     image: feeder:latest
@@ -353,5 +374,7 @@ services:
       aps-net:
         aliases:
           - sdx-edge-api.localtest.me
+
 networks:
-  aps-net: {}
+  aps-net:
+    driver: bridge

@@ -184,6 +184,10 @@ export async function EnrichWithRuntimeGroup(
   };
 }
 
+export function BuildClientID(subsystemEntry: SubsystemEntry): string {
+  return `${subsystemEntry.member?.memberClass}.${subsystemEntry.member?.memberId}.${subsystemEntry.name}`;
+}
+
 export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
   const member = parseOrganizationMemberDetails(c.organization.tags);
 
@@ -223,7 +227,15 @@ export function BuildServiceName(
   return `${env}.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
 }
 
-export function ParseClientId(id: string): any {
+export function ParseClientId(id: string): {
+  member: {
+    memberClass: string;
+    memberId: string;
+  };
+  subsystem: {
+    name: string;
+  };
+} {
   const parts = id.split('.');
   assertAndRaiseValidateError(
     parts.length === 3,

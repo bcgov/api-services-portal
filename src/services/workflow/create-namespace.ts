@@ -36,6 +36,7 @@ export interface CreateNamespaceArgs {
   dataPlane?: string;
   domains?: string[];
   routePaths?: string[];
+  assignedScopes?: string[];
 }
 
 export async function CreateNamespace(
@@ -98,7 +99,7 @@ export async function CreateNamespace(
       envCtx.issuerEnvConfig.issuerUrl,
       envCtx.accessToken
     );
-    for (const scope of [
+    for (const scope of args.assignedScopes || [
       'Namespace.Manage',
       'CredentialIssuer.Admin',
       'GatewayConfig.Publish',

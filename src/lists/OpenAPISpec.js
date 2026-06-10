@@ -50,6 +50,11 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    specVersion: {
+      type: Text,
+      isRequired: true,
+      access: { update: false },
+    },
     subsystem: {
       type: Relationship,
       ref: 'Subsystem',

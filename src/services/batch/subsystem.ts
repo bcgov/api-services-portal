@@ -264,6 +264,7 @@ class SubsystemService {
 
     assert.strictEqual(records.length == 0, false, 'Subsystem not found');
     assert.strictEqual(records.length > 1, false, 'Multiple subsystems found');
+
     return records.pop();
   };
 }

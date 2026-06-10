@@ -1,9 +1,12 @@
+import { v4 as uuidv4 } from 'uuid'
+
 import {
   clientIdForSubsystem,
   createConnection,
   createRuntimeGroup,
   createSubsystem,
   createSubsystemAndOASService,
+  createSubsystemGateway,
   uniqueSubsystemName,
 } from '../../../support/sdx-commands'
 
@@ -13,6 +16,9 @@ describe('SDX Subsystem', () => {
   before(() => {
     cy.buildOrgGatewayDatasetAndProduct().then((data) => {
       workingData = data
+
+      const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
+      workingData['runtimeGroupId'] = rg.toLowerCase()
     })
   })
 
@@ -159,21 +165,29 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - active client connection request exists', () => {
-      const { org } = workingData
+      const { org, runtimeGroupId } = workingData
       const subsystemName = uniqueSubsystemName()
 
       createSubsystemAndOASService(org, subsystemName, (service: any) => {
-        createConnection(org, service.subsystem.clientId, service.name, () => {
-          cy.setQueryString({ force: false })
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${service.subsystem.name}`,
-            'DELETE',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(422)
-            expect(body.message).to.be.equal(
-              'Subsystem cannot be deleted because it has active connection requests as a client'
-            )
+        createRuntimeGroup(
+          org,
+          runtimeGroupId,
+          `http://internal.${runtimeGroupId}.servers.sdx`
+        )
+
+        createSubsystemGateway(org, runtimeGroupId, service.subsystem.name, () => {
+          createConnection(org, service.subsystem.clientId, service.name, () => {
+            cy.setQueryString({ force: false })
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/subsystems/${service.subsystem.name}`,
+              'DELETE',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.message).to.be.equal(
+                'Subsystem cannot be deleted because it has active connection requests as a client'
+              )
+            })
           })
         })
       })

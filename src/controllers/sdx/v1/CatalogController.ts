@@ -1,3 +1,4 @@
+import { assertAndRaiseValidateError } from '../../../services/gateway-patterns/evaluator';
 import {
   Controller,
   Example,
@@ -19,6 +20,7 @@ import {
   GetCatalog,
   GetCatalogByName,
   GetSubsystemEntryForSubsystem,
+  ParseClientId,
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
@@ -27,6 +29,7 @@ import {
   getOrganizations,
 } from '../../../services/keystone/organization';
 import { KeystoneService } from '../../ioc/keystoneInjector';
+import assert from 'assert';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -90,7 +93,14 @@ export class CatalogController extends Controller {
     const subsystemService = new SubsystemService();
     const ctx = this.keystone.sudo();
     const subsystem = await subsystemService.findSubsystemByClientId(ctx, name);
-    const result = await GetSubsystemEntryForSubsystem(subsystem);
+    const result = GetSubsystemEntryForSubsystem(subsystem);
+
+    const client = ParseClientId(name);
+    assert.strictEqual(
+      result.member.memberClass,
+      client.member.memberClass,
+      'Member class does not matchh'
+    );
     return removeKeys(removeEmpty(result), ['gateway']) as SubsystemEntry;
   }
 

@@ -4,6 +4,7 @@ import LoginPage from '../pageObjects/login'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
 import { checkElementExists } from './e2e'
+import { request } from 'http'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
@@ -658,6 +659,8 @@ Cypress.Commands.add(
           apiRes: apiResponse,
         }
         // cy.addToAstraScanIdList(response2.body.status)
+        queryString = undefined
+        requestBody = undefined
         return responseData
       })
   }

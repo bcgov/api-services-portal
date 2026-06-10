@@ -449,6 +449,7 @@ const metadata = {
       'title',
       'version',
       'spec',
+      'specVersion',
       'summary',
       'description',
       'environment',

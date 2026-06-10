@@ -39,7 +39,7 @@ export class OrgConnectionController extends Controller {
     this.keystone = _keystone;
   }
 
-  @Patch()
+  @Put()
   @OperationId('upsertConnection')
   @Security('jwt', ['System.Manage'])
   public async upsertConnection(

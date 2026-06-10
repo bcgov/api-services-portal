@@ -12,7 +12,7 @@ namespace SDX {
                 clientId: String,
                 serviceId: String,
                 isApproved: Bool,
-                policy_release?: String,
+                policyVersion?: String,
                 environment?: String,
                 requesterDetails?: {},
                 clientResources?: {
