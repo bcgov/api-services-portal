@@ -547,7 +547,7 @@ export interface Activity {
   extRefId?: string; // Primary Key
   type?: string;
   name?: string;
-  action?: "add" | "update" | "create" | "delete" | "validate" | "publish" | "published";
+  action?: "add" | "update" | "create" | "delete" | "validate" | "publish";
   result?: "" | "received" | "failed" | "completed" | "success";
   message?: string;
   refId?: string;

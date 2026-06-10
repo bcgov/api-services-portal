@@ -1,92 +1,136 @@
 import { strict as assert } from 'assert';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import { Logger } from '../../logger';
-import { format, recordActivity } from '../keystone/activity';
+import { format, recordActivity, recordActivityWithBlob } from '../keystone/activity';
+import { getOrganizationUnit } from '../keystone/organization';
 import { KeycloakUserService } from '../keycloak/user-service';
 
 const logger = Logger('wf.OrgActivity');
 
-const ORG_PROFILE_FIELDS = [
-  'title',
-  'description',
-  'tags',
+/** Matches Organization.sync in data-rules (orgUnits excluded — logged separately). */
+const ORG_PROFILE_SNAPSHOT_FIELDS = [
+  'name',
   'sector',
+  'title',
+  'tags',
+  'description',
   'publicBodyId',
-  'orgUnits',
+  'extSource',
+  'extRecordHash',
 ] as const;
 
-function normalizeTags(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map(String).sort();
+export const CKAN_EXT_SOURCE = 'ckan';
+
+/** Matches OrganizationUnit.sync in data-rules. */
+const ORG_UNIT_PROFILE_SNAPSHOT_FIELDS = [
+  'name',
+  'sector',
+  'title',
+  'tags',
+  'description',
+  'extSource',
+  'extRecordHash',
+] as const;
+
+export type OrgHierarchyKeys = {
+  filterOrg: string;
+  refId: string;
+  orgUnit?: string;
+};
+
+export function resolveOrgHierarchyKeys(
+  parent: string | undefined,
+  name: string
+): OrgHierarchyKeys {
+  const fullPath = parent ? `${parent}/${name}` : name;
+  const segments = fullPath.split('/').filter((part) => part.length > 0);
+
+  // Root organization
+  if (segments.length === 1) {
+    return { filterOrg: segments[0], refId: segments[0] };
   }
-  if (typeof value === 'string' && value.length > 0) {
-    try {
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) {
-        return parsed.map(String).sort();
-      }
-    } catch {
-      return [value];
-    }
+
+  // Ministry-level organization
+  if (segments.length === 2) {
+    return { filterOrg: segments[1], refId: segments[1] };
   }
-  return [];
+
+  // Org unit
+  return {
+    filterOrg: segments[1],
+    refId: segments[2],
+    orgUnit: segments[2],
+  };
 }
 
-function normalizeOrgUnits(value: unknown): string[] {
-  let units: unknown = value;
-  if (typeof value === 'string' && value.length > 0) {
-    try {
-      units = JSON.parse(value);
-    } catch {
-      return [];
+function pickProfileSnapshot(
+  record: Record<string, any>,
+  fields: readonly string[]
+): Record<string, unknown> {
+  const snapshot: Record<string, unknown> = {};
+  for (const field of fields) {
+    if (record[field] !== undefined) {
+      snapshot[field] = record[field];
     }
   }
-  if (!Array.isArray(units)) {
-    return [];
-  }
-  return units
-    .map((unit: any) => {
-      if (!unit || typeof unit !== 'object') {
-        return '';
-      }
-      return String(unit.name ?? unit.extForeignKey ?? unit.id ?? '');
-    })
-    .filter((name) => name.length > 0)
-    .sort();
+  return snapshot;
 }
 
-function normalizeOptionalScalar(value: unknown): string | null {
-  if (value === undefined || value === null || value === '') {
-    return null;
-  }
-  return String(value);
+export function buildOrganizationProfileSnapshot(
+  record: Record<string, any>
+): Record<string, unknown> {
+  return pickProfileSnapshot(record, ORG_PROFILE_SNAPSHOT_FIELDS);
 }
 
-export function diffOrganizationProfileFields(
-  before: Record<string, any>,
-  after: Record<string, any>
-): string[] {
-  return ORG_PROFILE_FIELDS.filter((field) => {
-    if (field === 'tags') {
-      return (
-        JSON.stringify(normalizeTags(before[field])) !==
-        JSON.stringify(normalizeTags(after[field]))
-      );
-    }
-    if (field === 'orgUnits') {
-      return (
-        JSON.stringify(normalizeOrgUnits(before[field])) !==
-        JSON.stringify(normalizeOrgUnits(after[field]))
-      );
-    }
-    if (field === 'publicBodyId' || field === 'sector' || field === 'description') {
-      return (
-        normalizeOptionalScalar(before[field]) !==
-        normalizeOptionalScalar(after[field])
-      );
-    }
-    return before[field] !== after[field];
-  });
+export function buildOrganizationUnitProfileSnapshot(
+  record: Record<string, any>
+): Record<string, unknown> {
+  return pickProfileSnapshot(record, ORG_UNIT_PROFILE_SNAPSHOT_FIELDS);
+}
+
+export function shouldLogOrgUnitEstablishment(
+  record: Record<string, any>
+): boolean {
+  return record.extSource !== CKAN_EXT_SOURCE;
+}
+
+const SDX_KEYS_PATTERN = 'sdx-keys.r1';
+
+type SdxKeyActivityScope = 'organization' | 'subsystem' | 'runtime-group';
+
+function gatewayPatternPublishEntity(
+  pattern: string,
+  scope?: SdxKeyActivityScope
+): string {
+  if (pattern !== SDX_KEYS_PATTERN) {
+    return 'GatewayPatternPublish';
+  }
+
+  switch (scope) {
+    case 'organization':
+      return 'OrganizationKey';
+    case 'subsystem':
+      return 'SubsystemKey';
+    case 'runtime-group':
+      return 'RuntimeGroupKey';
+    default:
+      return 'GatewayPatternPublish';
+  }
+}
+
+function gatewayPatternPublishMessage(
+  targetName: string | undefined,
+  removed: boolean
+): string {
+  const includeTarget = Boolean(targetName);
+  if (removed) {
+    return includeTarget
+      ? '{actor} removed {pattern} for {targetName}: {detail}'
+      : '{actor} removed {pattern}: {detail}';
+  }
+  return includeTarget
+    ? '{actor} published {pattern} for {targetName}'
+    : '{actor} published {pattern}';
 }
 
 export class OrgActivityService {
@@ -106,35 +150,83 @@ export class OrgActivityService {
     );
   }
 
-  async logOrganizationEstablished(success: boolean): Promise<void> {
+  async logOrganizationEstablished(
+    success: boolean,
+    profile?: Record<string, unknown>
+  ): Promise<void> {
     return this.recordOrgActivity(
       success,
       '{actor} established organization {organization}',
       {
-        action: 'register',
+        action: 'registered',
         entity: 'Organization',
         actor: this.getActorName(),
         organization: this.orgName,
       },
-      [`org:${this.orgName}`]
+      this.orgName,
+      [`org:${this.orgName}`],
+      profile
+    );
+  }
+
+  async logOrganizationUnitEstablished(
+    success: boolean,
+    data: {
+      orgUnit: string;
+      profile: Record<string, unknown>;
+    }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} established organization unit {orgUnit}',
+      {
+        action: 'registered',
+        entity: 'OrganizationUnit',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        orgUnit: data.orgUnit,
+      },
+      data.orgUnit,
+      [`org:${this.orgName}`, `orgUnit:${data.orgUnit}`],
+      data.profile
     );
   }
 
   async logOrganizationProfileChange(
     success: boolean,
-    data: { changedFields: string }
+    data: {
+      refId?: string;
+      orgUnit?: string;
+      profile: Record<string, unknown>;
+    }
   ): Promise<void> {
+    const refId = data.refId ?? (data.orgUnit ?? this.orgName);
+    const ids = [`org:${this.orgName}`];
+    if (data.orgUnit) {
+      ids.push(`orgUnit:${data.orgUnit}`);
+    }
+
+    const message = data.orgUnit
+      ? '{actor} updated organization unit profile for {orgUnit}'
+      : '{actor} updated organization profile for {organization}';
+
+    const params: { [key: string]: string } = {
+      action: 'updated',
+      entity: 'OrganizationProfile',
+      actor: this.getActorName(),
+      organization: this.orgName,
+    };
+    if (data.orgUnit) {
+      params.orgUnit = data.orgUnit;
+    }
+
     return this.recordOrgActivity(
       success,
-      '{actor} updated organization profile ({changedFields}) for {organization}',
-      {
-        action: 'update',
-        entity: 'OrganizationProfile',
-        actor: this.getActorName(),
-        organization: this.orgName,
-        changedFields: data.changedFields,
-      },
-      [`org:${this.orgName}`]
+      message,
+      params,
+      refId,
+      ids,
+      data.profile
     );
   }
 
@@ -144,22 +236,34 @@ export class OrgActivityService {
       subject_email: string;
       subject: string;
       roles: string;
+      refId: string;
+      orgUnit?: string;
     }
   ): Promise<void> {
-    return this.recordOrgActivity(
-      success,
-      '{actor} {action} {subject} organization access on {organization}: {roles}',
-      {
-        action: 'updated',
-        entity: 'OrganizationAccess',
-        actor: this.getActorName(),
-        organization: this.orgName,
-        subject_email: data.subject_email,
-        subject: data.subject,
-        roles: data.roles,
-      },
-      [`org:${this.orgName}`, `user:${data.subject_email}`]
-    );
+    const ids = [`org:${this.orgName}`];
+    if (data.orgUnit) {
+      ids.push(`orgUnit:${data.orgUnit}`);
+    }
+    ids.push(`user:${data.subject_email}`);
+
+    const message = data.orgUnit
+      ? '{actor} {action} {subject} organization unit access on {orgUnit}: {roles}'
+      : '{actor} {action} {subject} organization access on {organization}: {roles}';
+
+    const params: { [key: string]: string } = {
+      action: 'updated',
+      entity: 'OrganizationAccess',
+      actor: this.getActorName(),
+      organization: this.orgName,
+      subject_email: data.subject_email,
+      subject: data.subject,
+      roles: data.roles,
+    };
+    if (data.orgUnit) {
+      params.orgUnit = data.orgUnit;
+    }
+
+    return this.recordOrgActivity(success, message, params, data.refId, ids);
   }
 
   async logOrganizationCSR(
@@ -170,52 +274,67 @@ export class OrgActivityService {
       success,
       '{actor} requested organization certificate for {keyName} on {organization}',
       {
-        action: 'request',
+        action: 'requested',
         entity: 'OrganizationCertificate',
         actor: this.getActorName(),
         organization: this.orgName,
         keyName: data.keyName,
       },
+      data.keyName,
       [`org:${this.orgName}`, `key:${data.keyName}`]
     );
   }
 
-  async logOrganizationPatternPublish(
+  async logGatewayPatternPublish(
     success: boolean,
     data: {
-      keysAdded?: string[];
-      keysRotated?: string[];
-      keysRemoved?: string[];
+      pattern: string;
+      /** Remove-only summary; deck output is stored in blob on apply. */
+      detail?: string;
+      removed?: boolean;
+      scope?: 'organization' | 'subsystem' | 'runtime-group';
+      targetName?: string;
+      deckBlob?: string;
     }
   ): Promise<void> {
-    for (const keyName of data.keysAdded ?? []) {
-      await this.logOrganizationKey(success, 'add', keyName);
-    }
-    for (const keyName of data.keysRotated ?? []) {
-      await this.logOrganizationKey(success, 'rotate', keyName);
-    }
-    for (const keyName of data.keysRemoved ?? []) {
-      await this.logOrganizationKey(success, 'delete', keyName);
-    }
-  }
+    const isRemove = data.removed === true;
+    const message = gatewayPatternPublishMessage(data.targetName, isRemove);
 
-  async logOrganizationKey(
-    success: boolean,
-    keyAction: 'add' | 'rotate' | 'delete',
-    keyName: string
-  ): Promise<void> {
+    const entity = gatewayPatternPublishEntity(data.pattern, data.scope);
+
+    const params: { [key: string]: string } = {
+      action: isRemove ? 'removed' : 'published',
+      entity,
+      actor: this.getActorName(),
+      organization: this.orgName,
+      pattern: data.pattern,
+    };
+    if (isRemove && data.detail) {
+      params.detail = data.detail;
+    }
+    if (data.scope) {
+      params.scope = data.scope;
+    }
+    if (data.targetName) {
+      params.targetName = data.targetName;
+    }
+
+    const ids = [`org:${this.orgName}`];
+    if (data.scope) {
+      ids.push(`scope:${data.scope}`);
+    }
+    if (data.targetName) {
+      ids.push(`target:${data.targetName}`);
+    }
+
+    const refId = data.targetName ?? this.orgName;
     return this.recordOrgActivity(
       success,
-      '{actor} {keyAction} organization key {keyName} on {organization}',
-      {
-        action: keyAction,
-        entity: 'OrganizationKey',
-        actor: this.getActorName(),
-        organization: this.orgName,
-        keyName,
-        keyAction,
-      },
-      [`org:${this.orgName}`, `key:${keyName}`]
+      message,
+      params,
+      refId,
+      ids,
+      data.deckBlob
     );
   }
 
@@ -223,7 +342,9 @@ export class OrgActivityService {
     success: boolean,
     message: string,
     params: { [key: string]: string },
-    ids: string[]
+    refId: string,
+    ids: string[],
+    blob?: Record<string, unknown> | string
   ): Promise<void> {
     assert.strictEqual(
       ids.length > 0 && ids.length < 5,
@@ -242,19 +363,33 @@ export class OrgActivityService {
     });
 
     const formattedMessage = format(message, params);
-    logger.info('[OrgActivity] %s (%j)', formattedMessage, ids);
+    const actorIds = ids.concat(`actor:${params.actor}`);
+    logger.info('[OrgActivity] %s (%j)', formattedMessage, actorIds);
 
-    const result = await recordActivity(
-      this.context,
-      params.action,
-      params.entity,
-      `org:${this.orgName}`,
-      formattedMessage,
-      success ? 'success' : 'failed',
-      activityContext,
-      null,
-      ids.concat(`actor:${params.actor}`)
-    );
+    const result = blob
+      ? await recordActivityWithBlob(
+          this.context,
+          params.action,
+          params.entity,
+          refId,
+          formattedMessage,
+          success ? 'success' : 'failed',
+          activityContext,
+          blob,
+          actorIds,
+          null
+        )
+      : await recordActivity(
+          this.context,
+          params.action,
+          params.entity,
+          refId,
+          formattedMessage,
+          success ? 'success' : 'failed',
+          activityContext,
+          null,
+          actorIds
+        );
     if (result.errors) {
       logger.error('[OrgActivity] %s %j %j', message, params, result);
     }
@@ -316,13 +451,19 @@ function signRoleDelta(added: string[], removed: string[]): string {
 }
 
 export async function logOrganizationAccessChanges(
-  orgActivity: OrgActivityService,
+  context: any,
+  membership: { parent?: string; name: string },
   changes: {
     granted: Record<string, string[]>;
     revoked: Record<string, string[]>;
   },
   resolveDisplayName: (email: string) => Promise<string>
 ): Promise<void> {
+  const { filterOrg, refId, orgUnit } = resolveOrgHierarchyKeys(
+    membership.parent,
+    membership.name
+  );
+  const orgActivity = new OrgActivityService(context, filterOrg);
   const emails = new Set([
     ...Object.keys(changes.granted || {}),
     ...Object.keys(changes.revoked || {}),
@@ -336,6 +477,8 @@ export async function logOrganizationAccessChanges(
         changes.granted[email] ?? [],
         changes.revoked[email] ?? []
       ),
+      refId,
+      orgUnit,
     });
   }
 }
@@ -343,16 +486,101 @@ export async function logOrganizationAccessChanges(
 export async function logOrganizationProfileChangeFromRecords(
   context: any,
   orgName: string,
-  before: Record<string, any>,
-  after: Record<string, any>
+  record: Record<string, any>
 ): Promise<void> {
-  const changedFields = diffOrganizationProfileFields(before, after);
-  if (changedFields.length === 0) {
-    return;
-  }
   await new OrgActivityService(context, orgName)
     .logOrganizationProfileChange(true, {
-      changedFields: changedFields.join(','),
+      refId: orgName,
+      profile: buildOrganizationProfileSnapshot(record),
     })
     .catch((e) => logger.error('[OrgActivity] profile change %s', e));
+}
+
+export async function logOrganizationUnitsFromChildSync(
+  context: any,
+  units: Array<Record<string, any>>,
+  childResults: Array<{ result?: string }>,
+  parentOrgName: string
+): Promise<void> {
+  for (let i = 0; i < childResults.length; i++) {
+    const childResult = childResults[i];
+    const unitRecord = units[i];
+    if (!unitRecord?.name) {
+      continue;
+    }
+    if (childResult.result === 'created') {
+      await logOrganizationUnitEstablishedFromRecords(
+        context,
+        unitRecord.name,
+        unitRecord,
+        parentOrgName
+      );
+    } else if (childResult.result === 'updated') {
+      await logOrganizationUnitProfileChangeFromRecords(
+        context,
+        unitRecord.name,
+        unitRecord,
+        parentOrgName
+      );
+    }
+  }
+}
+
+export async function logOrganizationUnitEstablishedFromRecords(
+  context: any,
+  unitName: string,
+  record: Record<string, any>,
+  parentOrgName?: string
+): Promise<void> {
+  if (!shouldLogOrgUnitEstablishment(record)) {
+    return;
+  }
+
+  let ministryName = parentOrgName;
+  if (!ministryName) {
+    const org = await getOrganizationUnit(context, unitName);
+    if (!org?.name) {
+      logger.error(
+        '[OrgActivity] unit establishment - parent org not found for %s',
+        unitName
+      );
+      return;
+    }
+    ministryName = org.name;
+  }
+
+  await new OrgActivityService(context, ministryName)
+    .logOrganizationUnitEstablished(true, {
+      orgUnit: unitName,
+      profile: buildOrganizationUnitProfileSnapshot(record),
+    })
+    .catch((e) => logger.error('[OrgActivity] unit establishment %s', e));
+}
+
+export async function logOrganizationUnitProfileChangeFromRecords(
+  context: any,
+  unitName: string,
+  record: Record<string, any>,
+  parentOrgName?: string
+): Promise<void> {
+  let ministryName = parentOrgName;
+  if (!ministryName) {
+    const org = await getOrganizationUnit(context, unitName);
+    if (!org?.name) {
+      logger.error(
+        '[OrgActivity] unit profile change - parent org not found for %s',
+        unitName
+      );
+      return;
+    }
+    ministryName = org.name;
+  }
+
+  await new OrgActivityService(context, ministryName)
+    .logOrganizationProfileChange(true, {
+      refId: unitName,
+      orgUnit: unitName,
+      profile: buildOrganizationUnitProfileSnapshot(record),
+    })
+    .catch((e) => logger.error('[OrgActivity] unit profile change %s', e));
 }

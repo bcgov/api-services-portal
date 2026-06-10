@@ -43,7 +43,6 @@ import { getActivity } from '../../services/keystone/activity';
 import {
   buildOrgAccessDisplayNameResolver,
   logOrganizationAccessChanges,
-  OrgActivityService,
 } from '../../services/workflow/org-activity';
 import { Logger } from '../../logger';
 import { isParent } from '../../services/org-groups/group-converter-utils';
@@ -155,7 +154,6 @@ export class OrganizationController extends Controller {
     ]);
 
     const activityCtx = this.keystone.createContext(request, true);
-    const orgActivity = new OrgActivityService(activityCtx, org);
 
     const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
       envConfig.issuerUrl,
@@ -164,7 +162,8 @@ export class OrganizationController extends Controller {
     );
 
     await logOrganizationAccessChanges(
-      orgActivity,
+      activityCtx,
+      { parent: body.parent, name: body.name! },
       changes,
       resolveDisplayName
     ).catch((e) =>

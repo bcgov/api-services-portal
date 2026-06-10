@@ -72,13 +72,197 @@ dQIDAQAB
       const entry = activities.find(
         (a: any) =>
           a.params?.entity === 'Organization' &&
-          a.params?.action === 'register' &&
+          a.params?.action === 'registered' &&
           a.params?.organization === org.name
       )
       expect(entry?.params?.entity).to.equal('Organization')
-      expect(entry?.params?.action).to.equal('register')
+      expect(entry?.params?.action).to.equal('registered')
       expect(entry?.params?.organization).to.equal(org.name)
+      expect(entry?.blob?.title).to.equal(org.title)
+      expect(entry?.blob?.description).to.equal(org.description)
       expect(entry?.result).to.equal('success')
+    })
+  })
+
+  describe('Organization unit profile in catalog activity', () => {
+    let org: any
+    let orgUnit: any
+
+    before(() => {
+      const orgId = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 4)
+
+      cy.loginByAuthAPI('', '').then((token_res: any) => {
+        cy.setHeaders({ 'Content-Type': 'application/json' })
+        cy.setAuthorizationToken(token_res.token)
+
+        org = {
+          name: `ministry-of-hounds-${orgId}`,
+          title: 'Ministry of Hounds',
+          description: 'Organization for org unit activity test',
+          tags: ['member_class:MIN', `member_id:${orgId}`],
+          orgUnits: [],
+          extSource: 'internal',
+          extRecordHash: '',
+        }
+
+        cy.setRequestBody(org)
+        cy.callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.result).to.match(/created/)
+          }
+        )
+      })
+    })
+
+    it('records org unit establishment when a unit is added to an organization', () => {
+      const orgId = org.tags[1].split(':')[1]
+      orgUnit = {
+        name: `division-of-pups-${orgId}`,
+        title: 'Division of pups',
+        description: 'Org unit for catalog activity test',
+        tags: [],
+        extForeignKey: `division-of-pups-${orgId}`,
+        extSource: 'internal',
+        extRecordHash: '',
+      }
+
+      cy.setRequestBody({ ...org, orgUnits: [orgUnit] })
+      cy.callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.match(/updated/)
+
+          cy.callAPI(
+            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+            'GET'
+          ).then(({ apiRes: { status: activityStatus, body: activities } }: any) => {
+            expect(activityStatus).to.be.equal(200)
+            const entry = activities.find(
+              (a: any) =>
+                a.params?.entity === 'OrganizationUnit' &&
+                a.params?.action === 'registered' &&
+                a.params?.organization === org.name &&
+                a.params?.orgUnit === orgUnit.name
+            )
+            expect(entry?.params?.entity).to.equal('OrganizationUnit')
+            expect(entry?.params?.action).to.equal('registered')
+            expect(entry?.params?.organization).to.equal(org.name)
+            expect(entry?.params?.orgUnit).to.equal(orgUnit.name)
+            expect(entry?.blob?.title).to.equal(orgUnit.title)
+            expect(entry?.blob?.description).to.equal(orgUnit.description)
+            expect(entry?.result).to.equal('success')
+          })
+        }
+      )
+    })
+
+    it('records org unit profile updates after establishment', () => {
+      const updatedOrgUnit = {
+        ...orgUnit,
+        title: 'Division of pups (updated)',
+        description: 'Updated org unit description for catalog activity test',
+      }
+
+      cy.setRequestBody({ ...org, orgUnits: [updatedOrgUnit] })
+      cy.callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.match(/updated/)
+
+          cy.callAPI(
+            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+            'GET'
+          ).then(({ apiRes: { status: activityStatus, body: activities } }: any) => {
+            expect(activityStatus).to.be.equal(200)
+            const entry = activities.find(
+              (a: any) =>
+                a.params?.entity === 'OrganizationProfile' &&
+                a.params?.action === 'updated' &&
+                a.params?.organization === org.name &&
+                a.params?.orgUnit === orgUnit.name &&
+                a.blob?.title === updatedOrgUnit.title
+            )
+            expect(entry?.params?.entity).to.equal('OrganizationProfile')
+            expect(entry?.params?.action).to.equal('updated')
+            expect(entry?.params?.organization).to.equal(org.name)
+            expect(entry?.params?.orgUnit).to.equal(orgUnit.name)
+            expect(entry?.blob?.title).to.equal(updatedOrgUnit.title)
+            expect(entry?.blob?.description).to.equal(updatedOrgUnit.description)
+            expect(entry?.result).to.equal('success')
+          })
+        }
+      )
+    })
+
+    it('records organization establishment and org unit register when created together', () => {
+      const orgId = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 4)
+      const orgUnit = {
+        name: `division-of-pups-together-${orgId}`,
+        title: 'Division of hounds',
+        description: 'Org unit created with parent organization',
+        tags: [],
+        extForeignKey: `division-of-pups-together-${orgId}`,
+        extSource: 'internal',
+        extRecordHash: '',
+      }
+      const org = {
+        name: `ministry-of-hounds-together-${orgId}`,
+        title: 'Ministry of hounds together',
+        description: 'Organization created with an org unit',
+        tags: ['member_class:MIN', `member_id:${orgId}`],
+        orgUnits: [orgUnit],
+        extSource: 'internal',
+        extRecordHash: '',
+      }
+
+      cy.loginByAuthAPI('', '').then((token_res: any) => {
+        cy.setHeaders({ 'Content-Type': 'application/json' })
+        cy.setAuthorizationToken(token_res.token)
+        cy.setRequestBody(org)
+
+        cy.callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.result).to.match(/created/)
+
+            cy.callAPI(
+              `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+              'GET'
+            ).then(({ apiRes: { status: activityStatus, body: activities } }: any) => {
+              expect(activityStatus).to.be.equal(200)
+
+              const establishment = activities.find(
+                (a: any) =>
+                  a.params?.entity === 'Organization' &&
+                  a.params?.action === 'registered' &&
+                  a.params?.organization === org.name
+              )
+              expect(establishment?.params?.entity).to.equal('Organization')
+              expect(establishment?.params?.action).to.equal('registered')
+              expect(establishment?.params?.organization).to.equal(org.name)
+              expect(establishment?.blob?.title).to.equal(org.title)
+              expect(establishment?.blob?.description).to.equal(org.description)
+              expect(establishment?.result).to.equal('success')
+
+              const unitEstablishment = activities.find(
+                (a: any) =>
+                  a.params?.entity === 'OrganizationUnit' &&
+                  a.params?.action === 'registered' &&
+                  a.params?.organization === org.name &&
+                  a.params?.orgUnit === orgUnit.name
+              )
+              expect(unitEstablishment?.params?.entity).to.equal('OrganizationUnit')
+              expect(unitEstablishment?.params?.action).to.equal('registered')
+              expect(unitEstablishment?.params?.organization).to.equal(org.name)
+              expect(unitEstablishment?.params?.orgUnit).to.equal(orgUnit.name)
+              expect(unitEstablishment?.blob?.title).to.equal(orgUnit.title)
+              expect(unitEstablishment?.blob?.description).to.equal(orgUnit.description)
+              expect(unitEstablishment?.result).to.equal('success')
+            })
+          }
+        )
+      })
     })
   })
 
@@ -104,14 +288,14 @@ dQIDAQAB
           const entry = activities.find(
             (a: any) =>
               a.params?.entity === 'OrganizationProfile' &&
-              a.params?.action === 'update' &&
+              a.params?.action === 'updated' &&
               a.params?.organization === org.name
           )
           expect(entry?.params?.entity).to.equal('OrganizationProfile')
-          expect(entry?.params?.action).to.equal('update')
+          expect(entry?.params?.action).to.equal('updated')
           expect(entry?.params?.organization).to.equal(org.name)
-          expect(entry?.params?.changedFields).to.include('title')
-          expect(entry?.params?.changedFields).to.include('description')
+          expect(entry?.blob?.title).to.equal(updatedOrg.title)
+          expect(entry?.blob?.description).to.equal(updatedOrg.description)
           expect(entry?.result).to.equal('success')
         })
       }
@@ -223,7 +407,7 @@ dQIDAQAB
       })
     })
 
-    it('records add on initial organization public key apply', () => {
+    it('records published activity on initial organization public key apply', () => {
       const { org } = workingData
 
       cy.callAPI(
@@ -234,17 +418,21 @@ dQIDAQAB
         const entry = activities.find(
           (a: any) =>
             a.params?.entity === 'OrganizationKey' &&
-            a.params?.keyName === orgKeyName &&
-            a.params?.keyAction === 'add'
+            a.params?.action === 'published' &&
+            a.params?.targetName === org.name
         )
+        const deckResults = Array.isArray(entry?.blob)
+          ? entry.blob[0]?.results
+          : entry?.blob?.results
         expect(entry?.params?.entity).to.equal('OrganizationKey')
-        expect(entry?.params?.keyName).to.equal(orgKeyName)
-        expect(entry?.params?.keyAction).to.equal('add')
+        expect(entry?.params?.action).to.equal('published')
+        expect(entry?.params?.detail).to.be.undefined
+        expect(deckResults).to.include(`creating key ${orgKeyName}`)
         expect(entry?.result).to.equal('success')
       })
     })
 
-    it('records rotate when organization public key material changes', () => {
+    it('records published activity when organization public key material changes in-place', () => {
       const { org } = workingData
 
       applyOrgPublicKeyPattern(org.name, publicKeyPemB).then(
@@ -256,22 +444,32 @@ dQIDAQAB
             'GET'
           ).then(({ apiRes: { status, body: activities } }: any) => {
             expect(status).to.be.equal(200)
-            const entry = activities.find(
+            const publishEntries = activities.filter(
               (a: any) =>
                 a.params?.entity === 'OrganizationKey' &&
-                a.params?.keyName === orgKeyName &&
-                a.params?.keyAction === 'rotate'
+                a.params?.action === 'published' &&
+                a.params?.targetName === org.name
             )
+            const entry = publishEntries.find((a: any) => {
+              const deckResults = Array.isArray(a.blob)
+                ? a.blob[0]?.results
+                : a.blob?.results
+              return deckResults?.includes(`updating key ${orgKeyName}`)
+            })
+            const deckResults = Array.isArray(entry?.blob)
+              ? entry.blob[0]?.results
+              : entry?.blob?.results
             expect(entry?.params?.entity).to.equal('OrganizationKey')
-            expect(entry?.params?.keyName).to.equal(orgKeyName)
-            expect(entry?.params?.keyAction).to.equal('rotate')
+            expect(entry?.params?.action).to.equal('published')
+            expect(entry?.params?.detail).to.be.undefined
+            expect(deckResults).to.include(`updating key ${orgKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }
       )
     })
 
-    it('records delete when organization public key is removed', () => {
+    it('records removed activity when organization public key is removed', () => {
       const { org } = workingData
 
       applyOrgPublicKeyPattern(org.name, publicKeyPemB, 'remove').then(
@@ -286,12 +484,12 @@ dQIDAQAB
             const entry = activities.find(
               (a: any) =>
                 a.params?.entity === 'OrganizationKey' &&
-                a.params?.keyName === orgKeyName &&
-                a.params?.keyAction === 'delete'
+                a.params?.action === 'removed' &&
+                a.params?.detail?.includes(`removed key ${orgKeyName}`)
             )
             expect(entry?.params?.entity).to.equal('OrganizationKey')
-            expect(entry?.params?.keyName).to.equal(orgKeyName)
-            expect(entry?.params?.keyAction).to.equal('delete')
+            expect(entry?.params?.action).to.equal('removed')
+            expect(entry?.params?.detail).to.include(`removed key ${orgKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }

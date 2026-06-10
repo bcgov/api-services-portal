@@ -44,6 +44,7 @@ import {
 } from '../../services/workflow';
 import {
   buildOrgAccessDisplayNameResolver,
+  buildOrganizationProfileSnapshot,
   logOrganizationAccessChanges,
   OrgActivityService,
 } from '../../services/workflow/org-activity';
@@ -121,7 +122,10 @@ export class OrganizationController extends Controller {
     // Profile updates are logged from feed-worker after syncRecords updates.
     if (!existing && result.result?.startsWith('created')) {
       await new OrgActivityService(ctx, body['name'])
-        .logOrganizationEstablished(true)
+        .logOrganizationEstablished(
+          true,
+          buildOrganizationProfileSnapshot(body)
+        )
         .catch((e) =>
           logger.error('[OrgActivity] organization established %s', e)
         );
@@ -213,7 +217,6 @@ export class OrganizationController extends Controller {
     ]);
 
     const activityCtx = this.keystone.createContext(request, true);
-    const orgActivity = new OrgActivityService(activityCtx, org);
 
     const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
       envConfig.issuerUrl,
@@ -222,7 +225,8 @@ export class OrganizationController extends Controller {
     );
 
     await logOrganizationAccessChanges(
-      orgActivity,
+      activityCtx,
+      { parent: body.parent, name: body.name! },
       changes,
       resolveDisplayName
     ).catch((e) =>

@@ -2,18 +2,11 @@ export const PUBLIC_ORG_ACTIVITY: ReadonlyArray<{
   action: string;
   type: string;
 }> = [
-  { action: 'register', type: 'Organization' },
-  { action: 'update', type: 'OrganizationProfile' },
+  { action: 'registered', type: 'Organization' },
+  { action: 'registered', type: 'OrganizationUnit' },
+  { action: 'updated', type: 'OrganizationProfile' },
   { action: 'updated', type: 'OrganizationAccess' },
-  { action: 'request', type: 'OrganizationCertificate' },
-  { action: 'add', type: 'OrganizationKey' },
-  { action: 'rotate', type: 'OrganizationKey' },
-  { action: 'delete', type: 'OrganizationKey' },
+  { action: 'requested', type: 'OrganizationCertificate' },
+  { action: 'published', type: 'OrganizationKey' },
+  { action: 'removed', type: 'OrganizationKey' },
 ];
-
-export function getPublicOrgActivityWhereClause(): Array<{
-  action: string;
-  type: string;
-}> {
-  return PUBLIC_ORG_ACTIVITY.map(({ action, type }) => ({ action, type }));
-}

@@ -803,7 +803,6 @@ const metadata = {
           'delete',
           'validate',
           'publish',
-          'published',
         ],
       },
       result: {

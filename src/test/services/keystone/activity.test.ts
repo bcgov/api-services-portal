@@ -1,5 +1,5 @@
 import { format, getOrgActivity } from '../../../services/keystone/activity';
-import { getPublicOrgActivityWhereClause } from '../../../services/workflow/org-activity-public';
+import { PUBLIC_ORG_ACTIVITY } from '../../../services/workflow/org-activity-public';
 
 const sampleActivities = [
   {
@@ -180,7 +180,7 @@ describe('getOrgActivity', function () {
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
       AND: [
         { filterKey1: 'org:ministry-of-health' },
-        { OR: getPublicOrgActivityWhereClause() },
+        { OR: [...PUBLIC_ORG_ACTIVITY] },
       ],
     });
   });

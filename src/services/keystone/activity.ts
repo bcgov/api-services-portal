@@ -2,7 +2,7 @@ import { Logger } from '../../logger';
 import { Activity, ActivityWhereInput } from './types';
 import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
-import { getPublicOrgActivityWhereClause } from '../workflow/org-activity-public';
+import { PUBLIC_ORG_ACTIVITY } from '../workflow/org-activity-public';
 
 const logger = Logger('keystone.activity');
 
@@ -20,10 +20,14 @@ export async function recordActivityWithBlob(
   result: string = '',
   activityContext: string = '',
   blob: any = {},
-  ids: string[] = []
+  ids: string[] = [],
+  productNamespace: string | null | undefined = undefined
 ) {
-  const userId = context.authedItem.userId;
-  const namespace = context.authedItem.namespace;
+  const userId = context.authedItem?.userId;
+  const namespace =
+    productNamespace !== undefined
+      ? productNamespace
+      : context.authedItem?.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivityWithBlob] userid=%s name=%s', userId, name);
 
@@ -243,7 +247,7 @@ export async function getOrgActivity(
 
   if (publicOnly) {
     conditions.push({
-      OR: getPublicOrgActivityWhereClause(),
+      OR: [...PUBLIC_ORG_ACTIVITY],
     });
   }
 

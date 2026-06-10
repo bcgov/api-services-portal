@@ -16,12 +16,6 @@ import {
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
-import {
-  diffGatewayKeys,
-  GatewayKeyDocument,
-  getPublishedGatewayKeysFromActivity,
-  isGatewayKeyInScopes,
-} from '../../../services/gateway-patterns/gateway-key-diff';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
 import { OrgActivityService } from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
@@ -55,6 +49,34 @@ interface ValidateErrorJSON {
   code: 'validation_error';
   message: 'Invalid input';
   fields: { [name: string]: { message: string } };
+}
+
+type SdxGatewayKeyScope = 'organization' | 'subsystem' | 'runtime-group';
+
+/** Kong key tags use `type:client` for subsystem-scoped keys (see sdx-keys.r1). */
+const GATEWAY_KEY_TAG_BY_SCOPE: Record<SdxGatewayKeyScope, string> = {
+  organization: 'organization',
+  subsystem: 'client',
+  'runtime-group': 'runtime-group',
+};
+
+type GatewayKeyDocument = {
+  name: string;
+  kid?: string;
+  tags?: string[];
+  pem?: { public_key?: string };
+  jwk?: string;
+  set?: { name?: string };
+};
+
+function isGatewayKeyInScopes(
+  key: GatewayKeyDocument,
+  scopes: readonly SdxGatewayKeyScope[]
+): boolean {
+  const tags = key.tags ?? [];
+  return scopes.some((scope) =>
+    tags.includes(`type:${GATEWAY_KEY_TAG_BY_SCOPE[scope]}`)
+  );
 }
 
 @injectable()
@@ -138,7 +160,7 @@ export class OrgGatewaysController extends Controller {
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.createContext(request, true);
 
     body.parameters['organization'] = org; // inject org into parameters for pattern evaluation
 
@@ -177,27 +199,6 @@ export class OrgGatewaysController extends Controller {
 
     const subjectToken = getSubjectToken(request);
     const incomingKeys = payload.keys as GatewayKeyDocument[];
-    const orgKeyScopes = ['organization'] as const;
-    let keysBeforePublish: GatewayKeyDocument[] = [];
-    if (
-      body.pattern === 'sdx-keys.r1' &&
-      !dryRun &&
-      !body.parameters.runtime_group_name &&
-      !body.parameters.client_id &&
-      action !== 'remove'
-    ) {
-      const readCtx = this.keystone.createContext(request, true);
-      keysBeforePublish = await getPublishedGatewayKeysFromActivity(
-        readCtx,
-        config._gateway_id
-      );
-      if (keysBeforePublish.length === 0) {
-        logger.warn(
-          '[generateConfigFromPattern] no published GatewayConfig activity for %s; key changes will be classified as add only',
-          config._gateway_id
-        );
-      }
-    }
 
     // Validate the generated config to ensure it only contains allowed configurations for the organization
     const result = await gwaService.publishGatewayConfiguration(
@@ -208,29 +209,49 @@ export class OrgGatewaysController extends Controller {
       artifact
     );
 
-    if (
-      body.pattern === 'sdx-keys.r1' &&
-      !dryRun &&
-      !body.parameters.runtime_group_name &&
-      !body.parameters.client_id
-    ) {
-      const keyDiff =
-        action === 'remove'
-          ? {
-              keysAdded: [] as string[],
-              keysRotated: [] as string[],
-              keysRemoved: incomingKeys
-                .filter((key) =>
-                  isGatewayKeyInScopes(key, orgKeyScopes)
-                )
-                .map((key) => key.name),
-            }
-          : diffGatewayKeys(keysBeforePublish, incomingKeys, orgKeyScopes);
+    if (!dryRun) {
+      let detail: string | undefined;
+      let deckBlob: string | undefined;
+      const removed = action === 'remove';
+      let scope: SdxGatewayKeyScope | undefined;
+      let targetName: string | undefined;
+
+      if (body.pattern === 'sdx-keys.r1') {
+        scope = body.parameters.runtime_group_name
+          ? 'runtime-group'
+          : body.parameters.client_id
+            ? 'subsystem'
+            : 'organization';
+        targetName =
+          body.parameters.runtime_group_name ??
+          body.parameters.client_id ??
+          org;
+
+        if (removed) {
+          const removedKeyNames = incomingKeys
+            .filter((key) => isGatewayKeyInScopes(key, [scope]))
+            .map((key) => key.name);
+          detail = removedKeyNames
+            .map((name) => `removed key ${name}`)
+            .join('; ');
+        } else {
+          deckBlob = YAML.dump(result, { noRefs: true });
+        }
+      } else if (removed) {
+        detail = `removed ${body.pattern}`;
+      }
 
       await new OrgActivityService(ctx, org)
-        .logOrganizationPatternPublish(true, keyDiff)
+        .logGatewayPatternPublish(true, {
+          pattern: body.pattern,
+          ...(detail ? { detail } : {}),
+          removed,
+          scope,
+          targetName,
+          deckBlob,
+        })
         .catch((e) =>
-          logger.error('[OrgActivity] organization pattern keys %s', e)
+          logger.error('[OrgActivity] gateway pattern publish %s', e)
         );
     }
 
