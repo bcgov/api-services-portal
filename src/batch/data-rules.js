@@ -438,6 +438,7 @@ const metadata = {
     compositeRefKey: [
       'title',
       'version',
+      'environment',
       {
         key: 'organization',
         whereClause: 'organization: { name: $organization }',

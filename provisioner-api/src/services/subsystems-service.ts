@@ -61,6 +61,7 @@ export class SdxMemberService {
         description: o.description || '',
         services: services
           .filter((s) => s.subsystem.clientId === o.clientId)
+          .filter((s) => s.environment === environment)
           .map((s) => ({
             name: s.name,
             title: s.title,
@@ -85,29 +86,32 @@ export class SdxMemberService {
         }
       });
 
-      return Object.values(subsystemsMap).map((o) => ({
-        id: o.clientId,
-        name: o.name,
-        organization: o.organization?.name || 'unknown',
-        environment: environment,
-        description: o.description || '',
-        services: services
-          .filter((s) => s.subsystem.clientId === o.clientId)
-          .map((s) => ({
-            name: s.name,
-            title: s.title,
-            scopes: s.operations.reduce(
-              (acc: { [name: string]: string }, op) => {
-                op.scopes?.forEach((scope) => {
-                  acc[scope] = '';
-                });
-                return acc;
-              },
-              {}
-            ),
-            summary: s.summary || '',
-          })),
-      }));
+      return Object.values(subsystemsMap)
+        .map((o) => ({
+          id: o.clientId,
+          name: o.name,
+          organization: o.organization?.name || 'unknown',
+          environment: environment,
+          description: o.description || '',
+          services: services
+            .filter((s) => s.subsystem.clientId === o.clientId)
+            .filter((s) => s.environment === environment)
+            .map((s) => ({
+              name: s.name,
+              title: s.title,
+              scopes: s.operations.reduce(
+                (acc: { [name: string]: string }, op) => {
+                  op.scopes?.forEach((scope) => {
+                    acc[scope] = '';
+                  });
+                  return acc;
+                },
+                {}
+              ),
+              summary: s.summary || '',
+            })),
+        }))
+        .filter((o) => o.services.length > 0);
     } else if (subjectToken) {
       // check subjectToken JWT is valid
       // do a search in authz for `provider_user_guid` attribute

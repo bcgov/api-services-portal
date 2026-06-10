@@ -64,4 +64,12 @@ module.exports = {
     },
   },
   access: EnforcementPoint,
+  hooks: {
+    resolveInput: ({ operation, resolvedData }) => {
+      if (operation === 'update') {
+        delete resolvedData['specVersion'];
+      }
+      return resolvedData;
+    },
+  },
 };
