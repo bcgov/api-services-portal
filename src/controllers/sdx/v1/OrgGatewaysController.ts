@@ -142,33 +142,17 @@ export class OrgGatewaysController extends Controller {
       body.parameters,
       action
     );
-    /*
-    logger.debug('Artifacts %j', payload);
-
-    const artifact = YAML.dump(payload, { noRefs: true });
 
     if (action === 'preview') {
       request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-      request.res?.send(artifact);
+      request.res?.send(result);
       return '';
     }
 
-    const subjectToken = getSubjectToken(request);
-    const incomingKeys = payload.keys as GatewayKeyDocument[];
-
-    // Validate the generated config to ensure it only contains allowed configurations for the organization
-    const result = await gwaService.publishGatewayConfiguration(
-      action === 'remove' ? 'DELETE' : 'PUT',
-      subjectToken,
-      config._gateway_id,
-      dryRun,
-      artifact
-    );
-
-    if (!dryRun) {
+    if (action !== 'diff') {
       let detail: string | undefined;
       let deckBlob: string | undefined;
-      const removed = action === 'remove';
+      const removed = action === 'delete';
       let scope: SdxGatewayKeyScope | undefined;
       let targetName: string | undefined;
 
@@ -176,45 +160,42 @@ export class OrgGatewaysController extends Controller {
         scope = body.parameters.runtime_group_name
           ? 'runtime-group'
           : body.parameters.client_id
-            ? 'subsystem'
-            : 'organization';
+          ? 'subsystem'
+          : 'organization';
         targetName =
           body.parameters.runtime_group_name ??
           body.parameters.client_id ??
           org;
 
-        if (removed) {
-          const removedKeyNames = incomingKeys
-            .filter((key) => isGatewayKeyInScopes(key, [scope]))
-            .map((key) => key.name);
-          detail = removedKeyNames
-            .map((name) => `removed key ${name}`)
-            .join('; ');
-        } else {
-          deckBlob = YAML.dump(result, { noRefs: true });
-        }
-      } else if (removed) {
-        detail = `removed ${body.pattern}`;
+        //   if (removed) {
+        //     const removedKeyNames = incomingKeys
+        //       .filter((key) => isGatewayKeyInScopes(key, [scope]))
+        //       .map((key) => key.name);
+        //     detail = removedKeyNames
+        //       .map((name) => `removed key ${name}`)
+        //       .join('; ');
+        //   } else {
+        //     deckBlob = YAML.dump(result, { noRefs: true });
+        //   }
+        // } else if (removed) {
+        //   detail = `removed ${body.pattern}`;
+        // }
+        deckBlob = YAML.dump(result, { noRefs: true });
+
+        await new OrgActivityService(ctx, org)
+          .logGatewayPatternPublish(true, {
+            pattern: body.pattern,
+            ...(detail ? { detail } : {}),
+            removed,
+            scope,
+            targetName,
+            deckBlob,
+          })
+          .catch((e) =>
+            logger.error('[OrgActivity] gateway pattern publish %s', e)
+          );
       }
-
-      await new OrgActivityService(ctx, org)
-        .logGatewayPatternPublish(true, {
-          pattern: body.pattern,
-          ...(detail ? { detail } : {}),
-          removed,
-          scope,
-          targetName,
-          deckBlob,
-        })
-        .catch((e) =>
-          logger.error('[OrgActivity] gateway pattern publish %s', e)
-        );
     }
-
-    request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-    request.res?.send(YAML.dump(result, { noRefs: true }));
-    return '';
-    */
     return result;
   }
 
