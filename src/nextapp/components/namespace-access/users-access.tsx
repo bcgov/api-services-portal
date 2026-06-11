@@ -31,6 +31,13 @@ interface UsersAccessProps {
   prodEnvId: string;
 }
 
+const EDIT_UNAVAILABLE_MESSAGE =
+  'Email unavailable. Revoke access and re-grant with a valid email.';
+
+function canEditUserAccess(item: AccessItem): boolean {
+  return Boolean(item.requesterEmail?.trim());
+}
+
 const UsersAccess: React.FC<UsersAccessProps> = ({
   resourceId,
   resourceScopes,
@@ -274,40 +281,56 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         ]}
         data={requests}
       >
-        {(d: AccessItem, index) => (
-          <Tr key={uid(d)} data-testid={`nsa-users-table-row-${index}`}>
-            <Td>{d.requesterName}</Td>
-            <Td>
-              <Wrap>
-                {d.scopes.map((s) => (
-                  <WrapItem key={uid(s)}>
-                    <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
-                  </WrapItem>
-                ))}
-              </Wrap>
-            </Td>
-            <Td textAlign="right">
-              <ActionsMenu
-                placement="bottom-end"
-                data-testid={`nsa-users-table-row-${index}-menu`}
-              >
-                <MenuItem
-                  onClick={handleEditAccess(d)}
-                  data-testid={`nsa-users-table-row-${index}-edit-btn`}
+        {(d: AccessItem, index) => {
+          const canEdit = canEditUserAccess(d);
+          return (
+            <Tr key={uid(d)} data-testid={`nsa-users-table-row-${index}`}>
+              <Td>
+                {d.requesterName}
+                {!canEdit && (
+                  <Text
+                    fontSize="sm"
+                    color="bc-component"
+                    mt={1}
+                    data-testid={`nsa-users-table-row-${index}-email-unavailable`}
+                  >
+                    {EDIT_UNAVAILABLE_MESSAGE}
+                  </Text>
+                )}
+              </Td>
+              <Td>
+                <Wrap>
+                  {d.scopes.map((s) => (
+                    <WrapItem key={uid(s)}>
+                      <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
+                    </WrapItem>
+                  ))}
+                </Wrap>
+              </Td>
+              <Td textAlign="right">
+                <ActionsMenu
+                  placement="bottom-end"
+                  data-testid={`nsa-users-table-row-${index}-menu`}
                 >
-                  Edit Access
-                </MenuItem>
-                <MenuItem
-                  color="bc-error"
-                  onClick={handleRevokeAccess(d)}
-                  data-testid={`nsa-users-table-row-${index}-revoke-btn`}
-                >
-                  Revoke Access
-                </MenuItem>
-              </ActionsMenu>
-            </Td>
-          </Tr>
-        )}
+                  <MenuItem
+                    isDisabled={!canEdit}
+                    onClick={handleEditAccess(d)}
+                    data-testid={`nsa-users-table-row-${index}-edit-btn`}
+                  >
+                    Edit Access
+                  </MenuItem>
+                  <MenuItem
+                    color="bc-error"
+                    onClick={handleRevokeAccess(d)}
+                    data-testid={`nsa-users-table-row-${index}-revoke-btn`}
+                  >
+                    Revoke Access
+                  </MenuItem>
+                </ActionsMenu>
+              </Td>
+            </Tr>
+          );
+        }}
       </Table>
     </>
   );
