@@ -62,7 +62,10 @@ services:
     container_name: oauth2-proxy
     command: --alpha-config /oauth2-proxy.yaml --config /oauth2-proxy.cfg
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - 4180:4180/tcp
     volumes:
@@ -220,13 +223,18 @@ services:
           - kong.localtest.me
     restart: on-failure:5
   redis:
-    image: bitnami/redis:latest
+    image: bitnamilegacy/redis:7.4
     container_name: redis-master
     environment:
       - REDIS_PASSWORD=s3cr3t
     restart: on-failure
     ports:
       - 6379:6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 's3cr3t', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       aps-net:
         aliases:
@@ -324,7 +332,7 @@ services:
       - testsuite
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.30
     container_name: mailpit
     restart: unless-stopped
     ports:
@@ -375,6 +383,31 @@ services:
         aliases:
           - sdx-edge-api.localtest.me
 
+  # Optional Postgres browser UI (not started by default).
+  #   docker compose --profile db-tools up -d pgadmin
+  # Open http://localhost:8080 — login: admin@local.dev / local
+  # kong-db is pre-registered; Superuser credentials: postgres / postgres
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: local
+      PGADMIN_DISABLE_POSTFIX: '1'
+    ports:
+      - '8080:80'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./local/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - aps-net
+    profiles:
+      - db-tools
+
 networks:
   aps-net:
-    driver: bridge
+    name: aps-net
+
+volumes:
+  pgadmin-data:

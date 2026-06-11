@@ -16,6 +16,8 @@ components:
                     type: string
                 id:
                     type: string
+                refKey:
+                    type: string
                 ownedBy:
                     type: string
                 childResults:
@@ -449,6 +451,8 @@ components:
                     $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 org:
                     $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
+                permRoutePaths:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
                 permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
@@ -579,6 +583,12 @@ components:
                     type: string
                 enabled:
                     type: boolean
+                permDataPlane:
+                    type: string
+                permDomains:
+                    items:
+                        type: string
+                    type: array
                 updatedAt:
                     type: number
                     format: double
@@ -1558,7 +1568,7 @@ paths:
                                 required:
                                     - result
                                 type: object
-            description: '> `Required Scope:` Namespace.Assign'
+            description: "Assign a Namespace to an Organization Unit.\n\nOnly Organizations sourced from the BC Data Catalogue\n(`extSource: \"ckan\"`) may be assigned to a Namespace.  Organizations\nsourced from SDX or created as \"custom\" entries are intentionally\nrejected so that namespace-to-organization mappings stay aligned\nwith the authoritative public-body data registry.  This mirrors the\nfilter applied to the _Add Organization_ dropdown in the UI so\ndirect API callers cannot bypass it.\n\n> `Required Scope:` Namespace.Assign"
             tags:
                 - Organizations
             security:

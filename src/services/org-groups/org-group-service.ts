@@ -570,7 +570,7 @@ export class OrgGroupService {
     orgGroup: OrganizationGroup,
     memberEmails: UserReference[],
     validIdentityProviders: string[]
-  ) {
+  ): Promise<{ additions: UserReference[]; deletions: UserReference[] }> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     const group = groupIds[groupIds.length - 1];
 
@@ -581,23 +581,38 @@ export class OrgGroupService {
       memberEmails
     );
 
-    const currentMembers = (await this.listMembersForLeafOnly(orgGroup)).map(
-      (u) => u.id
-    );
-    const desiredMembers = (
-      await Promise.all(
-        memberEmails.map((u) =>
-          this.userKeycloakService.lookupUserIdByEmail(
-            u.email,
-            false,
-            validIdentityProviders
-          )
-        )
-      )
-    ).filter((s) => s);
+    const currentMembers = await this.listMembersForLeafOnly(orgGroup);
+    const currentMemberIds = currentMembers.map((u) => u.id).filter((s) => s);
 
-    const deletions = currentMembers.filter((u) => !desiredMembers.includes(u));
-    const additions = desiredMembers.filter((u) => !currentMembers.includes(u));
+    const desiredLookups = await Promise.all(
+      memberEmails.map(async (u) => {
+        const email = u.email;
+        if (!email) {
+          return { email, id: undefined };
+        }
+        const id = await this.userKeycloakService.lookupUserIdByEmail(
+          email,
+          false,
+          validIdentityProviders
+        );
+        return { email, id };
+      })
+    );
+
+    const desiredMembers = desiredLookups
+      .map((o) => o.id)
+      .filter((s) => s);
+
+    const deletions = currentMemberIds.filter((u) => !desiredMembers.includes(u));
+    const additions = desiredMembers.filter((u) => !currentMemberIds.includes(u));
+
+    const additionRefs: UserReference[] = desiredLookups
+      .filter((o) => o.email && o.id && additions.includes(o.id))
+      .map((o) => ({ email: o.email }));
+
+    const deletionRefs: UserReference[] = currentMembers
+      .filter((u) => u.id && deletions.includes(u.id))
+      .map((u) => ({ email: u.email }));
 
     for (const userId of deletions) {
       await this.keycloakService.delMemberFromGroup(userId, group.id);
@@ -610,6 +625,8 @@ export class OrgGroupService {
     if (deletions.length == 0 && additions.length == 0) {
       logger.debug('[syncMembers] %s no updated needed.', orgGroup.name);
     }
+
+    return { additions: additionRefs, deletions: deletionRefs };
   }
 
   private isExistingInList(

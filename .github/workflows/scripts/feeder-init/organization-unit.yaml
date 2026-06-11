@@ -7,7 +7,7 @@ record:
   title: 'Ministry of Citizens Services'
   tags: []
   description: ''
-  extSource: ''
+  extSource: 'ckan'
   extRecordHash: ''
   orgUnits:
     - id: 319b3297-846d-4b97-8095-ceb3ec505fb8
@@ -16,5 +16,5 @@ record:
       title: 'DataBC'
       tags: []
       description: ''
-      extSource: ''
+      extSource: 'ckan'
       extRecordHash: ''

@@ -5901,6 +5901,7 @@ export type Organization = {
   title?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  publicBodyId?: Maybe<Scalars['String']>;
   orgUnits: Array<OrganizationUnit>;
   _orgUnitsMeta?: Maybe<_QueryMeta>;
   extSource?: Maybe<Scalars['String']>;

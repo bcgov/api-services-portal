@@ -17,9 +17,9 @@ jobs:
         working-directory: ./src/
     # the list of steps that the action will go through
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v6
       - run: yarn
-      - uses: chromaui/action@v1
+      - uses: chromaui/action@v16
         # options required to the GitHub chromatic action
         with:
           workingDir: ./src/

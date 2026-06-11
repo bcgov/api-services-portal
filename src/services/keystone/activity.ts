@@ -2,6 +2,7 @@ import { Logger } from '../../logger';
 import { Activity, ActivityWhereInput } from './types';
 import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
+import { PUBLIC_ORG_ACTIVITY } from '../workflow/org-activity-public';
 
 const logger = Logger('keystone.activity');
 
@@ -19,10 +20,14 @@ export async function recordActivityWithBlob(
   result: string = '',
   activityContext: string = '',
   blob: any = {},
-  ids: string[] = []
+  ids: string[] = [],
+  productNamespace: string | null | undefined = undefined
 ) {
-  const userId = context.authedItem.userId;
-  const namespace = context.authedItem.namespace;
+  const userId = context.authedItem?.userId;
+  const namespace =
+    productNamespace !== undefined
+      ? productNamespace
+      : context.authedItem?.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivityWithBlob] userid=%s name=%s', userId, name);
 
@@ -125,13 +130,14 @@ export async function recordActivity(
   message: string,
   result: string = '',
   activityContext: string = '',
-  productNamespace: string = undefined,
+  productNamespace: string | null = undefined,
   ids: string[] = []
 ) {
-  const userId = context.authedItem.userId;
-  const namespace = productNamespace
-    ? productNamespace
-    : context.authedItem.namespace;
+  const userId = context.authedItem?.userId;
+  const namespace =
+    productNamespace !== undefined
+      ? productNamespace
+      : context.authedItem?.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivity] userid=%s name=%s', userId, name);
 
@@ -220,6 +226,65 @@ export async function getActivity(
   });
   logger.debug(
     '[getActivity] returned=%d',
+    activities.data.allActivities.length
+  );
+  return activities.data.allActivities;
+}
+
+export async function getOrgActivity(
+  context: any,
+  orgName?: string,
+  first: number = 20,
+  skip: number = 0,
+  publicOnly: boolean = false
+): Promise<Activity[]> {
+  const cappedFirst = first > 100 ? 100 : first;
+  const conditions: ActivityWhereInput[] = [
+    orgName
+      ? { filterKey1: `org:${orgName}` }
+      : { filterKey1_starts_with: 'org:' },
+  ];
+
+  if (publicOnly) {
+    conditions.push({
+      OR: [...PUBLIC_ORG_ACTIVITY],
+    });
+  }
+
+  const where: ActivityWhereInput =
+    conditions.length === 1 ? conditions[0] : { AND: conditions };
+
+  logger.debug('[getOrgActivity] where: %j', where);
+
+  const activities = await context.executeGraphQL({
+    query: `query OrgActivities($where: ActivityWhereInput!, $first: Int, $skip: Int) {
+              allActivities(where: $where, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+                id
+                type
+                name
+                namespace
+                action
+                refId
+                result
+                message
+                context
+                actor {
+                  name
+                }
+                blob {
+                  type
+                  blob
+                }
+                filterKey1
+                createdAt
+                updatedAt
+              }
+            }
+      `,
+    variables: { where, first: cappedFirst, skip },
+  });
+  logger.debug(
+    '[getOrgActivity] returned=%d',
     activities.data.allActivities.length
   );
   return activities.data.allActivities;

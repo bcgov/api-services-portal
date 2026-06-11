@@ -22,6 +22,10 @@ env:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
       - name: Build GWA API Image
         run: |
@@ -30,7 +34,7 @@ jobs:
           docker build -t gwa-api:e2e .
 
       - name: Checkout Portal
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -70,21 +74,21 @@ jobs:
 
       - name: Upload E2E Test Results HTML Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-html
           path: ${{ github.workspace }}/e2e/results/report
 
       - name: Upload E2E Test Results JSON Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-json
           path: ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json
 
       - name: Upload E2E Code Coverage Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
@@ -101,7 +105,7 @@ jobs:
 
       - name: SonarCloud Scan
         if: always()
-        uses: sonarsource/sonarqube-scan-action@v3.1.0
+        uses: sonarsource/sonarqube-scan-action@v7
         with:
           args: >
             -Dsonar.organization=bcgov-oss
@@ -116,12 +120,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload Astra scan results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: astra-scan-results
           path: ${{ github.workspace }}/e2e/cypress/fixtures/state/scanResult.json
 
-      - name: Check for failed tests and create Issue
+      - name: Check for failed tests and report results
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -138,15 +142,32 @@ jobs:
               "- " + $file + " - " + .title
             ' ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json)
             STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' | column -t)
-            echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
+            RUN_LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            {
+              echo "## Cypress E2E tests failed ($FAILURE_COUNT)"
+              echo ""
+              echo "### Stats"
+              echo '```'
+              echo "$STATS"
+              echo '```'
+              echo ""
+              echo "### Failed tests"
+              echo "$FAILED_TESTS"
+              echo ""
+              echo "[View workflow run]($RUN_LINK)"
+            } > msg
             export MSG=$(cat msg)
-            gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              gh pr comment ${{ github.event.pull_request.number }} --body "$MSG"
+            else
+              gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+            fi
             exit 1
           fi
 
       - name: Set up Python 3.9
         if: failure()
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
           python-version: '3.9'
           architecture: 'x64'

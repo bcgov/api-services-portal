@@ -14,6 +14,10 @@ import YAML from 'yaml';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { CreateNewKeyInput } from './types';
 import { CreateNewKey } from '../../../services/workflow/sdx-org-keys';
+import { OrgActivityService } from '../../../services/workflow/org-activity';
+import { Logger } from '../../../logger';
+
+const logger = Logger('OrgKeysController');
 
 @injectable()
 @Route('/organizations/{org}/keys')
@@ -47,6 +51,10 @@ export class OrgKeysController extends Controller {
 
     // call the Edge Server endpoint for generating a new key pair
     const result = await CreateNewKey(context, org, body.runtimeGroupName);
+
+    await new OrgActivityService(context, org)
+      .logOrganizationCSR(true, { keyName: body.runtimeGroupName })
+      .catch((e) => logger.error('[OrgActivity] organization CSR %s', e));
 
     // Unusual way to return data, but this is due to the version of tsoa
     // being used and the need to return raw text instead of JSON

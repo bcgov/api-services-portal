@@ -17,6 +17,7 @@ import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
+import { OrgActivityService } from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -50,6 +51,34 @@ interface ValidateErrorJSON {
   code: 'validation_error';
   message: 'Invalid input';
   fields: { [name: string]: { message: string } };
+}
+
+type SdxGatewayKeyScope = 'organization' | 'subsystem' | 'runtime-group';
+
+/** Kong key tags use `type:client` for subsystem-scoped keys (see sdx-keys.r1). */
+const GATEWAY_KEY_TAG_BY_SCOPE: Record<SdxGatewayKeyScope, string> = {
+  organization: 'organization',
+  subsystem: 'client',
+  'runtime-group': 'runtime-group',
+};
+
+type GatewayKeyDocument = {
+  name: string;
+  kid?: string;
+  tags?: string[];
+  pem?: { public_key?: string };
+  jwk?: string;
+  set?: { name?: string };
+};
+
+function isGatewayKeyInScopes(
+  key: GatewayKeyDocument,
+  scopes: readonly SdxGatewayKeyScope[]
+): boolean {
+  const tags = key.tags ?? [];
+  return scopes.some((scope) =>
+    tags.includes(`type:${GATEWAY_KEY_TAG_BY_SCOPE[scope]}`)
+  );
 }
 
 @injectable()
@@ -100,7 +129,7 @@ export class OrgGatewaysController extends Controller {
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
   ): Promise<any> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.createContext(request, true);
 
     const provisionerService = new ProvisionerService(
       process.env.PROVISIONER_URL || 'http://localhost:8080'
@@ -113,6 +142,79 @@ export class OrgGatewaysController extends Controller {
       body.parameters,
       action
     );
+    /*
+    logger.debug('Artifacts %j', payload);
+
+    const artifact = YAML.dump(payload, { noRefs: true });
+
+    if (action === 'preview') {
+      request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
+      request.res?.send(artifact);
+      return '';
+    }
+
+    const subjectToken = getSubjectToken(request);
+    const incomingKeys = payload.keys as GatewayKeyDocument[];
+
+    // Validate the generated config to ensure it only contains allowed configurations for the organization
+    const result = await gwaService.publishGatewayConfiguration(
+      action === 'remove' ? 'DELETE' : 'PUT',
+      subjectToken,
+      config._gateway_id,
+      dryRun,
+      artifact
+    );
+
+    if (!dryRun) {
+      let detail: string | undefined;
+      let deckBlob: string | undefined;
+      const removed = action === 'remove';
+      let scope: SdxGatewayKeyScope | undefined;
+      let targetName: string | undefined;
+
+      if (body.pattern === 'sdx-keys.r1') {
+        scope = body.parameters.runtime_group_name
+          ? 'runtime-group'
+          : body.parameters.client_id
+            ? 'subsystem'
+            : 'organization';
+        targetName =
+          body.parameters.runtime_group_name ??
+          body.parameters.client_id ??
+          org;
+
+        if (removed) {
+          const removedKeyNames = incomingKeys
+            .filter((key) => isGatewayKeyInScopes(key, [scope]))
+            .map((key) => key.name);
+          detail = removedKeyNames
+            .map((name) => `removed key ${name}`)
+            .join('; ');
+        } else {
+          deckBlob = YAML.dump(result, { noRefs: true });
+        }
+      } else if (removed) {
+        detail = `removed ${body.pattern}`;
+      }
+
+      await new OrgActivityService(ctx, org)
+        .logGatewayPatternPublish(true, {
+          pattern: body.pattern,
+          ...(detail ? { detail } : {}),
+          removed,
+          scope,
+          targetName,
+          deckBlob,
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] gateway pattern publish %s', e)
+        );
+    }
+
+    request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
+    request.res?.send(YAML.dump(result, { noRefs: true }));
+    return '';
+    */
     return result;
   }
 

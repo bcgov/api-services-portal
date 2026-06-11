@@ -6229,6 +6229,7 @@ export type Organization = {
   title?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  publicBodyId?: Maybe<Scalars['String']>;
   orgUnits: Array<OrganizationUnit>;
   _orgUnitsMeta?: Maybe<_QueryMeta>;
   extSource?: Maybe<Scalars['String']>;
@@ -6264,6 +6265,7 @@ export type OrganizationCreateInput = {
   title?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  publicBodyId?: Maybe<Scalars['String']>;
   orgUnits?: Maybe<OrganizationUnitRelateToManyInput>;
   extSource?: Maybe<Scalars['String']>;
   extForeignKey?: Maybe<Scalars['String']>;
@@ -6518,6 +6520,7 @@ export type OrganizationUpdateInput = {
   title?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  publicBodyId?: Maybe<Scalars['String']>;
   orgUnits?: Maybe<OrganizationUnitRelateToManyInput>;
   extSource?: Maybe<Scalars['String']>;
   extForeignKey?: Maybe<Scalars['String']>;

@@ -5,6 +5,7 @@ import {
   Get,
   OperationId,
   Path,
+  Query,
   Request,
   Response,
   Route,
@@ -14,7 +15,15 @@ import {
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
-import { removeEmpty, removeKeys } from '../../../batch/feed-worker';
+import {
+  parseBlobString,
+  parseJsonString,
+  removeEmpty,
+  removeKeys,
+} from '../../../batch/feed-worker';
+import { getOrgActivity } from '../../../services/keystone/activity';
+import { transformActivity } from '../../../services/workflow';
+import { ActivityDetail } from '../../v3/types-extra';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import {
   GetCatalog,
@@ -48,6 +57,39 @@ export class CatalogController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Retrieve public organization-level activity for the SDX catalog.
+   *
+   * @summary List public organization activity
+   * @param organization Optional organization name filter
+   * @param first Maximum records to return (capped at 100)
+   * @param skip Records to skip for pagination
+   */
+  @Get('/activity')
+  @OperationId('listPublicActivity')
+  public async listOrgActivity(
+    @Query() organization?: string,
+    @Query() first: number = 20,
+    @Query() skip: number = 0
+  ): Promise<ActivityDetail[]> {
+    const ctx = this.keystone.sudo();
+    const records = await getOrgActivity(
+      ctx,
+      organization,
+      first > 100 ? 100 : first,
+      skip,
+      true
+    );
+
+    return transformActivity(records)
+      .map((o) =>
+        removeKeys(o, ['id', 'namespace', 'subject_email'])
+      )
+      .map((o) => removeEmpty(o))
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
+  }
+
   @Get('/organizations')
   @OperationId('organization-list')
   public async listOrganizations(): Promise<any[]> {
@@ -57,6 +99,7 @@ export class CatalogController extends Controller {
         name: o.name,
         title: o.title,
         description: o.description,
+        publicBodyId: o.publicBodyId,
         member: getOrganizationMemberDetails(o.tags),
       }))
       .filter((o) => o.member !== undefined)

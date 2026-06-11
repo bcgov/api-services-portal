@@ -33,6 +33,15 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    // Optional reference to a Public Body from the authoritative
+    // data registry (FOIPPA).  When set it MUST be unique across all
+    // Organizations, but multiple Organizations may have a NULL value
+    // (i.e. not all Organizations are Public Bodies).
+    publicBodyId: {
+        type: Text,
+        isRequired: false,
+        isUnique: true,
+    },
     orgUnits: { type: Relationship, ref: "OrganizationUnit", many: true }
   },
   access: EnforcementPoint,

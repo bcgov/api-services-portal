@@ -11,6 +11,7 @@ const metadata = {
       'title',
       'tags',
       'description',
+      'publicBodyId',
       'orgUnits',
       'extSource',
       'extRecordHash',
@@ -21,6 +22,7 @@ const metadata = {
         name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
+        refKey: 'extForeignKey',
       },
     },
   },
@@ -857,7 +859,14 @@ const metadata = {
     validations: {
       action: {
         type: 'enum',
-        values: ['add', 'update', 'create', 'delete', 'validate', 'publish'],
+        values: [
+          'add',
+          'update',
+          'create',
+          'delete',
+          'validate',
+          'publish',
+        ],
       },
       result: {
         type: 'enum',
