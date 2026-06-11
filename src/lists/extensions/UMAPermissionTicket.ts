@@ -149,12 +149,27 @@ module.exports = {
                   ),
                 ];
                 for (const requesterId of requesterIds) {
-                  const kcUser = await userApi.lookupUserById(requesterId);
-                  permissions.forEach((perm) => {
-                    if (perm.requester === requesterId && !perm.requesterEmail) {
-                      perm.requesterEmail = kcUser.email;
+                  try {
+                    const kcUser = await userApi.lookupUserById(requesterId);
+                    const requesterEmail = kcUser?.email;
+                    if (!requesterEmail) {
+                      continue;
                     }
-                  });
+                    permissions.forEach((perm) => {
+                      if (
+                        perm.requester === requesterId &&
+                        !perm.requesterEmail
+                      ) {
+                        perm.requesterEmail = requesterEmail;
+                      }
+                    });
+                  } catch (err) {
+                    logger.warn(
+                      '[getPermissionTicketsForResource] failed to resolve requester %s: %s',
+                      requesterId,
+                      err
+                    );
+                  }
                 }
               }
 
