@@ -1,56 +1,59 @@
 import {
-  Controller,
-  Request,
-  Delete,
-  OperationId,
-  Put,
-  Path,
-  Route,
-  Query,
-  Security,
   Body,
+  Controller,
+  Delete,
   Get,
-  Tags,
-  Post,
+  OperationId,
+  Path,
+  Put,
+  Query,
+  Request,
+  Route,
+  Security,
+  Tags
 } from 'tsoa';
-import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
-  getRecords,
+  parseBlobString,
   parseJsonString,
   removeEmpty,
   removeKeys,
-  transformAllRefID,
-  syncRecordsThrowErrors,
-  parseBlobString,
+  syncRecordsThrowErrors
 } from '../../batch/feed-worker';
-import {
-  GroupAccessService,
-  leaf,
-  NamespaceService,
-} from '../../services/org-groups';
-import {
-  getGwaProductEnvironment,
-  transformActivity,
-} from '../../services/workflow';
-import {
-  GroupAccess,
-  GroupMembership,
-  OrgNamespace,
-} from '../../services/org-groups/types';
+import { BatchResult } from '../../batch/types';
+import { Logger } from '../../logger';
 import {
   getOrganization,
   getOrganizations,
   getOrganizationUnit,
 } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity, Organization } from './types';
+import {
+  GroupAccessService,
+  NamespaceService
+} from '../../services/org-groups';
 import { isParent } from '../../services/org-groups/group-converter-utils';
-import { ActivitySummary } from '../../services/keystone/types';
-import { ActivityDetail } from './types-extra';
-import { BatchResult } from '../../batch/types';
+import {
+  GroupAccess,
+  GroupMembership,
+  OrgNamespace,
+} from '../../services/org-groups/types';
+import {
+  getGwaProductEnvironment,
+  transformActivity,
+} from '../../services/workflow';
+import {
+  buildOrgAccessDisplayNameResolver,
+  buildOrganizationProfileSnapshot,
+  logOrganizationAccessChanges,
+  OrgActivityService,
+} from '../../services/workflow/org-activity';
 import { assertEqual } from '../ioc/assert';
+import { KeystoneService } from '../ioc/keystoneInjector';
+import { Organization } from './types';
+import { ActivityDetail } from './types-extra';
+
+const logger = Logger('v3.OrganizationController');
 
 @injectable()
 @Route('/organizations')
@@ -103,12 +106,32 @@ export class OrganizationController extends Controller {
       'org',
       'Only root level is allowed to do this operation'
     );
-    return await syncRecordsThrowErrors(
-      this.keystone.createContext(request, true),
+    const ctx = this.keystone.createContext(request, true);
+    const sudoCtx = this.keystone.sudo();
+    const existing = (await getOrganizations(sudoCtx)).find(
+      (o) => o.name === body['name']
+    );
+
+    const result = await syncRecordsThrowErrors(
+      ctx,
       'Organization',
       body['name'],
       body
     );
+
+    // Profile updates are logged from feed-worker after syncRecords updates.
+    if (!existing && result.result?.startsWith('created')) {
+      await new OrgActivityService(ctx, body['name'])
+        .logOrganizationEstablished(
+          true,
+          buildOrganizationProfileSnapshot(body)
+        )
+        .catch((e) =>
+          logger.error('[OrgActivity] organization established %s', e)
+        );
+    }
+
+    return result;
   }
 
   @Get('{org}')
@@ -172,7 +195,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['GroupAccess.Manage'])
   public async put(
     @Path() org: string,
-    @Body() body: GroupMembership
+    @Body() body: GroupMembership,
+    @Request() request: any
   ): Promise<void> {
     // must match either the 'name' or one of the parent nodes
     assertEqual(
@@ -188,7 +212,26 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
+    const changes = await groupAccessService.createOrUpdateGroupAccess(body, [
+      'idir',
+    ]);
+
+    const activityCtx = this.keystone.createContext(request, true);
+
+    const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
+      envConfig.issuerUrl,
+      envConfig.clientId,
+      envConfig.clientSecret
+    );
+
+    await logOrganizationAccessChanges(
+      activityCtx,
+      { parent: body.parent, name: body.name! },
+      changes,
+      resolveDisplayName
+    ).catch((e) =>
+      logger.error('[OrgActivity] organization access changes %s', e)
+    );
   }
 
   /**
@@ -226,7 +269,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Path() orgUnit: string,
     @Path() gatewayId: string,
-    @Query() enable: boolean = true
+    @Query() enable = true
   ): Promise<{ result: string }> {
     const ns = gatewayId;
     const ctx = this.keystone.sudo();
@@ -307,8 +350,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
+    @Query() first = 20,
+    @Query() skip = 0
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     //const org = await getOrganizationUnit(ctx, orgUnit);

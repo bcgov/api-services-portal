@@ -1,0 +1,25 @@
+# Local dev overlay. Apply on top of docker-compose.yml when the Portal is run
+# on the host via `npm run dev` (apsportal container stopped).
+#
+# Maps `apsportal.localtest.me` inside containers that post to the Portal
+# (gwa-api / feeder) to the Docker host, so /feed/Activity etc. reach the
+# host-run Portal on port 3000 instead of an empty container alias.
+#
+# Usage:
+#   docker compose stop apsportal oauth2-proxy
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d \
+#     --force-recreate --no-deps gwa-api feeder
+#
+# `--no-deps` prevents compose from restarting `oauth2-proxy` (a feeder
+# dependency), so port 4180 stays free for the locally-run oauth2-proxy.
+#
+# Switch back to full compose:
+#   docker compose up -d --force-recreate apsportal oauth2-proxy gwa-api feeder
+
+services:
+  gwa-api:
+    extra_hosts:
+      - 'apsportal.localtest.me:host-gateway'
+  feeder:
+    extra_hosts:
+      - 'apsportal.localtest.me:host-gateway'

@@ -103,6 +103,7 @@ const models: TsoaRoute.Models = {
             "result": {"dataType":"string","required":true},
             "reason": {"dataType":"string"},
             "id": {"dataType":"string"},
+            "refKey": {"dataType":"string"},
             "ownedBy": {"dataType":"string"},
             "childResults": {"dataType":"array","array":{"dataType":"refObject","ref":"BatchResult"}},
         },
@@ -381,6 +382,8 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
             "enabled": {"dataType":"boolean","required":true},
+            "permDataPlane": {"dataType":"string"},
+            "permDomains": {"dataType":"array","array":{"dataType":"string"}},
             "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -1345,6 +1348,7 @@ export function RegisterRoutes(app: express.Router) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"GroupMembership"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
