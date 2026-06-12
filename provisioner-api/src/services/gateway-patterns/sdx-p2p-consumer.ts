@@ -148,7 +148,12 @@ export const SDXP2PConsumerPattern = {
           tags,
         },
       ],
-      tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+      tags: [
+        ...tags,
+        `service:${serviceLocator}`,
+        `client:${clientLocator}`,
+        `rghost:${data.client.runtimeGroup.host}`,
+      ],
       url: data.serviceSubsystem.runtimeGroup.sdxEndpoint,
       plugins: [
         ...[transformer(tags, data)],

@@ -92,30 +92,37 @@ export const SDXSubsystemsPattern = {
 
       const upgrades = inputs.upgrades || {};
 
-      const routes = (service.operations || []).map((op) => {
-        return {
-          name: `sdx.sys.${serviceLocator}.${op.operationId}`,
-          tags: [
-            ...tags,
-            `service:${serviceLocator}`,
-            `operation:${op.operationId}`,
-          ],
-          hosts: [serviceHost],
-          snis: inputs.use_sni === 'false' ? [] : [serviceHost],
-          paths: [convertPath(op.path).kongPath],
-          methods: [op.method],
-          headers: {
-            'X-Service-Id': [serviceLocator],
-          },
-          protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
-          strip_path: false,
-        };
-      });
+      const routes = (service.operations || [{ operationId: 'all' }]).map(
+        (op) => {
+          return {
+            name: `sdx.sys.${serviceLocator}.${op.operationId}`,
+            tags: [
+              ...tags,
+              `service:${serviceLocator}`,
+              `operation:${op.operationId}`,
+            ],
+            hosts: [serviceHost],
+            snis: inputs.use_sni === 'false' ? [] : [serviceHost],
+            paths: [
+              op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
+            ],
+            methods:
+              op.operationId === 'all'
+                ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+                : [op.method],
+            headers: {
+              'X-Service-Id': [serviceLocator],
+            },
+            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            strip_path: false,
+          };
+        }
+      );
 
       return {
         kind: 'GatewayService',
         name: `sdx.sys.${serviceLocator}`,
-        tags: [...tags, `service:${serviceLocator}`],
+        tags: [...tags, `service:${serviceLocator}`, `rghost:${serviceHost}`],
         url: inputs.upstream_url,
         retries: 0,
         routes: [

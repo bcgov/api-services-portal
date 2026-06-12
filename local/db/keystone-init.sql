@@ -2378,6 +2378,7 @@ ALTER TABLE ONLY public."CredentialIssuer"
 CREATE TABLE public."RuntimeGroup" (
     id integer NOT NULL,
     name text NOT NULL,
+    environment text NOT NULL,
     namespace text NOT NULL,
     host text NOT NULL,
     organization integer,
@@ -2452,7 +2453,7 @@ ALTER TABLE ONLY public."RuntimeGroup"
 --
 
 ALTER TABLE ONLY public."RuntimeGroup"
-    ADD CONSTRAINT runtimegroup_name_unique UNIQUE (name);
+    ADD CONSTRAINT runtimegroup_name_environment_unique UNIQUE (name, environment);
 
 
 
