@@ -31,6 +31,28 @@ export class KeycloakUserService {
       : undefined;
   }
 
+  /**
+   * Mirrors auth-oauth2-proxy migration logic: the legacy account username is
+   * provider_username@identity_provider, while federated accounts use a GUID.
+   */
+  public isLegacyIdirUser(user: UserRepresentation): boolean {
+    const identityProvider = this.getOneAttributeValue(
+      user,
+      'identity_provider'
+    );
+    const providerUsername = this.getOneAttributeValue(
+      user,
+      'provider_username'
+    );
+    if (!identityProvider || !providerUsername || !user.username) {
+      return false;
+    }
+    const expectedLegacyUsername = providerUsername.includes('@')
+      ? providerUsername.toLowerCase()
+      : `${providerUsername}@${identityProvider}`.toLowerCase();
+    return user.username.toLowerCase() === expectedLegacyUsername;
+  }
+
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
     const users = await this.kcAdminClient.users.find({
@@ -72,11 +94,24 @@ export class KeycloakUserService {
       )
     );
     assert.strictEqual(
-      usersForIdentityProviders.length,
+      usersForIdentityProviders.length > 0,
+      true,
+      `No suitable match for ${identityProviders.join(',')} : ${email}`
+    );
+    if (usersForIdentityProviders.length === 1) {
+      return usersForIdentityProviders[0];
+    }
+
+    // During IDIR migration, legacy and federated accounts may share an email.
+    const legacyUsers = usersForIdentityProviders.filter((user) =>
+      this.isLegacyIdirUser(user)
+    );
+    assert.strictEqual(
+      legacyUsers.length,
       1,
       `Expected exactly one ${identityProviders.join(',')} user for ${email}, found ${usersForIdentityProviders.length}`
     );
-    return usersForIdentityProviders[0];
+    return legacyUsers[0];
   }
 
   public async lookupActiveUsersByEmail(
