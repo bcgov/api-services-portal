@@ -1,11 +1,45 @@
 import { strict as assert } from 'assert';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import { Logger } from '../../logger';
-import { format, recordActivity, recordActivityWithBlob } from '../keystone/activity';
+import {
+  format,
+  getActivity,
+  getOrgActivity,
+  recordActivity,
+  recordActivityWithBlob,
+} from '../keystone/activity';
+import { Activity } from '../keystone/types';
+import { NamespaceService } from '../org-groups';
+import { getGwaProductEnvironment } from './get-namespaces';
 import { getOrganizationUnit } from '../keystone/organization';
 import { KeycloakUserService } from '../keycloak/user-service';
 
 const logger = Logger('wf.OrgActivity');
+
+const SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS = ['name', 'description'] as const;
+
+function buildSubsystemProfileSnapshot(
+  record: Record<string, any>
+): Record<string, unknown> {
+  return pickProfileSnapshot(record, SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS);
+}
+
+function subsystemRefId(subsystemName: string): string {
+  return `subsystem:${subsystemName}`;
+}
+
+async function lookupOrganizationNameById(
+  context: any,
+  orgId: string
+): Promise<string | undefined> {
+  const result = await context.executeGraphQL({
+    query: `query OrganizationNameById($id: ID!) {
+      allOrganizations(where: { id: $id }, first: 1) { name }
+    }`,
+    variables: { id: orgId },
+  });
+  return result.data?.allOrganizations?.[0]?.name;
+}
 
 /** Matches Organization.sync in data-rules (orgUnits excluded — logged separately). */
 const ORG_PROFILE_SNAPSHOT_FIELDS = [
@@ -338,13 +372,129 @@ export class OrgActivityService {
     );
   }
 
+  async logSubsystemCreated(
+    success: boolean,
+    data: { subsystemName: string; productNamespace: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} created subsystem {subsystemName} on {organization}',
+      {
+        action: 'created',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+      },
+      subsystemRefId(data.subsystemName),
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`],
+      undefined,
+      data.productNamespace
+    );
+  }
+
+  async logSubsystemDeleted(
+    success: boolean,
+    data: { subsystemName: string; productNamespace: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} deleted subsystem {subsystemName} on {organization}',
+      {
+        action: 'deleted',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+      },
+      subsystemRefId(data.subsystemName),
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`],
+      undefined,
+      data.productNamespace
+    );
+  }
+
+  async logSubsystemProfileChange(
+    success: boolean,
+    data: {
+      subsystemName: string;
+      productNamespace: string;
+      profile: Record<string, unknown>;
+    }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} updated subsystem profile for {subsystemName} on {organization}',
+      {
+        action: 'updated',
+        entity: 'Subsystem',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+      },
+      subsystemRefId(data.subsystemName),
+      [`org:${this.orgName}`, `subsystem:${data.subsystemName}`],
+      data.profile,
+      data.productNamespace
+    );
+  }
+
+  async logServicePublished(
+    success: boolean,
+    data: { serviceName: string; subsystemName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} published service {serviceName} on subsystem {subsystemName} in {organization}',
+      {
+        action: 'published',
+        entity: 'Service',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+        serviceName: data.serviceName,
+      },
+      data.serviceName,
+      [
+        `org:${this.orgName}`,
+        `subsystem:${data.subsystemName}`,
+        `service:${data.serviceName}`,
+      ]
+    );
+  }
+
+  async logServiceRemoved(
+    success: boolean,
+    data: { serviceName: string; subsystemName: string }
+  ): Promise<void> {
+    return this.recordOrgActivity(
+      success,
+      '{actor} removed service {serviceName} from subsystem {subsystemName} in {organization}',
+      {
+        action: 'removed',
+        entity: 'Service',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+        serviceName: data.serviceName,
+      },
+      data.serviceName,
+      [
+        `org:${this.orgName}`,
+        `subsystem:${data.subsystemName}`,
+        `service:${data.serviceName}`,
+      ]
+    );
+  }
+
   private async recordOrgActivity(
     success: boolean,
     message: string,
     params: { [key: string]: string },
     refId: string,
     ids: string[],
-    blob?: Record<string, unknown> | string
+    blob?: Record<string, unknown> | string,
+    productNamespace: string | null = null
   ): Promise<void> {
     assert.strictEqual(
       ids.length > 0 && ids.length < 5,
@@ -377,7 +527,7 @@ export class OrgActivityService {
           activityContext,
           blob,
           actorIds,
-          null
+          productNamespace
         )
       : await recordActivity(
           this.context,
@@ -387,7 +537,7 @@ export class OrgActivityService {
           formattedMessage,
           success ? 'success' : 'failed',
           activityContext,
-          null,
+          productNamespace,
           actorIds
         );
     if (result.errors) {
@@ -583,4 +733,118 @@ export async function logOrganizationUnitProfileChangeFromRecords(
       profile: buildOrganizationUnitProfileSnapshot(record),
     })
     .catch((e) => logger.error('[OrgActivity] unit profile change %s', e));
+}
+
+export async function logSubsystemActivityFromHook(
+  context: any,
+  operation: 'create' | 'update' | 'delete',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>
+): Promise<void> {
+  const item = updatedItem ?? existingItem;
+  const subsystemName = item?.name;
+  assert.strictEqual(
+    typeof subsystemName === 'string' && subsystemName.length > 0,
+    true,
+    'Subsystem name is required for activity logging'
+  );
+
+  const orgId = item?.organization;
+  assert.strictEqual(
+    orgId != null && orgId !== '',
+    true,
+    'Subsystem organization id is required for activity logging'
+  );
+
+  const productNamespace = item?.namespace;
+  assert.strictEqual(
+    typeof productNamespace === 'string' && productNamespace.length > 0,
+    true,
+    'Subsystem product namespace is required for activity logging'
+  );
+
+  const orgName = await lookupOrganizationNameById(context, String(orgId));
+  assert.strictEqual(
+    typeof orgName === 'string' && orgName.length > 0,
+    true,
+    `Unable to resolve organization name for subsystem ${subsystemName}`
+  );
+  const orgActivity = new OrgActivityService(context, orgName);
+
+  const subsystemData = { subsystemName, productNamespace };
+
+  if (operation === 'delete') {
+    await orgActivity.logSubsystemDeleted(true, subsystemData);
+    return;
+  }
+  if (operation === 'create') {
+    await orgActivity.logSubsystemCreated(true, subsystemData);
+    return;
+  }
+
+  await orgActivity.logSubsystemProfileChange(true, {
+    ...subsystemData,
+    profile: buildSubsystemProfileSnapshot(updatedItem),
+  });
+}
+
+export async function logServiceRemovedForOrg(
+  context: any,
+  orgName: string,
+  serviceName: string,
+  subsystemName: string
+): Promise<void> {
+  await new OrgActivityService(context, orgName)
+    .logServiceRemoved(true, { serviceName, subsystemName })
+    .catch((e) => logger.error('[OrgActivity] service remove %s', e));
+}
+
+export async function getCombinedOrganizationActivity(
+  context: any,
+  org: string,
+  first: number = 20,
+  skip: number = 0
+): Promise<Activity[]> {
+  const cappedFirst = first > 100 ? 100 : first;
+  const fetchLimit = Math.min(cappedFirst + skip, 100);
+
+  const orgRecords = await getOrgActivity(
+    context,
+    org,
+    fetchLimit,
+    0,
+    false
+  );
+
+  const prodEnv = await getGwaProductEnvironment(context, false);
+  const envConfig = prodEnv.issuerEnvConfig;
+  const svc = new NamespaceService(envConfig.issuerUrl);
+  await svc.login(envConfig.clientId, envConfig.clientSecret);
+  const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org);
+  const gatewayRecords =
+    assignedNamespaces.length > 0
+      ? await getActivity(
+          context,
+          assignedNamespaces.map((n) => n.name),
+          undefined,
+          fetchLimit,
+          0
+        )
+      : [];
+
+  const seen = new Set<string>();
+  const combined = [...orgRecords, ...gatewayRecords].filter((record) => {
+    if (seen.has(record.id)) {
+      return false;
+    }
+    seen.add(record.id);
+    return true;
+  });
+
+  return combined
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .slice(skip, skip + cappedFirst);
 }
