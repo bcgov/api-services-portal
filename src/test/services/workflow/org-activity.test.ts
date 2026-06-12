@@ -34,58 +34,6 @@ const recordActivityWithBlobMock =
   activityModule.recordActivityWithBlob as jest.Mock;
 const getOrganizationUnitMock = organizationModule.getOrganizationUnit as jest.Mock;
 
-function getRecordActivityCall(mock: jest.Mock, callIndex = 0) {
-  const [
-    context,
-    action,
-    type,
-    refId,
-    message,
-    result,
-    activityContext,
-    productNamespace,
-    ids,
-  ] = mock.mock.calls[callIndex];
-  return {
-    context,
-    action,
-    type,
-    refId,
-    message,
-    result,
-    activityContext,
-    productNamespace,
-    ids,
-  };
-}
-
-function getRecordActivityWithBlobCall(mock: jest.Mock, callIndex = 0) {
-  const [
-    context,
-    action,
-    type,
-    refId,
-    message,
-    result,
-    activityContext,
-    blob,
-    ids,
-    productNamespace,
-  ] = mock.mock.calls[callIndex];
-  return {
-    context,
-    action,
-    type,
-    refId,
-    message,
-    result,
-    activityContext,
-    blob,
-    ids,
-    productNamespace,
-  };
-}
-
 describe('resourceRefId', function () {
   it('prefixes standard org activity resources', function () {
     expect(
@@ -210,10 +158,9 @@ describe('OrgActivityService', function () {
       });
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('registered');
-    expect(call.type).toBe('Organization');
-    expect(call.blob).toEqual({
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('registered');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('Organization');
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'my-org',
       title: 'My Org',
       description: 'About us',
@@ -226,18 +173,18 @@ describe('OrgActivityService', function () {
     await new OrgActivityService(ctxAuthed, 'my-org').logOrganizationEstablished(
       true
     );
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:Alice');
+    expect(recordActivityMock.mock.calls[0][8]).toContain('actor:Alice');
 
     recordActivityMock.mockClear();
     const ctxReq = { req: { user: { name: 'Bob' } } };
     await new OrgActivityService(ctxReq, 'my-org').logOrganizationEstablished(
       true
     );
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:Bob');
+    expect(recordActivityMock.mock.calls[0][8]).toContain('actor:Bob');
 
     recordActivityMock.mockClear();
     await new OrgActivityService({}, 'my-org').logOrganizationEstablished(true);
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:system');
+    expect(recordActivityMock.mock.calls[0][8]).toContain('actor:system');
   });
 
   it('always records access changes as "updated" with the signed delta', async function () {
@@ -252,18 +199,17 @@ describe('OrgActivityService', function () {
         value: 'my-org',
       },
     });
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('updated');
-    expect(call.refId).toBe('org:my-org');
-    const ctx = JSON.parse(call.activityContext);
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('org:my-org');
+    const ctx = JSON.parse(recordActivityMock.mock.calls[0][6]);
     expect(ctx.params.subject_email).toBe('user1@local');
     expect(ctx.params.subject).toBe('User One');
     expect(ctx.params.accessAction).toBeUndefined();
     expect(ctx.message).toBe(
       '{actor} {action} {subject} organization access on {organization}: {roles}'
     );
-    expect(call.ids).toContain('user:user1@local');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][8]).toContain('user:user1@local');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin updated User One organization access on my-org: [-] organization-admin'
     );
   });
@@ -281,21 +227,24 @@ describe('OrgActivityService', function () {
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
     expect(recordActivityMock).not.toHaveBeenCalled();
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('published');
-    expect(call.type).toBe('OrganizationKey');
-    expect(call.refId).toBe('sdx.keys.min.citz.org:0');
-    const ctx = JSON.parse(call.activityContext);
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('published');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationKey');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe(
+      'sdx.keys.min.citz.org:0'
+    );
+    const ctx = JSON.parse(recordActivityWithBlobMock.mock.calls[0][6]);
     expect(ctx.params.entity).toBe('OrganizationKey');
     expect(ctx.params.targetName).toBe('my-org');
     expect(ctx.params.detail).toBeUndefined();
-    expect(call.blob).toBe(deckBlob);
-    expect(call.ids).toEqual([
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toBe(deckBlob);
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'scope:organization',
       'actor:Admin',
     ]);
-    expect(call.message).toBe('Admin published sdx-keys.r1 for my-org');
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
+      'Admin published sdx-keys.r1 for my-org'
+    );
   });
 
   it('records removed activity for logGatewayPatternPublish remove path', async function () {
@@ -311,9 +260,8 @@ describe('OrgActivityService', function () {
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
     expect(recordActivityWithBlobMock).not.toHaveBeenCalled();
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('removed');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][1]).toBe('removed');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin removed sdx-keys.r1 for my-org: removed key sdx.keys.min.citz.org:0'
     );
   });
@@ -328,9 +276,7 @@ describe('OrgActivityService', function () {
       deckBlob: 'results: creating key\n',
     });
 
-    expect(getRecordActivityWithBlobCall(recordActivityWithBlobMock).type).toBe(
-      'RuntimeGroupKey'
-    );
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('RuntimeGroupKey');
   });
 
   it('includes targetName when subsystem-scoped', async function () {
@@ -343,13 +289,14 @@ describe('OrgActivityService', function () {
       deckBlob: 'results: creating key\n',
     });
 
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.type).toBe('SubsystemKey');
-    expect(call.refId).toBe('sdx.keys.lab.min.food.my-ui.sys:0');
-    expect(call.message).toBe(
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('SubsystemKey');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe(
+      'sdx.keys.lab.min.food.my-ui.sys:0'
+    );
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
       'Admin published sdx-keys.r1 for LAB.MIN.FOOD.MY-UI'
     );
-    expect(call.ids).toEqual([
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'scope:subsystem',
       'client:LAB.MIN.FOOD.MY-UI',
@@ -363,20 +310,20 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-p2p-consumer.r1',
     });
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.type).toBe('GatewayPatternPublish');
-    expect(call.refId).toBe('pattern:sdx-p2p-consumer.r1');
-    expect(call.message).toBe('Admin published sdx-p2p-consumer.r1');
-    expect(call.ids).toEqual(['org:my-org', 'actor:Admin']);
+    expect(recordActivityMock.mock.calls[0][2]).toBe('GatewayPatternPublish');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('pattern:sdx-p2p-consumer.r1');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin published sdx-p2p-consumer.r1'
+    );
+    expect(recordActivityMock.mock.calls[0][8]).toEqual(['org:my-org', 'actor:Admin']);
   });
 
   it('always passes org filterKey as first id', async function () {
     await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
       .logOrganizationCSR(true, { keyName: 'signing-key' });
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.refId).toBe('key:signing-key');
-    expect(call.ids[0]).toBe('org:my-org');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('key:signing-key');
+    expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:my-org');
   });
 
   it('records subsystem create with org filter keys, subsystem refId, and product namespace', async function () {
@@ -387,13 +334,14 @@ describe('OrgActivityService', function () {
       });
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('created');
-    expect(call.type).toBe('Subsystem');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.message).toBe('Admin created subsystem MY-SUBSYS on my-org');
-    expect(call.productNamespace).toBe('sdx-abc123');
-    expect(call.ids).toEqual([
+    expect(recordActivityMock.mock.calls[0][1]).toBe('created');
+    expect(recordActivityMock.mock.calls[0][2]).toBe('Subsystem');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
+      'Admin created subsystem MY-SUBSYS on my-org'
+    );
+    expect(recordActivityMock.mock.calls[0][7]).toBe('sdx-abc123');
+    expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'subsystem:MY-SUBSYS',
       'actor:Admin',
@@ -407,10 +355,9 @@ describe('OrgActivityService', function () {
         productNamespace: 'sdx-abc123',
       });
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('deleted');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.productNamespace).toBe('sdx-abc123');
+    expect(recordActivityMock.mock.calls[0][1]).toBe('deleted');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityMock.mock.calls[0][7]).toBe('sdx-abc123');
   });
 
   it('records subsystem profile updates with a profile blob and product namespace', async function () {
@@ -422,16 +369,15 @@ describe('OrgActivityService', function () {
       });
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('Subsystem');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.blob).toEqual({
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('Subsystem');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'MY-SUBSYS',
       description: 'Updated details',
     });
-    expect(call.productNamespace).toBe('sdx-abc123');
-    expect(call.message).toBe(
+    expect(recordActivityWithBlobMock.mock.calls[0][9]).toBe('sdx-abc123');
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
       'Admin updated subsystem profile for MY-SUBSYS on my-org'
     );
   });
@@ -443,14 +389,13 @@ describe('OrgActivityService', function () {
         subsystemName: 'MY-SUBSYS',
       });
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('published');
-    expect(call.type).toBe('Service');
-    expect(call.refId).toBe('service:MY-SERVICE');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][1]).toBe('published');
+    expect(recordActivityMock.mock.calls[0][2]).toBe('Service');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('service:MY-SERVICE');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin published service MY-SERVICE on subsystem MY-SUBSYS in my-org'
     );
-    expect(call.ids).toEqual([
+    expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'subsystem:MY-SUBSYS',
       'service:MY-SERVICE',
@@ -465,10 +410,9 @@ describe('OrgActivityService', function () {
         subsystemName: 'MY-SUBSYS',
       });
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('removed');
-    expect(call.refId).toBe('service:MY-SERVICE');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][1]).toBe('removed');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('service:MY-SERVICE');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin removed service MY-SERVICE from subsystem MY-SUBSYS in my-org'
     );
   });
@@ -498,11 +442,10 @@ describe('logSubsystemActivityFromHook', function () {
     );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('created');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.productNamespace).toBe('sdx-abc123');
-    expect(call.ids[0]).toBe('org:ca.bc.gov.my-org');
+    expect(recordActivityMock.mock.calls[0][1]).toBe('created');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityMock.mock.calls[0][7]).toBe('sdx-abc123');
+    expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:ca.bc.gov.my-org');
   });
 
   it('throws when organization id cannot be resolved to a name', async function () {
@@ -563,10 +506,9 @@ describe('logSubsystemActivityFromHook', function () {
     );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('deleted');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.productNamespace).toBe('sdx-abc123');
+    expect(recordActivityMock.mock.calls[0][1]).toBe('deleted');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityMock.mock.calls[0][7]).toBe('sdx-abc123');
   });
 
   it('records update activity even when profile is unchanged', async function () {
@@ -593,12 +535,11 @@ describe('logSubsystemActivityFromHook', function () {
     );
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('Subsystem');
-    expect(call.refId).toBe('subsystem:MY-SUBSYS');
-    expect(call.productNamespace).toBe('sdx-abc123');
-    expect(call.blob).toEqual({
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('Subsystem');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('subsystem:MY-SUBSYS');
+    expect(recordActivityWithBlobMock.mock.calls[0][9]).toBe('sdx-abc123');
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'MY-SUBSYS',
       description: 'same',
     });
@@ -626,15 +567,14 @@ describe('logOrganizationAccessChanges', function () {
     );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('updated');
-    expect(call.refId).toBe('org:my-org');
-    expect(call.ids).toEqual([
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('org:my-org');
+    expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'user:aidan@idir',
       'actor:Admin',
     ]);
-    const message = call.message;
+    const message = recordActivityMock.mock.calls[0][4];
     expect(message).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [+] system-owner'
     );
@@ -652,18 +592,17 @@ describe('logOrganizationAccessChanges', function () {
       resolveDisplayName
     );
 
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.refId).toBe('orgUnit:my-unit');
-    expect(call.ids).toEqual([
+    expect(recordActivityMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'orgUnit:my-unit',
       'user:aidan@idir',
       'actor:Admin',
     ]);
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization unit access on my-unit: [+] organization-admin'
     );
-    const ctx = JSON.parse(call.activityContext);
+    const ctx = JSON.parse(recordActivityMock.mock.calls[0][6]);
     expect(ctx.params.organization).toBe('my-org');
     expect(ctx.params.orgUnit).toBe('my-unit');
     expect(ctx.message).toBe(
@@ -683,9 +622,8 @@ describe('logOrganizationAccessChanges', function () {
     );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('updated');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [+] system-owner, [-] organization-admin'
     );
   });
@@ -702,9 +640,8 @@ describe('logOrganizationAccessChanges', function () {
     );
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('updated');
-    expect(call.message).toBe(
+    expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [-] system-owner'
     );
   });
@@ -729,20 +666,26 @@ describe('logOrganizationProfileChangeFromRecords', function () {
     );
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('OrganizationProfile');
-    expect(call.refId).toBe('org:my-org');
-    expect(call.message).toBe('Admin updated organization profile for my-org');
-    expect(call.blob).toEqual({
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationProfile');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('org:my-org');
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
+      'Admin updated organization profile for my-org'
+    );
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'my-org',
       sector: 's2',
       title: 'New',
       extRecordHash: 'hash',
     });
-    expect(call.ids).toEqual(['org:my-org', 'actor:Admin']);
-    expect(call.productNamespace).toBeNull();
-    const activityContext = JSON.parse(call.activityContext);
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
+      'org:my-org',
+      'actor:Admin',
+    ]);
+    expect(recordActivityWithBlobMock.mock.calls[0][9]).toBeNull();
+    const activityContext = JSON.parse(
+      recordActivityWithBlobMock.mock.calls[0][6]
+    );
     expect(activityContext.params.organization).toBe('my-org');
   });
 });
@@ -781,11 +724,12 @@ describe('logOrganizationUnitsFromChildSync', function () {
 
     expect(getOrganizationUnitMock).not.toHaveBeenCalled();
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('registered');
-    expect(call.type).toBe('OrganizationUnit');
-    expect(call.refId).toBe('orgUnit:my-unit');
-    const activityContext = JSON.parse(call.activityContext);
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('registered');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationUnit');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    const activityContext = JSON.parse(
+      recordActivityWithBlobMock.mock.calls[0][6]
+    );
     expect(activityContext.params.organization).toBe('my-org');
     expect(activityContext.params.orgUnit).toBe('my-unit');
     expect(activityContext.message).toBe(
@@ -808,9 +752,8 @@ describe('logOrganizationUnitsFromChildSync', function () {
     );
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('OrganizationProfile');
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('updated');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationProfile');
   });
 
   it('does not log establishment for ckan-sourced child units', async function () {
@@ -844,11 +787,12 @@ describe('logOrganizationUnitEstablishedFromRecords', function () {
     );
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('registered');
-    expect(call.type).toBe('OrganizationUnit');
-    expect(call.message).toBe('Admin established organization unit my-unit');
-    expect(call.ids).toEqual([
+    expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('registered');
+    expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationUnit');
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
+      'Admin established organization unit my-unit'
+    );
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'orgUnit:my-unit',
       'actor:Admin',
@@ -883,22 +827,23 @@ describe('logOrganizationUnitProfileChangeFromRecords', function () {
       'my-unit'
     );
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.refId).toBe('orgUnit:my-unit');
-    expect(call.blob).toEqual({
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'my-unit',
       title: 'New unit title',
       description: 'Unit details',
     });
-    expect(call.ids).toEqual([
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'orgUnit:my-unit',
       'actor:Admin',
     ]);
-    expect(call.message).toBe(
+    expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
       'Admin updated organization unit profile for my-unit'
     );
-    const activityContext = JSON.parse(call.activityContext);
+    const activityContext = JSON.parse(
+      recordActivityWithBlobMock.mock.calls[0][6]
+    );
     expect(activityContext.params.organization).toBe('my-org');
     expect(activityContext.params.orgUnit).toBe('my-unit');
     expect(activityContext.message).toBe(
@@ -920,7 +865,7 @@ describe('logOrganizationUnitProfileChangeFromRecords', function () {
 
     expect(getOrganizationUnitMock).not.toHaveBeenCalled();
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    expect(getRecordActivityWithBlobCall(recordActivityWithBlobMock).ids).toEqual([
+    expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'orgUnit:my-unit',
       'actor:Admin',
