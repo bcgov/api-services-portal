@@ -59,27 +59,6 @@ describe('SDX Subsystem', () => {
           expect(body.result).to.be.equal('deleted')
           expect(body.childResults.length).to.be.greaterThan(0)
 
-          // Check for service removed in catalog activity
-          cy.callAPI(
-            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
-            'GET'
-          ).then(({ apiRes: { status, body: activities } }: any) => {
-            expect(status).to.be.equal(200)
-            const entry = activities.find(
-              (a: any) =>
-                a.params?.entity === 'Service' &&
-                a.params?.action === 'removed' &&
-                a.params?.serviceName === service.name &&
-                a.params?.subsystemName === subsystemName &&
-                a.params?.organization === org.name
-            )
-            expect(entry?.params?.entity).to.equal('Service')
-            expect(entry?.params?.action).to.equal('removed')
-            expect(entry?.params?.serviceName).to.equal(service.name)
-            expect(entry?.params?.subsystemName).to.equal(subsystemName)
-            expect(entry?.result).to.equal('success')
-          })
-
           cy.callAPI(
             `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
             'GET',

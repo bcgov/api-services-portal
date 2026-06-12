@@ -90,14 +90,12 @@ class OpenAPISpecService {
   deleteOASService = async (
     context: Keystone,
     org: string,
-    name: string,
-    serviceSpec?: OpenApiSpec
+    name: string
   ): Promise<BatchResult> => {
-    const resolvedSpec =
-      serviceSpec ?? (await this.findOpenAPISpecByName(context, name));
+    const serviceSpec = await this.findOpenAPISpecByName(context, name);
 
     assertEqual(
-      resolvedSpec && resolvedSpec.subsystem.organization.name === org,
+      serviceSpec && serviceSpec.subsystem.organization.name === org,
       true,
       'organization',
       'Not authorized to access this service'
@@ -105,7 +103,7 @@ class OpenAPISpecService {
 
     const activeConnections = await this.listActiveConnectionsByServiceId(
       context,
-      resolvedSpec.name
+      serviceSpec.name
     );
 
     assert.strictEqual(
@@ -114,11 +112,7 @@ class OpenAPISpecService {
       'OAS service cannot be deleted because it has active connection requests'
     );
 
-    return await deleteRecordByInternalId(
-      context,
-      'OpenAPISpec',
-      resolvedSpec.id
-    );
+    return await deleteRecordByInternalId(context, 'OpenAPISpec', serviceSpec.id);
   };
 }
 

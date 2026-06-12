@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  FormField,
   Get,
   OperationId,
   Path,
@@ -10,7 +11,8 @@ import {
   Request,
   Route,
   Security,
-  Tags
+  Tags,
+  UploadedFile,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
@@ -19,7 +21,6 @@ import {
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
 import { BatchResult } from '../../../batch/types';
-import { Logger } from '../../../logger';
 import { OpenAPISpecService } from '../../../services/batch/oas-service';
 import {
   GetCatalog,
@@ -30,12 +31,9 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
-import {
-  logServiceRemovedForOrg,
-  OrgActivityService,
-} from '../../../services/workflow/org-activity';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
+import { Logger } from '../../../logger';
 import { ExpressRequest } from './types';
 
 const logger = Logger('controller.gateway-service');
@@ -110,15 +108,8 @@ export class GatewayServiceController extends Controller {
       final
     );
     if (result.result === 'created') {
-      const { name: serviceName } = await getRecordById(
-        context,
-        'OpenAPISpec',
-        result.id!
-      );
-      result.refKey = serviceName;
-      await new OrgActivityService(context, org)
-        .logServicePublished(true, { serviceName, subsystemName: subsystem })
-        .catch((e) => logger.error('[OrgActivity] service publish %s', e));
+      const { name } = await getRecordById(context, 'OpenAPISpec', result.id!);
+      result.refKey = name;
     }
     return result;
   }
@@ -234,24 +225,7 @@ export class GatewayServiceController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
-    const oasService = new OpenAPISpecService();
-    const serviceSpec = await oasService.findOpenAPISpecByName(context, name);
-    const result = await oasService.deleteOASService(
-      context,
-      org,
-      name,
-      serviceSpec
-    );
 
-    if (result.result === 'deleted') {
-      await logServiceRemovedForOrg(
-        context,
-        org,
-        serviceSpec.name,
-        serviceSpec.subsystem.name
-      );
-    }
-
-    return result;
+    return await new OpenAPISpecService().deleteOASService(context, org, name);
   }
 }
