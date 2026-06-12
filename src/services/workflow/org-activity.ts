@@ -250,13 +250,20 @@ function gatewayKeyFilterResources(
 
 function gatewayPatternPublishMessage(
   targetName: string | undefined,
-  removed: boolean
+  removed: boolean,
+  detail?: string
 ): string {
   const includeTarget = Boolean(targetName);
+  const includeDetail = Boolean(detail);
   if (removed) {
     return includeTarget
       ? '{actor} removed {pattern} for {targetName}: {detail}'
       : '{actor} removed {pattern}: {detail}';
+  }
+  if (includeDetail) {
+    return includeTarget
+      ? '{actor} published {pattern} for {targetName}: {detail}'
+      : '{actor} published {pattern}: {detail}';
   }
   return includeTarget
     ? '{actor} published {pattern} for {targetName}'
@@ -442,7 +449,7 @@ export class OrgActivityService {
     success: boolean,
     data: {
       pattern: string;
-      /** Remove-only summary; deck output is stored in blob on apply. */
+      /** Key or pattern summary appended to publish/remove messages. */
       detail?: string;
       removed?: boolean;
       scope?: 'organization' | 'subsystem' | 'runtime-group';
@@ -450,11 +457,16 @@ export class OrgActivityService {
       targetName?: string;
       /** Kong GatewayKey name when pattern is sdx-keys.r1. */
       gatewayKeyName?: string;
+      /** Deck/GWA output stored on apply for audit. */
       deckBlob?: string;
     }
   ): Promise<void> {
     const isRemove = data.removed === true;
-    const message = gatewayPatternPublishMessage(data.targetName, isRemove);
+    const message = gatewayPatternPublishMessage(
+      data.targetName,
+      isRemove,
+      data.detail
+    );
 
     const entity = gatewayPatternPublishEntity(data.pattern, data.scope);
 
@@ -465,7 +477,7 @@ export class OrgActivityService {
       organization: this.orgName,
       pattern: data.pattern,
     };
-    if (isRemove && data.detail) {
+    if (data.detail) {
       params.detail = data.detail;
     }
     if (data.scope) {
