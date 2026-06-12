@@ -76,7 +76,7 @@ export class SdxMemberApiClient {
     org: string,
     body: ConnectionRequestInput
   ): Promise<BatchResult> {
-    return this.request('PATCH', `organizations/${enc(org)}/connections`, {
+    return this.request('PUT', `organizations/${enc(org)}/connections`, {
       body,
     });
   }
