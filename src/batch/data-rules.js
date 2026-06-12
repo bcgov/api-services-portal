@@ -506,8 +506,10 @@ const metadata = {
   },
   RuntimeGroup: {
     query: 'allRuntimeGroups',
-    refKey: 'name',
+    compositeRefKey: ['name', 'environment'],
     sync: [
+      'name',
+      'environment',
       'host',
       'sdxEndpoint',
       'consumerEndpoint',
@@ -528,9 +530,10 @@ const metadata = {
       },
     },
     example: {
-      name: 'my-runtime-group',
+      name: 'edge1',
+      environment: 'dev',
       gatewayId: 'gw-abc',
-      host: 'runtime-group.my-domain.sdx',
+      host: 'edge1.dev.servers.sdx',
       sdxEndpoint: '10.10.10.10:443',
       consumerEndpoint: '10.0.0.11:6443',
       hostedOrganizations: [
@@ -859,14 +862,7 @@ const metadata = {
     validations: {
       action: {
         type: 'enum',
-        values: [
-          'add',
-          'update',
-          'create',
-          'delete',
-          'validate',
-          'publish',
-        ],
+        values: ['add', 'update', 'create', 'delete', 'validate', 'publish'],
       },
       result: {
         type: 'enum',

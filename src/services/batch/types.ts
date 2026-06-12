@@ -314,9 +314,10 @@ export interface Subsystem {
 /**
  * @tsoaModel
  * @example {
- *   "name": "my-runtime-group",
+ *   "name": "edge1",
+ *   "environment": "dev",
  *   "gatewayId": "gw-abc",
- *   "host": "runtime-group.my-domain.sdx",
+ *   "host": "edge1.dev.servers.sdx",
  *   "sdxEndpoint": "10.10.10.10:443",
  *   "consumerEndpoint": "10.0.0.11:6443",
  *   "hostedOrganizations": [
@@ -326,7 +327,8 @@ export interface Subsystem {
  * }
  */  
 export interface RuntimeGroup {
-  name?: string; // Primary Key
+  name?: string;
+  environment?: string;
   host?: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;

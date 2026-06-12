@@ -11,7 +11,11 @@ module.exports = {
     name: {
       type: Text,
       isRequired: true,
-      isUnique: true,
+      isUnique: false,
+    },
+    environment: {
+      type: Text,
+      isRequired: true,
     },
     namespace: {
       type: Text,
