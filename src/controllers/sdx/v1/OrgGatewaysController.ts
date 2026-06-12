@@ -215,7 +215,6 @@ export class OrgGatewaysController extends Controller {
       const removed = action === 'remove';
       let scope: SdxGatewayKeyScope | undefined;
       let targetName: string | undefined;
-      let gatewayKeyName: string | undefined;
 
       if (body.pattern === 'sdx-keys.r1') {
         scope = body.parameters.runtime_group_name
@@ -228,14 +227,12 @@ export class OrgGatewaysController extends Controller {
           body.parameters.client_id ??
           org;
 
-        const scopedKeys = incomingKeys.filter((key) =>
-          isGatewayKeyInScopes(key, [scope])
-        );
-        gatewayKeyName = scopedKeys[0]?.name;
-
         if (removed) {
-          detail = scopedKeys
-            .map((key) => `removed key ${key.name}`)
+          const removedKeyNames = incomingKeys
+            .filter((key) => isGatewayKeyInScopes(key, [scope]))
+            .map((key) => key.name);
+          detail = removedKeyNames
+            .map((name) => `removed key ${name}`)
             .join('; ');
         } else {
           deckBlob = YAML.dump(result, { noRefs: true });
@@ -251,7 +248,6 @@ export class OrgGatewaysController extends Controller {
           removed,
           scope,
           targetName,
-          gatewayKeyName,
           deckBlob,
         })
         .catch((e) =>

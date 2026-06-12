@@ -1,7 +1,6 @@
 import {
   buildOrganizationProfileSnapshot,
   buildOrganizationUnitProfileSnapshot,
-  OrgActivityResourceKind,
   OrgActivityService,
   logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
@@ -9,7 +8,6 @@ import {
   logOrganizationUnitProfileChangeFromRecords,
   logOrganizationUnitsFromChildSync,
   logSubsystemActivityFromHook,
-  resourceRefId,
   shouldLogOrgUnitEstablishment,
   resolveOrgHierarchyKeys,
 } from '../../../services/workflow/org-activity';
@@ -34,34 +32,11 @@ const recordActivityWithBlobMock =
   activityModule.recordActivityWithBlob as jest.Mock;
 const getOrganizationUnitMock = organizationModule.getOrganizationUnit as jest.Mock;
 
-describe('resourceRefId', function () {
-  it('prefixes standard org activity resources', function () {
-    expect(
-      resourceRefId({
-        kind: OrgActivityResourceKind.Subsystem,
-        value: 'MY-SUBSYS',
-      })
-    ).toBe('subsystem:MY-SUBSYS');
-  });
-
-  it('uses bare Kong gateway key names', function () {
-    expect(
-      resourceRefId({
-        kind: OrgActivityResourceKind.GatewayKey,
-        value: 'sdx.keys.min.citz.org:0',
-      })
-    ).toBe('sdx.keys.min.citz.org:0');
-  });
-});
-
 describe('resolveOrgHierarchyKeys', function () {
   it('uses the sole segment for root organization access', function () {
     expect(resolveOrgHierarchyKeys('', 'ca.bc.gov')).toEqual({
       filterOrg: 'ca.bc.gov',
-      resource: {
-        kind: OrgActivityResourceKind.Organization,
-        value: 'ca.bc.gov',
-      },
+      refId: 'ca.bc.gov',
     });
   });
 
@@ -70,10 +45,7 @@ describe('resolveOrgHierarchyKeys', function () {
       resolveOrgHierarchyKeys('/ca.bc.gov', 'ministry-of-kittens')
     ).toEqual({
       filterOrg: 'ministry-of-kittens',
-      resource: {
-        kind: OrgActivityResourceKind.Organization,
-        value: 'ministry-of-kittens',
-      },
+      refId: 'ministry-of-kittens',
     });
   });
 
@@ -85,10 +57,7 @@ describe('resolveOrgHierarchyKeys', function () {
       )
     ).toEqual({
       filterOrg: 'ministry-of-kittens',
-      resource: {
-        kind: OrgActivityResourceKind.OrgUnit,
-        value: 'division-of-toys',
-      },
+      refId: 'division-of-toys',
       orgUnit: 'division-of-toys',
     });
   });
@@ -194,13 +163,10 @@ describe('OrgActivityService', function () {
       subject_email: 'user1@local',
       subject: 'User One',
       roles: '[-] organization-admin',
-      resource: {
-        kind: OrgActivityResourceKind.Organization,
-        value: 'my-org',
-      },
+      refId: 'my-org',
     });
     expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
-    expect(recordActivityMock.mock.calls[0][3]).toBe('org:my-org');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('my-org');
     const ctx = JSON.parse(recordActivityMock.mock.calls[0][6]);
     expect(ctx.params.subject_email).toBe('user1@local');
     expect(ctx.params.subject).toBe('User One');
@@ -221,7 +187,6 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-keys.r1',
       scope: 'organization',
       targetName: 'my-org',
-      gatewayKeyName: 'sdx.keys.min.citz.org:0',
       deckBlob,
     });
 
@@ -229,9 +194,7 @@ describe('OrgActivityService', function () {
     expect(recordActivityMock).not.toHaveBeenCalled();
     expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('published');
     expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationKey');
-    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe(
-      'sdx.keys.min.citz.org:0'
-    );
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('my-org');
     const ctx = JSON.parse(recordActivityWithBlobMock.mock.calls[0][6]);
     expect(ctx.params.entity).toBe('OrganizationKey');
     expect(ctx.params.targetName).toBe('my-org');
@@ -240,6 +203,7 @@ describe('OrgActivityService', function () {
     expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'scope:organization',
+      'target:my-org',
       'actor:Admin',
     ]);
     expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
@@ -253,7 +217,6 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-keys.r1',
       scope: 'organization',
       targetName: 'my-org',
-      gatewayKeyName: 'sdx.keys.min.citz.org:0',
       detail: 'removed key sdx.keys.min.citz.org:0',
       removed: true,
     });
@@ -272,7 +235,6 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-keys.r1',
       scope: 'runtime-group',
       targetName: 'my-edge-rg',
-      gatewayKeyName: 'sdx.keys.my-edge-rg.edge:0',
       deckBlob: 'results: creating key\n',
     });
 
@@ -285,21 +247,18 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-keys.r1',
       scope: 'subsystem',
       targetName: 'LAB.MIN.FOOD.MY-UI',
-      gatewayKeyName: 'sdx.keys.lab.min.food.my-ui.sys:0',
       deckBlob: 'results: creating key\n',
     });
 
     expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('SubsystemKey');
-    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe(
-      'sdx.keys.lab.min.food.my-ui.sys:0'
-    );
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('LAB.MIN.FOOD.MY-UI');
     expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
       'Admin published sdx-keys.r1 for LAB.MIN.FOOD.MY-UI'
     );
     expect(recordActivityWithBlobMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'scope:subsystem',
-      'client:LAB.MIN.FOOD.MY-UI',
+      'target:LAB.MIN.FOOD.MY-UI',
       'actor:Admin',
     ]);
   });
@@ -311,7 +270,7 @@ describe('OrgActivityService', function () {
     });
 
     expect(recordActivityMock.mock.calls[0][2]).toBe('GatewayPatternPublish');
-    expect(recordActivityMock.mock.calls[0][3]).toBe('pattern:sdx-p2p-consumer.r1');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('my-org');
     expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin published sdx-p2p-consumer.r1'
     );
@@ -322,7 +281,7 @@ describe('OrgActivityService', function () {
     await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
       .logOrganizationCSR(true, { keyName: 'signing-key' });
 
-    expect(recordActivityMock.mock.calls[0][3]).toBe('key:signing-key');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('signing-key');
     expect(recordActivityMock.mock.calls[0][8][0]).toBe('org:my-org');
   });
 
@@ -391,7 +350,6 @@ describe('OrgActivityService', function () {
 
     expect(recordActivityMock.mock.calls[0][1]).toBe('published');
     expect(recordActivityMock.mock.calls[0][2]).toBe('Service');
-    expect(recordActivityMock.mock.calls[0][3]).toBe('service:MY-SERVICE');
     expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin published service MY-SERVICE on subsystem MY-SUBSYS in my-org'
     );
@@ -411,7 +369,6 @@ describe('OrgActivityService', function () {
       });
 
     expect(recordActivityMock.mock.calls[0][1]).toBe('removed');
-    expect(recordActivityMock.mock.calls[0][3]).toBe('service:MY-SERVICE');
     expect(recordActivityMock.mock.calls[0][4]).toBe(
       'Admin removed service MY-SERVICE from subsystem MY-SUBSYS in my-org'
     );
@@ -568,7 +525,7 @@ describe('logOrganizationAccessChanges', function () {
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
     expect(recordActivityMock.mock.calls[0][1]).toBe('updated');
-    expect(recordActivityMock.mock.calls[0][3]).toBe('org:my-org');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('my-org');
     expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'user:aidan@idir',
@@ -592,7 +549,7 @@ describe('logOrganizationAccessChanges', function () {
       resolveDisplayName
     );
 
-    expect(recordActivityMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    expect(recordActivityMock.mock.calls[0][3]).toBe('my-unit');
     expect(recordActivityMock.mock.calls[0][8]).toEqual([
       'org:my-org',
       'orgUnit:my-unit',
@@ -668,7 +625,7 @@ describe('logOrganizationProfileChangeFromRecords', function () {
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
     expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('updated');
     expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationProfile');
-    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('org:my-org');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('my-org');
     expect(recordActivityWithBlobMock.mock.calls[0][4]).toBe(
       'Admin updated organization profile for my-org'
     );
@@ -726,7 +683,7 @@ describe('logOrganizationUnitsFromChildSync', function () {
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
     expect(recordActivityWithBlobMock.mock.calls[0][1]).toBe('registered');
     expect(recordActivityWithBlobMock.mock.calls[0][2]).toBe('OrganizationUnit');
-    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('my-unit');
     const activityContext = JSON.parse(
       recordActivityWithBlobMock.mock.calls[0][6]
     );
@@ -827,7 +784,7 @@ describe('logOrganizationUnitProfileChangeFromRecords', function () {
       'my-unit'
     );
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('orgUnit:my-unit');
+    expect(recordActivityWithBlobMock.mock.calls[0][3]).toBe('my-unit');
     expect(recordActivityWithBlobMock.mock.calls[0][7]).toEqual({
       name: 'my-unit',
       title: 'New unit title',
