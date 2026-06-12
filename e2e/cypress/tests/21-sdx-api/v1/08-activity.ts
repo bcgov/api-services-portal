@@ -570,9 +570,13 @@ dQIDAQAB
             a.params?.action === 'published' &&
             a.params?.targetName === org.name
         )
+        const deckResults = Array.isArray(entry?.blob)
+          ? entry.blob[0]?.results
+          : entry?.blob?.results
         expect(entry?.params?.entity).to.equal('OrganizationKey')
         expect(entry?.params?.action).to.equal('published')
-        expect(entry?.params?.detail).to.include(`published key ${orgKeyName}`)
+        expect(entry?.params?.detail).to.be.undefined
+        expect(deckResults).to.include(`creating key ${orgKeyName}`)
         expect(entry?.result).to.equal('success')
       })
     })
@@ -595,10 +599,19 @@ dQIDAQAB
                 a.params?.action === 'published' &&
                 a.params?.targetName === org.name
             )
-            const entry = publishEntries[0]
+            const entry = publishEntries.find((a: any) => {
+              const deckResults = Array.isArray(a.blob)
+                ? a.blob[0]?.results
+                : a.blob?.results
+              return deckResults?.includes(`updating key ${orgKeyName}`)
+            })
+            const deckResults = Array.isArray(entry?.blob)
+              ? entry.blob[0]?.results
+              : entry?.blob?.results
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.action).to.equal('published')
-            expect(entry?.params?.detail).to.include(`published key ${orgKeyName}`)
+            expect(entry?.params?.detail).to.be.undefined
+            expect(deckResults).to.include(`updating key ${orgKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }
@@ -690,10 +703,14 @@ dQIDAQAB
             a.params?.action === 'published' &&
             a.params?.targetName === clientId
         )
+        const deckResults = Array.isArray(entry?.blob)
+          ? entry.blob[0]?.results
+          : entry?.blob?.results
         expect(entry?.params?.entity).to.equal('SubsystemKey')
         expect(entry?.params?.action).to.equal('published')
         expect(entry?.params?.targetName).to.equal(clientId)
-        expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
+        expect(entry?.params?.detail).to.be.undefined
+        expect(deckResults).to.include(`creating key ${subsystemKeyName}`)
         expect(entry?.result).to.equal('success')
       })
     })
@@ -716,10 +733,19 @@ dQIDAQAB
                 a.params?.action === 'published' &&
                 a.params?.targetName === clientId
             )
-            const entry = publishEntries[0]
+            const entry = publishEntries.find((a: any) => {
+              const deckResults = Array.isArray(a.blob)
+                ? a.blob[0]?.results
+                : a.blob?.results
+              return deckResults?.includes(`updating key ${subsystemKeyName}`)
+            })
+            const deckResults = Array.isArray(entry?.blob)
+              ? entry.blob[0]?.results
+              : entry?.blob?.results
             expect(entry?.params?.entity).to.equal('SubsystemKey')
             expect(entry?.params?.action).to.equal('published')
-            expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
+            expect(entry?.params?.detail).to.be.undefined
+            expect(deckResults).to.include(`updating key ${subsystemKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }

@@ -233,11 +233,11 @@ export class OrgGatewaysController extends Controller {
         );
         gatewayKeyName = scopedKeys[0]?.name;
 
-        const keyVerb = removed ? 'removed' : 'published';
-        detail = scopedKeys
-          .map((key) => `${keyVerb} key ${key.name}`)
-          .join('; ');
-        if (!removed) {
+        if (removed) {
+          detail = scopedKeys
+            .map((key) => `removed key ${key.name}`)
+            .join('; ');
+        } else {
           deckBlob = YAML.dump(result, { noRefs: true });
         }
       } else if (removed) {

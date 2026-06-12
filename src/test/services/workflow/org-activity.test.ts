@@ -276,7 +276,6 @@ describe('OrgActivityService', function () {
       scope: 'organization',
       targetName: 'my-org',
       gatewayKeyName: 'sdx.keys.min.citz.org:0',
-      detail: 'published key sdx.keys.min.citz.org:0',
       deckBlob,
     });
 
@@ -289,16 +288,14 @@ describe('OrgActivityService', function () {
     const ctx = JSON.parse(call.activityContext);
     expect(ctx.params.entity).toBe('OrganizationKey');
     expect(ctx.params.targetName).toBe('my-org');
-    expect(ctx.params.detail).toBe('published key sdx.keys.min.citz.org:0');
+    expect(ctx.params.detail).toBeUndefined();
     expect(call.blob).toBe(deckBlob);
     expect(call.ids).toEqual([
       'org:my-org',
       'scope:organization',
       'actor:Admin',
     ]);
-    expect(call.message).toBe(
-      'Admin published sdx-keys.r1 for my-org: published key sdx.keys.min.citz.org:0'
-    );
+    expect(call.message).toBe('Admin published sdx-keys.r1 for my-org');
   });
 
   it('records removed activity for logGatewayPatternPublish remove path', async function () {
@@ -328,7 +325,6 @@ describe('OrgActivityService', function () {
       scope: 'runtime-group',
       targetName: 'my-edge-rg',
       gatewayKeyName: 'sdx.keys.my-edge-rg.edge:0',
-      detail: 'published key sdx.keys.my-edge-rg.edge:0',
       deckBlob: 'results: creating key\n',
     });
 
@@ -344,7 +340,6 @@ describe('OrgActivityService', function () {
       scope: 'subsystem',
       targetName: 'LAB.MIN.FOOD.MY-UI',
       gatewayKeyName: 'sdx.keys.lab.min.food.my-ui.sys:0',
-      detail: 'published key sdx.keys.lab.min.food.my-ui.sys:0',
       deckBlob: 'results: creating key\n',
     });
 
@@ -352,7 +347,7 @@ describe('OrgActivityService', function () {
     expect(call.type).toBe('SubsystemKey');
     expect(call.refId).toBe('sdx.keys.lab.min.food.my-ui.sys:0');
     expect(call.message).toBe(
-      'Admin published sdx-keys.r1 for LAB.MIN.FOOD.MY-UI: published key sdx.keys.lab.min.food.my-ui.sys:0'
+      'Admin published sdx-keys.r1 for LAB.MIN.FOOD.MY-UI'
     );
     expect(call.ids).toEqual([
       'org:my-org',
