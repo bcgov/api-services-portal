@@ -412,13 +412,7 @@ const metadata = {
   Application: {
     query: 'allApplications',
     refKey: 'appId',
-    compositeRefKey: [
-      'name',
-      {
-        key: 'organization',
-        whereClause: 'organization: { name: $organization }',
-      },
-    ],
+    compositeRefKey: ['name', 'namespace'],
     sync: ['name', 'description'],
     transformations: {
       organization: {
@@ -457,6 +451,7 @@ const metadata = {
       'description',
       'environment',
       'operations',
+      'annotations',
       'namespace',
       'organization',
       'subsystem',

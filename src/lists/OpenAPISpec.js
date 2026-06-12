@@ -50,6 +50,15 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    // annotations are a general space for a few different bits of metadata
+    // 1. capturing the different rulesets that have passed for this specification
+    // 2. sha1 hash of the particular spec
+    // 3. type of spec (tool or data) - perhaps can influence the filtering or types of connections
+    //
+    annotations: {
+      type: Text,
+      isRequired: false,
+    },
     specVersion: {
       type: Text,
       isRequired: true,

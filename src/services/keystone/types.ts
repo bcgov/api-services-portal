@@ -771,6 +771,7 @@ export type Application = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
@@ -783,6 +784,7 @@ export type ApplicationCreateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
@@ -806,6 +808,7 @@ export type ApplicationUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
@@ -876,6 +879,24 @@ export type ApplicationWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   certificate?: Maybe<Scalars['String']>;
   certificate_not?: Maybe<Scalars['String']>;
   certificate_contains?: Maybe<Scalars['String']>;
@@ -5975,6 +5996,8 @@ export type OpenApiSpec = {
   environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
+  annotations?: Maybe<Scalars['String']>;
+  specVersion?: Maybe<Scalars['String']>;
   subsystem?: Maybe<Subsystem>;
 };
 
@@ -5990,6 +6013,8 @@ export type OpenApiSpecCreateInput = {
   environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
+  annotations?: Maybe<Scalars['String']>;
+  specVersion?: Maybe<Scalars['String']>;
   subsystem?: Maybe<SubsystemRelateToOneInput>;
 };
 
@@ -6000,6 +6025,7 @@ export type OpenApiSpecUpdateInput = {
   environment?: Maybe<Scalars['String']>;
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
+  annotations?: Maybe<Scalars['String']>;
 };
 
 export type OpenApiSpecWhereInput = {
@@ -6195,6 +6221,42 @@ export type OpenApiSpecWhereInput = {
   spec_not_ends_with_i?: Maybe<Scalars['String']>;
   spec_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   spec_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  annotations?: Maybe<Scalars['String']>;
+  annotations_not?: Maybe<Scalars['String']>;
+  annotations_contains?: Maybe<Scalars['String']>;
+  annotations_not_contains?: Maybe<Scalars['String']>;
+  annotations_starts_with?: Maybe<Scalars['String']>;
+  annotations_not_starts_with?: Maybe<Scalars['String']>;
+  annotations_ends_with?: Maybe<Scalars['String']>;
+  annotations_not_ends_with?: Maybe<Scalars['String']>;
+  annotations_i?: Maybe<Scalars['String']>;
+  annotations_not_i?: Maybe<Scalars['String']>;
+  annotations_contains_i?: Maybe<Scalars['String']>;
+  annotations_not_contains_i?: Maybe<Scalars['String']>;
+  annotations_starts_with_i?: Maybe<Scalars['String']>;
+  annotations_not_starts_with_i?: Maybe<Scalars['String']>;
+  annotations_ends_with_i?: Maybe<Scalars['String']>;
+  annotations_not_ends_with_i?: Maybe<Scalars['String']>;
+  annotations_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  annotations_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  specVersion?: Maybe<Scalars['String']>;
+  specVersion_not?: Maybe<Scalars['String']>;
+  specVersion_contains?: Maybe<Scalars['String']>;
+  specVersion_not_contains?: Maybe<Scalars['String']>;
+  specVersion_starts_with?: Maybe<Scalars['String']>;
+  specVersion_not_starts_with?: Maybe<Scalars['String']>;
+  specVersion_ends_with?: Maybe<Scalars['String']>;
+  specVersion_not_ends_with?: Maybe<Scalars['String']>;
+  specVersion_i?: Maybe<Scalars['String']>;
+  specVersion_not_i?: Maybe<Scalars['String']>;
+  specVersion_contains_i?: Maybe<Scalars['String']>;
+  specVersion_not_contains_i?: Maybe<Scalars['String']>;
+  specVersion_starts_with_i?: Maybe<Scalars['String']>;
+  specVersion_not_starts_with_i?: Maybe<Scalars['String']>;
+  specVersion_ends_with_i?: Maybe<Scalars['String']>;
+  specVersion_not_ends_with_i?: Maybe<Scalars['String']>;
+  specVersion_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  specVersion_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   subsystem?: Maybe<SubsystemWhereInput>;
   subsystem_is_null?: Maybe<Scalars['Boolean']>;
 };
@@ -6628,6 +6690,24 @@ export type OrganizationWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  publicBodyId?: Maybe<Scalars['String']>;
+  publicBodyId_not?: Maybe<Scalars['String']>;
+  publicBodyId_contains?: Maybe<Scalars['String']>;
+  publicBodyId_not_contains?: Maybe<Scalars['String']>;
+  publicBodyId_starts_with?: Maybe<Scalars['String']>;
+  publicBodyId_not_starts_with?: Maybe<Scalars['String']>;
+  publicBodyId_ends_with?: Maybe<Scalars['String']>;
+  publicBodyId_not_ends_with?: Maybe<Scalars['String']>;
+  publicBodyId_i?: Maybe<Scalars['String']>;
+  publicBodyId_not_i?: Maybe<Scalars['String']>;
+  publicBodyId_contains_i?: Maybe<Scalars['String']>;
+  publicBodyId_not_contains_i?: Maybe<Scalars['String']>;
+  publicBodyId_starts_with_i?: Maybe<Scalars['String']>;
+  publicBodyId_not_starts_with_i?: Maybe<Scalars['String']>;
+  publicBodyId_ends_with_i?: Maybe<Scalars['String']>;
+  publicBodyId_not_ends_with_i?: Maybe<Scalars['String']>;
+  publicBodyId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  publicBodyId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   /**  condition must be true for all nodes  */
   orgUnits_every?: Maybe<OrganizationUnitWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -8098,6 +8178,7 @@ export type RuntimeGroup = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   host?: Maybe<Scalars['String']>;
@@ -8133,6 +8214,7 @@ export type RuntimeGroup_HostedOrganizationsMetaArgs = {
 
 export type RuntimeGroupCreateInput = {
   name?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   host?: Maybe<Scalars['String']>;
@@ -8143,6 +8225,7 @@ export type RuntimeGroupCreateInput = {
 
 export type RuntimeGroupUpdateInput = {
   name?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
   hostedOrganizations?: Maybe<OrganizationRelateToManyInput>;
   sdxEndpoint?: Maybe<Scalars['String']>;
   consumerEndpoint?: Maybe<Scalars['String']>;
@@ -8177,6 +8260,24 @@ export type RuntimeGroupWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environment?: Maybe<Scalars['String']>;
+  environment_not?: Maybe<Scalars['String']>;
+  environment_contains?: Maybe<Scalars['String']>;
+  environment_not_contains?: Maybe<Scalars['String']>;
+  environment_starts_with?: Maybe<Scalars['String']>;
+  environment_not_starts_with?: Maybe<Scalars['String']>;
+  environment_ends_with?: Maybe<Scalars['String']>;
+  environment_not_ends_with?: Maybe<Scalars['String']>;
+  environment_i?: Maybe<Scalars['String']>;
+  environment_not_i?: Maybe<Scalars['String']>;
+  environment_contains_i?: Maybe<Scalars['String']>;
+  environment_not_contains_i?: Maybe<Scalars['String']>;
+  environment_starts_with_i?: Maybe<Scalars['String']>;
+  environment_not_starts_with_i?: Maybe<Scalars['String']>;
+  environment_ends_with_i?: Maybe<Scalars['String']>;
+  environment_not_ends_with_i?: Maybe<Scalars['String']>;
+  environment_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environment_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace?: Maybe<Scalars['String']>;
   namespace_not?: Maybe<Scalars['String']>;
   namespace_contains?: Maybe<Scalars['String']>;
@@ -8626,6 +8727,8 @@ export enum SortApplicationsBy {
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   CertificateAsc = 'certificate_ASC',
   CertificateDesc = 'certificate_DESC',
   OrganizationAsc = 'organization_ASC',
@@ -9073,6 +9176,10 @@ export enum SortOpenApiSpecsBy {
   OperationsDesc = 'operations_DESC',
   SpecAsc = 'spec_ASC',
   SpecDesc = 'spec_DESC',
+  AnnotationsAsc = 'annotations_ASC',
+  AnnotationsDesc = 'annotations_DESC',
+  SpecVersionAsc = 'specVersion_ASC',
+  SpecVersionDesc = 'specVersion_DESC',
   SubsystemAsc = 'subsystem_ASC',
   SubsystemDesc = 'subsystem_DESC'
 }
@@ -9111,6 +9218,8 @@ export enum SortOrganizationsBy {
   TagsDesc = 'tags_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  PublicBodyIdAsc = 'publicBodyId_ASC',
+  PublicBodyIdDesc = 'publicBodyId_DESC',
   OrgUnitsAsc = 'orgUnits_ASC',
   OrgUnitsDesc = 'orgUnits_DESC',
   ExtSourceAsc = 'extSource_ASC',
@@ -9147,6 +9256,8 @@ export enum SortRuntimeGroupsBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
+  EnvironmentAsc = 'environment_ASC',
+  EnvironmentDesc = 'environment_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
   OrganizationAsc = 'organization_ASC',
