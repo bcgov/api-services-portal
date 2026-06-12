@@ -84,12 +84,23 @@ export class GatewayAdminService {
       const dryRun = action === 'diff';
 
       if (action === 'delete') {
-        throw new UnprocessableEntityError(
-          `Delete action is not supported for GatewayAdminService`
+        // find the qualifier from the resource tag `ns.<namespace>.qualifier`
+        const qualifierTag = ((resources[0] as any).tags || []).find((t: any) =>
+          t.startsWith(`ns.${gatewayId}.`)
         );
-        // const qualifier = 'abc';
-        // await this.api.deleteGatewayConfig(gatewayId, qualifier);
-        //return { message: `config deleted for ${gatewayId}.${qualifier}` };
+        // qualifier can have "." character, so take as is after <namespace>
+        const qualifier = qualifierTag?.split('.').slice(2).join('.');
+        if (!qualifier) {
+          throw new InvalidAccessRequestError(
+            `Missing qualifier tag for delete action: ns.${gatewayId}.qualifier`
+          );
+        }
+        this.logger?.debug(
+          { gatewayId, qualifier },
+          'Deleting gateway config for namespace'
+        );
+        await this.api.deleteGatewayConfig(gatewayId, qualifier);
+        return { message: `config deleted for ${gatewayId}.${qualifier}` };
       } else {
         const input: PublishGatewayConfigInput = {
           dryRun,

@@ -15,7 +15,7 @@ export interface SubsystemInput {
 export interface OpenAPISpecInput {
   spec: string;
   subsystem: string;
-  environments?: string[];
+  environment?: string;
 }
 
 /**
@@ -24,6 +24,7 @@ export interface OpenAPISpecInput {
  */
 export interface RuntimeGroupInput {
   name: string;
+  environment: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;
   hostedOrganizations?: string[];

@@ -5,6 +5,8 @@
             "kube-ns": "xxxxxx-dev",
             "validate-upstreams": false
         },
-        "sdx-edge": {}
+        "sdx-edge": {
+            "enforce-reserved-hosts": false
+        }
     }
 }

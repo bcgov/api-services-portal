@@ -32,18 +32,22 @@ class RuntimeGroupService {
     body: RuntimeGroup
   ): Promise<BatchResult> => {
     // host should be based on a standard format for edge servers
-    body['host'] = `${body['name']}.servers.sdx`;
+    body['host'] = `${body['name']}.${body['environment']}.servers.sdx`;
     if (!body.sdxEndpoint) {
-      body['sdxEndpoint'] = `https://${body['name']}.servers.sdx`;
+      body[
+        'sdxEndpoint'
+      ] = `https://${body['name']}.${body['environment']}.servers.sdx`;
     }
     if (!body.consumerEndpoint) {
-      body['consumerEndpoint'] = `http://internal.${body['name']}.servers.sdx`;
+      body[
+        'consumerEndpoint'
+      ] = `http://internal.${body['name']}.${body['environment']}.servers.sdx`;
     }
 
     return await syncRecordsThrowErrors(
       context,
       'RuntimeGroup',
-      body['name'],
+      undefined,
       body
     );
   };
