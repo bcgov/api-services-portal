@@ -102,6 +102,29 @@ describe('OAS Service', function () {
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });
 
+    it('uses a preloaded service spec without looking up by name again', async () => {
+      const service = new OpenAPISpecService();
+
+      getRecords.mockResolvedValueOnce([]);
+
+      deleteRecordByInternalId.mockResolvedValue({
+        status: 200,
+        result: 'deleted',
+        id: 'service-123',
+        childResults: [],
+      });
+
+      const result = await service.deleteOASService(
+        context,
+        'ministry-of-citz',
+        'LAB.MIN.CITZ.SERVICE-A.v1',
+        serviceSpec
+      );
+
+      expect(getRecords).toHaveBeenCalledTimes(1);
+      expect(result.result).toBe('deleted');
+    });
+
     it('rejects delete when the service belongs to another organization', async () => {
       const service = new OpenAPISpecService();
 

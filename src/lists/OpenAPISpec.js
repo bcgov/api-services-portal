@@ -1,4 +1,4 @@
-const { Select, Text, Relationship } = require('@keystonejs/fields');
+const { Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
 
 module.exports = {
