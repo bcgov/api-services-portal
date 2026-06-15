@@ -377,10 +377,10 @@ describe('OrgActivityService', function () {
 
   it('always passes org filterKey as first id', async function () {
     await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logOrganizationCSR(true, { keyName: 'signing-key' });
+      .logOrganizationCSR(true, { runtimeGroupName: 'my-edge-rg' });
 
     const call = getRecordActivityCall(recordActivityMock);
-    expect(call.refId).toBe('key:signing-key');
+    expect(call.refId).toBe('csr:my-edge-rg');
     expect(call.ids[0]).toBe('org:my-org');
   });
 

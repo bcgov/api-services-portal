@@ -404,10 +404,10 @@ dQIDAQAB
               const entry = activities.find(
                 (a: any) =>
                   a.params?.entity === 'OrganizationCertificate' &&
-                  a.params?.keyName === runtimeGroupName
+                  a.params?.runtimeGroupName === runtimeGroupName
               )
               expect(entry?.params?.entity).to.equal('OrganizationCertificate')
-              expect(entry?.params?.keyName).to.equal(runtimeGroupName)
+              expect(entry?.params?.runtimeGroupName).to.equal(runtimeGroupName)
               expect(entry?.result).to.equal('success')
             })
           }

@@ -24,8 +24,7 @@ export enum OrgActivityResourceKind {
   OrgUnit = 'orgUnit',
   Subsystem = 'subsystem',
   Service = 'service',
-  /** CSR / logical key name (not Kong gateway key). */
-  Key = 'key',
+  CSR = 'csr',
   /** Kong GatewayKey name — refId is the bare name (no prefix). */
   GatewayKey = 'gatewayKey',
   Pattern = 'pattern',
@@ -423,22 +422,22 @@ export class OrgActivityService {
 
   async logOrganizationCSR(
     success: boolean,
-    data: { keyName: string }
+    data: { runtimeGroupName: string }
   ): Promise<void> {
     const resource = {
-      kind: OrgActivityResourceKind.Key,
-      value: data.keyName,
+      kind: OrgActivityResourceKind.CSR,
+      value: data.runtimeGroupName,
     };
     return this.recordOrgActivity({
       success,
       message:
-        '{actor} requested organization certificate for {keyName} on {organization}',
+        '{actor} requested organization certificate for {runtimeGroupName} on {organization}',
       params: {
         action: 'requested',
         entity: 'OrganizationCertificate',
         actor: this.getActorName(),
         organization: this.orgName,
-        keyName: data.keyName,
+        runtimeGroupName: data.runtimeGroupName,
       },
       resource,
       filterResources: [resource],
