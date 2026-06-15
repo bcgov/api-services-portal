@@ -3,6 +3,7 @@ import {
   buildOrganizationUnitProfileSnapshot,
   OrgActivityResourceKind,
   OrgActivityService,
+  isGatewayPatternPublishSuccessful,
   logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
   logOrganizationUnitEstablishedFromRecords,
@@ -195,6 +196,49 @@ describe('profile snapshots', function () {
   });
 });
 
+describe('isGatewayPatternPublishSuccessful', function () {
+  it('returns true for empty DELETE response', function () {
+    expect(isGatewayPatternPublishSuccessful({})).toBe(true);
+  });
+
+  it('returns true when failed is 0', function () {
+    expect(
+      isGatewayPatternPublishSuccessful({
+        applied: 1,
+        failed: 0,
+        results: [{ provider: 'gwa', status: 'applied' }],
+      })
+    ).toBe(true);
+  });
+
+  it('returns false when failed is greater than 0', function () {
+    expect(
+      isGatewayPatternPublishSuccessful({
+        applied: 0,
+        failed: 1,
+        results: [
+          {
+            provider: 'gwa',
+            status: 'failed',
+            details: { message: 'GWA API responded 403' },
+          },
+        ],
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when any result status is failed', function () {
+    expect(
+      isGatewayPatternPublishSuccessful({
+        results: [
+          { provider: 'gwa', status: 'applied' },
+          { provider: 'gwa', status: 'failed' },
+        ],
+      })
+    ).toBe(false);
+  });
+});
+
 describe('OrgActivityService', function () {
   beforeEach(() => {
     recordActivityMock.mockClear();
@@ -266,6 +310,22 @@ describe('OrgActivityService', function () {
     expect(call.message).toBe(
       'Admin updated User One organization access on my-org: [-] organization-admin'
     );
+  });
+
+  it('records failed activity for logGatewayPatternPublish', async function () {
+    const deckBlob = 'applied: 0\nfailed: 1\n';
+    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    await service.logGatewayPatternPublish(false, {
+      pattern: 'sdx-keys.r1',
+      scope: 'organization',
+      targetName: 'my-org',
+      gatewayKeyName: 'sdx.keys.min.citz.org:0',
+      detail: 'published key sdx.keys.min.citz.org:0',
+      deckBlob,
+    });
+
+    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
+    expect(call.result).toBe('failed');
   });
 
   it('records one published activity for logGatewayPatternPublish', async function () {

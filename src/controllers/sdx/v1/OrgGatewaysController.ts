@@ -17,7 +17,10 @@ import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
-import { OrgActivityService } from '../../../services/workflow/org-activity';
+import {
+  OrgActivityService,
+  isGatewayPatternPublishSuccessful,
+} from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -208,6 +211,7 @@ export class OrgGatewaysController extends Controller {
       dryRun,
       artifact
     );
+    const publishSucceeded = isGatewayPatternPublishSuccessful(result);
 
     if (!dryRun) {
       let detail: string | undefined;
@@ -245,7 +249,7 @@ export class OrgGatewaysController extends Controller {
       }
 
       await new OrgActivityService(ctx, org)
-        .logGatewayPatternPublish(true, {
+        .logGatewayPatternPublish(publishSucceeded, {
           pattern: body.pattern,
           ...(detail ? { detail } : {}),
           removed,
