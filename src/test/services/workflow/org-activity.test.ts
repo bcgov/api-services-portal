@@ -4,12 +4,17 @@ import {
   OrgActivityResourceKind,
   OrgActivityService,
   isGatewayPatternPublishSuccessful,
+  formatHostedOrganizationsParam,
   logOrganizationAccessChanges,
   logOrganizationProfileChangeFromRecords,
   logOrganizationUnitEstablishedFromRecords,
   logOrganizationUnitProfileChangeFromRecords,
   logOrganizationUnitsFromChildSync,
+  logRuntimeGroupCreatedFromSync,
+  logRuntimeGroupDeletedForOrg,
+  logRuntimeGroupHostingChangeFromSync,
   logSubsystemActivityFromHook,
+  normalizeHostedOrganizationNames,
   resourceRefId,
   shouldLogOrgUnitEstablishment,
   resolveOrgHierarchyKeys,
@@ -536,6 +541,161 @@ describe('OrgActivityService', function () {
     expect(call.message).toBe(
       'Admin removed service MY-SERVICE from subsystem MY-SUBSYS in my-org'
     );
+  });
+
+  it('records runtime group create with runtime group refId and hosting params', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logRuntimeGroupCreated(true, {
+        runtimeGroupName: 'myedge',
+        hostedOrganizations: ['ministry-of-health', 'my-org'],
+      });
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('created');
+    expect(call.type).toBe('RuntimeGroup');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+    expect(call.message).toBe(
+      'Admin created runtime group myedge on my-org hosting ministry-of-health, my-org'
+    );
+    expect(call.ids).toEqual([
+      'org:my-org',
+      'runtimeGroup:myedge',
+      'actor:Admin',
+    ]);
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBe('ministry-of-health, my-org');
+  });
+
+  it('records runtime group create without hosting param when empty', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logRuntimeGroupCreated(true, {
+        runtimeGroupName: 'myedge',
+      });
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.message).toBe('Admin created runtime group myedge on my-org');
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBeUndefined();
+  });
+
+  it('records runtime group delete with runtime group refId', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logRuntimeGroupDeleted(true, { runtimeGroupName: 'myedge' });
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('deleted');
+    expect(call.type).toBe('RuntimeGroup');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+    expect(call.message).toBe(
+      'Admin deleted runtime group myedge on my-org'
+    );
+    expect(call.ids).toEqual([
+      'org:my-org',
+      'runtimeGroup:myedge',
+      'actor:Admin',
+    ]);
+  });
+
+  it('records runtime group hosting updates with full list in params', async function () {
+    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
+      .logRuntimeGroupHostingChange(true, {
+        runtimeGroupName: 'myedge',
+        hostedOrganizations: ['ministry-of-health'],
+      });
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('updated');
+    expect(call.type).toBe('RuntimeGroup');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+    expect(call.message).toBe(
+      'Admin updated hosted organizations for runtime group myedge on my-org: ministry-of-health'
+    );
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBe('ministry-of-health');
+  });
+});
+
+describe('runtime group activity helpers', function () {
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+  });
+
+  it('formats hosted organizations for params', function () {
+    expect(
+      formatHostedOrganizationsParam(['ministry-of-health', 'my-org'])
+    ).toBe('ministry-of-health, my-org');
+    expect(formatHostedOrganizationsParam([])).toBe('');
+  });
+
+  it('normalizes hosted organization names from sync payloads', function () {
+    expect(normalizeHostedOrganizationNames(['a-org', 'b-org'])).toEqual([
+      'a-org',
+      'b-org',
+    ]);
+    expect(
+      normalizeHostedOrganizationNames([{ name: 'a-org' }, { name: 'b-org' }])
+    ).toEqual(['a-org', 'b-org']);
+    expect(normalizeHostedOrganizationNames(null)).toEqual([]);
+  });
+
+  it('logs runtime group create from sync payload', async function () {
+    await logRuntimeGroupCreatedFromSync(
+      { authedItem: { name: 'Admin' } },
+      {
+        name: 'myedge',
+        organization: 'my-org',
+        hostedOrganizations: ['my-org'],
+      }
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('created');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+  });
+
+  it('logs runtime group hosting change from sync payload', async function () {
+    await logRuntimeGroupHostingChangeFromSync(
+      { authedItem: { name: 'Admin' } },
+      { name: 'myedge', organization: { name: 'my-org' } },
+      { hostedOrganizations: [] }
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('updated');
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBe('');
+  });
+
+  it('logs runtime group hosting change when sync record only has organization id', async function () {
+    await logRuntimeGroupHostingChangeFromSync(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'my-org' }] },
+        }),
+      },
+      { name: 'myedge', organization: { id: 'org-1' } },
+      { organization: 'my-org', hostedOrganizations: [] }
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('updated');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBe('');
+  });
+
+  it('logs runtime group delete for org', async function () {
+    await logRuntimeGroupDeletedForOrg(
+      { authedItem: { name: 'Admin' } },
+      'my-org',
+      'myedge'
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('deleted');
+    expect(call.refId).toBe('runtimeGroup:myedge');
   });
 });
 

@@ -15,6 +15,7 @@ import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
 import { StepTokenService } from '../certificate-authority/step-token';
+import { logRuntimeGroupDeletedForOrg } from '../workflow/org-activity';
 
 const logger = Logger('batch.runtime-group');
 
@@ -116,7 +117,19 @@ class RuntimeGroupService {
       name
     );
 
-    return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
+    const result = await deleteRecordByInternalId(
+      context,
+      'RuntimeGroup',
+      entry.id
+    );
+    if (result.status === 200 && entry.organization?.name && entry.name) {
+      await logRuntimeGroupDeletedForOrg(
+        context,
+        entry.organization.name,
+        entry.name
+      );
+    }
+    return result;
   };
 
   checkRuntimeGroup = async (

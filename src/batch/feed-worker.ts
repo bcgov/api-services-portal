@@ -26,6 +26,8 @@ import {
   logOrganizationUnitEstablishedFromRecords,
   logOrganizationUnitProfileChangeFromRecords,
   logOrganizationUnitsFromChildSync,
+  logRuntimeGroupCreatedFromSync,
+  logRuntimeGroupHostingChangeFromSync,
 } from '../services/workflow/org-activity';
 
 const { metadata } = require('./data-rules');
@@ -509,6 +511,9 @@ export const syncRecords = async function (
             { ...json, ...data }
           );
         }
+        if (entity === 'RuntimeGroup') {
+          await logRuntimeGroupCreatedFromSync(context, json);
+        }
         return { status: 200, result: 'created', id: nr.id, childResults };
       }
     } catch (ex) {
@@ -674,6 +679,13 @@ export const syncRecords = async function (
               ...data,
             },
             parentRecord?.name
+          );
+        }
+        if (entity === 'RuntimeGroup' && 'hostedOrganizations' in data) {
+          await logRuntimeGroupHostingChangeFromSync(
+            context,
+            localRecord,
+            json
           );
         }
         return {

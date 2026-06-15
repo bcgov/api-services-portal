@@ -672,6 +672,90 @@ export class OrgActivityService {
     });
   }
 
+  async logRuntimeGroupCreated(
+    success: boolean,
+    data: { runtimeGroupName: string; hostedOrganizations?: string[] }
+  ): Promise<void> {
+    const resource = {
+      kind: OrgActivityResourceKind.RuntimeGroup,
+      value: data.runtimeGroupName,
+    };
+    const params: { [key: string]: string } = {
+      action: 'created',
+      entity: 'RuntimeGroup',
+      actor: this.getActorName(),
+      organization: this.orgName,
+      runtimeGroupName: data.runtimeGroupName,
+    };
+    const hostedOrganizations = data.hostedOrganizations ?? [];
+    let message =
+      '{actor} created runtime group {runtimeGroupName} on {organization}';
+    if (hostedOrganizations.length > 0) {
+      params.hostedOrganizations =
+        formatHostedOrganizationsParam(hostedOrganizations);
+      message +=
+        ' hosting {hostedOrganizations}';
+    }
+    return this.recordOrgActivity({
+      success,
+      message,
+      params,
+      resource,
+      filterResources: [resource],
+    });
+  }
+
+  async logRuntimeGroupDeleted(
+    success: boolean,
+    data: { runtimeGroupName: string }
+  ): Promise<void> {
+    const resource = {
+      kind: OrgActivityResourceKind.RuntimeGroup,
+      value: data.runtimeGroupName,
+    };
+    return this.recordOrgActivity({
+      success,
+      message:
+        '{actor} deleted runtime group {runtimeGroupName} on {organization}',
+      params: {
+        action: 'deleted',
+        entity: 'RuntimeGroup',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        runtimeGroupName: data.runtimeGroupName,
+      },
+      resource,
+      filterResources: [resource],
+    });
+  }
+
+  async logRuntimeGroupHostingChange(
+    success: boolean,
+    data: { runtimeGroupName: string; hostedOrganizations: string[] }
+  ): Promise<void> {
+    const resource = {
+      kind: OrgActivityResourceKind.RuntimeGroup,
+      value: data.runtimeGroupName,
+    };
+    return this.recordOrgActivity({
+      success,
+      message:
+        '{actor} updated hosted organizations for runtime group {runtimeGroupName} on {organization}: {hostedOrganizations}',
+      params: {
+        action: 'updated',
+        entity: 'RuntimeGroup',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        runtimeGroupName: data.runtimeGroupName,
+        hostedOrganizations: formatHostedOrganizationsParam(
+          data.hostedOrganizations
+        ),
+      },
+      resource,
+      filterResources: [resource],
+    });
+  }
+
   private async recordOrgActivity(input: OrgActivityRecordInput): Promise<void> {
     const refId = resourceRefId(input.resource);
     const ids = buildOrgActivityFilterKeys(this.orgName, input.filterResources);
@@ -984,6 +1068,110 @@ export async function logServiceRemovedForOrg(
   await new OrgActivityService(context, orgName)
     .logServiceRemoved(true, { serviceName, subsystemName })
     .catch((e) => logger.error('[OrgActivity] service remove %s', e));
+}
+
+export function normalizeHostedOrganizationNames(value: unknown): string[] {
+  if (value == null) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => {
+      if (typeof item === 'string') {
+        return item;
+      }
+      if (item && typeof item === 'object' && 'name' in item) {
+        return String((item as { name: string }).name);
+      }
+      return undefined;
+    })
+    .filter(
+      (name): name is string => typeof name === 'string' && name.length > 0
+    );
+}
+
+export function formatHostedOrganizationsParam(orgs: string[]): string {
+  return [...orgs].sort().join(', ');
+}
+
+async function resolveRuntimeGroupOwnerOrgName(
+  context: any,
+  record: Record<string, any>
+): Promise<string | undefined> {
+  const org = record.organization;
+  if (org && typeof org === 'object' && typeof org.name === 'string') {
+    return org.name;
+  }
+  if (org && typeof org === 'object' && typeof org.id === 'string') {
+    return lookupOrganizationNameById(context, org.id);
+  }
+  if (typeof org === 'string' && org.length > 0) {
+    return lookupOrganizationNameById(context, org);
+  }
+  return undefined;
+}
+
+export async function logRuntimeGroupCreatedFromSync(
+  context: any,
+  json: Record<string, any>
+): Promise<void> {
+  const orgName =
+    typeof json.organization === 'string' ? json.organization : undefined;
+  const runtimeGroupName =
+    typeof json.name === 'string' ? json.name : undefined;
+  if (!orgName || !runtimeGroupName) {
+    logger.error('[OrgActivity] runtime group create missing org or name');
+    return;
+  }
+  await new OrgActivityService(context, orgName)
+    .logRuntimeGroupCreated(true, {
+      runtimeGroupName,
+      hostedOrganizations: normalizeHostedOrganizationNames(
+        json.hostedOrganizations
+      ),
+    })
+    .catch((e) => logger.error('[OrgActivity] runtime group create %s', e));
+}
+
+export async function logRuntimeGroupHostingChangeFromSync(
+  context: any,
+  localRecord: Record<string, any>,
+  json: Record<string, any>
+): Promise<void> {
+  const orgName =
+    typeof json.organization === 'string'
+      ? json.organization
+      : await resolveRuntimeGroupOwnerOrgName(context, localRecord);
+  const runtimeGroupName =
+    typeof localRecord.name === 'string' ? localRecord.name : undefined;
+  if (!orgName || !runtimeGroupName) {
+    logger.error(
+      '[OrgActivity] runtime group hosting change missing org or name'
+    );
+    return;
+  }
+  await new OrgActivityService(context, orgName)
+    .logRuntimeGroupHostingChange(true, {
+      runtimeGroupName,
+      hostedOrganizations: normalizeHostedOrganizationNames(
+        json.hostedOrganizations
+      ),
+    })
+    .catch((e) =>
+      logger.error('[OrgActivity] runtime group hosting change %s', e)
+    );
+}
+
+export async function logRuntimeGroupDeletedForOrg(
+  context: any,
+  orgName: string,
+  runtimeGroupName: string
+): Promise<void> {
+  await new OrgActivityService(context, orgName)
+    .logRuntimeGroupDeleted(true, { runtimeGroupName })
+    .catch((e) => logger.error('[OrgActivity] runtime group delete %s', e));
 }
 
 export async function getCombinedOrganizationActivity(

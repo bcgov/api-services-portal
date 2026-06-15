@@ -60,7 +60,10 @@ export class OrgActivityController extends Controller {
 
     return transformActivity(records)
       .map((o) => removeKeys(o, ['id']))
-      .map((o) => removeEmpty(o))
+      .map((o: any) => {
+        const { params, ...rest } = o;
+        return { ...removeEmpty(rest), params };
+      })
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
   }
