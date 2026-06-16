@@ -2345,6 +2345,12 @@ ALTER TABLE public."Activity"
  ADD COLUMN "filterKey3" text,
  ADD COLUMN "filterKey4" text;
 
+--
+-- Name: activity_filterkey1_org_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX activity_filterkey1_org_createdat_index ON public."Activity" USING btree ("filterKey1", "createdAt_utc" DESC) WHERE ("filterKey1" LIKE 'org:%');
+
 ALTER TABLE public."Metric"
  ADD COLUMN "namespace" text;
 

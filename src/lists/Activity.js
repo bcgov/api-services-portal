@@ -47,6 +47,7 @@ module.exports = {
     filterKey1: {
       type: Text,
       isRequired: false,
+      isIndexed: true,
     },
     filterKey2: {
       type: Text,
