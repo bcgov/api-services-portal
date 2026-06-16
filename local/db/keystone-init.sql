@@ -2346,10 +2346,28 @@ ALTER TABLE public."Activity"
  ADD COLUMN "filterKey4" text;
 
 --
--- Name: activity_filterkey1_org_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+-- Name: activity_filterkey1_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
 --
 
-CREATE INDEX activity_filterkey1_org_createdat_index ON public."Activity" USING btree ("filterKey1", "createdAt_utc" DESC) WHERE ("filterKey1" LIKE 'org:%');
+CREATE INDEX activity_filterkey1_createdat_index ON public."Activity" USING btree ("filterKey1", "createdAt_utc" DESC);
+
+--
+-- Name: activity_filterkey2_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX activity_filterkey2_createdat_index ON public."Activity" USING btree ("filterKey2", "createdAt_utc" DESC);
+
+--
+-- Name: activity_filterkey3_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX activity_filterkey3_createdat_index ON public."Activity" USING btree ("filterKey3", "createdAt_utc" DESC);
+
+--
+-- Name: activity_filterkey4_createdat_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX activity_filterkey4_createdat_index ON public."Activity" USING btree ("filterKey4", "createdAt_utc" DESC);
 
 ALTER TABLE public."Metric"
  ADD COLUMN "namespace" text;
