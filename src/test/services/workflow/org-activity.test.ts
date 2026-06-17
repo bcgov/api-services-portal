@@ -5,18 +5,13 @@ import {
   OrgActivityService,
   isGatewayPatternPublishSuccessful,
   formatHostedOrganizationsParam,
+  hasHostedOrganizationsChange,
   logOrganizationAccessChanges,
-  logOrganizationProfileChangeFromRecords,
-  logOrganizationUnitEstablishedFromRecords,
-  logOrganizationUnitProfileChangeFromRecords,
-  logOrganizationUnitsFromChildSync,
-  logRuntimeGroupCreatedFromSync,
-  logRuntimeGroupDeletedForOrg,
-  logRuntimeGroupHostingChangeFromSync,
+  logOrganizationActivityFromHook,
+  logOrganizationUnitActivityFromHook,
+  logRuntimeGroupActivityFromHook,
   logSubsystemActivityFromHook,
-  normalizeHostedOrganizationNames,
   resourceRefId,
-  shouldLogOrgUnitEstablishment,
   resolveOrgHierarchyKeys,
 } from '../../../services/workflow/org-activity';
 import * as activityModule from '../../../services/keystone/activity';
@@ -31,9 +26,13 @@ jest.mock('../../../services/keystone/activity', () => {
   };
 });
 
-jest.mock('../../../services/keystone/organization', () => ({
-  getOrganizationUnit: jest.fn(),
-}));
+jest.mock('../../../services/keystone/organization', () => {
+  const actual = jest.requireActual('../../../services/keystone/organization');
+  return {
+    ...actual,
+    getOrganizationUnit: jest.fn(),
+  };
+});
 
 const recordActivityMock = activityModule.recordActivity as jest.Mock;
 const recordActivityWithBlobMock =
@@ -616,11 +615,7 @@ describe('OrgActivityService', function () {
   });
 });
 
-describe('runtime group activity helpers', function () {
-  beforeEach(() => {
-    recordActivityMock.mockClear();
-  });
-
+describe('hosted organization helpers', function () {
   it('formats hosted organizations for params', function () {
     expect(
       formatHostedOrganizationsParam(['ministry-of-health', 'my-org'])
@@ -628,24 +623,216 @@ describe('runtime group activity helpers', function () {
     expect(formatHostedOrganizationsParam([])).toBe('');
   });
 
-  it('normalizes hosted organization names from sync payloads', function () {
-    expect(normalizeHostedOrganizationNames(['a-org', 'b-org'])).toEqual([
-      'a-org',
-      'b-org',
-    ]);
-    expect(
-      normalizeHostedOrganizationNames([{ name: 'a-org' }, { name: 'b-org' }])
-    ).toEqual(['a-org', 'b-org']);
-    expect(normalizeHostedOrganizationNames(null)).toEqual([]);
+  it('detects hosted organization list changes', async function () {
+    const context = {
+      executeGraphQL: jest.fn().mockResolvedValue({
+        data: { allOrganizations: [{ name: 'my-org' }] },
+      }),
+    };
+
+    await expect(
+      hasHostedOrganizationsChange(
+        context,
+        { hostedOrganizations: ['org-1'] },
+        { hostedOrganizations: [] }
+      )
+    ).resolves.toBe(true);
   });
 
-  it('logs runtime group create from sync payload', async function () {
-    await logRuntimeGroupCreatedFromSync(
+  it('ignores unchanged hosted organization lists', async function () {
+    await expect(
+      hasHostedOrganizationsChange(
+        {},
+        { hostedOrganizations: [{ name: 'my-org' }] },
+        { hostedOrganizations: [{ name: 'my-org' }] }
+      )
+    ).resolves.toBe(false);
+  });
+});
+
+describe('logOrganizationActivityFromHook', function () {
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+    recordActivityWithBlobMock.mockClear();
+  });
+
+  it('records organization establishment on create', async function () {
+    await logOrganizationActivityFromHook(
       { authedItem: { name: 'Admin' } },
+      'create',
+      null,
+      {
+        name: 'my-org',
+        title: 'My Org',
+        description: 'About us',
+        tags: '[]',
+        extSource: 'ckan',
+      }
+    );
+
+    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
+    expect(call.action).toBe('registered');
+    expect(call.type).toBe('Organization');
+    expect(call.blob?.title).toBe('My Org');
+  });
+
+  it('records organization establishment and linked org units on create', async function () {
+    await logOrganizationActivityFromHook(
+      { authedItem: { name: 'Admin' } },
+      'create',
+      null,
+      {
+        name: 'my-org',
+        title: 'My Org',
+        description: 'About us',
+        tags: '[]',
+        extSource: 'internal',
+      },
+      {
+        orgUnits: {
+          create: [
+            {
+              name: 'unit-a',
+              title: 'Unit A',
+              description: 'Unit details',
+              tags: '[]',
+              extSource: 'internal',
+              extRecordHash: '',
+            },
+          ],
+        },
+      }
+    );
+
+    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(2);
+    const orgCall = getRecordActivityWithBlobCall(recordActivityWithBlobMock, 0);
+    expect(orgCall.action).toBe('registered');
+    expect(orgCall.type).toBe('Organization');
+    const unitCall = getRecordActivityWithBlobCall(recordActivityWithBlobMock, 1);
+    expect(unitCall.action).toBe('registered');
+    expect(unitCall.type).toBe('OrganizationUnit');
+    expect(unitCall.message).toBe(
+      'Admin established organization unit unit-a'
+    );
+    expect(unitCall.blob).toEqual({
+      name: 'unit-a',
+      title: 'Unit A',
+      description: 'Unit details',
+      tags: '[]',
+      extSource: 'internal',
+      extRecordHash: '',
+    });
+  });
+
+  it('records organization profile updates on scalar field changes', async function () {
+    await logOrganizationActivityFromHook(
+      { authedItem: { name: 'Admin' } },
+      'update',
+      { name: 'my-org', title: 'Old' },
+      { name: 'my-org', title: 'New' }
+    );
+
+    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
+    expect(call.action).toBe('updated');
+    expect(call.type).toBe('OrganizationProfile');
+    expect(call.blob).toEqual({
+      name: 'my-org',
+      title: 'New',
+    });
+  });
+
+  it('records org unit establishment from originalInput connect mutation', async function () {
+    const executeGraphQL = jest.fn().mockResolvedValue({
+      data: {
+        allOrganizationUnits: [
+          {
+            name: 'unit-2',
+            title: 'Unit 2',
+            description: 'Second unit',
+            tags: '[]',
+            extSource: 'internal',
+            extRecordHash: '',
+          },
+        ],
+      },
+    });
+
+    await logOrganizationActivityFromHook(
+      { authedItem: { name: 'Admin' }, executeGraphQL },
+      'update',
+      { name: 'my-org', title: 'Same', orgUnits: [] },
+      { name: 'my-org', title: 'Same' },
+      { orgUnits: { disconnectAll: true, connect: [{ id: 'unit-2' }] } }
+    );
+
+    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
+    expect(call.action).toBe('registered');
+    expect(call.type).toBe('OrganizationUnit');
+    expect(call.message).toBe('Admin established organization unit unit-2');
+  });
+});
+
+describe('logOrganizationUnitActivityFromHook', function () {
+  beforeEach(() => {
+    recordActivityWithBlobMock.mockClear();
+    getOrganizationUnitMock.mockReset();
+  });
+
+  it('records org unit profile updates on update', async function () {
+    getOrganizationUnitMock.mockResolvedValue({
+      name: 'my-org',
+      orgUnits: [{ name: 'my-unit' }],
+    });
+
+    await logOrganizationUnitActivityFromHook(
+      { authedItem: { name: 'Admin' } },
+      { name: 'my-unit', title: 'Old' },
+      { name: 'my-unit', title: 'New' }
+    );
+
+    expect(getOrganizationUnitMock).toHaveBeenCalledWith(
+      { authedItem: { name: 'Admin' } },
+      'my-unit'
+    );
+    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
+    expect(call.action).toBe('updated');
+    expect(call.type).toBe('OrganizationProfile');
+    expect(call.refId).toBe('orgUnit:my-unit');
+    expect(call.blob).toEqual({
+      name: 'my-unit',
+      title: 'New',
+    });
+    expect(call.ids).toEqual([
+      'org:my-org',
+      'orgUnit:my-unit',
+      'actor:Admin',
+    ]);
+  });
+});
+
+describe('logRuntimeGroupActivityFromHook', function () {
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+  });
+
+  it('records runtime group create from hook data', async function () {
+    await logRuntimeGroupActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'my-org' }] },
+        }),
+      },
+      'create',
+      null,
       {
         name: 'myedge',
-        organization: 'my-org',
-        hostedOrganizations: ['my-org'],
+        organization: 'org-1',
+        hostedOrganizations: ['org-1'],
       }
     );
 
@@ -654,43 +841,139 @@ describe('runtime group activity helpers', function () {
     expect(call.refId).toBe('runtimeGroup:myedge');
   });
 
-  it('logs runtime group hosting change from sync payload', async function () {
-    await logRuntimeGroupHostingChangeFromSync(
-      { authedItem: { name: 'Admin' } },
-      { name: 'myedge', organization: { name: 'my-org' } },
-      { hostedOrganizations: [] }
-    );
-
-    const call = getRecordActivityCall(recordActivityMock);
-    expect(call.action).toBe('updated');
-    const context = JSON.parse(call.activityContext);
-    expect(context.params.hostedOrganizations).toBe('');
-  });
-
-  it('logs runtime group hosting change when sync record only has organization id', async function () {
-    await logRuntimeGroupHostingChangeFromSync(
+  it('records runtime group hosting change from hook data', async function () {
+    await logRuntimeGroupActivityFromHook(
       {
         authedItem: { name: 'Admin' },
         executeGraphQL: jest.fn().mockResolvedValue({
           data: { allOrganizations: [{ name: 'my-org' }] },
         }),
       },
-      { name: 'myedge', organization: { id: 'org-1' } },
-      { organization: 'my-org', hostedOrganizations: [] }
+      'update',
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+        hostedOrganizations: [{ name: 'my-org' }],
+      },
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+        hostedOrganizations: [],
+      }
     );
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('updated');
-    expect(call.refId).toBe('runtimeGroup:myedge');
     const context = JSON.parse(call.activityContext);
     expect(context.params.hostedOrganizations).toBe('');
   });
 
-  it('logs runtime group delete for org', async function () {
-    await logRuntimeGroupDeletedForOrg(
-      { authedItem: { name: 'Admin' } },
-      'my-org',
-      'myedge'
+  it('records hosting clear when originalInput includes hostedOrganizations', async function () {
+    await logRuntimeGroupActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: {
+            allOrganizations: [{ name: 'my-org' }],
+            allRuntimeGroups: [
+              {
+                organization: { name: 'my-org' },
+                hostedOrganizations: [],
+              },
+            ],
+          },
+        }),
+      },
+      'update',
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+      },
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+      },
+      { hostedOrganizations: { disconnectAll: true } }
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('updated');
+    const context = JSON.parse(call.activityContext);
+    expect(context.params.hostedOrganizations).toBe('');
+  });
+
+  it('skips runtime group logging when only endpoints change', async function () {
+    await logRuntimeGroupActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'my-org' }] },
+        }),
+      },
+      'update',
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+        hostedOrganizations: [{ name: 'my-org' }],
+        sdxEndpoint: 'https://old',
+      },
+      {
+        name: 'myedge',
+        organization: { name: 'my-org' },
+        hostedOrganizations: [{ name: 'my-org' }],
+        sdxEndpoint: 'https://new',
+      }
+    );
+
+    expect(recordActivityMock).not.toHaveBeenCalled();
+  });
+
+  it('records runtime group delete from hook data', async function () {
+    await logRuntimeGroupActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [{ name: 'my-org' }] },
+        }),
+      },
+      'delete',
+      {
+        name: 'myedge',
+        organization: 'org-1',
+      },
+      {
+        name: 'myedge',
+        organization: 'org-1',
+      }
+    );
+
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('deleted');
+    expect(call.refId).toBe('runtimeGroup:myedge');
+  });
+
+  it('records runtime group delete when hook item omits organization', async function () {
+    await logRuntimeGroupActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: {
+            allRuntimeGroups: [
+              {
+                organization: { name: 'my-org' },
+                hostedOrganizations: [],
+              },
+            ],
+          },
+        }),
+      },
+      'delete',
+      {
+        name: 'myedge',
+      },
+      {
+        name: 'myedge',
+      }
     );
 
     const call = getRecordActivityCall(recordActivityMock);
@@ -932,235 +1215,5 @@ describe('logOrganizationAccessChanges', function () {
     expect(call.message).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [-] system-owner'
     );
-  });
-});
-
-describe('logOrganizationProfileChangeFromRecords', function () {
-  beforeEach(() => {
-    recordActivityWithBlobMock.mockClear();
-  });
-
-  it('records profile change with a JSON blob snapshot', async function () {
-    await logOrganizationProfileChangeFromRecords(
-      { authedItem: { name: 'Admin' } },
-      'my-org',
-      {
-        name: 'my-org',
-        title: 'New',
-        sector: 's2',
-        orgUnits: [{ name: 'unit-a' }],
-        extRecordHash: 'hash',
-      }
-    );
-
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('OrganizationProfile');
-    expect(call.refId).toBe('org:my-org');
-    expect(call.message).toBe('Admin updated organization profile for my-org');
-    expect(call.blob).toEqual({
-      name: 'my-org',
-      sector: 's2',
-      title: 'New',
-      extRecordHash: 'hash',
-    });
-    expect(call.ids).toEqual(['org:my-org', 'actor:Admin']);
-    expect(call.productNamespace).toBeNull();
-    const activityContext = JSON.parse(call.activityContext);
-    expect(activityContext.params.organization).toBe('my-org');
-  });
-});
-
-describe('shouldLogOrgUnitEstablishment', function () {
-  it('skips ckan-sourced org units', function () {
-    expect(shouldLogOrgUnitEstablishment({ extSource: 'ckan' })).toBe(false);
-  });
-
-  it('allows non-ckan org units', function () {
-    expect(shouldLogOrgUnitEstablishment({ extSource: 'internal' })).toBe(true);
-    expect(shouldLogOrgUnitEstablishment({})).toBe(true);
-  });
-});
-
-describe('logOrganizationUnitsFromChildSync', function () {
-  beforeEach(() => {
-    recordActivityWithBlobMock.mockClear();
-    getOrganizationUnitMock.mockReset();
-  });
-
-  it('logs register activity for created child units under the parent org', async function () {
-    await logOrganizationUnitsFromChildSync(
-      { authedItem: { name: 'Admin' } },
-      [
-        {
-          name: 'my-unit',
-          title: 'Division of pups',
-          description: 'Org unit for catalog activity test',
-          extSource: 'internal',
-        },
-      ],
-      [{ result: 'created' }],
-      'my-org'
-    );
-
-    expect(getOrganizationUnitMock).not.toHaveBeenCalled();
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('registered');
-    expect(call.type).toBe('OrganizationUnit');
-    expect(call.refId).toBe('orgUnit:my-unit');
-    const activityContext = JSON.parse(call.activityContext);
-    expect(activityContext.params.organization).toBe('my-org');
-    expect(activityContext.params.orgUnit).toBe('my-unit');
-    expect(activityContext.message).toBe(
-      '{actor} established organization unit {orgUnit}'
-    );
-  });
-
-  it('logs profile updates for updated child units', async function () {
-    await logOrganizationUnitsFromChildSync(
-      { authedItem: { name: 'Admin' } },
-      [
-        {
-          name: 'my-unit',
-          title: 'Updated title',
-          extSource: 'internal',
-        },
-      ],
-      [{ result: 'updated' }],
-      'my-org'
-    );
-
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('updated');
-    expect(call.type).toBe('OrganizationProfile');
-  });
-
-  it('does not log establishment for ckan-sourced child units', async function () {
-    await logOrganizationUnitsFromChildSync(
-      { authedItem: { name: 'Admin' } },
-      [{ name: 'my-unit', title: 'BCDC unit', extSource: 'ckan' }],
-      [{ result: 'created' }],
-      'my-org'
-    );
-
-    expect(recordActivityWithBlobMock).not.toHaveBeenCalled();
-  });
-});
-
-describe('logOrganizationUnitEstablishedFromRecords', function () {
-  beforeEach(() => {
-    recordActivityWithBlobMock.mockClear();
-  });
-
-  it('records org unit establishment with a JSON blob snapshot', async function () {
-    await logOrganizationUnitEstablishedFromRecords(
-      { authedItem: { name: 'Admin' } },
-      'my-unit',
-      {
-        name: 'my-unit',
-        title: 'New unit title',
-        description: 'Unit details',
-        extSource: 'internal',
-      },
-      'my-org'
-    );
-
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.action).toBe('registered');
-    expect(call.type).toBe('OrganizationUnit');
-    expect(call.message).toBe('Admin established organization unit my-unit');
-    expect(call.ids).toEqual([
-      'org:my-org',
-      'orgUnit:my-unit',
-      'actor:Admin',
-    ]);
-  });
-});
-
-describe('logOrganizationUnitProfileChangeFromRecords', function () {
-  beforeEach(() => {
-    recordActivityWithBlobMock.mockClear();
-    getOrganizationUnitMock.mockReset();
-  });
-
-  it('records org unit profile changes under the parent org with orgUnit filter key', async function () {
-    getOrganizationUnitMock.mockResolvedValue({
-      name: 'my-org',
-      orgUnits: [{ name: 'my-unit' }],
-    });
-
-    await logOrganizationUnitProfileChangeFromRecords(
-      { authedItem: { name: 'Admin' } },
-      'my-unit',
-      {
-        name: 'my-unit',
-        title: 'New unit title',
-        description: 'Unit details',
-      }
-    );
-
-    expect(getOrganizationUnitMock).toHaveBeenCalledWith(
-      { authedItem: { name: 'Admin' } },
-      'my-unit'
-    );
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
-    expect(call.refId).toBe('orgUnit:my-unit');
-    expect(call.blob).toEqual({
-      name: 'my-unit',
-      title: 'New unit title',
-      description: 'Unit details',
-    });
-    expect(call.ids).toEqual([
-      'org:my-org',
-      'orgUnit:my-unit',
-      'actor:Admin',
-    ]);
-    expect(call.message).toBe(
-      'Admin updated organization unit profile for my-unit'
-    );
-    const activityContext = JSON.parse(call.activityContext);
-    expect(activityContext.params.organization).toBe('my-org');
-    expect(activityContext.params.orgUnit).toBe('my-unit');
-    expect(activityContext.message).toBe(
-      '{actor} updated organization unit profile for {orgUnit}'
-    );
-  });
-
-  it('uses parentOrgName when provided without looking up the parent org', async function () {
-    await logOrganizationUnitProfileChangeFromRecords(
-      { authedItem: { name: 'Admin' } },
-      'my-unit',
-      {
-        name: 'my-unit',
-        title: 'New unit title',
-        description: 'Unit details',
-      },
-      'my-org'
-    );
-
-    expect(getOrganizationUnitMock).not.toHaveBeenCalled();
-    expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
-    expect(getRecordActivityWithBlobCall(recordActivityWithBlobMock).ids).toEqual([
-      'org:my-org',
-      'orgUnit:my-unit',
-      'actor:Admin',
-    ]);
-  });
-
-  it('does not record activity when parent org cannot be resolved', async function () {
-    getOrganizationUnitMock.mockResolvedValue(null);
-
-    await logOrganizationUnitProfileChangeFromRecords(
-      { authedItem: { name: 'Admin' } },
-      'my-unit',
-      { name: 'my-unit', title: 'New' }
-    );
-
-    expect(recordActivityWithBlobMock).not.toHaveBeenCalled();
   });
 });

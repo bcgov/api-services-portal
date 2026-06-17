@@ -11,12 +11,13 @@ import {
 import { Activity } from '../keystone/types';
 import { NamespaceService } from '../org-groups';
 import { getGwaProductEnvironment } from './get-namespaces';
-import { getOrganizationUnit } from '../keystone/organization';
+import {
+  getOrganizationUnit,
+  lookupOrganizationNameById,
+} from '../keystone/organization';
 import { KeycloakUserService } from '../keycloak/user-service';
 
 const logger = Logger('wf.OrgActivity');
-
-const SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS = ['name', 'description'] as const;
 
 /** Prefix for org-activity refId and filter keys (except bare gateway key names). */
 export enum OrgActivityResourceKind {
@@ -72,26 +73,187 @@ type OrgActivityRecordInput = {
   productNamespace?: string | null;
 };
 
-function buildSubsystemProfileSnapshot(
-  record: Record<string, any>
-): Record<string, unknown> {
-  return pickProfileSnapshot(record, SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS);
+async function organizationNameFromRelationship(
+  context: any,
+  organization: { name?: string; id?: string } | string | null | undefined
+): Promise<string | undefined> {
+  if (organization == null) {
+    return undefined;
+  }
+  if (typeof organization === 'object') {
+    if (typeof organization.name === 'string' && organization.name.length > 0) {
+      return organization.name;
+    }
+    if (typeof organization.id === 'string' && organization.id.length > 0) {
+      return lookupOrganizationNameById(context, organization.id);
+    }
+    return undefined;
+  }
+  return (await lookupOrganizationNameById(context, organization)) ?? organization;
 }
 
-async function lookupOrganizationNameById(
+async function lookupRuntimeGroupForActivity(
   context: any,
-  orgId: string
-): Promise<string | undefined> {
+  runtimeGroupName: string
+): Promise<{
+  orgName?: string;
+  hostedOrganizationNames: string[];
+} | null> {
   const result = await context.executeGraphQL({
-    query: `query OrganizationNameById($id: ID!) {
-      allOrganizations(where: { id: $id }, first: 1) { name }
+    query: `query RuntimeGroupForActivity($name: String!) {
+      allRuntimeGroups(where: { name: $name }, first: 1) {
+        organization { id name }
+        hostedOrganizations { id name }
+      }
     }`,
-    variables: { id: orgId },
+    variables: { name: runtimeGroupName },
   });
-  return result.data?.allOrganizations?.[0]?.name;
+  const rg = result.data?.allRuntimeGroups?.[0];
+  if (!rg) {
+    return null;
+  }
+  let orgName = await organizationNameFromRelationship(context, rg.organization);
+  const hostedOrganizationNames = (rg.hostedOrganizations ?? [])
+    .map((org: { name?: string }) => org.name)
+    .filter(
+      (name: string | undefined): name is string =>
+        typeof name === 'string' && name.length > 0
+    );
+  return { orgName, hostedOrganizationNames };
+}
+
+async function lookupOrganizationUnitForActivity(
+  context: any,
+  ref: string
+): Promise<Record<string, any> | null> {
+  const fields = ORG_UNIT_PROFILE_SNAPSHOT_FIELDS.join(' ');
+  const byId = /^\d+$/.test(ref);
+  const result = await context.executeGraphQL({
+    query: `query OrganizationUnitForActivity($where: OrganizationUnitWhereInput!) {
+      allOrganizationUnits(where: $where, first: 1) { ${fields} }
+    }`,
+    variables: {
+      where: byId ? { id: ref } : { name: ref },
+    },
+  });
+  return result.data?.allOrganizationUnits?.[0] ?? null;
+}
+
+function resolveNewOrgUnitsFromOriginalInput(
+  originalInput: Record<string, any>,
+  existingItem: Record<string, any> | null | undefined
+): {
+  connectRefs: string[];
+  createRecords: Record<string, any>[];
+} {
+  const orgUnits = originalInput.orgUnits;
+  if (orgUnits == null || typeof orgUnits !== 'object' || Array.isArray(orgUnits)) {
+    return { connectRefs: [], createRecords: [] };
+  }
+
+  const existingRefs = new Set(
+    (existingItem?.orgUnits ?? [])
+      .map((unit: { id?: string | number }) =>
+        unit?.id != null ? String(unit.id) : undefined
+      )
+      .filter(
+        (id: string | undefined): id is string =>
+          typeof id === 'string' && id.length > 0
+      )
+  );
+
+  const createRecords = Array.isArray(orgUnits.create)
+    ? (orgUnits.create as Record<string, unknown>[]).filter(
+        (record): record is Record<string, any> =>
+          record != null &&
+          typeof record === 'object' &&
+          typeof record.name === 'string'
+      )
+    : [];
+
+  const connectRefs = Array.isArray(orgUnits.connect)
+    ? (orgUnits.connect as Array<{ id?: string | number }>)
+        .map((item) => (item?.id != null ? String(item.id) : undefined))
+        .filter(
+          (id: string | undefined): id is string =>
+            typeof id === 'string' && id.length > 0
+        )
+        .filter((id: string) => !existingRefs.has(id))
+    : [];
+
+  return { connectRefs, createRecords };
+}
+
+async function logEstablishedOrgUnit(
+  context: any,
+  orgName: string,
+  unitName: string,
+  record: Record<string, any>,
+  loggedUnitNames: Set<string>
+): Promise<void> {
+  if (loggedUnitNames.has(unitName)) {
+    return;
+  }
+  loggedUnitNames.add(unitName);
+  await new OrgActivityService(context, orgName)
+    .logOrganizationUnitEstablished(true, {
+      orgUnit: unitName,
+      profile: buildOrganizationUnitProfileSnapshot(record),
+    })
+    .catch((e) => logger.error('[OrgActivity] unit establishment %s', e));
+}
+
+async function logOrganizationUnitsEstablishedFromOrganizationHook(
+  context: any,
+  orgName: string,
+  existingItem: Record<string, any> | null | undefined,
+  originalInput?: Record<string, any> | null
+): Promise<void> {
+  if (
+    originalInput == null ||
+    !Object.prototype.hasOwnProperty.call(originalInput, 'orgUnits')
+  ) {
+    return;
+  }
+
+  const { connectRefs, createRecords } = resolveNewOrgUnitsFromOriginalInput(
+    originalInput,
+    existingItem
+  );
+  const loggedUnitNames = new Set<string>();
+
+  for (const record of createRecords) {
+    await logEstablishedOrgUnit(
+      context,
+      orgName,
+      record.name,
+      record,
+      loggedUnitNames
+    );
+  }
+
+  for (const ref of connectRefs) {
+    const unitRecord = await lookupOrganizationUnitForActivity(context, ref);
+    if (!unitRecord?.name) {
+      logger.error(
+        '[OrgActivity] organization hook - org unit not found for ref %s',
+        ref
+      );
+      continue;
+    }
+    await logEstablishedOrgUnit(
+      context,
+      orgName,
+      unitRecord.name,
+      unitRecord,
+      loggedUnitNames
+    );
+  }
 }
 
 /** Matches Organization.sync in data-rules (orgUnits excluded — logged separately). */
+const SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS = ['name', 'description'] as const;
+
 const ORG_PROFILE_SNAPSHOT_FIELDS = [
   'name',
   'sector',
@@ -102,8 +264,6 @@ const ORG_PROFILE_SNAPSHOT_FIELDS = [
   'extSource',
   'extRecordHash',
 ] as const;
-
-export const CKAN_EXT_SOURCE = 'ckan';
 
 /** Matches OrganizationUnit.sync in data-rules. */
 const ORG_UNIT_PROFILE_SNAPSHOT_FIELDS = [
@@ -187,10 +347,13 @@ export function buildOrganizationUnitProfileSnapshot(
   return pickProfileSnapshot(record, ORG_UNIT_PROFILE_SNAPSHOT_FIELDS);
 }
 
-export function shouldLogOrgUnitEstablishment(
-  record: Record<string, any>
+function hasOrganizationProfileFieldChanges(
+  existing: Record<string, any> | null | undefined,
+  updated: Record<string, any>
 ): boolean {
-  return record.extSource !== CKAN_EXT_SOURCE;
+  return ORG_PROFILE_SNAPSHOT_FIELDS.some(
+    (field) => existing?.[field] !== updated?.[field]
+  );
 }
 
 const SDX_KEYS_PATTERN = 'sdx-keys.r1';
@@ -906,102 +1069,77 @@ export async function logOrganizationAccessChanges(
   }
 }
 
-export async function logOrganizationProfileChangeFromRecords(
+export async function logOrganizationActivityFromHook(
   context: any,
-  orgName: string,
-  record: Record<string, any>
+  operation: 'create' | 'update',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>,
+  originalInput?: Record<string, any> | null
 ): Promise<void> {
+  const orgName = updatedItem?.name;
+  if (typeof orgName !== 'string' || orgName.length === 0) {
+    logger.error('[OrgActivity] organization hook missing name');
+    return;
+  }
+
+  if (operation === 'create') {
+    await new OrgActivityService(context, orgName)
+      .logOrganizationEstablished(
+        true,
+        buildOrganizationProfileSnapshot(updatedItem)
+      )
+      .catch((e) => logger.error('[OrgActivity] organization established %s', e));
+    await logOrganizationUnitsEstablishedFromOrganizationHook(
+      context,
+      orgName,
+      null,
+      originalInput
+    );
+    return;
+  }
+
+  await logOrganizationUnitsEstablishedFromOrganizationHook(
+    context,
+    orgName,
+    existingItem,
+    originalInput
+  );
+
+  if (!hasOrganizationProfileFieldChanges(existingItem, updatedItem)) {
+    return;
+  }
+
   await new OrgActivityService(context, orgName)
     .logOrganizationProfileChange(true, {
-      profile: buildOrganizationProfileSnapshot(record),
+      profile: buildOrganizationProfileSnapshot(updatedItem),
     })
     .catch((e) => logger.error('[OrgActivity] profile change %s', e));
 }
 
-export async function logOrganizationUnitsFromChildSync(
+export async function logOrganizationUnitActivityFromHook(
   context: any,
-  units: Array<Record<string, any>>,
-  childResults: Array<{ result?: string }>,
-  parentOrgName: string
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>
 ): Promise<void> {
-  for (let i = 0; i < childResults.length; i++) {
-    const childResult = childResults[i];
-    const unitRecord = units[i];
-    if (!unitRecord?.name) {
-      continue;
-    }
-    if (childResult.result === 'created') {
-      await logOrganizationUnitEstablishedFromRecords(
-        context,
-        unitRecord.name,
-        unitRecord,
-        parentOrgName
-      );
-    } else if (childResult.result === 'updated') {
-      await logOrganizationUnitProfileChangeFromRecords(
-        context,
-        unitRecord.name,
-        unitRecord,
-        parentOrgName
-      );
-    }
-  }
-}
-
-export async function logOrganizationUnitEstablishedFromRecords(
-  context: any,
-  unitName: string,
-  record: Record<string, any>,
-  parentOrgName?: string
-): Promise<void> {
-  if (!shouldLogOrgUnitEstablishment(record)) {
+  const unitName = updatedItem?.name;
+  if (typeof unitName !== 'string' || unitName.length === 0) {
+    logger.error('[OrgActivity] organization unit hook missing name');
     return;
   }
 
-  let ministryName = parentOrgName;
-  if (!ministryName) {
-    const org = await getOrganizationUnit(context, unitName);
-    if (!org?.name) {
-      logger.error(
-        '[OrgActivity] unit establishment - parent org not found for %s',
-        unitName
-      );
-      return;
-    }
-    ministryName = org.name;
+  const org = await getOrganizationUnit(context, unitName);
+  if (!org?.name) {
+    logger.error(
+      '[OrgActivity] unit profile change - parent org not found for %s',
+      unitName
+    );
+    return;
   }
 
-  await new OrgActivityService(context, ministryName)
-    .logOrganizationUnitEstablished(true, {
-      orgUnit: unitName,
-      profile: buildOrganizationUnitProfileSnapshot(record),
-    })
-    .catch((e) => logger.error('[OrgActivity] unit establishment %s', e));
-}
-
-export async function logOrganizationUnitProfileChangeFromRecords(
-  context: any,
-  unitName: string,
-  record: Record<string, any>,
-  parentOrgName?: string
-): Promise<void> {
-  let ministryName = parentOrgName;
-  if (!ministryName) {
-    const org = await getOrganizationUnit(context, unitName);
-    if (!org?.name) {
-      logger.error(
-        '[OrgActivity] unit profile change - parent org not found for %s',
-        unitName
-      );
-      return;
-    }
-    ministryName = org.name;
-  }
-
-  await new OrgActivityService(context, ministryName)
+  await new OrgActivityService(context, org.name)
     .logOrganizationProfileChange(true, {
       orgUnit: unitName,
-      profile: buildOrganizationUnitProfileSnapshot(record),
+      profile: buildOrganizationUnitProfileSnapshot(updatedItem),
     })
     .catch((e) => logger.error('[OrgActivity] unit profile change %s', e));
 }
@@ -1055,7 +1193,7 @@ export async function logSubsystemActivityFromHook(
 
   await orgActivity.logSubsystemProfileChange(true, {
     ...subsystemData,
-    profile: buildSubsystemProfileSnapshot(updatedItem),
+    profile: pickProfileSnapshot(updatedItem, SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS),
   });
 }
 
@@ -1070,108 +1208,147 @@ export async function logServiceRemovedForOrg(
     .catch((e) => logger.error('[OrgActivity] service remove %s', e));
 }
 
-export function normalizeHostedOrganizationNames(value: unknown): string[] {
-  if (value == null) {
+export async function resolveHostedOrganizationNames(
+  context: any,
+  value: unknown
+): Promise<string[]> {
+  if (value == null || !Array.isArray(value)) {
     return [];
   }
-  if (!Array.isArray(value)) {
-    return [];
+  const names: string[] = [];
+  for (const item of value) {
+    const name = await organizationNameFromRelationship(context, item);
+    if (name) {
+      names.push(name);
+    }
   }
-  return value
-    .map((item) => {
-      if (typeof item === 'string') {
-        return item;
-      }
-      if (item && typeof item === 'object' && 'name' in item) {
-        return String((item as { name: string }).name);
-      }
-      return undefined;
-    })
-    .filter(
-      (name): name is string => typeof name === 'string' && name.length > 0
-    );
+  return names;
+}
+
+export async function hasHostedOrganizationsChange(
+  context: any,
+  existing: Record<string, any> | null | undefined,
+  updated: Record<string, any>
+): Promise<boolean> {
+  const existingNames = await resolveHostedOrganizationNames(
+    context,
+    existing?.hostedOrganizations
+  );
+  const updatedNames = await resolveHostedOrganizationNames(
+    context,
+    updated?.hostedOrganizations
+  );
+  if (existingNames.length !== updatedNames.length) {
+    return true;
+  }
+  const sortedExisting = [...existingNames].sort();
+  const sortedUpdated = [...updatedNames].sort();
+  return sortedExisting.some((name, index) => name !== sortedUpdated[index]);
 }
 
 export function formatHostedOrganizationsParam(orgs: string[]): string {
   return [...orgs].sort().join(', ');
 }
 
-async function resolveRuntimeGroupOwnerOrgName(
+export async function logRuntimeGroupActivityFromHook(
   context: any,
-  record: Record<string, any>
-): Promise<string | undefined> {
-  const org = record.organization;
-  if (org && typeof org === 'object' && typeof org.name === 'string') {
-    return org.name;
-  }
-  if (org && typeof org === 'object' && typeof org.id === 'string') {
-    return lookupOrganizationNameById(context, org.id);
-  }
-  if (typeof org === 'string' && org.length > 0) {
-    return lookupOrganizationNameById(context, org);
-  }
-  return undefined;
-}
-
-export async function logRuntimeGroupCreatedFromSync(
-  context: any,
-  json: Record<string, any>
+  operation: 'create' | 'update' | 'delete',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>,
+  originalInput?: Record<string, any> | null
 ): Promise<void> {
-  const orgName =
-    typeof json.organization === 'string' ? json.organization : undefined;
-  const runtimeGroupName =
-    typeof json.name === 'string' ? json.name : undefined;
-  if (!orgName || !runtimeGroupName) {
-    logger.error('[OrgActivity] runtime group create missing org or name');
+  const item = updatedItem ?? existingItem;
+  const runtimeGroupName = item?.name;
+  if (typeof runtimeGroupName !== 'string' || runtimeGroupName.length === 0) {
+    logger.error('[OrgActivity] runtime group hook missing name');
     return;
   }
-  await new OrgActivityService(context, orgName)
-    .logRuntimeGroupCreated(true, {
-      runtimeGroupName,
-      hostedOrganizations: normalizeHostedOrganizationNames(
-        json.hostedOrganizations
-      ),
-    })
-    .catch((e) => logger.error('[OrgActivity] runtime group create %s', e));
-}
 
-export async function logRuntimeGroupHostingChangeFromSync(
-  context: any,
-  localRecord: Record<string, any>,
-  json: Record<string, any>
-): Promise<void> {
-  const orgName =
-    typeof json.organization === 'string'
-      ? json.organization
-      : await resolveRuntimeGroupOwnerOrgName(context, localRecord);
-  const runtimeGroupName =
-    typeof localRecord.name === 'string' ? localRecord.name : undefined;
-  if (!orgName || !runtimeGroupName) {
-    logger.error(
-      '[OrgActivity] runtime group hosting change missing org or name'
+  if (operation === 'delete') {
+    let orgName = await organizationNameFromRelationship(
+      context,
+      (existingItem ?? item)?.organization
     );
+    if (!orgName) {
+      const loaded = await lookupRuntimeGroupForActivity(
+        context,
+        runtimeGroupName
+      );
+      orgName = loaded?.orgName;
+    }
+    if (!orgName) {
+      logger.error('[OrgActivity] runtime group hook missing owner org');
+      return;
+    }
+    await new OrgActivityService(context, orgName)
+      .logRuntimeGroupDeleted(true, { runtimeGroupName })
+      .catch((e) => logger.error('[OrgActivity] runtime group delete %s', e));
     return;
   }
+
+  const loaded = await lookupRuntimeGroupForActivity(context, runtimeGroupName);
+
+  let orgName = await organizationNameFromRelationship(context, item.organization);
+  if (!orgName) {
+    orgName = loaded?.orgName;
+  }
+  if (!orgName) {
+    logger.error('[OrgActivity] runtime group hook missing owner org');
+    return;
+  }
+
+  if (operation === 'create') {
+    let hostedOrganizations = await resolveHostedOrganizationNames(
+      context,
+      item.hostedOrganizations
+    );
+    if (hostedOrganizations.length === 0 && loaded?.hostedOrganizationNames) {
+      hostedOrganizations = loaded.hostedOrganizationNames;
+    }
+    await new OrgActivityService(context, orgName)
+      .logRuntimeGroupCreated(true, {
+        runtimeGroupName,
+        hostedOrganizations,
+      })
+      .catch((e) => logger.error('[OrgActivity] runtime group create %s', e));
+    return;
+  }
+
+  const updatedItemForCompare =
+    updatedItem?.hostedOrganizations == null && loaded
+      ? {
+          ...updatedItem,
+          hostedOrganizations: loaded.hostedOrganizationNames.map((name) => ({
+            name,
+          })),
+        }
+      : updatedItem;
+
+  const hostingChanged =
+    (originalInput != null &&
+      Object.prototype.hasOwnProperty.call(originalInput, 'hostedOrganizations')) ||
+    (await hasHostedOrganizationsChange(
+      context,
+      existingItem,
+      updatedItemForCompare
+    ));
+
+  if (!hostingChanged) {
+    return;
+  }
+
+  let hostedOrganizations = await resolveHostedOrganizationNames(
+    context,
+    updatedItemForCompare.hostedOrganizations
+  );
   await new OrgActivityService(context, orgName)
     .logRuntimeGroupHostingChange(true, {
       runtimeGroupName,
-      hostedOrganizations: normalizeHostedOrganizationNames(
-        json.hostedOrganizations
-      ),
+      hostedOrganizations,
     })
     .catch((e) =>
       logger.error('[OrgActivity] runtime group hosting change %s', e)
     );
-}
-
-export async function logRuntimeGroupDeletedForOrg(
-  context: any,
-  orgName: string,
-  runtimeGroupName: string
-): Promise<void> {
-  await new OrgActivityService(context, orgName)
-    .logRuntimeGroupDeleted(true, { runtimeGroupName })
-    .catch((e) => logger.error('[OrgActivity] runtime group delete %s', e));
 }
 
 export async function getCombinedOrganizationActivity(

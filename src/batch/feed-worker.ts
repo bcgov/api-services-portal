@@ -21,14 +21,6 @@ import {
   CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
-import {
-  logOrganizationProfileChangeFromRecords,
-  logOrganizationUnitEstablishedFromRecords,
-  logOrganizationUnitProfileChangeFromRecords,
-  logOrganizationUnitsFromChildSync,
-  logRuntimeGroupCreatedFromSync,
-  logRuntimeGroupHostingChangeFromSync,
-} from '../services/workflow/org-activity';
 
 const { metadata } = require('./data-rules');
 
@@ -492,28 +484,6 @@ export const syncRecords = async function (
           childResults,
         };
       } else {
-        if (
-          entity === 'Organization' &&
-          Array.isArray(json.orgUnits) &&
-          json.orgUnits.length > 0
-        ) {
-          await logOrganizationUnitsFromChildSync(
-            context,
-            json.orgUnits,
-            json.orgUnits.map(() => ({ result: 'created' })),
-            json.name
-          );
-        }
-        if (entity === 'OrganizationUnit' && !parentRecord?.name) {
-          await logOrganizationUnitEstablishedFromRecords(
-            context,
-            json.name,
-            { ...json, ...data }
-          );
-        }
-        if (entity === 'RuntimeGroup') {
-          await logRuntimeGroupCreatedFromSync(context, json);
-        }
         return { status: 200, result: 'created', id: nr.id, childResults };
       }
     } catch (ex) {
@@ -590,14 +560,6 @@ export const syncRecords = async function (
             }
 
             json[transformKey + '_ids'] = allIds.map((status) => status.id);
-            if (feedEntity === 'Organization' && transformKey === 'orgUnits') {
-              await logOrganizationUnitsFromChildSync(
-                context,
-                json[transformKey],
-                allIds,
-                localRecord.name
-              );
-            }
           }
           if (transformInfo.filterByNamespace) {
             json['_namespace'] = parentRecord['namespace'];
@@ -655,39 +617,6 @@ export const syncRecords = async function (
           childResults,
         };
       } else {
-        if (entity === 'Organization') {
-          const hasNonOrgUnitChanges = Object.keys(data).some(
-            (key) => key !== 'orgUnits'
-          );
-          if (hasNonOrgUnitChanges) {
-            await logOrganizationProfileChangeFromRecords(
-              context,
-              localRecord.name,
-              {
-                ...localRecord,
-                ...data,
-              }
-            );
-          }
-        }
-        if (entity === 'OrganizationUnit' && !parentRecord?.name) {
-          await logOrganizationUnitProfileChangeFromRecords(
-            context,
-            localRecord.name,
-            {
-              ...localRecord,
-              ...data,
-            },
-            parentRecord?.name
-          );
-        }
-        if (entity === 'RuntimeGroup' && 'hostedOrganizations' in data) {
-          await logRuntimeGroupHostingChangeFromSync(
-            context,
-            localRecord,
-            json
-          );
-        }
         return {
           status: 200,
           result: 'updated',

@@ -2,11 +2,13 @@ import {
   getOrganization,
   getOrganizations,
   getOrganizationMemberDetails,
+  lookupOrganizationNameById,
   parseOrganizationMemberDetails,
 } from '../../../services/keystone/organization';
 
 const orgs = [
   {
+    id: '1',
     name: 'ministry-of-health',
     title: 'Ministry of Health',
     description: 'Health stuff',
@@ -21,6 +23,7 @@ const orgs = [
     ],
   },
   {
+    id: '2',
     name: 'ministry-of-citizens-services',
     title: 'Ministry of Citizens Services',
     description: 'Custom org without a public body reference',
@@ -34,6 +37,10 @@ const orgs = [
 function mockContext(): any {
   return {
     executeGraphQL: jest.fn(({ query, variables }: any) => {
+      if (query.includes('OrganizationNameById')) {
+        const org = orgs.find((o) => o.id === variables.id);
+        return { data: { allOrganizations: org ? [{ name: org.name }] : [] } };
+      }
       if (query.indexOf('GetOrganizations') < 0) {
         return { errors: [{ message: 'Unexpected query' }] };
       }
@@ -105,6 +112,14 @@ describe('KeystoneJS', function () {
       expect(() =>
         parseOrganizationMemberDetails(JSON.stringify([]))
       ).toThrow();
+    });
+  });
+
+  describe('organization name resolution', function () {
+    it('looks up organization name by id', async function () {
+      await expect(
+        lookupOrganizationNameById(mockContext(), '1')
+      ).resolves.toBe('ministry-of-health');
     });
   });
 });
