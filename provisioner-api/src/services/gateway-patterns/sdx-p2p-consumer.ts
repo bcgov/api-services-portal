@@ -14,7 +14,7 @@ import {
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
 export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
-  conn_id: string;
+  environment: string;
   client_id: string;
   service_id: string;
   upgrades: ConsumerUpgrades;
@@ -67,30 +67,30 @@ export const SDXP2PConsumerPattern = {
     )) as EnrichedSubsystemEntry;
 
     // validate the connection request exists for the client's organization
-    const connections = await api.listConnections(client.organization.name);
-    const conn = connections.find((c) => c.id === inputs.conn_id);
+    // const connections = await api.listConnections(client.organization.name);
+    // const conn = connections.find((c) => c.id === inputs.conn_id);
 
-    assert.strictEqual(Boolean(conn), true, 'Connection request not found');
-    assert.strictEqual(
-      conn!.clientId === inputs.client_id,
-      true,
-      'Connection request clientId does not match the specified client_id'
-    );
-    assert.strictEqual(
-      conn!.serviceId === inputs.service_id,
-      true,
-      'Connection request serviceId does not match the specified service_id'
-    );
-    assert.strictEqual(
-      conn!.isActive,
-      true,
-      'Connection request is not active'
-    );
-    assert.strictEqual(
-      conn!.isApproved,
-      true,
-      'Connection request is not approved'
-    );
+    // assert.strictEqual(Boolean(conn), true, 'Connection request not found');
+    // assert.strictEqual(
+    //   conn!.clientId === inputs.client_id,
+    //   true,
+    //   'Connection request clientId does not match the specified client_id'
+    // );
+    // assert.strictEqual(
+    //   conn!.serviceId === inputs.service_id,
+    //   true,
+    //   'Connection request serviceId does not match the specified service_id'
+    // );
+    // assert.strictEqual(
+    //   conn!.isActive,
+    //   true,
+    //   'Connection request is not active'
+    // );
+    // assert.strictEqual(
+    //   conn!.isApproved,
+    //   true,
+    //   'Connection request is not approved'
+    // );
 
     const orgClient = (await api.getSubsystemClient(
       client.organization.name,
@@ -112,23 +112,23 @@ export const SDXP2PConsumerPattern = {
     );
 
     const clientRG = orgClient.runtimeGroups.find(
-      (rg) => rg.environment === conn?.environment
+      (rg) => rg.environment === inputs.environment
     );
 
     assert.strictEqual(
       Boolean(clientRG),
       true,
-      `Client subsystem does not have a runtime group for environment '${conn?.environment}'`
+      `Client subsystem does not have a runtime group for environment '${inputs.environment}'`
     );
 
     const serviceRG = serviceSubsystem.runtimeGroups?.find(
-      (rg) => rg.environment === conn?.environment
+      (rg) => rg.environment === inputs.environment
     );
 
     assert.strictEqual(
       Boolean(serviceRG),
       true,
-      `Service subsystem does not have a runtime group for environment '${conn?.environment}'`
+      `Service subsystem does not have a runtime group for environment '${inputs.environment}'`
     );
 
     return {
@@ -138,7 +138,6 @@ export const SDXP2PConsumerPattern = {
       serviceSubsystem: serviceSubsystem,
       clientRuntimeGroup: clientRG,
       serviceRuntimeGroup: serviceRG,
-      connections,
     };
   },
 

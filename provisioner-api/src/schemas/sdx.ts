@@ -69,8 +69,9 @@ const ResourceServerServiceAccess = Type.Object(
 
 export const ResourceServerAccess = Type.Object(
   {
-    id: Type.String({ examples: ['claims'] }),
+    clientId: Type.String({ examples: ['partner-app-claims'] }),
     environment: Type.String({ examples: ['dev'] }),
+    subsystemId: Type.String({ examples: ['claims'] }),
     services: Type.Array(ResourceServerServiceAccess),
   },
   {
@@ -91,7 +92,7 @@ export const IntegrationAccessRequest = Type.Object(
     submissionId: Type.String({
       examples: ['9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a'],
     }),
-    integrationId: Type.String({ examples: ['integration-42'] }),
+    clientId: Type.String({ examples: ['integration-42'] }),
     resourceServers: Type.Array(Type.Ref(ResourceServerAccess)),
   },
   {
@@ -100,11 +101,12 @@ export const IntegrationAccessRequest = Type.Object(
     examples: [
       {
         submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-        integrationId: 'integration-42',
+        integrationClientId: 'integration-42',
         resourceServers: [
           {
             id: 'claims',
             environment: 'dev',
+            integrationClientId: '1234',
             services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
           },
         ],
@@ -136,11 +138,10 @@ export const NewIntegrationAccessRequestResponse = Type.Object(
 
 const NewIntegrationAccessResourceServer = Type.Object(
   {
-    services: Type.Array(ResourceServerServiceAccess),
-    privacyZone: Type.String({ examples: ['public'] }),
     clientId: Type.String({ examples: ['partner-app-claims'] }),
+    privacyZone: Type.String({ examples: ['public'] }),
     environment: Type.String({ examples: ['dev'] }),
-    id: Type.String({ examples: ['claims'] }),
+    services: Type.Array(ResourceServerServiceAccess),
   },
   {
     additionalProperties: false,
@@ -161,6 +162,7 @@ export const NewIntegrationAccessRequest = Type.Object(
     integrationId: Type.String({ examples: ['integration-42'] }),
     requester: Type.String({ examples: ['user@example.gov.bc.ca'] }),
     clientId: Type.String({ examples: ['partner-app'] }),
+    policyVersion: Type.String({ examples: ['SDX.R1.00'] }),
     privacyZone: Type.String({ examples: ['public'] }),
     resourceServers: Type.Array(NewIntegrationAccessResourceServer),
   },
@@ -172,6 +174,7 @@ export const NewIntegrationAccessRequest = Type.Object(
         integrationId: 'integration-42',
         requester: 'user@example.gov.bc.ca',
         clientId: 'partner-app',
+        policyVersion: 'SDX.R1.00',
         privacyZone: 'public',
         resourceServers: [
           {

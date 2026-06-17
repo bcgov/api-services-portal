@@ -123,6 +123,7 @@ export class PatternsEvaluatorService {
         parameters: {
           ...{
             conn_id: id,
+            environment: connection.environment,
             client_id: connection.clientId,
             service_id: connection.serviceId,
           },

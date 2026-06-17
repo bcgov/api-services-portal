@@ -34,6 +34,7 @@ export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
               Type.Literal('preview'),
               Type.Literal('diff'),
               Type.Literal('apply'),
+              Type.Literal('delete'),
             ],
             {
               description:

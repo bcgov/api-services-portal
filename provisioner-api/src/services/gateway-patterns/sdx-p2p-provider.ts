@@ -62,29 +62,29 @@ export const SDXP2PProviderPattern = {
     const client = (await api.getCatalogSubsystem(
       inputs.client_id
     )) as EnrichedSubsystemEntry;
-    const connections = await api.listConnections(client.organization.name);
-    const conn = connections.find((c) => c.id === inputs.conn_id);
-    assert.strictEqual(Boolean(conn), true, `Connection request not found`);
-    assert.strictEqual(
-      conn!.clientId === inputs.client_id,
-      true,
-      'Connection request clientId does not match the specified client_id'
-    );
-    assert.strictEqual(
-      conn!.serviceId === inputs.service_id,
-      true,
-      'Connection request serviceId does not match the specified service_id'
-    );
-    assert.strictEqual(
-      conn!.isActive,
-      true,
-      'Connection request is not active'
-    );
-    assert.strictEqual(
-      conn!.isApproved,
-      true,
-      'Connection request is not approved'
-    );
+    // const connections = await api.listConnections(client.organization.name);
+    // const conn = connections.find((c) => c.id === inputs.conn_id);
+    // assert.strictEqual(Boolean(conn), true, `Connection request not found`);
+    // assert.strictEqual(
+    //   conn!.clientId === inputs.client_id,
+    //   true,
+    //   'Connection request clientId does not match the specified client_id'
+    // );
+    // assert.strictEqual(
+    //   conn!.serviceId === inputs.service_id,
+    //   true,
+    //   'Connection request serviceId does not match the specified service_id'
+    // );
+    // assert.strictEqual(
+    //   conn!.isActive,
+    //   true,
+    //   'Connection request is not active'
+    // );
+    // assert.strictEqual(
+    //   conn!.isApproved,
+    //   true,
+    //   'Connection request is not approved'
+    // );
     const service = (await api.getOASService(
       inputs.service_id
     )) as EnrichedServiceCatalogEntry;

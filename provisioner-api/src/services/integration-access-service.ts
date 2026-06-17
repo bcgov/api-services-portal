@@ -36,7 +36,7 @@ export class IntegrationAccessService {
     integrationClientId: string,
     input: TNewIntegrationAccessRequest
   ): Promise<TNewIntegrationAccessRequestResponse> {
-    const policyVersion = 'SDX.R1.00';
+    const policyVersion = input.policyVersion || 'SDX.R1.00';
 
     // find the subsystem from the "integrationClientId"
     // if there is none, then put the access request on hold
@@ -223,20 +223,25 @@ export class IntegrationAccessService {
   ): Promise<TIntegrationAccessRequest[]> {
     // query the subsystem by an integrationClientId
     //
-    const subsystemId = '123';
-
-    const subsystem = await this.api.getCatalogSubsystem(subsystemId);
-    if (!subsystem) {
+    const subsystems = await this.api.listCatalogSubsystems({
+      integrationClientId,
+    });
+    if (!subsystems || subsystems.length === 0) {
       throw new BadRequestError(
-        `Subsystem with clientId ${subsystemId} not found`
+        `Subsystem with clientId ${integrationClientId} not found`
       );
     }
+
+    const subsystem = subsystems[0];
+
+    this.logger?.debug('Subsystem = %j', subsystem);
 
     // get all the approved connection requests for the subsystem client ID
     // and only the connections that match the particular policy version
     const connections = await this.api.listConnections(
-      subsystem.organization?.name || ''
+      subsystem.organization?.name!
     );
+    this.logger?.debug('Connections = %j', connections);
     const allowedServices = connections.filter(
       (c) =>
         c.isApproved &&
@@ -277,15 +282,16 @@ export class IntegrationAccessService {
           .filter(
             (s) =>
               integrationClientId === undefined ||
-              s.requesterDetails.client.integrationId === integrationClientId
+              s.requesterDetails.client.clientId === integrationClientId
           )
           .map((s) => ({
-            integrationId: s.requesterDetails.client.integrationId,
+            clientId: s.requesterDetails.client.clientId,
             submissionId: s.requesterDetails.submissionId,
             resourceServers: [
               {
-                id: subsystemDetail.clientId,
-                name: subsystemDetail.name,
+                clientId: s.requesterDetails.service.clientId,
+                subsystemId: subsystemDetail.clientId,
+                subsystemName: subsystemDetail.name,
                 environment: s.environment!,
                 organization: orgName,
                 services: [

@@ -16,7 +16,7 @@ export class ConnectionsController {
   async onConnectionRequestChange(
     id: string,
     connectionRequest: TConnectionChangeRequest,
-    action: 'preview' | 'apply' | 'diff'
+    action: 'preview' | 'apply' | 'diff' | 'delete'
   ): Promise<TConnectionChangeResponse> {
     const resourceSets =
       await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
