@@ -487,16 +487,43 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace'],
+    sync: ['name', 'description', 'organization', 'namespace', 'integrations'],
     transformations: {
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
       },
+      integrations: {
+        name: 'connectExclusiveListCreate',
+        list: 'SubsystemIntegration',
+        syncFirst: true,
+        refKey: 'integrationClientId',
+      },
     },
     example: {
       name: 'my-new-subsystem',
+    },
+  },
+  SubsystemIntegration: {
+    ownedBy: 'subsystem',
+    query: 'allSubsystemIntegrations',
+    refKey: 'integrationClientId',
+    sync: ['integrationClientId', 'subsystemId'],
+    transformations: {},
+  },
+  Task: {
+    query: 'allTasks',
+    refKey: 'ref',
+    sync: ['ref', 'title', 'type', 'status', 'jsonBlob'],
+    transformations: {
+      jsonBlob: { name: 'toString' },
+    },
+    validations: {
+      status: {
+        type: 'enum',
+        values: ['pending', 'approved', 'rejected', 'processed'],
+      },
     },
   },
   RuntimeGroup: {

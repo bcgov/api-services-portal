@@ -172,7 +172,8 @@ describe('SDX Subsystem', () => {
         createRuntimeGroup(
           org,
           runtimeGroupId,
-          `http://internal.${runtimeGroupId}.servers.sdx`
+          'cyp',
+          `http://internal.${runtimeGroupId}.cyp.servers.sdx`
         )
 
         createSubsystemGateway(org, runtimeGroupId, service.subsystem.name, () => {
@@ -231,7 +232,8 @@ describe('SDX Subsystem', () => {
         createRuntimeGroup(
           org,
           runtimeGroupName,
-          `http://internal.${runtimeGroupName}.servers.sdx`
+          'cyp',
+          `http://internal.${runtimeGroupName}.cyp.servers.sdx`
         )
 
         cy.setRequestBody({

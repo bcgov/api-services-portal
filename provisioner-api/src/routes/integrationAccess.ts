@@ -14,6 +14,8 @@ const RESOURCE_SERVERS_ONLY_DESC =
   'When true, restricts the result to subsystems exposing resource server services only.';
 const ENVIRONMENT_DESC =
   'Target environment (for example `dev`, `test`, or `prod`) the subsystems are scoped to.';
+const CLIENT_ID_DESC = 'Identifier of the OAuth Integration Client ID';
+
 const SUBSYSTEM_ID_DESC =
   'Identifier of the subsystem the request is scoped to.';
 const INTEGRATION_ID_DESC =
@@ -68,52 +70,44 @@ const security = [{ jwt: [] }];
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {
     app.get(
-      '/subsystems/:id/allowed-services',
+      '/integrations/:clientId/allowed-services',
       {
         schema: {
-          tags: ['Integration Access'],
+          tags: ['Integration Requests'],
           summary: 'List allowed access',
           operationId: 'getSubsystemAllowedServices',
           description:
-            'Returns the integration access requests with approved access to SDX services.',
+            'Returns the details of an integration access request with approved access to SDX services.',
           security,
           params: Type.Object({
-            id: Type.String({
-              description: SUBSYSTEM_ID_DESC,
+            clientId: Type.String({
+              description: CLIENT_ID_DESC,
               examples: ['claims'],
             }),
           }),
-          querystring: Type.Object({
-            integrationId: Type.Optional(
-              Type.String({
-                description: INTEGRATION_ID_DESC,
-                examples: ['integration-42'],
-              })
-            ),
-          }),
+
           response: { 200: AllowedServicesResponse },
         },
       },
       async (req) =>
-        app.controllers.subsystem.getSubsystemAllowedServices({
-          subsystemId: req.params.id,
-          integrationId: req.query.integrationId,
+        app.controllers.integration.getIntegrationAllowedServices({
+          integrationClientId: req.params.clientId,
         })
     );
 
     app.post(
-      '/subsystems/:id/access-requests',
+      '/integrations/:clientId/access-requests',
       {
         schema: {
-          tags: ['Integration Access'],
+          tags: ['Integration Requests'],
           summary: 'New access request',
-          operationId: 'createSubsystemAccessRequest',
+          operationId: 'createIntegrationAccessRequest',
           description:
-            'Submits a new integration access request for a partner authorization integration for the SDX subsystem. Approval triggers the `provisionAllowedServices` callback to the partner.',
+            'Submits a new integration access request for a partner authorization integration. Approval triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
-            id: Type.String({
-              description: SUBSYSTEM_ID_DESC,
+            clientId: Type.String({
+              description: INTEGRATION_ID_DESC,
               examples: ['claims'],
             }),
           }),
@@ -121,7 +115,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
           callbacks: {
             provisionAllowedServices: {
-              '/integrations/{$request.body#/integrationId}/allowed-services': {
+              '/integrations/{$request.params#/clientId}/allowed-services': {
                 put: {
                   requestBody: {
                     required: true,
@@ -146,8 +140,8 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
         },
       },
       async (req) =>
-        app.controllers.subsystem.createSubsystemAccessRequest({
-          subsystemId: req.params.id,
+        app.controllers.integration.createIntegrationAccessRequest({
+          integrationClientId: req.params.clientId,
           request: req.body,
         })
     );

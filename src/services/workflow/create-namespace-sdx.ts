@@ -85,32 +85,24 @@ export async function CreateNamespaceForRuntimeGroup(
 ): Promise<ResourceSet> {
   // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
-  const rg = await rgService.findRuntimeGroupByUniqueName(
+  const runtimeGroups = await rgService.findRuntimeGroupsByName(
     context,
+    args.organization,
     args.runtimeGroupName
   );
 
-  assert.strictEqual(
-    rg.hostedOrganizations.filter((o) => o.name === args.organization).length >
-      0,
-    true,
-    'Runtime Group not allowed for organization'
-  );
-
-  // Extract the consumer endpoint hostname for domain configuration
-  const consumerEP = new URL(rg.consumerEndpoint);
-
   // Create the namespace with SDX edge configuration
   const resourceSet = await createSDXNamespace(context, {
-    name: rg.namespace,
+    name: runtimeGroups[0].namespace,
     org: args.organization,
     orgUnit: undefined,
     orgEnabled: false,
     displayName: `SDX - Edge ${args.runtimeGroupName}`,
     dataPlane: 'sdx-edge',
+    runtimeGroupName: args.runtimeGroupName,
     domains: [
-      rg.host,
-      consumerEP.hostname,
+      ...runtimeGroups.map((rg) => rg.host),
+      ...runtimeGroups.map((rg) => new URL(rg.consumerEndpoint).hostname),
       ...(process.env.SDX_RESERVED_DOMAINS
         ? process.env.SDX_RESERVED_DOMAINS.split(',')
         : ['pzgw.api.gov.bc.ca']),
@@ -155,21 +147,11 @@ export async function CreateNamespaceForSubsystem(
 ): Promise<ResourceSet> {
   // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
-  const rg = await rgService.findRuntimeGroupByUniqueName(
+  const runtimeGroups = await rgService.findRuntimeGroupsByName(
     context,
+    args.subsystem.organization.name,
     args.runtimeGroupName
   );
-
-  assert.strictEqual(
-    rg.hostedOrganizations.filter(
-      (o) => o.name === args.subsystem.organization?.name
-    ).length > 0,
-    true,
-    'Runtime Group not allowed for organization'
-  );
-
-  // Extract the consumer endpoint hostname for domain configuration
-  const consumerEP = new URL(rg.consumerEndpoint);
 
   // Create the namespace using subsystem organization and gateway details
   // pzgw.api.gov.bc.ca : required for allowing API calls from PZGW to the subsystem in the SDX edge environment
@@ -182,9 +164,10 @@ export async function CreateNamespaceForSubsystem(
     orgEnabled: false,
     displayName: `SDX - ${args.subsystem.name}`,
     dataPlane: 'sdx-edge',
+    runtimeGroupName: args.runtimeGroupName,
     domains: [
-      rg.host,
-      consumerEP.hostname,
+      ...runtimeGroups.map((rg) => rg.host),
+      ...runtimeGroups.map((rg) => new URL(rg.consumerEndpoint).hostname),
       ...(process.env.SDX_RESERVED_DOMAINS
         ? process.env.SDX_RESERVED_DOMAINS.split(',')
         : ['pzgw.api.gov.bc.ca']),

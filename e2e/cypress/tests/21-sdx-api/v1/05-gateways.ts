@@ -37,6 +37,7 @@ describe('SDX Gateways', () => {
 
         const runtimeGroup = {
           name: `${runtimeGroupId}1`,
+          environment: 'cyp',
           hostedOrganizations: [org.name],
         }
         cy.setRequestBody(runtimeGroup)
@@ -50,7 +51,9 @@ describe('SDX Gateways', () => {
             ).then(({ apiRes: { status, body } }: any) => {
               expect(status).to.be.equal(200)
               expect(body.length).to.be.equal(1)
-              expect(body[0].host).to.be.equal(`${runtimeGroup.name}.servers.sdx`)
+              expect(body[0].host).to.be.equal(
+                `${runtimeGroup.name}.${runtimeGroup.environment}.servers.sdx`
+              )
               expect(body[0].name).to.be.equal(`${runtimeGroup.name}`)
               expect(body[0]).to.have.property('gatewayId')
               expect(body[0].organization).to.be.equal(org.name)
@@ -76,7 +79,9 @@ describe('SDX Gateways', () => {
       it('PUT /organizations/{org}/subsystems/{subsystem}/gateway', () => {
         const { org, gateway, dataset, datasetId, runtimeGroupId, product } = workingData
 
-        const guidSuffix = Cypress._.random(1e5, 1e6 - 1).toString(16).slice(0, 5)
+        const guidSuffix = Cypress._.random(1e5, 1e6 - 1)
+          .toString(16)
+          .slice(0, 5)
 
         const subsystem = {
           name: `SUBSYS-${guidSuffix.toUpperCase()}`,
@@ -89,6 +94,7 @@ describe('SDX Gateways', () => {
 
             const runtimeGroup = {
               name: `${runtimeGroupId}2`,
+              environment: 'cyp',
               hostedOrganizations: [org.name],
               consumerEndpoint: `http://internal.${runtimeGroupId}.servers.sdx`,
             }
@@ -116,7 +122,7 @@ describe('SDX Gateways', () => {
                   'GET'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(status, body.message).to.be.equal(200)
-                  expect(body.runtimeGroup.name).to.be.equal(runtimeGroup.name)
+                  expect(body.runtimeGroups[0].name).to.be.equal(runtimeGroup.name)
 
                   expect(body.name).to.be.equal(subsystem.name)
                   // expect(JSON.stringify(body)).to.be.equal('')
@@ -126,21 +132,19 @@ describe('SDX Gateways', () => {
 
                   const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
 
-                  cy.callAPI(
-                    `ds/api/v2/namespaces/${gatewayId}`,
-                    'GET'
-                  ).then(({ apiRes: { status, body } }: any) => {
-                    expect(status, body.message).to.be.equal(200)
-                    expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
-                  })
+                  cy.callAPI(`ds/api/v2/namespaces/${gatewayId}`, 'GET').then(
+                    ({ apiRes: { status, body } }: any) => {
+                      expect(status, body.message).to.be.equal(200)
+                      expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
+                    }
+                  )
 
-                  cy.callAPI(
-                    `ds/api/v3/gateways/${gatewayId}`,
-                    'GET'
-                  ).then(({ apiRes: { status, body } }: any) => {
-                    expect(status, body.message).to.be.equal(200)
-                    expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
-                  })
+                  cy.callAPI(`ds/api/v3/gateways/${gatewayId}`, 'GET').then(
+                    ({ apiRes: { status, body } }: any) => {
+                      expect(status, body.message).to.be.equal(200)
+                      expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
+                    }
+                  )
                 })
               })
             })
@@ -157,6 +161,7 @@ describe('SDX Gateways', () => {
 
         const runtimeGroup = {
           name: `${runtimeGroupId}3`,
+          environment: 'cyp',
           hostedOrganizations: [org.name],
         }
         cy.setRequestBody(runtimeGroup)
@@ -203,7 +208,7 @@ describe('SDX Gateways', () => {
               `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/gateway`,
               'PUT'
             ).then(({ apiRes: { status, body } }: any) => {
-              expect(body.message).to.be.equal('Runtime Group not found')
+              expect(body.message).to.be.equal('Runtime group does not exist')
             })
           }
         )
@@ -228,6 +233,9 @@ describe('SDX Gateways', () => {
             ).then(({ apiRes: { status, body } }: any) => {
               expect(status).to.be.equal(200)
 
+              cy.setRequestBody({
+                runtimeGroupName: `${runtimeGroupId}2`,
+              })
               cy.callAPI(
                 `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/gateway`,
                 'PUT'

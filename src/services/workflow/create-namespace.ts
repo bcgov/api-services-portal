@@ -35,6 +35,7 @@ export interface CreateNamespaceArgs {
   displayName?: string;
   dataPlane?: string;
   domains?: string[];
+  runtimeGroupName?: string;
   routePaths?: string[];
   assignedScopes?: string[];
 }
@@ -140,6 +141,9 @@ export async function CreateNamespace(
     }
     if (args.domains) {
       gwGroup.attributes['perm-domains'] = args.domains;
+    }
+    if (args.runtimeGroupName) {
+      gwGroup.attributes['perm-runtime-group'] = [args.runtimeGroupName];
     }
     if (args.routePaths) {
       gwGroup.attributes['perm-route-paths'] = args.routePaths;

@@ -104,10 +104,12 @@ export function createConnection(
 export function createRuntimeGroup(
   org: any,
   runtimeGroupName: string,
+  environment: string,
   consumerEndpoint: string
 ) {
   cy.setRequestBody({
     name: runtimeGroupName,
+    environment,
     hostedOrganizations: [org.name],
     consumerEndpoint,
   })

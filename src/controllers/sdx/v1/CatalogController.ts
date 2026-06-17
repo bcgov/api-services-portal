@@ -82,9 +82,7 @@ export class CatalogController extends Controller {
     );
 
     return transformActivity(records)
-      .map((o) =>
-        removeKeys(o, ['id', 'namespace', 'subject_email'])
-      )
+      .map((o) => removeKeys(o, ['id', 'namespace', 'subject_email']))
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
@@ -112,9 +110,25 @@ export class CatalogController extends Controller {
    */
   @Get('/subsystems')
   @OperationId('subsystems-list')
-  public async listSubsystems(): Promise<SubsystemEntry[]> {
+  public async listSubsystems(
+    @Query() integrationClientId?: string
+  ): Promise<SubsystemEntry[]> {
     const ctx = this.keystone.sudo();
-    const records = await new SubsystemService().listSubsystems(ctx);
+    let records;
+    if (integrationClientId) {
+      // lookup the subsystem using the client id
+      const intg = await new SubsystemService().lookupSubsystemIntegration(
+        ctx,
+        integrationClientId
+      );
+
+      records = await new SubsystemService().listSubsystemsByIntegration(
+        ctx,
+        intg.id
+      );
+    } else {
+      records = await new SubsystemService().listSubsystems(ctx);
+    }
     const result = await Promise.all(
       records.map(async (o) => GetSubsystemEntryForSubsystem(o))
     );

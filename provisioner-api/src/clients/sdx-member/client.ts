@@ -45,8 +45,10 @@ export class SdxMemberApiClient {
   }
 
   /** `subsystems-list` — GET /catalog/subsystems */
-  listCatalogSubsystems(): Promise<SubsystemEntry[]> {
-    return this.request('GET', 'catalog/subsystems');
+  listCatalogSubsystems(query: {
+    integrationClientId: string;
+  }): Promise<SubsystemEntry[]> {
+    return this.request('GET', 'catalog/subsystems', { query });
   }
 
   /** `subsystems-list` — GET /catalog/subsystem/{name} */

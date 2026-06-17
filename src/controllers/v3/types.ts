@@ -309,6 +309,30 @@ export interface Subsystem {
   description?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
+  integrations?: SubsystemIntegration[];
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface SubsystemIntegration {
+  integrationClientId?: string; // Primary Key
+  subsystemId?: string;
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface Task {
+  ref?: string; // Primary Key
+  title?: string;
+  type?: string;
+  status?: "pending" | "approved" | "rejected" | "processed";
+  jsonBlob?: any; // toString
 }
 
 

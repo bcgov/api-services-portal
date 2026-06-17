@@ -13,7 +13,7 @@ export type EnrichedSubsystemEntry = SubsystemEntry & {
   organization: NonNullable<SubsystemEntry['organization']>;
   member: NonNullable<SubsystemEntry['member']>;
   gateway: NonNullable<SubsystemEntry['gateway']>;
-  runtimeGroup: NonNullable<SubsystemEntry['runtimeGroup']>;
+  runtimeGroups: NonNullable<SubsystemEntry['runtimeGroups']>;
 };
 
 /** A {@link ServiceCatalogEntry} whose subsystem is fully enriched. */

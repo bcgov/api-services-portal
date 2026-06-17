@@ -153,6 +153,8 @@ for (const _list of [
   'RuntimeGroup',
   'ServiceAccess',
   'Subsystem',
+  'SubsystemIntegration',
+  'Task',
   'TemporaryIdentity',
   'User',
 ]) {
@@ -405,7 +407,8 @@ const configureExpress = (app: any) => {
       helpLinks: {
         helpDeskUrl: process.env.NEXT_PUBLIC_HELP_DESK_URL,
         helpTeamsAlertsUrl: process.env.NEXT_PUBLIC_HELP_TEAMS_ALERTS_URL,
-        helpTeamsOperationsUrl: process.env.NEXT_PUBLIC_HELP_TEAMS_OPERATIONS_URL,
+        helpTeamsOperationsUrl:
+          process.env.NEXT_PUBLIC_HELP_TEAMS_OPERATIONS_URL,
         helpTeamsAccessRequestUrl:
           process.env.NEXT_PUBLIC_HELP_TEAMS_ACCESS_REQUEST_URL,
         helpIssueUrl: process.env.NEXT_PUBLIC_HELP_ISSUE_URL,

@@ -123,6 +123,8 @@ export class PatternsEvaluatorService {
         parameters: {
           ...{
             conn_id: id,
+            client_id: connection.clientId,
+            service_id: connection.serviceId,
           },
           ...gatewayPatterns[pattern],
         },
@@ -149,7 +151,7 @@ export class PatternsEvaluatorService {
 
     if (pattern.inject) {
       const data = await pattern.inject(this.api, inputs.parameters);
-      this.logger?.info('Pattern inject data: %j', data);
+      this.logger?.info('Pattern inject data for %s: %j', inputs.pattern, data);
       return {
         _gateway_id: data.gateway_id,
         documents: pattern.eval(inputs.parameters, data),

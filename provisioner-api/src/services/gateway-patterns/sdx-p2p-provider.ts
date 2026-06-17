@@ -62,11 +62,9 @@ export const SDXP2PProviderPattern = {
     const client = (await api.getCatalogSubsystem(
       inputs.client_id
     )) as EnrichedSubsystemEntry;
-
     const connections = await api.listConnections(client.organization.name);
     const conn = connections.find((c) => c.id === inputs.conn_id);
-
-    assert.strictEqual(Boolean(conn), true, 'Connection request not found');
+    assert.strictEqual(Boolean(conn), true, `Connection request not found`);
     assert.strictEqual(
       conn!.clientId === inputs.client_id,
       true,
@@ -87,16 +85,13 @@ export const SDXP2PProviderPattern = {
       true,
       'Connection request is not approved'
     );
-
     const service = (await api.getOASService(
       inputs.service_id
     )) as EnrichedServiceCatalogEntry;
-
     const serviceSubsystem = await api.getSubsystemClient(
       service.subsystem.organization.name,
       service.subsystem.name
     );
-
     return {
       gateway_id: service.subsystem.gateway.id,
       client,

@@ -1,5 +1,6 @@
 import type {
   ConnectionRequest,
+  RuntimeGroup,
   SdxMemberApiClient,
 } from '../../clients/sdx-member/index.js';
 import {
@@ -47,6 +48,8 @@ export interface SDXP2PConsumerPatternData {
   client: EnrichedSubsystemEntry;
   serviceSubsystem: EnrichedSubsystemEntry;
   connections: ConnectionRequest[];
+  clientRuntimeGroup: RuntimeGroup;
+  serviceRuntimeGroup: RuntimeGroup;
 }
 
 /**
@@ -108,11 +111,33 @@ export const SDXP2PConsumerPattern = {
       service.subsystem.name
     );
 
+    const clientRG = orgClient.runtimeGroups.find(
+      (rg) => rg.environment === conn?.environment
+    );
+
+    assert.strictEqual(
+      Boolean(clientRG),
+      true,
+      `Client subsystem does not have a runtime group for environment '${conn?.environment}'`
+    );
+
+    const serviceRG = serviceSubsystem.runtimeGroups?.find(
+      (rg) => rg.environment === conn?.environment
+    );
+
+    assert.strictEqual(
+      Boolean(serviceRG),
+      true,
+      `Service subsystem does not have a runtime group for environment '${conn?.environment}'`
+    );
+
     return {
       gateway_id: orgClient.gateway.id,
       client: orgClient,
       service: subsystemService,
       serviceSubsystem: serviceSubsystem,
+      clientRuntimeGroup: clientRG,
+      serviceRuntimeGroup: serviceRG,
       connections,
     };
   },
@@ -121,7 +146,7 @@ export const SDXP2PConsumerPattern = {
     const serviceLocator = data.service.name;
 
     const clientLocator = data.client.clientId;
-    const routeHostUrl = new URL(data.client.runtimeGroup.consumerEndpoint!);
+    const routeHostUrl = new URL(data.clientRuntimeGroup.consumerEndpoint!);
 
     const consumerGateway = data.client.gateway.id;
 
@@ -152,9 +177,9 @@ export const SDXP2PConsumerPattern = {
         ...tags,
         `service:${serviceLocator}`,
         `client:${clientLocator}`,
-        `rghost:${data.client.runtimeGroup.host}`,
+        `rghost:${data.clientRuntimeGroup.host}`,
       ],
-      url: data.serviceSubsystem.runtimeGroup.sdxEndpoint,
+      url: data.serviceRuntimeGroup.sdxEndpoint,
       plugins: [
         ...[transformer(tags, data)],
         ...(upgrades.hasOwnProperty('dpop') ? [upgradeToDPoP(tags, data)] : []),
@@ -202,7 +227,7 @@ export const SDXP2PConsumerPattern = {
 function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
   const clientLocator = data.client.clientId;
   const serviceLocator = data.service.name;
-  const serviceHost = data.serviceSubsystem.runtimeGroup.host;
+  const serviceHost = data.serviceRuntimeGroup.host;
   return {
     name: 'request-transformer',
     tags,
@@ -253,8 +278,8 @@ function upgradeToDPoP(tags: string[], data: SDXP2PConsumerPatternData) {
 }
 
 function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:0`;
-  const keySetName = `sdx.edge.${data.client.runtimeGroup.name}`;
+  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:0`;
+  const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}`;
 
   return {
     name: 'trust-sign',
@@ -291,7 +316,7 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.token_exchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.client.runtimeGroup.name}:0`;
+  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:0`;
 
   return {
     name: 'token-exchange',

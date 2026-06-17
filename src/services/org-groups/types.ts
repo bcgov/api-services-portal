@@ -35,5 +35,6 @@ export interface OrgNamespace {
   enabled: boolean;
   permDataPlane?: string;
   permDomains?: string[];
+  permRuntimeGroup?: string;
   updatedAt: number;
 }

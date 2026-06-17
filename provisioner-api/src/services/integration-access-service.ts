@@ -33,21 +33,29 @@ export class IntegrationAccessService {
    */
   async submitIntegrationAccessRequest(
     submissionId: string,
-    subsystemId: string,
+    integrationClientId: string,
     input: TNewIntegrationAccessRequest
   ): Promise<TNewIntegrationAccessRequestResponse> {
     const policyVersion = 'SDX.R1.00';
 
-    const subsystem = await this.api.getCatalogSubsystem(subsystemId);
-    if (!subsystem) {
+    // find the subsystem from the "integrationClientId"
+    // if there is none, then put the access request on hold
+    // until the subsystem has been linked
+
+    const subsystems = await this.api.listCatalogSubsystems({
+      integrationClientId,
+    });
+    if (!subsystems || subsystems.length === 0) {
       throw new NotFoundError(
-        `Subsystem with clientId ${subsystemId} not found`
+        `Subsystem with clientId ${integrationClientId} not found`
       );
     }
 
+    const subsystem = subsystems[0];
+
     if (subsystem.organization === undefined) {
       throw new NotFoundError(
-        `Organization for subsystem with clientId ${subsystemId} not found`
+        `Organization for subsystem with clientId ${integrationClientId} not found`
       );
     }
 
@@ -210,10 +218,13 @@ export class IntegrationAccessService {
    * @returns
    */
   async buildIntegrationAllowedServices(
-    subsystemId: string,
-    policyVersion: string,
-    integrationId?: string
+    integrationClientId: string,
+    policyVersion: string
   ): Promise<TIntegrationAccessRequest[]> {
+    // query the subsystem by an integrationClientId
+    //
+    const subsystemId = '123';
+
     const subsystem = await this.api.getCatalogSubsystem(subsystemId);
     if (!subsystem) {
       throw new BadRequestError(
@@ -265,8 +276,8 @@ export class IntegrationAccessService {
         ...services
           .filter(
             (s) =>
-              integrationId === undefined ||
-              s.requesterDetails.client.integrationId === integrationId
+              integrationClientId === undefined ||
+              s.requesterDetails.client.integrationId === integrationClientId
           )
           .map((s) => ({
             integrationId: s.requesterDetails.client.integrationId,

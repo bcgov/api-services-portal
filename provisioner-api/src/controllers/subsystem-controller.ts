@@ -1,26 +1,17 @@
 import type { Services } from '../services/index.js';
 import type {
   TIntegrationAccessRequest,
-  TNewIntegrationAccessRequest,
-  TNewIntegrationAccessRequestResponse,
   TSubsystemEnvironment,
 } from '../schemas/sdx.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
 export interface GetSubsystemsInput {
-  subjectToken?: string;
-  resourceServersOnly?: boolean;
   environment?: string;
 }
 
 export interface GetSubsystemAllowedServicesInput {
   subsystemId: string;
   integrationId?: string;
-}
-
-export interface CreateSubsystemAccessRequestInput {
-  subsystemId: string;
-  request: TNewIntegrationAccessRequest;
 }
 
 export class SubsystemController {
@@ -32,32 +23,6 @@ export class SubsystemController {
   async getSubsystems(
     input: GetSubsystemsInput
   ): Promise<TSubsystemEnvironment[]> {
-    return await this.services.sdxMember.getSubsystems(
-      input.environment,
-      input.resourceServersOnly,
-      input.subjectToken
-    );
-  }
-
-  async getSubsystemAllowedServices(
-    input: GetSubsystemAllowedServicesInput
-  ): Promise<TIntegrationAccessRequest[]> {
-    return this.services.integrationAccess.buildIntegrationAllowedServices(
-      input.subsystemId,
-      'SDX.R1.00',
-      input.integrationId
-    );
-  }
-
-  async createSubsystemAccessRequest(
-    input: CreateSubsystemAccessRequestInput
-  ): Promise<TNewIntegrationAccessRequestResponse> {
-    // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
-    const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    return await this.services.integrationAccess.submitIntegrationAccessRequest(
-      submissionId,
-      input.subsystemId,
-      input.request
-    );
+    return await this.services.sdxMember.getSubsystems(input.environment);
   }
 }

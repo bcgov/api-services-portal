@@ -71,13 +71,13 @@ class ConnectionService {
       body.environment = serviceSpec.environment as any;
     }
 
-    // if approving the connection, validate the client and service belong to the same organization
-    if (body.isApproved) {
+    // if approving or explicitely rejecting the connection, validate the client and service belong to the same organization
+    if (body.isApproved === true || body.isApproved === false) {
       assertEqual(
         serviceSpec.organization.name === org,
         true,
         'isApproved',
-        'Cannot approve connection request when service organization does not match the specified organization'
+        'Cannot approve/reject connection request when service organization does not match the specified organization'
       );
     } else {
       assertEqual(

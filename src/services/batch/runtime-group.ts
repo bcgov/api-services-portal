@@ -143,6 +143,34 @@ class RuntimeGroupService {
     return rg;
   };
 
+  findRuntimeGroupsByName = async (
+    context: Keystone,
+    org: string,
+    name: string
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const runtimeGroups = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
+
+    assert.strictEqual(
+      runtimeGroups.length > 0,
+      true,
+      'Runtime group does not exist'
+    );
+
+    return runtimeGroups.filter((rg) =>
+      rg.hostedOrganizations.some((o: any) => o.name === org)
+    );
+  };
+
   findRuntimeGroupByName = async (
     context: Keystone,
     org: string,

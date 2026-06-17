@@ -16,6 +16,7 @@ import {
   Subsystem as KeystoneSubsystem,
   Product as KeystoneProduct,
   Application as KeystoneApplication,
+  SubsystemIntegration as KeystoneSubsystemIntegration,
 } from '../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
 import {
@@ -25,6 +26,7 @@ import {
 import { Logger } from '../../logger';
 import { OpenAPISpecService } from './oas-service';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
+import { context } from 'msw';
 
 const logger = Logger('batch.subsystem');
 
@@ -76,6 +78,48 @@ class SubsystemService {
       'Subsystem',
       'allSubsystems',
       ['organization']
+    );
+    return records;
+  };
+
+  lookupSubsystemIntegration = async (
+    context: Keystone,
+    integrationClientId: string
+  ): Promise<KeystoneSubsystemIntegration> => {
+    const records: KeystoneSubsystemIntegration[] = await getRecords(
+      context,
+      'SubsystemIntegration',
+      'allSubsystemIntegrations',
+      [],
+      {
+        query: '$integrationClientId: String!',
+        clause: '{ integrationClientId: $integrationClientId }',
+        variables: { integrationClientId },
+      }
+    );
+
+    assert.strictEqual(
+      records.length == 0,
+      false,
+      'No subsystems found for integration'
+    );
+    return records.pop();
+  };
+
+  listSubsystemsByIntegration = async (
+    context: Keystone,
+    subsystemIntegrationId: string
+  ): Promise<KeystoneSubsystem[]> => {
+    const records: KeystoneSubsystem[] = await getRecords(
+      context,
+      'Subsystem',
+      'allSubsystems',
+      ['organization'],
+      {
+        query: '$subsystemIntegrationId: String!',
+        clause: '{ integrations_some: { id: $subsystemIntegrationId } }',
+        variables: { subsystemIntegrationId },
+      }
     );
     return records;
   };

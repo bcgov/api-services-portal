@@ -373,7 +373,7 @@ describe('SDX Connection Requests', () => {
 
                   expect(body.message).to.be.equal('Validation Failed')
                   expect(body.fields.isApproved.message).to.be.equal(
-                    'Cannot approve connection request when service organization does not match the specified organization'
+                    'Cannot approve/reject connection request when service organization does not match the specified organization'
                   )
                 })
               }

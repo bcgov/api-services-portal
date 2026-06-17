@@ -183,7 +183,7 @@ export const SDXSubsystemsPattern = {
       {
         kind: 'Application',
         name: data.subsystem.name,
-        organization: data.subsystem.organization?.name,
+        namespace: data.subsystem.gateway?.id,
         description: data.subsystem.description,
       },
       {

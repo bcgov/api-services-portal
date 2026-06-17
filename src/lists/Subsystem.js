@@ -23,6 +23,11 @@ module.exports = {
       isRequired: false,
     },
     organization: { type: Relationship, ref: 'Organization' },
+    integrations: {
+      type: Relationship,
+      ref: 'SubsystemIntegration',
+      many: true,
+    },
     slug: {
       type: Slug,
       adminConfig: {

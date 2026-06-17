@@ -76,21 +76,9 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
         summary: 'List subsystems',
         operationId: 'getSubsystems',
         description:
-          'Returns the list of SDX subsystems, optionally filtered by subject token, service provider flag, or environment.',
+          'Returns the list of SDX subsystems, filtered by environment.',
         security,
         querystring: Type.Object({
-          subjectToken: Type.Optional(
-            Type.String({
-              description: SUBJECT_TOKEN_DESC,
-              examples: ['eyJhbGciOi...'],
-            })
-          ),
-          resourceServersOnly: Type.Optional(
-            Type.Boolean({
-              description: RESOURCE_SERVERS_ONLY_DESC,
-              examples: [true],
-            })
-          ),
           environment: Type.Optional(
             Type.String({
               description: ENVIRONMENT_DESC,
@@ -103,8 +91,6 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
     },
     async (req) =>
       app.controllers.subsystem.getSubsystems({
-        subjectToken: req.query.subjectToken,
-        resourceServersOnly: req.query.resourceServersOnly,
         environment: req.query.environment,
       })
   );

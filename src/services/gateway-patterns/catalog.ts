@@ -37,12 +37,13 @@ export interface SubsystemEntry {
       domains: string[];
     };
   };
-  runtimeGroup?: {
+  runtimeGroups?: {
     name: string;
+    environment: string;
     host: string;
-    sdxEndpoint?: string;
-    consumerEndpoint?: string;
-  };
+    sdxEndpoint: string;
+    consumerEndpoint: string;
+  }[];
 }
 
 /**
@@ -113,6 +114,8 @@ export async function GetCatalog(
       name: c.name,
       title: c.title,
       version: c.version,
+      specVersion: c.specVersion,
+      annotations: c.annotations,
       environment: c.environment,
       summary: c.summary,
       description: c.description,
@@ -173,15 +176,19 @@ export async function EnrichWithRuntimeGroup(
   );
 
   // lookup runtime group based on domain
-  const host = orgNamespace.permDomains[0];
   const rgService = new RuntimeGroupService();
-  const runtimeGroup = await rgService.findRuntimeGroupByUniqueHost(ctx, host);
-  subsystemEntry.runtimeGroup = {
-    name: runtimeGroup.name,
-    host,
-    sdxEndpoint: runtimeGroup.sdxEndpoint,
-    consumerEndpoint: runtimeGroup.consumerEndpoint,
-  };
+  const runtimeGroups = await rgService.findRuntimeGroupsByName(
+    ctx,
+    subsystemEntry.organization.name,
+    orgNamespace.permRuntimeGroup
+  );
+  subsystemEntry.runtimeGroups = runtimeGroups.map((rg) => ({
+    name: rg.name,
+    environment: rg.environment,
+    host: rg.host,
+    sdxEndpoint: rg.sdxEndpoint,
+    consumerEndpoint: rg.consumerEndpoint,
+  }));
 }
 
 export function BuildClientID(subsystemEntry: SubsystemEntry): string {

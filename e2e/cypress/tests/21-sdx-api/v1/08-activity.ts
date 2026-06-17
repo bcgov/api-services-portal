@@ -311,43 +311,42 @@ dQIDAQAB
           member: {
             email: 'benny@test.com',
           },
-          roles: ['organization-admin','system-owner'],
+          roles: ['organization-admin', 'system-owner'],
         },
         {
           member: {
             email: 'janis@testmail.com',
           },
-          roles: ['organization-admin','system-owner'],
+          roles: ['organization-admin', 'system-owner'],
         },
       ],
     }
 
     cy.setRequestBody(payload)
-    cy.callAPI(
-      `ds/api/v3/organizations/${workingData.org.name}/access`,
-      'PUT'
-    ).then(({ apiRes: { status } }: any) => {
-      expect(status).to.be.equal(204)
+    cy.callAPI(`ds/api/v3/organizations/${workingData.org.name}/access`, 'PUT').then(
+      ({ apiRes: { status } }: any) => {
+        expect(status).to.be.equal(204)
 
-      cy.callAPI(
-        `ds/api/sdx/v1/catalog/activity?organization=${workingData.org.name}&first=100`,
-        'GET'
-      ).then(({ apiRes: { status, body: activities } }: any) => {
-        expect(status).to.be.equal(200)
-        const entry = activities.find(
-          (a: any) =>
-            a.params?.entity === 'OrganizationAccess' &&
-            a.params?.subject === 'benny@idir' &&
-            a.params?.action === 'updated'
-        )
-        expect(entry?.params?.entity).to.equal('OrganizationAccess')
-        expect(entry?.params?.subject).to.equal('benny@idir')
-        expect(entry?.params?.subject_email).to.be.undefined
-        expect(entry?.params?.action).to.equal('updated')
-        expect(entry?.params?.roles).to.include('[+] organization-admin')
-        expect(entry?.result).to.equal('success')
-      })
-    })
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${workingData.org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'OrganizationAccess' &&
+              a.params?.subject === 'benny@idir' &&
+              a.params?.action === 'updated'
+          )
+          expect(entry?.params?.entity).to.equal('OrganizationAccess')
+          expect(entry?.params?.subject).to.equal('benny@idir')
+          expect(entry?.params?.subject_email).to.be.undefined
+          expect(entry?.params?.action).to.equal('updated')
+          expect(entry?.params?.roles).to.include('[+] organization-admin')
+          expect(entry?.result).to.equal('success')
+        })
+      }
+    )
   })
 
   it('records organization CSR requests in public catalog activity', () => {
@@ -356,6 +355,7 @@ dQIDAQAB
 
     cy.setRequestBody({
       name: runtimeGroupName,
+      environment: 'cyp',
       hostedOrganizations: [org.name],
     })
     cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
@@ -498,12 +498,11 @@ dQIDAQAB
   })
 
   it('keeps v3 organization gateway activity endpoint working', () => {
-    cy.callAPI(
-      `ds/api/v3/organizations/${workingData.org.name}/activity`,
-      'GET'
-    ).then(({ apiRes: { status, body } }: any) => {
-      expect(status).to.be.equal(200)
-      expect(body).to.be.an('array')
-    })
+    cy.callAPI(`ds/api/v3/organizations/${workingData.org.name}/activity`, 'GET').then(
+      ({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        expect(body).to.be.an('array')
+      }
+    )
   })
 })

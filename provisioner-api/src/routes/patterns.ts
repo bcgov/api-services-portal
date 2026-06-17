@@ -19,7 +19,7 @@ export const registerPatternsRoutes: FastifyPluginAsyncTypebox = async (
     '/patterns/:name',
     {
       schema: {
-        tags: ['Resource Patterns'],
+        tags: ['Resource Provisioning'],
         summary: 'Evaluate gateway pattern',
         operationId: 'applyPattern',
         description:

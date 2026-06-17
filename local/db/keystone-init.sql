@@ -2779,3 +2779,137 @@ ALTER TABLE ONLY public."ConnectionRequest"
 
 
 
+
+
+CREATE TABLE public."SubsystemIntegration" (
+    id integer NOT NULL,
+    "integrationClientId" text NOT NULL
+);
+
+
+ALTER TABLE public."SubsystemIntegration" OWNER TO keystonejsuser;
+
+--
+-- Name: SubsystemIntegration_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."SubsystemIntegration_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."SubsystemIntegration_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: SubsystemIntegration_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."SubsystemIntegration_id_seq" OWNED BY public."SubsystemIntegration".id;
+
+
+
+--
+-- Name: SubsystemIntegration id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."SubsystemIntegration" ALTER COLUMN id SET DEFAULT nextval('public."SubsystemIntegration_id_seq"'::regclass);
+
+
+--
+-- Name: SubsystemIntegration SubsystemIntegration_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."SubsystemIntegration"
+    ADD CONSTRAINT "SubsystemIntegration_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: SubsystemIntegration subsystemintegration_integrationclientid_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."SubsystemIntegration"
+    ADD CONSTRAINT subsystemintegration_integrationclientid_unique UNIQUE ("integrationClientId");
+
+
+--
+-- Name: Subsystem_integrations_many; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."Subsystem_integrations_many" (
+    "Subsystem_left_id" integer NOT NULL,
+    "SubsystemIntegration_right_id" integer NOT NULL
+);
+
+
+ALTER TABLE public."Subsystem_integrations_many" OWNER TO keystonejsuser;
+
+
+
+
+--
+-- Name: Task; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."Task" (
+    id integer NOT NULL,
+    ref text NOT NULL,
+    title text NOT NULL,
+    type text NOT NULL,
+    status text NOT NULL,
+    "jsonBlob" text NOT NULL,
+    "updatedAt_utc" timestamp without time zone,
+    "updatedAt_offset" text,
+    "createdAt_utc" timestamp without time zone,
+    "createdAt_offset" text
+);
+
+
+ALTER TABLE public."Task" OWNER TO keystonejsuser;
+
+--
+-- Name: Task_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."Task_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Task_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: Task_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."Task_id_seq" OWNED BY public."Task".id;
+
+
+
+--
+-- Name: Task id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Task" ALTER COLUMN id SET DEFAULT nextval('public."Task_id_seq"'::regclass);
+
+
+--
+-- Name: Task Task_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Task"
+    ADD CONSTRAINT "Task_pkey" PRIMARY KEY (id);
+
+--
+-- Name: Task task_ref_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Task"
+    ADD CONSTRAINT task_ref_unique UNIQUE (ref);

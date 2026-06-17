@@ -59,7 +59,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       ],
       tags: [
         {
-          name: 'Integration Access',
+          name: 'Integration Requests',
           description:
             'Submitting and retrieving status of integration access requests for SDX subsystem environments.',
         },
@@ -69,7 +69,7 @@ export async function buildApp(): Promise<FastifyInstance> {
             'Operations for partner services to query SDX for subsystem and access details and to submit new access requests.',
         },
         {
-          name: 'Resource Patterns',
+          name: 'Resource Provisioning',
           description:
             'Evaluate SDX patterns into resources and dispatch them to their applicable providers.',
         },

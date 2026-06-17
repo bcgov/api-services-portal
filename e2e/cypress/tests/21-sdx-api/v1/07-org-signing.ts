@@ -18,6 +18,7 @@ describe('SDX Organization Signing', () => {
 
       const payload = {
         name: `${runtimeGroupId}`,
+        environment: 'cyp',
         hostedOrganizations: [org.name],
       }
       cy.setRequestBody(payload)
@@ -63,6 +64,7 @@ describe('SDX Organization Signing', () => {
 
       const payload = {
         name: `${runtimeGroupId}`,
+        environment: 'cyp',
         hostedOrganizations: [],
       }
       cy.setRequestBody(payload)

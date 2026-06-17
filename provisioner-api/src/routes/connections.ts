@@ -15,7 +15,7 @@ export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
     '/connections/:id',
     {
       schema: {
-        tags: ['Resource Patterns'],
+        tags: ['Resource Provisioning'],
         summary: 'Evaluate connection request',
         operationId: 'connectionChange',
         description:

@@ -18,6 +18,7 @@ describe('SDX Runtime Groups', () => {
 
       const payload = {
         name: `${runtimeGroupId}`,
+        environment: 'cyp',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
@@ -30,11 +31,15 @@ describe('SDX Runtime Groups', () => {
             expect(status).to.be.equal(200)
             const rg = body.find((rg: any) => rg.name === payload.name)
             expect(rg).to.not.be.undefined
-            expect(rg.host).to.be.equal(`${payload.name}.servers.sdx`)
+            expect(rg.host).to.be.equal(
+              `${payload.name}.${payload.environment}.servers.sdx`
+            )
             expect(rg.name).to.be.equal(`${payload.name}`)
-            expect(rg.sdxEndpoint).to.be.equal(`https://${payload.name}.servers.sdx`)
+            expect(rg.sdxEndpoint).to.be.equal(
+              `https://${payload.name}.${payload.environment}.servers.sdx`
+            )
             expect(rg.consumerEndpoint).to.be.equal(
-              `http://internal.${payload.name}.servers.sdx`
+              `http://internal.${payload.name}.${payload.environment}.servers.sdx`
             )
             expect(rg).to.have.property('gatewayId')
             expect(rg.organization).to.be.equal(org.name)
@@ -48,6 +53,7 @@ describe('SDX Runtime Groups', () => {
 
       const payload = {
         name: `${runtimeGroupId}t2`,
+        environment: 'cyp',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
@@ -121,6 +127,7 @@ describe('SDX Runtime Groups', () => {
 
       const payload = {
         name: `${runtimeGroupId}longname`,
+        environment: 'cyp',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
@@ -139,6 +146,7 @@ describe('SDX Runtime Groups', () => {
 
       const payload = {
         name: `${runtimeGroupId}404`,
+        environment: 'cyp',
       }
       cy.setQueryString({ force: false })
       cy.callAPI(
@@ -156,6 +164,7 @@ describe('SDX Runtime Groups', () => {
       const payload = {
         name: `${runtimeGroupId}3`,
         sdxEndpoint: 'invalid-url',
+        environment: 'cyp',
       }
       cy.setRequestBody(payload)
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
