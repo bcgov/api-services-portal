@@ -41,7 +41,7 @@ export class CommonSsoService {
     request: TIntegrationAccessRequest
   ): Promise<void> {
     const path = `/integrations/${encodeURIComponent(
-      request.integrationId
+      request.clientId
     )}/allowed-services`;
 
     const res = await this.client
@@ -52,12 +52,12 @@ export class CommonSsoService {
       })
       .catch((err) => {
         this.logger?.error(
-          { err, integrationId: request.integrationId },
+          { err, integrationClientId: request.clientId },
           'common-sso provisionAllowedServices request failed'
         );
         throw withDetails(
           new BadGatewayError('common-sso provisionAllowedServices failed'),
-          { integrationId: request.integrationId }
+          { integrationClientId: request.clientId }
         );
       });
 
@@ -66,7 +66,7 @@ export class CommonSsoService {
       this.logger?.error(
         {
           status: res.status,
-          integrationId: request.integrationId,
+          integrationClientId: request.clientId,
           detail,
         },
         'common-sso provisionAllowedServices returned non-2xx'
@@ -74,7 +74,7 @@ export class CommonSsoService {
       throw withDetails(
         new BadGatewayError('common-sso provisionAllowedServices failed'),
         {
-          integrationId: request.integrationId,
+          integrationClientId: request.clientId,
           status: res.status,
         }
       );
@@ -82,7 +82,7 @@ export class CommonSsoService {
 
     this.logger?.info(
       {
-        integrationId: request.integrationId,
+        integrationClientId: request.clientId,
         submissionId: request.submissionId,
       },
       'common-sso provisionAllowedServices delivered'

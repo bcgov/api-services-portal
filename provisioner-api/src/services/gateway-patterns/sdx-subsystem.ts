@@ -1,6 +1,8 @@
 import type {
+  RuntimeGroup,
   SdxMemberApiClient,
   SubsystemEntry,
+  SubsystemRuntimeGroup,
 } from '../../clients/sdx-member/index.js';
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
 import {
@@ -15,6 +17,7 @@ export interface SDXSubsystemConfig extends Record<string, any> {
   subsystem_id: string;
   upstream_url: string;
   use_sni: string;
+  environment: string;
   upgrades: SubsystemUpgrades;
 }
 
@@ -42,6 +45,7 @@ interface SDXSubsystemsPatternData {
   gateway_id: string;
   subsystem: SubsystemEntry;
   services: EnrichedServiceCatalogEntry[];
+  subsystemRuntimeGroup: RuntimeGroup;
 }
 
 /**
@@ -69,10 +73,21 @@ export const SDXSubsystemsPattern = {
       (s) => s.subsystem.clientId === subsystem.clientId
     ) as EnrichedServiceCatalogEntry[];
 
+    const subsystemRG = subsystemClient.runtimeGroups?.find(
+      (rg) => rg.environment === inputs.environment
+    );
+
+    assert.strictEqual(
+      Boolean(subsystemRG),
+      true,
+      `Service subsystem does not have a runtime group for environment '${inputs.environment}'`
+    );
+
     return {
       gateway_id: subsystemClient.gateway?.id!,
       subsystem: subsystemClient,
       services,
+      subsystemRuntimeGroup: subsystemRG as any,
     };
   },
 
@@ -88,7 +103,8 @@ export const SDXSubsystemsPattern = {
 
     const serviceRoutes = data.services.map((service) => {
       const serviceLocator = service.name;
-      const serviceHost = data.subsystem.runtimeGroup?.host;
+
+      const serviceHost = data.subsystemRuntimeGroup.host;
 
       const upgrades = inputs.upgrades || {};
 
@@ -269,8 +285,8 @@ function upgradeToMTLSACL(
 }
 
 function upgradeToTrustSign(tags: string[], data: SDXSubsystemsPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.subsystem.runtimeGroup?.name!}:0`;
-  const keySetName = `sdx.edge.${data.subsystem.runtimeGroup?.name!}`;
+  const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name!}:0`;
+  const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
 
   return {
     name: 'trust-sign',

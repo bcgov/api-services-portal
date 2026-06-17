@@ -27,13 +27,15 @@ export interface SubsystemEntry {
     };
     id: string;
   };
-  runtimeGroups?: {
-    consumerEndpoint?: string;
-    sdxEndpoint?: string;
-    host: string;
-    name: string;
-    environment: string;
-  }[];
+  runtimeGroups?: SubsystemRuntimeGroup[];
+}
+
+export interface SubsystemRuntimeGroup {
+  consumerEndpoint?: string;
+  sdxEndpoint?: string;
+  host: string;
+  name: string;
+  environment: string;
 }
 
 export interface ServiceCatalogOperation {
