@@ -9,8 +9,10 @@ import {
   logOrganizationAccessChanges,
   logOrganizationActivityFromHook,
   logOrganizationUnitActivityFromHook,
+  logOpenAPISpecActivityFromHook,
   logRuntimeGroupActivityFromHook,
   logSubsystemActivityFromHook,
+  relationshipNameFromRef,
   resourceRefId,
   resolveOrgHierarchyKeys,
 } from '../../../services/workflow/org-activity';
@@ -650,6 +652,43 @@ describe('hosted organization helpers', function () {
   });
 });
 
+describe('relationshipNameFromRef', function () {
+  const lookupById = jest.fn();
+
+  beforeEach(() => {
+    lookupById.mockReset();
+  });
+
+  it('returns embedded name from relationship object', async function () {
+    await expect(
+      relationshipNameFromRef({}, { name: 'my-org' }, lookupById)
+    ).resolves.toBe('my-org');
+    expect(lookupById).not.toHaveBeenCalled();
+  });
+
+  it('looks up name by relationship object id', async function () {
+    lookupById.mockResolvedValue('my-org');
+    await expect(
+      relationshipNameFromRef({}, { id: '27' }, lookupById)
+    ).resolves.toBe('my-org');
+    expect(lookupById).toHaveBeenCalledWith({}, '27');
+  });
+
+  it('falls back to raw id when lookup misses and fallbackToRawId is set', async function () {
+    lookupById.mockResolvedValue(undefined);
+    await expect(
+      relationshipNameFromRef({}, 'org-1', lookupById, { fallbackToRawId: true })
+    ).resolves.toBe('org-1');
+  });
+
+  it('returns undefined when lookup misses and fallbackToRawId is false', async function () {
+    lookupById.mockResolvedValue(undefined);
+    await expect(
+      relationshipNameFromRef({}, 'org-1', lookupById)
+    ).resolves.toBeUndefined();
+  });
+});
+
 describe('logOrganizationActivityFromHook', function () {
   beforeEach(() => {
     recordActivityMock.mockClear();
@@ -1110,6 +1149,110 @@ describe('logSubsystemActivityFromHook', function () {
       name: 'MY-SUBSYS',
       description: 'same',
     });
+  });
+});
+
+describe('logOpenAPISpecActivityFromHook', function () {
+  beforeEach(() => {
+    recordActivityMock.mockClear();
+  });
+
+  it('records service publish on create', async function () {
+    await logOpenAPISpecActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn(),
+      },
+      'create',
+      null,
+      {
+        name: 'MY-SERVICE',
+        organization: { name: 'my-org' },
+        subsystem: { name: 'MY-SUBSYS' },
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('published');
+    expect(call.type).toBe('Service');
+    expect(call.refId).toBe('service:MY-SERVICE');
+    expect(call.message).toBe(
+      'Admin published service MY-SERVICE on subsystem MY-SUBSYS in my-org'
+    );
+  });
+
+  it('records service remove on delete', async function () {
+    await logOpenAPISpecActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn(),
+      },
+      'delete',
+      {
+        name: 'MY-SERVICE',
+        organization: { name: 'my-org' },
+        subsystem: { name: 'MY-SUBSYS' },
+      },
+      {
+        name: 'MY-SERVICE',
+        organization: { name: 'my-org' },
+        subsystem: { name: 'MY-SUBSYS' },
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.action).toBe('removed');
+    expect(call.refId).toBe('service:MY-SERVICE');
+  });
+
+  it('resolves organization and subsystem from relationship ids', async function () {
+    const executeGraphQL = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data: { allOrganizations: [{ name: 'my-org' }] },
+      })
+      .mockResolvedValueOnce({
+        data: { allSubsystems: [{ name: 'MY-SUBSYS' }] },
+      });
+
+    await logOpenAPISpecActivityFromHook(
+      { authedItem: { name: 'Admin' }, executeGraphQL },
+      'create',
+      null,
+      {
+        name: 'MY-SERVICE',
+        organization: 'org-1',
+        subsystem: 'sub-1',
+      }
+    );
+
+    expect(recordActivityMock).toHaveBeenCalledTimes(1);
+    const call = getRecordActivityCall(recordActivityMock);
+    expect(call.message).toBe(
+      'Admin published service MY-SERVICE on subsystem MY-SUBSYS in my-org'
+    );
+  });
+
+  it('does not record activity when organization cannot be resolved', async function () {
+    await logOpenAPISpecActivityFromHook(
+      {
+        authedItem: { name: 'Admin' },
+        executeGraphQL: jest.fn().mockResolvedValue({
+          data: { allOrganizations: [], allOpenAPISpecs: [] },
+        }),
+      },
+      'create',
+      null,
+      {
+        name: 'MY-SERVICE',
+        organization: { id: 'missing-org' },
+        subsystem: { name: 'MY-SUBSYS' },
+      }
+    );
+
+    expect(recordActivityMock).not.toHaveBeenCalled();
   });
 });
 

@@ -15,6 +15,7 @@ import {
   getOrganizationUnit,
   lookupOrganizationNameById,
 } from '../keystone/organization';
+import { lookupSubsystemNameById } from '../keystone/subsystem';
 import { KeycloakUserService } from '../keycloak/user-service';
 
 const logger = Logger('wf.OrgActivity');
@@ -73,23 +74,75 @@ type OrgActivityRecordInput = {
   productNamespace?: string | null;
 };
 
-async function organizationNameFromRelationship(
+type RelationshipRef =
+  | { name?: string; id?: string }
+  | string
+  | number
+  | null
+  | undefined;
+
+type RelationshipNameLookup = (
   context: any,
-  organization: { name?: string; id?: string } | string | null | undefined
+  id: string
+) => Promise<string | undefined>;
+
+/** Resolve a Keystone relationship field (id, object, or name) to the related record name. */
+export async function relationshipNameFromRef(
+  context: any,
+  ref: RelationshipRef,
+  lookupById: RelationshipNameLookup,
+  { fallbackToRawId = false }: { fallbackToRawId?: boolean } = {}
 ): Promise<string | undefined> {
-  if (organization == null) {
+  if (ref == null) {
     return undefined;
   }
-  if (typeof organization === 'object') {
-    if (typeof organization.name === 'string' && organization.name.length > 0) {
-      return organization.name;
+  if (typeof ref === 'object') {
+    if (typeof ref.name === 'string' && ref.name.length > 0) {
+      return ref.name;
     }
-    if (typeof organization.id === 'string' && organization.id.length > 0) {
-      return lookupOrganizationNameById(context, organization.id);
+    if (typeof ref.id === 'string' && ref.id.length > 0) {
+      return lookupById(context, ref.id);
     }
     return undefined;
   }
-  return (await lookupOrganizationNameById(context, organization)) ?? organization;
+  const id = String(ref);
+  const name = await lookupById(context, id);
+  return name ?? (fallbackToRawId ? id : undefined);
+}
+
+function organizationNameFromRelationship(
+  context: any,
+  organization: RelationshipRef
+): Promise<string | undefined> {
+  return relationshipNameFromRef(context, organization, lookupOrganizationNameById, {
+    fallbackToRawId: true,
+  });
+}
+
+function subsystemNameFromRelationship(
+  context: any,
+  subsystem: RelationshipRef
+): Promise<string | undefined> {
+  return relationshipNameFromRef(context, subsystem, lookupSubsystemNameById, {
+    fallbackToRawId: true,
+  });
+}
+
+async function lookupOpenAPISpecForActivity(
+  context: any,
+  serviceName: string
+): Promise<Record<string, any> | null> {
+  const result = await context.executeGraphQL({
+    query: `query OpenAPISpecForActivity($name: String!) {
+      allOpenAPISpecs(where: { name: $name }, first: 1) {
+        name
+        organization { id name }
+        subsystem { id name }
+      }
+    }`,
+    variables: { name: serviceName },
+  });
+  return result.data?.allOpenAPISpecs?.[0] ?? null;
 }
 
 async function lookupRuntimeGroupForActivity(
@@ -1197,14 +1250,68 @@ export async function logSubsystemActivityFromHook(
   });
 }
 
-export async function logServiceRemovedForOrg(
+export async function logOpenAPISpecActivityFromHook(
   context: any,
-  orgName: string,
-  serviceName: string,
-  subsystemName: string
+  operation: 'create' | 'delete',
+  existingItem: Record<string, any> | null | undefined,
+  updatedItem: Record<string, any>
 ): Promise<void> {
-  await new OrgActivityService(context, orgName)
-    .logServiceRemoved(true, { serviceName, subsystemName })
+  const item =
+    operation === 'delete' ? (existingItem ?? updatedItem) : updatedItem;
+  const serviceName = item?.name;
+  if (typeof serviceName !== 'string' || serviceName.length === 0) {
+    logger.error('[OrgActivity] open api spec hook missing service name');
+    return;
+  }
+
+  let orgName = await organizationNameFromRelationship(
+    context,
+    item?.organization
+  );
+  let subsystemName = await subsystemNameFromRelationship(
+    context,
+    item?.subsystem
+  );
+
+  if (!orgName || !subsystemName) {
+    const loaded = await lookupOpenAPISpecForActivity(context, serviceName);
+    if (loaded) {
+      orgName =
+        orgName ??
+        (await organizationNameFromRelationship(context, loaded.organization));
+      subsystemName =
+        subsystemName ??
+        (await subsystemNameFromRelationship(context, loaded.subsystem));
+    }
+  }
+
+  if (!orgName) {
+    logger.error(
+      '[OrgActivity] open api spec hook missing organization for %s',
+      serviceName
+    );
+    return;
+  }
+  if (!subsystemName) {
+    logger.error(
+      '[OrgActivity] open api spec hook missing subsystem for %s',
+      serviceName
+    );
+    return;
+  }
+
+  const orgActivity = new OrgActivityService(context, orgName);
+  const serviceData = { serviceName, subsystemName };
+
+  if (operation === 'create') {
+    await orgActivity
+      .logServicePublished(true, serviceData)
+      .catch((e) => logger.error('[OrgActivity] service publish %s', e));
+    return;
+  }
+
+  await orgActivity
+    .logServiceRemoved(true, serviceData)
     .catch((e) => logger.error('[OrgActivity] service remove %s', e));
 }
 

@@ -11,9 +11,6 @@ const {
 const {
   getNamespaceDetails,
 } = require('../../../services/workflow/get-namespaces');
-const {
-  logServiceRemovedForOrg,
-} = require('../../../services/workflow/org-activity');
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -49,10 +46,6 @@ jest.mock('../../../services/batch/oas-service', () => ({
 
 jest.mock('../../../services/workflow/get-namespaces', () => ({
   getNamespaceDetails: jest.fn(),
-}));
-
-jest.mock('../../../services/workflow/org-activity', () => ({
-  logServiceRemovedForOrg: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('SubsystemService', () => {
@@ -145,15 +138,9 @@ describe('SubsystemService', () => {
           },
         ],
       });
-      expect(logServiceRemovedForOrg).toHaveBeenCalledWith(
-        context,
-        'ministry-of-citz',
-        serviceSpec.name,
-        'MY-SUBSYSTEM'
-      );
     });
 
-    it('does not log service remove activity when cascade OAS delete fails', async () => {
+    it('continues subsystem delete when cascade OAS delete fails', async () => {
       const service = new SubsystemService();
 
       setupDeleteSubsystem({
@@ -174,7 +161,11 @@ describe('SubsystemService', () => {
 
       await service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM');
 
-      expect(logServiceRemovedForOrg).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
     });
 
     it('rejects delete when active client connection requests exist', async () => {

@@ -30,10 +30,6 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
-import {
-  logServiceRemovedForOrg,
-  OrgActivityService,
-} from '../../../services/workflow/org-activity';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ExpressRequest } from './types';
@@ -116,9 +112,6 @@ export class GatewayServiceController extends Controller {
         result.id!
       );
       result.refKey = serviceName;
-      await new OrgActivityService(context, org)
-        .logServicePublished(true, { serviceName, subsystemName: subsystem })
-        .catch((e) => logger.error('[OrgActivity] service publish %s', e));
     }
     return result;
   }
@@ -242,15 +235,6 @@ export class GatewayServiceController extends Controller {
       name,
       serviceSpec
     );
-
-    if (result.result === 'deleted') {
-      await logServiceRemovedForOrg(
-        context,
-        org,
-        serviceSpec.name,
-        serviceSpec.subsystem.name
-      );
-    }
 
     return result;
   }
