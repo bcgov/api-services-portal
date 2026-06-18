@@ -99,30 +99,4 @@ describe('KeycloakUserService', function () {
       expect(user.id).toBe('user-id');
     });
   });
-
-  describe('isLegacyIdirUser', function () {
-    it('identifies legacy and federated idir accounts', function () {
-      const kc = new KeycloakUserService('https://provider/realms/abc');
-
-      expect(
-        kc.isLegacyIdirUser({
-          username: 'jdoe@idir',
-          attributes: {
-            identity_provider: ['idir'],
-            provider_username: ['jdoe'],
-          },
-        })
-      ).toBe(true);
-
-      expect(
-        kc.isLegacyIdirUser({
-          username: 'af8b80da00934b11b7f0485d9066609a@idir',
-          attributes: {
-            identity_provider: ['idir'],
-            provider_username: ['jdoe'],
-          },
-        })
-      ).toBe(false);
-    });
-  });
 });

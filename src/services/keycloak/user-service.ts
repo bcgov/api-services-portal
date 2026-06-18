@@ -35,7 +35,7 @@ export class KeycloakUserService {
    * Mirrors auth-oauth2-proxy migration logic: the legacy account username is
    * provider_username@identity_provider, while federated accounts use a GUID.
    */
-  public isLegacyIdirUser(user: UserRepresentation): boolean {
+  private isLegacyIdirUser(user: UserRepresentation): boolean {
     const identityProvider = this.getOneAttributeValue(
       user,
       'identity_provider'
