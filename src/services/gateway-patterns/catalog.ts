@@ -309,7 +309,7 @@ export async function EnrichWithRuntimeGroup(
 
   // lookup runtime group based on domain
   const rgService = new RuntimeGroupService();
-  const runtimeGroups = await rgService.findRuntimeGroupsByName(
+  const runtimeGroups = await rgService.findHostedRuntimeGroupsByName(
     ctx,
     subsystemEntry.organization.name,
     orgNamespace.permRuntimeGroup

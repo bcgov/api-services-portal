@@ -112,13 +112,18 @@ class RuntimeGroupService {
     context: Keystone,
     org: string,
     name: string,
+    environment: string,
     force: boolean = false
   ): Promise<BatchResult> => {
-    const entry = await new RuntimeGroupService().findRuntimeGroupByName(
+    const rgList = await new RuntimeGroupService().findRuntimeGroupsByName(
       context,
       org,
       name
     );
+    const entry = rgList.find((rg) => rg.environment === environment);
+    if (!entry) {
+      throw new Error('Runtime Group not found for the specified environment');
+    }
 
     return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
   };
@@ -143,7 +148,7 @@ class RuntimeGroupService {
     return rg;
   };
 
-  findRuntimeGroupsByName = async (
+  findHostedRuntimeGroupsByName = async (
     context: Keystone,
     org: string,
     name: string
@@ -171,20 +176,24 @@ class RuntimeGroupService {
     );
   };
 
-  findRuntimeGroupByName = async (
+  findRuntimeGroupsByName = async (
     context: Keystone,
     org: string,
     name: string
-  ): Promise<KeystoneRuntimeGroup> => {
-    const rg = await this.findRuntimeGroupByUniqueName(context, name);
-
-    assert.strictEqual(
-      rg.organization?.name === org,
-      true,
-      'Runtime Group not found for organization'
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const runtimeGroups = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
     );
 
-    return rg;
+    return runtimeGroups.filter((rg) => rg.organization?.name === org);
   };
 
   findRuntimeGroupByUniqueName = async (

@@ -85,7 +85,7 @@ export async function CreateNamespaceForRuntimeGroup(
 ): Promise<ResourceSet> {
   // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
-  const runtimeGroups = await rgService.findRuntimeGroupsByName(
+  const runtimeGroups = await rgService.findHostedRuntimeGroupsByName(
     context,
     args.organization,
     args.runtimeGroupName
@@ -147,7 +147,7 @@ export async function CreateNamespaceForSubsystem(
 ): Promise<ResourceSet> {
   // Retrieve the runtime group configuration
   const rgService = new RuntimeGroupService();
-  const runtimeGroups = await rgService.findRuntimeGroupsByName(
+  const runtimeGroups = await rgService.findHostedRuntimeGroupsByName(
     context,
     args.subsystem.organization.name,
     args.runtimeGroupName
