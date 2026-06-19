@@ -13,36 +13,36 @@ import {
 
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
-export interface SDXSubsystemConfig extends Record<string, any> {
-  subsystem_id: string;
-  upstream_url: string;
-  use_sni: string;
+export interface SDXSubsystemConfig {
+  subsystemId: string;
+  upstreamUrl: string;
+  useSni: string;
   environment: string;
   upgrades: SubsystemUpgrades;
 }
 
 interface SubsystemUpgrades {
-  mtls_auth: {};
-  mtls_acl: {
+  mtlsAuth: {};
+  mtlsAcl: {
     allow: string[];
-    certificate_header_name?: string;
+    certificateHeaderName?: string;
   };
   sign: {};
   verify: {};
   token: {
-    allowed_aud: string;
-    allowed_iss: string[];
+    allowedAud: string;
+    allowedIss: string[];
     scope?: string;
-    consumer_match?: boolean;
-    consumer_match_claim?: string;
-    consumer_match_claim_custom_id?: boolean;
-    consumer_match_ignore_not_found?: boolean;
+    consumerMatch?: boolean;
+    consumerMatchClaim?: string;
+    consumerMatchClaimCustomId?: boolean;
+    consumerMatchIgnoreNotFound?: boolean;
   };
-  counter_sign: {};
+  counterSign: {};
 }
 
 interface SDXSubsystemsPatternData {
-  gateway_id: string;
+  gatewayId: string;
   subsystem: SubsystemEntry;
   services: EnrichedServiceCatalogEntry[];
   subsystemRuntimeGroup: RuntimeGroup;
@@ -54,13 +54,13 @@ interface SDXSubsystemsPatternData {
  */
 export const SDXSubsystemsPattern = {
   id: 'sdx-subsystem.r1',
-  requiredParams: ['subsystem_id', 'upstream_url'],
+  requiredParams: ['subsystemId', 'upstreamUrl'],
 
   inject: async (
     api: SdxMemberApiClient,
-    inputs: SDXSubsystemConfig | Record<string, any>
+    inputs: SDXSubsystemConfig
   ): Promise<SDXSubsystemsPatternData> => {
-    const subsystem = await api.getCatalogSubsystem(inputs.subsystem_id);
+    const subsystem = await api.getCatalogSubsystem(inputs.subsystemId);
 
     const subsystemClient = await api.getSubsystemClient(
       subsystem.organization?.name!,
@@ -84,19 +84,16 @@ export const SDXSubsystemsPattern = {
     );
 
     return {
-      gateway_id: subsystemClient.gateway?.id!,
+      gatewayId: subsystemClient.gateway?.id!,
       subsystem: subsystemClient,
       services,
       subsystemRuntimeGroup: subsystemRG as any,
     };
   },
 
-  eval: (
-    inputs: SDXSubsystemConfig | Record<string, any>,
-    data: SDXSubsystemsPatternData
-  ) => {
+  eval: (inputs: SDXSubsystemConfig, data: SDXSubsystemsPatternData) => {
     let tags = [
-      `ns.${data.gateway_id}.sys-${data.subsystem.name}`,
+      `ns.${data.gatewayId}.sys-${data.subsystem.name}`,
       `subsystem:${data.subsystem.clientId}`,
       'sdx',
     ];
@@ -118,7 +115,7 @@ export const SDXSubsystemsPattern = {
               `operation:${op.operationId}`,
             ],
             hosts: [serviceHost],
-            snis: inputs.use_sni === 'false' ? [] : [serviceHost],
+            snis: inputs.useSni === 'false' ? [] : [serviceHost],
             paths: [
               op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
             ],
@@ -129,7 +126,7 @@ export const SDXSubsystemsPattern = {
             headers: {
               'X-Service-Id': [serviceLocator],
             },
-            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
             strip_path: false,
           };
         }
@@ -139,7 +136,7 @@ export const SDXSubsystemsPattern = {
         kind: 'GatewayService',
         name: `sdx.sys.${serviceLocator}`,
         tags: [...tags, `service:${serviceLocator}`, `rghost:${serviceHost}`],
-        url: inputs.upstream_url,
+        url: inputs.upstreamUrl,
         retries: 0,
         routes: [
           ...routes,
@@ -148,13 +145,13 @@ export const SDXSubsystemsPattern = {
               name: `sdx.sys.${serviceLocator}.hello`,
               tags: [...tags, `service:${serviceLocator}`, `operation:hello`],
               hosts: [serviceHost],
-              snis: inputs.use_sni === 'false' ? [] : [serviceHost],
+              snis: inputs.useSni === 'false' ? [] : [serviceHost],
               paths: [`/hello`],
               methods: ['GET'],
               headers: {
                 'X-Service-Id': [`${serviceLocator}`],
               },
-              protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+              protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
               plugins: [
                 {
                   name: 'request-termination',
@@ -239,15 +236,15 @@ function upgradeToJWTKeycloak(
     name: 'jwt-keycloak',
     tags,
     config: {
-      allowed_aud: jwtKeycloakConfig?.allowed_aud,
-      allowed_iss: jwtKeycloakConfig?.allowed_iss,
+      allowed_aud: jwtKeycloakConfig?.allowedAud,
+      allowed_iss: jwtKeycloakConfig?.allowedIss,
       scope: jwtKeycloakConfig?.scope,
-      consumer_match: jwtKeycloakConfig?.consumer_match || false,
-      consumer_match_claim: jwtKeycloakConfig?.consumer_match_claim || 'azp',
+      consumer_match: jwtKeycloakConfig?.consumerMatch || false,
+      consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:
-        jwtKeycloakConfig?.consumer_match_claim_custom_id || false,
+        jwtKeycloakConfig?.consumerMatchClaimCustomId || false,
       consumer_match_ignore_not_found:
-        jwtKeycloakConfig?.consumer_match_ignore_not_found || false,
+        jwtKeycloakConfig?.consumerMatchIgnoreNotFound || false,
     },
   };
 }
@@ -271,9 +268,9 @@ function upgradeToMTLSACL(
   data: SDXSubsystemsPatternData,
   inputs: SDXSubsystemConfig
 ) {
-  const allow = inputs.upgrades.mtls_acl.allow || [];
+  const allow = inputs.upgrades.mtlsAcl.allow || [];
   const headerName =
-    inputs.upgrades.mtls_acl.certificate_header_name || 'X-Client-Cert-I-Dn';
+    inputs.upgrades.mtlsAcl.certificateHeaderName || 'X-Client-Cert-I-Dn';
   return {
     name: 'mtls-acl',
     tags: tags,

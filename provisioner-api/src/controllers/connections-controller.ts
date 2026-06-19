@@ -6,6 +6,9 @@ import type {
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { BadRequestError } from '../errors/api-errors.js';
+import { Activity } from '../clients/feed/types.js';
+import { connect } from 'http2';
+import { v4 as uuidv4 } from 'uuid';
 
 export class ConnectionsController {
   constructor(
@@ -18,9 +21,14 @@ export class ConnectionsController {
     connectionRequest: TConnectionChangeRequest,
     action: 'preview' | 'apply' | 'diff' | 'delete'
   ): Promise<TConnectionChangeResponse> {
+    const service = await this.services.sdxMember.getSubsystemService(
+      connectionRequest.serviceId
+    );
+
     const resourceSets =
       await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
         id,
+        service,
         connectionRequest
       );
 
@@ -45,12 +53,47 @@ export class ConnectionsController {
         );
         results.push(...result);
       }
-    }
 
-    return {
-      applied: results.filter((r) => r.status === 'applied').length,
-      failed: results.filter((r) => r.status === 'failed').length,
-      results,
+      if (action !== 'diff') {
+        await this.logActivity(action, connectionRequest, service, results);
+      }
+
+      return {
+        applied: results.filter((r) => r.status === 'applied').length,
+        failed: results.filter((r) => r.status === 'failed').length,
+        results,
+      };
+    }
+  }
+
+  private async logActivity(
+    action: 'apply' | 'delete',
+    connectionRequest: TConnectionChangeRequest,
+    service: any,
+    results: TResourceResult[]
+  ): Promise<void> {
+    const activity: Activity = {
+      id: uuidv4(),
+      type: 'ConnectionRequest',
+      action: 'publish',
+      result: results.some((r) => r.status === 'failed') ? 'failed' : 'success',
+      name: 'N/A',
+      message: `Connection ${connectionRequest.clientId} -> ${connectionRequest.serviceId} ${action === 'apply' ? 'provisioned' : 'removed'}`,
+      refId: '',
+      context: {
+        message: 'Connection {client} -> {service} {action}',
+        params: {
+          client: connectionRequest.clientId,
+          service: connectionRequest.serviceId,
+          action: action === 'apply' ? 'provisioned' : 'removed',
+        },
+      },
+      blob: [{ id: uuidv4(), blob: JSON.stringify(results) }],
+      filterKey1: `org:${service.subsystem.organization?.name}`,
+      filterKey2: `sdxClient:${connectionRequest.clientId}`,
+      filterKey3: `sdxService:${connectionRequest.serviceId}`,
     };
+
+    await this.services.activity.publishActivity(activity);
   }
 }

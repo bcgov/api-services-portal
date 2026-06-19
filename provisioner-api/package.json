@@ -24,7 +24,8 @@
     "fastify": "^5.2.0",
     "jose": "^6.2.3",
     "js-yaml": "^4.1.1",
-    "oauth4webapi": "^3.8.6"
+    "oauth4webapi": "^3.8.6",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@stoplight/spectral-cli": "^6.11.1",

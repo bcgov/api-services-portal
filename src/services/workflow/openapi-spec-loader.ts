@@ -20,7 +20,12 @@ export interface SpecOperations {
   summary: string;
   method: string;
   path: string;
-  scopes?: string[];
+  scopes?: ResourceScope[];
+}
+
+export interface ResourceScope {
+  name: string;
+  description?: string;
 }
 
 export const LoadOpenAPISpec = async (
@@ -81,59 +86,54 @@ export const LoadOpenAPISpec = async (
 function parseSpecOperations(spec: any) {
   const operations =
     spec?.paths &&
-    Object.keys(spec.paths)
-      .filter((path) => !['summary', 'description'].includes(path))
-      .map((path) => {
-        const pathItem = spec.paths[path];
+    Object.keys(spec.paths).map((path) => {
+      const pathItem = spec.paths[path];
 
-        // include all the standard operations
-        const stdOperations = Object.keys(pathItem).map((method) => {
+      // include all the standard operations
+      const stdOperations = Object.keys(pathItem)
+        .filter((path) => !['summary', 'description'].includes(path))
+        .map((method) => {
           const op = pathItem[method];
           return {
             operationId: op.operationId,
             method: method.toUpperCase(),
             path,
             summary: op.summary || '',
-            scopes:
-              op.security && op.security[0] && op.security[0]['bearer_auth']
-                ? op.security[0]['bearer_auth']
-                : [],
+            scopes: parseScopes(spec.components.securitySchemes, op.security),
           };
         });
 
-        // if there is a "callback" then add that as an event
-        if (pathItem.callback) {
-          Object.keys(pathItem.callback).forEach((cbName) => {
-            Object.keys(pathItem.callback[cbName]).forEach((callbackPath) => {
-              Object.keys(pathItem.callback[cbName][callbackPath]).forEach(
-                (method) => {
-                  const op = pathItem.callback[cbName][callbackPath][method];
-                  stdOperations.push({
-                    operationId: `callback:${cbName}`,
-                    method,
-                    path: callbackPath,
-                    summary: op.summary,
-                    scopes:
-                      op.security &&
-                      op.security[0] &&
-                      op.security[0]['bearer_auth']
-                        ? op.security[0]['bearer_auth']
-                        : [],
-                  });
-                }
-              );
-            });
+      // if there is a "callback" then add that as an event
+      if (pathItem.callback) {
+        Object.keys(pathItem.callback).forEach((cbName) => {
+          Object.keys(pathItem.callback[cbName]).forEach((callbackPath) => {
+            Object.keys(pathItem.callback[cbName][callbackPath]).forEach(
+              (method) => {
+                const op = pathItem.callback[cbName][callbackPath][method];
+                stdOperations.push({
+                  operationId: `callback:${cbName}`,
+                  method,
+                  path: callbackPath,
+                  summary: op.summary,
+                  scopes: parseScopes(
+                    spec.components.securitySchemes,
+                    op.security
+                  ),
+                });
+              }
+            );
           });
-        }
-        return [...stdOperations];
-      });
+        });
+      }
+      return [...stdOperations];
+    });
 
   const flattenedOperations: {
     operationId: string;
     summary: string;
     method: string;
     path: string;
-    scopes?: string[];
+    scopes?: ResourceScope[];
   }[] = [];
   if (operations) {
     for (const opList of operations) {
@@ -143,4 +143,30 @@ function parseSpecOperations(spec: any) {
     }
   }
   return flattenedOperations;
+}
+
+function parseScopes(schemes: any, security: any): ResourceScope[] {
+  if (!security || !security[0]) {
+    return [];
+  }
+  // get the first scheme to get the required scopes for this operation
+  const firstScheme = Object.keys(security[0])[0];
+  const requiredScopes = security[0][firstScheme];
+
+  const scopes = schemes[firstScheme].flows?.authorizationCode?.scopes || [];
+
+  if (Array.isArray(scopes)) {
+    return scopes
+      .filter((s) => requiredScopes.includes(s))
+      .map((s) => ({ name: s }));
+  } else if (typeof scopes === 'object') {
+    return Object.keys(scopes)
+      .filter((s) => requiredScopes.includes(s))
+      .map((s) => ({
+        name: s,
+        description: scopes[s],
+      }));
+  } else {
+    return [];
+  }
 }

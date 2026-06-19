@@ -12,6 +12,7 @@ import {
   SuccessResponse,
   Tags,
   Query,
+  Get,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
@@ -24,6 +25,15 @@ import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
 import { ProvisionerService } from '../../../services/provisioner';
 import { PostPatternsResponse } from '../../../services/provisioner/provisioner-service';
+import { ActivityDetail } from '../../../controllers/v3/types-extra';
+import { getOrgActivity } from '../../../services/keystone/activity';
+import { transformActivity } from '../../../services/workflow';
+import {
+  parseBlobString,
+  parseJsonString,
+  removeEmpty,
+  removeKeys,
+} from '../../../batch/feed-worker';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -89,6 +99,37 @@ export class OrgGatewaysController extends Controller {
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
+  }
+
+  /**
+   * Retrieve organization-level activity for the SDX catalog.
+   *
+   * @summary List organization activity
+   * @param organization Optional organization name filter
+   * @param first Maximum records to return (capped at 100)
+   * @param skip Records to skip for pagination
+   */
+  @Get('/activity')
+  @OperationId('listOrgActivity')
+  public async listOrgActivity(
+    @Query() organization?: string,
+    @Query() first: number = 20,
+    @Query() skip: number = 0
+  ): Promise<ActivityDetail[]> {
+    const ctx = this.keystone.sudo();
+    const records = await getOrgActivity(
+      ctx,
+      organization,
+      first > 100 ? 100 : first,
+      skip,
+      false
+    );
+
+    return transformActivity(records)
+      .map((o) => removeKeys(o, ['id', 'namespace', 'subject_email']))
+      .map((o) => removeEmpty(o))
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
   }
 
   /**

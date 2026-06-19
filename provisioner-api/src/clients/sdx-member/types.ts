@@ -39,7 +39,7 @@ export interface SubsystemRuntimeGroup {
 }
 
 export interface ServiceCatalogOperation {
-  scopes?: string[];
+  scopes?: { name: string; description?: string }[];
   path: string;
   method: string;
   summary: string;
@@ -114,6 +114,7 @@ export interface RuntimeGroupInput {
 export interface RuntimeGroup {
   name?: string;
   host?: string;
+  environment?: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;
   gatewayId?: string;

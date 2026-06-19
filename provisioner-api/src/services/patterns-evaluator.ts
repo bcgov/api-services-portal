@@ -3,6 +3,7 @@ import type { OAuthClient } from '../clients/oauth.js';
 import {
   ConnectionRequestInput,
   SdxMemberApiClient,
+  ServiceCatalogEntry,
 } from '../clients/sdx-member/index.js';
 import { SDXP2PConsumerPattern } from './gateway-patterns/sdx-p2p-consumer.js';
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
@@ -16,6 +17,8 @@ import {
   withDetails,
 } from '../errors/api-errors.js';
 import { PolicyService } from './policy-service.js';
+
+import { Environments } from './policies/env.js';
 
 export interface PatternOutput {
   documents: any[];
@@ -31,11 +34,8 @@ export interface PatternOutput {
 export interface PatternProcessor {
   id: string;
   requiredParams: string[];
-  eval: (inputs: Record<string, any>, data?: any) => any[];
-  inject?: (
-    api: SdxMemberApiClient,
-    inputs: Record<string, any>
-  ) => Promise<any>;
+  eval: (inputs: any, data?: any) => any[];
+  inject?: (api: SdxMemberApiClient, inputs: any) => Promise<any>;
 }
 
 const PATTERNS: Record<string, PatternProcessor> = {
@@ -48,7 +48,6 @@ const PATTERNS: Record<string, PatternProcessor> = {
 
 export interface GatewayPatternConfig {
   pattern: string;
-  //action?: 'preview' | 'apply' | 'diff' | 'delete';
   parameters: Record<string, any>;
 }
 
@@ -75,25 +74,34 @@ export class PatternsEvaluatorService {
    */
   async buildResourcesUsingConnectionRequest(
     id: string,
+    service: ServiceCatalogEntry,
     connection: ConnectionRequestInput
   ): Promise<PatternOutput[]> {
-    const service = await this.api.getOASService(connection.serviceId);
-    const orgName = service.subsystem.organization?.name;
-    if (!orgName) {
-      throw new NotFoundError(
-        `Organization for service '${connection.serviceId}' not found`
+    if (connection.environment !== service.environment) {
+      throw new BadRequestError(
+        `Connection request environment '${connection.environment}' does not match service environment '${service.environment}'`
       );
     }
 
-    this.logger?.debug(
-      { serviceId: connection.serviceId, org: orgName },
-      'SdxMemberService.onConnectionRequestChange'
-    );
+    const combinedScopes = [
+      ...(connection.requesterDetails.scopes || []),
+      connection.requesterDetails.service.privacyZone,
+    ];
+
+    const policyContext = {
+      ...connection,
+      combinedScopes,
+      globals: {
+        environment: Environments[connection.environment],
+      },
+    };
+
+    this.logger?.debug('Evaluting policy with %j', policyContext);
 
     // run the policy check
     const policyResult = this.policyService.validateConnectionRequest(
       connection.policyVersion || '',
-      connection as unknown as Record<string, any>
+      policyContext
     );
 
     if (!policyResult.allowed) {
@@ -122,10 +130,9 @@ export class PatternsEvaluatorService {
         pattern: pattern,
         parameters: {
           ...{
-            conn_id: id,
-            environment: connection.environment,
-            client_id: connection.clientId,
-            service_id: connection.serviceId,
+            connId: id,
+            clientId: connection.clientId,
+            serviceId: connection.serviceId,
           },
           ...gatewayPatterns[pattern],
         },
@@ -154,7 +161,7 @@ export class PatternsEvaluatorService {
       const data = await pattern.inject(this.api, inputs.parameters);
       this.logger?.info('Pattern inject data for %s: %j', inputs.pattern, data);
       return {
-        _gateway_id: data.gateway_id,
+        _gateway_id: data.gatewayId,
         documents: pattern.eval(inputs.parameters, data),
       };
     }

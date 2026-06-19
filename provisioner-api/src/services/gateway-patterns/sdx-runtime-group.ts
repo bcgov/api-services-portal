@@ -2,15 +2,16 @@ import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
 import { assert } from './utils.js';
 
-export interface SDXRuntimeGroupPatternConfig extends Record<string, string> {
+export interface SDXRuntimeGroupPatternConfig {
   organization: string;
-  runtime_group_name: string;
+  runtimeGroupName: string;
+  environment: string;
 }
 
 interface SDXRuntimeGroupPatternData {
-  gateway_id: string;
-  runtime_group: RuntimeGroup;
-  operator_runtime_group: RuntimeGroup;
+  gatewayId: string;
+  runtimeGroup: RuntimeGroup;
+  operatorRuntimeGroup: RuntimeGroup;
 }
 
 /**
@@ -19,19 +20,26 @@ interface SDXRuntimeGroupPatternData {
  */
 export const SDXRuntimeGroupPattern = {
   id: 'sdx-runtime-group.r1',
-  requiredParams: ['organization', 'runtime_group_name'],
+  requiredParams: ['organization', 'runtimeGroupName', 'environment'],
 
-  inject: async (api: SdxMemberApiClient, inputs: Record<string, string>) => {
+  inject: async (
+    api: SdxMemberApiClient,
+    inputs: SDXRuntimeGroupPatternConfig
+  ) => {
     // retrieve the runtime groups owned by the organization
     const owned = await api.listRuntimeGroups(inputs.organization, {
       filter: 'owned',
     });
-    const rg = owned.find((g) => g.name === inputs.runtime_group_name);
+    const rg = owned.find(
+      (g) =>
+        g.name === inputs.runtimeGroupName &&
+        g.environment === inputs.environment
+    );
 
     assert.strictEqual(
       Boolean(rg),
       true,
-      'Organization does not own this runtime group'
+      'Organization does not own this runtime group environment'
     );
 
     // the operator edge may be owned by, or merely available to, this org
@@ -49,24 +57,27 @@ export const SDXRuntimeGroupPattern = {
     );
 
     return {
-      gateway_id: rg!.gatewayId,
-      runtime_group: rg!,
-      operator_runtime_group: operatorEdge!,
+      gatewayId: rg!.gatewayId,
+      runtimeGroup: rg!,
+      operatorRuntimeGroup: operatorEdge!,
     };
   },
 
-  eval: (inputs: Record<string, string>, data: SDXRuntimeGroupPatternData) => {
-    const gw = data.gateway_id;
-    const nm = `sdx.rg.${inputs.runtime_group_name}`;
-    const nsQualifier = `rg-${inputs.runtime_group_name}`;
+  eval: (
+    inputs: SDXRuntimeGroupPatternConfig,
+    data: SDXRuntimeGroupPatternData
+  ) => {
+    const gw = data.gatewayId;
+    const nm = `sdx.rg.${inputs.runtimeGroupName}.${inputs.environment}`;
+    const nsQualifier = `rg-${inputs.runtimeGroupName}-${inputs.environment}`;
 
-    const runtimeGroupName = inputs.runtime_group_name;
-    const routeHost = data.runtime_group.host!;
+    const runtimeGroupName = inputs.runtimeGroupName;
+    const routeHost = data.runtimeGroup.host!;
 
-    const consumerUrl = new URL(data.runtime_group.consumerEndpoint!);
+    const consumerUrl = new URL(data.runtimeGroup.consumerEndpoint!);
     const consumerHost = consumerUrl.host;
 
-    const routeHostUrl = new URL(data.operator_runtime_group.consumerEndpoint!);
+    const routeHostUrl = new URL(data.operatorRuntimeGroup.consumerEndpoint!);
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 
@@ -216,13 +227,13 @@ export const SDXRuntimeGroupPattern = {
       {
         kind: 'GatewayService',
         name: `ops.c.${nm}.KMS`,
-        url: `${data.runtime_group.sdxEndpoint}/csr`,
+        url: `${data.runtimeGroup.sdxEndpoint}/csr`,
         tags,
         tls_verify: true,
         routes: [
           {
             name: `ops.c.${nm}.KMS`,
-            paths: [`/edge/${data.runtime_group.name}/csr`],
+            paths: [`/edge/${data.runtimeGroup.name}/csr`],
             strip_path: true,
             tags,
             hosts: [routeHostUrl.hostname],
@@ -237,7 +248,7 @@ export const SDXRuntimeGroupPattern = {
 };
 
 function transformer(tags: string[], data: SDXRuntimeGroupPatternData) {
-  const serviceHost = data.runtime_group.host;
+  const serviceHost = data.runtimeGroup.host;
   return {
     name: 'request-transformer',
     tags,

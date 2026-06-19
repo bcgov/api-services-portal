@@ -159,7 +159,6 @@ const NewIntegrationAccessResourceServer = Type.Object(
 
 export const NewIntegrationAccessRequest = Type.Object(
   {
-    integrationId: Type.String({ examples: ['integration-42'] }),
     requester: Type.String({ examples: ['user@example.gov.bc.ca'] }),
     clientId: Type.String({ examples: ['partner-app'] }),
     policyVersion: Type.String({ examples: ['SDX.R1.00'] }),

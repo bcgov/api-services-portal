@@ -16,6 +16,7 @@ export default fp(async (app) => {
       sdx: clients.sdx.baseUrl || 'unconfigured',
       gwa: clients.gwa.baseUrl || 'unconfigured',
       css: clients.css.baseUrl || 'unconfigured',
+      feed: process.env.FEED_URL || 'unconfigured',
     },
     'upstream clients registered'
   );

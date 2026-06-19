@@ -6,7 +6,7 @@ import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import clientsPlugin from './plugins/clients.js';
 import servicesPlugin from './plugins/services.js';
 import controllersPlugin from './plugins/controllers.js';
-import { registerSubsystemsRoutes } from './routes/subsystems.js';
+import { registerResourceServersRoutes } from './routes/resource-servers.js';
 import { registerResourcesRoutes } from './routes/connections.js';
 import { registerPatternsRoutes } from './routes/patterns.js';
 import { sdxSchemas } from './schemas/sdx.js';
@@ -113,7 +113,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(clientsPlugin);
   await app.register(servicesPlugin);
   await app.register(controllersPlugin);
-  await app.register(registerSubsystemsRoutes, { prefix: API_PREFIX });
+  await app.register(registerResourceServersRoutes, { prefix: API_PREFIX });
   await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
   await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
   await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });

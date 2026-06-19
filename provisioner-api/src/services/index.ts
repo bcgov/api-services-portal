@@ -8,8 +8,10 @@ import { PolicyService } from './policy-service.js';
 import { PatternsEvaluatorService } from './patterns-evaluator.js';
 import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
+import { ActivityService } from './activity-service.js';
 
 export {
+  ActivityService,
   DirectoryService,
   SdxMemberService,
   GatewayAdminService,
@@ -18,6 +20,7 @@ export {
 };
 
 export interface Services {
+  activity: ActivityService;
   directory: DirectoryService;
   sdxMember: SdxMemberService;
   gatewayAdmin: GatewayAdminService;
@@ -40,6 +43,7 @@ export function buildServices(
   logger?: FastifyBaseLogger
 ): Services {
   return {
+    activity: new ActivityService(clients.feed, child(logger, 'activity')),
     directory: new DirectoryService(clients.aps, child(logger, 'directory')),
     sdxMember: new SdxMemberService(clients.sdx, child(logger, 'sdxMember')),
     gatewayAdmin: new GatewayAdminService(

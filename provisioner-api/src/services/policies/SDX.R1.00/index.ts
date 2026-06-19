@@ -12,7 +12,7 @@ const readRelativeFile = (relativePath: string) => {
 
 const schema = readRelativeFile('./schema.cedarschema');
 
-const rawPolicies = ['connection.cedar', 'environment.cedar'].map((file) => {
+const rawPolicies = ['connection.cedar'].map((file) => {
   const content = readRelativeFile(`./${file}`);
   // split on permit | forbid
   const parts = content.match(/(permit|forbid)\s*\([^)]*\)\s*[\s\S]*?;/g) ?? [];
@@ -23,7 +23,10 @@ const rawPolicies = ['connection.cedar', 'environment.cedar'].map((file) => {
 const policies: Record<string, string> = {};
 rawPolicies.forEach((p) => {
   p.parts.forEach((part, index) => {
-    policies[`${p.name}:${index}`] = part;
+    // get the label from the first line as a comment after the permit|forbid keyword
+    const labelMatch = part.split('\n')[0].split('//')[1];
+    const label = labelMatch ? labelMatch.trim() : `${index}`;
+    policies[`${p.name}:${label}`] = part;
   });
 });
 

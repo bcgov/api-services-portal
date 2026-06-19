@@ -4,7 +4,6 @@ import cedar, {
 } from '@cedar-policy/cedar-wasm/nodejs';
 import { SDXPolicy as SDX_R0_00_Policy } from './policies/SDX.R0.00/index.js';
 import { SDXPolicy as SDX_R1_00_Policy } from './policies/SDX.R1.00/index.js';
-import { OAuthClient } from '../clients/oauth.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { BadRequestError } from '../errors/api-errors.js';
 
@@ -26,46 +25,6 @@ export class PolicyService {
         type: 'SDX::ConnectionRequest',
         id: `${ctx.clientId}:${ctx.serviceId}`,
       },
-      ctx as unknown as Record<string, CedarValueJson>
-    );
-  }
-
-  /**
-   *
-   * @param pattern
-   * @param ctx
-   * @returns PolicyResult
-   */
-  validateConsumerPolicy(
-    policy: string,
-    pattern: string,
-    ctx: Record<string, CedarValueJson>
-  ): PolicyResult {
-    return EvaluatePolicy(
-      policy,
-      { type: 'SDX::User', id: 'system' },
-      { type: 'SDX::Action', id: 'ApplyConsumerPattern' },
-      { type: 'SDX::ConsumerPattern', id: `${pattern}` },
-      ctx as unknown as Record<string, CedarValueJson>
-    );
-  }
-
-  /**
-   *
-   * @param pattern
-   * @param ctx
-   * @returns PolicyResult
-   */
-  validateProviderPolicy(
-    policy: string,
-    pattern: string,
-    ctx: Record<string, CedarValueJson>
-  ): PolicyResult {
-    return EvaluatePolicy(
-      policy,
-      { type: 'SDX::User', id: 'system' },
-      { type: 'SDX::Action', id: 'ApplyProviderPattern' },
-      { type: 'SDX::ProviderPattern', id: `${pattern}` },
       ctx as unknown as Record<string, CedarValueJson>
     );
   }

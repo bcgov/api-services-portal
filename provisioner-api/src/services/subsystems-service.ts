@@ -2,9 +2,10 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import {
   SdxMemberApiClient,
+  ServiceCatalogEntry,
   SubsystemEntry,
 } from '../clients/sdx-member/index.js';
-import { BadRequestError } from '../errors/api-errors.js';
+import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
 import { TSubsystemEnvironment } from '../schemas/sdx.js';
 
 /**
@@ -23,6 +24,28 @@ export class SdxMemberService {
     private readonly logger?: FastifyBaseLogger
   ) {
     this.api = new SdxMemberApiClient(client, logger);
+  }
+
+  async getSubsystemByIntegrationClientId(
+    integrationClientId: string
+  ): Promise<SubsystemEntry> {
+    const subsystems = await this.api.listCatalogSubsystems({
+      integrationClientId,
+    });
+    if (!subsystems || subsystems.length === 0) {
+      throw new NotFoundError(
+        `Subsystem with clientId ${integrationClientId} not found`
+      );
+    }
+
+    const subsystem = subsystems[0];
+
+    if (subsystem.organization === undefined) {
+      throw new NotFoundError(
+        `Organization for subsystem with clientId ${integrationClientId} not found`
+      );
+    }
+    return subsystem;
   }
 
   /**
@@ -60,7 +83,7 @@ export class SdxMemberService {
               scopes: s.operations.reduce(
                 (acc: { [name: string]: string }, op) => {
                   op.scopes?.forEach((scope) => {
-                    acc[scope] = '';
+                    acc[scope.name] = scope.description || '';
                   });
                   return acc;
                 },
@@ -73,5 +96,21 @@ export class SdxMemberService {
     } else {
       throw new BadRequestError('Must provide environment query parameters');
     }
+  }
+
+  /**
+   *
+   * @param serviceId
+   * @returns ServiceCatalogEntry
+   */
+  async getSubsystemService(serviceId: string): Promise<ServiceCatalogEntry> {
+    const service = await this.api.getOASService(serviceId);
+    const orgName = service.subsystem.organization?.name;
+    if (!orgName) {
+      throw new NotFoundError(
+        `Organization for service '${serviceId}' not found`
+      );
+    }
+    return service;
   }
 }

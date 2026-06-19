@@ -1,6 +1,9 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
-import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
+import {
+  SdxMemberApiClient,
+  SubsystemEntry,
+} from '../clients/sdx-member/index.js';
 import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
 import {
   TIntegrationAccessRequest,
@@ -33,7 +36,7 @@ export class IntegrationAccessService {
    */
   async submitIntegrationAccessRequest(
     submissionId: string,
-    integrationClientId: string,
+    subsystem: SubsystemEntry,
     input: TNewIntegrationAccessRequest
   ): Promise<TNewIntegrationAccessRequestResponse> {
     const policyVersion = input.policyVersion || 'SDX.R1.00';
@@ -42,24 +45,7 @@ export class IntegrationAccessService {
     // if there is none, then put the access request on hold
     // until the subsystem has been linked
 
-    const subsystems = await this.api.listCatalogSubsystems({
-      integrationClientId,
-    });
-    if (!subsystems || subsystems.length === 0) {
-      throw new NotFoundError(
-        `Subsystem with clientId ${integrationClientId} not found`
-      );
-    }
-
-    const subsystem = subsystems[0];
-
-    if (subsystem.organization === undefined) {
-      throw new NotFoundError(
-        `Organization for subsystem with clientId ${integrationClientId} not found`
-      );
-    }
-
-    const subsystemOrgName = subsystem.organization.name;
+    const subsystemOrgName = subsystem.organization!.name;
 
     const existingConnections =
       await this.api.listConnections(subsystemOrgName);
@@ -83,7 +69,6 @@ export class IntegrationAccessService {
               requester: input.requester,
               scopes: requestedService.scopes,
               client: {
-                integrationId: input.integrationId,
                 clientId: input.clientId,
                 privacyZone: input.privacyZone,
               },
@@ -107,7 +92,7 @@ export class IntegrationAccessService {
               const operations = spec.operations || [];
               const scopeExists = operations.some((op) => {
                 const opScopes = op.scopes || [];
-                return opScopes.includes(scope);
+                return opScopes.some((s: { name: string }) => s.name === scope);
               });
               if (!scopeExists) {
                 throw new BadRequestError(
@@ -120,10 +105,7 @@ export class IntegrationAccessService {
               gatewayPatterns: {},
             };
 
-            const serviceResources = {
-              subsystemId: spec.subsystem.clientId,
-              gatewayPatterns: {},
-            };
+            const serviceResources = {};
 
             // check if there is an existing connection for this service
             const existingConnection = existingConnections.find(

@@ -11,43 +11,43 @@ import {
 } from './utils.js';
 
 // TODO: clean this up a bit!
-const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'http://sdx.public.url';
 
-export interface SDXP2PConsumerPatternConfig extends Record<string, any> {
-  environment: string;
-  client_id: string;
-  service_id: string;
+export interface SDXP2PConsumerPatternConfig {
+  connId: string;
+  clientId: string;
+  serviceId: string;
   upgrades: ConsumerUpgrades;
-  tls_verify?: string;
-  strip_path: boolean;
+  tlsVerify?: string;
+  stripPath: boolean;
 }
 
 export interface ConsumerUpgrades {
   sign: {};
   verify: {};
   token: {
-    allowed_aud: string;
-    allowed_iss: string[];
+    allowedAud: string;
+    allowedIss: string[];
     scope?: string;
-    consumer_match?: boolean;
-    consumer_match_claim?: string;
-    consumer_match_claim_custom_id?: boolean;
-    consumer_match_ignore_not_found?: boolean;
+    consumerMatch?: boolean;
+    consumerMatchClaim?: string;
+    consumerMatchClaimCustomId?: boolean;
+    consumerMatchIgnoreNotFound?: boolean;
   };
-  counter_sign: {};
-  token_exchange: {
-    token_endpoint: string;
-    client_id: string;
+  counterSign: {};
+  tokenExchange: {
+    tokenEndpoint: string;
+    clientId: string;
     scopes: string[];
     audience: string;
   };
 }
 
 export interface SDXP2PConsumerPatternData {
+  gatewayId: string;
   service: EnrichedServiceCatalogEntry;
   client: EnrichedSubsystemEntry;
   serviceSubsystem: EnrichedSubsystemEntry;
-  connections: ConnectionRequest[];
   clientRuntimeGroup: RuntimeGroup;
   serviceRuntimeGroup: RuntimeGroup;
 }
@@ -58,39 +58,19 @@ export interface SDXP2PConsumerPatternData {
  */
 export const SDXP2PConsumerPattern = {
   id: 'sdx-p2p-consumer.r1',
-  requiredParams: ['conn_id', 'client_id', 'service_id'],
+  requiredParams: ['connId', 'clientId', 'serviceId'],
 
-  inject: async (api: SdxMemberApiClient, inputs: Record<string, any>) => {
+  inject: async (
+    api: SdxMemberApiClient,
+    inputs: SDXP2PConsumerPatternConfig
+  ): Promise<SDXP2PConsumerPatternData> => {
     // retrieve the consumer subsystem (the client) from the catalog
     const client = (await api.getCatalogSubsystem(
-      inputs.client_id
+      inputs.clientId
     )) as EnrichedSubsystemEntry;
 
-    // validate the connection request exists for the client's organization
-    // const connections = await api.listConnections(client.organization.name);
-    // const conn = connections.find((c) => c.id === inputs.conn_id);
-
-    // assert.strictEqual(Boolean(conn), true, 'Connection request not found');
-    // assert.strictEqual(
-    //   conn!.clientId === inputs.client_id,
-    //   true,
-    //   'Connection request clientId does not match the specified client_id'
-    // );
-    // assert.strictEqual(
-    //   conn!.serviceId === inputs.service_id,
-    //   true,
-    //   'Connection request serviceId does not match the specified service_id'
-    // );
-    // assert.strictEqual(
-    //   conn!.isActive,
-    //   true,
-    //   'Connection request is not active'
-    // );
-    // assert.strictEqual(
-    //   conn!.isApproved,
-    //   true,
-    //   'Connection request is not approved'
-    // );
+    // this pattern will be used via a connection request, so will not need
+    // to valid it
 
     const orgClient = (await api.getSubsystemClient(
       client.organization.name,
@@ -98,12 +78,12 @@ export const SDXP2PConsumerPattern = {
     )) as EnrichedSubsystemEntry;
 
     const service = (await api.getOASService(
-      inputs.service_id
+      inputs.serviceId
     )) as EnrichedServiceCatalogEntry;
 
     const subsystemService = await api.getOrganizationOASService(
       service.subsystem.organization.name,
-      inputs.service_id
+      inputs.serviceId
     );
 
     const serviceSubsystem = await api.getSubsystemClient(
@@ -111,37 +91,42 @@ export const SDXP2PConsumerPattern = {
       service.subsystem.name
     );
 
+    const environment = service.environment;
+
     const clientRG = orgClient.runtimeGroups.find(
-      (rg) => rg.environment === inputs.environment
+      (rg) => rg.environment === environment
     );
 
     assert.strictEqual(
       Boolean(clientRG),
       true,
-      `Client subsystem does not have a runtime group for environment '${inputs.environment}'`
+      `Client subsystem does not have a runtime group for environment '${environment}'`
     );
 
     const serviceRG = serviceSubsystem.runtimeGroups?.find(
-      (rg) => rg.environment === inputs.environment
+      (rg) => rg.environment === environment
     );
 
     assert.strictEqual(
       Boolean(serviceRG),
       true,
-      `Service subsystem does not have a runtime group for environment '${inputs.environment}'`
+      `Service subsystem does not have a runtime group for environment '${environment}'`
     );
 
     return {
-      gateway_id: orgClient.gateway.id,
+      gatewayId: orgClient.gateway.id,
       client: orgClient,
-      service: subsystemService,
-      serviceSubsystem: serviceSubsystem,
-      clientRuntimeGroup: clientRG,
-      serviceRuntimeGroup: serviceRG,
+      service: subsystemService as EnrichedServiceCatalogEntry,
+      serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
+      clientRuntimeGroup: clientRG as RuntimeGroup,
+      serviceRuntimeGroup: serviceRG as RuntimeGroup,
     };
   },
 
-  eval: (inputs: Record<string, any>, data: SDXP2PConsumerPatternData) => {
+  eval: (
+    inputs: SDXP2PConsumerPatternConfig,
+    data: SDXP2PConsumerPatternData
+  ) => {
     const serviceLocator = data.service.name;
 
     const clientLocator = data.client.clientId;
@@ -149,8 +134,8 @@ export const SDXP2PConsumerPattern = {
 
     const consumerGateway = data.client.gateway.id;
 
-    const tags = [`ns.${consumerGateway}.${inputs.conn_id}.c`, 'sdx'];
-    const name = `sdx.p2p.${inputs.conn_id}.c.${serviceLocator}`;
+    const tags = [`ns.${consumerGateway}.${inputs.connId}.c`, 'sdx'];
+    const name = `sdx.p2p.${inputs.connId}.c.${serviceLocator}`;
 
     const upgrades: ConsumerUpgrades = inputs.upgrades || {};
 
@@ -166,7 +151,7 @@ export const SDXP2PConsumerPattern = {
           paths: [routePathPrefix],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
           name,
-          strip_path: inputs.strip_path,
+          strip_path: inputs.stripPath,
           protocols:
             routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
           tags,
@@ -197,10 +182,10 @@ export const SDXP2PConsumerPattern = {
         ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
           : []),
-        ...(upgrades.hasOwnProperty('counter_sign')
+        ...(upgrades.hasOwnProperty('counterSign')
           ? [upgradeToTrustKMS(tags, data)]
           : []),
-        ...(upgrades.hasOwnProperty('token_exchange')
+        ...(upgrades.hasOwnProperty('tokenExchange')
           ? [
               upgradeToTokenExchange(
                 tags,
@@ -212,8 +197,8 @@ export const SDXP2PConsumerPattern = {
       ],
     } as any;
 
-    if (inputs.tls_verify) {
-      config['tls_verify'] = inputs.tls_verify === 'false' ? false : true;
+    if (inputs.tlsVerify) {
+      config['tls_verify'] = inputs.tlsVerify === 'false' ? false : true;
     }
 
     return [
@@ -255,15 +240,15 @@ function upgradeToJWTKeycloak(
     name: 'jwt-keycloak',
     tags,
     config: {
-      allowed_aud: jwtKeycloakConfig?.allowed_aud,
-      allowed_iss: jwtKeycloakConfig?.allowed_iss,
+      allowed_aud: jwtKeycloakConfig?.allowedAud,
+      allowed_iss: jwtKeycloakConfig?.allowedIss,
       scope: jwtKeycloakConfig?.scope,
-      consumer_match: jwtKeycloakConfig?.consumer_match || false,
-      consumer_match_claim: jwtKeycloakConfig?.consumer_match_claim || 'azp',
+      consumer_match: jwtKeycloakConfig?.consumerMatch || false,
+      consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:
-        jwtKeycloakConfig?.consumer_match_claim_custom_id || false,
+        jwtKeycloakConfig?.consumerMatchClaimCustomId || false,
       consumer_match_ignore_not_found:
-        jwtKeycloakConfig?.consumer_match_ignore_not_found || false,
+        jwtKeycloakConfig?.consumerMatchIgnoreNotFound || false,
     },
   };
 }
@@ -313,7 +298,7 @@ function upgradeToTokenExchange(
   data: SDXP2PConsumerPatternData,
   inputs: SDXP2PConsumerPatternConfig
 ) {
-  const tokenExchangeConfig = inputs.upgrades.token_exchange;
+  const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
   const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:0`;
 
@@ -321,8 +306,8 @@ function upgradeToTokenExchange(
     name: 'token-exchange',
     tags: tags,
     config: {
-      client_id: tokenExchangeConfig?.client_id,
-      token_endpoint: tokenExchangeConfig?.token_endpoint,
+      client_id: tokenExchangeConfig?.clientId,
+      token_endpoint: tokenExchangeConfig?.tokenEndpoint,
       scopes: tokenExchangeConfig?.scopes,
       audience: tokenExchangeConfig?.audience,
       key_id: kid,

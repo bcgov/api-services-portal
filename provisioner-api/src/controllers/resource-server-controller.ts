@@ -5,23 +5,23 @@ import type {
 } from '../schemas/sdx.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
-export interface GetSubsystemsInput {
+export interface GetResourceServersInput {
   environment?: string;
 }
 
-export interface GetSubsystemAllowedServicesInput {
-  subsystemId: string;
+export interface GetResourceServerAllowedServicesInput {
+  resourceServerId: string;
   integrationId?: string;
 }
 
-export class SubsystemController {
+export class ResourceServerController {
   constructor(
     private readonly services: Services,
     private readonly logger?: FastifyBaseLogger
   ) {}
 
-  async getSubsystems(
-    input: GetSubsystemsInput
+  async getResourceServers(
+    input: GetResourceServersInput
   ): Promise<TSubsystemEnvironment[]> {
     return await this.services.sdxMember.getSubsystems(input.environment);
   }

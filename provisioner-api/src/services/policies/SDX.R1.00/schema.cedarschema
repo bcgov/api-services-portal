@@ -12,12 +12,10 @@ namespace SDX {
                 clientId: String,
                 serviceId: String,
                 isApproved: Bool,
-                isActive?: Bool,
                 policyVersion: String,
                 environment: String,
                 requesterDetails: {
                     client: {
-                        integrationId: String,
                         clientId: String,
                         privacyZone: String
                     },
@@ -31,26 +29,14 @@ namespace SDX {
                 },
                 clientResources: {
                     gatewayPatterns?: {
-                        "sdx-p2p-consumer.r1"?: {
-                            strip_path?: Bool,
-                            client_id?: String,
-                            service_id?: String,
-                            upgrades?: {
+                        "sdx-p2p-consumer.r1": {
+                            upgrades: {
                                 sign?: {},
                                 verify?: {},
-                                counter_sign?: {},
-                                token?: {
-                                    allowed_aud: String,
-                                    allowed_iss: String,
-                                    scope?: String,
-                                    consumer_match?: Bool,
-                                    consumer_match_claim?: String,
-                                    consumer_match_claim_custom_id?: Bool,
-                                    consumer_match_ignore_not_found?: Bool
-                                },
-                                token_exchange?: {
-                                    client_id: String,
-                                    token_endpoint: String,
+                                counterSign?: {},
+                                tokenExchange: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
                                     audience: String,
                                     scopes: Set<String>
                                 }
@@ -58,88 +44,12 @@ namespace SDX {
                         }
                     }
                 },
-                serviceResources: {
-                    subsystemId: String,
-                    gatewayPatterns?: {
-                        "sdx-p2p-provider.r1"?: {
-                            client_id?: String,
-                            service_id?: String,
-                            upgrades?: {
-                                sign?: {},
-                                verify?: {},
-                                counter_sign?: {},
-                                token?: {
-                                    allowed_aud: String,
-                                    allowed_iss: String,
-                                    scope?: String,
-                                    consumer_match?: Bool,
-                                    consumer_match_claim?: String,
-                                    consumer_match_claim_custom_id?: Bool,
-                                    consumer_match_ignore_not_found?: Bool
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-    entity ConsumerPattern;
-
-    action ApplyConsumerPattern
-        appliesTo {
-            principal: User,
-            resource: ConsumerPattern,
-            context: {
-                conn_id: String,
-                client_id: String,
-                service_id: String,
-                tls_verify?: Bool,
-                upgrades?: {
-                    sign?: {},
-                    verify?: {},
-                    counter_sign?: {},
-                    token?: {
-                        allowed_aud: String,
-                        allowed_iss: String,
-                        scope?: String,
-                        consumer_match?: Bool,
-                        consumer_match_claim?: String,
-                        consumer_match_claim_custom_id?: Bool,
-                        consumer_match_ignore_not_found?: Bool
-                    },
-                    token_exchange?: {
+                combinedScopes: Set<String>,
+                globals: {
+                    environment: {
                         client_id: String,
-                        token_endpoint: String,
-
+                        oauth_token_url: String
                     }
-                }
-            }
-        };
-
-    entity ProviderPattern;
-
-    action ApplyProviderPattern
-        appliesTo {
-            principal: User,
-            resource: ProviderPattern,
-            context: {
-                conn_id: String,
-                client_id: String,
-                service_id: String,
-                upgrades?: {
-                    sign?: {},
-                    verify?: {},
-                    token?: {
-                        allowed_aud: String,
-                        allowed_iss: String,
-                        scope?: String,
-                        consumer_match?: Bool,
-                        consumer_match_claim?: String,
-                        consumer_match_claim_custom_id?: Bool,
-                        consumer_match_ignore_not_found?: Bool
-                    },
-                    dpop?: {}
                 }
             }
         };

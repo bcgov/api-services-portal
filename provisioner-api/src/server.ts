@@ -7,7 +7,7 @@ const app = await buildApp();
 
 try {
   await app.listen({ port, host });
-  app.log.info(`Swagger UI: http://localhost:${port}/docs`);
+  app.log.info(`API Console UI: http://localhost:${port}/docs`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);

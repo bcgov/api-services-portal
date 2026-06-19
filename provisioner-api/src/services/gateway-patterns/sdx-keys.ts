@@ -11,18 +11,19 @@ function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
 }
 
 export interface SDXKeyConfig {
-  organization?: string;
-  runtime_group_name?: string;
-  client_id?: string;
-  public_key_pem?: string;
-  certificate_pem?: string[];
-  ca_certs?: string;
+  organization: string;
+  runtimeGroupName?: string;
+  environment?: string;
+  clientId?: string;
+  publicKeyPem?: string;
+  certificatePem?: string[];
+  caCerts?: string;
 }
 
 interface SDXKeysPatternData {
-  jwk_list: any[];
-  public_key_pem: string;
-  gateway_id: string;
+  jwkList: any[];
+  publicKeyPem: string;
+  gatewayId: string;
   profile: {
     name: string;
     kid: string;
@@ -47,16 +48,16 @@ export const SDXKeysPattern = {
 
   inject: async (
     api: SdxMemberApiClient,
-    inputs: Record<string, any>
+    inputs: SDXKeyConfig
   ): Promise<SDXKeysPatternData> => {
     const profile: any = {};
 
-    if (inputs.runtime_group_name) {
+    if (inputs.runtimeGroupName) {
       // retrieve the runtime group details owned by the organization
       const owned = await api.listRuntimeGroups(inputs.organization, {
         filter: 'owned',
       });
-      const rg = owned.find((g) => g.name === inputs.runtime_group_name);
+      const rg = owned.find((g) => g.name === inputs.runtimeGroupName);
 
       assert.strictEqual(
         Boolean(rg),
@@ -64,31 +65,31 @@ export const SDXKeysPattern = {
         'Organization does not own this runtime group'
       );
 
-      profile.keySetName = `sdx.edge.${inputs.runtime_group_name}`;
-      profile.name = `sdx.keys.${inputs.runtime_group_name}.edge`;
-      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtime_group_name}`;
-      profile.qualifier = `key-${inputs.runtime_group_name}`;
+      profile.keySetName = `sdx.edge.${inputs.runtimeGroupName}`;
+      profile.name = `sdx.keys.${inputs.runtimeGroupName}.edge`;
+      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}`;
+      profile.qualifier = `key-${inputs.runtimeGroupName}`;
       profile.type = 'runtime-group';
-      profile.value = inputs.runtime_group_name;
-      profile.gateway_id = rg!.gatewayId;
-    } else if (inputs.client_id) {
+      profile.value = inputs.runtimeGroupName;
+      profile.gatewayId = rg!.gatewayId;
+    } else if (inputs.clientId) {
       // retrieve the subsystem details for the client_id
-      const subsystem = await api.getCatalogSubsystem(inputs.client_id);
+      const subsystem = await api.getCatalogSubsystem(inputs.clientId);
 
       const orgSubsystem = await api.getSubsystemClient(
         subsystem.organization?.name!,
         subsystem.name
       );
 
-      const id = inputs.client_id.toLowerCase();
+      const id = inputs.clientId.toLowerCase();
 
       profile.keySetName = `sdx.sys.${id}`;
       profile.name = `sdx.keys.${id}.sys`;
       profile.kid = `urn:ca:bc:sdx:sys:${id}`;
       profile.qualifier = `key-${id}`;
       profile.type = 'client';
-      profile.value = inputs.client_id;
-      profile.gateway_id = orgSubsystem.gateway?.id;
+      profile.value = inputs.clientId;
+      profile.gatewayId = orgSubsystem.gateway?.id;
     } else {
       // assume organization — resolve the member details from any subsystem
       // belonging to the organization in the catalog.
@@ -114,16 +115,16 @@ export const SDXKeysPattern = {
       profile.qualifier = `key-${memberText}`;
       profile.type = 'organization';
       profile.value = inputs.organization;
-      profile.gateway_id =
+      profile.gatewayId =
         `sdx-o-${member.memberClass}-${member.memberId}`.toLowerCase();
     }
 
     let jwkList: any[] = [];
-    let publicKeyPem = inputs.public_key_pem;
+    let publicKeyPem = inputs.publicKeyPem;
 
     // extract public key from certificate
-    if (inputs.certificate_pem) {
-      for (const [index, certPem] of inputs.certificate_pem.entries()) {
+    if (inputs.certificatePem) {
+      for (const [index, certPem] of inputs.certificatePem.entries()) {
         // Create an X509Certificate instance
         const certs = splitCertificates(certPem, 'utf8');
 
@@ -140,8 +141,8 @@ export const SDXKeysPattern = {
           format: 'pem',
         }) as string;
 
-        if (inputs.ca_certs) {
-          const caCerts = splitCertificates(inputs.ca_certs, 'utf8');
+        if (inputs.caCerts) {
+          const caCerts = splitCertificates(inputs.caCerts, 'utf8');
           const fullChain = [...certs, ...caCerts];
           const result = verifyCertificateChain(fullChain);
           assert.strictEqual(
@@ -168,22 +169,22 @@ export const SDXKeysPattern = {
 
     return {
       profile,
-      jwk_list: jwkList,
-      public_key_pem: publicKeyPem,
-      gateway_id: profile.gateway_id,
+      jwkList: jwkList,
+      publicKeyPem: publicKeyPem,
+      gatewayId: profile.gatewayId,
     } as SDXKeysPatternData;
   },
 
-  eval: (_inputs: Record<string, string>, data: SDXKeysPatternData) => {
+  eval: (_: Record<string, string>, data: SDXKeysPatternData) => {
     const profile = data.profile;
 
-    let tags = [`ns.${data.gateway_id}.${profile.qualifier}`];
+    let tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
 
-    let publicKeyPem = data.public_key_pem;
+    let publicKeyPem = data.publicKeyPem;
 
     const keySetName = profile.keySetName;
 
-    const keys: any = data.jwk_list.map((jwk, index) => ({
+    const keys: any = data.jwkList.map((jwk, index) => ({
       kind: 'GatewayKey',
       name: `${profile.name}:${index}`,
       kid: jwk.kid,

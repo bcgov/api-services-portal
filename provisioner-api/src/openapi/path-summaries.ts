@@ -2,10 +2,10 @@ export const pathSummaries: Record<
   string,
   { summary: string; description?: string }
 > = {
-  '/subsystems': {
-    summary: 'Subsystem environment catalogue',
+  '/resource-servers': {
+    summary: 'Resource server environment catalogue',
     description:
-      'Lists subsystem environments visible to the calling partner service.',
+      'Lists resource server environments visible to the calling partner service.',
   },
   '/subsystems/{id}/allowed-services': {
     summary: 'Allowed-service grants for a subsystem',

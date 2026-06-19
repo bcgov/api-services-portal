@@ -160,10 +160,12 @@ module.exports = {
         operation,
         updatedItem
       );
-      const provisionerService = new ProvisionerService(
-        process.env.PROVISIONER_URL
-      );
-      await provisionerService.postConnectionRequestChangeEvent(updatedItem);
+      if (operation != 'create') {
+        const provisionerService = new ProvisionerService(
+          process.env.PROVISIONER_URL
+        );
+        await provisionerService.postConnectionRequestChangeEvent(updatedItem);
+      }
     },
   },
 };

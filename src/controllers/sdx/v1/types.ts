@@ -1,3 +1,5 @@
+import { SubsystemIntegration } from '../../v3/types';
+
 /**
  * @tsoaModel
  *
@@ -6,6 +8,7 @@ export interface SubsystemInput {
   name: string;
   description?: string;
   environments?: string[];
+  integrations?: SubsystemIntegration[];
 }
 
 /**

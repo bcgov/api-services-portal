@@ -11,17 +11,17 @@ import {
 const SUBJECT_TOKEN_DESC =
   'Bearer JWT identifying the subject the partner is acting on behalf of.';
 const RESOURCE_SERVERS_ONLY_DESC =
-  'When true, restricts the result to subsystems exposing resource server services only.';
+  'When true, restricts the result to resource servers exposing resource server services only.';
 const ENVIRONMENT_DESC =
-  'Target environment (for example `dev`, `test`, or `prod`) the subsystems are scoped to.';
-const SUBSYSTEM_ID_DESC =
-  'Identifier of the subsystem the request is scoped to.';
+  'Target environment (for example `dev`, `test`, or `prod`) the resource servers are scoped to.';
+const RESOURCE_SERVER_ID_DESC =
+  'Identifier of the resource server the request is scoped to.';
 const INTEGRATION_ID_DESC =
   'Identifier of the integration that allowed-services should be filtered or provisioned for.';
 
-const SubsystemsListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
+const ResourceServersListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
   description:
-    'Collection of subsystem environments visible to the calling partner service.',
+    'Collection of resource server environments visible to the calling partner service.',
   examples: [
     [
       {
@@ -45,7 +45,7 @@ const SubsystemsListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
 
 const AllowedServicesResponse = Type.Array(Type.Ref(IntegrationAccessRequest), {
   description:
-    'Allowed-service grants currently provisioned for the subsystem.',
+    'Allowed-service grants currently provisioned for the resource server.',
   examples: [
     [
       {
@@ -65,18 +65,18 @@ const AllowedServicesResponse = Type.Array(Type.Ref(IntegrationAccessRequest), {
 
 const security = [{ jwt: [] }];
 
-export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
+export const registerResourceServersRoutes: FastifyPluginAsyncTypebox = async (
   app
 ) => {
   app.get(
-    '/subsystems',
+    '/resource-servers',
     {
       schema: {
-        tags: ['Subsystems'],
-        summary: 'List subsystems',
-        operationId: 'getSubsystems',
+        tags: ['Resource Servers'],
+        summary: 'List resource servers',
+        operationId: 'getResourceServers',
         description:
-          'Returns the list of SDX subsystems, filtered by environment.',
+          'Returns the list of SDX resource servers, filtered by environment.',
         security,
         querystring: Type.Object({
           environment: Type.Optional(
@@ -86,11 +86,11 @@ export const registerSubsystemsRoutes: FastifyPluginAsyncTypebox = async (
             })
           ),
         }),
-        response: { 200: SubsystemsListResponse },
+        response: { 200: ResourceServersListResponse },
       },
     },
     async (req) =>
-      app.controllers.subsystem.getSubsystems({
+      app.controllers.resourceServer.getResourceServers({
         environment: req.query.environment,
       })
   );

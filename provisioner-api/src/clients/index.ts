@@ -6,12 +6,14 @@ import {
   type OAuthClient,
 } from './oauth.js';
 import { loadClientSecretConfig, loadSignedJwtConfig } from './config.js';
+import { FeedApiClient } from './feed/index.js';
 
 export interface Clients {
   aps: OAuthClient;
   sdx: OAuthClient;
   gwa: OAuthClient;
   css: OAuthClient;
+  feed: FeedApiClient;
 }
 
 function childLogger(
@@ -63,5 +65,6 @@ export function buildClients(logger?: FastifyBaseLogger): Clients {
     sdx: buildJwtClient('sdx', 'SDX', logger),
     gwa: buildJwtClient('gwa', 'GWA', logger),
     css: buildSecretClient('css', 'CSS', logger),
+    feed: new FeedApiClient(process.env.FEED_URL, logger),
   };
 }

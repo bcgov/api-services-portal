@@ -1,51 +1,46 @@
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import {
-  assert,
-  getRoutePathPrefix,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
 
-// TODO: clean this up a bit!
-const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+export interface SDXP2PProviderPatternConfig extends Record<string, any> {
+  connId: string;
+  clientId: string;
+  serviceId: string;
+  upstreamUrl: string;
+  upgrades: ProviderUpgrades;
+  useSni: string;
+}
 
 interface ProviderUpgrades {
-  mtls_auth: {};
-  mtls_acl: {};
+  mtlsAuth: {};
+  mtlsAcl: {};
   sign: {};
   verify: {};
   token: {
-    allowed_aud: string;
-    allowed_iss: string[];
+    allowedAud: string;
+    allowedIss: string[];
     scope?: string;
-    consumer_match?: boolean;
-    consumer_match_claim?: string;
-    consumer_match_claim_custom_id?: boolean;
-    consumer_match_ignore_not_found?: boolean;
+    consumerMatch?: boolean;
+    consumerMatchClaim?: string;
+    consumerMatchClaimCustomId?: boolean;
+    consumerMatchIgnoreNotFound?: boolean;
   };
-  counter_sign: {};
-  token_exchange: {
-    token_endpoint: string;
-    client_id: string;
+  counterSign: {};
+  tokenExchange: {
+    tokenEndpoint: string;
+    clientId: string;
     scopes: string[];
     audience: string;
   };
 }
 
-export interface SDXP2PProviderPatternConfig extends Record<string, any> {
-  conn_id: string;
-  client_id: string;
-  service_id: string;
-  upstream_url: string;
-  upgrades: ProviderUpgrades;
-  use_sni: string;
-}
-
 export interface SDXP2PProviderPatternData {
+  gatewayId: string;
   service: EnrichedServiceCatalogEntry;
   client: EnrichedSubsystemEntry;
   serviceSubsystem: EnrichedSubsystemEntry;
-  key: any;
 }
 
 /**
@@ -54,49 +49,33 @@ export interface SDXP2PProviderPatternData {
  */
 export const SDXP2PProviderPattern = {
   id: 'sdx-p2p-provider.r1',
-  requiredParams: ['conn_id', 'client_id', 'service_id'],
+  requiredParams: ['connId', 'clientId', 'serviceId'],
 
-  inject: async (api: SdxMemberApiClient, inputs: Record<string, string>) => {
+  inject: async (
+    api: SdxMemberApiClient,
+    inputs: SDXP2PProviderPatternConfig
+  ): Promise<SDXP2PProviderPatternData> => {
     // retrieve the consumer subsystem (the client) from the catalog. The
     // connection request is owned by the client's organization.
     const client = (await api.getCatalogSubsystem(
-      inputs.client_id
+      inputs.clientId
     )) as EnrichedSubsystemEntry;
-    // const connections = await api.listConnections(client.organization.name);
-    // const conn = connections.find((c) => c.id === inputs.conn_id);
-    // assert.strictEqual(Boolean(conn), true, `Connection request not found`);
-    // assert.strictEqual(
-    //   conn!.clientId === inputs.client_id,
-    //   true,
-    //   'Connection request clientId does not match the specified client_id'
-    // );
-    // assert.strictEqual(
-    //   conn!.serviceId === inputs.service_id,
-    //   true,
-    //   'Connection request serviceId does not match the specified service_id'
-    // );
-    // assert.strictEqual(
-    //   conn!.isActive,
-    //   true,
-    //   'Connection request is not active'
-    // );
-    // assert.strictEqual(
-    //   conn!.isApproved,
-    //   true,
-    //   'Connection request is not approved'
-    // );
+
+    // this pattern will be used via a connection request, so will not need
+    // to valid it
+
     const service = (await api.getOASService(
-      inputs.service_id
+      inputs.serviceId
     )) as EnrichedServiceCatalogEntry;
     const serviceSubsystem = await api.getSubsystemClient(
       service.subsystem.organization.name,
       service.subsystem.name
     );
     return {
-      gateway_id: service.subsystem.gateway.id,
+      gatewayId: service.subsystem.gateway.id,
       client,
       service,
-      serviceSubsystem,
+      serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
     };
   },
 
