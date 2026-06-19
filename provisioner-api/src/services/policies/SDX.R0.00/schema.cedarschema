@@ -24,19 +24,19 @@ namespace SDX {
                             upgrades?: {
                                 sign?: {},
                                 verify?: {},
-                                counter_sign?: {},
+                                counterSign?: {},
                                 token?: {
-                                    allowed_aud: String,
-                                    allowed_iss: String,
+                                    allowedAud: String,
+                                    allowedIss: String,
                                     scope?: String,
-                                    consumer_match?: Bool,
-                                    consumer_match_claim?: String,
-                                    consumer_match_claim_custom_id?: Bool,
-                                    consumer_match_ignore_not_found?: Bool
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
                                 },
-                                token_exchange?: {
-                                    client_id: String,
-                                    token_endpoint: String,
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
 
                                 }
                             }
@@ -50,20 +50,19 @@ namespace SDX {
                             upgrades: {
                                 sign?: {},
                                 verify?: {},
-                                counter_sign?: {},
+                                counterSign?: {},
                                 token?: {
-                                    allowed_aud: String,
-                                    allowed_iss: String,
+                                    allowedAud: String,
+                                    allowedIss: String,
                                     scope?: String,
-                                    consumer_match?: Bool,
-                                    consumer_match_claim?: String,
-                                    consumer_match_claim_custom_id?: Bool,
-                                    consumer_match_ignore_not_found?: Bool
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
                                 },
-                                token_exchange?: {
-                                    client_id: String,
-                                    token_endpoint: String,
-
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
                                 }
                             }
                         }
