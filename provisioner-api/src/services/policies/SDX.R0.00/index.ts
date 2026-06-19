@@ -12,12 +12,7 @@ const readRelativeFile = (relativePath: string) => {
 
 const schema = readRelativeFile('./schema.cedarschema');
 
-const rawPolicies = [
-  'connection.cedar',
-  'consumer.cedar',
-  'provider.cedar',
-  'environment.cedar',
-].map((file) => {
+const rawPolicies = ['connection.cedar'].map((file) => {
   const content = readRelativeFile(`./${file}`);
   // split on permit | forbid
   const parts = content.match(/(permit|forbid)\s*\([^)]*\)\s*[\s\S]*?;/g) ?? [];

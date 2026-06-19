@@ -86,10 +86,10 @@ export class PatternsEvaluatorService {
 
     // only do the policy check for preview, apply and diff actions, not for delete
     if (action !== 'delete') {
-      const combinedScopes = [
-        ...(connection.requesterDetails.scopes || []),
-        connection.requesterDetails.service?.privacyZone,
-      ];
+      const combinedScopes = [...(connection.requesterDetails?.scopes || [])];
+      if (connection.requesterDetails?.service?.privacyZone) {
+        combinedScopes.push(connection.requesterDetails.service.privacyZone);
+      }
 
       const policyContext = {
         ...connection,

@@ -1,8 +1,16 @@
-import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import type {
+  RuntimeGroup,
+  SdxMemberApiClient,
+} from '../../clients/sdx-member/index.js';
 import {
+  assert,
+  getRoutePathPrefix,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
+
+// TODO: clean this up a bit!
+const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'http://sdx.public.url';
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
@@ -41,6 +49,8 @@ export interface SDXP2PProviderPatternData {
   service: EnrichedServiceCatalogEntry;
   client: EnrichedSubsystemEntry;
   serviceSubsystem: EnrichedSubsystemEntry;
+  clientRG: RuntimeGroup;
+  serviceRG: RuntimeGroup;
 }
 
 /**
@@ -64,6 +74,11 @@ export const SDXP2PProviderPattern = {
     // this pattern will be used via a connection request, so will not need
     // to valid it
 
+    const orgClient = (await api.getSubsystemClient(
+      client.organization.name,
+      client.name
+    )) as EnrichedSubsystemEntry;
+
     const service = (await api.getOASService(
       inputs.serviceId
     )) as EnrichedServiceCatalogEntry;
@@ -71,15 +86,268 @@ export const SDXP2PProviderPattern = {
       service.subsystem.organization.name,
       service.subsystem.name
     );
+
+    const environment = service.environment;
+
+    const clientRG = orgClient.runtimeGroups.find(
+      (rg) => rg.environment === environment
+    );
+
+    assert.strictEqual(
+      Boolean(clientRG),
+      true,
+      `Client subsystem does not have a runtime group for environment '${environment}'`
+    );
+
+    const serviceRG = serviceSubsystem.runtimeGroups?.find(
+      (rg) => rg.environment === environment
+    );
+
+    assert.strictEqual(
+      Boolean(serviceRG),
+      true,
+      `Service subsystem does not have a runtime group for environment '${environment}'`
+    );
+
     return {
       gatewayId: service.subsystem.gateway.id,
       client,
       service,
       serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
+      clientRG: clientRG as RuntimeGroup,
+      serviceRG: serviceRG as RuntimeGroup,
     };
   },
 
-  eval: (inputs: Record<string, any>, data: SDXP2PProviderPatternData) => {
-    return [] as any[];
+  eval: (
+    inputs: SDXP2PProviderPatternConfig,
+    data: SDXP2PProviderPatternData
+  ) => {
+    const serviceLocator = data.service.name;
+    const serviceHost = data.serviceRG.host;
+
+    const clientLocator = data.client.clientId;
+
+    const providerGateway = data.service.subsystem.gateway.id;
+
+    const tags = [`ns.${providerGateway}.${inputs.connId}.p`, 'sdx'];
+    const name = `sdx.p2p.${inputs.connId}.p.${serviceLocator}`;
+
+    const upstreamUrl = inputs.upstreamUrl;
+
+    const upgrades: ProviderUpgrades = inputs.upgrades || {};
+
+    const routePathPrefix = getRoutePathPrefix(serviceLocator);
+
+    return [
+      {
+        kind: 'GatewayService',
+        name,
+        tags: [...tags, `service:${serviceLocator}`, `client:${clientLocator}`],
+        url: upstreamUrl,
+        retries: 0,
+        routes: [
+          {
+            name: `${name}.UPSTREAM`,
+            tags,
+            hosts: [serviceHost],
+            snis: inputs.useSni === 'false' ? [] : [serviceHost],
+            paths: [routePathPrefix],
+            methods: ['DELETE', 'GET', 'POST', 'PUT'],
+            headers: {
+              'X-Client-Id': [`${clientLocator}`],
+            },
+            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            strip_path: true,
+          },
+          {
+            name: `${name}.HELLO`,
+            tags,
+            hosts: [serviceHost],
+            snis: inputs.useSni === 'false' ? [] : [serviceHost],
+            paths: [`${routePathPrefix}/hello`],
+            methods: ['GET'],
+            headers: {
+              'X-Client-Id': [`${clientLocator}`],
+            },
+            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            plugins: [
+              {
+                name: 'request-termination',
+                tags,
+                config: {
+                  status_code: 200,
+                  content_type: 'application/json',
+                  body: JSON.stringify({
+                    message: 'peer-to-peer ok',
+                  }),
+                },
+              },
+            ],
+          },
+        ],
+        plugins: [
+          ...(upgrades.hasOwnProperty('mtls_auth')
+            ? [upgradeToMTLSAuth(tags, data)]
+            : []),
+          ...(upgrades.hasOwnProperty('mtls_acl')
+            ? [upgradeToMTLSACL(tags, data)]
+            : []),
+          ...(upgrades.hasOwnProperty('sign')
+            ? [upgradeToTrustSign(tags, data)]
+            : []),
+          ...(upgrades.hasOwnProperty('verify')
+            ? [upgradeToTrustVerify(tags, data)]
+            : []),
+          ...(upgrades.hasOwnProperty('token')
+            ? [
+                upgradeToJWTKeycloak(
+                  tags,
+                  data,
+                  inputs as SDXP2PProviderPatternConfig
+                ),
+              ]
+            : []),
+          ...(upgrades.hasOwnProperty('counter_sign')
+            ? [upgradeToTrustKMS(tags, data)]
+            : []),
+          ...(upgrades.hasOwnProperty('token_exchange')
+            ? [
+                upgradeToTokenExchange(
+                  tags,
+                  data,
+                  inputs as SDXP2PProviderPatternConfig
+                ),
+              ]
+            : []),
+        ],
+      },
+    ] as any[];
   },
 };
+
+function upgradeToJWTKeycloak(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
+  const jwtKeycloakConfig = inputs.upgrades.token;
+
+  return {
+    name: 'jwt-keycloak',
+    tags,
+    config: {
+      allowed_aud: jwtKeycloakConfig?.allowedAud,
+      allowed_iss: jwtKeycloakConfig?.allowedIss,
+      scope: jwtKeycloakConfig?.scope,
+      consumer_match: jwtKeycloakConfig?.consumerMatch || false,
+      consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
+      consumer_match_claim_custom_id:
+        jwtKeycloakConfig?.consumerMatchClaimCustomId || false,
+      consumer_match_ignore_not_found:
+        jwtKeycloakConfig?.consumerMatchIgnoreNotFound || false,
+    },
+  };
+}
+
+function upgradeToMTLSAuth(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'mtls-auth',
+    tags: tags,
+    config: {
+      // upstream_cert_header: 'X-Client-Cert',
+      upstream_cert_fingerprint_header: 'X-Client-Cert-Fingerprint',
+      upstream_cert_serial_header: 'X-Client-Cert-Serial',
+      upstream_cert_i_dn_header: 'X-Client-Cert-I-DN',
+      upstream_cert_s_dn_header: 'X-Client-Cert-S-DN',
+      upstream_cert_cn_header: 'X-Client-Cert-CN',
+      // upstream_cert_org_header: 'X-Client-Cert-ORG',
+    },
+  };
+}
+
+function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'mtls-acl',
+    tags: tags,
+    config: {
+      allow: [`${data.clientRG.host}`],
+      certificate_header_name: 'X-Client-Cert-CN',
+    },
+  };
+}
+
+function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:0`;
+  const keySetName = `sdx.edge.${data.serviceRG.name}`;
+
+  return {
+    name: 'trust-sign',
+    tags: tags,
+    config: {
+      direction: 'response',
+      signature_header_key: 'X-Edge-Token',
+      keyid: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      alg: 'ES256',
+      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
+      hash_alg: 'sha256',
+    },
+  };
+}
+
+function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'trust-verify-signature',
+    tags: tags,
+    config: {
+      direction: 'request',
+      signature_header_key: 'X-Edge-Token',
+      manifest_type: 'signature-only',
+      iss_key_grace_period: 300,
+    },
+  };
+}
+
+function upgradeToTokenExchange(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
+  const tokenExchangeConfig = inputs.upgrades.tokenExchange;
+
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:0`;
+
+  return {
+    name: 'token-exchange',
+    tags: tags,
+    config: {
+      client_id: tokenExchangeConfig?.clientId,
+      token_endpoint: tokenExchangeConfig?.tokenEndpoint,
+      scopes: tokenExchangeConfig?.scopes,
+      audience: tokenExchangeConfig?.audience,
+      key_id: kid,
+      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      algorithm: 'ES256',
+      expiration: 60,
+    },
+  };
+}
+
+function upgradeToTrustKMS(tags: string[], data: SDXP2PProviderPatternData) {
+  const member = data.service.subsystem.member;
+  const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
+
+  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+
+  return {
+    name: 'trust-kms',
+    tags: tags,
+    config: {
+      direction: 'response',
+      operation: 'sign',
+      signature_header_key: 'X-Edge-Token',
+      key_id,
+    },
+  };
+}

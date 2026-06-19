@@ -6,7 +6,7 @@
 // ============================================================
 
 
-permit (
+permit ( // Permit if all required fields are present and valid
     principal,
     action == SDX::Action::"SubmitConnectionRequest",
     resource is SDX::ConnectionRequest
@@ -26,7 +26,7 @@ when {
 };
 
 // Deny explicitly if any required Connection Request field is missing
-forbid (
+forbid ( // Deny if any required field is missing or invalid
     principal,
     action == SDX::Action::"SubmitConnectionRequest",
     resource is SDX::ConnectionRequest
