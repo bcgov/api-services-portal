@@ -88,7 +88,12 @@ export class ConnectionsController {
           action: action === 'apply' ? 'provisioned' : 'removed',
         },
       },
-      blob: [{ id: uuidv4(), blob: JSON.stringify(results) }],
+      blob: [
+        {
+          id: uuidv4(),
+          blob: JSON.stringify({ input: connectionRequest, output: results }),
+        },
+      ],
       filterKey1: `org:${service.subsystem.organization?.name}`,
       filterKey2: `sdxClient:${connectionRequest.clientId}`,
       filterKey3: `sdxService:${connectionRequest.serviceId}`,

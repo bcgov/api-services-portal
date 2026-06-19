@@ -105,21 +105,24 @@ export class OrgGatewaysController extends Controller {
    * Retrieve organization-level activity for the SDX catalog.
    *
    * @summary List organization activity
-   * @param organization Optional organization name filter
-   * @param first Maximum records to return (capped at 100)
-   * @param skip Records to skip for pagination
+   * @param org - Organization identifier
+   * @param first - Maximum records to return (capped at 100)
+   * @param skip - Records to skip for pagination
+   *
+   * > `Required Scope:` System.Manage
    */
   @Get('/activity')
   @OperationId('listOrgActivity')
+  @Security('jwt', ['System.Manage'])
   public async listOrgActivity(
-    @Query() organization?: string,
+    @Path() org: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     const records = await getOrgActivity(
       ctx,
-      organization,
+      org,
       first > 100 ? 100 : first,
       skip,
       false

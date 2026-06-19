@@ -1,3 +1,4 @@
+import { ParseArgsOptionsType } from 'node:util';
 import type {
   ConnectionRequest,
   RuntimeGroup,
@@ -340,11 +341,16 @@ function buildIntegrationAllowAccess(
   inputs: SDXP2PConsumerPatternConfig,
   data: SDXP2PConsumerPatternData
 ) {
-  const serviceLocator = data.service.name;
-  const clientLocator = data.client.clientId;
+  // const serviceLocator = data.service.name;
+  // const clientLocator = data.client.clientId;
 
-  //const allowAccessDocument = getIntegrationAllowedServices
+  // const allowedServices =
+  //   inputs.integrationAccess!.buildIntegrationAllowedServices(
+  //     inputs.integrationClientId,
+  //     'SDX.R1.00'
+  //   );
+
   return {
-    kind: 'IntegrationAllowAccess',
+    kind: 'IntegrationAllowedServices',
   };
 }
