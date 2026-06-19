@@ -80,7 +80,12 @@ export class IntegrationController {
           action: 'submitted',
         },
       },
-      blob: [{ id: uuidv4(), blob: JSON.stringify(result || error) }],
+      blob: [
+        {
+          id: uuidv4(),
+          blob: JSON.stringify({ input: request, output: result || error }),
+        },
+      ],
       filterKey1: `org:${clientSubsystem.organization?.name}`,
       filterKey2: `sdxClient:${clientSubsystem.clientId}`,
     };

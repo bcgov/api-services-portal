@@ -164,8 +164,25 @@ module.exports = {
         const provisionerService = new ProvisionerService(
           process.env.PROVISIONER_URL
         );
-        await provisionerService.postConnectionRequestChangeEvent(updatedItem);
+        await provisionerService.postConnectionRequestChangeEvent(
+          updatedItem,
+          'apply'
+        );
       }
+    },
+
+    afterDelete: async function ({ existingItem }) {
+      logger.debug(
+        'After delete hook for ConnectionRequest: existingItem=%j',
+        existingItem
+      );
+      const provisionerService = new ProvisionerService(
+        process.env.PROVISIONER_URL
+      );
+      await provisionerService.postConnectionRequestChangeEvent(
+        existingItem,
+        'delete'
+      );
     },
   },
 };

@@ -9,6 +9,7 @@ import { OpenApiSpec, Subsystem } from '../keystone/types';
 import { OrgNamespace } from '../org-groups/types';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { assertAndRaiseValidateError } from './evaluator';
+import { ResourceScope } from '../workflow/openapi-spec-loader';
 
 const logger = Logger('gateway-patterns.catalog');
 
@@ -37,6 +38,7 @@ export interface SubsystemEntry {
       domains: string[];
     };
   };
+  integrationClientIds: string[];
   runtimeGroups?: {
     name: string;
     environment: string;
@@ -69,10 +71,32 @@ export interface ServiceCatalogEntry {
     summary: string;
     method: string;
     path: string;
-    scopes?: string[];
+    scopes?: ResourceScope[];
   }[];
   spec?: string;
+  specVersion: string;
   subsystem: SubsystemEntry;
+}
+
+export interface ResourceScopeParts {
+  name: string;
+  description: string;
+  namespace: string;
+  resourceType: string;
+  subResourceTypes?: string[];
+  action: string;
+}
+
+export interface ScopedServiceOperations {
+  name: string;
+  specVersion: string;
+  version: string;
+  subsystem: SubsystemEntry;
+  operationIds: string[];
+}
+
+export interface ResourceScopeEntry extends ResourceScopeParts {
+  services: ScopedServiceOperations[];
 }
 
 export async function GetCatalogByName(
@@ -134,10 +158,118 @@ export async function GetCatalog(
         gateway: {
           id: c.namespace,
         },
+        integrationClientIds: c.subsystem.integrations.map(
+          (i) => i.integrationClientId
+        ),
       },
       operations: JSON.parse(c.operations || '[]'),
     } as ServiceCatalogEntry;
   });
+}
+
+export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
+  const catalog = await GetCatalog(ctx);
+  const scopes: ({ service: ScopedServiceOperations } & ResourceScopeParts)[] =
+    [];
+
+  catalog.forEach((service) => {
+    const serviceScopes = service.operations.reduce(
+      (acc: ResourceScope[], op) => {
+        if (op.scopes) {
+          return acc.concat(op.scopes);
+        }
+        return acc;
+      },
+      []
+    );
+
+    const serviceBase = {
+      name: service.name,
+      specVersion: service.specVersion,
+      version: service.version,
+      subsystem: service.subsystem,
+    };
+
+    const scopeList = serviceScopes
+      .filter((scope) => typeof scope !== 'string')
+      .map(
+        (scope) =>
+          ({
+            ...parseScopeName(scope),
+            ...{
+              service: {
+                ...serviceBase,
+                subsystem: service.subsystem,
+                operationIds: service.operations
+                  .filter((op) => op.scopes && op.scopes.includes(scope))
+                  .map((op) => op.operationId),
+              },
+            },
+          } as { service: ScopedServiceOperations } & ResourceScopeParts)
+      );
+
+    scopes.push(...scopeList);
+  });
+
+  // group the scopes by name to get all the ScopedServiceOperations
+  // to create the ResourceScopeEntry response
+  const scopeGroups: Record<string, ResourceScopeEntry> = {};
+  scopes.forEach((scope) => {
+    if (!scopeGroups[scope.name]) {
+      scopeGroups[scope.name] = {
+        name: scope.name,
+        description: scope.description,
+        namespace: scope.namespace,
+        resourceType: scope.resourceType,
+        subResourceTypes: scope.subResourceTypes,
+        action: scope.action,
+        services: [scope.service],
+      };
+    } else {
+      // if the scope already exists then we need to add the service to the existing entry
+      scopeGroups[scope.name].services.push(scope.service);
+    }
+  });
+  return Object.values(scopeGroups);
+}
+
+/**
+ * Scope format in BCNF format:
+ *
+ * scope           = namespace ":" resource { ":" resource } ":" action ;
+ * namespace       = identifier ;
+ * resource        = identifier ;
+ * action          = identifier ;
+ * identifier      = letter { letter | digit | "-" | "_" } ;
+ * letter          = "a"…"z" ;
+ * digit           = "0"…"9" ;
+ *
+ * @param scope
+ * @returns
+ */
+function parseScopeName(
+  // service: ServiceCatalogEntry,
+  // operation: { operationId: string },
+  scope: ResourceScope
+): ResourceScopeParts {
+  const parts = scope.name.split(':');
+  // parse based on the BCNF format defined above, which should have at least 3 parts: {namespace}:{resourceType}:{action}
+  assertAndRaiseValidateError(
+    parts.length >= 3,
+    'Invalid scope format',
+    'inputs.scope',
+    'scope should be in format: namespace ":" resource { ":" resource } ":" action'
+  );
+
+  return {
+    name: scope.name,
+    description: scope.description,
+    namespace: parts[0],
+    resourceType: parts[1],
+    subResourceTypes:
+      parts.length > 3 ? parts.slice(2, parts.length - 1) : undefined,
+    action: parts[parts.length - 1],
+  };
 }
 
 export async function EnrichWithRuntimeGroup(
@@ -211,6 +343,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     gateway: {
       id: c.namespace,
     },
+    integrationClientIds: c.integrations.map((i) => i.integrationClientId),
   };
 }
 

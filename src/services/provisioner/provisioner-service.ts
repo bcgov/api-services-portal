@@ -55,11 +55,10 @@ export class ProvisionerService {
   }
 
   public async postConnectionRequestChangeEvent(
-    connection: ConnectionRequest
+    connection: ConnectionRequest,
+    action: 'apply' | 'delete'
   ): Promise<ConnectionRequestChangeEventResponse> {
     // credentials will be using the gwa admin
-
-    const action = 'diff';
 
     const payload = {
       clientId: connection.clientId,

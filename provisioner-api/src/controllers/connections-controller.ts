@@ -25,44 +25,64 @@ export class ConnectionsController {
       connectionRequest.serviceId
     );
 
-    const resourceSets =
-      await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
-        id,
-        service,
-        connectionRequest
-      );
-
-    const results: TResourceResult[] = [];
-
-    if (action === 'preview') {
-      // For preview, we return the generated resources without applying them
-      return {
-        applied: 0,
-        failed: 0,
-        results,
-        preview: resourceSets.flatMap((resourceSet) =>
-          resourceSet.documents.map((doc) => doc)
-        ),
-      };
-    } else {
-      for (const resource of resourceSets) {
-        const result = await this.services.resourceDispatcher.dispatch(
-          resource._gateway_id!,
-          resource.documents,
-          action
+    try {
+      const resourceSets =
+        await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
+          id,
+          action,
+          service,
+          connectionRequest
         );
-        results.push(...result);
-      }
 
-      if (action !== 'diff') {
-        await this.logActivity(action, connectionRequest, service, results);
-      }
+      const results: TResourceResult[] = [];
 
-      return {
-        applied: results.filter((r) => r.status === 'applied').length,
-        failed: results.filter((r) => r.status === 'failed').length,
-        results,
-      };
+      if (action === 'preview') {
+        // For preview, we return the generated resources without applying them
+        return {
+          applied: 0,
+          failed: 0,
+          results,
+          preview: resourceSets.flatMap((resourceSet) =>
+            resourceSet.documents.map((doc) => doc)
+          ),
+        };
+      } else {
+        for (const resource of resourceSets) {
+          const result = await this.services.resourceDispatcher.dispatch(
+            resource._gateway_id!,
+            resource.documents,
+            action
+          );
+          results.push(...result);
+        }
+
+        if (action !== 'diff') {
+          await this.logActivity(action, connectionRequest, service, results);
+        }
+
+        return {
+          applied: results.filter((r) => r.status === 'applied').length,
+          failed: results.filter((r) => r.status === 'failed').length,
+          results,
+        };
+      }
+    } catch (err) {
+      if (action !== 'diff' && action !== 'preview') {
+        await this.logActivity(
+          action,
+          connectionRequest,
+          service,
+          undefined,
+          err
+        );
+        return {
+          applied: 0,
+          failed: 1,
+          results: [],
+        };
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -70,13 +90,17 @@ export class ConnectionsController {
     action: 'apply' | 'delete',
     connectionRequest: TConnectionChangeRequest,
     service: any,
-    results: TResourceResult[]
+    results: TResourceResult[] | undefined,
+    error?: unknown
   ): Promise<void> {
     const activity: Activity = {
       id: uuidv4(),
       type: 'ConnectionRequest',
       action: 'publish',
-      result: results.some((r) => r.status === 'failed') ? 'failed' : 'success',
+      result:
+        error || results?.some((r) => r.status === 'failed')
+          ? 'failed'
+          : 'success',
       name: 'N/A',
       message: `Connection ${connectionRequest.clientId} -> ${connectionRequest.serviceId} ${action === 'apply' ? 'provisioned' : 'removed'}`,
       refId: '',
@@ -91,7 +115,10 @@ export class ConnectionsController {
       blob: [
         {
           id: uuidv4(),
-          blob: JSON.stringify({ input: connectionRequest, output: results }),
+          blob: JSON.stringify({
+            input: connectionRequest,
+            output: results || error,
+          }),
         },
       ],
       filterKey1: `org:${service.subsystem.organization?.name}`,

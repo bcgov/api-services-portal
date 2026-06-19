@@ -28,8 +28,10 @@ import { SubsystemService } from '../../../services/batch/subsystem';
 import {
   GetCatalog,
   GetCatalogByName,
+  GetScopes,
   GetSubsystemEntryForSubsystem,
   ParseClientId,
+  ResourceScopeEntry,
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
@@ -39,6 +41,7 @@ import {
 } from '../../../services/keystone/organization';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import assert from 'assert';
+import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -174,13 +177,14 @@ export class CatalogController extends Controller {
       name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
       title: 'Sample OAS Service',
       version: '1.0.0',
+      specVersion: 'openapi-3.1.0',
       summary: 'A sample OpenAPI service',
       description:
         'This is a sample service defined by an OpenAPI specification.',
       subsystem: {
         name: 'SAMPLE-SUBSYS',
         description: 'A sample subsystem for demonstration purposes',
-        clientId: 'LAB.MIN.CITZ.SAMPLE-SUBSYS',
+        clientId: 'MIN.CITZ.SAMPLE-SUBSYS',
         organization: {
           name: 'sample-organization',
         },
@@ -188,6 +192,7 @@ export class CatalogController extends Controller {
           memberClass: 'MIN',
           memberId: 'CITZ',
         },
+        integrationClientIds: ['client-x-12343'],
       },
       operations: [
         {
@@ -195,7 +200,12 @@ export class CatalogController extends Controller {
           path: '/users',
           operationId: 'getUsers',
           summary: 'Retrieve a list of users',
-          scopes: ['users.read'],
+          scopes: [
+            {
+              name: 'sdpr:case:read',
+              description: 'Permission to read case information',
+            },
+          ] as ResourceScope[],
         },
       ],
     },
@@ -208,6 +218,55 @@ export class CatalogController extends Controller {
     const ctx = this.keystone.sudo();
     const result = await GetCatalog(ctx);
     result.map((o) => removeKeys(o, ['gateway']));
+    return result;
+  }
+
+  /**
+   * Retrieve a list of resource scopes registered in the SDX service catalog.
+   *
+   * @summary List of resource scopes in catalog
+   */
+  @Get('/scopes')
+  @OperationId('listScopeCatalog')
+  @SuccessResponse('200', 'OK')
+  @Example<ResourceScopeEntry[]>([
+    {
+      name: 'sdpr:case:read',
+      description: 'Permission to read case information',
+      namespace: 'sdpr',
+      resourceType: 'case',
+      action: 'read',
+      services: [
+        {
+          name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
+          specVersion: '1.0.0',
+          version: '1.0.0',
+
+          operationIds: ['getUsers'],
+          subsystem: {
+            name: 'SAMPLE-SUBSYS',
+            description: 'A sample subsystem for demonstration purposes',
+            clientId: 'MIN.CITZ.SAMPLE-SUBSYS',
+            organization: {
+              name: 'sample-organization',
+            },
+            member: {
+              memberClass: 'MIN',
+              memberId: 'CITZ',
+            },
+            integrationClientIds: ['client-x-12343'], // TODO: need to populate this field based on the connections for this service
+          },
+        },
+      ],
+    },
+  ])
+  @Response<MissingCredentialsJSON>(401, 'Unauthorized', {
+    code: 'credentials_required',
+    message: 'No authorization token was found',
+  })
+  public async listCatalogScopes(): Promise<ResourceScopeEntry[]> {
+    const ctx = this.keystone.sudo();
+    const result = await GetScopes(ctx);
     return result;
   }
 

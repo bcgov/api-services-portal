@@ -74,6 +74,7 @@ export class PatternsEvaluatorService {
    */
   async buildResourcesUsingConnectionRequest(
     id: string,
+    action: 'preview' | 'apply' | 'diff' | 'delete',
     service: ServiceCatalogEntry,
     connection: ConnectionRequestInput
   ): Promise<PatternOutput[]> {
@@ -83,40 +84,43 @@ export class PatternsEvaluatorService {
       );
     }
 
-    const combinedScopes = [
-      ...(connection.requesterDetails.scopes || []),
-      connection.requesterDetails.service.privacyZone,
-    ];
+    // only do the policy check for preview, apply and diff actions, not for delete
+    if (action !== 'delete') {
+      const combinedScopes = [
+        ...(connection.requesterDetails.scopes || []),
+        connection.requesterDetails.service?.privacyZone,
+      ];
 
-    const policyContext = {
-      ...connection,
-      combinedScopes,
-      globals: {
-        environment: Environments[connection.environment],
-      },
-    };
+      const policyContext = {
+        ...connection,
+        combinedScopes,
+        globals: {
+          environment: Environments[connection.environment],
+        },
+      };
 
-    this.logger?.debug('Evaluting policy with %j', policyContext);
+      this.logger?.debug('Evaluting policy with %j', policyContext);
 
-    // run the policy check
-    const policyResult = this.policyService.validateConnectionRequest(
-      connection.policyVersion || '',
-      policyContext
-    );
-
-    if (!policyResult.allowed) {
-      this.logger?.error('Policy check failed: %j', policyResult);
-      throw withDetails(
-        new BadRequestError(
-          `Connection request change not allowed by '${connection.policyVersion}' policy`
-        ),
-        {
-          reason: policyResult,
-        }
+      // run the policy check
+      const policyResult = this.policyService.validateConnectionRequest(
+        connection.policyVersion || '',
+        policyContext
       );
-    }
 
-    this.logger?.debug('Policy check passed: %j', policyResult);
+      if (!policyResult.allowed) {
+        this.logger?.error('Policy check failed: %j', policyResult);
+        throw withDetails(
+          new BadRequestError(
+            `Connection request change not allowed by '${connection.policyVersion}' policy`
+          ),
+          {
+            reason: policyResult,
+          }
+        );
+      }
+
+      this.logger?.debug('Policy check passed: %j', policyResult);
+    }
 
     // use the gateway patterns to create the resources
     const gatewayPatterns = {
