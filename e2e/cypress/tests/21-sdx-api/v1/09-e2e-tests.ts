@@ -50,6 +50,7 @@ describe('SDX E2E Tests', () => {
               policyVersion: 'SDX.R0.00',
               environment: 'dev',
               isApproved: true,
+              isActive: true,
               requesterDetails: {
                 requester: 'Janis',
                 client: {
@@ -106,6 +107,41 @@ describe('SDX E2E Tests', () => {
                   100,
                   'SDX call did not succeed after 8 retries'
                 )
+
+                // revoke access
+                connection.isActive = false
+
+                cy.setRequestBody(connection)
+                cy.callAPI(
+                  `ds/api/sdx/v1/organizations/${org.name}/connections`,
+                  'PUT'
+                ).then(({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(200)
+                  expect(body.result).to.be.equal('updated')
+                  expect(typeof body.id).to.be.equal('string')
+
+                  // connection is de-activated; the provisioner runs asynchronously
+                  // and kong control plane also pushes out changes to the data planes
+                  // async, so do some retries until we get a good response
+                  let retries = 0
+                  while (retries < 8) {
+                    retries++
+                    cy.makeSDXCall({
+                      method: 'GET',
+                      path: `/sdx/0/${serviceId}/ping`,
+                    }).then(({ status, body }) => {
+                      if (status === 401) {
+                        retries = 100
+                      } else {
+                        cy.wait(2000)
+                      }
+                    })
+                  }
+                  expect(retries).to.be.lessThan(
+                    100,
+                    'SDX access was still available after 8 retries, expected it to be revoked'
+                  )
+                })
               }
             )
           })

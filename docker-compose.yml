@@ -56,7 +56,7 @@ services:
       test: timeout 10s bash -c ':> /dev/tcp/localhost/9081'
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.8.1
     container_name: oauth2-proxy
