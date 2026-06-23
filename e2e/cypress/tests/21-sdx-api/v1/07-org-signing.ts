@@ -26,9 +26,13 @@ describe('SDX Organization Signing', () => {
         ({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
 
+          const rg = body.find((rg: any) => rg.name === payload.name)
+          expect(rg).to.not.be.undefined
+
           // call the /keys endpoint to get a CSR
           cy.setRequestBody({
-            runtimeGroupName: payload.name,
+            runtimeGroupName: rg.name,
+            environment: rg.environment,
           })
           cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
             ({ apiRes: { status, body, headers } }: any) => {

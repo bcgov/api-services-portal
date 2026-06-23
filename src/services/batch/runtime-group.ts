@@ -15,6 +15,7 @@ import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
 import { StepTokenService } from '../certificate-authority/step-token';
+import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('batch.runtime-group');
 
@@ -115,15 +116,17 @@ class RuntimeGroupService {
     environment: string,
     force: boolean = false
   ): Promise<BatchResult> => {
-    const rgList = await new RuntimeGroupService().findRuntimeGroupsByName(
+    const rgList = await new RuntimeGroupService().findOrgRuntimeGroupsByName(
       context,
       org,
       name
     );
     const entry = rgList.find((rg) => rg.environment === environment);
-    if (!entry) {
-      throw new Error('Runtime Group not found for the specified environment');
-    }
+    assertIsDefined(
+      entry,
+      'environment',
+      'Runtime Group not found for the specified environment'
+    );
 
     return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
   };
@@ -176,9 +179,17 @@ class RuntimeGroupService {
     );
   };
 
-  findRuntimeGroupsByName = async (
+  findOrgRuntimeGroupsByName = async (
     context: Keystone,
     org: string,
+    name: string
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const groups = await this.findRuntimeGroupsByName(context, name);
+    return groups.filter((rg) => rg.organization?.name === org);
+  };
+
+  findRuntimeGroupsByName = async (
+    context: Keystone,
     name: string
   ): Promise<KeystoneRuntimeGroup[]> => {
     const runtimeGroups = await getRecords(
@@ -193,7 +204,7 @@ class RuntimeGroupService {
       }
     );
 
-    return runtimeGroups.filter((rg) => rg.organization?.name === org);
+    return runtimeGroups;
   };
 
   findRuntimeGroupByUniqueName = async (

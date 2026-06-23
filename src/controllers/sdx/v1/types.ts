@@ -39,6 +39,7 @@ export interface RuntimeGroupInput {
  */
 export interface CreateNewKeyInput {
   runtimeGroupName: string;
+  environment: string;
 }
 
 export interface GatewayPattern {

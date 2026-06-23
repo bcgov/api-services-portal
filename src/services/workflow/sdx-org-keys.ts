@@ -4,25 +4,30 @@ import {
   parseOrganizationMemberDetails,
 } from '../keystone/organization';
 import assert from '../user-assert';
-import https from 'https';
-import fs from 'fs';
 import { Logger } from '../../logger';
-import { check } from 'prettier';
 import { checkStatus } from '../checkStatus';
+import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('workflow.sdx-org-keys');
 
 export const CreateNewKey = async (
   context: any,
   orgName: string,
-  runtimeGroupName: string
+  runtimeGroupName: string,
+  environment: string
 ) => {
   const service = new RuntimeGroupService();
 
   // Verify the runtime group belongs to the specified organization
-  const rg = await service.findRuntimeGroupByUniqueName(
+  const rgList = await service.findRuntimeGroupsByName(
     context,
     runtimeGroupName
+  );
+  const rg = rgList.find((rg) => rg.environment === environment);
+  assertIsDefined(
+    rg,
+    'environment',
+    'Runtime Group not found for the specified environment'
   );
   assert.strictEqual(
     rg.hostedOrganizations?.filter((o) => o.name === orgName).length == 1,
@@ -34,13 +39,16 @@ export const CreateNewKey = async (
 
   const member = parseOrganizationMemberDetails(org.tags);
 
-  const san =
-    `LAB-${member.memberClass}-${member.memberId}.${rg.name}.servers.sdx`.toLocaleLowerCase();
+  const san = `${environment.toLocaleUpperCase()}-${member.memberClass}-${
+    member.memberId
+  }.${rg.name}.servers.sdx`.toLocaleLowerCase();
 
   const body = {
     country: 'CA',
     org_name: org.title,
-    serial_number: `LAB/${member.memberClass}/${rg.name.toUpperCase()}`,
+    serial_number: `${environment.toLocaleUpperCase()}/${
+      member.memberClass
+    }/${rg.name!.toUpperCase()}`,
     common_name: member.memberId,
     san: san,
     requester_name: context.req?.user?.name || 'unknown',

@@ -41,9 +41,9 @@ const logger = Logger('OrgGatewaysController');
  * @example {
  *   "pattern": "sdx-p2p-consumer.r1",
  *   "parameters": {
- *     "client_id": "LAB.MIN.FOOD.MY-UI",
- *     "service_id": "LAB.MIN.FOOD.CASE-MANAGEMENT.v1",
- *     "upstream_url": "httpbun.com"
+ *     "clientId": "LAB.MIN.FOOD.MY-UI",
+ *     "serviceId": "LAB.MIN.FOOD.CASE-MANAGEMENT.v1",
+ *     "upstreamUrl": "httpbun.com"
  *   }
  * }
  */
@@ -201,15 +201,13 @@ export class OrgGatewaysController extends Controller {
       let targetName: string | undefined;
 
       if (body.pattern === 'sdx-keys.r1') {
-        scope = body.parameters.runtime_group_name
+        scope = body.parameters.runtimeGroupName
           ? 'runtime-group'
-          : body.parameters.client_id
+          : body.parameters.clientId
           ? 'subsystem'
           : 'organization';
         targetName =
-          body.parameters.runtime_group_name ??
-          body.parameters.client_id ??
-          org;
+          body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
 
         //   if (removed) {
         //     const removedKeyNames = incomingKeys

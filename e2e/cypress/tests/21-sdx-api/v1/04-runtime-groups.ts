@@ -48,7 +48,7 @@ describe('SDX Runtime Groups', () => {
       )
     })
 
-    it('DELETE /organizations/{org}/runtime-groups/{name}', () => {
+    it('DELETE /organizations/{org}/runtime-groups/{name}/environments/{environment}', () => {
       const { org, gateway, dataset, runtimeGroupId, product } = workingData
 
       const payload = {
@@ -63,7 +63,7 @@ describe('SDX Runtime Groups', () => {
 
           cy.setQueryString({ force: false })
           cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}`,
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}/environments/${payload.environment}`,
             'DELETE'
           ).then(({ apiRes: { status, body } }: any) => {
             expect(status).to.be.equal(200)
@@ -91,13 +91,13 @@ describe('SDX Runtime Groups', () => {
       )
     })
 
-    it('POST /organizations/{org}/runtime-groups/{name}/tokens', () => {
+    it('POST /organizations/{org}/runtime-groups/{name}/environments/{environment}/tokens', () => {
       const { org, gateway, dataset, runtimeGroupId, product } = workingData
 
       cy.clearRequestBody()
       cy.setQueryString({})
       cy.callAPI(
-        `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupId}/tokens`,
+        `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupId}/environments/cyp/tokens`,
         'POST'
       ).then(({ apiRes: { status, body } }: any) => {
         expect(status).to.be.equal(200)
@@ -141,7 +141,7 @@ describe('SDX Runtime Groups', () => {
       )
     })
 
-    it('DELETE /organizations/{org}/runtime-groups/{name} (not exists)', () => {
+    it('DELETE /organizations/{org}/runtime-groups/{name}/environments/{environment} (not exists)', () => {
       const { org, gateway, dataset, runtimeGroupId, product } = workingData
 
       const payload = {
@@ -150,15 +150,19 @@ describe('SDX Runtime Groups', () => {
       }
       cy.setQueryString({ force: false })
       cy.callAPI(
-        `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}`,
+        `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${payload.name}/environments/${payload.environment}`,
         'DELETE'
       ).then(({ apiRes: { status, body } }: any) => {
         expect(status).to.be.equal(422)
-        expect(body.message).to.be.equal('Runtime Group not found')
+        // expect(JSON.stringify(body)).to.contain('blah')
+        expect(body.message).to.be.equal('Validation Failed')
+        expect(body.fields['environment'].message).to.be.equal(
+          'Runtime Group not found for the specified environment'
+        )
       })
     })
 
-    it('POST /organizations/{org}/runtime-groups/{name}/tokens (bad url)', () => {
+    it('POST /organizations/{org}/runtime-groups/{name}/environments/{environment}/tokens (bad url)', () => {
       const { org, gateway, dataset, runtimeGroupId, product } = workingData
 
       const payload = {
@@ -177,7 +181,7 @@ describe('SDX Runtime Groups', () => {
           cy.clearRequestBody()
           cy.setQueryString({})
           cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${newRuntimeGroupId}/tokens`,
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${newRuntimeGroupId}/environments/${payload.environment}/tokens`,
             'POST'
           ).then(({ apiRes: { status, body } }: any) => {
             expect(status).to.be.equal(422)
