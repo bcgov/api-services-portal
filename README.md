@@ -64,13 +64,12 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Follow [local deployment instructions](#local-deployment) and run `docker compose up`.
 1. In `/src` run `npm install`.
-
    1. If using Node version > 17, run `npm install --legacy-peer-deps`
 
 1. Switch to local-dev mode: stop `apsportal` and `oauth2-proxy`, then recreate `gwa-api` and `feeder` with `docker-compose.dev.yml` so they point at the host for local development.
 
    ```sh
-   docker compose stop apsportal oauth2-proxy
+   docker compose stop apsportal oauth2-proxy provisioner
    docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d \
      --force-recreate --no-deps gwa-api feeder
    ```
@@ -78,7 +77,7 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
    To switch back to full compose later, recreate without the overlay:
 
    ```sh
-   docker compose up -d --force-recreate apsportal oauth2-proxy gwa-api feeder
+   docker compose up -d --force-recreate apsportal oauth2-proxy gwa-api feeder provisioner
    ```
 
 1. Start the OAuth2 Proxy locally (from the repo root):
@@ -123,6 +122,16 @@ docker run -ti --rm --name proxy -p 4180:4180 \
    ```
 
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180 and should auto-update on code changes.
+
+1. Start the provisioner
+
+   ```sh
+   cd provisioner-api
+   set -a; source .env.local; set +a;
+   npm run dev | npx pino-pretty
+   ```
+
+The provisioner is now live at http://provisioner.localtest.me:3030 and should auto-update on code changes.
 
 ## Design
 

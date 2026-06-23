@@ -2,26 +2,21 @@ import type {
   RuntimeGroup,
   SdxMemberApiClient,
   SubsystemEntry,
-  SubsystemRuntimeGroup,
 } from '../../clients/sdx-member/index.js';
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
-import {
-  assert,
-  type EnrichedServiceCatalogEntry,
-  type EnrichedSubsystemEntry,
-} from './utils.js';
+import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
 
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
 
-export interface SDXSubsystemConfig {
-  subsystemId: string;
+export interface SDXServiceConfig {
+  serviceId: string;
   upstreamUrl: string;
   useSni: string;
   environment: string;
-  upgrades: SubsystemUpgrades;
+  upgrades: ServiceUpgrades;
 }
 
-interface SubsystemUpgrades {
+interface ServiceUpgrades {
   mtlsAuth: {};
   mtlsAcl: {
     allow: string[];
@@ -41,10 +36,10 @@ interface SubsystemUpgrades {
   counterSign: {};
 }
 
-interface SDXSubsystemsPatternData {
+interface SDXServicePatternData {
   gatewayId: string;
   subsystem: SubsystemEntry;
-  services: EnrichedServiceCatalogEntry[];
+  service: EnrichedServiceCatalogEntry;
   subsystemRuntimeGroup: RuntimeGroup;
 }
 
@@ -52,26 +47,31 @@ interface SDXSubsystemsPatternData {
  * This pattern will provision default routes for the subsystem
  *
  */
-export const SDXSubsystemsPattern = {
-  id: 'sdx-subsystem.r1',
-  requiredParams: ['subsystemId', 'upstreamUrl'],
+export const SDXServicePattern = {
+  id: 'sdx-service.r1',
+  requiredParams: ['serviceId', 'environment', 'upstreamUrl'],
 
   inject: async (
     api: SdxMemberApiClient,
-    inputs: SDXSubsystemConfig
-  ): Promise<SDXSubsystemsPatternData> => {
-    const subsystem = await api.getCatalogSubsystem(inputs.subsystemId);
-
-    const subsystemClient = await api.getSubsystemClient(
-      subsystem.organization?.name!,
-      subsystem.name
-    );
-
+    inputs: SDXServiceConfig
+  ): Promise<SDXServicePatternData> => {
     // get all the services for this subsystem from the service catalog
     const catalog = await api.listServiceCatalog();
     const services = catalog.filter(
-      (s) => s.subsystem.clientId === subsystem.clientId
+      (s) => s.name === inputs.serviceId
     ) as EnrichedServiceCatalogEntry[];
+
+    const service = services.pop();
+    if (service === undefined) {
+      throw new Error(
+        `Service ${inputs.serviceId} not found in service catalog`
+      );
+    }
+
+    const subsystemClient = await api.getSubsystemClient(
+      service.subsystem.organization.name,
+      service.subsystem.name
+    );
 
     const subsystemRG = subsystemClient.runtimeGroups?.find(
       (rg) => rg.environment === inputs.environment
@@ -83,56 +83,63 @@ export const SDXSubsystemsPattern = {
       `Service subsystem does not have a runtime group for environment '${inputs.environment}'`
     );
 
+    assert.strictEqual(
+      Boolean(subsystemClient.gateway?.id),
+      true,
+      `Subsystem ${subsystemClient.name} does not have a gateway registered`
+    );
+
     return {
       gatewayId: subsystemClient.gateway?.id!,
       subsystem: subsystemClient,
-      services,
+      service,
       subsystemRuntimeGroup: subsystemRG as any,
     };
   },
 
-  eval: (inputs: SDXSubsystemConfig, data: SDXSubsystemsPatternData) => {
+  eval: (inputs: SDXServiceConfig, data: SDXServicePatternData) => {
+    const service = data.service;
+
     let tags = [
-      `ns.${data.gatewayId}.sys-${data.subsystem.name}`,
+      `ns.${data.gatewayId}.svc-${service.name}`,
       `subsystem:${data.subsystem.clientId}`,
       'sdx',
     ];
+    const serviceLocator = service.name;
 
-    const serviceRoutes = data.services.map((service) => {
-      const serviceLocator = service.name;
+    const serviceHost = data.subsystemRuntimeGroup.host;
 
-      const serviceHost = data.subsystemRuntimeGroup.host;
+    const upgrades = inputs.upgrades || {};
 
-      const upgrades = inputs.upgrades || {};
+    const routes = (service.operations || [{ operationId: 'all' }]).map(
+      (op) => {
+        return {
+          name: `sdx.sys.${serviceLocator}.${op.operationId}`,
+          tags: [
+            ...tags,
+            `service:${serviceLocator}`,
+            `operation:${op.operationId}`,
+          ],
+          hosts: [serviceHost],
+          snis: inputs.useSni === 'false' ? [] : [serviceHost],
+          paths: [
+            op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
+          ],
+          methods:
+            op.operationId === 'all'
+              ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+              : [op.method],
+          headers: {
+            'X-Service-Id': [serviceLocator],
+          },
+          protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
+          strip_path: false,
+        };
+      }
+    );
 
-      const routes = (service.operations || [{ operationId: 'all' }]).map(
-        (op) => {
-          return {
-            name: `sdx.sys.${serviceLocator}.${op.operationId}`,
-            tags: [
-              ...tags,
-              `service:${serviceLocator}`,
-              `operation:${op.operationId}`,
-            ],
-            hosts: [serviceHost],
-            snis: inputs.useSni === 'false' ? [] : [serviceHost],
-            paths: [
-              op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
-            ],
-            methods:
-              op.operationId === 'all'
-                ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-                : [op.method],
-            headers: {
-              'X-Service-Id': [serviceLocator],
-            },
-            protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
-            strip_path: false,
-          };
-        }
-      );
-
-      return {
+    const serviceRoutes = [
+      {
         kind: 'GatewayService',
         name: `sdx.sys.${serviceLocator}`,
         tags: [...tags, `service:${serviceLocator}`, `rghost:${serviceHost}`],
@@ -174,7 +181,7 @@ export const SDXSubsystemsPattern = {
             ? [upgradeToMTLSAuth(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('mtls_acl')
-            ? [upgradeToMTLSACL(tags, data, inputs as SDXSubsystemConfig)]
+            ? [upgradeToMTLSACL(tags, data, inputs as SDXServiceConfig)]
             : []),
           ...(upgrades.hasOwnProperty('sign')
             ? [upgradeToTrustSign(tags, data)]
@@ -183,52 +190,52 @@ export const SDXSubsystemsPattern = {
             ? [upgradeToTrustVerify(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('token')
-            ? [upgradeToJWTKeycloak(tags, data, inputs as SDXSubsystemConfig)]
+            ? [upgradeToJWTKeycloak(tags, data, inputs as SDXServiceConfig)]
             : []),
           ...(upgrades.hasOwnProperty('counter_sign')
             ? [upgradeToTrustKMS(tags, data)]
             : []),
         ],
-      };
-    });
-
-    const apsResources = [
-      {
-        kind: 'Application',
-        name: data.subsystem.name,
-        namespace: data.subsystem.gateway?.id,
-        description: data.subsystem.description,
-      },
-      {
-        kind: 'Product',
-        name: data.subsystem.name,
-        organization: data.subsystem.organization?.name,
-        description: data.subsystem.description,
-        environments: [
-          {
-            name: 'dev',
-            flow: 'protected-externally',
-          },
-          {
-            name: 'test',
-            flow: 'protected-externally',
-          },
-          {
-            name: 'prod',
-            flow: 'protected-externally',
-          },
-        ] as any[],
       },
     ];
 
-    return [...serviceRoutes, ...apsResources];
+    // const apsResources = [
+    //   {
+    //     kind: 'Application',
+    //     name: data.subsystem.name,
+    //     namespace: data.subsystem.gateway?.id,
+    //     description: data.subsystem.description,
+    //   },
+    //   {
+    //     kind: 'Product',
+    //     name: data.subsystem.name,
+    //     organization: data.subsystem.organization?.name,
+    //     description: data.subsystem.description,
+    //     environments: [
+    //       {
+    //         name: 'dev',
+    //         flow: 'protected-externally',
+    //       },
+    //       {
+    //         name: 'test',
+    //         flow: 'protected-externally',
+    //       },
+    //       {
+    //         name: 'prod',
+    //         flow: 'protected-externally',
+    //       },
+    //     ] as any[],
+    //   },
+    // ];
+
+    return [...serviceRoutes];
   },
 };
 
 function upgradeToJWTKeycloak(
   tags: string[],
-  data: SDXSubsystemsPatternData,
-  inputs: SDXSubsystemConfig
+  data: SDXServicePatternData,
+  inputs: SDXServiceConfig
 ) {
   const jwtKeycloakConfig = inputs.upgrades.token;
 
@@ -249,7 +256,7 @@ function upgradeToJWTKeycloak(
   };
 }
 
-function upgradeToMTLSAuth(tags: string[], data: SDXSubsystemsPatternData) {
+function upgradeToMTLSAuth(tags: string[], data: SDXServicePatternData) {
   return {
     name: 'mtls-auth',
     tags: tags,
@@ -265,8 +272,8 @@ function upgradeToMTLSAuth(tags: string[], data: SDXSubsystemsPatternData) {
 
 function upgradeToMTLSACL(
   tags: string[],
-  data: SDXSubsystemsPatternData,
-  inputs: SDXSubsystemConfig
+  data: SDXServicePatternData,
+  inputs: SDXServiceConfig
 ) {
   const allow = inputs.upgrades.mtlsAcl.allow || [];
   const headerName =
@@ -281,7 +288,7 @@ function upgradeToMTLSACL(
   };
 }
 
-function upgradeToTrustSign(tags: string[], data: SDXSubsystemsPatternData) {
+function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
   const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name!}:0`;
   const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
 
@@ -300,7 +307,7 @@ function upgradeToTrustSign(tags: string[], data: SDXSubsystemsPatternData) {
   };
 }
 
-function upgradeToTrustVerify(tags: string[], data: SDXSubsystemsPatternData) {
+function upgradeToTrustVerify(tags: string[], data: SDXServicePatternData) {
   return {
     name: 'trust-verify-signature',
     tags: tags,
@@ -313,7 +320,7 @@ function upgradeToTrustVerify(tags: string[], data: SDXSubsystemsPatternData) {
   };
 }
 
-function upgradeToTrustKMS(tags: string[], data: SDXSubsystemsPatternData) {
+function upgradeToTrustKMS(tags: string[], data: SDXServicePatternData) {
   const member = data.subsystem.member;
   const memberText = `${member?.memberClass}.${member?.memberId}`.toLowerCase();
 

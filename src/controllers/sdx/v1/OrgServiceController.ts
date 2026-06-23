@@ -31,7 +31,7 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
-import { assertEqual } from '../../ioc/assert';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { Logger } from '../../../logger';
 import { ExpressRequest } from './types';
@@ -205,6 +205,11 @@ export class GatewayServiceController extends Controller {
       'Not authorized to access this service'
     );
 
+    assertIsDefined(
+      entry.spec,
+      'spec',
+      'No OpenAPI specification found for this service'
+    );
     return YAML.parse(entry.spec);
   }
 

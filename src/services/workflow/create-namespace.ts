@@ -84,6 +84,8 @@ export async function CreateNamespace(
     'Access.Manage',
     'Content.Publish',
     'CredentialIssuer.Admin',
+    'Connection.Manage', // SDX specific permission
+    'GatewayPattern.Publish', // SDX specific permission
   ];
   const res = <ResourceSetInput>{
     name: newNS,

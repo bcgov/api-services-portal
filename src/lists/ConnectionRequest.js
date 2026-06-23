@@ -160,7 +160,7 @@ module.exports = {
         operation,
         updatedItem
       );
-      if (operation != 'create') {
+      if (updatedItem.isActive) {
         const provisionerService = new ProvisionerService(
           process.env.PROVISIONER_URL
         );
@@ -168,21 +168,15 @@ module.exports = {
           updatedItem,
           'apply'
         );
+      } else {
+        const provisionerService = new ProvisionerService(
+          process.env.PROVISIONER_URL
+        );
+        await provisionerService.postConnectionRequestChangeEvent(
+          updatedItem,
+          'delete'
+        );
       }
-    },
-
-    afterDelete: async function ({ existingItem }) {
-      logger.debug(
-        'After delete hook for ConnectionRequest: existingItem=%j',
-        existingItem
-      );
-      const provisionerService = new ProvisionerService(
-        process.env.PROVISIONER_URL
-      );
-      await provisionerService.postConnectionRequestChangeEvent(
-        existingItem,
-        'delete'
-      );
     },
   },
 };

@@ -509,11 +509,10 @@ export const syncRecords = async function (
           );
         }
         if (entity === 'OrganizationUnit' && !parentRecord?.name) {
-          await logOrganizationUnitEstablishedFromRecords(
-            context,
-            json.name,
-            { ...json, ...data }
-          );
+          await logOrganizationUnitEstablishedFromRecords(context, json.name, {
+            ...json,
+            ...data,
+          });
         }
         return { status: 200, result: 'created', id: nr.id, childResults };
       }

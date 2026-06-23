@@ -153,7 +153,7 @@ describe('SDX OpenAPI Services', () => {
       const { org, datasetId } = workingData
 
       const subsystemName = `SUBSYS-${datasetId.toUpperCase()}`
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
         cy.setRequestBody(undefined)
         cy.callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
@@ -190,6 +190,7 @@ describe('SDX OpenAPI Services', () => {
       createSubsystemAndOASService(
         org,
         `SUBSYS-${datasetId.toUpperCase()}`,
+        'lab',
         (service: any) => {
           createConnection(org, service.subsystem.clientId, service.name, () => {
             cy.setRequestBody(undefined)

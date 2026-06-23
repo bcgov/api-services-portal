@@ -189,7 +189,7 @@ export class OrgGatewaysController extends Controller {
 
     if (action === 'preview') {
       request.res?.header('Content-Type', 'application/yaml; charset=utf-8');
-      request.res?.send(result);
+      request.res?.send(YAML.dump(result, { noRefs: true }));
       return '';
     }
 

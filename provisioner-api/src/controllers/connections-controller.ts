@@ -5,9 +5,7 @@ import type {
   TResourceResult,
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import { BadRequestError } from '../errors/api-errors.js';
 import { Activity } from '../clients/feed/types.js';
-import { connect } from 'http2';
 import { v4 as uuidv4 } from 'uuid';
 
 export class ConnectionsController {
@@ -41,6 +39,7 @@ export class ConnectionsController {
         return {
           applied: 0,
           failed: 0,
+          skipped: 0,
           results,
           preview: resourceSets.flatMap((resourceSet) =>
             resourceSet.documents.map((doc) => doc)
@@ -63,6 +62,7 @@ export class ConnectionsController {
         return {
           applied: results.filter((r) => r.status === 'applied').length,
           failed: results.filter((r) => r.status === 'failed').length,
+          skipped: results.filter((r) => r.status === 'skipped').length,
           results,
         };
       }
@@ -78,6 +78,7 @@ export class ConnectionsController {
         return {
           applied: 0,
           failed: 1,
+          skipped: 0,
           results: [],
         };
       } else {
@@ -93,6 +94,13 @@ export class ConnectionsController {
     results: TResourceResult[] | undefined,
     error?: unknown
   ): Promise<void> {
+    this.logger?.debug('Logging activity for connection request change: %j', {
+      action,
+      connectionRequest,
+      service,
+      results,
+      error,
+    });
     const activity: Activity = {
       id: uuidv4(),
       type: 'ConnectionRequest',

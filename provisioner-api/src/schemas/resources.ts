@@ -168,6 +168,10 @@ export const ConnectionChangeResponse = Type.Object(
       description: 'Number of resources that failed to apply.',
       examples: [0],
     }),
+    skipped: Type.Integer({
+      description: 'Number of resources that were skipped.',
+      examples: [0],
+    }),
     results: Type.Array(ResourceResult),
     preview: Type.Optional(Type.Array(Type.Unknown()), true),
   },
@@ -201,6 +205,10 @@ export const ApplyResourcesResponse = Type.Object(
       description: 'Number of resources that failed to apply.',
       examples: [0],
     }),
+    skipped: Type.Integer({
+      description: 'Number of resources that were skipped.',
+      examples: [0],
+    }),
     results: Type.Array(ResourceResult),
     preview: Type.Optional(Type.Array(Type.Unknown()), true),
   },
@@ -211,6 +219,7 @@ export const ApplyResourcesResponse = Type.Object(
       {
         applied: 1,
         failed: 0,
+        skipped: 0,
         results: [
           {
             kind: 'Product',

@@ -54,7 +54,7 @@ describe('SDX Subsystem', () => {
       const { org } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
         cy.setQueryString({ force: false })
         cy.callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
@@ -168,7 +168,7 @@ describe('SDX Subsystem', () => {
       const { org, runtimeGroupId } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
         createRuntimeGroup(
           org,
           runtimeGroupId,
@@ -200,26 +200,31 @@ describe('SDX Subsystem', () => {
       const providerSubsystemName = uniqueSubsystemName()
 
       createSubsystem(org, clientSubsystemName, () => {
-        createSubsystemAndOASService(org, providerSubsystemName, (service: any) => {
-          createConnection(
-            org,
-            clientIdForSubsystem(org, clientSubsystemName),
-            service.name,
-            () => {
-              cy.setQueryString({ force: false })
-              cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/subsystems/${providerSubsystemName}`,
-                'DELETE',
-                false
-              ).then(({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(422)
-                expect(body.message).to.be.equal(
-                  'Subsystem cannot be deleted because it has active connection requests as a service provider'
-                )
-              })
-            }
-          )
-        })
+        createSubsystemAndOASService(
+          org,
+          providerSubsystemName,
+          'lab',
+          (service: any) => {
+            createConnection(
+              org,
+              clientIdForSubsystem(org, clientSubsystemName),
+              service.name,
+              () => {
+                cy.setQueryString({ force: false })
+                cy.callAPI(
+                  `ds/api/sdx/v1/organizations/${org.name}/subsystems/${providerSubsystemName}`,
+                  'DELETE',
+                  false
+                ).then(({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(422)
+                  expect(body.message).to.be.equal(
+                    'Subsystem cannot be deleted because it has active connection requests as a service provider'
+                  )
+                })
+              }
+            )
+          }
+        )
       })
     })
 

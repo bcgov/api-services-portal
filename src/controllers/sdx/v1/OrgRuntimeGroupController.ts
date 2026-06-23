@@ -217,7 +217,7 @@ export class RuntimeGroupController extends Controller {
       'Gateway ID mismatch after creation'
     );
 
-    return { gatewayId: rgs[0].namespace };
+    return { gatewayId: rgs[0].namespace! };
   }
 
   /**
@@ -256,7 +256,7 @@ export class RuntimeGroupController extends Controller {
       'Runtime Group not found for the specified environment'
     );
 
-    const token = await service.generateCertSignRequestToken(rg);
+    const token = await service.generateCertSignRequestToken(rg!);
 
     return { token };
   }

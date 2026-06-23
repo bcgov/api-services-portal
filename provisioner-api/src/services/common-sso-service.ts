@@ -24,12 +24,12 @@ export class CommonSsoService {
       { count: resources.length },
       'CommonSsoService.applyResources'
     );
-    for (const resource of resources) {
-      await this.provisionAllowedServices(
-        resource as unknown as TIntegrationAccessRequest
-      );
-    }
-    return { message: 'resources applied to Common SSO' };
+    // for (const resource of resources) {
+    //   await this.provisionAllowedServices(
+    //     resource as unknown as TIntegrationAccessRequest
+    //   );
+    // }
+    return { message: 'Common SSO disabled' };
   }
 
   /**

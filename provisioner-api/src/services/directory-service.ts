@@ -2,6 +2,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import type { TResource } from '../schemas/resources.js';
 import {
+  BatchResult,
   DirectoryApiClient,
   type Product,
 } from '../clients/directory/index.js';
@@ -32,16 +33,20 @@ export class DirectoryService {
     gatewayId: string,
     resources: TResource[],
     action: Action
-  ): Promise<any> {
+  ): Promise<BatchResult[]> {
     this.logger?.debug(
       { count: resources.length, kinds: resources.map((r) => r.kind) },
       'DirectoryService.applyResources'
     );
 
     if (action === 'diff' || action === 'delete') {
-      throw new UnprocessableEntityError(
-        `DirectoryService does not support action ${action}`
-      );
+      return [
+        {
+          status: 422,
+          result: 'skipped',
+          reason: `DirectoryService does not support action ${action}`,
+        } as BatchResult,
+      ];
     }
 
     // Example: creating a Product from a Product resource document.

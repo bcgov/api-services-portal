@@ -38,3 +38,13 @@ unless {
     context.clientId != "" &&
     context.serviceId != ""
 };
+
+forbid ( // Deny if environment is anything except dev
+    principal,
+    action == SDX::Action::"SubmitConnectionRequest",
+    resource is SDX::ConnectionRequest
+)
+unless {
+    context has environment &&
+    context.environment == "dev"
+};

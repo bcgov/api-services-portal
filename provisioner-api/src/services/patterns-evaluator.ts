@@ -9,7 +9,7 @@ import { SDXP2PConsumerPattern } from './gateway-patterns/sdx-p2p-consumer.js';
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
-import { SDXSubsystemsPattern } from './gateway-patterns/sdx-subsystem.js';
+import { SDXServicePattern } from './gateway-patterns/sdx-service.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
 import {
   BadRequestError,
@@ -43,7 +43,7 @@ const PATTERNS: Record<string, PatternProcessor> = {
   [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
   [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
   [SDXKeysPattern.id]: SDXKeysPattern,
-  [SDXSubsystemsPattern.id]: SDXSubsystemsPattern,
+  [SDXServicePattern.id]: SDXServicePattern,
 };
 
 export interface GatewayPatternConfig {

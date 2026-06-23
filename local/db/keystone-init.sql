@@ -2600,6 +2600,7 @@ CREATE TABLE public."OpenAPISpec" (
     operations text NOT NULL,
     spec text NOT NULL,
     "specVersion" text NOT NULL,
+    annotations text,
     subsystem integer
 );
 

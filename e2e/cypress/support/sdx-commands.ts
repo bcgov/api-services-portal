@@ -41,7 +41,12 @@ export function createSubsystemGateway(
   })
 }
 
-export function createOASService(org: any, subsystemName: string, next: any) {
+export function createOASService(
+  org: any,
+  subsystemName: string,
+  environment: string,
+  next: any
+) {
   cy.fixture('toys.v1.yaml', null).then((text: any) => {
     expect(Cypress.Buffer.isBuffer(text)).to.be.true
 
@@ -53,7 +58,7 @@ export function createOASService(org: any, subsystemName: string, next: any) {
     cy.setRequestBodyRaw(body)
     cy.setHeader('Content-Type', 'application/octet-stream')
     cy.callAPI(
-      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
+      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=${environment}`,
       'PUT',
       false
     ).then(({ apiRes: { status, body } }: any) => {
@@ -73,9 +78,14 @@ export function createOASService(org: any, subsystemName: string, next: any) {
   })
 }
 
-export function createSubsystemAndOASService(org: any, subsystemName: string, next: any) {
+export function createSubsystemAndOASService(
+  org: any,
+  subsystemName: string,
+  environment: string,
+  next: any
+) {
   createSubsystem(org, subsystemName, () => {
-    createOASService(org, subsystemName, next)
+    createOASService(org, subsystemName, environment, next)
   })
 }
 
@@ -118,4 +128,38 @@ export function createRuntimeGroup(
       expect(status, body.message).to.be.equal(200)
     }
   )
+}
+
+export function updateRuntimeGroupAddHostedOrg(
+  org: any,
+  runtimeGroupName: string,
+  environment: string,
+  hostedOrg: string
+) {
+  // get the runtime-group first, and then append the new hostOrganization
+  cy.callAPI(
+    `ds/api/sdx/v1/organizations/${org.name}/runtime-groups?filter=owned`,
+    'GET'
+  ).then(({ apiRes: { status, body } }: any) => {
+    expect(status, body.message).to.be.equal(200)
+    const runtimeGroup = body.find((rg: any) => rg.name === runtimeGroupName)
+    expect(runtimeGroup, `Runtime group ${runtimeGroupName} not found`).to.exist
+
+    const hostedOrganizations = runtimeGroup.hostedOrganizations || []
+    if (!hostedOrganizations.includes(hostedOrg)) {
+      hostedOrganizations.push(hostedOrg)
+    }
+    cy.setRequestBody({
+      name: runtimeGroupName,
+      environment,
+      hostedOrganizations,
+      sdxEndpoint: runtimeGroup.sdxEndpoint,
+      consumerEndpoint: runtimeGroup.consumerEndpoint,
+    })
+    cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+      ({ apiRes: { status, body } }: any) => {
+        expect(status, body.message).to.be.equal(200)
+      }
+    )
+  })
 }

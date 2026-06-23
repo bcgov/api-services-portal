@@ -5,8 +5,12 @@ import type {
   TConnectionChangeRequest,
   TConnectionChangeResponse,
   TResource,
+  TResourceResult,
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
+import { Activity } from '../clients/feed/index.js';
+import { v4 as uuidv4 } from 'uuid';
+import { PatternOutput } from '../services/patterns-evaluator.js';
 
 export interface ApplyResourcesInput {
   gateway_id: string; // for provider-unique handling, e.g. GWA's gateway_id query param
@@ -49,6 +53,7 @@ export class PatternsController {
       return {
         applied: 0,
         failed: 0,
+        skipped: 0,
         results: [],
         preview: output.documents,
       };
@@ -61,10 +66,47 @@ export class PatternsController {
       action
     );
 
+    await this.logActivity(input, output, results);
+
     return {
       applied: results.filter((r) => r.status === 'applied').length,
       failed: results.filter((r) => r.status === 'failed').length,
+      skipped: results.filter((r) => r.status === 'skipped').length,
       results,
     };
+  }
+
+  private async logActivity(
+    request: ApplyPatternInput,
+    output: PatternOutput,
+    result: TResourceResult[] | undefined,
+    error?: unknown
+  ): Promise<void> {
+    const activity: Activity = {
+      id: uuidv4(),
+      type: 'GatewayPattern',
+      action: 'update',
+      result: error ? 'failed' : 'success',
+      name: 'N/A',
+      message: `Gateway pattern ${request.pattern} processed with action ${request.action}`,
+      refId: '',
+      context: {
+        message: 'Gateway pattern {pattern} processed with action {action}',
+        params: {
+          pattern: request.pattern,
+          action: request.action,
+        },
+      },
+      blob: [
+        {
+          id: uuidv4(),
+          blob: JSON.stringify({ input: request, output: result || error }),
+        },
+      ],
+      filterKey1: `org:${request.parameters['organization']}`,
+      filterKey2: `namespace:${output._gateway_id}`,
+    };
+
+    await this.services.activity.publishActivity(activity);
   }
 }

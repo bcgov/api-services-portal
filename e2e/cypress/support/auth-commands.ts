@@ -749,6 +749,25 @@ Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
   })
 })
 
+Cypress.Commands.add(
+  'makeSDXCall',
+  (options: { method: string; path: string; body?: string }) => {
+    return cy
+      .request({
+        url: 'http://kong-sdx-edge0.localtest.me:9080' + options.path,
+        method: options.method,
+        failOnStatusCode: false,
+        body: options.body,
+      })
+      .then((res) => {
+        if (res.body instanceof ArrayBuffer) {
+          res.body = JSON.parse(new TextDecoder().decode(res.body))
+        }
+        return res
+      })
+  }
+)
+
 Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
   return cy.request({
     url: 'http://astra.localtest.me:8094/alerts/' + scanID,

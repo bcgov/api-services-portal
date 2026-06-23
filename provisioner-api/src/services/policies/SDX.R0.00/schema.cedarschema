@@ -15,12 +15,18 @@ namespace SDX {
                 isApproved: Bool,
                 policyVersion: String,
                 requesterDetails?: {
-                    scopes: Set<String>,
+                    client: {
+                        clientId: String,
+                    },
                     requester: String,
+                    service: {
+                        clientId: String,
+                    }
                 },
                 clientResources?: {
                     gatewayPatterns?: {
                         "sdx-p2p-consumer.r1": {
+                            stripPath?: Bool,
                             upgrades?: {
                                 sign?: {},
                                 verify?: {},
@@ -48,6 +54,8 @@ namespace SDX {
                         "sdx-p2p-provider.r1": {
                             upstreamUrl: String,
                             upgrades: {
+                                mtlsAuth?: {},
+                                mtlsAcl?: {},
                                 sign?: {},
                                 verify?: {},
                                 counterSign?: {},

@@ -6,7 +6,8 @@
             "validate-upstreams": false
         },
         "sdx-edge": {
-            "enforce-reserved-hosts": false
+            "enforce-reserved-hosts": false,
+            "kong-addr": "http://kong-sdx-control.localtest.me:8001"
         }
     }
 }

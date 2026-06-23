@@ -189,7 +189,7 @@ async function createSDXNamespace(
   args: CreateNamespaceArgs
 ): Promise<ResourceSet> {
   // A user should only be getting Namespace.View, but due to how the getResources
-  // works, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
+  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
   args.assignedScopes = ['Namespace.Manage'];
 
   const resourceSet = await CreateNamespace(context, args);
