@@ -7,6 +7,11 @@ export const Environments: Record<
     oauth_token_url:
       'https://dev.sandbox.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token',
   },
+  lab: {
+    client_id: 'aps-kong-gw-20771',
+    oauth_token_url:
+      'https://dev.sandbox.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token',
+  },
   dev: {
     client_id: 'aps-kong-gw-20771',
     oauth_token_url:
