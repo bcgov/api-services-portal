@@ -169,12 +169,7 @@ describe('SDX Subsystem', () => {
       const subsystemName = uniqueSubsystemName()
 
       createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
-        createRuntimeGroup(
-          org,
-          runtimeGroupId,
-          'cyp',
-          `http://internal.${runtimeGroupId}.cyp.servers.sdx`
-        )
+        createRuntimeGroup(org, runtimeGroupId, 'cyp')
 
         createSubsystemGateway(org, runtimeGroupId, service.subsystem.name, () => {
           createConnection(org, service.subsystem.clientId, service.name, () => {
@@ -234,12 +229,7 @@ describe('SDX Subsystem', () => {
       const runtimeGroupName = `rg${Cypress._.random(100000, 999999)}`
 
       createSubsystem(org, subsystemName, () => {
-        createRuntimeGroup(
-          org,
-          runtimeGroupName,
-          'cyp',
-          `http://internal.${runtimeGroupName}.cyp.servers.sdx`
-        )
+        createRuntimeGroup(org, runtimeGroupName, 'cyp')
 
         cy.setRequestBody({
           runtimeGroupName,

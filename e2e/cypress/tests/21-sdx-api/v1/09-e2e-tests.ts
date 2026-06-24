@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import {
+  createJanisOrgAndAccess,
+  createRuntimeGroup,
   createSubsystemAndOASService,
   createSubsystemGateway,
   updateRuntimeGroupAddHostedOrg,
@@ -16,14 +18,24 @@ describe('SDX E2E Tests', () => {
       const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
       workingData['runtimeGroupId'] = rg.toLowerCase()
 
-      // docker compose spins up one runtime group "rg0"
-      // but for this org to use the "rg0" runtime group, we need to add the org to the hostedOrganizations list for rg0
-      updateRuntimeGroupAddHostedOrg(
-        { name: 'user-janis' },
-        'rg0',
-        'dev',
-        workingData.org.name
-      )
+      return createJanisOrgAndAccess().then(() => {
+        return createRuntimeGroup(
+          { name: 'user-janis' },
+          'rg0',
+          'dev',
+          'http://kong-sdx-edge0.localtest.me:9080',
+          'https://kong-sdx-edge0.localtest.me:9443'
+        ).then(() => {
+          // docker compose spins up one runtime group "rg0"
+          // but for this org to use the "rg0" runtime group, we need to add the org to the hostedOrganizations list for rg0
+          return updateRuntimeGroupAddHostedOrg(
+            { name: 'user-janis' },
+            'rg0',
+            'dev',
+            workingData.org.name
+          )
+        })
+      })
     })
   })
 
@@ -84,30 +96,18 @@ describe('SDX E2E Tests', () => {
                 expect(body.result).to.be.equal('created')
                 expect(typeof body.id).to.be.equal('string')
 
+                cy.wait(10000)
+
                 // connection is approved; the provisioner runs asynchronously
                 // and kong control plane also pushes out changes to the data planes
                 // async, so do some retries until we get a good response
-                let retries = 0
-                while (retries < 8) {
-                  retries++
-                  cy.makeSDXCall({
-                    method: 'GET',
-                    path: `/sdx/0/${serviceId}/ping`,
-                  }).then(({ status, body }) => {
-                    if (status == 200) {
-                      expect(status).to.be.equal(200)
-                      expect(body).has.property('currentTime')
-                      retries = 100
-                    } else {
-                      cy.wait(2000)
-                    }
-                  })
-                }
-                expect(retries).to.be.lessThan(
-                  100,
-                  'SDX call did not succeed after 8 retries'
-                )
-
+                cy.makeSDXCall({
+                  method: 'GET',
+                  path: `/sdx/0/${serviceId}/ping`,
+                }).then(({ status, body }) => {
+                  expect(status).to.be.equal(200)
+                  expect(body).has.property('currentTime')
+                })
                 // revoke access
                 connection.isActive = false
 
@@ -120,27 +120,18 @@ describe('SDX E2E Tests', () => {
                   expect(body.result).to.be.equal('updated')
                   expect(typeof body.id).to.be.equal('string')
 
+                  cy.wait(10000)
+
                   // connection is de-activated; the provisioner runs asynchronously
                   // and kong control plane also pushes out changes to the data planes
                   // async, so do some retries until we get a good response
-                  let retries = 0
-                  while (retries < 8) {
-                    retries++
-                    cy.makeSDXCall({
-                      method: 'GET',
-                      path: `/sdx/0/${serviceId}/ping`,
-                    }).then(({ status, body }) => {
-                      if (status === 401) {
-                        retries = 100
-                      } else {
-                        cy.wait(2000)
-                      }
-                    })
-                  }
-                  expect(retries).to.be.lessThan(
-                    100,
-                    'SDX access was still available after 8 retries, expected it to be revoked'
-                  )
+                  cy.makeSDXCall({
+                    method: 'GET',
+                    path: `/sdx/0/${serviceId}/ping`,
+                  }).then(({ status, body }) => {
+                    // expect 401 or 404, depending on runtime group default routes
+                    expect([401, 404]).to.include(status)
+                  })
                 })
               }
             )

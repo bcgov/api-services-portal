@@ -26,22 +26,31 @@ describe('SDX Organization Signing', () => {
         ({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
 
-          const rg = body.find((rg: any) => rg.name === payload.name)
-          expect(rg).to.not.be.undefined
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/runtime-groups?filter=owned`,
+            'GET'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            const rg = body.find(
+              (rg: any) =>
+                rg.name === payload.name && rg.environment === payload.environment
+            )
+            expect(rg).to.not.be.undefined
 
-          // call the /keys endpoint to get a CSR
-          cy.setRequestBody({
-            runtimeGroupName: rg.name,
-            environment: rg.environment,
+            // call the /keys endpoint to get a CSR
+            cy.setRequestBody({
+              runtimeGroupName: rg.name,
+              environment: rg.environment,
+            })
+            cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
+              ({ apiRes: { status, body, headers } }: any) => {
+                expect(status).to.be.equal(200)
+                expect(headers['content-type']).to.be.equal('text/plain; charset=utf-8')
+                expect(body).to.include('-----BEGIN CERTIFICATE REQUEST-----')
+                expect(body).to.include('-----END CERTIFICATE REQUEST-----')
+              }
+            )
           })
-          cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
-            ({ apiRes: { status, body, headers } }: any) => {
-              expect(status).to.be.equal(200)
-              expect(headers['content-type']).to.be.equal('text/plain; charset=utf-8')
-              expect(body).to.include('-----BEGIN CERTIFICATE REQUEST-----')
-              expect(body).to.include('-----END CERTIFICATE REQUEST-----')
-            }
-          )
         }
       )
     })
@@ -54,11 +63,15 @@ describe('SDX Organization Signing', () => {
       // call the /keys endpoint to get a CSR
       cy.setRequestBody({
         runtimeGroupName: 'BLAH',
+        environment: 'cyp',
       })
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
         ({ apiRes: { status, body, headers } }: any) => {
           expect(status).to.be.equal(422)
-          expect(body.message).to.equal('Runtime Group not found')
+          expect(body.message).to.equal('Validation Failed')
+          expect(body.fields.environment.message).to.be.equal(
+            'Runtime Group not found for the specified environment'
+          )
         }
       )
     })
@@ -79,6 +92,7 @@ describe('SDX Organization Signing', () => {
           // call the /keys endpoint to get a CSR
           cy.setRequestBody({
             runtimeGroupName: payload.name,
+            environment: payload.environment,
           })
           cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
             ({ apiRes: { status, body, headers } }: any) => {

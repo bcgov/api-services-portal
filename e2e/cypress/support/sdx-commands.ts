@@ -115,19 +115,21 @@ export function createRuntimeGroup(
   org: any,
   runtimeGroupName: string,
   environment: string,
-  consumerEndpoint: string
+  consumerEndpoint?: string,
+  sdxEndpoint?: string
 ) {
   cy.setRequestBody({
     name: runtimeGroupName,
     environment,
     hostedOrganizations: [org.name],
     consumerEndpoint,
+    sdxEndpoint,
   })
-  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
-    ({ apiRes: { status, body } }: any) => {
+  return cy
+    .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
+    .then(({ apiRes: { status, body } }: any) => {
       expect(status, body.message).to.be.equal(200)
-    }
-  )
+    })
 }
 
 export function updateRuntimeGroupAddHostedOrg(
@@ -137,29 +139,85 @@ export function updateRuntimeGroupAddHostedOrg(
   hostedOrg: string
 ) {
   // get the runtime-group first, and then append the new hostOrganization
-  cy.callAPI(
-    `ds/api/sdx/v1/organizations/${org.name}/runtime-groups?filter=owned`,
-    'GET'
-  ).then(({ apiRes: { status, body } }: any) => {
-    expect(status, body.message).to.be.equal(200)
-    const runtimeGroup = body.find((rg: any) => rg.name === runtimeGroupName)
-    expect(runtimeGroup, `Runtime group ${runtimeGroupName} not found`).to.exist
+  return cy
+    .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups?filter=owned`, 'GET')
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      const runtimeGroup = body.find((rg: any) => rg.name === runtimeGroupName)
+      expect(runtimeGroup, `Runtime group ${runtimeGroupName} not found`).to.exist
 
-    const hostedOrganizations = runtimeGroup.hostedOrganizations || []
-    if (!hostedOrganizations.includes(hostedOrg)) {
-      hostedOrganizations.push(hostedOrg)
-    }
-    cy.setRequestBody({
-      name: runtimeGroupName,
-      environment,
-      hostedOrganizations,
-      sdxEndpoint: runtimeGroup.sdxEndpoint,
-      consumerEndpoint: runtimeGroup.consumerEndpoint,
-    })
-    cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
-      ({ apiRes: { status, body } }: any) => {
-        expect(status, body.message).to.be.equal(200)
+      const hostedOrganizations = runtimeGroup.hostedOrganizations || []
+      if (!hostedOrganizations.includes(hostedOrg)) {
+        hostedOrganizations.push(hostedOrg)
       }
-    )
+      cy.setRequestBody({
+        name: runtimeGroupName,
+        environment,
+        hostedOrganizations,
+        sdxEndpoint: runtimeGroup.sdxEndpoint,
+        consumerEndpoint: runtimeGroup.consumerEndpoint,
+      })
+      return cy
+        .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
+        .then(({ apiRes: { status, body } }: any) => {
+          expect(status, body.message).to.be.equal(200)
+        })
+    })
+}
+
+export function createJanisOrgAndAccess() {
+  const org = {
+    name: 'user-janis',
+    title: 'User Janis',
+    description: '',
+    extSource: 'custom',
+    extRecordHash: '0000',
+    tags: ['member_class:USR', 'member_id:JANIS'],
+    orgUnits: [],
+  }
+  cy.setRequestBody(org)
+  return cy
+    .callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT')
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+
+      const orgAccess = {
+        name: org.name,
+        parent: `/ca.bc.gov`,
+        members: [
+          {
+            member: {
+              email: 'janis@testmail.com',
+            },
+            roles: ['organization-admin', 'system-owner'],
+          },
+        ],
+      }
+      cy.setRequestBody(orgAccess)
+
+      // Set permissions for the new Org
+      cy.callAPI(`ds/api/v3/organizations/ca.bc.gov/access`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(204)
+        }
+      )
+    })
+}
+
+export async function sdxFetchCall(options: {
+  method: string
+  path: string
+  body?: string
+}): Promise<{ status: number; body: any }> {
+  return await fetch(`http://kong-sdx-edge0.localtest.me:9080${options.path}`, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: options.body,
+  }).then(async (response) => {
+    const status = response.status
+    const body = await response.json().catch(() => ({}))
+    return { status, body }
   })
 }
