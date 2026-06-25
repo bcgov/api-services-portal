@@ -175,6 +175,7 @@ export class CatalogController extends Controller {
   @Example<ServiceCatalogEntry[]>([
     {
       name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
+      environment: 'lab',
       title: 'Sample OAS Service',
       version: '1.0.0',
       specVersion: 'openapi-3.1.0',
@@ -239,6 +240,7 @@ export class CatalogController extends Controller {
       services: [
         {
           name: 'LAB.MIN.CITZ.SAMPLE-API.v1',
+          environment: 'lab',
           specVersion: '1.0.0',
           version: '1.0.0',
 

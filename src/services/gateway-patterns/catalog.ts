@@ -62,6 +62,7 @@ export interface ServiceClient {
  */
 export interface ServiceCatalogEntry {
   name: string;
+  environment: string;
   title: string;
   version: string;
   summary?: string;
@@ -89,6 +90,7 @@ export interface ResourceScopeParts {
 
 export interface ScopedServiceOperations {
   name: string;
+  environment: string;
   specVersion: string;
   version: string;
   subsystem: SubsystemEntry;
@@ -185,6 +187,7 @@ export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
 
     const serviceBase = {
       name: service.name,
+      environment: service.environment,
       specVersion: service.specVersion,
       version: service.version,
       subsystem: service.subsystem,
