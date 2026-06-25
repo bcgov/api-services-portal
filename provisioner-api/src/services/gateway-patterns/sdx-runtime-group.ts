@@ -2,6 +2,8 @@ import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
 import { assert } from './utils.js';
 
+const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
+
 export interface SDXRuntimeGroupPatternConfig {
   organization: string;
   runtimeGroupName: string;
@@ -11,7 +13,6 @@ export interface SDXRuntimeGroupPatternConfig {
 interface SDXRuntimeGroupPatternData {
   gatewayId: string;
   runtimeGroup: RuntimeGroup;
-  operatorRuntimeGroup: RuntimeGroup;
 }
 
 /**
@@ -42,24 +43,9 @@ export const SDXRuntimeGroupPattern = {
       'Organization does not own this runtime group environment'
     );
 
-    // the operator edge may be owned by, or merely available to, this org
-    const available = await api.listRuntimeGroups(inputs.organization, {
-      filter: 'available',
-    });
-    const operatorEdge = [...owned, ...available].find(
-      (g) => g.name === process.env.SDX_OPERATOR_EDGE
-    );
-
-    assert.strictEqual(
-      Boolean(operatorEdge),
-      true,
-      'Operator edge runtime group not found'
-    );
-
     return {
       gatewayId: rg!.gatewayId,
       runtimeGroup: rg!,
-      operatorRuntimeGroup: operatorEdge!,
     };
   },
 
@@ -77,7 +63,7 @@ export const SDXRuntimeGroupPattern = {
     const consumerUrl = new URL(data.runtimeGroup.consumerEndpoint!);
     const consumerHost = consumerUrl.host;
 
-    const routeHostUrl = new URL(data.operatorRuntimeGroup.consumerEndpoint!);
+    const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 
