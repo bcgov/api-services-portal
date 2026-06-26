@@ -23,7 +23,13 @@ const { IssuerMisconfigError } = require('./services/issuerMisconfigError');
 const logger = Logger('dsapi');
 
 class ApiOpenapiApp {
-  constructor() {}
+  constructor() {
+    const validationApiUrl = process.env.OAS_VALIDATION_API_URL;
+    if (!validationApiUrl) {
+      throw new Error('OAS_VALIDATION_API_URL is required');
+    }
+    assertHttpUrl('OAS_VALIDATION_API_URL', validationApiUrl);
+  }
 
   prepareV1(app) {
     const { RegisterRoutes } = require('./controllers/v1/routes');
@@ -186,6 +192,19 @@ class ApiOpenapiApp {
           code: 'misconfig_error',
           message: `[${err?.statusCode}] ${err?.reason} (${err?.description})`,
         });
+      } else if (err?.name === 'OpenAPISpecValidationError' && err?.result) {
+        logger.warn(
+          `Caught OpenAPI Spec Validation Error for ${req.path}:`,
+          err.message,
+          err.fields
+        );
+        logger.error('OpenAPI Spec Validation Error: ', err.result);
+        return res.status(422).json({
+          code: 'validation_error',
+          message: err?.message,
+          fields: err?.fields,
+          validation: err?.result,
+        });
       } else if (err instanceof ValidateError) {
         logger.warn(
           `Caught Validation Error for ${req.path}:`,
@@ -236,6 +255,19 @@ class ApiOpenapiApp {
     });
 
     return app;
+  }
+}
+
+function assertHttpUrl(name, value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} must be an absolute http(s) URL`);
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(`${name} must be an absolute http(s) URL`);
   }
 }
 
