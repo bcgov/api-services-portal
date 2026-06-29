@@ -21,7 +21,19 @@ export async function updatePermissions(
   resourceId: string,
   grant: 'grant' | 'update' = 'update'
 ): Promise<{ userId: string; result: { id: string }[] }> {
-  logger.debug('[updatePermissions] %s : %s %s', email, resourceId, scopes);
+  const normalizedEmail = email?.trim() ?? '';
+  logger.debug(
+    '[updatePermissions] %s : %s %s',
+    normalizedEmail,
+    resourceId,
+    scopes
+  );
+
+  assert.strictEqual(
+    normalizedEmail.length > 0,
+    true,
+    'Email is required to grant or update user access'
+  );
 
   await enforceAccessToResource(envCtx, resourceId);
 
@@ -30,7 +42,11 @@ export async function updatePermissions(
     envCtx.issuerEnvConfig.clientId,
     envCtx.issuerEnvConfig.clientSecret
   );
-  const user = await userApi.lookupUserByEmail(email, false, ['idir']);
+  const user = await userApi.lookupUserByEmail(
+    normalizedEmail,
+    false,
+    ['idir']
+  );
   const displayName =
     userApi.getOneAttributeValue(user, 'display_name') || user.email;
 

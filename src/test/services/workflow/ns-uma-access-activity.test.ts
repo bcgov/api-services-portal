@@ -108,6 +108,19 @@ describe('gateway namespace access activity always uses "updated" and is signed 
       );
     });
 
+    it('rejects empty email', async function () {
+      await expect(
+        updatePermissions(
+          buildContext(),
+          permEnvCtx,
+          '  ',
+          ['Namespace.Manage'],
+          RESOURCE_ID,
+          'update'
+        )
+      ).rejects.toThrow('Email is required to grant or update user access');
+    });
+
     it('edit access records "updated" with mixed [+]/[-] markers', async function () {
       UserServiceMock.mockImplementation(() => ({
         login: jest.fn().mockResolvedValue({}),
