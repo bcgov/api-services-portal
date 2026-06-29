@@ -53,7 +53,7 @@ export class OrgKeysController extends Controller {
     const result = await CreateNewKey(context, org, body.runtimeGroupName);
 
     await new OrgActivityService(context, org)
-      .logOrganizationCSR(true, { keyName: body.runtimeGroupName })
+      .logOrganizationCSR(true, { runtimeGroupName: body.runtimeGroupName })
       .catch((e) => logger.error('[OrgActivity] organization CSR %s', e));
 
     // Unusual way to return data, but this is due to the version of tsoa

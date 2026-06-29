@@ -82,7 +82,10 @@ export {
   getOrganization,
   getOrganizations,
   getOrganizationUnit,
+  lookupOrganizationNameById,
 } from './organization';
+
+export { lookupSubsystemNameById } from './subsystem';
 
 export { getConsumerLabels } from './labels';
 

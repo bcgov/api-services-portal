@@ -17,7 +17,10 @@ import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
-import { OrgActivityService } from '../../../services/workflow/org-activity';
+import {
+  OrgActivityService,
+  isGatewayPatternPublishSuccessful,
+} from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -208,6 +211,10 @@ export class OrgGatewaysController extends Controller {
       dryRun,
       artifact
     );
+    const publishSucceeded = isGatewayPatternPublishSuccessful(
+      result,
+      action === 'remove' ? 'remove' : 'apply'
+    );
 
     if (!dryRun) {
       let detail: string | undefined;
@@ -215,6 +222,7 @@ export class OrgGatewaysController extends Controller {
       const removed = action === 'remove';
       let scope: SdxGatewayKeyScope | undefined;
       let targetName: string | undefined;
+      let gatewayKeyName: string | undefined;
 
       if (body.pattern === 'sdx-keys.r1') {
         scope = body.parameters.runtime_group_name
@@ -227,14 +235,16 @@ export class OrgGatewaysController extends Controller {
           body.parameters.client_id ??
           org;
 
-        if (removed) {
-          const removedKeyNames = incomingKeys
-            .filter((key) => isGatewayKeyInScopes(key, [scope]))
-            .map((key) => key.name);
-          detail = removedKeyNames
-            .map((name) => `removed key ${name}`)
-            .join('; ');
-        } else {
+        const scopedKeys = incomingKeys.filter((key) =>
+          isGatewayKeyInScopes(key, [scope])
+        );
+        gatewayKeyName = scopedKeys[0]?.name;
+
+        const keyVerb = removed ? 'removed' : 'published';
+        detail = scopedKeys
+          .map((key) => `${keyVerb} key ${key.name}`)
+          .join('; ');
+        if (!removed) {
           deckBlob = YAML.dump(result, { noRefs: true });
         }
       } else if (removed) {
@@ -242,12 +252,13 @@ export class OrgGatewaysController extends Controller {
       }
 
       await new OrgActivityService(ctx, org)
-        .logGatewayPatternPublish(true, {
+        .logGatewayPatternPublish(publishSucceeded, {
           pattern: body.pattern,
           ...(detail ? { detail } : {}),
           removed,
           scope,
           targetName,
+          gatewayKeyName,
           deckBlob,
         })
         .catch((e) =>

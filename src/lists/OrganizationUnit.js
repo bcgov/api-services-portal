@@ -6,6 +6,8 @@ const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const { externallySourced } = require('../components/ExternalSource')
 
 const { EnforcementPoint } = require('../authz/enforcement')
+const { logOrganizationUnitActivityFromHook } = require('../services/workflow/org-activity');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -37,5 +39,24 @@ module.exports = {
   access: EnforcementPoint,
   plugins: [
     externallySourced(),
-  ]
+  ],
+  hooks: {
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      context,
+    }) {
+      if (operation !== 'update') {
+        return;
+      }
+      await logOrganizationUnitActivityFromHook(
+        context,
+        existingItem,
+        updatedItem
+      ).catch((e) => {
+        logger.error('[OrgActivity] organization unit change %s', e);
+      });
+    },
+  },
 }

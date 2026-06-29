@@ -101,6 +101,19 @@ export async function getOrganizationUnit(
   return orgs.length === 0 ? null : orgs[0];
 }
 
+export async function lookupOrganizationNameById(
+  context: any,
+  orgId: string
+): Promise<string | undefined> {
+  const result = await context.executeGraphQL({
+    query: `query OrganizationNameById($id: ID!) {
+      allOrganizations(where: { id: $id }, first: 1) { name }
+    }`,
+    variables: { id: orgId },
+  });
+  return result.data?.allOrganizations?.[0]?.name;
+}
+
 export function parseOrganizationMemberDetails(
   tagsStr: string
 ): MemberOrganization {
