@@ -415,6 +415,14 @@ type SdxKeyActivityScope = 'organization' | 'subsystem' | 'runtime-group';
 
 export type GatewayPatternPublishAction = 'apply' | 'remove';
 
+function gatewayPublishFailedInDeckText(text: string): boolean {
+  const failedMatch = text.match(/^failed:\s*(\d+)\s*$/m);
+  if (failedMatch && Number(failedMatch[1]) > 0) {
+    return true;
+  }
+  return /\bstatus:\s*failed\b/i.test(text);
+}
+
 /** Interpret a GWA publish response for activity result logging. */
 export function isGatewayPatternPublishSuccessful(
   gwaResult: unknown,
@@ -423,7 +431,7 @@ export function isGatewayPatternPublishSuccessful(
   if (gwaResult != null && typeof gwaResult === 'object') {
     const result = gwaResult as {
       failed?: number;
-      results?: Array<{ status?: string }>;
+      results?: Array<{ status?: string }> | string;
     };
 
     if (typeof result.failed === 'number') {
@@ -432,6 +440,10 @@ export function isGatewayPatternPublishSuccessful(
 
     if (Array.isArray(result.results)) {
       return result.results.every((item) => item.status !== 'failed');
+    }
+
+    if (typeof result.results === 'string' && result.results.length > 0) {
+      return !gatewayPublishFailedInDeckText(result.results);
     }
   }
 

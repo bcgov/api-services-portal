@@ -276,6 +276,28 @@ describe('isGatewayPatternPublishSuccessful', function () {
       )
     ).toBe(false);
   });
+
+  it('returns true for apply when results is a successful deck output string', function () {
+    expect(
+      isGatewayPatternPublishSuccessful(
+        {
+          results: 'results: |\n  creating key-set sdx.org.min.citz\n',
+        },
+        'apply'
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for apply when results string reports failed count', function () {
+    expect(
+      isGatewayPatternPublishSuccessful(
+        {
+          results: 'applied: 0\nfailed: 1\n',
+        },
+        'apply'
+      )
+    ).toBe(false);
+  });
 });
 
 describe('OrgActivityService', function () {
