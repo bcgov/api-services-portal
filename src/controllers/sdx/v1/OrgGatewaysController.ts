@@ -211,7 +211,10 @@ export class OrgGatewaysController extends Controller {
       dryRun,
       artifact
     );
-    const publishSucceeded = isGatewayPatternPublishSuccessful(result);
+    const publishSucceeded = isGatewayPatternPublishSuccessful(
+      result,
+      action === 'remove' ? 'remove' : 'apply'
+    );
 
     if (!dryRun) {
       let detail: string | undefined;

@@ -413,26 +413,32 @@ const SDX_KEYS_PATTERN = 'sdx-keys.r1';
 
 type SdxKeyActivityScope = 'organization' | 'subsystem' | 'runtime-group';
 
+export type GatewayPatternPublishAction = 'apply' | 'remove';
+
 /** Interpret a GWA publish response for activity result logging. */
-export function isGatewayPatternPublishSuccessful(gwaResult: unknown): boolean {
-  if (!gwaResult || typeof gwaResult !== 'object') {
+export function isGatewayPatternPublishSuccessful(
+  gwaResult: unknown,
+  action: GatewayPatternPublishAction
+): boolean {
+  if (gwaResult != null && typeof gwaResult === 'object') {
+    const result = gwaResult as {
+      failed?: number;
+      results?: Array<{ status?: string }>;
+    };
+
+    if (typeof result.failed === 'number') {
+      return result.failed === 0;
+    }
+
+    if (Array.isArray(result.results)) {
+      return result.results.every((item) => item.status !== 'failed');
+    }
+  }
+
+  if (action === 'remove') {
     return true;
   }
-
-  const result = gwaResult as {
-    failed?: number;
-    results?: Array<{ status?: string }>;
-  };
-
-  if (typeof result.failed === 'number') {
-    return result.failed === 0;
-  }
-
-  if (Array.isArray(result.results)) {
-    return result.results.every((item) => item.status !== 'failed');
-  }
-
-  return true;
+  return false;
 }
 
 function gatewayPatternPublishEntity(

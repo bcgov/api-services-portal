@@ -204,43 +204,76 @@ describe('profile snapshots', function () {
 
 describe('isGatewayPatternPublishSuccessful', function () {
   it('returns true for empty DELETE response', function () {
-    expect(isGatewayPatternPublishSuccessful({})).toBe(true);
+    expect(isGatewayPatternPublishSuccessful({}, 'remove')).toBe(true);
+  });
+
+  it('returns false for empty apply response', function () {
+    expect(isGatewayPatternPublishSuccessful({}, 'apply')).toBe(false);
+  });
+
+  it('returns false for null apply response', function () {
+    expect(isGatewayPatternPublishSuccessful(null, 'apply')).toBe(false);
+  });
+
+  it('returns true for null remove response', function () {
+    expect(isGatewayPatternPublishSuccessful(null, 'remove')).toBe(true);
   });
 
   it('returns true when failed is 0', function () {
     expect(
-      isGatewayPatternPublishSuccessful({
-        applied: 1,
-        failed: 0,
-        results: [{ provider: 'gwa', status: 'applied' }],
-      })
+      isGatewayPatternPublishSuccessful(
+        {
+          applied: 1,
+          failed: 0,
+          results: [{ provider: 'gwa', status: 'applied' }],
+        },
+        'apply'
+      )
     ).toBe(true);
   });
 
   it('returns false when failed is greater than 0', function () {
     expect(
-      isGatewayPatternPublishSuccessful({
-        applied: 0,
-        failed: 1,
-        results: [
-          {
-            provider: 'gwa',
-            status: 'failed',
-            details: { message: 'GWA API responded 403' },
-          },
-        ],
-      })
+      isGatewayPatternPublishSuccessful(
+        {
+          applied: 0,
+          failed: 1,
+          results: [
+            {
+              provider: 'gwa',
+              status: 'failed',
+              details: { message: 'GWA API responded 403' },
+            },
+          ],
+        },
+        'apply'
+      )
     ).toBe(false);
   });
 
   it('returns false when any result status is failed', function () {
     expect(
-      isGatewayPatternPublishSuccessful({
-        results: [
-          { provider: 'gwa', status: 'applied' },
-          { provider: 'gwa', status: 'failed' },
-        ],
-      })
+      isGatewayPatternPublishSuccessful(
+        {
+          results: [
+            { provider: 'gwa', status: 'applied' },
+            { provider: 'gwa', status: 'failed' },
+          ],
+        },
+        'apply'
+      )
+    ).toBe(false);
+  });
+
+  it('returns false for remove when failed is greater than 0', function () {
+    expect(
+      isGatewayPatternPublishSuccessful(
+        {
+          failed: 1,
+          results: [{ provider: 'gwa', status: 'failed' }],
+        },
+        'remove'
+      )
     ).toBe(false);
   });
 });
