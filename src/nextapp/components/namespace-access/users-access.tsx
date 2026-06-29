@@ -32,7 +32,7 @@ interface UsersAccessProps {
 }
 
 const EDIT_UNAVAILABLE_MESSAGE =
-  'Email unavailable. Revoke access and re-grant with a valid email.';
+  'Email unavailable. Ask this user to sign in to the API Services Portal with IDIR, then refresh this page. If email is still unavailable, revoke access and re-grant using their email address.';
 
 function canEditUserAccess(item: AccessItem): boolean {
   return Boolean(item.requesterEmail?.trim());
@@ -143,16 +143,6 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   const handleUpdateAccess = async (form: FormData) => {
     const email = (form.get('email') as string)?.trim();
     const scopes = form.getAll('scopes') as string[];
-
-    if (!email) {
-      toast({
-        status: 'error',
-        title: 'Unable to update user access',
-        description: 'Email is required. Reload the page and try again.',
-        isClosable: true,
-      });
-      return;
-    }
 
     try {
       await update.mutateAsync({
