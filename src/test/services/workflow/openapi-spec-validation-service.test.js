@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const {
   OpenAPISpecValidationError,
+  OpenAPISpecValidationServiceUnavailableError,
   OpenAPISpecValidationService,
 } = require('../../../services/workflow/openapi-spec-validation-service');
 
@@ -52,13 +53,13 @@ describe('OpenAPISpecValidationService', () => {
     expect(fetch).toHaveBeenNthCalledWith(
       3,
       'http://validation.local/versions/v-test/rulesets/basic-ruleset/validations',
-      {
+      expect.objectContaining({
         method: 'POST',
         body: '{"openapi":"3.1.0"}',
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      })
     );
   });
 
@@ -92,12 +93,12 @@ describe('OpenAPISpecValidationService', () => {
     expect(fetch).toHaveBeenNthCalledWith(
       1,
       'http://validation.local/versions',
-      {
+      expect.objectContaining({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      })
     );
     expect(fetch).toHaveBeenNthCalledWith(
       2,
@@ -144,12 +145,12 @@ describe('OpenAPISpecValidationService', () => {
     expect(fetch).toHaveBeenNthCalledWith(
       2,
       'http://validation.local/versions/v0.3.0-test/rulesets',
-      {
+      expect.objectContaining({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      })
     );
     expect(fetch).toHaveBeenNthCalledWith(
       3,
@@ -352,7 +353,7 @@ describe('OpenAPISpecValidationService', () => {
     );
   });
 
-  it('throws when the validation service request fails', async () => {
+  it('throws a service unavailable error when the validation service request fails', async () => {
     fetch.mockResolvedValue({
       ok: false,
       status: 404,
@@ -365,12 +366,13 @@ describe('OpenAPISpecValidationService', () => {
       'missing-version'
     );
 
-    await expect(service.validateRuleset('{}')).rejects.toThrow(
-      'OpenAPI specification validation service failed: 404 Not Found'
-    );
+    await expect(service.validateRuleset('{}')).rejects.toMatchObject({
+      name: 'OpenAPISpecValidationServiceUnavailableError',
+      message: 'OAS validation service unavailable: 404 Not Found',
+    });
   });
 
-  it('throws when the selected default ruleset is not found by the validation service', async () => {
+  it('throws a service unavailable error when the selected default ruleset is not found by the validation service', async () => {
     fetch
       .mockResolvedValueOnce({
         ok: true,
@@ -390,9 +392,10 @@ describe('OpenAPISpecValidationService', () => {
       'v-test'
     );
 
-    await expect(service.validateRuleset('{}')).rejects.toThrow(
-      'OpenAPI specification validation service failed: 404 Not Found'
-    );
+    await expect(service.validateRuleset('{}')).rejects.toMatchObject({
+      name: 'OpenAPISpecValidationServiceUnavailableError',
+      message: 'OAS validation service unavailable: 404 Not Found',
+    });
     expect(fetch).toHaveBeenNthCalledWith(
       2,
       'http://validation.local/versions/v-test/rulesets/basic-ruleset/validations',
@@ -400,6 +403,28 @@ describe('OpenAPISpecValidationService', () => {
         method: 'POST',
       })
     );
+  });
+
+  it('throws a service unavailable error when the request times out', async () => {
+    fetch.mockRejectedValue({
+      name: 'AbortError',
+    });
+
+    const service = new OpenAPISpecValidationService(
+      'http://validation.local',
+      undefined,
+      undefined,
+      1
+    );
+
+    const promise = service.validateRuleset('{}');
+
+    await expect(promise).rejects.toBeInstanceOf(
+      OpenAPISpecValidationServiceUnavailableError
+    );
+    await expect(promise).rejects.toMatchObject({
+      message: 'OAS validation service unavailable: request timed out',
+    });
   });
 
   it('throws when no versions are available for the default version lookup', async () => {
@@ -415,9 +440,11 @@ describe('OpenAPISpecValidationService', () => {
       undefined
     );
 
-    await expect(service.validateRuleset('{}')).rejects.toThrow(
-      'OpenAPI specification validation service did not return any ruleset versions'
-    );
+    await expect(service.validateRuleset('{}')).rejects.toMatchObject({
+      name: 'OpenAPISpecValidationServiceUnavailableError',
+      message:
+        'OpenAPI specification validation service did not return any ruleset versions',
+    });
   });
 
   it('requires the validation service URL', () => {

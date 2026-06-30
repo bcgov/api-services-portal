@@ -13,10 +13,16 @@ describe('ApiOpenapiApp', () => {
     process.env.OAS_VALIDATION_API_URL = originalValidationApiUrl;
   });
 
-  it('requires OAS_VALIDATION_API_URL', () => {
+  it('does not require OAS_VALIDATION_API_URL during construction', () => {
     delete process.env.OAS_VALIDATION_API_URL;
 
-    expect(() => new ApiOpenapiApp()).toThrow(
+    expect(() => new ApiOpenapiApp()).not.toThrow();
+  });
+
+  it('requires OAS_VALIDATION_API_URL when preparing middleware', () => {
+    delete process.env.OAS_VALIDATION_API_URL;
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
       'OAS_VALIDATION_API_URL is required'
     );
   });
@@ -24,7 +30,7 @@ describe('ApiOpenapiApp', () => {
   it('requires OAS_VALIDATION_API_URL to be an absolute http(s) URL', () => {
     process.env.OAS_VALIDATION_API_URL = 'validation.local';
 
-    expect(() => new ApiOpenapiApp()).toThrow(
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
       'OAS_VALIDATION_API_URL must be an absolute http(s) URL'
     );
   });

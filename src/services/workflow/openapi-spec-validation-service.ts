@@ -5,6 +5,7 @@ import { Logger } from '../../logger';
 const logger = Logger('wf.OASValidation');
 
 const DEFAULT_RULESET = 'basic-ruleset';
+const DEFAULT_TIMEOUT_MS = 30000;
 
 export interface OpenAPISpecValidationResult {
   valid: boolean;
@@ -27,12 +28,25 @@ export interface OpenAPISpecValidationResult {
 }
 
 export class OpenAPISpecValidationError extends ValidateError {
-  constructor(public result: OpenAPISpecValidationResult) {
+  public result: OpenAPISpecValidationResult;
+
+  constructor(result: OpenAPISpecValidationResult) {
     super(
       validationFields('spec', formatValidationFailure(result)),
       'Validation Failed'
     );
     this.name = 'OpenAPISpecValidationError';
+    this.result = result;
+  }
+}
+
+export class OpenAPISpecValidationServiceUnavailableError extends Error {
+  public cause?: unknown;
+
+  constructor(message = 'OAS validation service unavailable', cause?: unknown) {
+    super(message);
+    this.name = 'OpenAPISpecValidationServiceUnavailableError';
+    this.cause = cause;
   }
 }
 
@@ -40,11 +54,13 @@ export class OpenAPISpecValidationService {
   private validationApiUrl: string;
   private version?: string;
   private configuredRuleset?: string;
+  private timeoutMs: number;
 
   constructor(
     validationApiUrl = process.env.OAS_VALIDATION_API_URL,
     version = process.env.OAS_VALIDATION_RULESET_VERSION,
-    ruleset = process.env.OAS_VALIDATION_RULESET
+    ruleset = process.env.OAS_VALIDATION_RULESET,
+    timeoutMs = timeoutMsFromEnv(process.env.OAS_VALIDATION_API_TIMEOUT_MS)
   ) {
     if (!validationApiUrl) {
       throw new Error('OAS_VALIDATION_API_URL is required');
@@ -53,6 +69,7 @@ export class OpenAPISpecValidationService {
     this.validationApiUrl = validationApiUrl.replace(/\/+$/, '');
     this.version = version;
     this.configuredRuleset = ruleset;
+    this.timeoutMs = timeoutMs;
   }
 
   public async validateRuleset(
@@ -84,7 +101,7 @@ export class OpenAPISpecValidationService {
       ruleset
     );
 
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, this.timeoutMs, {
       method: 'POST',
       body: spec,
       headers: {
@@ -102,8 +119,8 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new Error(
-        `OpenAPI specification validation service failed: ${res.status} ${res.statusText}`
+      throw new OpenAPISpecValidationServiceUnavailableError(
+        `OAS validation service unavailable: ${res.status} ${res.statusText}`
       );
     }
 
@@ -114,7 +131,7 @@ export class OpenAPISpecValidationService {
     const supportedVersions = await this.getSupportedVersions();
     const latestVersion = supportedVersions[0];
     if (!latestVersion) {
-      throw new Error(
+      throw new OpenAPISpecValidationServiceUnavailableError(
         'OpenAPI specification validation service did not return any ruleset versions'
       );
     }
@@ -167,12 +184,16 @@ export class OpenAPISpecValidationService {
   }
 
   private async getSupportedVersions(): Promise<string[]> {
-    const res = await fetch(`${this.validationApiUrl}/versions`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const res = await fetchWithTimeout(
+      `${this.validationApiUrl}/versions`,
+      this.timeoutMs,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!res.ok) {
       const body = await res.text();
@@ -182,8 +203,8 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new Error(
-        `OpenAPI specification validation service failed: ${res.status} ${res.statusText}`
+      throw new OpenAPISpecValidationServiceUnavailableError(
+        `OAS validation service unavailable: ${res.status} ${res.statusText}`
       );
     }
 
@@ -192,8 +213,9 @@ export class OpenAPISpecValidationService {
   }
 
   private async getSupportedRulesets(version: string): Promise<string[]> {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${this.validationApiUrl}/versions/${encodeURIComponent(version)}/rulesets`,
+      this.timeoutMs,
       {
         method: 'GET',
         headers: {
@@ -211,14 +233,56 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new Error(
-        `OpenAPI specification validation service failed: ${res.status} ${res.statusText}`
+      throw new OpenAPISpecValidationServiceUnavailableError(
+        `OAS validation service unavailable: ${res.status} ${res.statusText}`
       );
     }
 
     const body = (await res.json()) as { rulesets?: string[] };
     return body.rulesets || [];
   }
+}
+
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs: number,
+  options: any
+): Promise<any> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      logger.error(
+        'OpenAPI spec validation request timed out after %dms: %s',
+        timeoutMs,
+        url
+      );
+      throw new OpenAPISpecValidationServiceUnavailableError(
+        'OAS validation service unavailable: request timed out',
+        err
+      );
+    }
+    logger.error('OpenAPI spec validation request failed: %s', err);
+    throw new OpenAPISpecValidationServiceUnavailableError(
+      'OAS validation service unavailable',
+      err
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function timeoutMsFromEnv(value?: string): number {
+  const timeoutMs = Number(value);
+  return Number.isFinite(timeoutMs) && timeoutMs > 0
+    ? timeoutMs
+    : DEFAULT_TIMEOUT_MS;
 }
 
 function contentTypeForSpec(
