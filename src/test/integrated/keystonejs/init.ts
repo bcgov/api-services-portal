@@ -76,6 +76,8 @@ export default async function InitKeystone(
     'RuntimeGroup',
     'ServiceAccess',
     'Subsystem',
+    'SubsystemIntegration',
+    'Task',
     'TemporaryIdentity',
     'User',
   ]) {
