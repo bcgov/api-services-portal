@@ -459,7 +459,7 @@ export function isGatewayPatternPublishSuccessful(
     }
   }
 
-  if (action === 'remove') {
+  if (action === 'delete') {
     return true;
   }
   return false;
