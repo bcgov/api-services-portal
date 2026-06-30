@@ -24,7 +24,9 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
 interface ProviderUpgrades {
   mtlsAuth: {};
   mtlsAcl: {};
-  sign: {};
+  sign: {
+    alg?: string;
+  };
   verify: {};
   token: {
     allowedAud: string;
@@ -35,7 +37,9 @@ interface ProviderUpgrades {
     consumerMatchClaimCustomId?: boolean;
     consumerMatchIgnoreNotFound?: boolean;
   };
-  counterSign: {};
+  counterSign: {
+    signatureAlgorithm?: string;
+  };
   tokenExchange: {
     tokenEndpoint: string;
     clientId: string;
@@ -187,31 +191,25 @@ export const SDXP2PProviderPattern = {
           },
         ],
         plugins: [
-          ...(upgrades.hasOwnProperty('mtls_auth')
+          ...(upgrades.hasOwnProperty('mtlsAuth')
             ? [upgradeToMTLSAuth(tags, data)]
             : []),
-          ...(upgrades.hasOwnProperty('mtls_acl')
+          ...(upgrades.hasOwnProperty('mtlsAcl')
             ? [upgradeToMTLSACL(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('sign')
-            ? [upgradeToTrustSign(tags, data)]
+            ? [upgradeToTrustSign(tags, data, inputs)]
             : []),
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('token')
-            ? [
-                upgradeToJWTKeycloak(
-                  tags,
-                  data,
-                  inputs as SDXP2PProviderPatternConfig
-                ),
-              ]
+            ? [upgradeToJWTKeycloak(tags, data, inputs)]
             : []),
-          ...(upgrades.hasOwnProperty('counter_sign')
-            ? [upgradeToTrustKMS(tags, data)]
+          ...(upgrades.hasOwnProperty('counterSign')
+            ? [upgradeToTrustKMS(tags, data, inputs)]
             : []),
-          ...(upgrades.hasOwnProperty('token_exchange')
+          ...(upgrades.hasOwnProperty('tokenExchange')
             ? [
                 upgradeToTokenExchange(
                   tags,
@@ -277,9 +275,13 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
   };
 }
 
-function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:0`;
-  const keySetName = `sdx.edge.${data.serviceRG.name}`;
+function upgradeToTrustSign(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${data.serviceRG.environment}:0`;
+  const keySetName = `sdx.edge.${data.serviceRG.name}.${data.serviceRG.environment}`;
 
   return {
     name: 'trust-sign',
@@ -289,7 +291,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PProviderPatternData) {
       signature_header_key: 'X-Edge-Token',
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      alg: 'ES256',
+      alg: inputs.upgrades.sign?.alg || 'ES256',
       jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
@@ -316,7 +318,7 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:0`;
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${data.serviceRG.environment}:0`;
 
   return {
     name: 'token-exchange',
@@ -334,7 +336,11 @@ function upgradeToTokenExchange(
   };
 }
 
-function upgradeToTrustKMS(tags: string[], data: SDXP2PProviderPatternData) {
+function upgradeToTrustKMS(
+  tags: string[],
+  data: SDXP2PProviderPatternData,
+  inputs: SDXP2PProviderPatternConfig
+) {
   const member = data.service.subsystem.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
@@ -347,6 +353,8 @@ function upgradeToTrustKMS(tags: string[], data: SDXP2PProviderPatternData) {
       direction: 'response',
       operation: 'sign',
       signature_header_key: 'X-Edge-Token',
+      signature_algorithm:
+        inputs.upgrades.counterSign?.signatureAlgorithm || 'ECDSA_SHA_512',
       key_id,
     },
   };

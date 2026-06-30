@@ -61,7 +61,7 @@ export const SDXRuntimeGroupPattern = {
     const routeHost = data.runtimeGroup.host!;
 
     const consumerUrl = new URL(data.runtimeGroup.consumerEndpoint!);
-    const consumerHost = consumerUrl.host;
+    const consumerHost = consumerUrl.hostname;
 
     const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
 
@@ -208,7 +208,7 @@ export const SDXRuntimeGroupPattern = {
         ],
       },
 
-      // Have a route from SDX_OPERATOR_EDGE
+      // Have a route from OPERATOR_CONSUMER_URL
       // so that the SDX internal operations from the Portal can call it
       {
         kind: 'GatewayService',

@@ -76,7 +76,12 @@ describe('SDX E2E Tests', () => {
                 gatewayPatterns: {
                   'sdx-p2p-consumer.r1': {
                     stripPath: false,
-                    upgrades: {},
+                    upgrades: {
+                      sign: {
+                        alg: 'RS256',
+                      },
+                      verify: {},
+                    },
                   },
                 },
               },
@@ -84,7 +89,12 @@ describe('SDX E2E Tests', () => {
                 gatewayPatterns: {
                   'sdx-p2p-provider.r1': {
                     upstreamUrl: 'http://upstream-mock-api.localtest.me:2025',
-                    upgrades: {},
+                    upgrades: {
+                      sign: {
+                        alg: 'RS256',
+                      },
+                      verify: {},
+                    },
                   },
                 },
               },
@@ -107,6 +117,8 @@ describe('SDX E2E Tests', () => {
                 }).then(({ status, body }) => {
                   expect(status).to.be.equal(200)
                   expect(body).has.property('currentTime')
+                  expect(body).has.property('headers')
+                  expect(body.headers).has.property('x-edge-token')
                 })
                 // revoke access
                 connection.isActive = false

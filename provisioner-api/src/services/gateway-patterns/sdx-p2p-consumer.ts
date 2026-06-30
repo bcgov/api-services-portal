@@ -24,7 +24,9 @@ export interface SDXP2PConsumerPatternConfig {
 }
 
 export interface ConsumerUpgrades {
-  sign: {};
+  sign: {
+    alg?: string;
+  };
   verify: {};
   token: {
     allowedAud: string;
@@ -35,7 +37,9 @@ export interface ConsumerUpgrades {
     consumerMatchClaimCustomId?: boolean;
     consumerMatchIgnoreNotFound?: boolean;
   };
-  counterSign: {};
+  counterSign: {
+    signatureAlgorithm?: string;
+  };
   tokenExchange: {
     tokenEndpoint: string;
     clientId: string;
@@ -178,22 +182,16 @@ export const SDXP2PConsumerPattern = {
             ]
           : []),
         ...(upgrades.hasOwnProperty('sign')
-          ? [upgradeToTrustSign(tags, data)]
+          ? [upgradeToTrustSign(tags, data, inputs)]
           : []),
         ...(upgrades.hasOwnProperty('verify')
           ? [upgradeToTrustVerify(tags, data)]
           : []),
         ...(upgrades.hasOwnProperty('counterSign')
-          ? [upgradeToTrustKMS(tags, data)]
+          ? [upgradeToTrustKMS(tags, data, inputs)]
           : []),
         ...(upgrades.hasOwnProperty('tokenExchange')
-          ? [
-              upgradeToTokenExchange(
-                tags,
-                data,
-                inputs as SDXP2PConsumerPatternConfig
-              ),
-            ]
+          ? [upgradeToTokenExchange(tags, data, inputs)]
           : []),
       ],
     } as any;
@@ -262,9 +260,13 @@ function upgradeToDPoP(tags: string[], data: SDXP2PConsumerPatternData) {
   };
 }
 
-function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:0`;
-  const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}`;
+function upgradeToTrustSign(
+  tags: string[],
+  data: SDXP2PConsumerPatternData,
+  inputs: SDXP2PConsumerPatternConfig
+) {
+  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${data.clientRuntimeGroup.environment}:0`;
+  const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}.${data.clientRuntimeGroup.environment}`;
 
   return {
     name: 'trust-sign',
@@ -274,7 +276,7 @@ function upgradeToTrustSign(tags: string[], data: SDXP2PConsumerPatternData) {
       signature_header_key: 'X-Edge-Token',
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      alg: 'ES256',
+      alg: inputs.upgrades.sign?.alg || 'ES256',
       jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
@@ -301,7 +303,7 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:0`;
+  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${data.clientRuntimeGroup.environment}:0`;
 
   return {
     name: 'token-exchange',
@@ -319,7 +321,11 @@ function upgradeToTokenExchange(
   };
 }
 
-function upgradeToTrustKMS(tags: string[], data: SDXP2PConsumerPatternData) {
+function upgradeToTrustKMS(
+  tags: string[],
+  data: SDXP2PConsumerPatternData,
+  inputs: SDXP2PConsumerPatternConfig
+) {
   const member = data.client.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
@@ -332,6 +338,8 @@ function upgradeToTrustKMS(tags: string[], data: SDXP2PConsumerPatternData) {
       direction: 'request',
       operation: 'sign',
       signature_header_key: 'X-Edge-Token',
+      signature_algorithm:
+        inputs.upgrades.counterSign?.signatureAlgorithm || 'ECDSA_SHA_512',
       key_id,
     },
   };

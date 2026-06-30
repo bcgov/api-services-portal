@@ -31,9 +31,13 @@ namespace SDX {
                     gatewayPatterns?: {
                         "sdx-p2p-consumer.r1": {
                             upgrades: {
-                                sign?: {},
+                                sign?: {
+                                    alg?: String
+                                },
                                 verify?: {},
-                                counterSign?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
                                 tokenExchange: {
                                     clientId: String,
                                     tokenEndpoint: String,

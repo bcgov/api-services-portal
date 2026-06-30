@@ -28,9 +28,13 @@ namespace SDX {
                         "sdx-p2p-consumer.r1": {
                             stripPath?: Bool,
                             upgrades?: {
-                                sign?: {},
+                                sign?: {
+                                    alg?: String
+                                },
                                 verify?: {},
-                                counterSign?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
                                 token?: {
                                     allowedAud: String,
                                     allowedIss: String,
@@ -56,9 +60,13 @@ namespace SDX {
                             upgrades: {
                                 mtlsAuth?: {},
                                 mtlsAcl?: {},
-                                sign?: {},
+                                sign?: {
+                                    alg?: String
+                                },
                                 verify?: {},
-                                counterSign?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
                                 token?: {
                                     allowedAud: String,
                                     allowedIss: String,

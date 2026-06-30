@@ -13,7 +13,7 @@ function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
 export interface SDXKeyConfig {
   organization: string;
   runtimeGroupName?: string;
-  environment?: string;
+  environment: string;
   clientId?: string;
   publicKeyPem?: string;
   certificatePem?: string[];
@@ -65,12 +65,12 @@ export const SDXKeysPattern = {
         'Organization does not own this runtime group'
       );
 
-      profile.keySetName = `sdx.edge.${inputs.runtimeGroupName}`;
-      profile.name = `sdx.keys.${inputs.runtimeGroupName}.edge`;
-      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}`;
-      profile.qualifier = `key-${inputs.runtimeGroupName}`;
+      profile.keySetName = `sdx.edge.${inputs.runtimeGroupName}.${inputs.environment}`;
+      profile.name = `sdx.keys.${inputs.runtimeGroupName}.${inputs.environment}.edge`;
+      profile.kid = `urn:ca:bc:sdx:edge:${inputs.runtimeGroupName}:${inputs.environment}`;
+      profile.qualifier = `key-${inputs.runtimeGroupName}-${inputs.environment}`;
       profile.type = 'runtime-group';
-      profile.value = inputs.runtimeGroupName;
+      profile.value = `${inputs.runtimeGroupName}.${inputs.environment}`;
       profile.gatewayId = rg!.gatewayId;
     } else if (inputs.clientId) {
       // retrieve the subsystem details for the client_id
@@ -83,12 +83,12 @@ export const SDXKeysPattern = {
 
       const id = inputs.clientId.toLowerCase();
 
-      profile.keySetName = `sdx.sys.${id}`;
-      profile.name = `sdx.keys.${id}.sys`;
-      profile.kid = `urn:ca:bc:sdx:sys:${id}`;
-      profile.qualifier = `key-${id}`;
+      profile.keySetName = `sdx.sys.${id}.${inputs.environment}`;
+      profile.name = `sdx.keys.${id}.${inputs.environment}.sys`;
+      profile.kid = `urn:ca:bc:sdx:sys:${id}:${inputs.environment}`;
+      profile.qualifier = `key-${id}-${inputs.environment}`;
       profile.type = 'client';
-      profile.value = inputs.clientId;
+      profile.value = `${inputs.clientId}.${inputs.environment}`;
       profile.gatewayId = orgSubsystem.gateway?.id;
     } else {
       // assume organization — resolve the member details from any subsystem
@@ -109,12 +109,12 @@ export const SDXKeysPattern = {
       const memberText =
         `${member.memberClass}.${member.memberId}`.toLowerCase();
 
-      profile.keySetName = `sdx.org.${memberText}`;
-      profile.name = `sdx.keys.${memberText}.org`;
-      profile.kid = `urn:ca:bc:sdx:org:${memberText}`;
-      profile.qualifier = `key-${memberText}`;
+      profile.keySetName = `sdx.org.${memberText}.${inputs.environment}`;
+      profile.name = `sdx.keys.${memberText}.org.${inputs.environment}`;
+      profile.kid = `urn:ca:bc:sdx:org:${memberText}:${inputs.environment}`;
+      profile.qualifier = `key-${memberText}-${inputs.environment}`;
       profile.type = 'organization';
-      profile.value = inputs.organization;
+      profile.value = `${inputs.organization}.${inputs.environment}`;
       profile.gatewayId =
         `sdx-o-${member.memberClass}-${member.memberId}`.toLowerCase();
     }
