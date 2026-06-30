@@ -133,6 +133,46 @@ module.exports = {
                 perm.requesterName = user?.name || perm.requesterName;
                 perm.requesterEmail = user?.email;
               });
+
+              const permissionsWithoutEmail = permissions.filter(
+                (p) => !p.requesterEmail
+              );
+              if (permissionsWithoutEmail.length > 0) {
+                const userApi = new KeycloakUserService(envCtx.openid.issuer);
+                await userApi.login(
+                  envCtx.issuerEnvConfig.clientId,
+                  envCtx.issuerEnvConfig.clientSecret
+                );
+                const requesterIds = [
+                  ...new Set(
+                    permissionsWithoutEmail.map((p) => p.requester)
+                  ),
+                ];
+                for (const requesterId of requesterIds) {
+                  try {
+                    const kcUser = await userApi.lookupUserById(requesterId);
+                    const requesterEmail = kcUser?.email;
+                    if (!requesterEmail) {
+                      continue;
+                    }
+                    permissions.forEach((perm) => {
+                      if (
+                        perm.requester === requesterId &&
+                        !perm.requesterEmail
+                      ) {
+                        perm.requesterEmail = requesterEmail;
+                      }
+                    });
+                  } catch (err) {
+                    logger.warn(
+                      '[getPermissionTicketsForResource] failed to resolve requester %s: %s',
+                      requesterId,
+                      err
+                    );
+                  }
+                }
+              }
+
               return permissions;
             },
             access: EnforcementPoint,

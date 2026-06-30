@@ -18,7 +18,10 @@ import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
-import { OrgActivityService } from '../../../services/workflow/org-activity';
+import {
+  OrgActivityService,
+  isGatewayPatternPublishSuccessful,
+} from '../../../services/workflow/org-activity';
 import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
 import getSubjectToken from '../../../auth/auth-token';
@@ -193,50 +196,68 @@ export class OrgGatewaysController extends Controller {
       return '';
     }
 
-    if (action !== 'diff') {
+    const subjectToken = getSubjectToken(request);
+    const incomingKeys = payload.keys as GatewayKeyDocument[];
+
+    // Validate the generated config to ensure it only contains allowed configurations for the organization
+    const result = await gwaService.publishGatewayConfiguration(
+      action === 'remove' ? 'DELETE' : 'PUT',
+      subjectToken,
+      config._gateway_id,
+      dryRun,
+      artifact
+    );
+    const publishSucceeded = isGatewayPatternPublishSuccessful(
+      result,
+      action === 'remove' ? 'remove' : 'apply'
+    );
+
+    if (!dryRun) {
       let detail: string | undefined;
       let deckBlob: string | undefined;
       const removed = action === 'delete';
       let scope: SdxGatewayKeyScope | undefined;
       let targetName: string | undefined;
+      let gatewayKeyName: string | undefined;
 
       if (body.pattern === 'sdx-keys.r1') {
         scope = body.parameters.runtimeGroupName
           ? 'runtime-group'
           : body.parameters.clientId
-          ? 'subsystem'
-          : 'organization';
+            ? 'subsystem'
+            : 'organization';
         targetName =
           body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
 
-        //   if (removed) {
-        //     const removedKeyNames = incomingKeys
-        //       .filter((key) => isGatewayKeyInScopes(key, [scope]))
-        //       .map((key) => key.name);
-        //     detail = removedKeyNames
-        //       .map((name) => `removed key ${name}`)
-        //       .join('; ');
-        //   } else {
-        //     deckBlob = YAML.dump(result, { noRefs: true });
-        //   }
-        // } else if (removed) {
-        //   detail = `removed ${body.pattern}`;
-        // }
-        deckBlob = YAML.dump(result, { noRefs: true });
+        const scopedKeys = incomingKeys.filter((key) =>
+          isGatewayKeyInScopes(key, [scope])
+        );
+        gatewayKeyName = scopedKeys[0]?.name;
 
-        await new OrgActivityService(ctx, org)
-          .logGatewayPatternPublish(true, {
-            pattern: body.pattern,
-            ...(detail ? { detail } : {}),
-            removed,
-            scope,
-            targetName,
-            deckBlob,
-          })
-          .catch((e) =>
-            logger.error('[OrgActivity] gateway pattern publish %s', e)
-          );
+        const keyVerb = removed ? 'removed' : 'published';
+        detail = scopedKeys
+          .map((key) => `${keyVerb} key ${key.name}`)
+          .join('; ');
+        if (!removed) {
+          deckBlob = YAML.dump(result, { noRefs: true });
+        }
+      } else if (removed) {
+        detail = `removed ${body.pattern}`;
       }
+
+      await new OrgActivityService(ctx, org)
+        .logGatewayPatternPublish(publishSucceeded, {
+          pattern: body.pattern,
+          ...(detail ? { detail } : {}),
+          removed,
+          scope,
+          targetName,
+          gatewayKeyName,
+          deckBlob,
+        })
+        .catch((e) =>
+          logger.error('[OrgActivity] gateway pattern publish %s', e)
+        );
     }
     return result;
   }

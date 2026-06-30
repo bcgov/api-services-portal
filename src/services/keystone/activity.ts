@@ -249,6 +249,7 @@ export async function getOrgActivity(
     conditions.push({
       OR: [...PUBLIC_ORG_ACTIVITY],
     });
+    conditions.push({ result_not: 'failed' });
   }
 
   const where: ActivityWhereInput =

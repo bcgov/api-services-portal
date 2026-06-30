@@ -140,6 +140,34 @@ describe('SubsystemService', () => {
       });
     });
 
+    it('continues subsystem delete when cascade OAS delete fails', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        serviceSpecs: [serviceSpec],
+      });
+
+      deleteRecordByInternalId
+        .mockResolvedValueOnce({
+          status: 400,
+          result: 'deletion-failed',
+          id: 'service-123',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'deleted',
+          id: 'subsystem-123',
+        });
+
+      await service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM');
+
+      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
+    });
+
     it('rejects delete when active client connection requests exist', async () => {
       const service = new SubsystemService();
 

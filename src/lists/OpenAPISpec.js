@@ -1,5 +1,9 @@
-const { Select, Text, Relationship } = require('@keystonejs/fields');
+const { Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
+const {
+  logOpenAPISpecActivityFromHook,
+} = require('../services/workflow/org-activity');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -79,6 +83,34 @@ module.exports = {
         delete resolvedData['specVersion'];
       }
       return resolvedData;
+    },
+    afterDelete: async function ({ existingItem, context }) {
+      await logOpenAPISpecActivityFromHook(
+        context,
+        'delete',
+        existingItem,
+        existingItem
+      ).catch((e) => {
+        logger.error('[OrgActivity] open api spec delete %s', e);
+      });
+    },
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      context,
+    }) {
+      if (operation !== 'create') {
+        return;
+      }
+      await logOpenAPISpecActivityFromHook(
+        context,
+        'create',
+        existingItem,
+        updatedItem
+      ).catch((e) => {
+        logger.error('[OrgActivity] open api spec create %s', e);
+      });
     },
   },
 };

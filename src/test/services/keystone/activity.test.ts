@@ -181,6 +181,7 @@ describe('getOrgActivity', function () {
       AND: [
         { filterKey1: 'org:ministry-of-health' },
         { OR: [...PUBLIC_ORG_ACTIVITY] },
+        { result_not: 'failed' },
       ],
     });
   });

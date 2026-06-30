@@ -128,7 +128,12 @@ class RuntimeGroupService {
       'Runtime Group not found for the specified environment'
     );
 
-    return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
+    const result = await deleteRecordByInternalId(
+      context,
+      'RuntimeGroup',
+      entry.id
+    );
+    return result;
   };
 
   checkRuntimeGroup = async (

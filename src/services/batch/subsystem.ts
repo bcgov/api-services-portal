@@ -247,9 +247,12 @@ class SubsystemService {
 
     const childResults: BatchResult[] = [];
     for (const serviceSpec of serviceSpecs) {
-      childResults.push(
-        await deleteRecordByInternalId(context, 'OpenAPISpec', serviceSpec.id)
+      const serviceDeleteResult = await deleteRecordByInternalId(
+        context,
+        'OpenAPISpec',
+        serviceSpec.id
       );
+      childResults.push(serviceDeleteResult);
     }
 
     const result = await deleteRecordByInternalId(

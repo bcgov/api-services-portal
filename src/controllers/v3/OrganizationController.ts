@@ -44,9 +44,7 @@ import {
 } from '../../services/workflow';
 import {
   buildOrgAccessDisplayNameResolver,
-  buildOrganizationProfileSnapshot,
   logOrganizationAccessChanges,
-  OrgActivityService,
 } from '../../services/workflow/org-activity';
 import { assertEqual } from '../ioc/assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
@@ -107,31 +105,13 @@ export class OrganizationController extends Controller {
       'Only root level is allowed to do this operation'
     );
     const ctx = this.keystone.createContext(request, true);
-    const sudoCtx = this.keystone.sudo();
-    const existing = (await getOrganizations(sudoCtx)).find(
-      (o) => o.name === body['name']
-    );
 
-    const result = await syncRecordsThrowErrors(
+    return await syncRecordsThrowErrors(
       ctx,
       'Organization',
       body['name'],
       body
     );
-
-    // Profile updates are logged from feed-worker after syncRecords updates.
-    if (!existing && result.result?.startsWith('created')) {
-      await new OrgActivityService(ctx, body['name'])
-        .logOrganizationEstablished(
-          true,
-          buildOrganizationProfileSnapshot(body)
-        )
-        .catch((e) =>
-          logger.error('[OrgActivity] organization established %s', e)
-        );
-    }
-
-    return result;
   }
 
   @Get('{org}')
