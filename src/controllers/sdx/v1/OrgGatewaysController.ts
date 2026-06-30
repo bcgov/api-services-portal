@@ -105,40 +105,6 @@ export class OrgGatewaysController extends Controller {
   }
 
   /**
-   * Retrieve organization-level activity for the SDX catalog.
-   *
-   * @summary List organization activity
-   * @param org - Organization identifier
-   * @param first - Maximum records to return (capped at 100)
-   * @param skip - Records to skip for pagination
-   *
-   * > `Required Scope:` System.Manage
-   */
-  @Get('/activity')
-  @OperationId('listOrgActivity')
-  @Security('jwt', ['System.Manage'])
-  public async listOrgActivity(
-    @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
-  ): Promise<ActivityDetail[]> {
-    const ctx = this.keystone.sudo();
-    const records = await getOrgActivity(
-      ctx,
-      org,
-      first > 100 ? 100 : first,
-      skip,
-      false
-    );
-
-    return transformActivity(records)
-      .map((o) => removeKeys(o, ['id', 'namespace', 'subject_email']))
-      .map((o) => removeEmpty(o))
-      .map((o) => parseJsonString(o, ['context']))
-      .map((o) => parseBlobString(o));
-  }
-
-  /**
    * > `Required Scope:` System.Manage
    *
    * @summary Provision gateway config from pre-defined patterns
@@ -196,23 +162,16 @@ export class OrgGatewaysController extends Controller {
       return '';
     }
 
-    const subjectToken = getSubjectToken(request);
-    const incomingKeys = payload.keys as GatewayKeyDocument[];
+    // const subjectToken = getSubjectToken(request);
+    // const incomingKeys = payload.keys as GatewayKeyDocument[];
 
-    // Validate the generated config to ensure it only contains allowed configurations for the organization
-    const result = await gwaService.publishGatewayConfiguration(
-      action === 'remove' ? 'DELETE' : 'PUT',
-      subjectToken,
-      config._gateway_id,
-      dryRun,
-      artifact
-    );
-    const publishSucceeded = isGatewayPatternPublishSuccessful(
-      result,
-      action === 'remove' ? 'remove' : 'apply'
-    );
+    if (action == 'apply' || action == 'delete') {
+      // Validate the generated config to ensure it only contains allowed configurations for the organization
+      const publishSucceeded = isGatewayPatternPublishSuccessful(
+        result,
+        action === 'delete' ? 'delete' : 'apply'
+      );
 
-    if (!dryRun) {
       let detail: string | undefined;
       let deckBlob: string | undefined;
       const removed = action === 'delete';
@@ -220,30 +179,30 @@ export class OrgGatewaysController extends Controller {
       let targetName: string | undefined;
       let gatewayKeyName: string | undefined;
 
-      if (body.pattern === 'sdx-keys.r1') {
-        scope = body.parameters.runtimeGroupName
-          ? 'runtime-group'
-          : body.parameters.clientId
-            ? 'subsystem'
-            : 'organization';
-        targetName =
-          body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
+      // if (body.pattern === 'sdx-keys.r1') {
+      //   scope = body.parameters.runtimeGroupName
+      //     ? 'runtime-group'
+      //     : body.parameters.clientId
+      //     ? 'subsystem'
+      //     : 'organization';
+      //   targetName =
+      //     body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
 
-        const scopedKeys = incomingKeys.filter((key) =>
-          isGatewayKeyInScopes(key, [scope])
-        );
-        gatewayKeyName = scopedKeys[0]?.name;
+      //   const scopedKeys = incomingKeys.filter((key) =>
+      //     isGatewayKeyInScopes(key, [scope])
+      //   );
+      //   gatewayKeyName = scopedKeys[0]?.name;
 
-        const keyVerb = removed ? 'removed' : 'published';
-        detail = scopedKeys
-          .map((key) => `${keyVerb} key ${key.name}`)
-          .join('; ');
-        if (!removed) {
-          deckBlob = YAML.dump(result, { noRefs: true });
-        }
-      } else if (removed) {
-        detail = `removed ${body.pattern}`;
-      }
+      //   const keyVerb = removed ? 'removed' : 'published';
+      //   detail = scopedKeys
+      //     .map((key) => `${keyVerb} key ${key.name}`)
+      //     .join('; ');
+      //   if (!removed) {
+      //     deckBlob = YAML.dump(result, { noRefs: true });
+      //   }
+      // } else if (removed) {
+      //   detail = `removed ${body.pattern}`;
+      // }
 
       await new OrgActivityService(ctx, org)
         .logGatewayPatternPublish(publishSucceeded, {

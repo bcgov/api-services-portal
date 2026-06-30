@@ -114,9 +114,14 @@ function organizationNameFromRelationship(
   context: any,
   organization: RelationshipRef
 ): Promise<string | undefined> {
-  return relationshipNameFromRef(context, organization, lookupOrganizationNameById, {
-    fallbackToRawId: true,
-  });
+  return relationshipNameFromRef(
+    context,
+    organization,
+    lookupOrganizationNameById,
+    {
+      fallbackToRawId: true,
+    }
+  );
 }
 
 function subsystemNameFromRelationship(
@@ -165,7 +170,10 @@ async function lookupRuntimeGroupForActivity(
   if (!rg) {
     return null;
   }
-  let orgName = await organizationNameFromRelationship(context, rg.organization);
+  let orgName = await organizationNameFromRelationship(
+    context,
+    rg.organization
+  );
   const hostedOrganizationNames = (rg.hostedOrganizations ?? [])
     .map((org: { name?: string }) => org.name)
     .filter(
@@ -200,7 +208,11 @@ function resolveNewOrgUnitsFromOriginalInput(
   createRecords: Record<string, any>[];
 } {
   const orgUnits = originalInput.orgUnits;
-  if (orgUnits == null || typeof orgUnits !== 'object' || Array.isArray(orgUnits)) {
+  if (
+    orgUnits == null ||
+    typeof orgUnits !== 'object' ||
+    Array.isArray(orgUnits)
+  ) {
     return { connectRefs: [], createRecords: [] };
   }
 
@@ -413,7 +425,7 @@ const SDX_KEYS_PATTERN = 'sdx-keys.r1';
 
 type SdxKeyActivityScope = 'organization' | 'subsystem' | 'runtime-group';
 
-export type GatewayPatternPublishAction = 'apply' | 'remove';
+export type GatewayPatternPublishAction = 'apply' | 'delete';
 
 function gatewayPublishFailedInDeckText(text: string): boolean {
   const failedMatch = text.match(/^failed:\s*(\d+)\s*$/m);
@@ -927,8 +939,7 @@ export class OrgActivityService {
     if (hostedOrganizations.length > 0) {
       params.hostedOrganizations =
         formatHostedOrganizationsParam(hostedOrganizations);
-      message +=
-        ' hosting {hostedOrganizations}';
+      message += ' hosting {hostedOrganizations}';
     }
     return this.recordOrgActivity({
       success,
@@ -990,7 +1001,9 @@ export class OrgActivityService {
     });
   }
 
-  private async recordOrgActivity(input: OrgActivityRecordInput): Promise<void> {
+  private async recordOrgActivity(
+    input: OrgActivityRecordInput
+  ): Promise<void> {
     const refId = resourceRefId(input.resource);
     const ids = buildOrgActivityFilterKeys(this.orgName, input.filterResources);
 
@@ -1058,7 +1071,10 @@ export function keycloakUserDisplayName(user: UserRepresentation): string {
   if (fromAttr) {
     return fromAttr;
   }
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  const fullName = [user.firstName, user.lastName]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
   if (fullName) {
     return fullName;
   }
@@ -1159,7 +1175,9 @@ export async function logOrganizationActivityFromHook(
         true,
         buildOrganizationProfileSnapshot(updatedItem)
       )
-      .catch((e) => logger.error('[OrgActivity] organization established %s', e));
+      .catch((e) =>
+        logger.error('[OrgActivity] organization established %s', e)
+      );
     await logOrganizationUnitsEstablishedFromOrganizationHook(
       context,
       orgName,
@@ -1264,7 +1282,10 @@ export async function logSubsystemActivityFromHook(
 
   await orgActivity.logSubsystemProfileChange(true, {
     ...subsystemData,
-    profile: pickProfileSnapshot(updatedItem, SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS),
+    profile: pickProfileSnapshot(
+      updatedItem,
+      SUBSYSTEM_PROFILE_SNAPSHOT_FIELDS
+    ),
   });
 }
 
@@ -1275,7 +1296,7 @@ export async function logOpenAPISpecActivityFromHook(
   updatedItem: Record<string, any>
 ): Promise<void> {
   const item =
-    operation === 'delete' ? (existingItem ?? updatedItem) : updatedItem;
+    operation === 'delete' ? existingItem ?? updatedItem : updatedItem;
   const serviceName = item?.name;
   if (typeof serviceName !== 'string' || serviceName.length === 0) {
     logger.error('[OrgActivity] open api spec hook missing service name');
@@ -1413,7 +1434,10 @@ export async function logRuntimeGroupActivityFromHook(
 
   const loaded = await lookupRuntimeGroupForActivity(context, runtimeGroupName);
 
-  let orgName = await organizationNameFromRelationship(context, item.organization);
+  let orgName = await organizationNameFromRelationship(
+    context,
+    item.organization
+  );
   if (!orgName) {
     orgName = loaded?.orgName;
   }
@@ -1451,7 +1475,10 @@ export async function logRuntimeGroupActivityFromHook(
 
   const hostingChanged =
     (originalInput != null &&
-      Object.prototype.hasOwnProperty.call(originalInput, 'hostedOrganizations')) ||
+      Object.prototype.hasOwnProperty.call(
+        originalInput,
+        'hostedOrganizations'
+      )) ||
     (await hasHostedOrganizationsChange(
       context,
       existingItem,
@@ -1485,13 +1512,7 @@ export async function getCombinedOrganizationActivity(
   const cappedFirst = first > 100 ? 100 : first;
   const fetchLimit = Math.min(cappedFirst + skip, 100);
 
-  const orgRecords = await getOrgActivity(
-    context,
-    org,
-    fetchLimit,
-    0,
-    false
-  );
+  const orgRecords = await getOrgActivity(context, org, fetchLimit, 0, false);
 
   const prodEnv = await getGwaProductEnvironment(context, false);
   const envConfig = prodEnv.issuerEnvConfig;
