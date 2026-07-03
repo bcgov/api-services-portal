@@ -12,6 +12,7 @@ export type Action = 'apply' | 'diff' | 'delete';
 /** Applies a batch of same-provider resources in a single upstream call. */
 type ApplyBatch = (
   gatewayId: string,
+  environment: string,
   resources: TResource[],
   action: Action
 ) => Promise<any>;
@@ -37,23 +38,34 @@ export class ResourceDispatcher {
       sdxMember: Services['sdxMember'];
       gatewayAdmin: Services['gatewayAdmin'];
       commonSso: Services['commonSso'];
+      kongAdmin: Services['kongAdmin'];
     },
     private readonly logger?: FastifyBaseLogger
   ) {
     this.providers = {
       gwa: {
         name: 'gwa',
-        apply: (gatewayId, r, action) =>
-          services.gatewayAdmin.applyResources(gatewayId, r, action),
+        apply: (gatewayId, environment, r, action) =>
+          services.gatewayAdmin.applyResources(
+            gatewayId,
+            environment,
+            r,
+            action
+          ),
+      },
+      kong: {
+        name: 'kong',
+        apply: (gatewayId, environment, r, action) =>
+          services.kongAdmin.applyResources(gatewayId, environment, r, action),
       },
       css: {
         name: 'css',
-        apply: (gatewayId, r, action) =>
-          services.commonSso.applyResources(gatewayId, r, action),
+        apply: (gatewayId, environment, r, action) =>
+          services.commonSso.applyResources(gatewayId, environment, r, action),
       },
       aps: {
         name: 'aps',
-        apply: (gatewayId, r, action) =>
+        apply: (gatewayId, _environment, r, action) =>
           services.directory.applyResources(gatewayId, r, action),
       },
     };
@@ -68,7 +80,7 @@ export class ResourceDispatcher {
       GatewayService: 'gwa',
       GatewayKeySet: 'gwa',
       GatewayKey: 'gwa',
-      // GatewayConsumer: 'gwa',
+      GatewayConsumer: 'gwa',
       IntegrationAllowedServices: 'css',
     };
   }
@@ -79,6 +91,7 @@ export class ResourceDispatcher {
    */
   async dispatch(
     gatewayId: string,
+    environment: string,
     resources: TResource[],
     action: Action
   ): Promise<TResourceResult[]> {
@@ -125,7 +138,12 @@ export class ResourceDispatcher {
       output.push(current);
 
       try {
-        const details = await provider.apply(gatewayId, batch, action);
+        const details = await provider.apply(
+          gatewayId,
+          environment,
+          batch,
+          action
+        );
 
         this.logger?.info(
           { provider: provider.name, count: batch.length },

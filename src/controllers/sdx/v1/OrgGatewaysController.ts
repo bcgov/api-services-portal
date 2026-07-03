@@ -51,7 +51,6 @@ const logger = Logger('OrgGatewaysController');
  * }
  */
 interface GatewayPatternConfigRequest {
-  pattern: string;
   parameters: { [key: string]: any };
 }
 
@@ -110,9 +109,9 @@ export class OrgGatewaysController extends Controller {
    * @summary Provision gateway config from pre-defined patterns
    * @produces application/yaml
    */
-  @Put('/pattern')
+  @Put('/patterns/{pattern}')
   @OperationId('provisionConfigFromPattern')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['GatewayPattern.Publish'])
   @SuccessResponse('200', 'OK')
   @Example<any>({
     documents: [
@@ -138,6 +137,7 @@ export class OrgGatewaysController extends Controller {
   })
   public async generateConfigFromPattern(
     @Path() org: string,
+    @Path() pattern: string,
     @Query() action: 'preview' | 'apply' | 'diff' | 'delete',
     @Body() body: GatewayPatternConfigRequest,
     @Request() request: any
@@ -151,7 +151,7 @@ export class OrgGatewaysController extends Controller {
     body.parameters['organization'] = org; // inject org into parameters for pattern evaluation
 
     const result: PostPatternsResponse = await provisionerService.postPatterns(
-      body.pattern,
+      pattern,
       body.parameters,
       action
     );
@@ -206,7 +206,7 @@ export class OrgGatewaysController extends Controller {
 
       await new OrgActivityService(ctx, org)
         .logGatewayPatternPublish(publishSucceeded, {
-          pattern: body.pattern,
+          pattern,
           ...(detail ? { detail } : {}),
           removed,
           scope,

@@ -7,6 +7,8 @@ import {
 } from './oauth.js';
 import { loadClientSecretConfig, loadSignedJwtConfig } from './config.js';
 import { FeedApiClient } from './feed/index.js';
+import { KongAdminApiClient } from './kong-admin/index.js';
+import { loadEnvironments } from '../config/environments.js';
 
 export interface Clients {
   aps: OAuthClient;
@@ -14,6 +16,7 @@ export interface Clients {
   gwa: OAuthClient;
   css: OAuthClient;
   feed: FeedApiClient;
+  kongAdmin: KongAdminApiClient;
 }
 
 function childLogger(
@@ -66,5 +69,6 @@ export function buildClients(logger?: FastifyBaseLogger): Clients {
     gwa: buildJwtClient('gwa', 'GWA', logger),
     css: buildSecretClient('css', 'CSS', logger),
     feed: new FeedApiClient(process.env.FEED_URL, logger),
+    kongAdmin: new KongAdminApiClient(loadEnvironments(), logger),
   };
 }

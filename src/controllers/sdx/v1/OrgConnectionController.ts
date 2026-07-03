@@ -39,6 +39,15 @@ export class OrgConnectionController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Add or update a connection request
+   * > `Required Scope:` System.Manage
+   *
+   * @param org
+   * @param input
+   * @param request
+   * @returns
+   */
   @Put()
   @OperationId('upsertConnection')
   @Security('jwt', ['System.Manage'])
@@ -50,6 +59,32 @@ export class OrgConnectionController extends Controller {
     const ctx = this.keystone.createContext(request);
 
     return new ConnectionService().upsertConnection(ctx, org, input);
+  }
+
+  /**
+   * Update a connection request approval setting `isApproved`
+   * > `Required Scope:` Connection.Manage
+   *
+   * @param org
+   * @param input
+   * @param request
+   * @returns
+   */
+  @Put('/approval')
+  @OperationId('updateConnectionApproval')
+  @Security('jwt', ['Connection.Manage'])
+  public async updateConnectionApproval(
+    @Path() org: string,
+    @Body() input: ConnectionRequestInput,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+
+    return new ConnectionService().upsertConnection(ctx, org, {
+      clientId: input.clientId,
+      serviceId: input.serviceId,
+      isApproved: input.isApproved,
+    });
   }
 
   @Get()

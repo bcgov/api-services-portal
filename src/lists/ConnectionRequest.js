@@ -4,6 +4,7 @@ const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
+const { UserAssertionError } = require('../services/user-assert');
 const { SubsystemService } = require('../services/batch/subsystem');
 const {
   ExtractClientIdFromServiceId,
@@ -15,7 +16,6 @@ const { ConnectionService } = require('../services/batch/connection-service');
 const {
   ProvisionerService,
 } = require('../services/provisioner/provisioner-service');
-const { type } = require('node:os');
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -67,6 +67,7 @@ module.exports = {
       type: Text,
       isRequired: true,
       defaultValue: '{}',
+      access: FieldEnforcementPoint,
     },
     clientResources: {
       type: Text,
@@ -82,6 +83,7 @@ module.exports = {
       type: Text,
       isRequired: true,
       defaultValue: '{}',
+      access: FieldEnforcementPoint,
     },
     slug: {
       type: Slug,
@@ -154,6 +156,18 @@ module.exports = {
       return resolvedData;
     },
 
+    beforeDelete: async function ({ existingItem, context }) {
+      logger.debug(
+        'Before delete hook for ConnectionRequest: existingItem=%j',
+        existingItem
+      );
+
+      if (existingItem.isActive) {
+        throw new UserAssertionError(
+          'Cannot delete an active connection request. Please set isActive to false before deleting.'
+        );
+      }
+    },
     afterChange: async function ({ operation, updatedItem }) {
       logger.debug(
         'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',

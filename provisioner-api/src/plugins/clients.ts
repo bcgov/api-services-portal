@@ -17,6 +17,7 @@ export default fp(async (app) => {
       gwa: clients.gwa.baseUrl || 'unconfigured',
       css: clients.css.baseUrl || 'unconfigured',
       feed: process.env.FEED_URL || 'unconfigured',
+      kongAdmin: process.env.ENVIRONMENTS_CONFIG_FILE || 'unconfigured',
     },
     'upstream clients registered'
   );

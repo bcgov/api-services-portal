@@ -44,8 +44,11 @@ export class PatternsController {
    * the providers that own each kind.
    */
   async process(input: ApplyPatternInput): Promise<TApplyResourcesResponse> {
-    const output =
-      await this.services.patternsEvaluator.buildResourcesUsingPattern(input);
+    const resource =
+      await this.services.patternsEvaluator.buildResourcesUsingPattern({
+        patternName: input.pattern,
+        parameters: input.parameters,
+      });
 
     const action = input.action;
 
@@ -55,18 +58,19 @@ export class PatternsController {
         failed: 0,
         skipped: 0,
         results: [],
-        preview: output.documents,
+        preview: resource.documents,
       };
     }
 
-    const resources = output.documents as unknown as TResource[];
+    const resources = resource.documents as unknown as TResource[];
     const results = await this.dispatcher.dispatch(
-      output._gateway_id!,
+      resource._gateway_id!,
+      input.parameters['environment'] as string,
       resources,
       action
     );
 
-    await this.logActivity(input, output, results);
+    await this.logActivity(input, resource, results);
 
     return {
       applied: results.filter((r) => r.status === 'applied').length,
@@ -78,7 +82,7 @@ export class PatternsController {
 
   private async logActivity(
     request: ApplyPatternInput,
-    output: PatternOutput,
+    resource: PatternOutput,
     result: TResourceResult[] | undefined,
     error?: unknown
   ): Promise<void> {
@@ -104,7 +108,7 @@ export class PatternsController {
         },
       ],
       filterKey1: `org:${request.parameters['organization']}`,
-      filterKey2: `namespace:${output._gateway_id}`,
+      filterKey2: `namespace:${resource._gateway_id}`,
     };
 
     await this.services.activity.publishActivity(activity);

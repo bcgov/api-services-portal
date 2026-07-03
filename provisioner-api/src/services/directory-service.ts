@@ -8,6 +8,7 @@ import {
 } from '../clients/directory/index.js';
 import { Action } from './resource-dispatcher.js';
 import { UnprocessableEntityError } from '../errors/api-errors.js';
+import { FeedApiClient } from '../clients/feed/index.js';
 
 /**
  * Applying Product and Application resources
@@ -20,6 +21,7 @@ export class DirectoryService {
 
   constructor(
     client: OAuthClient,
+    private readonly feedClient: FeedApiClient,
     private readonly logger?: FastifyBaseLogger
   ) {
     this.api = new DirectoryApiClient(client, logger);
@@ -58,6 +60,13 @@ export class DirectoryService {
         const detail: any = { ...r };
         delete detail.kind;
         const result = await this.api.putProduct(gatewayId, detail as Product);
+        itemDetails.push(result);
+      } else if (r.kind === 'Application') {
+        const detail: any = { ...r };
+        delete detail.kind;
+        detail.namespace = gatewayId;
+        this.logger?.debug({ application: detail }, 'Creating application');
+        const result = await this.feedClient.putApplication(detail);
         itemDetails.push(result);
       } else {
         this.logger?.warn({ resource: r }, 'Unsupported resource kind');

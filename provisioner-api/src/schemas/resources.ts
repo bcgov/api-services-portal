@@ -18,7 +18,7 @@ export const RESOURCE_KINDS = [
   'GatewayService',
   'GatewayKeySet',
   'GatewayKey',
-  // 'GatewayConsumer',
+  'GatewayConsumer',
   // CSS (commonSso)
   'IntegrationAllowedServices',
 ] as const;

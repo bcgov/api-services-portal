@@ -264,6 +264,7 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
+  gatewayId?: string;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }

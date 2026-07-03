@@ -16,6 +16,7 @@ export interface CreateIntegrationAccessRequestInput {
 
 export interface GetSubsystemAllowedServicesInput {
   integrationClientId: string;
+  environment: string;
 }
 
 export class IntegrationController {
@@ -26,10 +27,10 @@ export class IntegrationController {
 
   async getIntegrationAllowedServices(
     input: GetSubsystemAllowedServicesInput
-  ): Promise<TIntegrationAccessRequest[]> {
+  ): Promise<TIntegrationAccessRequest> {
     return this.services.integrationAccess.buildIntegrationAllowedServices(
       input.integrationClientId,
-      'SDX.R1.00'
+      input.environment
     );
   }
 

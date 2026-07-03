@@ -1,9 +1,11 @@
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
   RuntimeGroup,
   SdxMemberApiClient,
   SubsystemEntry,
 } from '../../clients/sdx-member/index.js';
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
+import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
 
 const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
@@ -22,6 +24,7 @@ interface ServiceUpgrades {
     allow: string[];
     certificateHeaderName?: string;
   };
+  acl: {};
   sign: {};
   verify: {};
   token: {
@@ -47,14 +50,22 @@ interface SDXServicePatternData {
  * This pattern will provision default routes for the subsystem
  *
  */
-export const SDXServicePattern = {
-  id: 'sdx-service.r1',
-  requiredParams: ['serviceId', 'environment', 'upstreamUrl'],
+export class SDXServicePattern implements PatternProcessor {
+  static ID = 'sdx-service.r1';
+  static requiredParams = ['serviceId', 'environment', 'upstreamUrl'];
 
-  inject: async (
-    api: SdxMemberApiClient,
-    inputs: SDXServiceConfig
-  ): Promise<SDXServicePatternData> => {
+  constructor(
+    private readonly api: SdxMemberApiClient,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
+
+  id = () => SDXServicePattern.ID;
+  requiredParams = () => SDXServicePattern.requiredParams;
+  deleteHandling = () => 'delete' as const;
+
+  async inject(inputs: SDXServiceConfig): Promise<SDXServicePatternData> {
+    const { api } = this;
+
     // get all the services for this subsystem from the service catalog
     const catalog = await api.listServiceCatalog();
     const services = catalog.filter(
@@ -95,9 +106,9 @@ export const SDXServicePattern = {
       service,
       subsystemRuntimeGroup: subsystemRG as any,
     };
-  },
+  }
 
-  eval: (inputs: SDXServiceConfig, data: SDXServicePatternData) => {
+  eval(inputs: SDXServiceConfig, data: SDXServicePatternData) {
     const service = data.service;
 
     let tags = [
@@ -183,6 +194,7 @@ export const SDXServicePattern = {
           ...(upgrades.hasOwnProperty('mtls_acl')
             ? [upgradeToMTLSACL(tags, data, inputs as SDXServiceConfig)]
             : []),
+          ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
           ...(upgrades.hasOwnProperty('sign')
             ? [upgradeToTrustSign(tags, data)]
             : []),
@@ -199,38 +211,9 @@ export const SDXServicePattern = {
       },
     ];
 
-    // const apsResources = [
-    //   {
-    //     kind: 'Application',
-    //     name: data.subsystem.name,
-    //     namespace: data.subsystem.gateway?.id,
-    //     description: data.subsystem.description,
-    //   },
-    //   {
-    //     kind: 'Product',
-    //     name: data.subsystem.name,
-    //     organization: data.subsystem.organization?.name,
-    //     description: data.subsystem.description,
-    //     environments: [
-    //       {
-    //         name: 'dev',
-    //         flow: 'protected-externally',
-    //       },
-    //       {
-    //         name: 'test',
-    //         flow: 'protected-externally',
-    //       },
-    //       {
-    //         name: 'prod',
-    //         flow: 'protected-externally',
-    //       },
-    //     ] as any[],
-    //   },
-    // ];
-
-    return [...serviceRoutes];
-  },
-};
+    return serviceRoutes;
+  }
+}
 
 function upgradeToJWTKeycloak(
   tags: string[],
@@ -284,6 +267,16 @@ function upgradeToMTLSACL(
     config: {
       allow,
       certificate_header_name: headerName,
+    },
+  };
+}
+
+function upgradeToACL(tags: string[], data: SDXServicePatternData) {
+  return {
+    name: 'acl',
+    tags: tags,
+    config: {
+      allow: [`${data.service.name}`],
     },
   };
 }

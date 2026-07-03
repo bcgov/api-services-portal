@@ -1,27 +1,26 @@
 import type { FastifyBaseLogger } from 'fastify';
-import type { OAuthClient } from '../clients/oauth.js';
 import {
   ConnectionRequestInput,
   SdxMemberApiClient,
   ServiceCatalogEntry,
 } from '../clients/sdx-member/index.js';
 import { SDXP2PConsumerPattern } from './gateway-patterns/sdx-p2p-consumer.js';
+import { SDXP2PConsumerAccessPattern } from './gateway-patterns/sdx-p2p-consumer-access.js';
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
 import { SDXServicePattern } from './gateway-patterns/sdx-service.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
-import {
-  BadRequestError,
-  NotFoundError,
-  withDetails,
-} from '../errors/api-errors.js';
+import { BadRequestError, withDetails } from '../errors/api-errors.js';
 import { PolicyService } from './policy-service.js';
 
-import { Environments } from './policies/env.js';
+import { loadEnvironments } from '../config/environments.js';
+import { SDXSubsystemPattern } from './gateway-patterns/sdx-subsystem.js';
+import { IntegrationAccessService } from './integration-access-service.js';
 
 export interface PatternOutput {
   documents: any[];
+  _delete_handling?: 'delete' | 'apply';
   _gateway_id?: string;
 }
 
@@ -32,22 +31,15 @@ export interface PatternOutput {
  * through the typed {@link SdxMemberApiClient}.
  */
 export interface PatternProcessor {
-  id: string;
-  requiredParams: string[];
+  id: () => string;
+  requiredParams: () => string[];
   eval: (inputs: any, data?: any) => any[];
-  inject?: (api: SdxMemberApiClient, inputs: any) => Promise<any>;
+  inject?: (inputs: any) => Promise<any>;
+  deleteHandling: () => 'delete' | 'apply';
 }
 
-const PATTERNS: Record<string, PatternProcessor> = {
-  [SDXP2PConsumerPattern.id]: SDXP2PConsumerPattern,
-  [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
-  [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
-  [SDXKeysPattern.id]: SDXKeysPattern,
-  [SDXServicePattern.id]: SDXServicePattern,
-};
-
 export interface GatewayPatternConfig {
-  pattern: string;
+  patternName: string;
   parameters: Record<string, any>;
 }
 
@@ -56,15 +48,27 @@ export interface GatewayPatternConfig {
  * request from the authenticated `sdx` OAuth client.
  */
 export class PatternsEvaluatorService {
-  private readonly api: SdxMemberApiClient;
-  readonly policyService: PolicyService;
+  private readonly patterns: Record<string, PatternProcessor>;
 
   constructor(
-    client: OAuthClient,
+    private readonly policyService: PolicyService,
+    sdx: SdxMemberApiClient,
+    integrationAccessService: IntegrationAccessService,
     private readonly logger?: FastifyBaseLogger
   ) {
-    this.api = new SdxMemberApiClient(client, logger);
-    this.policyService = new PolicyService(logger);
+    this.patterns = {
+      [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, logger),
+      [SDXP2PConsumerAccessPattern.ID]: new SDXP2PConsumerAccessPattern(
+        sdx,
+        integrationAccessService,
+        logger
+      ),
+      [SDXP2PConsumerPattern.ID]: new SDXP2PConsumerPattern(sdx, logger),
+      [SDXP2PProviderPattern.ID]: new SDXP2PProviderPattern(sdx, logger),
+      [SDXRuntimeGroupPattern.ID]: new SDXRuntimeGroupPattern(sdx, logger),
+      [SDXServicePattern.ID]: new SDXServicePattern(sdx, logger),
+      [SDXSubsystemPattern.ID]: new SDXSubsystemPattern(sdx, logger),
+    };
   }
 
   /**
@@ -94,8 +98,9 @@ export class PatternsEvaluatorService {
       const policyContext = {
         ...connection,
         combinedScopes,
+        action,
         globals: {
-          environment: Environments[connection.environment],
+          environment: loadEnvironments()[connection.environment],
         },
       };
 
@@ -128,17 +133,27 @@ export class PatternsEvaluatorService {
       ...(connection.serviceResources?.gatewayPatterns as any),
     };
 
+    this.logger?.debug(
+      'Evaluating patterns: %s',
+      Object.keys(gatewayPatterns).join(', ')
+    );
+
     const results = [];
-    for (const pattern of Object.keys(gatewayPatterns)) {
+    for (const patternName of Object.keys(gatewayPatterns)) {
+      this.logger?.debug(
+        'Building resources using pattern %s with parameters %j',
+        patternName,
+        gatewayPatterns[patternName]
+      );
       const patternResult = await this.buildResourcesUsingPattern({
-        pattern: pattern,
+        patternName: patternName,
         parameters: {
           ...{
             connId: id,
             clientId: connection.clientId,
             serviceId: connection.serviceId,
           },
-          ...gatewayPatterns[pattern],
+          ...gatewayPatterns[patternName],
         },
       });
       results.push(patternResult);
@@ -147,30 +162,33 @@ export class PatternsEvaluatorService {
     return results;
   }
 
-  async buildResourcesUsingPattern(
-    inputs: GatewayPatternConfig
-  ): Promise<PatternOutput> {
-    const pattern = PATTERNS[inputs.pattern];
+  /**
+   *
+   * @param inputs
+   * @returns PatternOutput
+   */
+  async buildResourcesUsingPattern({
+    patternName,
+    parameters,
+  }: GatewayPatternConfig): Promise<PatternOutput> {
+    const pattern = this.patterns[patternName];
     if (!pattern) {
-      raiseValidateError(
-        'Invalid input',
-        'inputs.pattern',
-        'unsupported pattern'
-      );
+      raiseValidateError('Invalid input', 'pattern', 'unsupported pattern');
     }
 
-    this.expectRequiredParams(inputs.parameters, pattern.requiredParams);
+    this.expectRequiredParams(parameters, pattern.requiredParams());
 
     if (pattern.inject) {
-      const data = await pattern.inject(this.api, inputs.parameters);
-      this.logger?.info('Pattern inject data for %s: %j', inputs.pattern, data);
+      const data = await pattern.inject(parameters);
+      this.logger?.info('Pattern inject data for %s: %j', patternName, data);
       return {
         _gateway_id: data.gatewayId,
-        documents: pattern.eval(inputs.parameters, data),
+        _delete_handling: pattern.deleteHandling(),
+        documents: pattern.eval(parameters, data),
       };
     }
 
-    return { documents: pattern.eval(inputs.parameters) };
+    return { documents: pattern.eval(parameters) };
   }
 
   private expectRequiredParams(

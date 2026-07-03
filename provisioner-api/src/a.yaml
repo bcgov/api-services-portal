@@ -1,0 +1,9 @@
+kind: Product
+name: SFMS Daily Fire Weather Index (pr-5573)
+dataset: psu-sfms-daily-fwi-pr-5573
+environments:
+  - name: dev
+    active: true
+    approval: true
+    flow: kong-api-key-acl
+    services: [psu-sfms-fwi-pr-5573]

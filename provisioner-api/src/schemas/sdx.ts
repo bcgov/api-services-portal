@@ -69,7 +69,6 @@ const ResourceServerServiceAccess = Type.Object(
 
 export const ResourceServerAccess = Type.Object(
   {
-    clientId: Type.String({ examples: ['partner-app-claims'] }),
     environment: Type.String({ examples: ['dev'] }),
     subsystemId: Type.String({ examples: ['claims'] }),
     services: Type.Array(ResourceServerServiceAccess),
@@ -79,9 +78,9 @@ export const ResourceServerAccess = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        id: 'claims',
         environment: 'dev',
-        services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+        subsystemId: 'MIN.CITZ.SYS-1',
+        services: [{ scopes: ['Claims.Read'], name: 'MIN.CITZ.MY-API.v1' }],
       },
     ],
   }
@@ -101,12 +100,11 @@ export const IntegrationAccessRequest = Type.Object(
     examples: [
       {
         submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-        integrationClientId: 'integration-42',
+        clientId: 'integration-42',
         resourceServers: [
           {
-            id: 'claims',
             environment: 'dev',
-            integrationClientId: '1234',
+            subsystemId: '1234',
             services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
           },
         ],

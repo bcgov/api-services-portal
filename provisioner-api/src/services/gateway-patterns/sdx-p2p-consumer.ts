@@ -1,9 +1,9 @@
-import { ParseArgsOptionsType } from 'node:util';
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
-  ConnectionRequest,
   RuntimeGroup,
   SdxMemberApiClient,
 } from '../../clients/sdx-member/index.js';
+import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
   getRoutePathPrefix,
@@ -61,14 +61,24 @@ export interface SDXP2PConsumerPatternData {
  * This pattern will provision the default route policies for a consumer of an SDX service
  *
  */
-export const SDXP2PConsumerPattern = {
-  id: 'sdx-p2p-consumer.r1',
-  requiredParams: ['connId', 'clientId', 'serviceId'],
+export class SDXP2PConsumerPattern implements PatternProcessor {
+  static ID = 'sdx-p2p-consumer.r1';
+  static requiredParams = ['connId', 'clientId', 'serviceId'];
 
-  inject: async (
-    api: SdxMemberApiClient,
+  constructor(
+    private readonly api: SdxMemberApiClient,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
+
+  id = () => SDXP2PConsumerPattern.ID;
+  requiredParams = () => SDXP2PConsumerPattern.requiredParams;
+  deleteHandling = () => 'delete' as const;
+
+  async inject(
     inputs: SDXP2PConsumerPatternConfig
-  ): Promise<SDXP2PConsumerPatternData> => {
+  ): Promise<SDXP2PConsumerPatternData> {
+    const { api } = this;
+
     // retrieve the consumer subsystem (the client) from the catalog
     const client = (await api.getCatalogSubsystem(
       inputs.clientId
@@ -126,12 +136,9 @@ export const SDXP2PConsumerPattern = {
       clientRuntimeGroup: clientRG as RuntimeGroup,
       serviceRuntimeGroup: serviceRG as RuntimeGroup,
     };
-  },
+  }
 
-  eval: (
-    inputs: SDXP2PConsumerPatternConfig,
-    data: SDXP2PConsumerPatternData
-  ) => {
+  eval(inputs: SDXP2PConsumerPatternConfig, data: SDXP2PConsumerPatternData) {
     const serviceLocator = data.service.name;
 
     const clientLocator = data.client.clientId;
@@ -200,12 +207,9 @@ export const SDXP2PConsumerPattern = {
       config['tls_verify'] = inputs.tlsVerify === 'false' ? false : true;
     }
 
-    return [
-      config,
-      buildIntegrationAllowAccess(inputs as SDXP2PConsumerPatternConfig, data),
-    ] as any[];
-  },
-};
+    return [config] as any[];
+  }
+}
 
 function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
   const clientLocator = data.client.clientId;
@@ -342,23 +346,5 @@ function upgradeToTrustKMS(
         inputs.upgrades.counterSign?.signatureAlgorithm || 'ECDSA_SHA_512',
       key_id,
     },
-  };
-}
-
-function buildIntegrationAllowAccess(
-  inputs: SDXP2PConsumerPatternConfig,
-  data: SDXP2PConsumerPatternData
-) {
-  // const serviceLocator = data.service.name;
-  // const clientLocator = data.client.clientId;
-
-  // const allowedServices =
-  //   inputs.integrationAccess!.buildIntegrationAllowedServices(
-  //     inputs.integrationClientId,
-  //     'SDX.R1.00'
-  //   );
-
-  return {
-    kind: 'IntegrationAllowedServices',
   };
 }

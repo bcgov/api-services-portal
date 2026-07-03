@@ -194,6 +194,7 @@ CREATE TABLE public."Application" (
     "appId" text NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
+    namespace text,
     certificate text,
     organization integer,
     "organizationUnit" integer,

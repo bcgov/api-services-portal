@@ -1,7 +1,9 @@
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
   RuntimeGroup,
   SdxMemberApiClient,
 } from '../../clients/sdx-member/index.js';
+import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
   getRoutePathPrefix,
@@ -24,6 +26,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
 interface ProviderUpgrades {
   mtlsAuth: {};
   mtlsAcl: {};
+  acl: {};
   sign: {
     alg?: string;
   };
@@ -61,14 +64,24 @@ export interface SDXP2PProviderPatternData {
  * This pattern will provision the default route policies for a provider of an SDX service
  *
  */
-export const SDXP2PProviderPattern = {
-  id: 'sdx-p2p-provider.r1',
-  requiredParams: ['connId', 'clientId', 'serviceId'],
+export class SDXP2PProviderPattern implements PatternProcessor {
+  static ID = 'sdx-p2p-provider.r1';
+  static requiredParams = ['connId', 'clientId', 'serviceId'];
 
-  inject: async (
-    api: SdxMemberApiClient,
+  constructor(
+    private readonly api: SdxMemberApiClient,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
+
+  id = () => SDXP2PProviderPattern.ID;
+  requiredParams = () => SDXP2PProviderPattern.requiredParams;
+  deleteHandling = () => 'delete' as const;
+
+  async inject(
     inputs: SDXP2PProviderPatternConfig
-  ): Promise<SDXP2PProviderPatternData> => {
+  ): Promise<SDXP2PProviderPatternData> {
+    const { api } = this;
+
     // retrieve the consumer subsystem (the client) from the catalog. The
     // connection request is owned by the client's organization.
     const client = (await api.getCatalogSubsystem(
@@ -121,12 +134,9 @@ export const SDXP2PProviderPattern = {
       clientRG: clientRG as RuntimeGroup,
       serviceRG: serviceRG as RuntimeGroup,
     };
-  },
+  }
 
-  eval: (
-    inputs: SDXP2PProviderPatternConfig,
-    data: SDXP2PProviderPatternData
-  ) => {
+  eval(inputs: SDXP2PProviderPatternConfig, data: SDXP2PProviderPatternData) {
     const serviceLocator = data.service.name;
     const serviceHost = data.serviceRG.host;
 
@@ -197,6 +207,7 @@ export const SDXP2PProviderPattern = {
           ...(upgrades.hasOwnProperty('mtlsAcl')
             ? [upgradeToMTLSACL(tags, data)]
             : []),
+          ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
           ...(upgrades.hasOwnProperty('sign')
             ? [upgradeToTrustSign(tags, data, inputs)]
             : []),
@@ -221,8 +232,8 @@ export const SDXP2PProviderPattern = {
         ],
       },
     ] as any[];
-  },
-};
+  }
+}
 
 function upgradeToJWTKeycloak(
   tags: string[],
@@ -271,6 +282,16 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       allow: [`${data.clientRG.host}`],
       certificate_header_name: 'X-Client-Cert-CN',
+    },
+  };
+}
+
+function upgradeToACL(tags: string[], data: SDXP2PProviderPatternData) {
+  return {
+    name: 'acl',
+    tags: tags,
+    config: {
+      allow: [`${data.service.name}`],
     },
   };
 }

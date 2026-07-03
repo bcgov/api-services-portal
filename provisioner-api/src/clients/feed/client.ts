@@ -1,6 +1,7 @@
 import type { FastifyBaseLogger } from 'fastify';
 import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
-import { Activity } from './index.js';
+import { Activity, Application } from './index.js';
+import { BatchResult } from '../sdx-member/index.js';
 
 /**
  * Client for the Feed API. Unauthenticated — posts activity events to the
@@ -17,19 +18,27 @@ export class FeedApiClient {
     );
   }
 
+  async putActivity(activity: Activity): Promise<BatchResult> {
+    return await this.putEntity('Activity', activity);
+  }
+
+  async putApplication(application: Application): Promise<BatchResult> {
+    return await this.putEntity('Application', application);
+  }
+
   /** PUT/feed/Activity — record a feed activity event. No authorization. */
-  async putActivity(activity: Activity): Promise<void> {
+  async putEntity(kind: string, entity: any): Promise<any> {
     if (!this.baseUrl) {
       throw withDetails(new BadGatewayError('Feed API is not configured'), {
         missing: 'FEED_URL',
       });
     }
 
-    const url = `${this.baseUrl.replace(/\/+$/, '')}/Activity`;
+    const url = `${this.baseUrl.replace(/\/+$/, '')}/${kind}`;
     const res = await fetch(url, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(activity),
+      body: JSON.stringify(entity),
     }).catch((err) => {
       this.logger?.error({ err, url }, 'Feed API request failed');
       throw withDetails(new BadGatewayError('Feed API request failed'), {
@@ -47,6 +56,8 @@ export class FeedApiClient {
         new BadGatewayError(`Feed API responded ${res.status}`),
         { url, status: res.status }
       );
+    } else {
+      return await res.json();
     }
   }
 }

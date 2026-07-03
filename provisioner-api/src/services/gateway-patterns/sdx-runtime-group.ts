@@ -1,5 +1,7 @@
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
+import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
 
 const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
@@ -19,14 +21,24 @@ interface SDXRuntimeGroupPatternData {
  * This pattern will provision the default route policies for an Edge Server
  *
  */
-export const SDXRuntimeGroupPattern = {
-  id: 'sdx-runtime-group.r1',
-  requiredParams: ['organization', 'runtimeGroupName', 'environment'],
+export class SDXRuntimeGroupPattern implements PatternProcessor {
+  static ID = 'sdx-runtime-group.r1';
+  static requiredParams = ['organization', 'runtimeGroupName', 'environment'];
 
-  inject: async (
-    api: SdxMemberApiClient,
+  constructor(
+    private readonly api: SdxMemberApiClient,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
+
+  id = () => SDXRuntimeGroupPattern.ID;
+  requiredParams = () => SDXRuntimeGroupPattern.requiredParams;
+  deleteHandling = () => 'delete' as const;
+
+  async inject(
     inputs: SDXRuntimeGroupPatternConfig
-  ) => {
+  ): Promise<SDXRuntimeGroupPatternData> {
+    const { api } = this;
+
     // retrieve the runtime groups owned by the organization
     const owned = await api.listRuntimeGroups(inputs.organization, {
       filter: 'owned',
@@ -44,15 +56,12 @@ export const SDXRuntimeGroupPattern = {
     );
 
     return {
-      gatewayId: rg!.gatewayId,
+      gatewayId: rg!.gatewayId!,
       runtimeGroup: rg!,
     };
-  },
+  }
 
-  eval: (
-    inputs: SDXRuntimeGroupPatternConfig,
-    data: SDXRuntimeGroupPatternData
-  ) => {
+  eval(inputs: SDXRuntimeGroupPatternConfig, data: SDXRuntimeGroupPatternData) {
     const gw = data.gatewayId;
     const nm = `sdx.rg.${inputs.runtimeGroupName}.${inputs.environment}`;
     const nsQualifier = `rg-${inputs.runtimeGroupName}-${inputs.environment}`;
@@ -230,8 +239,8 @@ export const SDXRuntimeGroupPattern = {
         plugins: [...[transformer(tags, data)]],
       },
     ];
-  },
-};
+  }
+}
 
 function transformer(tags: string[], data: SDXRuntimeGroupPatternData) {
   const serviceHost = data.runtimeGroup.host;

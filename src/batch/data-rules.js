@@ -413,7 +413,7 @@ const metadata = {
     query: 'allApplications',
     refKey: 'appId',
     compositeRefKey: ['name', 'namespace'],
-    sync: ['name', 'description'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
       organization: {
         name: 'connectOne',

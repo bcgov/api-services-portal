@@ -1,6 +1,9 @@
 import crypto, { X509Certificate } from 'crypto';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import type { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
+import { FastifyBaseLogger } from 'fastify/types/logger.js';
+import { OAuthClient } from '../../clients/oauth.js';
 
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
@@ -24,6 +27,7 @@ interface SDXKeysPatternData {
   jwkList: any[];
   publicKeyPem: string;
   gatewayId: string;
+  qualifier: string;
   profile: {
     name: string;
     kid: string;
@@ -42,19 +46,25 @@ interface SDXKeysPatternData {
  * - Subsystem (client_id) signing keys
  *
  */
-export const SDXKeysPattern = {
-  id: 'sdx-keys.r1',
-  requiredParams: [],
+export class SDXKeysPattern implements PatternProcessor {
+  static ID = 'sdx-keys.r1';
+  static requiredParams = ['organization', 'environment'];
 
-  inject: async (
-    api: SdxMemberApiClient,
-    inputs: SDXKeyConfig
-  ): Promise<SDXKeysPatternData> => {
+  constructor(
+    private readonly api: SdxMemberApiClient,
+    private readonly logger?: FastifyBaseLogger
+  ) {}
+
+  id = () => SDXKeysPattern.ID;
+  requiredParams = () => SDXKeysPattern.requiredParams;
+  deleteHandling = () => 'delete' as const;
+
+  async inject(inputs: SDXKeyConfig): Promise<SDXKeysPatternData> {
     const profile: any = {};
 
     if (inputs.runtimeGroupName) {
       // retrieve the runtime group details owned by the organization
-      const owned = await api.listRuntimeGroups(inputs.organization, {
+      const owned = await this.api.listRuntimeGroups(inputs.organization, {
         filter: 'owned',
       });
       const rg = owned.find((g) => g.name === inputs.runtimeGroupName);
@@ -74,9 +84,9 @@ export const SDXKeysPattern = {
       profile.gatewayId = rg!.gatewayId;
     } else if (inputs.clientId) {
       // retrieve the subsystem details for the client_id
-      const subsystem = await api.getCatalogSubsystem(inputs.clientId);
+      const subsystem = await this.api.getCatalogSubsystem(inputs.clientId);
 
-      const orgSubsystem = await api.getSubsystemClient(
+      const orgSubsystem = await this.api.getSubsystemClient(
         subsystem.organization?.name!,
         subsystem.name
       );
@@ -93,7 +103,7 @@ export const SDXKeysPattern = {
     } else {
       // assume organization — resolve the member details from any subsystem
       // belonging to the organization in the catalog.
-      const organizations: any = await api.listOrganizations();
+      const organizations: any = await this.api.listOrganizations();
       const orgMember = organizations.find(
         (s: any) => s.name === inputs.organization && s.member
       );
@@ -172,10 +182,11 @@ export const SDXKeysPattern = {
       jwkList: jwkList,
       publicKeyPem: publicKeyPem,
       gatewayId: profile.gatewayId,
+      qualifier: profile.qualifier,
     } as SDXKeysPatternData;
-  },
+  }
 
-  eval: (_: Record<string, string>, data: SDXKeysPatternData) => {
+  eval(_: Record<string, string>, data: SDXKeysPatternData) {
     const profile = data.profile;
 
     let tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
@@ -220,8 +231,8 @@ export const SDXKeysPattern = {
       ],
       ...keys,
     ];
-  },
-};
+  }
+}
 
 function verifyCertificateChain(chainPems: string[]): {
   valid: boolean;

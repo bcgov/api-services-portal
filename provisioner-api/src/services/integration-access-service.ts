@@ -9,8 +9,10 @@ import {
   TIntegrationAccessRequest,
   TNewIntegrationAccessRequest,
   TNewIntegrationAccessRequestResponse,
+  TResourceServerAccess,
 } from '../schemas/sdx.js';
 import { PolicyService } from './policy-service.js';
+import { EnrichedServiceCatalogEntry } from './gateway-patterns/utils.js';
 
 /**
  * Getting subsystem details
@@ -66,7 +68,9 @@ export class IntegrationAccessService {
           async (requestedService) => {
             const requesterDetails = {
               submissionId,
-              requester: input.requester,
+              requester: {
+                name: input.requester,
+              },
               scopes: requestedService.scopes,
               client: {
                 clientId: input.clientId,
@@ -105,7 +109,9 @@ export class IntegrationAccessService {
               gatewayPatterns: {},
             };
 
-            const serviceResources = {};
+            const serviceResources = {
+              gatewayPatterns: {},
+            };
 
             // check if there is an existing connection for this service
             const existingConnection = existingConnections.find(
@@ -189,20 +195,24 @@ export class IntegrationAccessService {
     );
 
     const outcomes = await Promise.all(allConnectionUpserts);
+    this.logger?.debug(
+      { outcomes },
+      'All connection upserts completed with outcomes'
+    );
 
     return submission;
   }
 
   /**
    *
-   * @param subsystemId
-   * @param integrationId
+   * @param integrationClientId
+   * @param environment
    * @returns
    */
   async buildIntegrationAllowedServices(
     integrationClientId: string,
-    policyVersion: string
-  ): Promise<TIntegrationAccessRequest[]> {
+    environment: string
+  ): Promise<TIntegrationAccessRequest> {
     // query the subsystem by an integrationClientId
     //
     const subsystems = await this.api.listCatalogSubsystems({
@@ -214,9 +224,19 @@ export class IntegrationAccessService {
       );
     }
 
-    const subsystem = subsystems[0];
+    // there will always be at most one
+    const subsystem = subsystems.pop();
+    if (!subsystem) {
+      throw new BadRequestError(
+        `Subsystem with clientId ${integrationClientId} not found`
+      );
+    }
 
-    this.logger?.debug('Subsystem = %j', subsystem);
+    this.logger?.debug(
+      'Matched %s to subsystem = %s',
+      integrationClientId,
+      subsystem.clientId
+    );
 
     // get all the approved connection requests for the subsystem client ID
     // and only the connections that match the particular policy version
@@ -224,70 +244,72 @@ export class IntegrationAccessService {
       subsystem.organization?.name!
     );
     this.logger?.debug('Connections = %j', connections);
-    const allowedServices = connections.filter(
+    const allowedConnections = connections.filter(
       (c) =>
         c.isApproved &&
+        c.isActive &&
         c.clientId === subsystem.clientId &&
-        c.policyVersion === policyVersion
+        c.environment === environment &&
+        c.requesterDetails.client.clientId === integrationClientId
     );
 
-    this.logger?.debug('connection allowed %j', allowedServices);
+    this.logger?.debug('connections allowed %j', allowedConnections);
 
     // group by the s.serviceResources.subsystemId
     // and then for each subsystem, popupate the resourceServer object
-    const servicesBySubsystem: Record<string, typeof allowedServices> = {};
-    allowedServices.forEach((s) => {
-      const subsystemId = s.serviceResources.subsystemId;
+    const servicesBySubsystem: Record<string, typeof allowedConnections> = {};
+    for (const s of allowedConnections) {
+      const service = (await this.api.getOASService(
+        s.serviceId!
+      )) as EnrichedServiceCatalogEntry;
+
+      const subsystemId = service.subsystem.clientId;
       if (!servicesBySubsystem[subsystemId]) {
         servicesBySubsystem[subsystemId] = [];
       }
       servicesBySubsystem[subsystemId].push(s);
-    });
+    }
 
     this.logger?.debug('servicesBySubsystem %j', servicesBySubsystem);
 
+    // find the submissionId
+    const submissionId =
+      allowedConnections[0]?.requesterDetails.submissionId || 'unknown';
+
     // for each subsystem, lookup the subsystem details from the catalog to get the organization name
     // and then construct the TIntegrationAccessRequest object
-    const integrationAllowedServices: TIntegrationAccessRequest[] = [];
-    for (const [subsystemId, services] of Object.entries(servicesBySubsystem)) {
-      const subsystemDetail = await this.api.getCatalogSubsystem(subsystemId);
-      if (!subsystemDetail) {
-        this.logger?.warn(
-          `Subsystem detail not found for subsystemId ${subsystemId}`
-        );
-        continue;
-      }
-      const orgName = subsystemDetail.organization?.name || 'unknown';
 
-      integrationAllowedServices.push(
-        ...services
-          .filter(
-            (s) =>
-              integrationClientId === undefined ||
-              s.requesterDetails.client.clientId === integrationClientId
-          )
-          .map((s) => ({
-            clientId: s.requesterDetails.client.clientId,
-            submissionId: s.requesterDetails.submissionId,
-            resourceServers: [
-              {
-                clientId: s.requesterDetails.service.clientId,
-                subsystemId: subsystemDetail.clientId,
-                subsystemName: subsystemDetail.name,
-                environment: s.environment!,
-                organization: orgName,
-                services: [
-                  {
-                    name: s.serviceId!,
-                    scopes: (s.requesterDetails?.scopes || []) as string[],
-                  },
-                ],
-              },
-            ],
-          }))
-      );
+    const resourceServers: TResourceServerAccess[] = [];
+    for (const [subsystemId, services] of Object.entries(servicesBySubsystem)) {
+      // const subsystemDetail = await this.api.getCatalogSubsystem(subsystemId);
+      // if (!subsystemDetail) {
+      //   this.logger?.warn(
+      //     `Subsystem detail not found for subsystemId ${subsystemId}`
+      //   );
+      //   continue;
+      // }
+      // const orgName = subsystemDetail.organization?.name || 'unknown';
+
+      resourceServers.push({
+        subsystemId: subsystemId,
+        environment: environment,
+        services: services.map((s) => ({
+          name: s.serviceId!,
+          scopes: (s.requesterDetails?.scopes || []) as string[],
+        })),
+      });
     }
 
-    return integrationAllowedServices;
+    this.logger?.debug(
+      { resourceServers },
+      'Built resource servers for integration clientId %s',
+      integrationClientId
+    );
+
+    return {
+      clientId: integrationClientId,
+      submissionId: submissionId,
+      resourceServers: resourceServers,
+    };
   }
 }

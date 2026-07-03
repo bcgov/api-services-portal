@@ -76,23 +76,26 @@ export const putFeedWorker = async (context: any, req: any, res: any) => {
   }
   const json = req.body;
 
-  assert.strictEqual(
-    eid === null ||
-      typeof eid == 'undefined' ||
-      json === null ||
-      typeof json == 'undefined',
-    false,
-    'Either entity or ID are missing ' + eid + json
-  );
+  // If the entity has a compositeRefKey, then let syncRecords handle things
+  if (md.compositeRefKey === undefined || md.compositeRefKey.length === 0) {
+    assert.strictEqual(
+      eid === null ||
+        typeof eid == 'undefined' ||
+        json === null ||
+        typeof json == 'undefined',
+      false,
+      'Either entity or ID are missing ' + eid + json
+    );
 
-  assert.strictEqual(
-    typeof eid == 'string',
-    true,
-    `Unique ID (${eid}) is not a string! ` +
-      JSON.stringify(req.params) +
-      ' :: ' +
-      JSON.stringify(req.body)
-  );
+    assert.strictEqual(
+      typeof eid == 'string',
+      true,
+      `Unique ID (${eid}) is not a string! ` +
+        JSON.stringify(req.params) +
+        ' :: ' +
+        JSON.stringify(req.body)
+    );
+  }
 
   //const context = keystone.createContext({ skipAccessControl: true });
   const result = await syncRecords(context, entity, eid, json);

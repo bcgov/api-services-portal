@@ -6,7 +6,10 @@ import {
   SubsystemEntry,
 } from '../clients/sdx-member/index.js';
 import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
-import { TSubsystemEnvironment } from '../schemas/sdx.js';
+import {
+  TIntegrationAccessRequest,
+  TSubsystemEnvironment,
+} from '../schemas/sdx.js';
 
 /**
  * Getting subsystem details

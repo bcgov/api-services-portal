@@ -27,6 +27,7 @@ export interface SubsystemEntry {
     };
     id: string;
   };
+  integrationClientIds: string[];
   runtimeGroups?: SubsystemRuntimeGroup[];
 }
 

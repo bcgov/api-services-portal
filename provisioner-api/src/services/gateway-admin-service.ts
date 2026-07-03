@@ -35,6 +35,7 @@ export class GatewayAdminService {
    */
   async applyResources(
     gatewayId: string,
+    environment: string,
     resources: TResource[],
     action: Action
   ): Promise<any> {
@@ -48,7 +49,7 @@ export class GatewayAdminService {
     );
 
     let gatewayResources = false;
-    const payload: any = {};
+    const payload: any = { _format_version: '3.0' };
 
     resources.forEach((doc: any) => {
       if (doc.kind === 'GatewayService') {
@@ -75,7 +76,7 @@ export class GatewayAdminService {
       }
     });
 
-    this.logger?.debug('Artifacts %j', payload);
+    this.logger?.debug({ payload }, 'To gwa-api');
 
     // Validate the generated config to ensure it only contains allowed configurations for the organization
     if (gatewayResources) {
@@ -107,7 +108,9 @@ export class GatewayAdminService {
           configFile,
         };
 
-        return await this.api.publishGatewayConfig(gatewayId, input);
+        const status = await this.api.publishGatewayConfig(gatewayId, input);
+        this.logger?.debug({ status }, 'Gateway config publish result');
+        return status;
       }
     }
     return { message: 'no gateway resources to apply' };

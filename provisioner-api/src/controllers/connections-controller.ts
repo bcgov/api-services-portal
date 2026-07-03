@@ -47,10 +47,21 @@ export class ConnectionsController {
         };
       } else {
         for (const resource of resourceSets) {
+          this.logger?.debug(
+            'Dispatching: %s',
+            resource.documents.map((doc) => doc.kind).join(', ')
+          );
+
+          const newAction =
+            resource._delete_handling === 'apply' && action === 'delete'
+              ? 'apply'
+              : action;
+
           const result = await this.services.resourceDispatcher.dispatch(
             resource._gateway_id!,
+            connectionRequest.environment!,
             resource.documents,
-            action
+            newAction
           );
           results.push(...result);
         }
@@ -67,6 +78,10 @@ export class ConnectionsController {
         };
       }
     } catch (err) {
+      this.logger?.error(
+        { err, connectionRequest, service },
+        'Error processing connection request change'
+      );
       if (action !== 'diff' && action !== 'preview') {
         await this.logActivity(
           action,

@@ -19,3 +19,9 @@ export interface Activity {
   context?: any; // toString
   actor?: string;
 }
+
+export interface Application {
+  name: string;
+  description?: string;
+  namespace: string;
+}

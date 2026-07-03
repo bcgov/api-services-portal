@@ -45,23 +45,21 @@ const SubsystemsListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
   ],
 });
 
-const AllowedServicesResponse = Type.Array(Type.Ref(IntegrationAccessRequest), {
+const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
   description:
     'Allowed-service grants currently provisioned for the subsystem.',
   examples: [
-    [
-      {
-        submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-        integrationId: 'integration-42',
-        resourceServers: [
-          {
-            id: 'claims',
-            environment: 'dev',
-            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
-          },
-        ],
-      },
-    ],
+    {
+      submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+      clientId: 'integration-42',
+      resourceServers: [
+        {
+          subsystemId: 'claims',
+          environment: 'dev',
+          services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+        },
+      ],
+    },
   ],
 });
 
@@ -85,6 +83,12 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
               examples: ['claims'],
             }),
           }),
+          querystring: Type.Object({
+            environment: Type.String({
+              description: ENVIRONMENT_DESC,
+              examples: ['dev'],
+            }),
+          }),
 
           response: { 200: AllowedServicesResponse },
         },
@@ -92,6 +96,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
       async (req) =>
         app.controllers.integration.getIntegrationAllowedServices({
           integrationClientId: req.params.clientId,
+          environment: req.query.environment,
         })
     );
 

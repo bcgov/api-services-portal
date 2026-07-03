@@ -17,6 +17,7 @@ export class CommonSsoService {
   /** Applies a batch of CSS resources (IntegrationAllowedServices). */
   async applyResources(
     gatewayId: string,
+    environment: string,
     resources: TResource[],
     action: Action
   ): Promise<any> {

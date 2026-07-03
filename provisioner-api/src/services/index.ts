@@ -3,18 +3,21 @@ import type { Clients } from '../clients/index.js';
 import { DirectoryService } from './directory-service.js';
 import { SdxMemberService } from './subsystems-service.js';
 import { GatewayAdminService } from './gateway-admin-service.js';
+import { KongAdminService } from './kong-admin-service.js';
 import { CommonSsoService } from './common-sso-service.js';
 import { PolicyService } from './policy-service.js';
 import { PatternsEvaluatorService } from './patterns-evaluator.js';
 import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
 import { ActivityService } from './activity-service.js';
+import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 
 export {
   ActivityService,
   DirectoryService,
   SdxMemberService,
   GatewayAdminService,
+  KongAdminService,
   CommonSsoService,
   PatternsEvaluatorService,
 };
@@ -24,6 +27,7 @@ export interface Services {
   directory: DirectoryService;
   sdxMember: SdxMemberService;
   gatewayAdmin: GatewayAdminService;
+  kongAdmin: KongAdminService;
   commonSso: CommonSsoService;
   integrationAccess: IntegrationAccessService;
   policyEngine: PolicyService;
@@ -44,11 +48,19 @@ export function buildServices(
 ): Services {
   return {
     activity: new ActivityService(clients.feed, child(logger, 'activity')),
-    directory: new DirectoryService(clients.aps, child(logger, 'directory')),
+    directory: new DirectoryService(
+      clients.aps,
+      clients.feed,
+      child(logger, 'directory')
+    ),
     sdxMember: new SdxMemberService(clients.sdx, child(logger, 'sdxMember')),
     gatewayAdmin: new GatewayAdminService(
       clients.gwa,
       child(logger, 'gatewayAdmin')
+    ),
+    kongAdmin: new KongAdminService(
+      clients.kongAdmin,
+      child(logger, 'kongAdmin')
     ),
     commonSso: new CommonSsoService(clients.css, child(logger, 'commonSso')),
     integrationAccess: new IntegrationAccessService(
@@ -57,13 +69,19 @@ export function buildServices(
     ),
     policyEngine: new PolicyService(child(logger, 'policyEngine')),
     patternsEvaluator: new PatternsEvaluatorService(
-      clients.sdx,
+      new PolicyService(child(logger, 'policyEngine')),
+      new SdxMemberApiClient(clients.sdx, child(logger, 'sdxMember')),
+      new IntegrationAccessService(
+        clients.sdx,
+        child(logger, 'integrationAccess')
+      ),
       child(logger, 'patternsEvaluator')
     ),
     resourceDispatcher: new ResourceDispatcher(
       {
         directory: new DirectoryService(
           clients.aps,
+          clients.feed,
           child(logger, 'directory')
         ),
         sdxMember: new SdxMemberService(
@@ -77,6 +95,10 @@ export function buildServices(
         commonSso: new CommonSsoService(
           clients.css,
           child(logger, 'commonSso')
+        ),
+        kongAdmin: new KongAdminService(
+          clients.kongAdmin,
+          child(logger, 'kongAdmin')
         ),
       },
       child(logger, 'resourceDispatcher')
