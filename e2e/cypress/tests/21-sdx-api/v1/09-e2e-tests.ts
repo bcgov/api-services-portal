@@ -6,6 +6,7 @@ import {
   createSubsystemAndOASService,
   createSubsystemGateway,
   updateRuntimeGroupAddHostedOrg,
+  updateSubsystemIntegrationClients,
 } from '../../../support/sdx-commands'
 
 describe('SDX E2E Tests', () => {
@@ -54,95 +55,120 @@ describe('SDX E2E Tests', () => {
 
           // register the subsystem on the "rg0" runtime group
           createSubsystemGateway(org, 'rg0', service.subsystem.name, () => {
-            // now create a connection between the subsystem and the service
-            // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
-            const connection = {
-              clientId: `${clientId}`,
-              serviceId: `${serviceId}`,
-              policyVersion: 'SDX.R0.00',
-              environment: 'dev',
-              isApproved: true,
-              isActive: true,
-              requesterDetails: {
-                requester: 'Janis',
-                client: {
-                  clientId: 'client-a',
-                },
-                service: {
-                  clientId: 'service-a',
-                },
-              },
-              clientResources: {
-                gatewayPatterns: {
-                  'sdx-p2p-consumer.r1': {
-                    stripPath: false,
-                    upgrades: {
-                      sign: {
-                        alg: 'RS256',
-                      },
-                      verify: {},
+            updateSubsystemIntegrationClients(
+              org,
+              service.subsystem.name,
+              [`client-${datasetId}`],
+              () => {
+                // now create a connection between the subsystem and the service
+                // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
+                const connection = {
+                  clientId: `${clientId}`,
+                  serviceId: `${serviceId}`,
+                  policyVersion: 'SDX.R0.00',
+                  environment: 'dev',
+                  isApproved: false,
+                  isActive: true,
+                  requesterDetails: {
+                    requester: {
+                      name: 'Janis',
+                    },
+                    client: {
+                      clientId: `client-${datasetId}`,
                     },
                   },
-                },
-              },
-              serviceResources: {
-                gatewayPatterns: {
-                  'sdx-p2p-provider.r1': {
-                    upstreamUrl: 'http://upstream-mock-api.localtest.me:2025',
-                    upgrades: {
-                      sign: {
-                        alg: 'RS256',
+                  clientResources: {
+                    gatewayPatterns: {
+                      'sdx-p2p-consumer.r1': {
+                        stripPath: false,
+                        upgrades: {
+                          sign: {
+                            alg: 'RS256',
+                          },
+                          verify: {},
+                        },
                       },
-                      verify: {},
+                      'sdx-p2p-consumer-access.r1': {},
                     },
                   },
-                },
-              },
-            }
-            cy.setRequestBody(connection)
-            cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-              ({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(200)
-                expect(body.result).to.be.equal('created')
-                expect(typeof body.id).to.be.equal('string')
-
-                cy.wait(10000)
-
-                // connection is approved; the provisioner runs asynchronously
-                // and kong control plane also pushes out changes to the data planes
-                // async, so do some retries until we get a good response
-                cy.makeSDXCall({
-                  method: 'GET',
-                  path: `/sdx/0/${serviceId}/ping`,
-                }).then(({ status, body }) => {
-                  expect(status).to.be.equal(200)
-                  expect(body).has.property('currentTime')
-                  expect(body).has.property('headers')
-                  expect(body.headers).has.property('x-edge-token')
-                })
-                // revoke access
-                connection.isActive = false
-
+                  serviceResources: {
+                    gatewayPatterns: {
+                      'sdx-p2p-provider.r1': {
+                        upstreamUrl: 'http://upstream-mock-api.localtest.me:2025',
+                        upgrades: {
+                          sign: {
+                            alg: 'RS256',
+                          },
+                          verify: {},
+                        },
+                      },
+                    },
+                  },
+                }
                 cy.setRequestBody(connection)
                 cy.callAPI(
                   `ds/api/sdx/v1/organizations/${org.name}/connections`,
                   'PUT'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(status).to.be.equal(200)
-                  expect(body.result).to.be.equal('updated')
+                  expect(body.result).to.be.equal('created')
                   expect(typeof body.id).to.be.equal('string')
 
-                  cy.wait(10000)
+                  cy.setRequestBody({
+                    clientId: `${clientId}`,
+                    serviceId: `${serviceId}`,
+                    isApproved: true,
+                  })
 
-                  // connection is de-activated; the provisioner runs asynchronously
-                  // and kong control plane also pushes out changes to the data planes
-                  // async, so do some retries until we get a good response
-                  cy.makeSDXCall({
-                    method: 'GET',
-                    path: `/sdx/0/${serviceId}/ping`,
-                  }).then(({ status, body }) => {
-                    // expect 401 or 404, depending on runtime group default routes
-                    expect([401, 404]).to.include(status)
+                  cy.callAPI(
+                    `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+                    'PUT'
+                  ).then(({ apiRes: { status, body } }: any) => {
+                    expect(status).to.be.equal(200)
+                    expect(body.result).to.be.equal('updated')
+                    expect(typeof body.id).to.be.equal('string')
+
+                    cy.wait(10000)
+
+                    // connection is approved; the provisioner runs asynchronously
+                    // and kong control plane also pushes out changes to the data planes
+                    // async, so do some retries until we get a good response
+                    cy.makeSDXCall({
+                      method: 'GET',
+                      path: `/sdx/0/${serviceId}/ping`,
+                    }).then(({ status, body }) => {
+                      expect(status).to.be.equal(200)
+                      expect(body).has.property('currentTime')
+                      expect(body).has.property('headers')
+                      expect(body.headers).has.property('x-edge-token')
+                    })
+                    // disable access
+                    cy.setRequestBody({
+                      clientId: `${clientId}`,
+                      serviceId: `${serviceId}`,
+                      isActive: false,
+                    })
+                    cy.callAPI(
+                      `ds/api/sdx/v1/organizations/${org.name}/connections`,
+                      'PUT'
+                    ).then(({ apiRes: { status, body } }: any) => {
+                      expect(status).to.be.equal(200)
+                      expect(body.result).to.be.equal('updated')
+                      expect(typeof body.id).to.be.equal('string')
+
+                      cy.wait(10000)
+
+                      // connection is de-activated; the provisioner runs asynchronously
+                      // and kong control plane also pushes out changes to the data planes
+                      // async, so do some retries until we get a good response
+                      cy.makeSDXCall({
+                        method: 'GET',
+                        path: `/sdx/0/${serviceId}/ping`,
+                      }).then(({ status, body }) => {
+                        // expect 401 or 404, depending on runtime group default routes
+                        expect([401, 404]).to.include(status)
+                      })
+                    })
                   })
                 })
               }

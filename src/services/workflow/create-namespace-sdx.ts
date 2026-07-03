@@ -190,7 +190,13 @@ async function createSDXNamespace(
 ): Promise<ResourceSet> {
   // A user should only be getting Namespace.View, but due to how the getResources
   // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
-  args.assignedScopes = ['Namespace.Manage'];
+  // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
+  // as a default
+  args.assignedScopes = [
+    'Namespace.Manage',
+    'Connection.Manage',
+    'GatewayPattern.Publish',
+  ];
 
   const resourceSet = await CreateNamespace(context, args);
 

@@ -1,6 +1,7 @@
 import {
   createConnection,
   createSubsystemAndOASService,
+  new_service,
 } from '../../../support/sdx-commands'
 
 describe('SDX OpenAPI Services', () => {

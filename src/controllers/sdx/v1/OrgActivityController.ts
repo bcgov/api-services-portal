@@ -19,6 +19,7 @@ import { transformActivity } from '../../../services/workflow';
 import { getCombinedOrganizationActivity } from '../../../services/workflow/org-activity';
 import { ActivityDetail } from '../../v3/types-extra';
 import { KeystoneService } from '../../ioc/keystoneInjector';
+import { ActivitySortOptions } from '../../../services/keystone/activity';
 
 @injectable()
 @Route('/organizations/{org}')
@@ -48,14 +49,16 @@ export class OrgActivityController extends Controller {
   public async listOrganizationActivity(
     @Path() org: string,
     @Query() first: number = 20,
-    @Query() skip: number = 0
+    @Query() skip: number = 0,
+    @Query() sortBy: ActivitySortOptions = 'createdAtDesc'
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     const records = await getCombinedOrganizationActivity(
       ctx,
       org,
       first > 100 ? 100 : first,
-      skip
+      skip,
+      sortBy
     );
 
     return transformActivity(records)

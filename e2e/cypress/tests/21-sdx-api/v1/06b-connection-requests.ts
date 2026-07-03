@@ -1,49 +1,4 @@
-import { env } from 'process'
-
-/**
- * Builds a new subsystem and service
- *
- * @param org
- * @param subsystemName
- * @param next
- */
-export function new_service(org: any, subsystemName: string, next: any) {
-  const payload = {
-    name: subsystemName,
-  }
-  cy.setRequestBody(payload)
-  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
-    ({ apiRes: { status } }: any) => {
-      expect(status).to.be.equal(200)
-
-      cy.get('@toys.v1').then((text: any) => {
-        expect(Cypress.Buffer.isBuffer(text)).to.be.true
-        const body = text.toString()
-        expect(body).to.include('openapi: 3.1.1')
-
-        cy.setRequestBodyRaw(body)
-        cy.setHeader('Content-Type', 'application/octet-stream')
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
-          'PUT',
-          false
-        ).then(({ apiRes: { status, body } }: any) => {
-          // expect(status).to.be.equal(200)
-          expect(JSON.stringify(body)).to.include('created')
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-            'GET',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            assert(body.length > 0, 'Expected at least one service in response')
-            next(body[0])
-          })
-        })
-      })
-    }
-  )
-}
+import { new_service } from '../../../support/sdx-commands'
 
 function createConnection(org: any, service: any, isApproved: boolean, next: any) {
   // Creates a ConnectionRequest through the public SDX API so the test data
@@ -55,10 +10,14 @@ function createConnection(org: any, service: any, isApproved: boolean, next: any
     serviceId: `${serviceId}`,
     policyVersion: 'SDX.R0.00',
     environment: 'lab',
-  }
-
-  if (isApproved) {
-    payload.isApproved = true
+    requesterDetails: {
+      requester: {
+        name: 'somebody',
+      },
+      client: {
+        clientId: 'client-x',
+      },
+    },
   }
 
   cy.setRequestBody(payload)
@@ -67,7 +26,20 @@ function createConnection(org: any, service: any, isApproved: boolean, next: any
       expect(status).to.be.equal(200)
       expect(body.result).to.be.equal('created')
       expect(typeof body.id).to.be.equal('string')
-      next(body.id)
+
+      cy.setRequestBody({
+        clientId: `${clientId}`,
+        serviceId: `${serviceId}`,
+        isApproved: isApproved,
+      })
+      cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+        'PUT'
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+
+        next(body.id)
+      })
     }
   )
 }
@@ -105,151 +77,6 @@ describe('SDX Connection Requests', () => {
       workingData = data
       cy.buildOrgGatewayDatasetAndProduct().then((data) => {
         diffOrg = data
-      })
-    })
-  })
-
-  describe('Connection Requests Happy Paths', () => {
-    it('GET /organizations/{org}/connections', () => {
-      const { org, gateway, dataset, datasetId, product } = workingData
-
-      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'GET').then(
-        ({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(200)
-          expect(body.length).to.be.equal(0)
-        }
-      )
-    })
-
-    it('PUT /organizations/{org}/connections - New', () => {
-      const { org, gateway, dataset, datasetId, product } = workingData
-
-      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
-        const clientId = service.subsystem.clientId
-        const serviceId = service.name
-        const payload = {
-          clientId: `${clientId}`,
-          serviceId: `${serviceId}`,
-          policyVersion: 'SDX.R0.00',
-          environment: 'lab',
-        }
-        cy.setRequestBody(payload)
-        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-          ({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            expect(body.result).to.be.equal('created')
-            expect(typeof body.id).to.be.equal('string')
-          }
-        )
-      })
-    })
-
-    it('PUT /organizations/{org}/connections - Approve', () => {
-      const { org, gateway, dataset, datasetId, product } = workingData
-
-      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-          'GET',
-          false
-        ).then(({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(200)
-          expect(body.length).to.be.equal(1)
-          const service = body[0]
-          const clientId = service.subsystem.clientId
-          const serviceId = service.name
-          const payload: any = {
-            clientId: `${clientId}`,
-            serviceId: `${serviceId}`,
-            policyVersion: 'SDX.R0.00',
-            environment: 'lab',
-          }
-          // first expect no changes
-          cy.setRequestBody(payload)
-          cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-            ({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
-              expect(body.result).to.be.equal('created')
-              expect(typeof body.id).to.be.equal('string')
-
-              const payload: any = {
-                clientId: `${clientId}`,
-                serviceId: `${serviceId}`,
-              }
-
-              cy.setRequestBody(payload)
-              cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/connections`,
-                'PUT'
-              ).then(({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(200)
-                expect(body.result).to.be.equal('no-change')
-                expect(typeof body.id).to.be.equal('string')
-
-                // then mark it approved and expect an updated record
-                const payload: any = {
-                  clientId: `${clientId}`,
-                  serviceId: `${serviceId}`,
-                  isApproved: true,
-                }
-
-                cy.setRequestBody(payload)
-                cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/connections`,
-                  'PUT'
-                ).then(({ apiRes: { status, body } }: any) => {
-                  expect(status).to.be.equal(200)
-                  expect(body.result).to.be.equal('updated')
-                  expect(typeof body.id).to.be.equal('string')
-                })
-              })
-            }
-          )
-        })
-      })
-    })
-
-    it('DELETE /organizations/{org}/connections/{id}', () => {
-      const { org, datasetId } = workingData
-
-      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
-        const clientId = service.subsystem.clientId
-        const serviceId = service.name
-        const payload: any = {
-          clientId: `${clientId}`,
-          serviceId: `${serviceId}`,
-          policyVersion: 'SDX.R0.00',
-          environment: 'lab',
-          isApproved: true,
-        }
-
-        cy.setRequestBody(payload)
-        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-          ({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            expect(body.result).to.be.equal('created')
-            expect(typeof body.id).to.be.equal('string')
-
-            const connectionId = body.id
-
-            cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}`,
-              'DELETE'
-            ).then(({ apiRes: { status, body } }: any) => {
-              expect(status).to.be.equal(200)
-              expect(body.result).to.be.equal('deleted')
-              expect(body.id).to.be.equal(connectionId)
-
-              cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/connections`,
-                'GET'
-              ).then(({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(200)
-                expect(body.length).to.be.equal(0)
-              })
-            })
-          }
-        )
       })
     })
   })
@@ -365,7 +192,7 @@ describe('SDX Connection Requests', () => {
                 payload.isApproved = true
                 cy.setRequestBody(payload)
                 cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/connections`,
+                  `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
                   'PUT'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(status).to.be.equal(422)

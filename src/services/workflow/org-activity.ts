@@ -2,6 +2,7 @@ import { strict as assert } from 'assert';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import { Logger } from '../../logger';
 import {
+  ActivitySortOptions,
   format,
   getActivity,
   getOrgActivity,
@@ -1507,12 +1508,20 @@ export async function getCombinedOrganizationActivity(
   context: any,
   org: string,
   first: number = 20,
-  skip: number = 0
+  skip: number = 0,
+  sortBy: ActivitySortOptions = 'createdAtDesc'
 ): Promise<Activity[]> {
   const cappedFirst = first > 100 ? 100 : first;
   const fetchLimit = Math.min(cappedFirst + skip, 100);
 
-  const orgRecords = await getOrgActivity(context, org, fetchLimit, 0, false);
+  const orgRecords = await getOrgActivity(
+    context,
+    org,
+    fetchLimit,
+    0,
+    false,
+    sortBy
+  );
 
   const prodEnv = await getGwaProductEnvironment(context, false);
   const envConfig = prodEnv.issuerEnvConfig;
@@ -1526,7 +1535,8 @@ export async function getCombinedOrganizationActivity(
           assignedNamespaces.map((n) => n.name),
           undefined,
           fetchLimit,
-          0
+          0,
+          sortBy
         )
       : [];
 

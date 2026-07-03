@@ -12,31 +12,18 @@ import {
   SuccessResponse,
   Tags,
   Query,
-  Get,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
-import { GetConfigUsingPattern } from '../../../services/gateway-patterns/evaluator';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';
 import {
   OrgActivityService,
   isGatewayPatternPublishSuccessful,
 } from '../../../services/workflow/org-activity';
-import { GWAService } from '../../../services/gwaapi';
 import YAML from 'js-yaml';
-import getSubjectToken from '../../../auth/auth-token';
 import { Logger } from '../../../logger';
 import { ProvisionerService } from '../../../services/provisioner';
 import { PostPatternsResponse } from '../../../services/provisioner/provisioner-service';
-import { ActivityDetail } from '../../../controllers/v3/types-extra';
-import { getOrgActivity } from '../../../services/keystone/activity';
-import { transformActivity } from '../../../services/workflow';
-import {
-  parseBlobString,
-  parseJsonString,
-  removeEmpty,
-  removeKeys,
-} from '../../../batch/feed-worker';
 
 const logger = Logger('OrgGatewaysController');
 
@@ -179,30 +166,30 @@ export class OrgGatewaysController extends Controller {
       let targetName: string | undefined;
       let gatewayKeyName: string | undefined;
 
-      // if (body.pattern === 'sdx-keys.r1') {
-      //   scope = body.parameters.runtimeGroupName
-      //     ? 'runtime-group'
-      //     : body.parameters.clientId
-      //     ? 'subsystem'
-      //     : 'organization';
-      //   targetName =
-      //     body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
+      if (pattern === 'sdx-keys.r1') {
+        scope = body.parameters.runtimeGroupName
+          ? 'runtime-group'
+          : body.parameters.clientId
+          ? 'subsystem'
+          : 'organization';
+        targetName =
+          body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
 
-      //   const scopedKeys = incomingKeys.filter((key) =>
-      //     isGatewayKeyInScopes(key, [scope])
-      //   );
-      //   gatewayKeyName = scopedKeys[0]?.name;
+        // const scopedKeys = incomingKeys.filter((key) =>
+        //   isGatewayKeyInScopes(key, [scope])
+        // );
+        // gatewayKeyName = scopedKeys[0]?.name;
 
-      //   const keyVerb = removed ? 'removed' : 'published';
-      //   detail = scopedKeys
-      //     .map((key) => `${keyVerb} key ${key.name}`)
-      //     .join('; ');
-      //   if (!removed) {
-      //     deckBlob = YAML.dump(result, { noRefs: true });
-      //   }
-      // } else if (removed) {
-      //   detail = `removed ${body.pattern}`;
-      // }
+        // const keyVerb = removed ? 'removed' : 'published';
+        // detail = scopedKeys
+        //   .map((key) => `${keyVerb} key ${key.name}`)
+        //   .join('; ');
+        if (!removed) {
+          deckBlob = YAML.dump(result, { noRefs: true });
+        }
+      } else if (removed) {
+        detail = `removed ${pattern}`;
+      }
 
       await new OrgActivityService(ctx, org)
         .logGatewayPatternPublish(publishSucceeded, {

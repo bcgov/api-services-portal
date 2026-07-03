@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export function uniqueSubsystemName(): string {
   return `SUBSYS-${Cypress._.random(100000, 999999)}`
 }
@@ -12,6 +14,25 @@ export function clientIdForSubsystem(org: any, subsystemName: string): string {
 export function createSubsystem(org: any, subsystemName: string, next: any) {
   cy.setRequestBody({
     name: subsystemName,
+  })
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
+    ({ apiRes: { status, body } }: any) => {
+      expect(status, body.reason || body.message).to.be.equal(200)
+
+      next(body)
+    }
+  )
+}
+
+export function updateSubsystemIntegrationClients(
+  org: any,
+  subsystemName: string,
+  clients: string[],
+  next: any
+) {
+  cy.setRequestBody({
+    name: subsystemName,
+    integrations: clients.map((c) => ({ integrationClientId: c })),
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
@@ -165,6 +186,51 @@ export function updateRuntimeGroupAddHostedOrg(
     })
 }
 
+export function new_service(org: any, subsystemName: string, next: any) {
+  const rg = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 6)
+
+  const payload = {
+    name: subsystemName,
+  }
+  cy.setRequestBody(payload)
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
+    ({ apiRes: { status } }: any) => {
+      expect(status).to.be.equal(200)
+
+      // create runtime group and add subsystem gateway
+      createRuntimeGroup(org, rg, 'dev').then(() => {
+        createSubsystemGateway(org, rg, subsystemName, () => {
+          cy.get('@toys.v1').then((text: any) => {
+            expect(Cypress.Buffer.isBuffer(text)).to.be.true
+            const body = text.toString()
+            expect(body).to.include('openapi: 3.1.1')
+
+            cy.setRequestBodyRaw(body)
+            cy.setHeader('Content-Type', 'application/octet-stream')
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
+              'PUT',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              // expect(status).to.be.equal(200)
+              expect(JSON.stringify(body)).to.include('created')
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
+                'GET',
+                false
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(200)
+                assert(body.length > 0, 'Expected at least one service in response')
+                next(body[0])
+              })
+            })
+          })
+        })
+      })
+    }
+  )
+}
+
 export function createJanisOrgAndAccess() {
   const org = {
     name: 'user-janis',
@@ -273,33 +339,33 @@ export function registerOrgGateway(orgName: string) {
 export function applyOrgPublicKeyPattern(
   orgName: string,
   publicKeyPem: string,
-  action: 'apply' | 'remove' = 'apply'
+  action: 'apply' | 'delete' = 'apply'
 ) {
   cy.setRequestBody({
-    pattern: 'sdx-keys.r1',
     parameters: {
       organization: orgName,
-      public_key_pem: publicKeyPem,
+      publicKeyPem: publicKeyPem,
     },
   })
-  cy.setQueryString({ action, dryRun: 'false' })
-  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/pattern`, 'PUT')
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
 }
 
 export function applySubsystemPublicKeyPattern(
   orgName: string,
   clientId: string,
+  environment: string,
   publicKeyPem: string,
-  action: 'apply' | 'remove' = 'apply'
+  action: 'apply' | 'delete' = 'apply'
 ) {
   cy.setRequestBody({
-    pattern: 'sdx-keys.r1',
     parameters: {
       organization: orgName,
-      client_id: clientId,
-      public_key_pem: publicKeyPem,
+      environment: environment,
+      clientId: clientId,
+      publicKeyPem: publicKeyPem,
     },
   })
-  cy.setQueryString({ action, dryRun: 'false' })
-  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/pattern`, 'PUT')
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
 }
