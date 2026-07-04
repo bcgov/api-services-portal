@@ -150,9 +150,11 @@ module.exports = {
       resolvedData.clientOrganization = clientSubsystem
         ? Number(clientSubsystem.organization.id)
         : null;
+
       resolvedData.serviceOrganization = serviceSpec
         ? Number(serviceSpec.organization.id)
         : null;
+
       return resolvedData;
     },
 
@@ -168,29 +170,20 @@ module.exports = {
         );
       }
     },
+
     afterChange: async function ({ operation, updatedItem }) {
       logger.debug(
         'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',
         operation,
         updatedItem
       );
-      if (updatedItem.isActive) {
-        const provisionerService = new ProvisionerService(
-          process.env.PROVISIONER_URL
-        );
-        await provisionerService.postConnectionRequestChangeEvent(
-          updatedItem,
-          'apply'
-        );
-      } else {
-        const provisionerService = new ProvisionerService(
-          process.env.PROVISIONER_URL
-        );
-        await provisionerService.postConnectionRequestChangeEvent(
-          updatedItem,
-          'delete'
-        );
-      }
+      const provisionerService = new ProvisionerService(
+        process.env.PROVISIONER_URL
+      );
+      await provisionerService.postConnectionRequestChangeEvent(
+        updatedItem,
+        updatedItem.isActive ? 'apply' : 'delete'
+      );
     },
   },
 };

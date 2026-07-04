@@ -2,6 +2,7 @@ import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import {
   deleteRecordByInternalId,
+  deleteRecordByInternalIdThrowErrors,
   getRecords,
   removeKeys,
   syncRecordsThrowErrors,
@@ -228,7 +229,11 @@ class ConnectionService {
       )}`
     );
 
-    return await deleteRecordByInternalId(context, 'ConnectionRequest', id);
+    return await deleteRecordByInternalIdThrowErrors(
+      context,
+      'ConnectionRequest',
+      id
+    );
   };
 
   listConnectionsByOrganization = async (

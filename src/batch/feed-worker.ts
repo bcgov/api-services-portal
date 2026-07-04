@@ -113,7 +113,8 @@ export const deleteFeedWorker = async (context: any, req: any, res: any) => {
     false
   );
 
-  res.json(deleteRecord(context, feedEntity, eid));
+  const result = await deleteRecord(context, feedEntity, eid);
+  res.status(result.status).json(result);
 };
 
 export const deleteRecord = async function (
@@ -139,6 +140,17 @@ export const deleteRecord = async function (
   }
 };
 
+export const deleteRecordByInternalIdThrowErrors = async function (
+  context: any,
+  entity: string,
+  dbid: string
+) {
+  const result = await deleteRecordByInternalId(context, entity, dbid);
+  if (result.status !== 200) {
+    throw new BatchSyncException(result);
+  }
+};
+
 export const deleteRecordByInternalId = async function (
   context: any,
   entity: string,
@@ -147,10 +159,10 @@ export const deleteRecordByInternalId = async function (
   const batchService = new BatchService(context);
 
   const result = await batchService.remove(entity, dbid);
-  if (result == null) {
-    return { status: 400, result: 'deletion-failed' };
+  if (result.error) {
+    return { status: 400, result: 'deletion-failed', reason: result.error };
   }
-  return { status: 200, result: 'deleted', id: dbid };
+  return { status: 200, result: 'deleted', id: result.id };
 };
 
 export const getFeedWorker = async (context: any, req: any, res: any) => {
