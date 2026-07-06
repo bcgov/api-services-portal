@@ -30,10 +30,12 @@ export const registerGatewaysRoutes: FastifyPluginAsyncTypebox = async (
           }),
         }),
         querystring: Type.Object({
-          environment: Type.String({
-            description: ENVIRONMENT_DESC,
-            examples: ['dev'],
-          }),
+          environment: Type.Optional(
+            Type.String({
+              description: ENVIRONMENT_DESC,
+              examples: ['dev'],
+            })
+          ),
           tag: Type.Optional(
             Type.String({
               description:

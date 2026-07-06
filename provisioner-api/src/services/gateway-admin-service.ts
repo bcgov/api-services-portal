@@ -22,13 +22,30 @@ import { BatchResult } from '../clients/sdx-member/index.js';
 export class GatewayAdminService {
   /** Typed client for the GWA API. */
   readonly api: GatewayAdminApiClient;
+  readonly environments: string[];
 
   constructor(
     resolveClient: GatewayClientResolver,
     environments: EnvironmentsConfig,
     private readonly logger?: FastifyBaseLogger
   ) {
+    this.environments = Object.keys(environments);
+
     this.api = new GatewayAdminApiClient(resolveClient, environments, logger);
+  }
+
+  async getResourcesFromAllEnvironments(
+    gatewayId: string,
+    tag?: string
+  ): Promise<GatewayResource[]> {
+    this.logger?.debug(
+      { gatewayId, tag },
+      'GatewayAdminService.getResourcesFromAllEnvironments'
+    );
+    const results = await Promise.all(
+      this.environments.map((env) => this.api.getResources(env, gatewayId, tag))
+    );
+    return results.flat();
   }
 
   /**

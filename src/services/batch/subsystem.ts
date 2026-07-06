@@ -27,6 +27,7 @@ import { Logger } from '../../logger';
 import { OpenAPISpecService } from './oas-service';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { context } from 'msw';
+import { ProvisionerService } from '../provisioner';
 
 const logger = Logger('batch.subsystem');
 
@@ -198,8 +199,7 @@ class SubsystemService {
   deleteSubsystem = async (
     context: any,
     org: string,
-    name: string,
-    force: boolean = false
+    name: string
   ): Promise<BatchResult> => {
     const subsystem = await this.findSubsystemByName(context, org, name);
     const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
@@ -213,14 +213,6 @@ class SubsystemService {
       activeClientConnections.length === 0,
       true,
       'Subsystem cannot be deleted because it has active connection requests as a client'
-    );
-
-    const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
-
-    assert.strictEqual(
-      gatewayExists,
-      false,
-      'Subsystem cannot be deleted because gateway configuration exists'
     );
 
     const oasService = new OpenAPISpecService();
@@ -243,6 +235,25 @@ class SubsystemService {
       activeProviderConnections.length === 0,
       true,
       'Subsystem cannot be deleted because it has active connection requests as a service provider'
+    );
+
+    // const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
+
+    // assert.strictEqual(
+    //   gatewayExists,
+    //   false,
+    //   'Subsystem cannot be deleted because gateway configuration exists'
+    // );
+
+    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
+    const resources = await provisioner.getGatewayResources(
+      subsystem.namespace!
+    );
+
+    assert.strictEqual(
+      resources.length === 0,
+      true,
+      'Subsystem cannot be deleted because gateway configuration exists'
     );
 
     const childResults: BatchResult[] = [];

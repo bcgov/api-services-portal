@@ -4,7 +4,7 @@ import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
 export interface GetGatewayResourcesInput {
   gatewayId: string;
-  environment: string;
+  environment?: string;
   tag?: string;
 }
 
@@ -17,10 +17,17 @@ export class GatewayController {
   async getResources(
     input: GetGatewayResourcesInput
   ): Promise<GatewayResource[]> {
-    return await this.services.gatewayAdmin.getResources(
-      input.gatewayId,
-      input.environment,
-      input.tag
-    );
+    if (input.environment) {
+      return await this.services.gatewayAdmin.getResources(
+        input.gatewayId,
+        input.environment,
+        input.tag
+      );
+    } else {
+      return await this.services.gatewayAdmin.getResourcesFromAllEnvironments(
+        input.gatewayId,
+        input.tag
+      );
+    }
   }
 }

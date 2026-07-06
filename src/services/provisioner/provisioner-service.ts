@@ -127,24 +127,25 @@ export class ProvisionerService {
 
   public async getGatewayResources(
     gatewayId: string,
-    environment: string,
+    environment?: string,
     tag?: string
   ): Promise<any> {
+    const params = {
+      ...(environment ? { environment } : {}),
+      ...(tag ? { tag } : {}),
+    };
+
     logger.debug(
       'Calling %s',
       `${
         this.provisionerUrl
-      }/gateways/${gatewayId}/resources?environment=${environment}${
-        tag ? `&tag=${tag}` : ''
-      }`
+      }/gateways/${gatewayId}/resources?${new URLSearchParams(params)}`
     );
 
     const res = await fetch(
       `${
         this.provisionerUrl
-      }/gateways/${gatewayId}/resources?environment=${environment}${
-        tag ? `&tag=${tag}` : ''
-      }`,
+      }/gateways/${gatewayId}/resources?${new URLSearchParams(params)}`,
       {
         method: 'GET',
         headers: {

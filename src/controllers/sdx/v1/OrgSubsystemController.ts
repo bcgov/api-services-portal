@@ -117,7 +117,6 @@ export class OrgSubsystemController extends Controller {
    * @param org - Organization identifier
    * @param name - Subsystem name to delete
    * @param request - HTTP request object for context creation
-   * @param force - Reserved for compatibility; deletion still requires no active connections or gateway configuration
    */
   @Delete('/{name}')
   @OperationId('deleteSubsystem')
@@ -125,12 +124,11 @@ export class OrgSubsystemController extends Controller {
   public async delete(
     @Path() org: string,
     @Path() name: string,
-    @Query('force') force: boolean,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    return new SubsystemService().deleteSubsystem(context, org, name, force);
+    return new SubsystemService().deleteSubsystem(context, org, name);
   }
 
   /**
