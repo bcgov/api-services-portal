@@ -144,10 +144,12 @@ export const deleteRecordByInternalIdThrowErrors = async function (
   context: any,
   entity: string,
   dbid: string
-) {
+): Promise<BatchResult> {
   const result = await deleteRecordByInternalId(context, entity, dbid);
   if (result.status !== 200) {
     throw new BatchSyncException(result);
+  } else {
+    return result;
   }
 };
 
