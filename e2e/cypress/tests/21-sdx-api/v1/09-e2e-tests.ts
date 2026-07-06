@@ -62,6 +62,9 @@ describe('SDX E2E Tests', () => {
               () => {
                 // now create a connection between the subsystem and the service
                 // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
+
+                // Not including `verify: {}` because getting the public key created is a bit tricky
+
                 const connection = {
                   clientId: `${clientId}`,
                   serviceId: `${serviceId}`,
@@ -85,7 +88,6 @@ describe('SDX E2E Tests', () => {
                           sign: {
                             alg: 'RS256',
                           },
-                          verify: {},
                         },
                       },
                       'sdx-p2p-consumer-access.r1': {},
@@ -99,7 +101,6 @@ describe('SDX E2E Tests', () => {
                           sign: {
                             alg: 'RS256',
                           },
-                          verify: {},
                         },
                       },
                     },

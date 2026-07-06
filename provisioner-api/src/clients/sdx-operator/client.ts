@@ -34,6 +34,7 @@ export class SdxOperatorApiClient {
     runtimeGroup: string,
     input: CsrRequest
   ): Promise<CsrResponse> {
+    this.logger?.debug({ environment, runtimeGroup }, 'Creating CSR');
     return this.request(
       environment,
       'POST',

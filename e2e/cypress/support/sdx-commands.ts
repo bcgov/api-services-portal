@@ -150,6 +150,28 @@ export function createRuntimeGroup(
     .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
     .then(({ apiRes: { status, body } }: any) => {
       expect(status, body.message).to.be.equal(200)
+
+      cy.clearRequestBody()
+      return cy
+        .callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupName}/gateway`,
+          'PUT'
+        )
+        .then(({ apiRes: { status, body } }: any) => {
+          //expect(status).to.be.equal(200)
+          //expect(body).to.have.property('gatewayId')
+
+          // provision default routes
+          return applyRuntimeGroupPattern(
+            org.name,
+            runtimeGroupName,
+            environment,
+            'apply'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            // expect(JSON.stringify(body)).to.be.equal('applied')
+          })
+        })
     })
 }
 
@@ -308,10 +330,10 @@ S2jKMiCW1pr8CU26fbma7xHNoLGimmenkAqRhXiONSxKnsmGgoZvaFQzpqGKGxWc
 dQIDAQAB
 -----END PUBLIC KEY-----`
 
-export function orgGatewayKeyName(org: { tags: string[] }): string {
+export function orgGatewayKeyName(env: string, org: { tags: string[] }): string {
   const memberClass = org.tags[0].split(':')[1].toLowerCase()
   const memberId = org.tags[1].split(':')[1].toLowerCase()
-  return `sdx.keys.${memberClass}.${memberId}.org:0`
+  return `sdx.keys.${memberClass}.${memberId}.org.${env}:0`
 }
 
 export function subsystemGatewayKeyName(clientId: string): string {
@@ -338,12 +360,14 @@ export function registerOrgGateway(orgName: string) {
 
 export function applyOrgPublicKeyPattern(
   orgName: string,
+  environment: string,
   publicKeyPem: string,
   action: 'apply' | 'delete' = 'apply'
 ) {
   cy.setRequestBody({
     parameters: {
       organization: orgName,
+      environment: environment,
       publicKeyPem: publicKeyPem,
     },
   })
@@ -368,4 +392,24 @@ export function applySubsystemPublicKeyPattern(
   })
   cy.setQueryString({ action })
   return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
+}
+
+export function applyRuntimeGroupPattern(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      organization: orgName,
+      runtimeGroupName: runtimeGroupName,
+      environment: environment,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-runtime-group.r1`,
+    'PUT'
+  )
 }

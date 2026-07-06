@@ -237,24 +237,20 @@ class SubsystemService {
       'Subsystem cannot be deleted because it has active connection requests as a service provider'
     );
 
-    // const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
+    const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
 
-    // assert.strictEqual(
-    //   gatewayExists,
-    //   false,
-    //   'Subsystem cannot be deleted because gateway configuration exists'
-    // );
+    if (gatewayExists) {
+      const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
+      const resources = await provisioner.getGatewayResources(
+        subsystem.namespace!
+      );
 
-    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
-    const resources = await provisioner.getGatewayResources(
-      subsystem.namespace!
-    );
-
-    assert.strictEqual(
-      resources.length === 0,
-      true,
-      'Subsystem cannot be deleted because gateway configuration exists'
-    );
+      assert.strictEqual(
+        resources.length === 0,
+        true,
+        'Subsystem cannot be deleted because gateway configuration exists'
+      );
+    }
 
     const childResults: BatchResult[] = [];
     for (const serviceSpec of serviceSpecs) {
