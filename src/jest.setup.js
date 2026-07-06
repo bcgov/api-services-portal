@@ -8,6 +8,8 @@ global.Headers = global.Headers || Headers;
 global.Request = global.Request || Request;
 global.Response = global.Response || Response;
 global.fetch = global.fetch || nodeFetch;
+process.env.OAS_VALIDATION_API_URL =
+  process.env.OAS_VALIDATION_API_URL || 'http://validation.local';
 import { setLogger } from 'react-query';
 import '@testing-library/jest-dom/extend-expect';
 

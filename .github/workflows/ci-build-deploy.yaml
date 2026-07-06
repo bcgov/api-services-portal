@@ -441,6 +441,10 @@ jobs:
               value: 'https://id.gov.bc.ca/account/'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
+            OAS_VALIDATION_API_URL:
+              value: 'https://oas-validation-api-gov-bc-ca.dev.api.gov.bc.ca'
+            OAS_VALIDATION_API_TIMEOUT_MS:
+              value: '30000'
             GWA_PROD_ENV_SLUG:
               value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
