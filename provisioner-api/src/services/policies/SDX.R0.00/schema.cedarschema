@@ -92,7 +92,9 @@ namespace SDX {
                     environment: {
                         client_id: String,
                         oauth_token_url: String,
-                        kong_admin_url: String
+                        kong_admin_url: String,
+                        gwa_api_url: String,
+                        operator_edge_url: String
                     }
                 }
             },

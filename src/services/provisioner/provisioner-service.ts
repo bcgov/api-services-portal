@@ -5,6 +5,11 @@ import { Logger } from '../../logger';
 
 const logger = Logger('services.provisioner');
 
+type CSRRequest = {
+  requester_name: string;
+  requester_email: string;
+};
+
 type ConnectionRequestChangeEventResponse = {
   applied: number;
   failed: number;
@@ -54,6 +59,33 @@ export class ProvisionerService {
     return res;
   }
 
+  public async postCSR(
+    org: string,
+    runtimeGroup: string,
+    environment: string,
+    csrRequest: CSRRequest
+  ): Promise<any> {
+    logger.debug(
+      'Calling %s',
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/csr`
+    );
+
+    const res = await fetch(
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/csr`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(csrRequest),
+      }
+    )
+      .then(checkStatus)
+      .then((r) => r.json());
+
+    return res;
+  }
+
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
     action: 'apply' | 'delete'
@@ -89,6 +121,39 @@ export class ProvisionerService {
       .then(checkStatus)
       .then((r) => r.json())
       .then((r) => r as ConnectionRequestChangeEventResponse);
+
+    return res;
+  }
+
+  public async getGatewayResources(
+    gatewayId: string,
+    environment: string,
+    tag?: string
+  ): Promise<any> {
+    logger.debug(
+      'Calling %s',
+      `${
+        this.provisionerUrl
+      }/gateways/${gatewayId}/resources?environment=${environment}${
+        tag ? `&tag=${tag}` : ''
+      }`
+    );
+
+    const res = await fetch(
+      `${
+        this.provisionerUrl
+      }/gateways/${gatewayId}/resources?environment=${environment}${
+        tag ? `&tag=${tag}` : ''
+      }`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(checkStatus)
+      .then((r) => r.json());
 
     return res;
   }

@@ -1,7 +1,7 @@
 import { KeystoneService } from '../controllers/ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { Logger } from '../logger';
-import { ForbiddenError } from './forbidden-error';
+import { LookupOrganizationGatewayId } from '../services/workflow/create-namespace-sdx';
 
 const logger = Logger('auth-sdx-middle');
 
@@ -17,32 +17,58 @@ export class AuthMiddle {
     pattern: string,
     body: any
   ): Promise<string | undefined> {
+    logger.debug(
+      "[lookupGatewayId] org='%s', pattern='%s', body='%j'",
+      org,
+      pattern,
+      body
+    );
+
     // if no pattern, assume it is a connection request, so use serviceId
     if (body.serviceId) {
       if (!pattern) {
         return await this.lookupServiceGateway(org, body.serviceId);
       }
     }
-    // else assume it is the various patterns
-    if (body.parameters?.clientId) {
-      if (pattern === 'sdx-keys.r1' || pattern === 'sdx-subsystem.r1') {
+    if (pattern === 'sdx-keys.r1') {
+      if (body.parameters?.clientId) {
         return await this.lookupSubsystemGateway(org, body.parameters.clientId);
-      }
-    }
-    if (body.parameters?.runtimeGroupName) {
-      if (pattern === 'sdx-keys.r1' || pattern === 'sdx-runtime-group.r1') {
+      } else if (body.parameters?.runtimeGroupName) {
         return await this.lookupRuntimeGroupGateway(
           org,
           body.parameters.runtimeGroupName,
           body.parameters.environment
         );
+      } else {
+        // assume org, so return org gateaway
+        const { gatewayId } = await LookupOrganizationGatewayId(
+          this.keystone.sudo(),
+          org
+        );
+        return gatewayId;
       }
     }
-    if (body.parameters?.serviceId) {
-      if (pattern === 'sdx-service.r1') {
-        return await this.lookupServiceGateway(org, body.parameters.serviceId);
-      }
+    // else assume it is the various patterns
+
+    if (pattern === 'sdx-subsystem.r1' && body.parameters?.clientId) {
+      return await this.lookupSubsystemGateway(org, body.parameters.clientId);
     }
+
+    if (
+      pattern === 'sdx-runtime-group.r1' &&
+      body.parameters?.runtimeGroupName
+    ) {
+      return await this.lookupRuntimeGroupGateway(
+        org,
+        body.parameters.runtimeGroupName,
+        body.parameters.environment
+      );
+    }
+
+    if (pattern === 'sdx-service.r1' && body.parameters?.serviceId) {
+      return await this.lookupServiceGateway(org, body.parameters.serviceId);
+    }
+
     return undefined;
   }
 

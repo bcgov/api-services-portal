@@ -20,6 +20,16 @@ export interface Profile {
   namespace?: string;
 }
 
+/** A tagged gateway entity belonging to a namespace. */
+export interface GatewayResource {
+  /** The namespace tag applied to the entity (e.g. `ns.platform`). */
+  tag: string;
+  /** The gateway entity's unique identifier. */
+  entity_id: string;
+  /** The gateway entity's name (e.g. `plugins`, `routes`). */
+  entity_name: string;
+}
+
 export interface NamespaceAttributes {
   'perm-domains'?: string[];
 }

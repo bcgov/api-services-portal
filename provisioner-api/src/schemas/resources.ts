@@ -120,11 +120,10 @@ export const ConnectionChangeRequest = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        clientId: 'LAB.MIN.FOOD.MY-UI',
+        clientId: 'MIN.FOOD.MY-UI',
         serviceId: 'LAB.MIN.FOOD.CASE-MANAGEMENT.v1',
         isApproved: false,
         environment: 'dev',
-        scopes: ['Claims.Read'],
       },
     ],
   }
@@ -251,11 +250,59 @@ export const ApplyPatternRequest = Type.Object(
     examples: [
       {
         parameters: {
-          client_id: 'LAB.MIN.FOOD.MY-UI',
-          service_id: 'LAB.MIN.FOOD.CASE-MANAGEMENT.v1',
-          upstream_url: 'httpbun.com',
+          clientId: 'MIN.FOOD.MY-UI',
+          serviceSd: 'LAB.MIN.FOOD.CASE-MANAGEMENT.v1',
+          upstreamUrl: 'httpbun.com',
         },
       },
+    ],
+  }
+);
+
+/**
+ * A tagged gateway entity belonging to a gateway (namespace), as returned by
+ * the GWA API. Mirrors the `GatewayResource` component from the GWA spec.
+ */
+export const GatewayResource = Type.Object(
+  {
+    tag: Type.String({
+      description: 'The namespace tag applied to the entity.',
+      examples: ['ns.platform'],
+    }),
+    entity_id: Type.String({
+      description: "The gateway entity's unique identifier.",
+      examples: ['7e6b4c2a-1c1e-4c79-8e34-9f6f2b6b9d8a'],
+    }),
+    entity_name: Type.String({
+      description: "The gateway entity's name.",
+      examples: ['routes'],
+    }),
+  },
+  {
+    $id: 'GatewayResource',
+    additionalProperties: true,
+    examples: [
+      {
+        tag: 'ns.platform',
+        entity_id: '7e6b4c2a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+        entity_name: 'routes',
+      },
+    ],
+  }
+);
+
+export const GatewayResourcesResponse = Type.Array(
+  Type.Ref(GatewayResource),
+  {
+    description: 'Tagged gateway entities belonging to the gateway.',
+    examples: [
+      [
+        {
+          tag: 'ns.platform',
+          entity_id: '7e6b4c2a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+          entity_name: 'routes',
+        },
+      ],
     ],
   }
 );
@@ -275,4 +322,5 @@ export const resourceSchemas = [
   ConnectionChangeRequest,
   ConnectionChangeResponse,
   ApplyPatternRequest,
+  GatewayResource,
 ];

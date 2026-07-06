@@ -122,7 +122,7 @@ export class OrgGatewaysController extends Controller {
       },
     },
   })
-  public async generateConfigFromPattern(
+  public async provisionConfigFromPattern(
     @Path() org: string,
     @Path() pattern: string,
     @Query() action: 'preview' | 'apply' | 'diff' | 'delete',

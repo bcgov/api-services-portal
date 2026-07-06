@@ -2,6 +2,7 @@ import type {
   ClientSecretConfig,
   SignedJwtConfig,
 } from './oauth.js';
+import type { EnvironmentConfig } from '../config/environments.js';
 
 type Missing = { missing: string[] };
 
@@ -52,6 +53,50 @@ export function loadSignedJwtConfig(
       kid: process.env[`${prefix}_KID`],
       scope: process.env[`${prefix}_SCOPE`],
       audience: process.env[`${prefix}_AUDIENCE`],
+      allowInsecure: allowInsecureRequests(),
+    },
+  };
+}
+
+/**
+ * Builds the signed-JWT config for the GWA OAuth client of a single
+ * environment. The token endpoint and client id come from that environment's
+ * entry in the environments config (`oauth_token_url`, `client_id`) — they
+ * differ per environment — while the signing key and other JWT parameters are
+ * shared across environments and read from the `GWA_*` variables. `client_id`
+ * falls back to `GWA_CLIENT_ID` when the environment omits it.
+ */
+export function loadGwaEnvJwtConfig(
+  environment: string,
+  env: EnvironmentConfig | undefined
+): ClientLoadResult<SignedJwtConfig> {
+  const missing: Missing = { missing: [] };
+  const tokenUrl = require_(
+    `oauth_token_url (environment '${environment}')`,
+    env?.oauth_token_url,
+    missing
+  );
+  const clientId = require_(
+    `client_id (environment '${environment}') or GWA_CLIENT_ID`,
+    env?.client_id ?? process.env.GWA_CLIENT_ID,
+    missing
+  );
+  const jwkPath = require_('GWA_JWK_PATH', process.env.GWA_JWK_PATH, missing);
+  if (missing.missing.length > 0) return { ok: false, missing: missing.missing };
+  return {
+    ok: true,
+    config: {
+      name: `gwa:${environment}`,
+      // The API endpoint is resolved separately from `gwa_api_url`; the OAuth
+      // client's baseUrl is unused for GWA, so mirror it here for context only.
+      baseUrl: env?.gwa_api_url ?? '',
+      tokenUrl: tokenUrl!,
+      clientId: clientId!,
+      jwkPath: jwkPath!,
+      keyAlg: process.env.GWA_KEY_ALG as SignedJwtConfig['keyAlg'],
+      kid: process.env.GWA_KID,
+      scope: process.env.GWA_SCOPE,
+      audience: process.env.GWA_AUDIENCE,
       allowInsecure: allowInsecureRequests(),
     },
   };

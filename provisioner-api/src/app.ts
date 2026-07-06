@@ -11,6 +11,7 @@ import { registerResourcesRoutes } from './routes/connections.js';
 import { registerPatternsRoutes } from './routes/patterns.js';
 import { sdxSchemas } from './schemas/sdx.js';
 import { resourceSchemas } from './schemas/resources.js';
+import { runtimeGroupSchemas } from './schemas/runtime-groups.js';
 import { ProblemSchema } from './errors/problem.js';
 import {
   ERROR_RESPONSE_REFS,
@@ -22,6 +23,8 @@ import { callbackSummaries } from './openapi/callback-summaries.js';
 import { componentSchemaDescriptions } from './openapi/component-descriptions.js';
 import { decorateOpenApi } from './openapi/decorate.js';
 import { registerIntegrationAccessRoutes } from './routes/integrationAccess.js';
+import { registerGatewaysRoutes } from './routes/gateways.js';
+import { registerRuntimeGroupsRoutes } from './routes/runtime-groups.js';
 
 const API_PREFIX = '/v1';
 
@@ -32,6 +35,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   for (const schema of sdxSchemas) app.addSchema(schema);
   for (const schema of resourceSchemas) app.addSchema(schema);
+  for (const schema of runtimeGroupSchemas) app.addSchema(schema);
   app.addSchema(ProblemSchema);
 
   await app.register(swagger, {
@@ -72,6 +76,16 @@ export async function buildApp(): Promise<FastifyInstance> {
           name: 'Resource Provisioning',
           description:
             'Evaluate SDX patterns into resources and dispatch them to their applicable providers.',
+        },
+        {
+          name: 'Gateways',
+          description:
+            'Query gateway (namespace) configuration and the tagged entities it owns.',
+        },
+        {
+          name: 'Runtime Groups',
+          description:
+            'Operations against runtime group edge servers, such as CSR generation.',
         },
       ],
       components: {
@@ -117,6 +131,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
   await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
   await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
+  await app.register(registerGatewaysRoutes, { prefix: API_PREFIX });
+  await app.register(registerRuntimeGroupsRoutes, { prefix: API_PREFIX });
 
   return app;
 }

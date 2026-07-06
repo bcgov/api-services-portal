@@ -3,23 +3,24 @@ import type { Clients } from '../clients/index.js';
 import { DirectoryService } from './directory-service.js';
 import { SdxMemberService } from './subsystems-service.js';
 import { GatewayAdminService } from './gateway-admin-service.js';
-import { KongAdminService } from './kong-admin-service.js';
 import { CommonSsoService } from './common-sso-service.js';
 import { PolicyService } from './policy-service.js';
 import { PatternsEvaluatorService } from './patterns-evaluator.js';
 import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
 import { ActivityService } from './activity-service.js';
+import { SdxOperatorService } from './sdx-operator-service.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
+import { loadEnvironments } from '../config/environments.js';
 
 export {
   ActivityService,
   DirectoryService,
   SdxMemberService,
   GatewayAdminService,
-  KongAdminService,
   CommonSsoService,
   PatternsEvaluatorService,
+  SdxOperatorService,
 };
 
 export interface Services {
@@ -27,12 +28,12 @@ export interface Services {
   directory: DirectoryService;
   sdxMember: SdxMemberService;
   gatewayAdmin: GatewayAdminService;
-  kongAdmin: KongAdminService;
   commonSso: CommonSsoService;
   integrationAccess: IntegrationAccessService;
   policyEngine: PolicyService;
   patternsEvaluator: PatternsEvaluatorService;
   resourceDispatcher: ResourceDispatcher;
+  sdxOperator: SdxOperatorService;
 }
 
 function child(
@@ -46,6 +47,7 @@ export function buildServices(
   clients: Clients,
   logger?: FastifyBaseLogger
 ): Services {
+  const environments = loadEnvironments();
   return {
     activity: new ActivityService(clients.feed, child(logger, 'activity')),
     directory: new DirectoryService(
@@ -56,11 +58,8 @@ export function buildServices(
     sdxMember: new SdxMemberService(clients.sdx, child(logger, 'sdxMember')),
     gatewayAdmin: new GatewayAdminService(
       clients.gwa,
+      environments,
       child(logger, 'gatewayAdmin')
-    ),
-    kongAdmin: new KongAdminService(
-      clients.kongAdmin,
-      child(logger, 'kongAdmin')
     ),
     commonSso: new CommonSsoService(clients.css, child(logger, 'commonSso')),
     integrationAccess: new IntegrationAccessService(
@@ -90,18 +89,20 @@ export function buildServices(
         ),
         gatewayAdmin: new GatewayAdminService(
           clients.gwa,
+          environments,
           child(logger, 'gatewayAdmin')
         ),
         commonSso: new CommonSsoService(
           clients.css,
           child(logger, 'commonSso')
         ),
-        kongAdmin: new KongAdminService(
-          clients.kongAdmin,
-          child(logger, 'kongAdmin')
-        ),
       },
       child(logger, 'resourceDispatcher')
+    ),
+    sdxOperator: new SdxOperatorService(
+      new SdxMemberApiClient(clients.sdx, child(logger, 'sdxMember')),
+      clients.sdxOperator,
+      child(logger, 'sdxOperator')
     ),
   };
 }

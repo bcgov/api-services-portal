@@ -32,4 +32,14 @@ export const pathSummaries: Record<
     description:
       'Evaluates a gateway pattern and dispatches the resources it produces to their owning providers.',
   },
+  '/gateways/{gateway}/resources': {
+    summary: 'Gateway resource catalogue',
+    description:
+      'Lists the tagged gateway entities belonging to the gateway (namespace).',
+  },
+  '/runtime-groups/{name}/environments/{env}/csr': {
+    summary: 'Runtime group CSR generation',
+    description:
+      "Requests a new key pair and CSR from the runtime group's edge server for the target environment.",
+  },
 };

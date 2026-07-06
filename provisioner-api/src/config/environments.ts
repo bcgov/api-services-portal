@@ -3,16 +3,31 @@ import { readFileSync } from 'node:fs';
 /**
  * Per-environment configuration. Sourced entirely from the external file named
  * by `ENVIRONMENTS_CONFIG_FILE` — there is no hardcoded fallback. Holds the
- * OAuth details previously kept in `services/policies/env.ts` plus the Kong
- * Admin API endpoint, which differs per environment.
+ * OAuth details previously kept in `services/policies/env.ts` plus the
+ * per-environment API endpoints (GWA), which differ per environment.
  */
 export type EnvironmentConfig = {
   /** OAuth client id used when minting tokens for this environment. */
   client_id?: string;
   /** OAuth token endpoint for this environment. */
   oauth_token_url: string;
-  /** Base URL of this environment's Kong Admin API (e.g. `http://kong:8001`). */
+  /**
+   * Base URL of this environment's Kong Admin API (e.g. `http://kong:8001`).
+   * Retained for policy evaluation; no longer consumed by an API client.
+   */
   kong_admin_url: string;
+  /**
+   * Base URL of this environment's Gateway Administration (GWA) API, including
+   * any version prefix (e.g. `https://gwa.dev.example.gov.bc.ca/v2`). Consumed
+   * by the {@link GatewayAdminApiClient}.
+   */
+  gwa_api_url?: string;
+  /**
+   * Base URL of this environment's SDX Operator edge server (e.g.
+   * `https://edge.dev.example.gov.bc.ca`). Consumed by the
+   * {@link SdxOperatorApiClient} for CSR generation.
+   */
+  operator_edge_url?: string;
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
@@ -39,7 +54,7 @@ export function loadEnvironments(): EnvironmentsConfig {
     // eslint-disable-next-line no-console
     console.warn(
       'ENVIRONMENTS_CONFIG_FILE is not set; environment config is empty. ' +
-        'Per-environment operations (Kong Admin, policy evaluation) will fail until it is provided.'
+        'Per-environment operations (GWA, policy evaluation) will fail until it is provided.'
     );
     cached = {};
     return cached;
@@ -89,15 +104,15 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     const entry = value as Record<string, unknown>;
     requireString(entry, 'oauth_token_url', name, path);
     requireString(entry, 'kong_admin_url', name, path);
-    if (entry.client_id !== undefined && typeof entry.client_id !== 'string') {
-      throw new Error(
-        `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' field 'client_id' must be a string`
-      );
-    }
+    optionalString(entry, 'client_id', name, path);
+    optionalString(entry, 'gwa_api_url', name, path);
+    optionalString(entry, 'operator_edge_url', name, path);
     result[name] = {
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
       kong_admin_url: entry.kong_admin_url as string,
+      gwa_api_url: entry.gwa_api_url as string | undefined,
+      operator_edge_url: entry.operator_edge_url as string | undefined,
     };
   }
   return result;
@@ -112,6 +127,19 @@ function requireString(
   if (typeof entry[field] !== 'string' || entry[field] === '') {
     throw new Error(
       `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' is missing required string field '${field}'`
+    );
+  }
+}
+
+function optionalString(
+  entry: Record<string, unknown>,
+  field: string,
+  name: string,
+  path: string
+): void {
+  if (entry[field] !== undefined && typeof entry[field] !== 'string') {
+    throw new Error(
+      `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' field '${field}' must be a string`
     );
   }
 }

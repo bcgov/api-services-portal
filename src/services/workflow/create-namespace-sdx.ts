@@ -24,10 +24,13 @@ export interface CreateNamespaceForOrganizationArgs {
   organization: string;
 }
 
-export async function CreateNamespaceForOrganization(
+export async function LookupOrganizationGatewayId(
   context: any,
-  { organization }: CreateNamespaceForOrganizationArgs
-): Promise<ResourceSet> {
+  organization: string
+): Promise<{
+  member: { memberClass: string; memberId: string };
+  gatewayId: string;
+}> {
   const org = await getOrganization(context, organization);
   if (!org) {
     throw new Error(`Organization ${organization} not found`);
@@ -35,12 +38,24 @@ export async function CreateNamespaceForOrganization(
 
   const member = parseOrganizationMemberDetails(org.tags);
 
-  const name =
+  const gatewayId =
     `sdx-o-${member.memberClass}-${member.memberId}`.toLocaleLowerCase();
+
+  return { member, gatewayId };
+}
+
+export async function CreateNamespaceForOrganization(
+  context: any,
+  { organization }: CreateNamespaceForOrganizationArgs
+): Promise<ResourceSet> {
+  const { member, gatewayId } = await LookupOrganizationGatewayId(
+    context,
+    organization
+  );
 
   // Create the namespace with SDX edge configuration
   const resourceSet = await createSDXNamespace(context, {
-    name: name,
+    name: gatewayId,
     org: organization,
     orgUnit: undefined,
     orgEnabled: false,

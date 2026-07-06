@@ -38,7 +38,6 @@ export class ResourceDispatcher {
       sdxMember: Services['sdxMember'];
       gatewayAdmin: Services['gatewayAdmin'];
       commonSso: Services['commonSso'];
-      kongAdmin: Services['kongAdmin'];
     },
     private readonly logger?: FastifyBaseLogger
   ) {
@@ -52,11 +51,6 @@ export class ResourceDispatcher {
             r,
             action
           ),
-      },
-      kong: {
-        name: 'kong',
-        apply: (gatewayId, environment, r, action) =>
-          services.kongAdmin.applyResources(gatewayId, environment, r, action),
       },
       css: {
         name: 'css',

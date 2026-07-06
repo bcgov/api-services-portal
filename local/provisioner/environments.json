@@ -1,7 +1,9 @@
 {
   "dev": {
-    "client_id": "aps-kong-gw-20771",
-    "oauth_token_url": "https://dev.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token",
-    "kong_admin_url": "http://kong-sdx-control.localtest.me:8002"
+    "client_id": "sdx-provisioner",
+    "oauth_token_url": "http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token",
+    "gwa_api_url": "http://gwa-api.localtest.me:2000/v2",
+    "kong_admin_url": "http://kong-sdx-admin0.localtest.me:9081",
+    "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080"
   }
 }

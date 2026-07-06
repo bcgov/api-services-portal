@@ -19,7 +19,7 @@ import { SubsystemService } from './subsystem';
 import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
-import { KongTagService } from '../kong/tag-service';
+import { ProvisionerService } from '../provisioner';
 
 const logger = Logger('batch.connection');
 
@@ -159,12 +159,25 @@ class ConnectionService {
       serviceSpec
     );
 
-    assert.strictEqual(Boolean(process.env.KONG_URL), true, 'KONG_URL not set');
+    assert.strictEqual(
+      Boolean(process.env.PROVISIONER_URL),
+      true,
+      'PROVISIONER_URL not set'
+    );
 
-    const kongTagService = new KongTagService(process.env.KONG_URL);
+    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
+
     const [clientConfig, serviceConfig] = await Promise.all([
-      kongTagService.listTaggedConfig(clientTag),
-      kongTagService.listTaggedConfig(serviceTag),
+      provisioner.getGatewayResources(
+        clientSubsystem.namespace!,
+        connection.environment!,
+        clientTag
+      ),
+      provisioner.getGatewayResources(
+        serviceSpec.subsystem!.namespace!,
+        connection.environment!,
+        serviceTag
+      ),
     ]);
 
     return {

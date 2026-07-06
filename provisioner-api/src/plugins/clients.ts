@@ -14,10 +14,10 @@ export default fp(async (app) => {
     {
       aps: clients.aps.baseUrl || 'unconfigured',
       sdx: clients.sdx.baseUrl || 'unconfigured',
-      gwa: clients.gwa.baseUrl || 'unconfigured',
+      gwa: process.env.ENVIRONMENTS_CONFIG_FILE || 'unconfigured',
       css: clients.css.baseUrl || 'unconfigured',
       feed: process.env.FEED_URL || 'unconfigured',
-      kongAdmin: process.env.ENVIRONMENTS_CONFIG_FILE || 'unconfigured',
+      sdxOperator: process.env.ENVIRONMENTS_CONFIG_FILE || 'unconfigured',
     },
     'upstream clients registered'
   );

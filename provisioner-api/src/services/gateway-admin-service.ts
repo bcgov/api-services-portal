@@ -1,8 +1,10 @@
 import type { FastifyBaseLogger } from 'fastify';
-import type { OAuthClient } from '../clients/oauth.js';
+import type { GatewayClientResolver } from '../clients/index.js';
+import type { EnvironmentsConfig } from '../config/environments.js';
 import type { TResource } from '../schemas/resources.js';
 import {
   GatewayAdminApiClient,
+  GatewayResource,
   PublishGatewayConfigInput,
 } from '../clients/gateway-admin/index.js';
 import YAML from 'js-yaml';
@@ -22,10 +24,27 @@ export class GatewayAdminService {
   readonly api: GatewayAdminApiClient;
 
   constructor(
-    client: OAuthClient,
+    resolveClient: GatewayClientResolver,
+    environments: EnvironmentsConfig,
     private readonly logger?: FastifyBaseLogger
   ) {
-    this.api = new GatewayAdminApiClient(client, logger);
+    this.api = new GatewayAdminApiClient(resolveClient, environments, logger);
+  }
+
+  /**
+   * Returns the tagged gateway entities (services, routes, plugins, etc.)
+   * belonging to the given gateway (namespace) in the target environment.
+   */
+  async getResources(
+    gatewayId: string,
+    environment: string,
+    tag?: string
+  ): Promise<GatewayResource[]> {
+    this.logger?.debug(
+      { gatewayId, environment },
+      'GatewayAdminService.getResources'
+    );
+    return this.api.getResources(environment, gatewayId, tag);
   }
 
   /**
@@ -100,7 +119,7 @@ export class GatewayAdminService {
           { gatewayId, qualifier },
           'Deleting gateway config for namespace'
         );
-        await this.api.deleteGatewayConfig(gatewayId, qualifier);
+        await this.api.deleteGatewayConfig(environment, gatewayId, qualifier);
         return { message: `config deleted for ${gatewayId}.${qualifier}` };
       } else {
         const input: PublishGatewayConfigInput = {
@@ -108,7 +127,11 @@ export class GatewayAdminService {
           configFile,
         };
 
-        const status = await this.api.publishGatewayConfig(gatewayId, input);
+        const status = await this.api.publishGatewayConfig(
+          environment,
+          gatewayId,
+          input
+        );
         this.logger?.debug({ status }, 'Gateway config publish result');
         return status;
       }

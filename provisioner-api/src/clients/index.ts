@@ -5,18 +5,32 @@ import {
   createUnconfiguredClient,
   type OAuthClient,
 } from './oauth.js';
-import { loadClientSecretConfig, loadSignedJwtConfig } from './config.js';
+import {
+  loadClientSecretConfig,
+  loadGwaEnvJwtConfig,
+  loadSignedJwtConfig,
+} from './config.js';
 import { FeedApiClient } from './feed/index.js';
-import { KongAdminApiClient } from './kong-admin/index.js';
-import { loadEnvironments } from '../config/environments.js';
+import { SdxOperatorApiClient } from './sdx-operator/index.js';
+import {
+  loadEnvironments,
+  type EnvironmentsConfig,
+} from '../config/environments.js';
+
+/**
+ * Resolves the GWA OAuth client for a given environment. The GWA OAuth client
+ * differs per environment (each has its own token endpoint and client id), so
+ * it is resolved on demand rather than being a single shared instance.
+ */
+export type GatewayClientResolver = (environment: string) => OAuthClient;
 
 export interface Clients {
   aps: OAuthClient;
   sdx: OAuthClient;
-  gwa: OAuthClient;
+  gwa: GatewayClientResolver;
   css: OAuthClient;
   feed: FeedApiClient;
-  kongAdmin: KongAdminApiClient;
+  sdxOperator: SdxOperatorApiClient;
 }
 
 function childLogger(
@@ -62,13 +76,45 @@ function buildSecretClient(
   });
 }
 
+/**
+ * Builds a resolver that lazily creates (and caches) one GWA OAuth client per
+ * environment from the environments config. Environments absent from the
+ * config, or missing required fields, yield an unconfigured client whose calls
+ * throw a descriptive error.
+ */
+function buildGwaClientResolver(
+  environments: EnvironmentsConfig,
+  parent: FastifyBaseLogger | undefined
+): GatewayClientResolver {
+  const cache = new Map<string, OAuthClient>();
+  return (environment: string): OAuthClient => {
+    let client = cache.get(environment);
+    if (!client) {
+      const name = `gwa:${environment}`;
+      const result = loadGwaEnvJwtConfig(environment, environments[environment]);
+      client = result.ok
+        ? createSignedJwtClient({
+            ...result.config,
+            logger: childLogger(parent, name),
+          })
+        : createUnconfiguredClient(
+            name,
+            `missing ${result.missing.join(', ')}`
+          );
+      cache.set(environment, client);
+    }
+    return client;
+  };
+}
+
 export function buildClients(logger?: FastifyBaseLogger): Clients {
+  const environments = loadEnvironments();
   return {
     aps: buildJwtClient('aps', 'APS', logger),
     sdx: buildJwtClient('sdx', 'SDX', logger),
-    gwa: buildJwtClient('gwa', 'GWA', logger),
+    gwa: buildGwaClientResolver(environments, logger),
     css: buildSecretClient('css', 'CSS', logger),
     feed: new FeedApiClient(process.env.FEED_URL, logger),
-    kongAdmin: new KongAdminApiClient(loadEnvironments(), logger),
+    sdxOperator: new SdxOperatorApiClient(environments, logger),
   };
 }

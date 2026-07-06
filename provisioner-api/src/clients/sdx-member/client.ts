@@ -333,9 +333,14 @@ export class SdxMemberApiClient {
         { method, path, status: res.status, detail },
         'SDX member API returned an error'
       );
+      let jsonDetail = { text: detail };
+      try {
+        jsonDetail = JSON.parse(detail);
+      } catch {}
+
       throw withDetails(
         new BadGatewayError(`SDX member API responded ${res.status}`),
-        { method, path, status: res.status }
+        { method, path, status: res.status, error: jsonDetail }
       );
     }
 
