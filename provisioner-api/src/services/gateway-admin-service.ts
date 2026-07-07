@@ -45,7 +45,23 @@ export class GatewayAdminService {
     const results = await Promise.all(
       this.environments.map((env) => this.api.getResources(env, gatewayId, tag))
     );
-    return results.flat();
+
+    const list = results.flat();
+
+    // count by entity_name to give a logged count
+    const countByEntityName = list.reduce(
+      (acc, r) => {
+        acc[r.entity_name] = (acc[r.entity_name] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    this.logger?.debug(
+      { gatewayId, tag, count: list.length, countByEntityName },
+      'GatewayAdminService.getResourcesFromAllEnvironments results'
+    );
+    return list;
   }
 
   /**

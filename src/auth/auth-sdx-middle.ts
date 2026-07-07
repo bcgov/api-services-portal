@@ -69,6 +69,20 @@ export class AuthMiddle {
       return await this.lookupServiceGateway(org, body.parameters.serviceId);
     }
 
+    const validPatterns = [
+      'sdx-keys.r1',
+      'sdx-runtime-group.r1',
+      'sdx-service.r1',
+      'sdx-subsystem.r1',
+    ];
+    if (!validPatterns.includes(pattern)) {
+      logger.error(
+        "[lookupGatewayId] unknown pattern='%s', expecting='%s'",
+        pattern,
+        validPatterns.join(', ')
+      );
+    }
+
     return undefined;
   }
 
