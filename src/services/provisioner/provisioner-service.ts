@@ -92,7 +92,7 @@ export class ProvisionerService {
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
     action: 'apply' | 'delete'
-  ): Promise<ConnectionRequestChangeEventResponse> {
+  ): Promise<void> {
     // credentials will be using the gwa admin
 
     const payload = {
@@ -111,21 +111,33 @@ export class ProvisionerService {
       `${this.provisionerUrl}/connections/${connection.id}?action=${action}`
     );
 
-    const res = await fetch(
+    const body = JSON.stringify(payload);
+
+    fetch(
       `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: body,
       }
     )
       .then(checkStatus)
       .then((r) => r.json())
-      .then((r) => r as ConnectionRequestChangeEventResponse);
-
-    return res;
+      .then((r) => r as ConnectionRequestChangeEventResponse)
+      .then((r) => {
+        logger.debug(
+          'Provisioner response: applied=%d, failed=%d : %j',
+          r.applied,
+          r.failed,
+          r
+        );
+      })
+      .catch((err) => {
+        logger.error('Provisioner Sent: %s', body);
+        logger.error('Provisioner Error: %s', err);
+      });
   }
 
   public async getGatewayResources(
