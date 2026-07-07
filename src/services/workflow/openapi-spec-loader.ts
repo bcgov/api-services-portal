@@ -81,7 +81,6 @@ export const LoadOpenAPISpec = async (
   oas.info['x-csbc-api-standard'] = validationResult.version;
   oas.info['x-csbc-api-standard-ruleset'] = validationResult.ruleset;
 
-  const serviceName = BuildServiceName(subsystemRecord, oas);
   const persistedSpec = YAML.stringify(oas);
 
   outSpec.spec = persistedSpec;
