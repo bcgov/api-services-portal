@@ -33,7 +33,10 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
 
   id = () => SDXP2PConsumerAccessPattern.ID;
   requiredParams = () => SDXP2PConsumerAccessPattern.requiredParams;
-  deleteHandling = () => 'apply' as const;
+  deleteHandling = (data?: SDXP2PConsumerPatternData) => {
+    const rs = data?.allowedAccess.resourceServers || [];
+    return rs.length > 0 ? ('apply' as const) : ('delete' as const);
+  };
 
   async inject(
     inputs: SDXP2PConsumerPatternConfig

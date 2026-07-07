@@ -35,7 +35,7 @@ export interface PatternProcessor {
   requiredParams: () => string[];
   eval: (inputs: any, data?: any) => any[];
   inject?: (inputs: any) => Promise<any>;
-  deleteHandling: () => 'delete' | 'apply';
+  deleteHandling: (data?: any) => 'delete' | 'apply';
 }
 
 export interface GatewayPatternConfig {
@@ -183,7 +183,7 @@ export class PatternsEvaluatorService {
       this.logger?.info('Pattern inject data for %s: %j', patternName, data);
       return {
         _gateway_id: data.gatewayId,
-        _delete_handling: pattern.deleteHandling(),
+        _delete_handling: pattern.deleteHandling(data),
         documents: pattern.eval(parameters, data),
       };
     }
