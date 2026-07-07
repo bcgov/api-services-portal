@@ -188,6 +188,7 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
               ),
             ]
           : []),
+        ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
         ...(upgrades.hasOwnProperty('sign')
           ? [upgradeToTrustSign(tags, data, inputs)]
           : []),
@@ -252,6 +253,16 @@ function upgradeToJWTKeycloak(
         jwtKeycloakConfig?.consumerMatchClaimCustomId || false,
       consumer_match_ignore_not_found:
         jwtKeycloakConfig?.consumerMatchIgnoreNotFound || false,
+    },
+  };
+}
+
+function upgradeToACL(tags: string[], data: SDXP2PConsumerPatternData) {
+  return {
+    name: 'acl',
+    tags: tags,
+    config: {
+      allow: [`${data.service.name}`],
     },
   };
 }

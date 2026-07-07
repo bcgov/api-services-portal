@@ -37,14 +37,15 @@ namespace SDX {
                                     signatureAlgorithm?: String
                                 },
                                 token?: {
-                                    allowedAud: String,
-                                    allowedIss: String,
+                                    allowedIss: Set<String>,
+                                    allowedAud?: String,
                                     scope?: String,
                                     consumerMatch?: Bool,
                                     consumerMatchClaim?: String,
                                     consumerMatchClaimCustomId?: Bool,
                                     consumerMatchIgnoreNotFound?: Bool
                                 },
+                                acl?: {},
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
@@ -61,7 +62,6 @@ namespace SDX {
                             upgrades: {
                                 mtlsAuth?: {},
                                 mtlsAcl?: {},
-                                acl?: {},
                                 sign?: {
                                     alg?: String
                                 },
@@ -78,6 +78,7 @@ namespace SDX {
                                     consumerMatchClaimCustomId?: Bool,
                                     consumerMatchIgnoreNotFound?: Bool
                                 },
+                                acl?: {},
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
