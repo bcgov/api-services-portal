@@ -70,8 +70,8 @@ namespace SDX {
                                     signatureAlgorithm?: String
                                 },
                                 token?: {
-                                    allowedAud: String,
-                                    allowedIss: String,
+                                    allowedIss: Set<String>,
+                                    allowedAud?: String,
                                     scope?: String,
                                     consumerMatch?: Bool,
                                     consumerMatchClaim?: String,
