@@ -60,7 +60,7 @@ module.exports = {
     isActive: {
       type: Checkbox,
       isRequired: true,
-      defaultValue: true,
+      defaultValue: false,
       access: FieldEnforcementPoint,
     },
     requesterDetails: {

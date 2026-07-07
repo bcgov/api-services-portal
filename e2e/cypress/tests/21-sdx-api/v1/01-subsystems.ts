@@ -19,6 +19,8 @@ describe('SDX Subsystem', () => {
 
       const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
       workingData['runtimeGroupId'] = rg.toLowerCase()
+
+      workingData['env'] = 'dev'
     })
   })
 
@@ -51,10 +53,10 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - deletes related OAS services when no active connections or gateway config exist', () => {
-      const { org } = workingData
+      const { org, env } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
         cy.setQueryString({ force: false })
         cy.callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
@@ -186,11 +188,11 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - active client connection request exists', () => {
-      const { org, runtimeGroupId } = workingData
+      const { org, runtimeGroupId, env } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, 'lab', (service: any) => {
-        createRuntimeGroup(org, runtimeGroupId, 'cyp')
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
+        createRuntimeGroup(org, runtimeGroupId, env)
 
         createSubsystemGateway(org, runtimeGroupId, service.subsystem.name, () => {
           createConnection(org, service.subsystem.clientId, service.name, () => {
@@ -211,68 +213,30 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - active provider connection request exists', () => {
-      const { org } = workingData
+      const { org, env } = workingData
       const clientSubsystemName = uniqueSubsystemName()
       const providerSubsystemName = uniqueSubsystemName()
 
       createSubsystem(org, clientSubsystemName, () => {
-        createSubsystemAndOASService(
-          org,
-          providerSubsystemName,
-          'lab',
-          (service: any) => {
-            createConnection(
-              org,
-              clientIdForSubsystem(org, clientSubsystemName),
-              service.name,
-              () => {
-                cy.setQueryString({ force: false })
-                cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/subsystems/${providerSubsystemName}`,
-                  'DELETE',
-                  false
-                ).then(({ apiRes: { status, body } }: any) => {
-                  expect(status).to.be.equal(422)
-                  expect(body.message).to.be.equal(
-                    'Subsystem cannot be deleted because it has active connection requests as a service provider'
-                  )
-                })
-              }
-            )
-          }
-        )
-      })
-    })
-
-    it('DELETE /organizations/{org}/subsystems/{name} - gateway configuration exists', () => {
-      const { org } = workingData
-      const subsystemName = uniqueSubsystemName()
-      const runtimeGroupName = `rg${Cypress._.random(100000, 999999)}`
-
-      createSubsystem(org, subsystemName, () => {
-        createRuntimeGroup(org, runtimeGroupName, 'cyp')
-
-        cy.setRequestBody({
-          runtimeGroupName,
-        })
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
-          'PUT'
-        ).then(({ apiRes: { status, body } }: any) => {
-          expect(status, body.message).to.be.equal(200)
-          expect(body).to.have.property('gatewayId')
-
-          cy.setQueryString({ force: false })
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
-            'DELETE',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(422)
-            expect(body.message).to.be.equal(
-              'Subsystem cannot be deleted because gateway configuration exists'
-            )
-          })
+        createSubsystemAndOASService(org, providerSubsystemName, env, (service: any) => {
+          createConnection(
+            org,
+            clientIdForSubsystem(org, clientSubsystemName),
+            service.name,
+            () => {
+              cy.setQueryString({ force: false })
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/subsystems/${providerSubsystemName}`,
+                'DELETE',
+                false
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(422)
+                expect(body.message).to.be.equal(
+                  'Subsystem cannot be deleted because it has active connection requests as a service provider'
+                )
+              })
+            }
+          )
         })
       })
     })

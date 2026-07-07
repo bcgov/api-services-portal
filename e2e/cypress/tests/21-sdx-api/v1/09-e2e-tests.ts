@@ -1,10 +1,12 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import {
+  applyServicePattern,
   createJanisOrgAndAccess,
   createRuntimeGroup,
   createSubsystemAndOASService,
   createSubsystemGateway,
+  uniqueSubsystemName,
   updateRuntimeGroupAddHostedOrg,
   updateSubsystemIntegrationClients,
 } from '../../../support/sdx-commands'
@@ -19,11 +21,13 @@ describe('SDX E2E Tests', () => {
       const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
       workingData['runtimeGroupId'] = rg.toLowerCase()
 
+      workingData['env'] = 'dev'
+
       return createJanisOrgAndAccess().then(() => {
         return createRuntimeGroup(
           { name: 'user-janis' },
           'rg0',
-          'dev',
+          workingData.env,
           'http://kong-sdx-edge0.localtest.me:9080',
           'https://kong-sdx-edge0.localtest.me:9443'
         ).then(() => {
@@ -32,7 +36,7 @@ describe('SDX E2E Tests', () => {
           return updateRuntimeGroupAddHostedOrg(
             { name: 'user-janis' },
             'rg0',
-            'dev',
+            workingData.env,
             workingData.org.name
           )
         })
@@ -42,13 +46,13 @@ describe('SDX E2E Tests', () => {
 
   describe('Basic connection', () => {
     it('PUT /organizations/{org}/connections', () => {
-      const { org, gateway, dataset, datasetId, product } = workingData
+      const { org, gateway, dataset, datasetId, product, env } = workingData
 
       // create a new subsystem and publish a new OAS Service in dev
       createSubsystemAndOASService(
         org,
         `SUBSYS-${datasetId.toUpperCase()}`,
-        'dev',
+        env,
         (service: any) => {
           const clientId = service.subsystem.clientId
           const serviceId = service.name
@@ -69,7 +73,7 @@ describe('SDX E2E Tests', () => {
                   clientId: `${clientId}`,
                   serviceId: `${serviceId}`,
                   policyVersion: 'SDX.R0.00',
-                  environment: 'dev',
+                  environment: env,
                   isApproved: false,
                   isActive: true,
                   requesterDetails: {
@@ -177,6 +181,41 @@ describe('SDX E2E Tests', () => {
           })
         }
       )
+    })
+  })
+
+  describe('Subsystem API', () => {
+    it('DELETE /organizations/{org}/subsystems/{name} - gateway configuration exists', () => {
+      const { org, env, datasetId } = workingData
+      const subsystemName = uniqueSubsystemName()
+
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
+        const serviceId = service.name
+
+        createSubsystemGateway(org, 'rg0', subsystemName, () => {
+          applyServicePattern(org.name, serviceId, env, 'apply').then(
+            ({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              // expect(JSON.stringify(body)).to.be.equal('applied')
+
+              // just have to wait because it takes a bit of time to propogate the changes
+              cy.wait(10000)
+
+              cy.setQueryString({})
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
+                'DELETE',
+                false
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(422)
+                expect(body.message).to.be.equal(
+                  'Subsystem cannot be deleted because gateway configuration exists'
+                )
+              })
+            }
+          )
+        })
+      })
     })
   })
 })

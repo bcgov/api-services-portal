@@ -120,7 +120,7 @@ export function createConnection(
     clientId,
     serviceId,
     policyVersion: 'SDX.R0.00',
-    environment: 'lab',
+    environment: 'dev',
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
@@ -170,6 +170,9 @@ export function createRuntimeGroup(
           ).then(({ apiRes: { status, body } }: any) => {
             expect(status).to.be.equal(200)
             // expect(JSON.stringify(body)).to.be.equal('applied')
+
+            // just have to wait because it takes a bit of time to propogate the changes
+            cy.wait(10000)
           })
         })
     })
@@ -230,7 +233,7 @@ export function new_service(org: any, subsystemName: string, next: any) {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=lab`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=dev`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -410,6 +413,26 @@ export function applyRuntimeGroupPattern(
   cy.setQueryString({ action })
   return cy.callAPI(
     `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-runtime-group.r1`,
+    'PUT'
+  )
+}
+
+export function applyServicePattern(
+  orgName: string,
+  serviceId: string,
+  environment: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      serviceId: serviceId,
+      environment: environment,
+      upstreamUrl: 'http://upstream-mock-api.localtest.me:2025',
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-service.r1`,
     'PUT'
   )
 }
