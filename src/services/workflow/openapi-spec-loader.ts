@@ -1,9 +1,11 @@
 import { OpenAPISpec } from '@/controllers/v3/types';
 import { Logger } from '../../logger';
 import YAML from 'yaml';
+import { ValidateError } from 'tsoa';
 import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
 import { BuildServiceName } from '../gateway-patterns/catalog';
+import { OpenAPISpecValidationService } from './openapi-spec-validation-service';
 
 const logger = Logger('wf.OASLoader');
 
@@ -57,17 +59,32 @@ export const LoadOpenAPISpec = async (
       logger.error(
         `Failed to parse spec as JSON for subsystem ${spec.subsystem} in organization ${spec.organization}. Error: ${jsonError}`
       );
-      throw new Error(
-        `Invalid OpenAPI specification format. Spec must be valid YAML or JSON.`
+      throw new ValidateError(
+        {
+          spec: {
+            message:
+              'Invalid OpenAPI specification format. Spec must be valid YAML or JSON.',
+          },
+        },
+        'Validation Failed'
       );
     }
   }
 
   const serviceName = BuildServiceName(subsystemRecord, spec.environment, oas);
 
-  outSpec.specVersion =
-    'openapi' in oas ? `openapi=${oas.openapi}` : `asyncapi=${oas.asyncapi}`;
-  outSpec.spec = spec.spec;
+  const validationResult =
+    await new OpenAPISpecValidationService().validateRuleset(
+      spec.spec,
+      getCSBCApiStandard(oas)
+    );
+  oas.info['x-csbc-api-standard'] = validationResult.version;
+  oas.info['x-csbc-api-standard-ruleset'] = validationResult.ruleset;
+
+  const serviceName = BuildServiceName(subsystemRecord, oas);
+  const persistedSpec = YAML.stringify(oas);
+
+  outSpec.spec = persistedSpec;
   outSpec.name = serviceName;
   (outSpec as any).namespace = subsystemRecord.namespace;
   outSpec.organization = spec.organization;
@@ -75,6 +92,8 @@ export const LoadOpenAPISpec = async (
   outSpec.environment = spec.environment;
   outSpec.title = oas.info?.title;
   outSpec.summary = oas.info?.summary;
+  outSpec.specVersion =
+    'openapi' in oas ? `openapi=${oas.openapi}` : `asyncapi=${oas.asyncapi}`;
   outSpec.version = oas.info?.version;
   outSpec.description = oas.info?.description;
   outSpec.ref = outSpec.name;
@@ -82,6 +101,24 @@ export const LoadOpenAPISpec = async (
 
   return outSpec;
 };
+
+function getCSBCApiStandard(oas: any): string | undefined {
+  const apiStandard = oas.info?.['x-csbc-api-standard'];
+  if (apiStandard === undefined) {
+    return undefined;
+  }
+  if (typeof apiStandard !== 'string' || apiStandard.trim().length === 0) {
+    throw new ValidateError(
+      {
+        'info.x-csbc-api-standard': {
+          message: 'info.x-csbc-api-standard must be a non-empty string',
+        },
+      },
+      'Validation Failed'
+    );
+  }
+  return apiStandard;
+}
 
 function parseSpecOperations(spec: any) {
   const operations =

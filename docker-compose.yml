@@ -395,6 +395,16 @@ services:
       - tls-certs:/etc/secrets:ro
     restart: on-failure:5
 
+  oas-validation-api:
+    image: ${OAS_VALIDATION_API_IMAGE:-ghcr.io/bcgov/gwa-api/gwa-csit-oas-validation-api:dev}
+    container_name: oas-validation-api
+    ports:
+      - 8080:8080
+    restart: on-failure:5
+    networks:
+      aps-net:
+        aliases:
+          - oas-validation-api.localtest.me
   cypress-jwks-url:
     build:
       context: ./local/cypress-jwks-url
