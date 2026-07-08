@@ -7,6 +7,7 @@ import type {
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { Activity } from '../clients/feed/types.js';
 import { v4 as uuidv4 } from 'uuid';
+import { BadRequestError, InternalError } from '../errors/api-errors.js';
 
 export class ConnectionsController {
   constructor(
@@ -90,12 +91,9 @@ export class ConnectionsController {
           undefined,
           err
         );
-        return {
-          applied: 0,
-          failed: 1,
-          skipped: 0,
-          results: [],
-        };
+        throw new InternalError(
+          'An unexpected error occurred while processing the connection request change. Please check the logs for more details.'
+        );
       } else {
         throw err;
       }

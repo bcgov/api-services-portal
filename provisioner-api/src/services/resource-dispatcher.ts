@@ -5,7 +5,7 @@ import type {
   TResource,
   TResourceResult,
 } from '../schemas/resources.js';
-import type { ApiError } from '../errors/api-errors.js';
+import { BadRequestError, type ApiError } from '../errors/api-errors.js';
 
 export type Action = 'apply' | 'diff' | 'delete';
 
@@ -100,6 +100,16 @@ export class ResourceDispatcher {
       status: 'skipped',
     }));
 
+    if (results.some((r: any) => r.provider === 'unknown')) {
+      this.logger?.error(
+        { results },
+        'some resources have unknown providers - cancelling request'
+      );
+      throw new BadRequestError(
+        'Some resources have unknown providers. Please check the logs for more details.'
+      );
+    }
+
     // Bucket the resolvable resources by provider, recording the result index
     // so the per-resource outcome can be filled in after the batch runs.
     const batches = new Map<string, number[]>();
@@ -125,7 +135,6 @@ export class ResourceDispatcher {
       const current: TResourceResult = {
         provider: provider.name,
         status: 'skipped',
-        // message: `Applying ${indices.length} resources`,
       };
       this.logger?.info(current, 'applying resource batch');
 

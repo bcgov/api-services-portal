@@ -112,7 +112,7 @@ jobs:
           securityContext:
             runAsUser: ${{ secrets.RUNNING_UID_GID }}
 
-          containerPort: 6000
+          containerPort: 3000
 
           serviceAccount:
             create: false
@@ -138,4 +138,4 @@ jobs:
       - name: 'Restart Provisioner API in Gold Test Namespace'
         if: github.ref == 'refs/heads/test'
         run: |
-          oc rollout restart deployment/bcgov-aps-portal-provisioner-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+          oc rollout restart deployment/bcgov-provisioner-api-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
