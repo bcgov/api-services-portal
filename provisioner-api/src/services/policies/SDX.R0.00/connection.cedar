@@ -46,5 +46,5 @@ forbid ( // Deny if environment is anything except dev
 )
 unless {
     context has environment &&
-    (context.environment == "dev" || context.environment == "lab")
+    (context.environment == "apsdev" || context.environment == "apstest" || context.environment == "dev")
 };
