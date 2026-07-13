@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Docker meta
         id: docker_meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-api
 
@@ -63,19 +63,17 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: provisioner-api
           file: provisioner-api/Dockerfile
-          tags: ${{ steps.docker_meta.outputs.tags }}
           push: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: 'Get Helm'
         if: github.ref != 'refs/heads/dev'
