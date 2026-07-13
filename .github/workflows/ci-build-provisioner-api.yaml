@@ -21,7 +21,7 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-api
+          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner
 
       - name: Set DEPLOY_ID
         run: |
@@ -97,7 +97,7 @@ jobs:
             maxSurge: 50%
 
           image:
-            repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-api
+            repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner
             tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
             pullPolicy: Always
 
