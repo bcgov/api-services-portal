@@ -593,7 +593,7 @@ export class OrgGroupService {
     const desiredLookups = await Promise.all(
       memberEmails.map(async (u) => {
         const email = u.email;
-        if (u.id) {
+        if (u.id && u.id !== null) {
           const user = await this.userKeycloakService.lookupUserById(u.id);
           return { email: user.email, id: u.id };
         } else if (!email) {
