@@ -3,14 +3,6 @@
     "text": "IDIR",
     "description": "Only available to B.C. government workers."
   },
-  "idir2": {
-    "text": "IDIR2",
-    "description": "Only available to B.C. government workers."
-  },
-  "azureidir2": {
-    "text": "Azure IDIR2",
-    "description": "Only available to B.C. government workers."
-  },
   "bcsc": {
     "text": "BC Services Card",
     "description": "",
