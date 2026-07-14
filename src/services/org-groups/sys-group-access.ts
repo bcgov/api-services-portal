@@ -6,7 +6,7 @@ import { GroupMembership } from './types';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { strict as assert } from 'assert';
 
-export const SystemRoles = ['tech-lead', 'access-manager'];
+export const SystemRoles = ['system-owner', 'tech-lead', 'access-manager'];
 
 export class SysGroupAccessService {
   private orgGroupService;
@@ -27,6 +27,7 @@ export class SysGroupAccessService {
   }
 
   async createOrUpdateGroupAccess(
+    type: 'subsystem' | 'runtime',
     groupMembership: GroupMembership,
     validIdentityProviders: string[] = [],
     syncMembers: boolean = true
@@ -40,8 +41,8 @@ export class SysGroupAccessService {
     const access = buildGroupAccess(
       groupMembership.name,
       groupMembership.parent,
-      'system',
-      `sys/${groupMembership.name}`
+      type,
+      `${type === 'subsystem' ? 'sys' : 'rg'}/${groupMembership.name}`
     );
 
     // CreateIfMissing the Resource for the "org unit" (if this GroupAccess is for an Org Unit)

@@ -12,36 +12,26 @@ export const PredefinedRolePermissions = {
       },
     ],
   },
-  'system-owner': {
-    label: 'System Owner',
+  'system-admin': {
+    label: 'System Administrator',
     permissions: [
       {
         resourceType: 'organization',
         scopes: ['System.Manage'],
       },
-      {
-        resourceType: 'namespace',
-        scopes: ['Namespace.Manage'],
-      },
     ],
+  },
+  'system-owner': {
+    label: 'System Owner',
+    permissions: [],
   },
   'tech-lead': {
     label: 'System Technical Lead',
-    permissions: [
-      {
-        resourceType: 'namespace',
-        scopes: ['GatewayPattern.Publish', 'Namespace.View'],
-      },
-    ],
+    permissions: [],
   },
   'access-manager': {
     label: 'Access Manager',
-    permissions: [
-      {
-        resourceType: 'namespace',
-        scopes: ['Connection.Manage'],
-      },
-    ],
+    permissions: [],
   },
 } as {
   [key: string]: {

@@ -280,7 +280,7 @@ export function createJanisOrgAndAccess() {
             member: {
               email: 'janis@testmail.com',
             },
-            roles: ['organization-admin', 'system-owner'],
+            roles: ['organization-admin', 'system-admin'],
           },
         ],
       }

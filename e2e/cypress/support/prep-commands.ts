@@ -47,7 +47,7 @@ Cypress.Commands.add('buildOrgGatewayDatasetAndProduct', (): Cypress.Chainable<a
               member: {
                 email: 'janis@testmail.com',
               },
-              roles: ['organization-admin', 'system-owner'],
+              roles: ['organization-admin', 'system-admin'],
             },
           ],
         }

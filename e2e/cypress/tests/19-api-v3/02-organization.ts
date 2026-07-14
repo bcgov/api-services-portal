@@ -42,7 +42,7 @@ describe('Organization', () => {
           ],
         },
         {
-          name: 'system-owner',
+          name: 'system-admin',
           permissions: [
             { resource: 'org/ministry-of-health', scopes: ['System.Manage'] },
           ],
@@ -190,16 +190,12 @@ describe('Organization', () => {
           { resourceType: 'namespace', scopes: ['Namespace.View'] },
         ],
       },
-      'system-owner': {
-        label: 'System Owner',
+      'system-admin': {
+        label: 'System Administrator',
         permissions: [
           {
             resourceType: 'organization',
             scopes: ['System.Manage'],
-          },
-          {
-            resourceType: 'namespace',
-            scopes: ['Namespace.Manage'],
           },
         ],
       },

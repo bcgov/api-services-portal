@@ -10,6 +10,8 @@ import { SystemRoles } from './sys-group-access';
 
 const logger = Logger('group-access');
 
+export const OrganizationRoles = ['organization-admin', 'system-admin'];
+
 export class GroupAccessService {
   private orgGroupService;
   private orgAuthzService;
@@ -53,7 +55,9 @@ export class GroupAccessService {
       access.name
     );
 
-    for (const groupRole of access.roles) {
+    for (const groupRole of access.roles.filter((r) =>
+      OrganizationRoles.includes(r.name)
+    )) {
       const parent = access.parent ? access.parent : '';
       const orgGroup: OrganizationGroup = {
         name: access.name,
@@ -153,7 +157,9 @@ export class GroupAccessService {
     );
 
     // for each role, update the group permissions
-    for (const groupRole of access.roles) {
+    for (const groupRole of access.roles.filter((r) =>
+      OrganizationRoles.includes(r.name)
+    )) {
       const parent = access.parent ? access.parent : '';
       const orgGroup: OrganizationGroup = {
         name: access.name,

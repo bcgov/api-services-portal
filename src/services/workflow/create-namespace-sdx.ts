@@ -208,44 +208,12 @@ export async function CreateNamespaceForSubsystem(
   // the 'tech-lead' and 'access-manager' roles by default
   const subsystemId = args.subsystem.clientId;
 
-  const sga = new SysGroupAccessService(envCtx.uma2);
-  await sga.login(
-    envCtx.issuerEnvConfig.clientId,
-    envCtx.issuerEnvConfig.clientSecret
-  );
-  const r = await sga.createOrUpdateGroupAccess(
-    {
-      name: subsystemId,
-      parent: '/systems',
-      members: [
-        {
-          member: { id: envCtx.subjectUuid },
-          roles: ['tech-lead', 'access-manager'],
-        },
-      ],
-    },
-    ['idir']
-  );
-  logger.debug(
-    "Created System Group Access for subsystem '%s': %o",
+  await prepareRoleAssignments(
+    envCtx,
+    'subsystem',
+    subsystemId,
     resourceSet.name,
-    r
-  );
-
-  // Assign the corresponding namespace permissions for the roles
-  const ga = new GroupAccessService(envCtx.uma2);
-  await ga.login(
-    envCtx.issuerEnvConfig.clientId,
-    envCtx.issuerEnvConfig.clientSecret
-  );
-  const namespaceRolesResult = await ga.assignSystemRolesToNamespace(
-    args.subsystem?.gateway?.id as string,
-    subsystemId
-  );
-  logger.debug(
-    "Assigned System Roles to Namespace '%s': %o",
-    resourceSet.name,
-    namespaceRolesResult
+    ['tech-lead', 'access-manager', 'system-owner']
   );
 
   return resourceSet;
@@ -264,6 +232,55 @@ async function getEnvCtx(context: any): Promise<EnvironmentContext> {
   return envCtx;
 }
 
+async function prepareRoleAssignments(
+  envCtx: EnvironmentContext,
+  type: 'subsystem' | 'runtime',
+  systemId: string,
+  gatewayId: string,
+  roles: string[]
+) {
+  const sga = new SysGroupAccessService(envCtx.uma2);
+  await sga.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const r = await sga.createOrUpdateGroupAccess(
+    type,
+    {
+      name: systemId,
+      parent: '/systems',
+      members: [
+        {
+          member: { id: envCtx.subjectUuid },
+          roles,
+        },
+      ],
+    },
+    ['idir']
+  );
+  logger.debug(
+    "Created System Group Access for subsystem '%s': %o",
+    systemId,
+    r
+  );
+
+  // Assign the corresponding namespace permissions for the roles
+  const ga = new GroupAccessService(envCtx.uma2);
+  await ga.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const namespaceRolesResult = await ga.assignSystemRolesToNamespace(
+    gatewayId,
+    systemId
+  );
+  logger.debug(
+    "Assigned System Roles to Namespace '%s': %o",
+    gatewayId,
+    namespaceRolesResult
+  );
+}
+
 async function createSDXNamespace(
   context: any,
   envCtx: EnvironmentContext,
@@ -273,7 +290,11 @@ async function createSDXNamespace(
   // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
   // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
   // as a default
-  args.assignedScopes = ['Namespace.Manage'];
+  args.assignedScopes = [
+    'Namespace.Manage',
+    'Connection.Manage',
+    'GatewayPattern.Publish',
+  ];
   args.includeSDXScopes = true;
 
   const resourceSet = await CreateNamespace(context, args);

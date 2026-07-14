@@ -278,13 +278,13 @@ describe('SDX Catalog Activity', () => {
           member: {
             email: 'benny@test.com',
           },
-          roles: ['organization-admin', 'system-owner'],
+          roles: ['organization-admin', 'system-admin'],
         },
         {
           member: {
             email: 'janis@testmail.com',
           },
-          roles: ['organization-admin', 'system-owner'],
+          roles: ['organization-admin', 'system-admin'],
         },
       ],
     }
