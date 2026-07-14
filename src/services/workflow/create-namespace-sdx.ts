@@ -10,9 +10,11 @@ import { Subsystem, UmaPolicyInput } from '../keystone/types';
 import { Policy, ResourceSet } from '../uma2';
 import { CreateNamespace, CreateNamespaceArgs } from './create-namespace';
 import assert from '../user-assert';
-import { getEnvironmentContext } from './get-namespaces';
+import { EnvironmentContext, getEnvironmentContext } from './get-namespaces';
 import { lookupProductEnvironmentServicesBySlug } from '../keystone';
 import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
+import { SysGroupAccessService } from '../org-groups/sys-group-access';
+import { GroupAccessService } from '../org-groups';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
@@ -53,8 +55,10 @@ export async function CreateNamespaceForOrganization(
     organization
   );
 
+  const envCtx = await getEnvCtx(context);
+
   // Create the namespace with SDX edge configuration
-  const resourceSet = await createSDXNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, envCtx, {
     name: gatewayId,
     org: organization,
     orgUnit: undefined,
@@ -106,8 +110,10 @@ export async function CreateNamespaceForRuntimeGroup(
     args.runtimeGroupName
   );
 
+  const envCtx = await getEnvCtx(context);
+
   // Create the namespace with SDX edge configuration
-  const resourceSet = await createSDXNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, envCtx, {
     name: runtimeGroups[0].namespace,
     org: args.organization,
     orgUnit: undefined,
@@ -168,11 +174,13 @@ export async function CreateNamespaceForSubsystem(
     args.runtimeGroupName
   );
 
+  const envCtx = await getEnvCtx(context);
+
   // Create the namespace using subsystem organization and gateway details
   // pzgw.api.gov.bc.ca : required for allowing API calls from PZGW to the subsystem in the SDX edge environment
   // In the p2p-consumer pattern, the consumer routes can be setup on the consumer's runtime group, or
   // due to the token exchange, a central gateway for handling consumer requests.
-  const resourceSet = await createSDXNamespace(context, {
+  const resourceSet = await createSDXNamespace(context, envCtx, {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
     orgUnit: args.subsystem.organization?.orgUnit,
@@ -193,28 +201,57 @@ export async function CreateNamespaceForSubsystem(
   logger.debug(
     '[CreateNamespaceForSubsystem] Created Namespace %s for Subsystem %s',
     resourceSet.name,
-    args.subsystem.name
+    args.subsystem.clientId
+  );
+
+  // Setup the roles for the subsystem and assign this user
+  // the 'tech-lead' and 'access-manager' roles by default
+  const subsystemId = args.subsystem.clientId;
+
+  const sga = new SysGroupAccessService(envCtx.uma2);
+  await sga.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const r = await sga.createOrUpdateGroupAccess(
+    {
+      name: subsystemId,
+      parent: '/systems',
+      members: [
+        {
+          member: { id: envCtx.subjectUuid },
+          roles: ['tech-lead', 'access-manager'],
+        },
+      ],
+    },
+    ['idir']
+  );
+  logger.debug(
+    "Created System Group Access for subsystem '%s': %o",
+    resourceSet.name,
+    r
+  );
+
+  // Assign the corresponding namespace permissions for the roles
+  const ga = new GroupAccessService(envCtx.uma2);
+  await ga.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const namespaceRolesResult = await ga.assignSystemRolesToNamespace(
+    args.subsystem?.gateway?.id as string,
+    subsystemId
+  );
+  logger.debug(
+    "Assigned System Roles to Namespace '%s': %o",
+    resourceSet.name,
+    namespaceRolesResult
   );
 
   return resourceSet;
 }
 
-async function createSDXNamespace(
-  context: any,
-  args: CreateNamespaceArgs
-): Promise<ResourceSet> {
-  // A user should only be getting Namespace.View, but due to how the getResources
-  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
-  // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
-  // as a default
-  args.assignedScopes = [
-    'Namespace.Manage',
-    'Connection.Manage',
-    'GatewayPattern.Publish',
-  ];
-
-  const resourceSet = await CreateNamespace(context, args);
-
+async function getEnvCtx(context: any): Promise<EnvironmentContext> {
   const noauthContext = context.createContext({
     skipAccessControl: true,
   });
@@ -223,6 +260,23 @@ async function createSDXNamespace(
     process.env.GWA_PROD_ENV_SLUG
   );
   const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, true);
+
+  return envCtx;
+}
+
+async function createSDXNamespace(
+  context: any,
+  envCtx: EnvironmentContext,
+  args: CreateNamespaceArgs
+): Promise<ResourceSet> {
+  // A user should only be getting Namespace.View, but due to how the getResources
+  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
+  // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
+  // as a default
+  args.assignedScopes = ['Namespace.Manage'];
+  args.includeSDXScopes = true;
+
+  const resourceSet = await CreateNamespace(context, args);
 
   const name = 'sdx-provisioner';
 

@@ -6,6 +6,7 @@ import { OrganizationGroup, OrgAuthzService, OrgGroupService } from './index';
 import { NamespaceService } from './namespace';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { GroupAccess, GroupMember, GroupMembership, GroupRole } from './types';
+import { SystemRoles } from './sys-group-access';
 
 const logger = Logger('group-access');
 
@@ -47,7 +48,10 @@ export class GroupAccessService {
 
     // CreateIfMissing the Resource for the "org unit" (if this GroupAccess is for an Org Unit)
     // CreateIfMissing the Authorization Scopes for: GroupAccess.Manage, Namespace.Assign, Dataset.Manage
-    await this.orgAuthzService.createIfMissingResource(access.name);
+    await this.orgAuthzService.createIfMissingResource(
+      'organization',
+      access.name
+    );
 
     for (const groupRole of access.roles) {
       const parent = access.parent ? access.parent : '';
@@ -167,6 +171,33 @@ export class GroupAccessService {
     return true;
   }
 
+  async assignSystemRolesToNamespace(
+    namespace: string,
+    sys: string
+  ): Promise<boolean> {
+    const access = buildGroupAccess(sys, `/systems`, 'namespace', namespace);
+
+    // for each role, update the group permissions
+    for (const groupRole of access.roles.filter((r) =>
+      SystemRoles.includes(r.name)
+    )) {
+      const parent = access.parent ? access.parent : '';
+      const orgGroup: OrganizationGroup = {
+        name: access.name,
+        parent: `/${groupRole.name}${parent}`,
+      };
+
+      for (const perm of groupRole.permissions) {
+        await this.orgGroupService.createOrUpdateGroupPermission(
+          orgGroup,
+          perm.resource,
+          perm.scopes
+        );
+      }
+    }
+    return true;
+  }
+
   async buildGroupHierarchyIfMissing(org: string, orgUnit: string) {
     const check = await this.orgAuthzService.resourceExists(orgUnit);
 
@@ -264,10 +295,11 @@ export class GroupAccessService {
         permissions: [],
       };
 
-      role.permissions = await this.orgGroupService.getPermissionsForGroupPolicy(
-        orgGroup,
-        role.name
-      );
+      role.permissions =
+        await this.orgGroupService.getPermissionsForGroupPolicy(
+          orgGroup,
+          role.name
+        );
 
       groupAccess.roles.push(role);
     }

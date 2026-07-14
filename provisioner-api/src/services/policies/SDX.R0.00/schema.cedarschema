@@ -27,7 +27,9 @@ namespace SDX {
                         "sdx-p2p-consumer-access.r1": {
                         },
                         "sdx-p2p-consumer.r1": {
+                            clientRuntimeOverride?: String,
                             stripPath?: Bool,
+                            tlsVerify?: String,
                             upgrades?: {
                                 sign?: {
                                     alg?: String

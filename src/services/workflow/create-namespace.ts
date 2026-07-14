@@ -38,6 +38,7 @@ export interface CreateNamespaceArgs {
   runtimeGroupName?: string;
   routePaths?: string[];
   assignedScopes?: string[];
+  includeSDXScopes?: boolean;
 }
 
 export async function CreateNamespace(
@@ -84,9 +85,11 @@ export async function CreateNamespace(
     'Access.Manage',
     'Content.Publish',
     'CredentialIssuer.Admin',
-    'Connection.Manage', // SDX specific permission
-    'GatewayPattern.Publish', // SDX specific permission
   ];
+  if (args.includeSDXScopes) {
+    scopes.push('Connection.Manage');
+    scopes.push('GatewayPattern.Publish');
+  }
   const res = <ResourceSetInput>{
     name: newNS,
     displayName,

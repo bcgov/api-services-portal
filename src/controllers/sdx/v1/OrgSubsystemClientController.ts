@@ -11,6 +11,7 @@ import {
 import { inject, injectable } from 'tsyringe';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import {
+  EnrichWithAccess,
   EnrichWithRuntimeGroup,
   GetSubsystemEntryForSubsystem,
   SubsystemEntry,
@@ -66,6 +67,8 @@ export class OrgSubsystemClientController extends Controller {
     for (const subsystem of subsystems) {
       const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
+      await EnrichWithAccess(ctx, subsystemEntry);
+
       // Not amazing, but the gateway_id is predefined, so have to check if the
       // gateway has been created or not; only include the subsystem if it has
       await EnrichWithRuntimeGroup(ctx, subsystemEntry, true);
@@ -95,18 +98,16 @@ export class OrgSubsystemClientController extends Controller {
     @Path() name: string,
     @Request() request: any
   ): Promise<SubsystemEntry> {
-    const context = this.keystone.createContext(request, true);
+    const ctx = this.keystone.createContext(request);
 
     const subsysService = new SubsystemService();
-    const subsystem = await subsysService.findSubsystemByName(
-      context,
-      org,
-      name
-    );
+    const subsystem = await subsysService.findSubsystemByName(ctx, org, name);
 
     const subsystemEntry = GetSubsystemEntryForSubsystem(subsystem);
 
-    await EnrichWithRuntimeGroup(context, subsystemEntry);
+    await EnrichWithAccess(ctx, subsystemEntry);
+
+    await EnrichWithRuntimeGroup(ctx, subsystemEntry);
 
     return subsystemEntry;
   }

@@ -6,10 +6,15 @@ import { RuntimeGroupService } from '../batch/runtime-group';
 import { BatchWhereClause } from '../keystone/batch-service';
 import { parseOrganizationMemberDetails } from '../keystone/organization';
 import { OpenApiSpec, Subsystem } from '../keystone/types';
-import { OrgNamespace } from '../org-groups/types';
+import { GroupMember, OrgNamespace } from '../org-groups/types';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { assertAndRaiseValidateError } from './evaluator';
 import { ResourceScope } from '../workflow/openapi-spec-loader';
+import {
+  getNamespacePermissions,
+  NamespaceUserPermissions,
+} from '../workflow/get-namespace-permissions';
+import { getSubsystemRoles } from '../workflow/get-subsystem-roles';
 
 const logger = Logger('gateway-patterns.catalog');
 
@@ -38,6 +43,7 @@ export interface SubsystemEntry {
       domains: string[];
     };
   };
+  access?: GroupMember[];
   integrationClientIds: string[];
   runtimeGroups?: {
     name: string;
@@ -273,6 +279,21 @@ function parseScopeName(
       parts.length > 3 ? parts.slice(2, parts.length - 1) : undefined,
     action: parts[parts.length - 1],
   };
+}
+
+export async function EnrichWithAccess(
+  ctx: any,
+  subsystemEntry: SubsystemEntry
+): Promise<void> {
+  if (!subsystemEntry.gateway?.id) {
+    logger.warn(
+      'Subsystem entry does not have a gateway id, skipping access enrichment'
+    );
+    return;
+  }
+
+  const roles = await getSubsystemRoles(ctx, subsystemEntry.clientId);
+  subsystemEntry.access = roles;
 }
 
 export async function EnrichWithRuntimeGroup(

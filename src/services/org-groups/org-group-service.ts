@@ -24,6 +24,8 @@ const logger = Logger('org-groups');
 enum RoleGroups {
   'organization-admin',
   'system-owner',
+  'tech-lead',
+  'access-manager',
 }
 
 /**
@@ -255,20 +257,20 @@ export class OrgGroupService {
     }
   }
 
-  public async createOrUpdateOrgPermission(
-    orgGroup: OrganizationGroup,
-    scopeNames: string[]
-  ): Promise<void> {
-    const policyName = this.getGroupPolicyName(orgGroup);
-    const resourceName = `org/${orgGroup.name}`;
-    const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
-    await this.createOrUpdatePermission(
-      policyName,
-      permissionName,
-      resourceName,
-      scopeNames
-    );
-  }
+  // public async createOrUpdateOrgPermission(
+  //   orgGroup: OrganizationGroup,
+  //   scopeNames: string[]
+  // ): Promise<void> {
+  //   const policyName = this.getGroupPolicyName(orgGroup);
+  //   const resourceName = `org/${orgGroup.name}`;
+  //   const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
+  //   await this.createOrUpdatePermission(
+  //     policyName,
+  //     permissionName,
+  //     resourceName,
+  //     scopeNames
+  //   );
+  // }
 
   public async createOrUpdateGroupPermission(
     orgGroup: OrganizationGroup,
@@ -563,6 +565,9 @@ export class OrgGroupService {
       id: user.id,
       username: user.username,
       email: user.email,
+      name:
+        user.attributes?.display_name?.[0] ||
+        user.firstName + ' ' + user.lastName,
     }));
   }
 
@@ -587,7 +592,10 @@ export class OrgGroupService {
     const desiredLookups = await Promise.all(
       memberEmails.map(async (u) => {
         const email = u.email;
-        if (!email) {
+        if (u.id) {
+          const user = await this.userKeycloakService.lookupUserById(u.id);
+          return { email: user.email, id: u.id };
+        } else if (!email) {
           return { email, id: undefined };
         }
         const id = await this.userKeycloakService.lookupUserIdByEmail(
@@ -599,12 +607,14 @@ export class OrgGroupService {
       })
     );
 
-    const desiredMembers = desiredLookups
-      .map((o) => o.id)
-      .filter((s) => s);
+    const desiredMembers = desiredLookups.map((o) => o.id).filter((s) => s);
 
-    const deletions = currentMemberIds.filter((u) => !desiredMembers.includes(u));
-    const additions = desiredMembers.filter((u) => !currentMemberIds.includes(u));
+    const deletions = currentMemberIds.filter(
+      (u) => !desiredMembers.includes(u)
+    );
+    const additions = desiredMembers.filter(
+      (u) => !currentMemberIds.includes(u)
+    );
 
     const additionRefs: UserReference[] = desiredLookups
       .filter((o) => o.email && o.id && additions.includes(o.id))

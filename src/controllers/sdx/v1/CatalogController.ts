@@ -26,6 +26,7 @@ import { transformActivity } from '../../../services/workflow';
 import { ActivityDetail } from '../../v3/types-extra';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import {
+  EnrichWithAccess,
   GetCatalog,
   GetCatalogByName,
   GetScopes,
@@ -148,7 +149,8 @@ export class CatalogController extends Controller {
   @Get('/subsystems/{name}')
   @OperationId('get-subsystem')
   public async getSubsystem(
-    @Path('name') name: string
+    @Path('name') name: string,
+    @Query('includeAccess') includeAccess: boolean = false
   ): Promise<SubsystemEntry> {
     const subsystemService = new SubsystemService();
     const ctx = this.keystone.sudo();
@@ -161,7 +163,12 @@ export class CatalogController extends Controller {
       client.member.memberClass,
       'Member class does not matchh'
     );
-    return removeKeys(removeEmpty(result), ['gateway']) as SubsystemEntry;
+
+    if (includeAccess) {
+      await EnrichWithAccess(ctx, result);
+    }
+
+    return removeKeys(removeEmpty(result), []) as SubsystemEntry;
   }
 
   /**

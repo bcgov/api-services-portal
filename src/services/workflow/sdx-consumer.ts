@@ -8,8 +8,6 @@
  */
 import { SubsystemService } from '../batch/subsystem';
 import {
-  EnrichWithRuntimeGroup,
-  GetCatalog,
   GetCatalogByName,
   GetSubsystemEntryForSubsystem,
 } from '../gateway-patterns/catalog';

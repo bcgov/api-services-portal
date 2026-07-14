@@ -25,6 +25,24 @@ export const PredefinedRolePermissions = {
       },
     ],
   },
+  'tech-lead': {
+    label: 'System Technical Lead',
+    permissions: [
+      {
+        resourceType: 'namespace',
+        scopes: ['GatewayPattern.Publish', 'Namespace.View'],
+      },
+    ],
+  },
+  'access-manager': {
+    label: 'Access Manager',
+    permissions: [
+      {
+        resourceType: 'namespace',
+        scopes: ['Connection.Manage'],
+      },
+    ],
+  },
 } as {
   [key: string]: {
     label: string;

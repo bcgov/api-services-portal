@@ -2,12 +2,8 @@ const {
   deleteRecordByInternalId,
   getRecords,
 } = require('../../../batch/feed-worker');
-const {
-  SubsystemService,
-} = require('../../../services/batch/subsystem');
-const {
-  OpenAPISpecService,
-} = require('../../../services/batch/oas-service');
+const { SubsystemService } = require('../../../services/batch/subsystem');
+const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
   getNamespaceDetails,
 } = require('../../../services/workflow/get-namespaces');
@@ -81,7 +77,9 @@ describe('SubsystemService', () => {
         .mockResolvedValueOnce(activeClientConnections);
 
       OpenAPISpecService.mockImplementation(() => ({
-        listOpenAPISpecsBySubsystemId: jest.fn().mockResolvedValue(serviceSpecs),
+        listOpenAPISpecsBySubsystemId: jest
+          .fn()
+          .mockResolvedValue(serviceSpecs),
         listActiveConnectionsByServiceId: jest
           .fn()
           .mockResolvedValue(activeProviderConnections),
@@ -159,7 +157,11 @@ describe('SubsystemService', () => {
           id: 'subsystem-123',
         });
 
-      await service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM');
+      await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
 
       expect(deleteRecordByInternalId).toHaveBeenCalledWith(
         context,
