@@ -593,18 +593,19 @@ export class OrgGroupService {
     const desiredLookups = await Promise.all(
       memberEmails.map(async (u) => {
         const email = u.email;
-        if (u.id && u.id !== null) {
+        if (email) {
+          const id = await this.userKeycloakService.lookupUserIdByEmail(
+            email,
+            false,
+            validIdentityProviders
+          );
+          return { email, id };
+        } else if (u.id) {
           const user = await this.userKeycloakService.lookupUserById(u.id);
           return { email: user.email, id: u.id };
-        } else if (!email) {
+        } else {
           return { email, id: undefined };
         }
-        const id = await this.userKeycloakService.lookupUserIdByEmail(
-          email,
-          false,
-          validIdentityProviders
-        );
-        return { email, id };
       })
     );
 
