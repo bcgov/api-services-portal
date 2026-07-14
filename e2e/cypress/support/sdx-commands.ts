@@ -121,6 +121,7 @@ export function createConnection(
     serviceId,
     policyVersion: 'SDX.R0.00',
     environment: 'dev',
+    isActive: true,
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {

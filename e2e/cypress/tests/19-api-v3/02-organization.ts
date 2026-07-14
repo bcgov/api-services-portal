@@ -109,6 +109,7 @@ describe('Organization', () => {
               member: {
                 username: 'mark@idir',
                 email: 'mark@gmail.com',
+                name: 'mark@idir',
               },
               roles: ['organization-admin'],
             },
@@ -198,6 +199,18 @@ describe('Organization', () => {
             scopes: ['System.Manage'],
           },
         ],
+      },
+      'system-owner': {
+        label: 'System Owner',
+        permissions: [],
+      },
+      'tech-lead': {
+        label: 'System Technical Lead',
+        permissions: [],
+      },
+      'access-manager': {
+        label: 'Access Manager',
+        permissions: [],
       },
     }
 
