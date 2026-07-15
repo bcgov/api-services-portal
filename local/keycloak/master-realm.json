@@ -746,8 +746,8 @@
     },
     {
       "id": "6f0b857d-3951-444d-823e-193bf9f12f67",
-      "name": "system-owner",
-      "path": "/system-owner",
+      "name": "system-admin",
+      "path": "/system-admin",
       "attributes": {},
       "realmRoles": [],
       "clientRoles": {},
@@ -755,7 +755,7 @@
         {
           "id": "1f434902-eda6-4d6a-a366-2dbfdbf3866c",
           "name": "ca.bc.gov",
-          "path": "/system-owner/ca.bc.gov",
+          "path": "/system-admin/ca.bc.gov",
           "attributes": {},
           "realmRoles": [],
           "clientRoles": {},
@@ -763,7 +763,7 @@
             {
               "id": "7f1b0078-fb8c-4ce9-aa50-06a690360508",
               "name": "ministry-of-health",
-              "path": "/system-owner/ca.bc.gov/ministry-of-health",
+              "path": "/system-admin/ca.bc.gov/ministry-of-health",
               "attributes": {},
               "realmRoles": [],
               "clientRoles": {},
@@ -1002,7 +1002,7 @@
       "notBefore": 0,
       "groups": [
         "/organization-admin/ca.bc.gov",
-        "/system-owner/ca.bc.gov"
+        "/system-admin/ca.bc.gov"
       ]
     },
     {
@@ -2303,24 +2303,24 @@
           },
           {
             "id": "ca848ff4-76b0-4f2d-afe9-7dfd77467fcb",
-            "name": "group-system-owner-ca.bc.gov-policy",
-            "description": "Group '/system-owner' / 'ca.bc.gov' Policy",
+            "name": "group-system-admin-ca.bc.gov-policy",
+            "description": "Group '/system-admin' / 'ca.bc.gov' Policy",
             "type": "group",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "groups": "[{\"path\":\"/system-owner/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-owner\",\"extendChildren\":false}]"
+              "groups": "[{\"path\":\"/system-admin/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-admin\",\"extendChildren\":false}]"
             }
           },
           {
             "id": "6a49c571-fbbb-4f86-a72a-c1591a446bb3",
-            "name": "group-system-owner-ca.bc.gov-ministry-of-health-policy",
-            "description": "Group '/system-owner/ca.bc.gov' / 'ministry-of-health' Policy",
+            "name": "group-system-admin-ca.bc.gov-ministry-of-health-policy",
+            "description": "Group '/system-admin/ca.bc.gov' / 'ministry-of-health' Policy",
             "type": "group",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "groups": "[{\"path\":\"/system-owner/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/system-owner/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-owner\",\"extendChildren\":false}]"
+              "groups": "[{\"path\":\"/system-admin/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/system-admin/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-admin\",\"extendChildren\":false}]"
             }
           },
           {
@@ -2416,14 +2416,14 @@
           },
           {
             "id": "3a934d3f-d231-48fc-9f5a-924da7808989",
-            "name": "Access to 'org/ministry-of-health' services for role system-owner",
+            "name": "Access to 'org/ministry-of-health' services for role system-admin",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "resources": "[\"org/ministry-of-health\"]",
               "scopes": "[\"System.Manage\"]",
-              "applyPolicies": "[\"group-system-owner-ca.bc.gov-ministry-of-health-policy\"]"
+              "applyPolicies": "[\"group-system-admin-ca.bc.gov-ministry-of-health-policy\"]"
             }
           },
           {
