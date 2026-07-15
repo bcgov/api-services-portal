@@ -143,16 +143,34 @@ jobs:
             ' ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json)
             STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' | column -t)
             RUN_LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            BRANCH="${{ github.head_ref || github.ref_name }}"
+            SHORT_SHA="${GIT_COMMIT_SHA:0:7}"
             {
               echo "## Cypress E2E tests failed ($FAILURE_COUNT)"
               echo ""
-              echo "### Stats"
+              echo "**Branch:** \`$BRANCH\` | **Commit:** \`$SHORT_SHA\`"
+              echo ""
+              echo "<details>"
+              echo "<summary>Stats</summary>"
+              echo ""
               echo '```'
               echo "$STATS"
               echo '```'
               echo ""
-              echo "### Failed tests"
-              echo "$FAILED_TESTS"
+              echo "</details>"
+              echo ""
+              if [[ "$FAILURE_COUNT" -gt 10 ]]; then
+                echo "<details>"
+                echo "<summary>Failed tests ($FAILURE_COUNT)</summary>"
+                echo ""
+                echo "$FAILED_TESTS"
+                echo ""
+                echo "</details>"
+              else
+                echo "### Failed tests ($FAILURE_COUNT)"
+                echo ""
+                echo "$FAILED_TESTS"
+              fi
               echo ""
               echo "[View workflow run]($RUN_LINK)"
             } > msg
