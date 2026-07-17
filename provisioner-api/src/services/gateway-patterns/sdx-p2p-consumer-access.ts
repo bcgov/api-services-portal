@@ -61,7 +61,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
     const allowedAccess =
       await this.integrationAccessService.buildIntegrationAllowedServices(
         inputs.integrationClientId ||
-          connection?.requesterDetails.client.clientId!,
+          connection?.requesterDetails.client?.clientId,
         connection?.environment!
       );
 

@@ -397,7 +397,7 @@ function upgradeToTrustKMS(
   const member = data.client.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
-  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+  const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.clientRuntimeGroup.environment}:0`;
 
   return {
     name: 'trust-kms',
