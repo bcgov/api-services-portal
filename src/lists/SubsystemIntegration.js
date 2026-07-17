@@ -20,6 +20,12 @@ module.exports = {
       isRequired: true,
       isUnique: true,
     },
+    subsystem: {
+      type: Relationship,
+      ref: 'Subsystem.integrations',
+      many: false,
+      access: { update: false },
+    },
   },
   access: EnforcementPoint,
 };

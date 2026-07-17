@@ -1,7 +1,9 @@
 const { Slug, Text, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { logSubsystemActivityFromHook } = require('../services/workflow/org-activity');
+const {
+  logSubsystemActivityFromHook,
+} = require('../services/workflow/org-activity');
 const { newNamespaceID } = require('../services/identifiers');
 const { SubsystemService } = require('../services/batch/subsystem');
 const { logger } = require('../logger');
@@ -26,7 +28,7 @@ module.exports = {
     organization: { type: Relationship, ref: 'Organization' },
     integrations: {
       type: Relationship,
-      ref: 'SubsystemIntegration',
+      ref: 'SubsystemIntegration.subsystem',
       many: true,
     },
     slug: {

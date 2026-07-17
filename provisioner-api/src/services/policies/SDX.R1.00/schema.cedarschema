@@ -20,7 +20,8 @@ namespace SDX {
                         privacyZone: String
                     },
                     requester: {
-                        name: String
+                        name: String,
+                        email?: String
                     },
                     scopes: Set<String>,
                     service: {

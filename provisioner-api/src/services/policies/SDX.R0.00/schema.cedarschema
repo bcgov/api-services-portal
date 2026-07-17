@@ -19,7 +19,8 @@ namespace SDX {
                         clientId: String
                     },
                     requester: {
-                        name: String
+                        name: String,
+                        email?: String
                     }
                 },
                 clientResources?: {

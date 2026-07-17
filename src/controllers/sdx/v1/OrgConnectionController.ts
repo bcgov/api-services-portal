@@ -58,6 +58,15 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request);
 
+    // For R0 policy, force the requester details to be the user making this request
+    input.requesterDetails = input.requesterDetails || {};
+    if (input.policyVersion === 'SDX.R0.00') {
+      input.requesterDetails.requester = {
+        name: request.user.name,
+        email: request.user.email,
+      };
+    }
+
     return new ConnectionService().upsertConnection(ctx, org, input);
   }
 
