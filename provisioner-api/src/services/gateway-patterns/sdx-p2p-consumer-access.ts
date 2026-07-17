@@ -9,6 +9,7 @@ export interface SDXP2PConsumerPatternConfig {
   connId: string;
   clientId: string;
   serviceId: string;
+  integrationClientId?: string;
 }
 
 export interface SDXP2PConsumerPatternData {
@@ -59,7 +60,8 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
 
     const allowedAccess =
       await this.integrationAccessService.buildIntegrationAllowedServices(
-        connection?.requesterDetails.client.clientId!,
+        inputs.integrationClientId ||
+          connection?.requesterDetails.client.clientId!,
         connection?.environment!
       );
 

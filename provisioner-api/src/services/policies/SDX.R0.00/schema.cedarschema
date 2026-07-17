@@ -15,7 +15,7 @@ namespace SDX {
                 isApproved: Bool,
                 policyVersion: String,
                 requesterDetails?: {
-                    client: {
+                    client?: {
                         clientId: String
                     },
                     requester: {
@@ -25,6 +25,7 @@ namespace SDX {
                 clientResources?: {
                     gatewayPatterns?: {
                         "sdx-p2p-consumer-access.r1": {
+                            integrationClientId?: String,
                         },
                         "sdx-p2p-consumer.r1": {
                             clientRuntimeOverride?: String,
