@@ -166,7 +166,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             tags,
             hosts: [serviceHost],
             snis: inputs.useSni === 'false' ? [] : [serviceHost],
-            paths: [routePathPrefix],
+            paths: [`/${routePathPrefix}`],
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
@@ -179,7 +179,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             tags,
             hosts: [serviceHost],
             snis: inputs.useSni === 'false' ? [] : [serviceHost],
-            paths: [`${routePathPrefix}/hello`],
+            paths: [`/${routePathPrefix}/hello`],
             methods: ['GET'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],

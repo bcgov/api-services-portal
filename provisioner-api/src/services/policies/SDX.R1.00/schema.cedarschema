@@ -31,6 +31,7 @@ namespace SDX {
                     submissionId: String
                 },
                 clientResources: {
+                    comment?: String,
                     gatewayPatterns?: {
                         "sdx-p2p-consumer-access.r1": {
                             integrationClientId?: String,

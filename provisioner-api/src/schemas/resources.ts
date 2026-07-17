@@ -6,6 +6,7 @@ import { Type, type Static } from '@sinclair/typebox';
  * README.
  */
 export const RESOURCE_KINDS = [
+  'Information',
   // APS (directory)
   'Product',
   'Application',
@@ -291,21 +292,18 @@ export const GatewayResource = Type.Object(
   }
 );
 
-export const GatewayResourcesResponse = Type.Array(
-  Type.Ref(GatewayResource),
-  {
-    description: 'Tagged gateway entities belonging to the gateway.',
-    examples: [
-      [
-        {
-          tag: 'ns.platform',
-          entity_id: '7e6b4c2a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-          entity_name: 'routes',
-        },
-      ],
+export const GatewayResourcesResponse = Type.Array(Type.Ref(GatewayResource), {
+  description: 'Tagged gateway entities belonging to the gateway.',
+  examples: [
+    [
+      {
+        tag: 'ns.platform',
+        entity_id: '7e6b4c2a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+        entity_name: 'routes',
+      },
     ],
-  }
-);
+  ],
+});
 
 export type TResource = Static<typeof Resource>;
 export type TResourceResult = Static<typeof ResourceResult>;

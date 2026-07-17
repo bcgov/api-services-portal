@@ -24,6 +24,7 @@ namespace SDX {
                     }
                 },
                 clientResources?: {
+                    comment?: String,
                     gatewayPatterns?: {
                         "sdx-p2p-consumer-access.r1"?: {
                             integrationClientId?: String,
@@ -60,6 +61,7 @@ namespace SDX {
                     }
                 },
                 serviceResources?: {
+                    comment?: String,
                     gatewayPatterns?: {
                         "sdx-p2p-provider.r1": {
                             upstreamUrl: String,
