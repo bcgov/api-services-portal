@@ -144,7 +144,12 @@ jobs:
             STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' | column -t)
             RUN_LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             BRANCH="${{ github.head_ref || github.ref_name }}"
-            SHORT_SHA="${GIT_COMMIT_SHA:0:7}"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+            else
+              COMMIT_SHA="${{ github.sha }}"
+            fi
+            SHORT_SHA="${COMMIT_SHA:0:7}"
             {
               echo "## Cypress E2E tests failed ($FAILURE_COUNT)"
               echo ""
