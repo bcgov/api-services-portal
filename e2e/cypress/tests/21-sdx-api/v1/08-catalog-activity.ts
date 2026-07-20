@@ -542,21 +542,14 @@ describe('SDX Catalog Activity', () => {
               const deckResults = Array.isArray(a.blob)
                 ? a.blob[0]?.results
                 : a.blob?.results
-              return deckResults[0].details.results?.includes(
-                `updating key ${orgKeyName}`
-              )
+              return deckResults
+                .find((r: any) => r.provider === 'gwa')
+                .details?.results?.includes(`updating key ${orgKeyName}`)
             })
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.action).to.equal('published')
             expect(entry?.params?.detail).to.be.undefined
             expect(entry?.result).to.equal('success')
-
-            const deckResults = Array.isArray(entry?.blob)
-              ? entry.blob[0]?.results
-              : entry?.blob?.results
-            expect(deckResults[0].details.results).to.include(
-              `updating key ${orgKeyName}`
-            )
           })
         }
       )
