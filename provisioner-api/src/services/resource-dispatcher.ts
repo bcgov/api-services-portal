@@ -42,6 +42,17 @@ export class ResourceDispatcher {
     private readonly logger?: FastifyBaseLogger
   ) {
     this.providers = {
+      info: {
+        name: 'info',
+        apply: async (_gatewayId, _environment, resources, _action) => {
+          this.logger?.info("Applying 'Information' resources: %o", resources);
+          const output: Record<string, any> = {};
+          resources.forEach((r: any) => {
+            Object.assign(output, r.data);
+          });
+          return output;
+        },
+      },
       gwa: {
         name: 'gwa',
         apply: (gatewayId, environment, r, action) =>
@@ -65,6 +76,7 @@ export class ResourceDispatcher {
     };
 
     this.kindProvider = {
+      Information: 'info',
       Product: 'aps',
       Application: 'aps',
       // ConsumerLabels: 'aps',

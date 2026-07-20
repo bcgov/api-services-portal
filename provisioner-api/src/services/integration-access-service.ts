@@ -250,7 +250,7 @@ export class IntegrationAccessService {
         c.isActive &&
         c.clientId === subsystem.clientId &&
         c.environment === environment &&
-        c.requesterDetails.client.clientId === integrationClientId
+        c.requesterDetails.client?.clientId === integrationClientId
     );
 
     this.logger?.debug('connections allowed %j', allowedConnections);

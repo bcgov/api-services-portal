@@ -5,6 +5,8 @@ import { assert } from './utils.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { OAuthClient } from '../../clients/oauth.js';
 
+const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
+
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
 
@@ -221,7 +223,19 @@ export class SDXKeysPattern implements PatternProcessor {
       });
     }
 
+    const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
+
+    const info = {
+      kind: 'Information',
+      data: {
+        type: profile.type,
+        set: keySetName,
+        endpoint: `${routeHostUrl}keysets/${keySetName}/.well-known/jwks.json`,
+      },
+    };
+
     return [
+      ...[info],
       ...[
         {
           kind: 'GatewayKeySet',

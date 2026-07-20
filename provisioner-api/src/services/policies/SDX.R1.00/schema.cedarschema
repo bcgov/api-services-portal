@@ -20,7 +20,8 @@ namespace SDX {
                         privacyZone: String
                     },
                     requester: {
-                        name: String
+                        name: String,
+                        email?: String
                     },
                     scopes: Set<String>,
                     service: {
@@ -30,8 +31,10 @@ namespace SDX {
                     submissionId: String
                 },
                 clientResources: {
+                    comment?: String,
                     gatewayPatterns?: {
                         "sdx-p2p-consumer-access.r1": {
+                            integrationClientId?: String,
                         },
                         "sdx-p2p-consumer.r1": {
                             upgrades: {

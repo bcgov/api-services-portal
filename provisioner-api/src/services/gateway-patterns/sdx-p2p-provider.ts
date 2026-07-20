@@ -166,7 +166,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             tags,
             hosts: [serviceHost],
             snis: inputs.useSni === 'false' ? [] : [serviceHost],
-            paths: [routePathPrefix],
+            paths: [`/${routePathPrefix}`],
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
@@ -179,7 +179,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             tags,
             hosts: [serviceHost],
             snis: inputs.useSni === 'false' ? [] : [serviceHost],
-            paths: [`${routePathPrefix}/hello`],
+            paths: [`/${routePathPrefix}/hello`],
             methods: ['GET'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
@@ -365,7 +365,7 @@ function upgradeToTrustKMS(
   const member = data.service.subsystem.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
-  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+  const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.serviceRG.environment}:0`;
 
   return {
     name: 'trust-kms',

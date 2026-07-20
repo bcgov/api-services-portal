@@ -213,7 +213,7 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
       routes: [
         {
           hosts: [routeHostUrl.hostname],
-          paths: [routePathPrefix],
+          paths: [`/${routePathPrefix}`],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
           name,
           strip_path: inputs.stripPath,
@@ -261,7 +261,15 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
       config['tls_verify'] = inputs.tlsVerify === 'false' ? false : true;
     }
 
-    return [config] as any[];
+    const info = {
+      kind: 'Information',
+      data: {
+        endpoint: `${routeHostUrl}${routePathPrefix}`,
+        spec: `/catalog/services/${data.service.name}/oas-spec`,
+      },
+    };
+
+    return [config, info] as any[];
   }
 }
 
@@ -397,7 +405,7 @@ function upgradeToTrustKMS(
   const member = data.client.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();
 
-  const key_id = `urn:ca:bc:sdx:org:${memberText}`;
+  const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.clientRuntimeGroup.environment}:0`;
 
   return {
     name: 'trust-kms',

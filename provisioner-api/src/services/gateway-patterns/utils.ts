@@ -60,5 +60,5 @@ export const assert = {
 
 /** Build the SDX route path prefix for a given service/client locator. */
 export function getRoutePathPrefix(clientId: string): string {
-  return `/sdx/0/${clientId}`;
+  return `sdx/0/${clientId}`;
 }
