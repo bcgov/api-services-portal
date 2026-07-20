@@ -235,14 +235,19 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
     })
   })
 
-  it('verify rate limit error when the API calls beyond the limit', () => {
-    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+  it('verify rate limit ok when the API calls within the limit', () => {
+    cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(200)
         }
       )
+    })
+  })
+
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(429)
@@ -302,14 +307,19 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
     })
   })
 
-  it('verify rate limit error when the API calls beyond the limit', () => {
-    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+  it('verify rate limit ok when the API calls within the limit', () => {
+    cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(200)
         }
       )
+    })
+  })
+
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(429)
