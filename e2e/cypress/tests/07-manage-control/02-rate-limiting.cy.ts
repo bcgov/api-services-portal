@@ -297,6 +297,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
       'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
       { failOnNonZeroExit: false }
     )
+    cy.exec('docker exec kong sh -c "curl -v -X DELETE http://127.0.0.1:8001/cache"')
   })
 
   it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
@@ -304,11 +305,11 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
       cy.visit(consumers.path)
       consumers.clickOnTheFirstConsumerID()
       consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Route', 'Redis')
+      cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     })
   })
 
   it('verify rate limit ok when the API calls within the limit', () => {
-    cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
