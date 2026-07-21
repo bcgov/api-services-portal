@@ -13,11 +13,14 @@ roles:
       - resource: platform
         scopes:
           - Namespace.View
+  - name: system-admin
+    permissions: []
   - name: system-owner
-    permissions:
-      - resource: platform
-        scopes:
-          - Namespace.Manage
+    permissions: []
+  - name: tech-lead
+    permissions: []
+  - name: access-manager
+    permissions: []
 `;
 
     const answer = buildGroupAccess(
@@ -40,11 +43,17 @@ roles:
           - GroupAccess.Manage
           - Namespace.Assign
           - Dataset.Manage
-  - name: system-owner
+  - name: system-admin
     permissions:
       - resource: org/databc
         scopes:
           - System.Manage
+  - name: system-owner
+    permissions: []
+  - name: tech-lead
+    permissions: []
+  - name: access-manager
+    permissions: []
 
 `;
 

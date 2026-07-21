@@ -44,10 +44,19 @@ jest.mock('../../../services/workflow/get-namespaces', () => ({
   getNamespaceDetails: jest.fn(),
 }));
 
+const mockGetGatewayResources = jest.fn();
+
+jest.mock('../../../services/provisioner', () => ({
+  ProvisionerService: jest.fn().mockImplementation(() => ({
+    getGatewayResources: mockGetGatewayResources,
+  })),
+}));
+
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getNamespaceDetails.mockResolvedValue(null);
+    mockGetGatewayResources.mockResolvedValue([]);
   });
 
   describe('deleteSubsystem', () => {
@@ -204,11 +213,15 @@ describe('SubsystemService', () => {
       getNamespaceDetails.mockResolvedValue({
         name: 'sdx-subsystem-gateway',
       });
+      mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
       await expect(
         service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
       ).rejects.toThrow(
         'Subsystem cannot be deleted because gateway configuration exists'
+      );
+      expect(mockGetGatewayResources).toHaveBeenCalledWith(
+        'sdx-subsystem-gateway'
       );
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });

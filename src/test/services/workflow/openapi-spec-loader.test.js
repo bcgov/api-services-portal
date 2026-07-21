@@ -46,6 +46,7 @@ describe('LoadOpenAPISpec', () => {
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
+        environment: 'LAB',
         spec: `
 openapi: 3.1.0
 info:
@@ -79,6 +80,7 @@ paths: {}
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
+        environment: 'LAB',
         spec: `
 openapi: 3.1.0
 info:
@@ -96,6 +98,7 @@ paths: {}
     );
     expect(mockBuildServiceName).toHaveBeenCalledWith(
       expect.any(Object),
+      'LAB',
       expect.objectContaining({
         info: expect.objectContaining({
           'x-csbc-api-standard': 'v0.2.0-test',
@@ -116,6 +119,7 @@ paths: {}
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
+        environment: 'LAB',
         spec: JSON.stringify({
           openapi: '3.1.0',
           info: {
@@ -141,6 +145,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
+          environment: 'LAB',
           spec: `
 openapi: 3.1.0
 info:
@@ -171,6 +176,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
+          environment: 'LAB',
           spec: 'openapi: "3.1.0"\ninfo:\n  title: [',
         }
       )
@@ -197,6 +203,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
+          environment: 'LAB',
           spec: `
 openapi: 3.1.0
 info:
