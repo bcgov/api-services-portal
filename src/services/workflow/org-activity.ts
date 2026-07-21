@@ -523,19 +523,15 @@ function gatewayPatternPublishMessage(
 ): string {
   const includeTarget = Boolean(targetName);
   const includeDetail = Boolean(detail);
-  if (removed) {
-    return includeTarget
-      ? '{actor} removed {pattern} for {targetName}: {detail}'
-      : '{actor} removed {pattern}: {detail}';
-  }
+  const action = removed ? 'removed' : 'published';
   if (includeDetail) {
     return includeTarget
-      ? '{actor} published {pattern} for {targetName}: {detail}'
-      : '{actor} published {pattern}: {detail}';
+      ? `{actor} ${action} {pattern} for {targetName}: {detail}`
+      : `{actor} ${action} {pattern}: {detail}`;
   }
   return includeTarget
-    ? '{actor} published {pattern} for {targetName}'
-    : '{actor} published {pattern}';
+    ? `{actor} ${action} {pattern} for {targetName}`
+    : `{actor} ${action} {pattern}`;
 }
 
 export class OrgActivityService {
