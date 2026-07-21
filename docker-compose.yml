@@ -556,7 +556,7 @@ services:
 
   # Optional Postgres browser UI (not started by default).
   #   docker compose --profile db-tools up -d pgadmin
-  # Open http://localhost:8080 — login: admin@local.dev / local
+  # Open http://localhost:5050 — login: admin@local.dev / local
   # kong-db is pre-registered; Superuser credentials: postgres / postgres
   pgadmin:
     image: dpage/pgadmin4:8
@@ -567,7 +567,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: local
       PGADMIN_DISABLE_POSTFIX: '1'
     ports:
-      - '8080:80'
+      - '5050:80'
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - ./local/pgadmin/servers.json:/pgadmin4/servers.json:ro
