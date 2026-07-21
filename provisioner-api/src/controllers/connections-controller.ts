@@ -123,10 +123,10 @@ export class ConnectionsController {
           ? 'failed'
           : 'success',
       name: 'N/A',
-      message: `Connection ${connectionRequest.clientId} -> ${connectionRequest.serviceId} ${action === 'apply' ? 'provisioned' : 'removed'}`,
+      message: `Connection ${connectionRequest.clientId} → ${connectionRequest.serviceId} ${action === 'apply' ? 'provisioned' : 'removed'}`,
       refId: '',
       context: {
-        message: 'Connection {client} -> {service} {action}',
+        message: 'Connection {client} → {service} {action}',
         params: {
           client: connectionRequest.clientId,
           service: connectionRequest.serviceId,
