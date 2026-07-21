@@ -13,7 +13,7 @@ RUN npx nyc instrument --compact=false . --in-place
 # Cypress E2E
 WORKDIR /e2e
 
-RUN apt-get -y update; apt-get -y install curl
+RUN apt-get -y update; apt-get -y install curl redis-tools
 COPY e2e/package.json /e2e
 COPY e2e/package-lock.json /e2e
 RUN --mount=type=secret,id=npm_token \

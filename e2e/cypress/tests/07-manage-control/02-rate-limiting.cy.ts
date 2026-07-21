@@ -294,10 +294,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
 
   it('Clear Redis rate limit keys before setting new rate limit', () => {
     cy.exec(
-      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
-      { failOnNonZeroExit: false }
+      "export REDISCLI_AUTH=s3cr3t && redis-cli -h redis-master --scan --pattern 'ratelimit*' | xargs -r redis-cli -h redis-master DEL",
+      { failOnNonZeroExit: true }
     )
-    cy.exec('docker exec kong sh -c "curl -v -X DELETE http://127.0.0.1:8001/cache"')
+    cy.exec('curl -v -X DELETE http://kong.localtest.me:8001/cache')
   })
 
   it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
