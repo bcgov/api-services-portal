@@ -222,9 +222,9 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
 
   it('Clear Redis rate limit keys before setting new rate limit', () => {
     cy.exec(
-      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
-      { failOnNonZeroExit: false }
+      "export REDISCLI_AUTH=s3cr3t && redis-cli -h redis-master --scan --pattern 'ratelimit*' | xargs -r redis-cli -h redis-master DEL"
     )
+    cy.exec('curl -v -X DELETE http://kong.localtest.me:8001/cache')
   })
 
   it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
