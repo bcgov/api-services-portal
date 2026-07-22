@@ -76,23 +76,26 @@ export const putFeedWorker = async (context: any, req: any, res: any) => {
   }
   const json = req.body;
 
-  assert.strictEqual(
-    eid === null ||
-      typeof eid == 'undefined' ||
-      json === null ||
-      typeof json == 'undefined',
-    false,
-    'Either entity or ID are missing ' + eid + json
-  );
+  // If the entity has a compositeRefKey, then let syncRecords handle things
+  if (md.compositeRefKey === undefined || md.compositeRefKey.length === 0) {
+    assert.strictEqual(
+      eid === null ||
+        typeof eid == 'undefined' ||
+        json === null ||
+        typeof json == 'undefined',
+      false,
+      'Either entity or ID are missing ' + eid + json
+    );
 
-  assert.strictEqual(
-    typeof eid == 'string',
-    true,
-    `Unique ID (${eid}) is not a string! ` +
-      JSON.stringify(req.params) +
-      ' :: ' +
-      JSON.stringify(req.body)
-  );
+    assert.strictEqual(
+      typeof eid == 'string',
+      true,
+      `Unique ID (${eid}) is not a string! ` +
+        JSON.stringify(req.params) +
+        ' :: ' +
+        JSON.stringify(req.body)
+    );
+  }
 
   //const context = keystone.createContext({ skipAccessControl: true });
   const result = await syncRecords(context, entity, eid, json);
@@ -110,7 +113,8 @@ export const deleteFeedWorker = async (context: any, req: any, res: any) => {
     false
   );
 
-  res.json(deleteRecord(context, feedEntity, eid));
+  const result = await deleteRecord(context, feedEntity, eid);
+  res.status(result.status).json(result);
 };
 
 export const deleteRecord = async function (
@@ -136,6 +140,19 @@ export const deleteRecord = async function (
   }
 };
 
+export const deleteRecordByInternalIdThrowErrors = async function (
+  context: any,
+  entity: string,
+  dbid: string
+): Promise<BatchResult> {
+  const result = await deleteRecordByInternalId(context, entity, dbid);
+  if (result.status !== 200) {
+    throw new BatchSyncException(result);
+  } else {
+    return result;
+  }
+};
+
 export const deleteRecordByInternalId = async function (
   context: any,
   entity: string,
@@ -144,10 +161,10 @@ export const deleteRecordByInternalId = async function (
   const batchService = new BatchService(context);
 
   const result = await batchService.remove(entity, dbid);
-  if (result == null) {
-    return { status: 400, result: 'deletion-failed' };
+  if (result.error) {
+    return { status: 400, result: 'deletion-failed', reason: result.error };
   }
-  return { status: 200, result: 'deleted', id: dbid };
+  return { status: 200, result: 'deleted', id: result.id };
 };
 
 export const getFeedWorker = async (context: any, req: any, res: any) => {
@@ -215,16 +232,15 @@ const syncListOfRecords = async function (
 // }
 
 function buildQueryResponse(md: any, children: string[] = undefined): string[] {
-  const relationshipFields = Object.keys(
-    md.transformations
-  ).filter((tranField: any) =>
-    [
-      'byKey',
-      'connectOne',
-      'connectExclusiveList',
-      'connectExclusiveListCreate',
-      'connectMany',
-    ].includes(md.transformations[tranField].name)
+  const relationshipFields = Object.keys(md.transformations).filter(
+    (tranField: any) =>
+      [
+        'byKey',
+        'connectOne',
+        'connectExclusiveList',
+        'connectExclusiveListCreate',
+        'connectMany',
+      ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
     .filter((s: string) => !relationshipFields.includes(s))
@@ -438,11 +454,18 @@ export const syncRecords = async function (
               );
               logger.debug('CHILDREN [%s] %j', transformKey, allIds);
               childResults.push(...allIds);
-              if (allIds.filter((record) => record.status != 200).length !== 0) {
+              if (
+                allIds.filter((record) => record.status != 200).length !== 0
+              ) {
                 throw new Error('Failed updating children');
               }
-              if (allIds.filter((record) => typeof record.ownedBy != 'undefined').length !== 0) {
-                throw new Error('There are some child records that have exclusive ownership already!');
+              if (
+                allIds.filter((record) => typeof record.ownedBy != 'undefined')
+                  .length !== 0
+              ) {
+                throw new Error(
+                  'There are some child records that have exclusive ownership already!'
+                );
               }
               json[transformKey + '_ids'] = allIds.map((status) => status.id);
             }
@@ -551,12 +574,16 @@ export const syncRecords = async function (
               throw new Error('Failed updating children');
             }
             logger.debug('%j', localRecord);
-            if (allIds.filter(
+            if (
+              allIds.filter(
                 (record) =>
                   typeof record.ownedBy != 'undefined' &&
                   record.ownedBy != localRecord.id
-              ).length !== 0) {
-              throw new Error('There are some child records that have ownership already (update not allowed)!');
+              ).length !== 0
+            ) {
+              throw new Error(
+                'There are some child records that have ownership already (update not allowed)!'
+              );
             }
 
             json[transformKey + '_ids'] = allIds.map((status) => status.id);
@@ -748,22 +775,25 @@ export const removeAllButKeys = (obj: object, keys: string[]) => {
 export const parseJsonString = (obj: any, keys: string[]) => {
   Object.entries(obj).forEach(
     ([key, val]) =>
-      (val && typeof val === 'object' && parseJsonString(val, keys)) ||
-      (keys.includes(key) && (obj[key] = JSON.parse(obj[key])))
+      (val && keys.includes(key) && (obj[key] = JSON.parse(val as string))) ||
+      (val && typeof val === 'object' && parseJsonString(val, keys))
   );
   return obj;
 };
 
 export const parseBlobString = (obj: any, keys: string[] = ['blob']) => {
-  Object.entries(obj).forEach(
-    ([key, val]) =>
-      keys.includes(key) &&
-      obj[key] &&
-      (obj[key] =
-        obj['type'] === 'json'
-          ? JSON.parse(Object.values(val).pop())
-          : YAML.loadAll(Object.values(val).pop()))
-  );
+  Object.entries(obj).forEach(([key, val]) => {
+    if (!keys.includes(key) || !obj[key] || typeof val !== 'object') {
+      return;
+    }
+    const blobRecord = val as { type?: string; blob?: string };
+    const blobType = blobRecord.type ?? obj.type;
+    const blobContent = blobRecord.blob ?? Object.values(val).pop();
+    obj[key] =
+      blobType === 'json'
+        ? JSON.parse(blobContent as string)
+        : YAML.loadAll(blobContent as string);
+  });
   return obj;
 };
 

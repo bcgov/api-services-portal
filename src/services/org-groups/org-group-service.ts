@@ -23,7 +23,10 @@ const logger = Logger('org-groups');
 
 enum RoleGroups {
   'organization-admin',
+  'system-admin',
   'system-owner',
+  'tech-lead',
+  'access-manager',
 }
 
 /**
@@ -156,7 +159,7 @@ export class OrgGroupService {
         permission.policies[0].id
       );
 
-      const groupIds: string[] = policy.groups.map((g: any) => g.id);
+      const groupIds: string[] = policy.groups?.map((g: any) => g.id) || [];
 
       const members = await this.listMembersOfGroups(groupIds);
 
@@ -226,13 +229,11 @@ export class OrgGroupService {
           if (groupMatch.length == 1) {
             rootGroup = groupMatch[0];
           } else {
-            const {
-              created,
-              id,
-            } = await this.keycloakService.createIfMissingForParentGroup(
-              rootGroup,
-              parts[i]
-            );
+            const { created, id } =
+              await this.keycloakService.createIfMissingForParentGroup(
+                rootGroup,
+                parts[i]
+              );
             created && (await this.backfillGroups());
             rootGroup = await this.keycloakService.getGroupById(id);
           }
@@ -257,20 +258,20 @@ export class OrgGroupService {
     }
   }
 
-  public async createOrUpdateOrgPermission(
-    orgGroup: OrganizationGroup,
-    scopeNames: string[]
-  ): Promise<void> {
-    const policyName = this.getGroupPolicyName(orgGroup);
-    const resourceName = `org/${orgGroup.name}`;
-    const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
-    await this.createOrUpdatePermission(
-      policyName,
-      permissionName,
-      resourceName,
-      scopeNames
-    );
-  }
+  // public async createOrUpdateOrgPermission(
+  //   orgGroup: OrganizationGroup,
+  //   scopeNames: string[]
+  // ): Promise<void> {
+  //   const policyName = this.getGroupPolicyName(orgGroup);
+  //   const resourceName = `org/${orgGroup.name}`;
+  //   const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
+  //   await this.createOrUpdatePermission(
+  //     policyName,
+  //     permissionName,
+  //     resourceName,
+  //     scopeNames
+  //   );
+  // }
 
   public async createOrUpdateGroupPermission(
     orgGroup: OrganizationGroup,
@@ -319,10 +320,8 @@ export class OrgGroupService {
     // Assume that the client we are authenticating with is the Resource Server
     const cid = (await clientService.findByClientId(this.clientId)).id;
 
-    const permissionPolicies: PolicyRepresentation[] = await clientPolicyService.findPermissionsByName(
-      cid,
-      permissionName
-    );
+    const permissionPolicies: PolicyRepresentation[] =
+      await clientPolicyService.findPermissionsByName(cid, permissionName);
     const permissionPolicy =
       permissionPolicies.length == 0 ? undefined : permissionPolicies[0];
 
@@ -383,8 +382,9 @@ export class OrgGroupService {
         permissionPolicy.id,
         permission
       );
-      const existingPolicyId = (permissionPolicy.config
-        .policies[0] as PolicyRepresentation).id;
+      const existingPolicyId = (
+        permissionPolicy.config.policies[0] as PolicyRepresentation
+      ).id;
 
       assert.strictEqual(
         existingPolicyId,
@@ -566,6 +566,9 @@ export class OrgGroupService {
       id: user.id,
       username: user.username,
       email: user.email,
+      name:
+        user.attributes?.display_name?.[0] ||
+        user.firstName + ' ' + user.lastName,
     }));
   }
 
@@ -573,7 +576,7 @@ export class OrgGroupService {
     orgGroup: OrganizationGroup,
     memberEmails: UserReference[],
     validIdentityProviders: string[]
-  ) {
+  ): Promise<{ additions: UserReference[]; deletions: UserReference[] }> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     const group = groupIds[groupIds.length - 1];
 
@@ -584,23 +587,44 @@ export class OrgGroupService {
       memberEmails
     );
 
-    const currentMembers = (await this.listMembersForLeafOnly(orgGroup)).map(
-      (u) => u.id
-    );
-    const desiredMembers = (
-      await Promise.all(
-        memberEmails.map((u) =>
-          this.userKeycloakService.lookupUserIdByEmail(
-            u.email,
+    const currentMembers = await this.listMembersForLeafOnly(orgGroup);
+    const currentMemberIds = currentMembers.map((u) => u.id).filter((s) => s);
+
+    const desiredLookups = await Promise.all(
+      memberEmails.map(async (u) => {
+        const email = u.email;
+        if (email) {
+          const id = await this.userKeycloakService.lookupUserIdByEmail(
+            email,
             false,
             validIdentityProviders
-          )
-        )
-      )
-    ).filter((s) => s);
+          );
+          return { email, id };
+        } else if (u.id) {
+          const user = await this.userKeycloakService.lookupUserById(u.id);
+          return { email: user.email, id: u.id };
+        } else {
+          return { email, id: undefined };
+        }
+      })
+    );
 
-    const deletions = currentMembers.filter((u) => !desiredMembers.includes(u));
-    const additions = desiredMembers.filter((u) => !currentMembers.includes(u));
+    const desiredMembers = desiredLookups.map((o) => o.id).filter((s) => s);
+
+    const deletions = currentMemberIds.filter(
+      (u) => !desiredMembers.includes(u)
+    );
+    const additions = desiredMembers.filter(
+      (u) => !currentMemberIds.includes(u)
+    );
+
+    const additionRefs: UserReference[] = desiredLookups
+      .filter((o) => o.email && o.id && additions.includes(o.id))
+      .map((o) => ({ email: o.email }));
+
+    const deletionRefs: UserReference[] = currentMembers
+      .filter((u) => u.id && deletions.includes(u.id))
+      .map((u) => ({ email: u.email }));
 
     for (const userId of deletions) {
       await this.keycloakService.delMemberFromGroup(userId, group.id);
@@ -613,6 +637,8 @@ export class OrgGroupService {
     if (deletions.length == 0 && additions.length == 0) {
       logger.debug('[syncMembers] %s no updated needed.', orgGroup.name);
     }
+
+    return { additions: additionRefs, deletions: deletionRefs };
   }
 
   private isExistingInList(

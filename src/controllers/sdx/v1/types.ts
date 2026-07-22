@@ -1,3 +1,5 @@
+import { SubsystemIntegration } from '../../v3/types';
+
 /**
  * @tsoaModel
  *
@@ -5,6 +7,8 @@
 export interface SubsystemInput {
   name: string;
   description?: string;
+  environments?: string[];
+  integrations?: SubsystemIntegration[];
 }
 
 /**
@@ -14,6 +18,7 @@ export interface SubsystemInput {
 export interface OpenAPISpecInput {
   spec: string;
   subsystem: string;
+  environment?: string;
 }
 
 /**
@@ -22,6 +27,7 @@ export interface OpenAPISpecInput {
  */
 export interface RuntimeGroupInput {
   name: string;
+  environment: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;
   hostedOrganizations?: string[];
@@ -33,6 +39,12 @@ export interface RuntimeGroupInput {
  */
 export interface CreateNewKeyInput {
   runtimeGroupName: string;
+  environment: string;
+}
+
+export interface GatewayPattern {
+  pattern: string;
+  parameters: Record<string, any>;
 }
 
 /**
@@ -44,6 +56,15 @@ export interface ConnectionRequestInput {
   serviceId: string;
   isApproved?: boolean;
   isActive?: boolean;
+  environment?: 'lab' | 'mck' | 'dev' | 'tst' | 'prd' | 'sbx';
+  policyVersion?: string;
+  requesterDetails?: any;
+  clientResources?: any;
+  serviceResources?: any;
+  provisionerStatus?: {
+    message: string;
+    status: 'pending' | 'provisioned' | 'failed';
+  };
 }
 
 export interface ExpressRequest extends Express.Request {}

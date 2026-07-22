@@ -1,4 +1,4 @@
-import { new_service } from './06-connection-requests'
+import { new_service } from '../../../support/sdx-commands'
 
 describe('SDX Services', () => {
   let workingData: any

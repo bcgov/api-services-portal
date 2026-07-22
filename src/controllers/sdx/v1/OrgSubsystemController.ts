@@ -57,9 +57,9 @@ export class OrgSubsystemController extends Controller {
    * @return Promise resolving to a BatchResult indicating the outcome of the operation
    */
   @Put()
-  @OperationId('createSubsystem')
+  @OperationId('upsertSubsystem')
   @Security('jwt', ['System.Manage'])
-  public async createSubsystem(
+  public async upsertSubsystem(
     @Path() org: string,
     @Body() body: SubsystemInput,
     @Request() request: any
@@ -106,10 +106,9 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * Deletes a subsystem from the specified organization. The subsystem can only be deleted
-   * if there are no services associated with it.
-   * If the `force` query parameter is set to true, the subsystem will be deleted along
-   * with all associated services.
+   * Deletes a subsystem from the specified organization. The subsystem can only
+   * be deleted when it has no active connection requests and no gateway
+   * configuration. Related OAS services are deleted with the subsystem.
    *
    * > `Required Scope:` System.Manage
    *
@@ -118,8 +117,6 @@ export class OrgSubsystemController extends Controller {
    * @param org - Organization identifier
    * @param name - Subsystem name to delete
    * @param request - HTTP request object for context creation
-   * @param force - If true, force deletion even if associated services exist (use with caution)
-   * @example { force: false } body
    */
   @Delete('/{name}')
   @OperationId('deleteSubsystem')
@@ -127,12 +124,11 @@ export class OrgSubsystemController extends Controller {
   public async delete(
     @Path() org: string,
     @Path() name: string,
-    @Query('force') force: boolean,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
 
-    return new SubsystemService().deleteSubsystem(context, org, name, force);
+    return new SubsystemService().deleteSubsystem(context, org, name);
   }
 
   /**
@@ -180,12 +176,12 @@ export class OrgSubsystemController extends Controller {
     });
 
     assertEqual(
-      client.gateway.id === result.name,
+      client.gateway && client.gateway.id === result.name,
       true,
       'gatewayId',
       'Gateway ID mismatch after creation'
     );
 
-    return { gatewayId: client.gateway.id };
+    return { gatewayId: client.gateway!.id };
   }
 }

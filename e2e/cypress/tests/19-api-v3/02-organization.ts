@@ -42,7 +42,7 @@ describe('Organization', () => {
           ],
         },
         {
-          name: 'system-owner',
+          name: 'system-admin',
           permissions: [
             { resource: 'org/ministry-of-health', scopes: ['System.Manage'] },
           ],
@@ -109,6 +109,7 @@ describe('Organization', () => {
               member: {
                 username: 'mark@idir',
                 email: 'mark@gmail.com',
+                name: 'mark@idir',
               },
               roles: ['organization-admin'],
             },
@@ -190,18 +191,26 @@ describe('Organization', () => {
           { resourceType: 'namespace', scopes: ['Namespace.View'] },
         ],
       },
-      'system-owner': {
-        label: 'System Owner',
+      'system-admin': {
+        label: 'System Administrator',
         permissions: [
           {
             resourceType: 'organization',
             scopes: ['System.Manage'],
           },
-          {
-            resourceType: 'namespace',
-            scopes: ['Namespace.Manage'],
-          },
         ],
+      },
+      'system-owner': {
+        label: 'System Owner',
+        permissions: [],
+      },
+      'tech-lead': {
+        label: 'System Technical Lead',
+        permissions: [],
+      },
+      'access-manager': {
+        label: 'Access Manager',
+        permissions: [],
       },
     }
 

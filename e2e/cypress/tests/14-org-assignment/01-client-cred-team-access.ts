@@ -10,6 +10,7 @@ import MyAccessPage from '../../pageObjects/myAccess'
 import ConsumersPage from '../../pageObjects/consumers'
 let namespace: string
 let displayName: string
+const cleanedUrl = Cypress.env('BASE_URL').replace(/^http?:\/\//i, "");
 
 describe('Add Organization to publish API', () => {
   const login = new LoginPage()
@@ -46,6 +47,12 @@ describe('Add Organization to publish API', () => {
 
   it('Set token with gwa config command', () => {
     cy.exec('gwa config set --token ' + userSession, { timeout: 3000, failOnNonZeroExit: false }).then((response) => {
+      expect(response.stdout).to.contain("Config settings saved")
+    });
+  })
+
+  it('Set environment with gwa config command', () => {
+    cy.executeCliCommand('gwa config set --host ' + cleanedUrl + ' --scheme http').then((response) => {
       expect(response.stdout).to.contain("Config settings saved")
     });
   })

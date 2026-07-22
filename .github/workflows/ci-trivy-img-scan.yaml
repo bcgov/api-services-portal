@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag bcgov/api-services-portal:trivy-scan
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'bcgov/api-services-portal:trivy-scan'
           format: 'template'
@@ -24,6 +24,6 @@ jobs:
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
       - name: Upload Trivy Scan Results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'

@@ -15,6 +15,7 @@ import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
 import { StepTokenService } from '../certificate-authority/step-token';
+import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('batch.runtime-group');
 
@@ -32,18 +33,22 @@ class RuntimeGroupService {
     body: RuntimeGroup
   ): Promise<BatchResult> => {
     // host should be based on a standard format for edge servers
-    body['host'] = `${body['name']}.servers.sdx`;
+    body['host'] = `${body['name']}.${body['environment']}.servers.sdx`;
     if (!body.sdxEndpoint) {
-      body['sdxEndpoint'] = `https://${body['name']}.servers.sdx`;
+      body[
+        'sdxEndpoint'
+      ] = `https://${body['name']}.${body['environment']}.servers.sdx`;
     }
     if (!body.consumerEndpoint) {
-      body['consumerEndpoint'] = `http://internal.${body['name']}.servers.sdx`;
+      body[
+        'consumerEndpoint'
+      ] = `http://internal.${body['name']}.${body['environment']}.servers.sdx`;
     }
 
     return await syncRecordsThrowErrors(
       context,
       'RuntimeGroup',
-      body['name'],
+      undefined,
       body
     );
   };
@@ -108,15 +113,27 @@ class RuntimeGroupService {
     context: Keystone,
     org: string,
     name: string,
+    environment: string,
     force: boolean = false
   ): Promise<BatchResult> => {
-    const entry = await new RuntimeGroupService().findRuntimeGroupByName(
+    const rgList = await new RuntimeGroupService().findOrgRuntimeGroupsByName(
       context,
       org,
       name
     );
+    const entry = rgList.find((rg) => rg.environment === environment);
+    assertIsDefined(
+      entry,
+      'environment',
+      'Runtime Group not found for the specified environment'
+    );
 
-    return await deleteRecordByInternalId(context, 'RuntimeGroup', entry.id);
+    const result = await deleteRecordByInternalId(
+      context,
+      'RuntimeGroup',
+      entry.id
+    );
+    return result;
   };
 
   checkRuntimeGroup = async (
@@ -139,20 +156,60 @@ class RuntimeGroupService {
     return rg;
   };
 
-  findRuntimeGroupByName = async (
+  findHostedRuntimeGroupsByName = async (
     context: Keystone,
     org: string,
     name: string
-  ): Promise<KeystoneRuntimeGroup> => {
-    const rg = await this.findRuntimeGroupByUniqueName(context, name);
-
-    assert.strictEqual(
-      rg.organization?.name === org,
-      true,
-      'Runtime Group not found for organization'
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const runtimeGroups = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
     );
 
-    return rg;
+    assert.strictEqual(
+      runtimeGroups.length > 0,
+      true,
+      'Runtime group does not exist'
+    );
+
+    return runtimeGroups.filter((rg) =>
+      rg.hostedOrganizations.some((o: any) => o.name === org)
+    );
+  };
+
+  findOrgRuntimeGroupsByName = async (
+    context: Keystone,
+    org: string,
+    name: string
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const groups = await this.findRuntimeGroupsByName(context, name);
+    return groups.filter((rg) => rg.organization?.name === org);
+  };
+
+  findRuntimeGroupsByName = async (
+    context: Keystone,
+    name: string
+  ): Promise<KeystoneRuntimeGroup[]> => {
+    const runtimeGroups = await getRecords(
+      context,
+      'RuntimeGroup',
+      undefined,
+      ['organization', 'hostedOrganizations'],
+      {
+        query: '$name: String!',
+        clause: '{ name: $name }',
+        variables: { name },
+      }
+    );
+
+    return runtimeGroups;
   };
 
   findRuntimeGroupByUniqueName = async (
@@ -218,7 +275,11 @@ class RuntimeGroupService {
       }
     );
 
-    assert.strictEqual(records.length == 0, false, 'Runtime Group not found');
+    assert.strictEqual(
+      records.length == 0,
+      false,
+      `Runtime Group with host '${host}' not found`
+    );
     return records.pop();
   };
 

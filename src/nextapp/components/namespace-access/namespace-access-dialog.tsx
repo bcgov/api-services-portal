@@ -128,7 +128,8 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                   <Input
                     readOnly={isEditing}
                     defaultValue={
-                      accessItem?.requesterEmail ?? serviceAccount?.name
+                      accessItem?.requesterEmail ??
+                      serviceAccount?.clients.join(', ')
                     }
                     name="email"
                     type="text"
@@ -203,4 +204,8 @@ const permissionHelpTextLookup = {
   'Namespace.Manage':
     'Can update the Access Control List for controlling access to viewing metrics, service configuration and service account management. This is a superuser for the gateway.',
   'Namespace.View': 'Read-only access to the gateway.',
+  'GatewayPattern.Publish':
+    'Can publish configuration using gateway patterns (for SDX only).',
+  'Connection.Manage':
+    'Can approve/reject connection requests to your APIs that you make discoverable (for SDX only).',
 };

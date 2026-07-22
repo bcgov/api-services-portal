@@ -56,13 +56,16 @@ services:
       test: timeout 10s bash -c ':> /dev/tcp/localhost/9081'
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.8.1
     container_name: oauth2-proxy
     command: --alpha-config /oauth2-proxy.yaml --config /oauth2-proxy.cfg
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - 4180:4180/tcp
     volumes:
@@ -110,6 +113,28 @@ services:
       aps-net:
         aliases:
           - feeder.localtest.me
+  provisioner:
+    container_name: provisioner
+    image: provisioner:latest
+    build:
+      context: ./provisioner-api
+      dockerfile: Dockerfile
+      secrets:
+        - npm_token
+    env_file:
+      - ./local/provisioner/.env.local
+    environment:
+      NODE_ENV: test # Needed for allowing non-secure connection to Keycloak
+    restart: on-failure
+    volumes:
+      - ./local/provisioner/key.json:/secrets/key.json
+      - ./local/provisioner/environments.json:/etc/environments.json
+    ports:
+      - 3030:3030
+    networks:
+      aps-net:
+        aliases:
+          - provisioner-api.localtest.me
   feeder-seeding:
     container_name: feeder-seeding
     image: feeder:latest
@@ -199,13 +224,18 @@ services:
           - kong.localtest.me
     restart: on-failure:5
   redis:
-    image: bitnami/redis:latest
+    image: bitnamilegacy/redis:7.4
     container_name: redis-master
     environment:
       - REDIS_PASSWORD=s3cr3t
     restart: on-failure
     ports:
       - 6379:6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 's3cr3t', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       aps-net:
         aliases:
@@ -225,6 +255,156 @@ services:
       aps-net:
         aliases:
           - gwa-api.localtest.me
+
+  # Run-to-completion job: generates a TLS root CA plus two cluster key pairs
+  # ("sdxkongc" for the control plane, "sdx-edge-rg0" for the data plane) and
+  # stores them on the mounted "tls-certs" volume. Idempotent: skips if present.
+  tls-cert-gen:
+    image: alpine:3.20
+    container_name: tls-cert-gen
+    command: sh -c "apk add --no-cache openssl >/dev/null && sh /gen/gen-cluster-certs.sh"
+    volumes:
+      - ./local/kong/gen-cluster-certs.sh:/gen/gen-cluster-certs.sh:ro
+      - tls-certs:/certs
+    networks:
+      - aps-net
+    restart: 'no'
+
+  # Bootstraps the dedicated `sdxkong` database for the control plane. Uses the
+  # sdx image so the custom plugin schemas are migrated too.
+  kong-sdx-migrations:
+    image: kong:sdx-control-local
+    build:
+      context: local/kong
+      dockerfile: sdx.Dockerfile
+    command: kong migrations bootstrap
+    depends_on:
+      kong-db:
+        condition: service_healthy
+    environment:
+      # sdx.Dockerfile defaults to role=data_plane (DB off); migrations need a
+      # DB-backed role. This bootstraps the control plane's database.
+      KONG_ROLE: control_plane
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: sdxkong
+      KONG_PG_USER: sdxkonguser
+      KONG_PG_PASSWORD: sdxkonguser
+      KONG_DNS_ORDER: 'LAST,A'
+      KONG_CLUSTER_MTLS: pki
+      KONG_CLUSTER_LISTEN: '0.0.0.0:8005'
+
+      # sdx.Dockerfile sets KONG_PREFIX=/kong_prefix, which doesn't exist in the
+      # image and isn't writable by the unprivileged kong user. Use the image's
+      # own kong-owned prefix instead.
+      KONG_PREFIX: /usr/local/kong
+    volumes:
+      # sdx.Dockerfile points KONG_LUA_SSL_TRUSTED_CERTIFICATE et al. at
+      # /etc/secrets; kong validates these paths even during migrations.
+      - tls-certs:/etc/secrets:ro
+    networks:
+      - aps-net
+    restart: on-failure
+
+  # Kong hybrid-mode CONTROL PLANE (sdxkongc). DB-backed (its own `sdxkong`
+  # database), serves config to data planes over the cluster listener (8005)
+  # using PKI mTLS. Does not proxy traffic itself.
+  kong-sdx-control:
+    image: kong:sdx-control-local
+    container_name: kong-sdx-control
+    depends_on:
+      kong-db:
+        condition: service_healthy
+      kong-sdx-migrations:
+        condition: service_completed_successfully
+      tls-cert-gen:
+        condition: service_completed_successfully
+    build:
+      context: local/kong
+      dockerfile: sdx.Dockerfile
+    environment:
+      KONG_DEBUG_LEVEL: debug
+      KONG_TRUSTED_IPS: '0.0.0.0/0,::/0'
+      # Control plane role, backed by its own database.
+      KONG_ROLE: control_plane
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: sdxkong
+      KONG_PG_USER: sdxkonguser
+      KONG_PG_PASSWORD: sdxkonguser
+      KONG_DNS_ORDER: 'LAST,A'
+      # Cluster (CP<->DP) PKI mTLS using the generated certs.
+      KONG_CLUSTER_MTLS: pki
+      KONG_CLUSTER_LISTEN: '0.0.0.0:8005'
+      # Control plane does not proxy; expose the admin API for inspection.
+      KONG_PROXY_LISTEN: 'off'
+      KONG_ADMIN_LISTEN: '0.0.0.0:8001'
+      KONG_STATUS_LISTEN: '0.0.0.0:8100'
+      # Use the image's kong-owned prefix (sdx.Dockerfile's /kong_prefix isn't
+      # writable by the unprivileged kong user).
+      KONG_PREFIX: /usr/local/kong
+    ports:
+      - 8002:8001 # admin API (8001 is taken by the traditional `kong`)
+      - 8005:8005 # cluster listener
+    networks:
+      aps-net:
+        aliases:
+          - kong-sdx-control.localtest.me
+    volumes:
+      - tls-certs:/etc/secrets:ro
+    restart: on-failure:5
+
+  # Kong hybrid-mode DATA PLANE (sdx-edge-rg0). No database; pulls config from
+  # the control plane over PKI mTLS and proxies traffic on 8443.
+  kong-sdx-edge0:
+    image: kong:sdx-edge-local
+    container_name: kong-sdx-edge0
+    depends_on:
+      tls-cert-gen:
+        condition: service_completed_successfully
+      kong-sdx-control:
+        condition: service_started
+    build:
+      context: local/kong
+      dockerfile: sdx.Dockerfile
+    environment:
+      KONG_DEBUG_LEVEL: debug
+      KONG_TRUSTED_IPS: '' # Don't trust any
+      # Connect to the control plane using PKI mTLS. KONG_CLUSTER_SERVER_NAME
+      # must match the CN of the sdxkongc (control plane) certificate.
+      KONG_CLUSTER_CONTROL_PLANE: 'kong-sdx-control:8005'
+      KONG_CLUSTER_SERVER_NAME: kong-sdx-control
+      KONG_CLUSTER_MTLS: pki
+      KONG_CLUSTER_CERT: /etc/secrets/sdx-edge-rg0/tls.crt
+      KONG_CLUSTER_CERT_KEY: /etc/secrets/sdx-edge-rg0/tls.key
+      # Use the image's kong-owned prefix (sdx.Dockerfile's /kong_prefix isn't
+      # writable by the unprivileged kong user).
+      KONG_PREFIX: /usr/local/kong
+      KONG_PROXY_LISTEN: '0.0.0.0:9080, [::]:9080, 0.0.0.0:9443 http2 ssl, [::]:9443 http2 ssl'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+
+    ports:
+      - 9443:9443
+      - 9080:9080
+    networks:
+      aps-net:
+        aliases:
+          - kong-sdx-edge0.localtest.me
+    volumes:
+      - tls-certs:/etc/secrets:ro
+    restart: on-failure:5
+
+  oas-validation-api:
+    image: ${OAS_VALIDATION_API_IMAGE:-ghcr.io/bcgov/gwa-api/gwa-csit-oas-validation-api:dev}
+    container_name: oas-validation-api
+    ports:
+      - 8080:8080
+    restart: on-failure:5
+    networks:
+      aps-net:
+        aliases:
+          - oas-validation-api.localtest.me
   cypress-jwks-url:
     build:
       context: ./local/cypress-jwks-url
@@ -303,7 +483,7 @@ services:
       - testsuite
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.30
     container_name: mailpit
     restart: unless-stopped
     ports:
@@ -324,8 +504,9 @@ services:
       - --allow-write
       - --allow-read
       - /app/main.ts
+    # Needed when running portal outside of docker compose
     ports:
-      - '2020:2020'
+      - 2020:2020
     volumes:
       - ./local/mocks/step-token-api/main.ts:/app/main.ts
     networks:
@@ -333,5 +514,72 @@ services:
         aliases:
           - step-token-api.localtest.me
 
+  mocks-sdx-edge-api:
+    image: denoland/deno:2.7.12
+    container_name: mocks-sdx-edge-api
+    command:
+      - deno
+      - run
+      - --allow-net=:2021,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2021:2021
+    volumes:
+      - ./local/mocks/sdx-edge-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - sdx-edge-api.localtest.me
+
+  mocks-upstream-api:
+    image: denoland/deno:2.7.12
+    container_name: mocks-upstream-api
+    command:
+      - deno
+      - run
+      - --allow-net=:2025,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2025:2025
+    volumes:
+      - ./local/mocks/upstream-mock-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - upstream-mock-api.localtest.me
+
+  # Optional Postgres browser UI (not started by default).
+  #   docker compose --profile db-tools up -d pgadmin
+  # Open http://localhost:5050 — login: admin@local.dev / local
+  # kong-db is pre-registered; Superuser credentials: postgres / postgres
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: local
+      PGADMIN_DISABLE_POSTFIX: '1'
+    ports:
+      - '5050:80'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./local/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - aps-net
+    profiles:
+      - db-tools
+
 networks:
-  aps-net: {}
+  aps-net:
+    name: aps-net
+
+volumes:
+  pgadmin-data: {}
+  tls-certs: {}

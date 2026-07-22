@@ -1,0 +1,71 @@
+
+namespace SDX {
+    entity User;
+
+    entity ConnectionRequest;
+
+    action SubmitConnectionRequest
+        appliesTo {
+            principal: [User],
+            resource: [ConnectionRequest],
+            context: {
+                clientId: String,
+                serviceId: String,
+                isApproved: Bool,
+                policyVersion: String,
+                environment: String,
+                requesterDetails: {
+                    client: {
+                        clientId: String,
+                        privacyZone: String
+                    },
+                    requester: {
+                        name: String,
+                        email?: String
+                    },
+                    scopes: Set<String>,
+                    service: {
+                        clientId: String,
+                        privacyZone: String
+                    },
+                    submissionId: String
+                },
+                clientResources: {
+                    comment?: String,
+                    gatewayPatterns?: {
+                        "sdx-p2p-consumer-access.r1": {
+                            integrationClientId?: String,
+                        },
+                        "sdx-p2p-consumer.r1": {
+                            upgrades: {
+                                sign?: {
+                                    alg?: String
+                                },
+                                verify?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
+                                tokenExchange: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
+                                    audience: String,
+                                    scopes: Set<String>
+                                }
+                            }
+                        }
+                    }
+                },
+                combinedScopes: Set<String>,
+                action: String,
+                globals: {
+                    environment: {
+                        client_id: String,
+                        oauth_token_url: String,
+                        kong_admin_url: String,
+                        gwa_api_url: String,
+                        operator_edge_url: String
+                    }
+                }
+            }
+        };
+}

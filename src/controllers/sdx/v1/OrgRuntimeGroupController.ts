@@ -24,7 +24,7 @@ import { BatchResult } from '../../../batch/types';
 import { RuntimeGroupService } from '../../../services/batch/runtime-group';
 import { RuntimeGroup } from '../../../services/batch/types';
 import { CreateNamespaceForRuntimeGroup } from '../../../services/workflow/create-namespace-sdx';
-import { assertEqual } from '../../ioc/assert';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { RuntimeGroupInput } from './types';
 import {
@@ -150,15 +150,17 @@ export class RuntimeGroupController extends Controller {
    *
    * @param org - Organization identifier
    * @param name - Runtime group name to delete
+   * @param environment - Environment of the runtime group
    * @param force - If true, force deletion even if gateways are associated
    * @param request - HTTP request object for context creation
    */
-  @Delete('/{name}')
+  @Delete('/{name}/environments/{environment}')
   @OperationId('deleteRuntimeGroup')
   @Security('jwt', ['System.Manage'])
   public async delete(
     @Path() org: string,
     @Path() name: string,
+    @Path() environment: string,
     @Query('force') force: boolean,
     @Request() request: any
   ): Promise<BatchResult> {
@@ -168,7 +170,7 @@ export class RuntimeGroupController extends Controller {
     const service = new RuntimeGroupService();
 
     // Delete the runtime group (with force option if specified)
-    return service.deleteRuntimeGroup(context, org, name, force);
+    return service.deleteRuntimeGroup(context, org, name, environment, force);
   }
 
   /**
@@ -199,7 +201,8 @@ export class RuntimeGroupController extends Controller {
     const service = new RuntimeGroupService();
 
     // Verify the runtime group belongs to the specified organization
-    const rg = await service.findRuntimeGroupByName(context, org, name);
+    // for atleast 'dev'
+    const rgs = await service.findHostedRuntimeGroupsByName(context, org, name);
 
     // Create the namespace for the runtime group in the SDX edge environment
     const result = await CreateNamespaceForRuntimeGroup(context, {
@@ -209,13 +212,13 @@ export class RuntimeGroupController extends Controller {
 
     // Ensure the created namespace matches the expected gateway ID
     assertEqual(
-      rg.namespace === result.name,
+      rgs[0].namespace === result.name,
       true,
       'gatewayId',
       'Gateway ID mismatch after creation'
     );
 
-    return { gatewayId: rg.namespace };
+    return { gatewayId: rgs[0].namespace! };
   }
 
   /**
@@ -229,12 +232,13 @@ export class RuntimeGroupController extends Controller {
    * @param name - Runtime group name
    * @param request - HTTP request object for context creation
    */
-  @Post('/{name}/tokens')
+  @Post('/{name}/environments/{environment}/tokens')
   @OperationId('generateOneTimeUseToken')
   @Security('jwt', ['System.Manage'])
   public async generateOneTimeUseToken(
     @Path() org: string,
     @Path() name: string,
+    @Path() environment: string,
     @Request() request: any
   ): Promise<{ token: string }> {
     // Create Keystone context with access control disabled
@@ -243,7 +247,14 @@ export class RuntimeGroupController extends Controller {
     const service = new RuntimeGroupService();
 
     // Verify the runtime group belongs to the specified organization
-    const rg = await service.findRuntimeGroupByName(context, org, name);
+    const rgList = await service.findOrgRuntimeGroupsByName(context, org, name);
+
+    const rg = rgList.find((rg) => rg.environment === environment);
+    assertIsDefined(
+      rg,
+      'environment',
+      'Runtime Group not found for the specified environment'
+    );
 
     const token = await service.generateCertSignRequestToken(rg);
 

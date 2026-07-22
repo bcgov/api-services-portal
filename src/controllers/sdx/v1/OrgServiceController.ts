@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  FormField,
   Get,
   OperationId,
   Path,
@@ -11,17 +10,16 @@ import {
   Request,
   Route,
   Security,
-  Tags,
-  UploadedFile,
+  Tags
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
 import {
-  deleteRecordByInternalId,
   getRecordById,
   syncRecordsThrowErrors,
 } from '../../../batch/feed-worker';
 import { BatchResult } from '../../../batch/types';
+import { Logger } from '../../../logger';
 import { OpenAPISpecService } from '../../../services/batch/oas-service';
 import {
   GetCatalog,
@@ -32,9 +30,8 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
-import { assertEqual } from '../../ioc/assert';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
-import { Logger } from '../../../logger';
 import { ExpressRequest } from './types';
 
 const logger = Logger('controller.gateway-service');
@@ -70,6 +67,7 @@ export class GatewayServiceController extends Controller {
   public async createOASService(
     @Path() org: string,
     @Query() subsystem: string,
+    @Query() environment: string,
     @Body() body: any,
     @Request() request: ExpressRequest & { rawBody: Buffer }
   ): Promise<BatchResult> {
@@ -98,6 +96,7 @@ export class GatewayServiceController extends Controller {
       subsystem,
       spec: rawBody,
       state: 'active',
+      environment,
     };
 
     const final = await LoadOpenAPISpec(context, input);
@@ -109,8 +108,12 @@ export class GatewayServiceController extends Controller {
       final
     );
     if (result.result === 'created') {
-      const { name } = await getRecordById(context, 'OpenAPISpec', result.id!);
-      result.refKey = name;
+      const { name: serviceName } = await getRecordById(
+        context,
+        'OpenAPISpec',
+        result.id!
+      );
+      result.refKey = serviceName;
     }
     return result;
   }
@@ -204,17 +207,23 @@ export class GatewayServiceController extends Controller {
       'Not authorized to access this service'
     );
 
+    assertIsDefined(
+      entry.spec,
+      'spec',
+      'No OpenAPI specification found for this service'
+    );
     return YAML.parse(entry.spec);
   }
 
   /**
+   * Deletes an OAS service.  Must have no active connection requests.
+   *
    * > `Required Scope:` System.Manage
    *
    * @summary Delete an OAS service
-   * @param org
-   * @param name
-   * @param request
-   * @example { force: false } body
+   * @param org - Organization identifier
+   * @param name - OAS service name to delete
+   * @param request - HTTP request object for context creation
    */
   @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')
@@ -225,18 +234,15 @@ export class GatewayServiceController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request, true);
-
-    const entry = await new OpenAPISpecService().findOpenAPISpecByName(
+    const oasService = new OpenAPISpecService();
+    const serviceSpec = await oasService.findOpenAPISpecByName(context, name);
+    const result = await oasService.deleteOASService(
       context,
-      name
-    );
-    assertEqual(
-      entry && entry.subsystem.organization.name === org,
-      true,
-      'organization',
-      'Not authorized to access this service'
+      org,
+      name,
+      serviceSpec
     );
 
-    return await deleteRecordByInternalId(context, 'OpenAPISpec', entry.id);
+    return result;
   }
 }

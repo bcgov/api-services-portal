@@ -16,13 +16,13 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ env.REGISTRY_USERNAME }}
@@ -41,10 +41,10 @@ jobs:
 
       - name: Set DEPLOY_ID
         run: |
-          echo "::set-output name=APP_REVISION::${GITHUB_SHA}"
+          echo "APP_REVISION=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
         id: set-deploy-id
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -53,10 +53,10 @@ jobs:
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v4
 
       - name: Build Portal
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -70,13 +70,27 @@ jobs:
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
       - name: Build Feeder
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: ./feeds
           file: ./feeds/Dockerfile
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder:${{ steps.release.outputs.tag_name }}
+          push: true
+          build-args: |
+            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+            APP_VERSION=${{ steps.release.outputs.version }}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
+
+      - name: Build Provisioner API
+        uses: docker/build-push-action@v2
+        with:
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          context: ./provisioner-api
+          file: ./provisioner-api/Dockerfile
+          tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-api:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}

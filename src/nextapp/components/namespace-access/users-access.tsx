@@ -13,7 +13,6 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
-import get from 'lodash/get';
 import { gql } from 'graphql-request';
 import groupBy from 'lodash/groupBy';
 import NamespaceAccessDialog from './namespace-access-dialog';
@@ -30,6 +29,13 @@ interface UsersAccessProps {
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
+}
+
+const EDIT_UNAVAILABLE_MESSAGE =
+  'Email unavailable. Ask this user to sign in to the API Services Portal with IDIR, then refresh this page. If email is still unavailable, revoke access and re-grant using their email address.';
+
+function canEditUserAccess(item: AccessItem): boolean {
+  return Boolean(item.requesterEmail?.trim());
 }
 
 const UsersAccess: React.FC<UsersAccessProps> = ({
@@ -76,11 +82,8 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       );
       const result = Object.keys(groupedByRequester).map((r) => {
         const requesterName = r.split('|')[1];
-        const requesterEmail = get(
-          groupedByRequester[r],
-          '[0].requesterEmail',
-          requesterName
-        );
+        const requesterEmail =
+          groupedByRequester[r][0]?.requesterEmail ?? undefined;
         return {
           requesterName,
           requesterEmail,
@@ -100,8 +103,18 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   }, [data, isSuccess, search]);
 
   const handleGrantAccess = async (form: FormData) => {
-    const email = form.get('email') as string;
+    const email = (form.get('email') as string)?.trim();
     const scopes = form.getAll('scopes') as string[];
+
+    if (!email) {
+      toast({
+        status: 'error',
+        title: 'Unable to grant user access',
+        description: 'Email is required.',
+        isClosable: true,
+      });
+      return;
+    }
 
     try {
       await grant.mutateAsync({
@@ -128,7 +141,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     }
   };
   const handleUpdateAccess = async (form: FormData) => {
-    const email = form.get('email') as string;
+    const email = (form.get('email') as string)?.trim();
     const scopes = form.getAll('scopes') as string[];
 
     try {
@@ -258,40 +271,56 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         ]}
         data={requests}
       >
-        {(d: AccessItem, index) => (
-          <Tr key={uid(d)} data-testid={`nsa-users-table-row-${index}`}>
-            <Td>{d.requesterName}</Td>
-            <Td>
-              <Wrap>
-                {d.scopes.map((s) => (
-                  <WrapItem key={uid(s)}>
-                    <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
-                  </WrapItem>
-                ))}
-              </Wrap>
-            </Td>
-            <Td textAlign="right">
-              <ActionsMenu
-                placement="bottom-end"
-                data-testid={`nsa-users-table-row-${index}-menu`}
-              >
-                <MenuItem
-                  onClick={handleEditAccess(d)}
-                  data-testid={`nsa-users-table-row-${index}-edit-btn`}
+        {(d: AccessItem, index) => {
+          const canEdit = canEditUserAccess(d);
+          return (
+            <Tr key={uid(d)} data-testid={`nsa-users-table-row-${index}`}>
+              <Td>
+                {d.requesterName}
+                {!canEdit && (
+                  <Text
+                    fontSize="sm"
+                    color="bc-component"
+                    mt={1}
+                    data-testid={`nsa-users-table-row-${index}-email-unavailable`}
+                  >
+                    {EDIT_UNAVAILABLE_MESSAGE}
+                  </Text>
+                )}
+              </Td>
+              <Td>
+                <Wrap>
+                  {d.scopes.map((s) => (
+                    <WrapItem key={uid(s)}>
+                      <Tag variant="outline">{s.name.replace(/Namespace/g, 'Gateway')}</Tag>
+                    </WrapItem>
+                  ))}
+                </Wrap>
+              </Td>
+              <Td textAlign="right">
+                <ActionsMenu
+                  placement="bottom-end"
+                  data-testid={`nsa-users-table-row-${index}-menu`}
                 >
-                  Edit Access
-                </MenuItem>
-                <MenuItem
-                  color="bc-error"
-                  onClick={handleRevokeAccess(d)}
-                  data-testid={`nsa-users-table-row-${index}-revoke-btn`}
-                >
-                  Revoke Access
-                </MenuItem>
-              </ActionsMenu>
-            </Td>
-          </Tr>
-        )}
+                  <MenuItem
+                    isDisabled={!canEdit}
+                    onClick={handleEditAccess(d)}
+                    data-testid={`nsa-users-table-row-${index}-edit-btn`}
+                  >
+                    Edit Access
+                  </MenuItem>
+                  <MenuItem
+                    color="bc-error"
+                    onClick={handleRevokeAccess(d)}
+                    data-testid={`nsa-users-table-row-${index}-revoke-btn`}
+                  >
+                    Revoke Access
+                  </MenuItem>
+                </ActionsMenu>
+              </Td>
+            </Tr>
+          );
+        }}
       </Table>
     </>
   );

@@ -1,12 +1,12 @@
 import {
   Controller,
-  Request,
   Delete,
   OperationId,
   Put,
   Path,
   Route,
   Query,
+  Request,
   Security,
   Body,
   Get,
@@ -16,16 +16,13 @@ import { KeystoneService } from '../ioc/keystoneInjector';
 import { assertEqual } from '../ioc/assert';
 import { inject, injectable } from 'tsyringe';
 import {
-  syncRecords,
-  getRecords,
   parseJsonString,
   removeEmpty,
   removeKeys,
-  transformAllRefID,
+  parseBlobString,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
-  leaf,
   NamespaceService,
 } from '../../services/org-groups';
 import {
@@ -37,12 +34,21 @@ import {
   GroupMembership,
   OrgNamespace,
 } from '../../services/org-groups/types';
-import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
+import {
+  getOrganization,
+  getOrganizations,
+  getOrganizationUnit,
+} from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
-import { Activity } from './types';
+import {
+  buildOrgAccessDisplayNameResolver,
+  logOrganizationAccessChanges,
+} from '../../services/workflow/org-activity';
+import { Logger } from '../../logger';
 import { isParent } from '../../services/org-groups/group-converter-utils';
-import { ActivitySummary } from '../../services/keystone/types';
 import { ActivityDetail } from './types-extra';
+
+const logger = Logger('v2.OrganizationController');
 
 @injectable()
 @Route('/organizations')
@@ -126,7 +132,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['GroupAccess.Manage'])
   public async put(
     @Path() org: string,
-    @Body() body: GroupMembership
+    @Body() body: GroupMembership,
+    @Request() request: any
   ): Promise<void> {
     // must match either the 'name' or one of the parent nodes
     assertEqual(
@@ -142,7 +149,26 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
+    const changes = await groupAccessService.createOrUpdateGroupAccess(body, [
+      'idir',
+    ]);
+
+    const activityCtx = this.keystone.createContext(request, true);
+
+    const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
+      envConfig.issuerUrl,
+      envConfig.clientId,
+      envConfig.clientSecret
+    );
+
+    await logOrganizationAccessChanges(
+      activityCtx,
+      { parent: body.parent, name: body.name! },
+      changes,
+      resolveDisplayName
+    ).catch((e) =>
+      logger.error('[OrgActivity] organization access changes %s', e)
+    );
   }
 
   /**
@@ -161,6 +187,16 @@ export class OrganizationController extends Controller {
   }
 
   /**
+   * Assign a Namespace to an Organization Unit.
+   *
+   * Only Organizations sourced from the BC Data Catalogue
+   * (`extSource: "ckan"`) may be assigned to a Namespace.  Organizations
+   * sourced from SDX or created as "custom" entries are intentionally
+   * rejected so that namespace-to-organization mappings stay aligned
+   * with the authoritative public-body data registry.  This mirrors the
+   * filter applied to the _Add Organization_ dropdown in the UI so
+   * direct API callers cannot bypass it.
+   *
    * > `Required Scope:` Namespace.Assign
    */
   @Put('{org}/{orgUnit}/namespaces/{ns}')
@@ -170,7 +206,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Path() orgUnit: string,
     @Path() ns: string,
-    @Query() enable: boolean = true
+    @Query() enable = true
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
@@ -179,6 +215,14 @@ export class OrganizationController extends Controller {
       true,
       'org',
       'Invalid Organization'
+    );
+
+    const parentOrg = await getOrganization(ctx, org);
+    assertEqual(
+      parentOrg.extSource === 'ckan',
+      true,
+      'org',
+      'Only ckan-sourced Organizations may be assigned to a namespace'
     );
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
@@ -241,8 +285,8 @@ export class OrganizationController extends Controller {
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,
-    @Query() first: number = 20,
-    @Query() skip: number = 0
+    @Query() first = 20,
+    @Query() skip = 0
   ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     //const org = await getOrganizationUnit(ctx, orgUnit);
@@ -263,8 +307,9 @@ export class OrganizationController extends Controller {
     );
 
     return transformActivity(records)
+      .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']));
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
   }
 }

@@ -2,6 +2,7 @@ import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import {
   deleteRecordByInternalId,
+  deleteRecordByInternalIdThrowErrors,
   getRecords,
   removeKeys,
   syncRecordsThrowErrors,
@@ -18,7 +19,7 @@ import { SubsystemService } from './subsystem';
 import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
-import { KongTagService } from '../kong/tag-service';
+import { ProvisionerService } from '../provisioner';
 
 const logger = Logger('batch.connection');
 
@@ -39,7 +40,7 @@ class ConnectionService {
   upsertConnection = async (
     context: Keystone,
     org: string,
-    body: ConnectionRequestUpdateInput
+    body: ConnectionRequestInput
   ): Promise<BatchResult> => {
     // lookup the client subsystem
     const service = new SubsystemService();
@@ -63,13 +64,21 @@ class ConnectionService {
       throw new Error('Invalid serviceId');
     }
 
-    // if approving the connection, validate the client and service belong to the same organization
-    if (body.isApproved) {
+    if (body.environment && serviceSpec.environment !== body.environment) {
+      throw new Error(
+        `Service environment '${serviceSpec.environment}' does not match requested connection environment '${body.environment}'`
+      );
+    } else {
+      body.environment = serviceSpec.environment as any;
+    }
+
+    // if approving or explicitely rejecting the connection, validate the client and service belong to the same organization
+    if (body.isApproved === true || body.isApproved === false) {
       assertEqual(
         serviceSpec.organization.name === org,
         true,
         'isApproved',
-        'Cannot approve connection request when service organization does not match the specified organization'
+        'Cannot approve/reject connection request when service organization does not match the specified organization'
       );
     } else {
       assertEqual(
@@ -150,12 +159,25 @@ class ConnectionService {
       serviceSpec
     );
 
-    assert.strictEqual(Boolean(process.env.KONG_URL), true, 'KONG_URL not set');
+    assert.strictEqual(
+      Boolean(process.env.PROVISIONER_URL),
+      true,
+      'PROVISIONER_URL not set'
+    );
 
-    const kongTagService = new KongTagService(process.env.KONG_URL);
+    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
+
     const [clientConfig, serviceConfig] = await Promise.all([
-      kongTagService.listTaggedConfig(clientTag),
-      kongTagService.listTaggedConfig(serviceTag),
+      provisioner.getGatewayResources(
+        clientSubsystem.namespace!,
+        connection.environment!,
+        clientTag
+      ),
+      provisioner.getGatewayResources(
+        serviceSpec.subsystem!.namespace!,
+        connection.environment!,
+        serviceTag
+      ),
     ]);
 
     return {
@@ -220,7 +242,11 @@ class ConnectionService {
       )}`
     );
 
-    return await deleteRecordByInternalId(context, 'ConnectionRequest', id);
+    return await deleteRecordByInternalIdThrowErrors(
+      context,
+      'ConnectionRequest',
+      id
+    );
   };
 
   listConnectionsByOrganization = async (
@@ -232,6 +258,26 @@ class ConnectionService {
       clause:
         '{ OR: [{ clientOrganization: { name: $org } }, { serviceOrganization: { name: $org } }] }',
       variables: { org },
+    };
+
+    const records: KeystoneConnectionRequest[] = await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      batchClause
+    );
+    return records;
+  };
+
+  listConnectionsByClientId = async (
+    context: Keystone,
+    clientId: string
+  ): Promise<KeystoneConnectionRequest[]> => {
+    const batchClause = {
+      query: '$clientId: String',
+      clause: '{ clientId: $clientId }',
+      variables: { clientId },
     };
 
     const records: KeystoneConnectionRequest[] = await getRecords(

@@ -46,7 +46,7 @@ import {
     authentication: { item: identity },
   });
 
-  if (true) {
+  if (false) {
     const r = await recordActivityWithBlob(
       ctx,
       'delete',
@@ -98,14 +98,37 @@ package2:
       yamlExample
     );
   }
-  const records = await getActivity(ctx, ['refactortime'], undefined, 20);
+  //const records = await getActivity(ctx, ['refactortime'], undefined, 20);
 
+  const records = [
+    {
+      id: '8',
+      clientId: 'LAB.MIN.FOOD.MY-FOOD-API',
+      serviceId: 'LAB.MIN.FOOD.FABRIC.v1',
+      isApproved: false,
+      isActive: true,
+      policyVersion: 'SDX.R0.00',
+      environment: 'dev',
+      requesterDetails:
+        '{"submissionId":"submission-1780532868201-i7430pqniml","requestor":"Joe","scopes":[],"client":{"integrationId":"000123","clientId":"client-123","privacyZone":"citizen"},"service":{"clientId":" client-456","privacyZone":"health"}}',
+      clientResources: '{}',
+      serviceResources:
+        '{"subsystemId":"LAB.MIN.FOOD.MY-FOOD-API","gatewayResources":{}}',
+      provisionerStatus: '{}',
+    },
+  ];
   o(
     records
       .map((o) => removeEmpty(o))
       // .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['context']))
-      .map((o) => parseBlobString(o))
+      .map((o) =>
+        parseJsonString(o, [
+          'requesterDetails',
+          'clientResources',
+          'serviceResources',
+          'provisionerStatus',
+        ])
+      )
   );
 
   await keystone.disconnect();

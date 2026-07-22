@@ -54,6 +54,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
   })
 
   it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
@@ -92,6 +93,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
   })
 
   it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
@@ -222,9 +224,9 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
 
   it('Clear Redis rate limit keys before setting new rate limit', () => {
     cy.exec(
-      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
-      { failOnNonZeroExit: false }
+      "export REDISCLI_AUTH=s3cr3t && redis-cli -h redis-master --scan --pattern 'ratelimit*' | xargs -r redis-cli -h redis-master DEL"
     )
+    cy.exec('curl -v -X DELETE http://kong.localtest.me:8001/cache')
   })
 
   it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
@@ -235,14 +237,19 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
     })
   })
 
-  it('verify rate limit error when the API calls beyond the limit', () => {
-    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+  it('verify rate limit ok when the API calls within the limit', () => {
+    cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(200)
         }
       )
+    })
+  })
+
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(429)
@@ -289,9 +296,10 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
 
   it('Clear Redis rate limit keys before setting new rate limit', () => {
     cy.exec(
-      'docker exec redis-master sh -c "export REDISCLI_AUTH=s3cr3t && redis-cli --scan --pattern \'ratelimit*\' | xargs -r redis-cli DEL"',
-      { failOnNonZeroExit: false }
+      "export REDISCLI_AUTH=s3cr3t && redis-cli -h redis-master --scan --pattern 'ratelimit*' | xargs -r redis-cli -h redis-master DEL",
+      { failOnNonZeroExit: true }
     )
+    cy.exec('curl -v -X DELETE http://kong.localtest.me:8001/cache')
   })
 
   it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
@@ -299,17 +307,22 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
       cy.visit(consumers.path)
       consumers.clickOnTheFirstConsumerID()
       consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, 'Route', 'Redis')
+      cy.wait(10000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     })
   })
 
-  it('verify rate limit error when the API calls beyond the limit', () => {
-    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
+  it('verify rate limit ok when the API calls within the limit', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(200)
         }
       )
+    })
+  })
+
+  it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
           expect(response.status).to.be.equal(429)

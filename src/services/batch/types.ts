@@ -17,6 +17,7 @@ export interface Organization {
   sector?: string;
   title?: string;
   description?: string;
+  publicBodyId?: string;
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];
@@ -263,7 +264,7 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
-  owner?: UserRefID;
+  gatewayId?: string;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }
@@ -286,9 +287,12 @@ export interface OpenAPISpec {
   title?: string;
   version?: string;
   spec?: string;
+  specVersion?: string;
   summary?: string;
   description?: string;
+  environment?: string;
   operations?: string;
+  annotations?: string;
   gatewayId?: string;
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
@@ -306,15 +310,40 @@ export interface Subsystem {
   description?: string;
   gatewayId?: string;
   organization?: OrganizationRefID;
+  integrations?: SubsystemIntegration[];
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface SubsystemIntegration {
+  integrationClientId?: string; // Primary Key
+  subsystemId?: string;
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface Task {
+  ref?: string; // Primary Key
+  title?: string;
+  type?: string;
+  status?: "pending" | "approved" | "rejected" | "processed";
+  jsonBlob?: any; // toString
 }
 
 
 /**
  * @tsoaModel
  * @example {
- *   "name": "my-runtime-group",
+ *   "name": "edge1",
+ *   "environment": "dev",
  *   "gatewayId": "gw-abc",
- *   "host": "runtime-group.my-domain.sdx",
+ *   "host": "edge1.dev.servers.sdx",
  *   "sdxEndpoint": "10.10.10.10:443",
  *   "consumerEndpoint": "10.0.0.11:6443",
  *   "hostedOrganizations": [
@@ -324,7 +353,8 @@ export interface Subsystem {
  * }
  */  
 export interface RuntimeGroup {
-  name?: string; // Primary Key
+  name?: string;
+  environment?: string;
   host?: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;
@@ -344,11 +374,29 @@ export interface RuntimeGroup {
  * }
  */  
 export interface ConnectionRequest {
-  slug?: string; // Primary Key
+  id?: string; // Primary Key
   clientId?: string;
   serviceId?: string;
   isApproved?: boolean;
   isActive?: boolean;
+  scopes?: string;
+  policyVersion?: string;
+  environment?: string;
+  provisionerStatus?: ProvisionerStatus;
+  requesterDetails?: any; // toString
+  clientResources?: any; // toString
+  serviceResources?: any; // toString
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface ProvisionerStatus {
+  name?: string; // Primary Key
+  message?: string;
+  status?: "pending" | "provisioned" | "failed";
 }
 
 
@@ -375,6 +423,7 @@ export interface Product {
   gatewayId?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
+  organization?: OrganizationRefID;
 }
 
 

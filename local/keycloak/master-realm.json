@@ -746,8 +746,8 @@
     },
     {
       "id": "6f0b857d-3951-444d-823e-193bf9f12f67",
-      "name": "system-owner",
-      "path": "/system-owner",
+      "name": "system-admin",
+      "path": "/system-admin",
       "attributes": {},
       "realmRoles": [],
       "clientRoles": {},
@@ -755,7 +755,7 @@
         {
           "id": "1f434902-eda6-4d6a-a366-2dbfdbf3866c",
           "name": "ca.bc.gov",
-          "path": "/system-owner/ca.bc.gov",
+          "path": "/system-admin/ca.bc.gov",
           "attributes": {},
           "realmRoles": [],
           "clientRoles": {},
@@ -763,7 +763,7 @@
             {
               "id": "7f1b0078-fb8c-4ce9-aa50-06a690360508",
               "name": "ministry-of-health",
-              "path": "/system-owner/ca.bc.gov/ministry-of-health",
+              "path": "/system-admin/ca.bc.gov/ministry-of-health",
               "attributes": {},
               "realmRoles": [],
               "clientRoles": {},
@@ -1002,7 +1002,7 @@
       "notBefore": 0,
       "groups": [
         "/organization-admin/ca.bc.gov",
-        "/system-owner/ca.bc.gov"
+        "/system-admin/ca.bc.gov"
       ]
     },
     {
@@ -1413,6 +1413,18 @@
       },
       "notBefore": 0,
       "groups": []
+    },
+    {
+      "id": "e0d511ab-0711-4634-94e6-7d7f4e473113",
+      "username": "service-account-sdx-provisioner",
+      "emailVerified": false,
+      "enabled": true,
+      "createdTimestamp": 1781066628919,
+      "totp": false,
+      "serviceAccountClientId": "sdx-provisioner",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "notBefore": 0
     },
     {
       "id": "106ae49e-2334-4147-9f59-cd1ef50dab3b",
@@ -2291,24 +2303,24 @@
           },
           {
             "id": "ca848ff4-76b0-4f2d-afe9-7dfd77467fcb",
-            "name": "group-system-owner-ca.bc.gov-policy",
-            "description": "Group '/system-owner' / 'ca.bc.gov' Policy",
+            "name": "group-system-admin-ca.bc.gov-policy",
+            "description": "Group '/system-admin' / 'ca.bc.gov' Policy",
             "type": "group",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "groups": "[{\"path\":\"/system-owner/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-owner\",\"extendChildren\":false}]"
+              "groups": "[{\"path\":\"/system-admin/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-admin\",\"extendChildren\":false}]"
             }
           },
           {
             "id": "6a49c571-fbbb-4f86-a72a-c1591a446bb3",
-            "name": "group-system-owner-ca.bc.gov-ministry-of-health-policy",
-            "description": "Group '/system-owner/ca.bc.gov' / 'ministry-of-health' Policy",
+            "name": "group-system-admin-ca.bc.gov-ministry-of-health-policy",
+            "description": "Group '/system-admin/ca.bc.gov' / 'ministry-of-health' Policy",
             "type": "group",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "groups": "[{\"path\":\"/system-owner/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/system-owner/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-owner\",\"extendChildren\":false}]"
+              "groups": "[{\"path\":\"/system-admin/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/system-admin/ca.bc.gov\",\"extendChildren\":false},{\"path\":\"/system-admin\",\"extendChildren\":false}]"
             }
           },
           {
@@ -2357,6 +2369,17 @@
             }
           },
           {
+            "id": "f2e764aa-c355-4e81-a5e6-e76ffb860100",
+            "name": "sdx-provisioner",
+            "description": "",
+            "type": "client",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "clients": "[\"sdx-provisioner\"]"
+            }
+          },
+          {
             "id": "65f0c0a4-e2ac-4364-800d-ebd4e11ce393",
             "name": "janis full access",
             "type": "scope",
@@ -2393,14 +2416,14 @@
           },
           {
             "id": "3a934d3f-d231-48fc-9f5a-924da7808989",
-            "name": "Access to 'org/ministry-of-health' services for role system-owner",
+            "name": "Access to 'org/ministry-of-health' services for role system-admin",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "resources": "[\"org/ministry-of-health\"]",
               "scopes": "[\"System.Manage\"]",
-              "applyPolicies": "[\"group-system-owner-ca.bc.gov-ministry-of-health-policy\"]"
+              "applyPolicies": "[\"group-system-admin-ca.bc.gov-ministry-of-health-policy\"]"
             }
           },
           {
@@ -2425,6 +2448,18 @@
               "resources": "[\"platform\"]",
               "scopes": "[\"Namespace.View\"]",
               "applyPolicies": "[\"group-organization-admin-ca.bc.gov-ministry-of-health-planning-and-innovation-division-policy\"]"
+            }
+          },
+          {
+            "id": "f2e764aa-c355-4e81-a5e6-e76ffb860000",
+            "name": "sdx-provisioner System.Manage",
+            "description": "",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "scopes": "[\"System.Manage\"]",
+              "applyPolicies": "[\"sdx-provisioner\"]"
             }
           }
         ],
@@ -2863,6 +2898,128 @@
       ],
       "defaultClientScopes": [],
       "optionalClientScopes": []
+    },
+    {
+      "id": "ab8888ac-a06b-44b8-abe1-291ac2d48383",
+      "clientId": "sdx-bruno-client",
+      "name": "",
+      "description": "",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://*"
+      ],
+      "webOrigins": [
+        "http://*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "dpop.bound.access.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "Namespace.Create",
+        "Namespace.Admin",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "3d2de300-3078-4f20-bde3-fb621c9cfc2e",
+      "clientId": "sdx-provisioner",
+      "name": "SDX Provisioner",
+      "description": "",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-jwt",
+      "secret": "**********",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "logout.confirmation.enabled": "false",
+        "jwks.string": "{\n  \"keys\": [\n    {\n      \"kty\": \"RSA\",\n      \"n\": \"y5dRkcSHXOXdoI9mbvR0Cqo4h3P3EfnprStWjhh4nezNPPz1TYDoa5JaC_sYBJxDCuRjDXxMH4TGGg5XOj-GZ-AFdAHYbQz-zQ4_s-cxBzdmmJ14rF1KSEzkTyYQSs5jpDfPhxEhBCIgzf-nS3yUHVSou6P4eO1AgJqSj26AG2pW8E0YnB9oFsnKMCyiqyAE7PiOqcB0UzSj19gpRdSkm5ndwpFOwLT1INEaWOq3iYpvBwClLX2rzbRXDpCi9dbfRPRXBQ63KW5bysmKPPro8rY3-zWBasbyk-lxjR8N0BsGNFz6Ozo-rbhS2hAS7qkKz6aYUxDTA-97OEwxEqgndQ\",\n      \"e\": \"AQAB\",\n      \"alg\": \"RS256\",\n      \"use\": \"sig\"\n    }\n  ]\n}",
+        "client.secret.creation.time": "1781066628",
+        "standard.token.exchange.enabled": "false",
+        "frontchannel.logout.session.required": "true",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "use.jwks.string": "true",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "dpop.bound.access.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "service_account",
+        "web-origins",
+        "acr",
+        "Namespace.Create",
+        "Namespace.Admin",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     },
     {
       "id": "5c797848-2f03-4085-a03a-e4f7c22d0050",

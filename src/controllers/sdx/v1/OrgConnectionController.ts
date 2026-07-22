@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   OperationId,
+  Patch,
   Path,
   Put,
   Request,
@@ -17,11 +18,15 @@ import { ConnectionRequest } from '../../../services/batch/types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ConnectionRequestInput } from './types';
 import {
+  parseJsonString,
   removeEmpty,
   removeKeys,
   transformAllRefID,
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
+import { Logger } from '../../../logger';
+
+const logger = Logger('controller.org-connection');
 
 @injectable()
 @Route('/organizations/{org}/connections')
@@ -34,6 +39,15 @@ export class OrgConnectionController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Add or update a connection request
+   * > `Required Scope:` System.Manage
+   *
+   * @param org
+   * @param input
+   * @param request
+   * @returns
+   */
   @Put()
   @OperationId('upsertConnection')
   @Security('jwt', ['System.Manage'])
@@ -44,7 +58,41 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request);
 
+    // For R0 policy, force the requester details to be the user making this request
+    if (input.policyVersion === 'SDX.R0.00' && input.requesterDetails) {
+      input.requesterDetails.requester = {
+        name: request.user.name,
+        email: request.user.email,
+      };
+    }
+
     return new ConnectionService().upsertConnection(ctx, org, input);
+  }
+
+  /**
+   * Update a connection request approval setting `isApproved`
+   * > `Required Scope:` Connection.Manage
+   *
+   * @param org
+   * @param input
+   * @param request
+   * @returns
+   */
+  @Put('/approval')
+  @OperationId('updateConnectionApproval')
+  @Security('jwt', ['Connection.Manage'])
+  public async updateConnectionApproval(
+    @Path() org: string,
+    @Body() input: ConnectionRequestInput,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+
+    return new ConnectionService().upsertConnection(ctx, org, {
+      clientId: input.clientId,
+      serviceId: input.serviceId,
+      isApproved: input.isApproved,
+    });
   }
 
   @Get()
@@ -59,12 +107,21 @@ export class OrgConnectionController extends Controller {
       ctx,
       org
     );
+
     return records
       .map((o) => removeEmpty(o))
+      .map((o) => removeKeys(o, ['slug']))
+      .map((o) =>
+        parseJsonString(o, [
+          'requesterDetails',
+          'clientResources',
+          'serviceResources',
+          'provisionerStatus',
+        ])
+      )
       .map((o) =>
         transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
-      )
-      .map((o) => removeKeys(o, ['slug']));
+      );
   }
 
   @Delete('/{id}')

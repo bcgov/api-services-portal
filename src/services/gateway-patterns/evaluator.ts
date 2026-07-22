@@ -1,9 +1,10 @@
 import { FieldErrors, ValidateError } from 'tsoa';
 import { SimpleServicePattern } from './patterns/simple-service';
-import { SDXP2PConsumerPattern } from './patterns/sdx-p2p-consumer';
-import { SDXP2PProviderPattern } from './patterns/sdx-p2p-provider';
-import { SDXRuntimeGroupPattern } from './patterns/sdx-runtime-group';
-import { SDXKeysPattern } from './patterns/sdx-keys';
+
+export interface PatternOutput {
+  documents: any[];
+  _gateway_id?: string;
+}
 
 interface PatternProcessor {
   id: string;
@@ -14,10 +15,6 @@ interface PatternProcessor {
 
 const PATTERNS: Record<string, PatternProcessor> = {
   [SimpleServicePattern.id]: SimpleServicePattern,
-  [SDXP2PConsumerPattern.id]: SDXP2PConsumerPattern,
-  [SDXP2PProviderPattern.id]: SDXP2PProviderPattern,
-  [SDXRuntimeGroupPattern.id]: SDXRuntimeGroupPattern,
-  [SDXKeysPattern.id]: SDXKeysPattern,
 };
 
 export interface GatewayPatternConfig {
@@ -55,7 +52,7 @@ export function raiseValidateError(
 export async function GetConfigUsingPattern(
   ctx: any,
   inputs: GatewayPatternConfig
-): Promise<any> {
+): Promise<PatternOutput> {
   if (PATTERNS[inputs.pattern]) {
     const pattern = PATTERNS[inputs.pattern];
     expectRequiredParams(inputs.parameters, pattern.requiredParams);

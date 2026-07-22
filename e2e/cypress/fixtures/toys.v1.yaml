@@ -24,8 +24,7 @@ paths:
       summary: Get a list of toys
       operationId: toys_list
       security:
-        - bearer_auth:
-            - openid
+        - bearer_auth: []
       description: This endpoint retrieves a list of toys.
       responses:
         '200':

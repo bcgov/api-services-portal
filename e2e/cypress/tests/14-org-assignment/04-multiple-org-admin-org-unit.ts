@@ -27,20 +27,17 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Navigate to User Groups', () => {
-    cy.wait(10000)
-    cy.get('[id=nav-toggle').click()
-    cy.contains('Groups').click()
-    cy.get('[id=nav-toggle').click()
+    groups.visitGroups()
   })
 
   it('Add another org unit', () => {
     const parentGroupName = 'ministry-of-health'
     const newGroupName = 'health-protection'
-    
+
     let authToken: string = ''
     let parentGroupId: string = ''
     let baseUrl: string = ''
-    
+
     // Intercept API calls to capture Bearer token from request headers
     cy.intercept('GET', '**/groups/**', (req) => {
       if (req.headers['authorization']) {
@@ -51,11 +48,18 @@ describe('Give a user org admin access at organization unit level', () => {
       }
       req.continue()
     }).as('groupsApi')
-    
+
     // Navigate to groups and click on parent group to trigger API call
-    cy.get('[data-testid="table-search-input"]').type(parentGroupName).type('{enter}')
-    cy.get('button').contains(parentGroupName).click({ force: true })
-    
+    cy.get(groups.groupSearchInput, { timeout: 20000 })
+      .should('be.visible')
+      .clear()
+      .type(parentGroupName)
+      .type('{enter}')
+    cy.get('button', { timeout: 15000 })
+      .contains(parentGroupName)
+      .should('be.visible')
+      .click()
+
     // Wait for API call and extract group ID and base URL from intercepted request
     cy.wait('@groupsApi', { timeout: 10000 }).then((interception: any) => {
       const url = interception.request.url
@@ -64,43 +68,43 @@ describe('Give a user org admin access at organization unit level', () => {
       if (groupIdMatch && groupIdMatch[1]) {
         parentGroupId = groupIdMatch[1]
       }
-      
+
       // Extract base URL from intercepted request (e.g., http://keycloak.localtest.me:9081)
       const baseUrlMatch = url.match(/^(https?:\/\/[^\/]+)/)
       if (baseUrlMatch && baseUrlMatch[1]) {
         baseUrl = baseUrlMatch[1]
       }
     })
-    
+
     // Create the child group via API
     cy.then(() => {
       if (!authToken) {
         throw new Error('Could not retrieve Bearer token')
       }
-      
+
       if (!parentGroupId) {
         throw new Error(`Could not find parent group ID for ${parentGroupName}`)
       }
-      
+
       if (!baseUrl) {
         throw new Error('Could not extract base URL from intercepted request')
       }
-      
+
       // Construct API URL using base URL from intercepted request
       const apiUrl = `${baseUrl}/auth/admin/realms/master/groups/${parentGroupId}/children`
-      
+
       cy.request({
         method: 'POST',
         url: apiUrl,
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+          Authorization: `Bearer ${authToken}`,
         },
         body: {
           name: newGroupName,
-          description: ''
-        }
+          description: '',
+        },
       }).then((createResponse) => {
         expect(createResponse.status).to.be.oneOf([200, 201])
         cy.log(`Successfully created group ${newGroupName} via API`)
@@ -109,10 +113,7 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Navigate to Users Page', () => {
-    cy.wait(10000)
-    cy.get('[id=nav-toggle').click()
-    cy.contains('Users').click()
-    cy.get('[id=nav-toggle').click()
+    user.visitUsers()
   })
 
   it('Search Wendy (Credential Issuer) from the user list', () => {
@@ -122,19 +123,18 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Navigate to Groups tab', () => {
-    cy.get(user.groupsTab).click({ force: true })
+    groups.openGroupsTab()
   })
 
   it('Leave existing org unit', () => {
-    user.leaveGroup('ministry-of-health')
+    groups.leaveGroup('ministry-of-health')
   })
 
   it('Set the user(Wendy) to the Organization Unit', () => {
-    user.setUserToOrganization('health-protection')
+    groups.setUserToOrganization('health-protection')
   })
 
   after(() => {
     cy.keycloakLogout()
   })
-
 })

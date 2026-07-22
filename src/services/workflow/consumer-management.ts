@@ -233,13 +233,6 @@ export async function getNamespaceConsumerAccess(
   const access: ConsumerAccess = {
     consumer: serviceAccess.consumer,
     application: serviceAccess.application,
-    owner: {
-      id: serviceAccess.application?.owner.id,
-      name: serviceAccess.application?.owner.name,
-      provider: serviceAccess.application?.owner.provider,
-      providerUsername: serviceAccess.application?.owner.providerUsername,
-      email: serviceAccess.application?.owner.email,
-    },
     labels: labels.map(
       (l: any) =>
         ({
@@ -249,6 +242,16 @@ export async function getNamespaceConsumerAccess(
     ),
     prodEnvAccess: [],
   };
+
+  if (serviceAccess.application?.owner) {
+    access.owner = {
+      id: serviceAccess.application?.owner.id,
+      name: serviceAccess.application?.owner.name,
+      provider: serviceAccess.application?.owner.provider,
+      providerUsername: serviceAccess.application?.owner.providerUsername,
+      email: serviceAccess.application?.owner.email,
+    };
+  }
 
   access.prodEnvAccess = (
     await getConsumerProdEnvAccessList(context, ns, serviceAccess.consumer.id)

@@ -18,10 +18,11 @@ const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
 const { UserAssertionError } = require('./services/user-assert');
+const { IssuerMisconfigError } = require('./services/issuerMisconfigError');
+
+const logger = Logger('dsapi');
 
 class ApiOpenapiApp {
-  constructor() {}
-
   prepareV1(app) {
     const { RegisterRoutes } = require('./controllers/v1/routes');
     const specFile = fs.realpathSync('controllers/v1/openapi.yaml');
@@ -33,6 +34,14 @@ class ApiOpenapiApp {
       res.setHeader('Content-Type', 'application/yaml');
       res.send(spec);
     });
+  }
+
+  validateConfig() {
+    const validationApiUrl = process.env.OAS_VALIDATION_API_URL;
+    if (!validationApiUrl) {
+      throw new Error('OAS_VALIDATION_API_URL is required');
+    }
+    assertHttpUrl('OAS_VALIDATION_API_URL', validationApiUrl);
   }
 
   prepareV2(app) {
@@ -118,8 +127,8 @@ class ApiOpenapiApp {
   }
 
   prepareMiddleware({ keystone }) {
-    const logger = Logger('dsapi');
-
+    logger.debug('Preparing API OpenAPI Middleware');
+    this.validateConfig();
     const app = express();
 
     // This middleware causes the proxy middleware to block, so am going to limit it to just
@@ -172,13 +181,43 @@ class ApiOpenapiApp {
           code: err.code,
           message: err.message,
         });
-      } else if (err instanceof ValidateError) {
+      } else if (err instanceof IssuerMisconfigError) {
+        const errmsg = JSON.parse(err.message);
+        logger.warn(`Caught Misconfig Error for ${req.path}: %j`, errmsg);
+        return res.status(500).json({
+          code: 'misconfig_error',
+          message: `[${errmsg?.statusCode}] ${errmsg?.reason} (${errmsg?.description})`,
+        });
+      } else if (err?.name === 'OpenAPISpecValidationError' && err?.result) {
         logger.warn(
-          `Caught Validation Error for ${req.path}:`,
+          `Caught OpenAPI Spec Validation Error for ${req.path}:`,
           err.message,
           err.fields
         );
-        logger.error('Validation Error: ', err);
+        logger.error('OpenAPI Spec Validation Error: ', err.result);
+        return res.status(422).json({
+          code: 'validation_error',
+          message: err?.message,
+          fields: err?.fields,
+          validation: err?.result,
+        });
+      } else if (
+        err?.name === 'OpenAPISpecValidationServiceUnavailableError'
+      ) {
+        logger.error(
+          `Caught OpenAPI Spec Validation Service Unavailable Error for ${req.path}:`,
+          err.message
+        );
+        return res.status(503).json({
+          code: 'validation_service_unavailable',
+          message: 'OAS validation service unavailable',
+        });
+      } else if (err instanceof ValidateError) {
+        logger.error(
+          `Caught Validation Error for ${req.path} '%s' %j`,
+          err.message,
+          err.fields
+        );
         return res.status(422).json({
           code: 'validation_error',
           message: err?.message,
@@ -218,11 +257,23 @@ class ApiOpenapiApp {
           message: 'Internal Server Error',
         });
       }
-
       next();
     });
 
     return app;
+  }
+}
+
+function assertHttpUrl(name, value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} must be an absolute http(s) URL`);
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(`${name} must be an absolute http(s) URL`);
   }
 }
 

@@ -13,29 +13,31 @@ jobs:
         run: |
           echo "BRANCH = ${{ github.event.ref }}"
           export BRANCH="${{ github.event.ref }}"
-          echo "::set-output name=DEPLOY_ID::${BRANCH//\//-}"
+          echo "DEPLOY_ID=${BRANCH//\//-}" >> "$GITHUB_OUTPUT"
         id: set-deploy-id
 
       - name: Get deploy ID
         run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Install oc
-        uses: redhat-actions/oc-installer@v1
-        with:
-          version: '4.6'
+        run: |
+          curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz -o /tmp/openshift-client-linux.tar.gz
+          tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp oc
+          sudo install /tmp/oc /usr/local/bin/oc
+          oc version --client
 
       - name: Authenticate and set context
-        uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-
-          # Disables SSL cert checking. Use this if you don't have the certificate authority data.
-          insecure_skip_tls_verify: true
-
-          namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+        env:
+          OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
+        run: |
+          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          if [ -n "$OPENSHIFT_NAMESPACE" ]; then
+            oc project "$OPENSHIFT_NAMESPACE"
+          fi
 
       - name: 'Get Helm'
         run: |
