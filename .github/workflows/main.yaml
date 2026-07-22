@@ -90,7 +90,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: ./provisioner-api
           file: ./provisioner-api/Dockerfile
-          tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-api:${{ steps.release.outputs.tag_name }}
+          tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
