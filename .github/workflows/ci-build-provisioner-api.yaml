@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: ./.github/workflows/.build.yml
+      - uses: ./.github/workflows/templates
         with:
           name: provisioner
           context: provisioner-api
