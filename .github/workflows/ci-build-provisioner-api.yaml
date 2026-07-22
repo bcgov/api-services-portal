@@ -15,7 +15,7 @@ env:
 
 jobs:
   image:
-    uses: bcgov/aps-services-portal/.github/workflows/.build.yml
+    uses: ./.github/workflows/.build.yml
     with:
       name: provisioner
       context: provisioner-api
