@@ -20,7 +20,7 @@ jobs:
       contents: read
       packages: write # 🚀 Crucial permission needed to push to ghcr.io
     with:
-      name: provisioner
+      name: provisioner-svc
       context: ./provisioner-api
 
   deploy:
