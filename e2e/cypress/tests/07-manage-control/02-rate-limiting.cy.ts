@@ -54,6 +54,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
   })
 
   it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
@@ -92,6 +93,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
   })
 
   it('verify rate limit error when the API calls beyond the limit', () => {
+    cy.wait(5000) // unfortunately needs to be here because async is not supported in cypress to do retry logic
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then(
         (response) => {
