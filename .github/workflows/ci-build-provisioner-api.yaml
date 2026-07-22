@@ -14,15 +14,16 @@ env:
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
-  build:
+  image:
+    uses: ./.github/workflows/templates
+    with:
+      name: provisioner
+      context: provisioner-api
+
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - uses: ./.github/workflows/templates
-        with:
-          name: provisioner
-          context: provisioner-api
 
       - name: Install oc
         uses: redhat-actions/oc-installer@v1
