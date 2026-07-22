@@ -14,14 +14,18 @@ env:
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
-  image:
+  build:
     uses: ./.github/workflows/.build.yml
+    permissions:
+      contents: read
+      packages: write # 🚀 Crucial permission needed to push to ghcr.io
     with:
       name: provisioner
       context: ./provisioner-api
 
   deploy:
     runs-on: ubuntu-latest
+    needs: [build]
     steps:
       - uses: actions/checkout@v2
 
