@@ -2,7 +2,7 @@ name: Build Provisioner API
 
 on:
   push:
-    branches: [feature/*, dev, test]
+    branches: [tmp/*, feature/*, dev, test]
 
 permissions:
   contents: read
@@ -17,21 +17,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Docker meta
-        id: docker_meta
-        uses: docker/metadata-action@v6
+      - uses: ./build.yml
         with:
-          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner
-
-      - name: Set DEPLOY_ID
-        run: |
-          echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
-          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
-          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
-        id: set-deploy-id
-
-      - name: Get deploy ID
-        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+          name: provisioner
+          context: provisioner-api
 
       - uses: actions/checkout@v2
 
@@ -50,30 +39,6 @@ jobs:
           insecure_skip_tls_verify: true
 
           namespace: ${{ env.OPENSHIFT_NAMESPACE }}
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build
-        uses: docker/build-push-action@v6
-        with:
-          context: provisioner-api
-          file: provisioner-api/Dockerfile
-          push: true
-          build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-            APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
-            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
-          tags: ${{ steps.docker_meta.outputs.tags }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: 'Get Helm'
         if: github.ref != 'refs/heads/dev'
