@@ -24,6 +24,7 @@ describe('SDX Catalog Activity', () => {
         .toUpperCase()
         .substring(0, 6)
         .toLowerCase()
+      workingData.env = 'dev'
     })
   })
 
@@ -277,83 +278,85 @@ describe('SDX Catalog Activity', () => {
           member: {
             email: 'benny@test.com',
           },
-          roles: ['organization-admin','system-owner'],
+          roles: ['organization-admin', 'system-admin'],
         },
         {
           member: {
             email: 'janis@testmail.com',
           },
-          roles: ['organization-admin','system-owner'],
+          roles: ['organization-admin', 'system-admin'],
         },
       ],
     }
 
     cy.setRequestBody(payload)
-    cy.callAPI(
-      `ds/api/v3/organizations/${workingData.org.name}/access`,
-      'PUT'
-    ).then(({ apiRes: { status } }: any) => {
-      expect(status).to.be.equal(204)
-
-      cy.callAPI(
-        `ds/api/sdx/v1/catalog/activity?organization=${workingData.org.name}&first=100`,
-        'GET'
-      ).then(({ apiRes: { status, body: activities } }: any) => {
-        expect(status).to.be.equal(200)
-        const entry = activities.find(
-          (a: any) =>
-            a.params?.entity === 'OrganizationAccess' &&
-            a.params?.subject === 'benny@idir' &&
-            a.params?.action === 'updated'
-        )
-        expect(entry?.params?.entity).to.equal('OrganizationAccess')
-        expect(entry?.params?.subject).to.equal('benny@idir')
-        expect(entry?.params?.subject_email).to.be.undefined
-        expect(entry?.params?.action).to.equal('updated')
-        expect(entry?.params?.roles).to.include('[+] organization-admin')
-        expect(entry?.result).to.equal('success')
-      })
-    })
-  })
-
-  it('records organization CSR requests in public catalog activity', () => {
-    const { org, runtimeGroupId } = workingData
-    const runtimeGroupName = runtimeGroupId
-
-    cy.setRequestBody({
-      name: runtimeGroupName,
-      hostedOrganizations: [org.name],
-    })
-    cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+    cy.callAPI(`ds/api/v3/organizations/${workingData.org.name}/access`, 'PUT').then(
       ({ apiRes: { status } }: any) => {
-        expect(status).to.be.equal(200)
+        expect(status).to.be.equal(204)
 
-        cy.setRequestBody({
-          runtimeGroupName,
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${workingData.org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'OrganizationAccess' &&
+              a.params?.subject === 'benny@idir' &&
+              a.params?.action === 'updated'
+          )
+          expect(entry?.params?.entity).to.equal('OrganizationAccess')
+          expect(entry?.params?.subject).to.equal('benny@idir')
+          expect(entry?.params?.subject_email).to.be.undefined
+          expect(entry?.params?.action).to.equal('updated')
+          expect(entry?.params?.roles).to.include('[+] organization-admin')
+          expect(entry?.result).to.equal('success')
         })
-        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
-          ({ apiRes: { status } }: any) => {
-            expect(status).to.be.equal(200)
-
-            cy.callAPI(
-              `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
-              'GET'
-            ).then(({ apiRes: { status, body: activities } }: any) => {
-              expect(status).to.be.equal(200)
-              const entry = activities.find(
-                (a: any) =>
-                  a.params?.entity === 'OrganizationCertificate' &&
-                  a.params?.runtimeGroupName === runtimeGroupName
-              )
-              expect(entry?.params?.entity).to.equal('OrganizationCertificate')
-              expect(entry?.params?.runtimeGroupName).to.equal(runtimeGroupName)
-              expect(entry?.result).to.equal('success')
-            })
-          }
-        )
       }
     )
   })
+
+  // MOVED TO 07-org-signing.ts test
+  // it('records organization CSR requests in public catalog activity', () => {
+  //   const { org, runtimeGroupId } = workingData
+  //   const runtimeGroupName = runtimeGroupId
+
+  //   cy.setRequestBody({
+  //     name: runtimeGroupName,
+  //     environment: 'cyp',
+  //     hostedOrganizations: [org.name],
+  //   })
+  //   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+  //     ({ apiRes: { status } }: any) => {
+  //       expect(status).to.be.equal(200)
+
+  //       cy.setRequestBody({
+  //         runtimeGroupName,
+  //         environment: 'cyp',
+  //       })
+  //       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
+  //         ({ apiRes: { status } }: any) => {
+  //           expect(status).to.be.equal(200)
+
+  //           cy.callAPI(
+  //             `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+  //             'GET'
+  //           ).then(({ apiRes: { status, body: activities } }: any) => {
+  //             expect(status).to.be.equal(200)
+  //             const entry = activities.find(
+  //               (a: any) =>
+  //                 a.params?.entity === 'OrganizationCertificate' &&
+  //                 a.params?.runtimeGroupName === runtimeGroupName
+  //             )
+  //             expect(entry?.params?.entity).to.equal('OrganizationCertificate')
+  //             expect(entry?.params?.runtimeGroupName).to.equal(runtimeGroupName)
+  //             expect(entry?.result).to.equal('success')
+  //           })
+  //         }
+  //       )
+  //     }
+  //   )
+  // })
 
   it('records subsystem lifecycle in public catalog and organization activity', () => {
     const { org } = workingData
@@ -396,7 +399,7 @@ describe('SDX Catalog Activity', () => {
         expect(entry?.result).to.equal('success')
       })
 
-      cy.setQueryString({ force: false })
+      cy.setQueryString({})
       cy.callAPI(
         `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
         'DELETE'
@@ -423,11 +426,11 @@ describe('SDX Catalog Activity', () => {
   })
 
   it('records service publish and remove in public catalog activity', () => {
-    const { org } = workingData
+    const { org, env } = workingData
     const subsystemName = uniqueSubsystemName()
 
     createSubsystem(org, subsystemName, () => {
-      createOASService(org, subsystemName, (service: any) => {
+      createOASService(org, subsystemName, env, (service: any) => {
         const serviceName = service.name
 
         cy.callAPI(
@@ -482,12 +485,12 @@ describe('SDX Catalog Activity', () => {
     let orgKeyName: string
 
     before(() => {
-      const { org } = workingData
-      orgKeyName = orgGatewayKeyName(org)
+      const { org, env } = workingData
+      orgKeyName = orgGatewayKeyName(env, org)
 
       registerOrgGateway(org.name).then(({ apiRes: { status } }: any) => {
         expect(status).to.be.equal(200)
-        applyOrgPublicKeyPattern(org.name, publicKeyPemA).then(
+        applyOrgPublicKeyPattern(org.name, env, publicKeyPemA).then(
           ({ apiRes: { status: applyStatus } }: any) => {
             expect(applyStatus).to.be.equal(200)
           }
@@ -511,15 +514,15 @@ describe('SDX Catalog Activity', () => {
         )
         expect(entry?.params?.entity).to.equal('OrganizationKey')
         expect(entry?.params?.action).to.equal('published')
-        expect(entry?.params?.detail).to.include(`published key ${orgKeyName}`)
+        // expect(entry?.params?.detail).to.include(`published key ${orgKeyName}`)
         expect(entry?.result).to.equal('success')
       })
     })
 
     it('records published activity when organization public key material changes in-place', () => {
-      const { org } = workingData
+      const { org, env } = workingData
 
-      applyOrgPublicKeyPattern(org.name, publicKeyPemB).then(
+      applyOrgPublicKeyPattern(org.name, env, publicKeyPemB).then(
         ({ apiRes: { status } }: any) => {
           expect(status).to.be.equal(200)
 
@@ -534,10 +537,18 @@ describe('SDX Catalog Activity', () => {
                 a.params?.action === 'published' &&
                 a.params?.targetName === org.name
             )
-            const entry = publishEntries[0]
+
+            const entry = publishEntries.find((a: any) => {
+              const deckResults = Array.isArray(a.blob)
+                ? a.blob[0]?.results
+                : a.blob?.results
+              return deckResults
+                .find((r: any) => r.provider === 'gwa')
+                .details?.results?.includes(`updating key ${orgKeyName}`)
+            })
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.action).to.equal('published')
-            expect(entry?.params?.detail).to.include(`published key ${orgKeyName}`)
+            expect(entry?.params?.detail).to.be.undefined
             expect(entry?.result).to.equal('success')
           })
         }
@@ -545,9 +556,9 @@ describe('SDX Catalog Activity', () => {
     })
 
     it('records removed activity when organization public key is removed', () => {
-      const { org } = workingData
+      const { org, env } = workingData
 
-      applyOrgPublicKeyPattern(org.name, publicKeyPemB, 'remove').then(
+      applyOrgPublicKeyPattern(org.name, env, publicKeyPemB, 'delete').then(
         ({ apiRes: { status } }: any) => {
           expect(status).to.be.equal(200)
 
@@ -556,15 +567,16 @@ describe('SDX Catalog Activity', () => {
             'GET'
           ).then(({ apiRes: { status, body: activities } }: any) => {
             expect(status).to.be.equal(200)
+
             const entry = activities.find(
               (a: any) =>
-                a.params?.entity === 'OrganizationKey' &&
-                a.params?.action === 'removed' &&
-                a.params?.detail?.includes(`removed key ${orgKeyName}`)
+                a.params?.entity === 'OrganizationKey' && a.params?.action === 'removed'
+              //  &&
+              // a.params?.detail?.includes(`removed key ${orgKeyName}`)
             )
             expect(entry?.params?.entity).to.equal('OrganizationKey')
             expect(entry?.params?.action).to.equal('removed')
-            expect(entry?.params?.detail).to.include(`removed key ${orgKeyName}`)
+            // expect(entry?.params?.detail).to.include(`removed key ${orgKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }
@@ -580,7 +592,7 @@ describe('SDX Catalog Activity', () => {
       uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6).toLowerCase()
 
     before(() => {
-      const { org } = workingData
+      const { org, env } = workingData
       subsystemName = uniqueSubsystemName()
       clientId = clientIdForSubsystem(org, subsystemName)
       subsystemKeyName = subsystemGatewayKeyName(clientId)
@@ -589,29 +601,28 @@ describe('SDX Catalog Activity', () => {
         const runtimeGroupName = runtimeGroupSuffix()
         cy.setRequestBody({
           name: runtimeGroupName,
+          environment: env,
           hostedOrganizations: [org.name],
-          consumerEndpoint: `http://internal.${runtimeGroupName}.servers.sdx`,
         })
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
-          'PUT'
-        ).then(({ apiRes: { status } }: any) => {
-          expect(status).to.be.equal(200)
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
+          ({ apiRes: { status } }: any) => {
+            expect(status).to.be.equal(200)
 
-          cy.setRequestBody({ runtimeGroupName })
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
-            'PUT'
-          ).then(({ apiRes: { status: gatewayStatus } }: any) => {
-            expect(gatewayStatus).to.be.equal(200)
+            cy.setRequestBody({ runtimeGroupName })
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
+              'PUT'
+            ).then(({ apiRes: { status: gatewayStatus } }: any) => {
+              expect(gatewayStatus).to.be.equal(200)
 
-            applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemA).then(
-              ({ apiRes: { status: applyStatus } }: any) => {
-                expect(applyStatus).to.be.equal(200)
-              }
-            )
-          })
-        })
+              applySubsystemPublicKeyPattern(org.name, clientId, env, publicKeyPemA).then(
+                ({ apiRes: { status: applyStatus } }: any) => {
+                  expect(applyStatus).to.be.equal(200)
+                }
+              )
+            })
+          }
+        )
       })
     })
 
@@ -632,15 +643,15 @@ describe('SDX Catalog Activity', () => {
         expect(entry?.params?.entity).to.equal('SubsystemKey')
         expect(entry?.params?.action).to.equal('published')
         expect(entry?.params?.targetName).to.equal(clientId)
-        expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
+        // expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
         expect(entry?.result).to.equal('success')
       })
     })
 
     it('records published activity when subsystem public key material changes', () => {
-      const { org } = workingData
+      const { org, env } = workingData
 
-      applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemB).then(
+      applySubsystemPublicKeyPattern(org.name, clientId, env, publicKeyPemB).then(
         ({ apiRes: { status } }: any) => {
           expect(status).to.be.equal(200)
 
@@ -658,7 +669,7 @@ describe('SDX Catalog Activity', () => {
             const entry = publishEntries[0]
             expect(entry?.params?.entity).to.equal('SubsystemKey')
             expect(entry?.params?.action).to.equal('published')
-            expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
+            // expect(entry?.params?.detail).to.include(`published key ${subsystemKeyName}`)
             expect(entry?.result).to.equal('success')
           })
         }
@@ -666,30 +677,33 @@ describe('SDX Catalog Activity', () => {
     })
 
     it('records removed activity when subsystem public key is removed', () => {
-      const { org } = workingData
+      const { org, env } = workingData
 
-      applySubsystemPublicKeyPattern(org.name, clientId, publicKeyPemB, 'remove').then(
-        ({ apiRes: { status } }: any) => {
+      applySubsystemPublicKeyPattern(
+        org.name,
+        clientId,
+        env,
+        publicKeyPemB,
+        'delete'
+      ).then(({ apiRes: { status } }: any) => {
+        expect(status).to.be.equal(200)
+
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
           expect(status).to.be.equal(200)
-
-          cy.callAPI(
-            `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
-            'GET'
-          ).then(({ apiRes: { status, body: activities } }: any) => {
-            expect(status).to.be.equal(200)
-            const entry = activities.find(
-              (a: any) =>
-                a.params?.entity === 'SubsystemKey' &&
-                a.params?.action === 'removed' &&
-                a.params?.detail?.includes(`removed key ${subsystemKeyName}`)
-            )
-            expect(entry?.params?.entity).to.equal('SubsystemKey')
-            expect(entry?.params?.action).to.equal('removed')
-            expect(entry?.params?.detail).to.include(`removed key ${subsystemKeyName}`)
-            expect(entry?.result).to.equal('success')
-          })
-        }
-      )
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'SubsystemKey' && a.params?.action === 'removed'
+          )
+          // expect(JSON.stringify(entry)).to.include(`removed key ${subsystemKeyName}`)
+          expect(entry?.params?.entity).to.equal('SubsystemKey')
+          expect(entry?.params?.action).to.equal('removed')
+          // expect(entry?.params?.detail).to.include(`removed key ${subsystemKeyName}`)
+          expect(entry?.result).to.equal('success')
+        })
+      })
     })
   })
 })

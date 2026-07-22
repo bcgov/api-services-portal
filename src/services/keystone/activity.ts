@@ -1,10 +1,12 @@
 import { Logger } from '../../logger';
-import { Activity, ActivityWhereInput } from './types';
+import { Activity, ActivityWhereInput, SortActivitiesBy } from './types';
 import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 import { PUBLIC_ORG_ACTIVITY } from '../workflow/org-activity-public';
 
 const logger = Logger('keystone.activity');
+
+export type ActivitySortOptions = 'createdAtDesc' | 'createdAtAsc';
 
 export interface TokenizedActivity {
   message: string;
@@ -179,7 +181,8 @@ export async function getActivity(
   namespaces: string[],
   activityQuery: ActivityWhereInput,
   first: number = 10,
-  skip: number = 0
+  skip: number = 0,
+  sortBy: ActivitySortOptions = 'createdAtDesc'
 ): Promise<Activity[]> {
   logger.debug('[getActivity] %d / %d', first, skip);
 
@@ -198,8 +201,8 @@ export async function getActivity(
   logger.debug('[getActivity] where: %j', where);
 
   const activities = await context.executeGraphQL({
-    query: `query NamespaceActivities($where: ActivityWhereInput!, $first: Int, $skip: Int) {
-              allActivities(where: $where, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+    query: `query NamespaceActivities($where: ActivityWhereInput!, $first: Int, $skip: Int, $sortBy: [SortActivitiesBy!]) {
+              allActivities(where: $where, first:$first, skip: $skip, sortBy: $sortBy) {
                 id
                 type
                 name
@@ -222,7 +225,16 @@ export async function getActivity(
               }
             }
       `,
-    variables: { where, first, skip },
+    variables: {
+      where,
+      first,
+      skip,
+      sortBy: [
+        sortBy === 'createdAtDesc'
+          ? SortActivitiesBy.CreatedAtDesc
+          : SortActivitiesBy.CreatedAtAsc,
+      ],
+    },
   });
   logger.debug(
     '[getActivity] returned=%d',
@@ -236,7 +248,8 @@ export async function getOrgActivity(
   orgName?: string,
   first: number = 20,
   skip: number = 0,
-  publicOnly: boolean = false
+  publicOnly: boolean = false,
+  sortBy: ActivitySortOptions = 'createdAtDesc'
 ): Promise<Activity[]> {
   const cappedFirst = first > 100 ? 100 : first;
   const conditions: ActivityWhereInput[] = [
@@ -258,8 +271,8 @@ export async function getOrgActivity(
   logger.debug('[getOrgActivity] where: %j', where);
 
   const activities = await context.executeGraphQL({
-    query: `query OrgActivities($where: ActivityWhereInput!, $first: Int, $skip: Int) {
-              allActivities(where: $where, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+    query: `query OrgActivities($where: ActivityWhereInput!, $first: Int, $skip: Int, $sortBy: [SortActivitiesBy!]) {
+              allActivities(where: $where, first:$first, skip: $skip, sortBy: $sortBy) {
                 id
                 type
                 name
@@ -282,8 +295,20 @@ export async function getOrgActivity(
               }
             }
       `,
-    variables: { where, first: cappedFirst, skip },
+    variables: {
+      where,
+      first: cappedFirst,
+      skip,
+      sortBy: [
+        sortBy === 'createdAtDesc'
+          ? SortActivitiesBy.CreatedAtDesc
+          : SortActivitiesBy.CreatedAtAsc,
+      ],
+    },
   });
+  if (activities.errors) {
+    logger.error('[getOrgActivity] %j', activities.errors);
+  }
   logger.debug(
     '[getOrgActivity] returned=%d',
     activities.data.allActivities.length

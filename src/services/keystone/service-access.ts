@@ -1,3 +1,4 @@
+import { assertEqual } from '../../controllers/ioc/assert';
 import { Logger } from '../../logger';
 import {
   Application,
@@ -417,6 +418,12 @@ export async function addServiceAccess(
     variables: { data },
   });
   logger.debug('[addServiceAccess] RESULT %j', result);
+  assertEqual(
+    'errors' in result,
+    false,
+    'serviceAccess',
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
   return result.data.createServiceAccess.id;
 }
 

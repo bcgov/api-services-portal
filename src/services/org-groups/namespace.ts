@@ -209,6 +209,10 @@ export class NamespaceService {
           'perm-domains' in nsGroup.attributes
             ? nsGroup.attributes['perm-domains']
             : [],
+        permRuntimeGroup:
+          'perm-runtime-group' in nsGroup.attributes
+            ? nsGroup.attributes['perm-runtime-group'][0]
+            : undefined,
         enabled:
           'org-enabled' in nsGroup.attributes
             ? nsGroup.attributes['org-enabled'][0] === 'true'

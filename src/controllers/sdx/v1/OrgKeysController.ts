@@ -50,7 +50,12 @@ export class OrgKeysController extends Controller {
     const context = this.keystone.createContext(request);
 
     // call the Edge Server endpoint for generating a new key pair
-    const result = await CreateNewKey(context, org, body.runtimeGroupName);
+    const result = await CreateNewKey(
+      context,
+      org,
+      body.runtimeGroupName,
+      body.environment
+    );
 
     await new OrgActivityService(context, org)
       .logOrganizationCSR(true, { runtimeGroupName: body.runtimeGroupName })

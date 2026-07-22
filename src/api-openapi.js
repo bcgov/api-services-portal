@@ -182,16 +182,11 @@ class ApiOpenapiApp {
           message: err.message,
         });
       } else if (err instanceof IssuerMisconfigError) {
-        logger.warn(
-          `Caught Misconfig Error for ${req.path}:`,
-          err.statusCode,
-          err.status,
-          err.reason,
-          err.description
-        );
+        const errmsg = JSON.parse(err.message);
+        logger.warn(`Caught Misconfig Error for ${req.path}: %j`, errmsg);
         return res.status(500).json({
           code: 'misconfig_error',
-          message: `[${err?.statusCode}] ${err?.reason} (${err?.description})`,
+          message: `[${errmsg?.statusCode}] ${errmsg?.reason} (${errmsg?.description})`,
         });
       } else if (err?.name === 'OpenAPISpecValidationError' && err?.result) {
         logger.warn(
@@ -218,12 +213,11 @@ class ApiOpenapiApp {
           message: 'OAS validation service unavailable',
         });
       } else if (err instanceof ValidateError) {
-        logger.warn(
-          `Caught Validation Error for ${req.path}:`,
+        logger.error(
+          `Caught Validation Error for ${req.path} '%s' %j`,
           err.message,
           err.fields
         );
-        logger.error('Validation Error: ', err);
         return res.status(422).json({
           code: 'validation_error',
           message: err?.message,

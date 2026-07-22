@@ -39,7 +39,8 @@ jest.mock('../../../services/keystone/organization', () => {
 const recordActivityMock = activityModule.recordActivity as jest.Mock;
 const recordActivityWithBlobMock =
   activityModule.recordActivityWithBlob as jest.Mock;
-const getOrganizationUnitMock = organizationModule.getOrganizationUnit as jest.Mock;
+const getOrganizationUnitMock =
+  organizationModule.getOrganizationUnit as jest.Mock;
 
 function getRecordActivityCall(mock: jest.Mock, callIndex = 0) {
   const [
@@ -204,7 +205,7 @@ describe('profile snapshots', function () {
 
 describe('isGatewayPatternPublishSuccessful', function () {
   it('returns true for empty DELETE response', function () {
-    expect(isGatewayPatternPublishSuccessful({}, 'remove')).toBe(true);
+    expect(isGatewayPatternPublishSuccessful({}, 'delete')).toBe(true);
   });
 
   it('returns false for empty apply response', function () {
@@ -215,8 +216,8 @@ describe('isGatewayPatternPublishSuccessful', function () {
     expect(isGatewayPatternPublishSuccessful(null, 'apply')).toBe(false);
   });
 
-  it('returns true for null remove response', function () {
-    expect(isGatewayPatternPublishSuccessful(null, 'remove')).toBe(true);
+  it('returns true for null delete response', function () {
+    expect(isGatewayPatternPublishSuccessful(null, 'delete')).toBe(true);
   });
 
   it('returns true when failed is 0', function () {
@@ -272,7 +273,7 @@ describe('isGatewayPatternPublishSuccessful', function () {
           failed: 1,
           results: [{ provider: 'gwa', status: 'failed' }],
         },
-        'remove'
+        'delete'
       )
     ).toBe(false);
   });
@@ -307,12 +308,14 @@ describe('OrgActivityService', function () {
   });
 
   it('records organization establishment with a profile blob when provided', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logOrganizationEstablished(true, {
-        name: 'my-org',
-        title: 'My Org',
-        description: 'About us',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logOrganizationEstablished(true, {
+      name: 'my-org',
+      title: 'My Org',
+      description: 'About us',
+    });
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
     const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
@@ -328,25 +331,35 @@ describe('OrgActivityService', function () {
   it('resolves actor from authedItem, then req.user, then system', async function () {
     recordActivityWithBlobMock.mockClear();
     const ctxAuthed = { authedItem: { name: 'Alice' } };
-    await new OrgActivityService(ctxAuthed, 'my-org').logOrganizationEstablished(
-      true
+    await new OrgActivityService(
+      ctxAuthed,
+      'my-org'
+    ).logOrganizationEstablished(true);
+    expect(getRecordActivityCall(recordActivityMock).ids).toContain(
+      'actor:Alice'
     );
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:Alice');
 
     recordActivityMock.mockClear();
     const ctxReq = { req: { user: { name: 'Bob' } } };
     await new OrgActivityService(ctxReq, 'my-org').logOrganizationEstablished(
       true
     );
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:Bob');
+    expect(getRecordActivityCall(recordActivityMock).ids).toContain(
+      'actor:Bob'
+    );
 
     recordActivityMock.mockClear();
     await new OrgActivityService({}, 'my-org').logOrganizationEstablished(true);
-    expect(getRecordActivityCall(recordActivityMock).ids).toContain('actor:system');
+    expect(getRecordActivityCall(recordActivityMock).ids).toContain(
+      'actor:system'
+    );
   });
 
   it('always records access changes as "updated" with the signed delta', async function () {
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
 
     await service.logUpdateOrganizationAccess(true, {
       subject_email: 'user1@local',
@@ -375,7 +388,10 @@ describe('OrgActivityService', function () {
 
   it('records failed activity for logGatewayPatternPublish', async function () {
     const deckBlob = 'applied: 0\nfailed: 1\n';
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(false, {
       pattern: 'sdx-keys.r1',
       scope: 'organization',
@@ -391,7 +407,10 @@ describe('OrgActivityService', function () {
 
   it('records one published activity for logGatewayPatternPublish', async function () {
     const deckBlob = 'results: |\n  creating key-set sdx.org.min.citz\n';
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(true, {
       pattern: 'sdx-keys.r1',
       scope: 'organization',
@@ -423,7 +442,10 @@ describe('OrgActivityService', function () {
   });
 
   it('records removed activity for logGatewayPatternPublish remove path', async function () {
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(true, {
       pattern: 'sdx-keys.r1',
       scope: 'organization',
@@ -443,7 +465,10 @@ describe('OrgActivityService', function () {
   });
 
   it('uses RuntimeGroupKey entity when runtime-group-scoped', async function () {
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(true, {
       pattern: 'sdx-keys.r1',
       scope: 'runtime-group',
@@ -459,7 +484,10 @@ describe('OrgActivityService', function () {
   });
 
   it('includes targetName when subsystem-scoped', async function () {
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(true, {
       pattern: 'sdx-keys.r1',
       scope: 'subsystem',
@@ -484,7 +512,10 @@ describe('OrgActivityService', function () {
   });
 
   it('uses GatewayPatternPublish entity for non-key patterns', async function () {
-    const service = new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org');
+    const service = new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    );
     await service.logGatewayPatternPublish(true, {
       pattern: 'sdx-p2p-consumer.r1',
     });
@@ -497,8 +528,10 @@ describe('OrgActivityService', function () {
   });
 
   it('always passes org filterKey as first id', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logOrganizationCSR(true, { runtimeGroupName: 'my-edge-rg' });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logOrganizationCSR(true, { runtimeGroupName: 'my-edge-rg' });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.refId).toBe('csr:my-edge-rg');
@@ -506,11 +539,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records subsystem create with org filter keys, subsystem refId, and product namespace', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logSubsystemCreated(true, {
-        subsystemName: 'MY-SUBSYS',
-        productNamespace: 'sdx-abc123',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logSubsystemCreated(true, {
+      subsystemName: 'MY-SUBSYS',
+      productNamespace: 'sdx-abc123',
+    });
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
     const call = getRecordActivityCall(recordActivityMock);
@@ -527,11 +562,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records subsystem delete with subsystem refId and product namespace', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logSubsystemDeleted(true, {
-        subsystemName: 'MY-SUBSYS',
-        productNamespace: 'sdx-abc123',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logSubsystemDeleted(true, {
+      subsystemName: 'MY-SUBSYS',
+      productNamespace: 'sdx-abc123',
+    });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('deleted');
@@ -540,12 +577,14 @@ describe('OrgActivityService', function () {
   });
 
   it('records subsystem profile updates with a profile blob and product namespace', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logSubsystemProfileChange(true, {
-        subsystemName: 'MY-SUBSYS',
-        productNamespace: 'sdx-abc123',
-        profile: { name: 'MY-SUBSYS', description: 'Updated details' },
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logSubsystemProfileChange(true, {
+      subsystemName: 'MY-SUBSYS',
+      productNamespace: 'sdx-abc123',
+      profile: { name: 'MY-SUBSYS', description: 'Updated details' },
+    });
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(1);
     const call = getRecordActivityWithBlobCall(recordActivityWithBlobMock);
@@ -563,11 +602,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records service publish with org, subsystem, and service filter keys', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logServicePublished(true, {
-        serviceName: 'MY-SERVICE',
-        subsystemName: 'MY-SUBSYS',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logServicePublished(true, {
+      serviceName: 'MY-SERVICE',
+      subsystemName: 'MY-SUBSYS',
+    });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('published');
@@ -585,11 +626,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records service remove in past tense', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logServiceRemoved(true, {
-        serviceName: 'MY-SERVICE',
-        subsystemName: 'MY-SUBSYS',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logServiceRemoved(true, {
+      serviceName: 'MY-SERVICE',
+      subsystemName: 'MY-SUBSYS',
+    });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('removed');
@@ -600,11 +643,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records runtime group create with runtime group refId and hosting params', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logRuntimeGroupCreated(true, {
-        runtimeGroupName: 'myedge',
-        hostedOrganizations: ['ministry-of-health', 'my-org'],
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logRuntimeGroupCreated(true, {
+      runtimeGroupName: 'myedge',
+      hostedOrganizations: ['ministry-of-health', 'my-org'],
+    });
 
     expect(recordActivityMock).toHaveBeenCalledTimes(1);
     const call = getRecordActivityCall(recordActivityMock);
@@ -620,14 +665,18 @@ describe('OrgActivityService', function () {
       'actor:Admin',
     ]);
     const context = JSON.parse(call.activityContext);
-    expect(context.params.hostedOrganizations).toBe('ministry-of-health, my-org');
+    expect(context.params.hostedOrganizations).toBe(
+      'ministry-of-health, my-org'
+    );
   });
 
   it('records runtime group create without hosting param when empty', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logRuntimeGroupCreated(true, {
-        runtimeGroupName: 'myedge',
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logRuntimeGroupCreated(true, {
+      runtimeGroupName: 'myedge',
+    });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.message).toBe('Admin created runtime group myedge on my-org');
@@ -636,16 +685,16 @@ describe('OrgActivityService', function () {
   });
 
   it('records runtime group delete with runtime group refId', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logRuntimeGroupDeleted(true, { runtimeGroupName: 'myedge' });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logRuntimeGroupDeleted(true, { runtimeGroupName: 'myedge' });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('deleted');
     expect(call.type).toBe('RuntimeGroup');
     expect(call.refId).toBe('runtimeGroup:myedge');
-    expect(call.message).toBe(
-      'Admin deleted runtime group myedge on my-org'
-    );
+    expect(call.message).toBe('Admin deleted runtime group myedge on my-org');
     expect(call.ids).toEqual([
       'org:my-org',
       'runtimeGroup:myedge',
@@ -654,11 +703,13 @@ describe('OrgActivityService', function () {
   });
 
   it('records runtime group hosting updates with full list in params', async function () {
-    await new OrgActivityService({ authedItem: { name: 'Admin' } }, 'my-org')
-      .logRuntimeGroupHostingChange(true, {
-        runtimeGroupName: 'myedge',
-        hostedOrganizations: ['ministry-of-health'],
-      });
+    await new OrgActivityService(
+      { authedItem: { name: 'Admin' } },
+      'my-org'
+    ).logRuntimeGroupHostingChange(true, {
+      runtimeGroupName: 'myedge',
+      hostedOrganizations: ['ministry-of-health'],
+    });
 
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('updated');
@@ -732,7 +783,9 @@ describe('relationshipNameFromRef', function () {
   it('falls back to raw id when lookup misses and fallbackToRawId is set', async function () {
     lookupById.mockResolvedValue(undefined);
     await expect(
-      relationshipNameFromRef({}, 'org-1', lookupById, { fallbackToRawId: true })
+      relationshipNameFromRef({}, 'org-1', lookupById, {
+        fallbackToRawId: true,
+      })
     ).resolves.toBe('org-1');
   });
 
@@ -800,15 +853,19 @@ describe('logOrganizationActivityFromHook', function () {
     );
 
     expect(recordActivityWithBlobMock).toHaveBeenCalledTimes(2);
-    const orgCall = getRecordActivityWithBlobCall(recordActivityWithBlobMock, 0);
+    const orgCall = getRecordActivityWithBlobCall(
+      recordActivityWithBlobMock,
+      0
+    );
     expect(orgCall.action).toBe('registered');
     expect(orgCall.type).toBe('Organization');
-    const unitCall = getRecordActivityWithBlobCall(recordActivityWithBlobMock, 1);
+    const unitCall = getRecordActivityWithBlobCall(
+      recordActivityWithBlobMock,
+      1
+    );
     expect(unitCall.action).toBe('registered');
     expect(unitCall.type).toBe('OrganizationUnit');
-    expect(unitCall.message).toBe(
-      'Admin established organization unit unit-a'
-    );
+    expect(unitCall.message).toBe('Admin established organization unit unit-a');
     expect(unitCall.blob).toEqual({
       name: 'unit-a',
       title: 'Unit A',
@@ -900,11 +957,7 @@ describe('logOrganizationUnitActivityFromHook', function () {
       name: 'my-unit',
       title: 'New',
     });
-    expect(call.ids).toEqual([
-      'org:my-org',
-      'orgUnit:my-unit',
-      'actor:Admin',
-    ]);
+    expect(call.ids).toEqual(['org:my-org', 'orgUnit:my-unit', 'actor:Admin']);
   });
 });
 
@@ -1335,11 +1388,7 @@ describe('logOrganizationAccessChanges', function () {
     const call = getRecordActivityCall(recordActivityMock);
     expect(call.action).toBe('updated');
     expect(call.refId).toBe('org:my-org');
-    expect(call.ids).toEqual([
-      'org:my-org',
-      'user:aidan@idir',
-      'actor:Admin',
-    ]);
+    expect(call.ids).toEqual(['org:my-org', 'user:aidan@idir', 'actor:Admin']);
     const message = call.message;
     expect(message).toBe(
       'Admin updated Cope, Aidan CITZ:EX organization access on my-org: [+] system-owner'

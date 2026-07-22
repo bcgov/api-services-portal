@@ -352,7 +352,10 @@ export class BatchService {
       : { id: result['data'][`update${entity}`].id };
   }
 
-  public async remove(entity: string, id: string): Promise<any> {
+  public async remove(
+    entity: string,
+    id: string
+  ): Promise<{ id?: string; error?: string }> {
     logger.debug('[remove] : %s %s', entity, id);
     const result = await this.context.executeGraphQL({
       query: `mutation ($id: ID!) {
@@ -365,7 +368,10 @@ export class BatchService {
     } else {
       logger.debug('[remove] RESULT %j', result);
     }
-    return 'errors' in result ? null : result['data'][`delete${entity}`];
+
+    return 'errors' in result
+      ? { error: result['errors'][0].message }
+      : { id: result['data'][`delete${entity}`].id };
   }
 
   public async removeAll(entity: string, ids: string[]): Promise<any> {

@@ -1,6 +1,7 @@
 import {
   createConnection,
   createSubsystemAndOASService,
+  new_service,
 } from '../../../support/sdx-commands'
 
 describe('SDX OpenAPI Services', () => {
@@ -45,7 +46,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setHeader('Content-Type', 'application/octet-stream')
 
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=dev`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -78,7 +79,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=dev`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -126,7 +127,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${payload.name}&environment=dev`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -153,7 +154,7 @@ describe('SDX OpenAPI Services', () => {
       const { org, datasetId } = workingData
 
       const subsystemName = `SUBSYS-${datasetId.toUpperCase()}`
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, 'dev', (service: any) => {
         cy.setRequestBody(undefined)
         cy.callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/oas-services/${service.name}`,
@@ -169,7 +170,7 @@ describe('SDX OpenAPI Services', () => {
             cy.setRequestBodyRaw(body)
             cy.setHeader('Content-Type', 'application/octet-stream')
             cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=dev`,
               'PUT',
               false
             ).then(({ apiRes: { status, body } }: any) => {
@@ -190,6 +191,7 @@ describe('SDX OpenAPI Services', () => {
       createSubsystemAndOASService(
         org,
         `SUBSYS-${datasetId.toUpperCase()}`,
+        'dev',
         (service: any) => {
           createConnection(org, service.subsystem.clientId, service.name, () => {
             cy.setRequestBody(undefined)

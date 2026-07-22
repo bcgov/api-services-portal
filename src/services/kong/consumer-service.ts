@@ -74,7 +74,8 @@ export class KongConsumerService {
     }
     if (app) {
       body.tags.push(`app:${alphanumericNoSpaces(app.name)}`);
-      body.tags.push(`owner:${alphanumericNoSpaces(app.owner.name)}`);
+      app.owner?.name &&
+        body.tags.push(`owner:${alphanumericNoSpaces(app.owner.name)}`);
     }
     logger.debug('[createKongConsumer] %s', `${this.kongUrl}/consumers`);
     try {

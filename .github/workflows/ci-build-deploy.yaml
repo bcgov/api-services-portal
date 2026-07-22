@@ -284,7 +284,7 @@ jobs:
                   cookie_expire='24h'
                   cookie_refresh='3m'
                   cookie_secure='true'
-                  cookie_samesite='strict'
+                  cookie_samesite='lax'
                   cookie_secret='not_secretenough'
                   email_domains='*'
                   redirect_url='https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback'

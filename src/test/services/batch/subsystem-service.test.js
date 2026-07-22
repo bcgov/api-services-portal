@@ -2,12 +2,8 @@ const {
   deleteRecordByInternalId,
   getRecords,
 } = require('../../../batch/feed-worker');
-const {
-  SubsystemService,
-} = require('../../../services/batch/subsystem');
-const {
-  OpenAPISpecService,
-} = require('../../../services/batch/oas-service');
+const { SubsystemService } = require('../../../services/batch/subsystem');
+const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
   getNamespaceDetails,
 } = require('../../../services/workflow/get-namespaces');
@@ -48,10 +44,19 @@ jest.mock('../../../services/workflow/get-namespaces', () => ({
   getNamespaceDetails: jest.fn(),
 }));
 
+const mockGetGatewayResources = jest.fn();
+
+jest.mock('../../../services/provisioner', () => ({
+  ProvisionerService: jest.fn().mockImplementation(() => ({
+    getGatewayResources: mockGetGatewayResources,
+  })),
+}));
+
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getNamespaceDetails.mockResolvedValue(null);
+    mockGetGatewayResources.mockResolvedValue([]);
   });
 
   describe('deleteSubsystem', () => {
@@ -81,7 +86,9 @@ describe('SubsystemService', () => {
         .mockResolvedValueOnce(activeClientConnections);
 
       OpenAPISpecService.mockImplementation(() => ({
-        listOpenAPISpecsBySubsystemId: jest.fn().mockResolvedValue(serviceSpecs),
+        listOpenAPISpecsBySubsystemId: jest
+          .fn()
+          .mockResolvedValue(serviceSpecs),
         listActiveConnectionsByServiceId: jest
           .fn()
           .mockResolvedValue(activeProviderConnections),
@@ -159,7 +166,11 @@ describe('SubsystemService', () => {
           id: 'subsystem-123',
         });
 
-      await service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM');
+      await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
 
       expect(deleteRecordByInternalId).toHaveBeenCalledWith(
         context,
@@ -202,11 +213,15 @@ describe('SubsystemService', () => {
       getNamespaceDetails.mockResolvedValue({
         name: 'sdx-subsystem-gateway',
       });
+      mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
       await expect(
         service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
       ).rejects.toThrow(
         'Subsystem cannot be deleted because gateway configuration exists'
+      );
+      expect(mockGetGatewayResources).toHaveBeenCalledWith(
+        'sdx-subsystem-gateway'
       );
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });

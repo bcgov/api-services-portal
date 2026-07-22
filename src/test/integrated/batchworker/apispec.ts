@@ -34,21 +34,23 @@ import { LoadOpenAPISpec } from '../../../services/workflow/openapi-spec-loader'
 
   if (true) {
     const theSpec = await fetch(
-      'https://bcgov.github.io/sdx-openapi/HTTPBUN.v1.yaml'
+      'https://bcgov.github.io/sdx-openapi/Toys.v1.yaml'
     );
     const spec = await theSpec.text();
     const specYAML = YAML.parse(spec);
 
     const json = {
       spec: YAML.stringify(specYAML),
-      organization: 'ministry-of-citizens-services',
-      subsystem: 'MY-SVC',
+      organization: 'ministry-of-citz',
+      subsystem: 'SAMPLER',
       state: 'active',
+      environment: 'lab',
     };
 
     const data = await LoadOpenAPISpec(ctx, { ...json });
-    const res = await syncRecords(ctx, 'OpenAPISpec', null, data);
-    o(res);
+    o(JSON.parse(data.operations));
+    // const res = await syncRecords(ctx, 'OpenAPISpec', null, data);
+    // o(res);
   }
   await keystone.disconnect();
 })();

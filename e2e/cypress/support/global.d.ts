@@ -114,6 +114,12 @@ declare namespace Cypress {
       formData?: boolean
     ): Chainable<Cypress.Response<any>>
 
+    makeSDXCall(options: {
+      method: string
+      path: string
+      body?: string
+    }): Chainable<Cypress.Response<any>>
+
     makeAPIRequest(endPoint: string, methodType: string): Chainable<Cypress.Response<any>>
 
     getUserSession(): Chainable<Cypress.Response<any>>

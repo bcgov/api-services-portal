@@ -1,3 +1,4 @@
+import { assertEqual } from '../../controllers/ioc/assert';
 import { Logger } from '../../logger';
 import { Application } from './types';
 

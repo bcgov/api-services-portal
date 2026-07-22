@@ -6,9 +6,15 @@ import { RuntimeGroupService } from '../batch/runtime-group';
 import { BatchWhereClause } from '../keystone/batch-service';
 import { parseOrganizationMemberDetails } from '../keystone/organization';
 import { OpenApiSpec, Subsystem } from '../keystone/types';
-import { OrgNamespace } from '../org-groups/types';
+import { GroupMember, OrgNamespace } from '../org-groups/types';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { assertAndRaiseValidateError } from './evaluator';
+import { ResourceScope } from '../workflow/openapi-spec-loader';
+import {
+  getNamespacePermissions,
+  NamespaceUserPermissions,
+} from '../workflow/get-namespace-permissions';
+import { getSubsystemRoles } from '../workflow/get-subsystem-roles';
 
 const logger = Logger('gateway-patterns.catalog');
 
@@ -37,12 +43,15 @@ export interface SubsystemEntry {
       domains: string[];
     };
   };
-  runtimeGroup?: {
+  access?: GroupMember[];
+  integrationClientIds: string[];
+  runtimeGroups?: {
     name: string;
+    environment: string;
     host: string;
-    sdxEndpoint?: string;
-    consumerEndpoint?: string;
-  };
+    sdxEndpoint: string;
+    consumerEndpoint: string;
+  }[];
 }
 
 /**
@@ -59,6 +68,7 @@ export interface ServiceClient {
  */
 export interface ServiceCatalogEntry {
   name: string;
+  environment: string;
   title: string;
   version: string;
   summary?: string;
@@ -68,10 +78,33 @@ export interface ServiceCatalogEntry {
     summary: string;
     method: string;
     path: string;
-    scopes?: string[];
+    scopes?: ResourceScope[];
   }[];
   spec?: string;
+  specVersion: string;
   subsystem: SubsystemEntry;
+}
+
+export interface ResourceScopeParts {
+  name: string;
+  description: string;
+  namespace: string;
+  resourceType: string;
+  subResourceTypes?: string[];
+  action: string;
+}
+
+export interface ScopedServiceOperations {
+  name: string;
+  environment: string;
+  specVersion: string;
+  version: string;
+  subsystem: SubsystemEntry;
+  operationIds: string[];
+}
+
+export interface ResourceScopeEntry extends ResourceScopeParts {
+  services: ScopedServiceOperations[];
 }
 
 export async function GetCatalogByName(
@@ -113,13 +146,16 @@ export async function GetCatalog(
       name: c.name,
       title: c.title,
       version: c.version,
+      specVersion: c.specVersion,
+      annotations: c.annotations,
+      environment: c.environment,
       summary: c.summary,
       description: c.description,
       spec: includeSpec ? c.spec : undefined,
       subsystem: {
         name: c.subsystem.name,
         description: c.subsystem.description,
-        clientId: `LAB.${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
+        clientId: `${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
         organization: {
           name: c.organization.name,
         },
@@ -130,10 +166,134 @@ export async function GetCatalog(
         gateway: {
           id: c.namespace,
         },
+        integrationClientIds: c.subsystem.integrations.map(
+          (i) => i.integrationClientId
+        ),
       },
-      operations: JSON.parse(c.operations || '{}'),
+      operations: JSON.parse(c.operations || '[]'),
     } as ServiceCatalogEntry;
   });
+}
+
+export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
+  const catalog = await GetCatalog(ctx);
+  const scopes: ({ service: ScopedServiceOperations } & ResourceScopeParts)[] =
+    [];
+
+  catalog.forEach((service) => {
+    const serviceScopes = service.operations.reduce(
+      (acc: ResourceScope[], op) => {
+        if (op.scopes) {
+          return acc.concat(op.scopes);
+        }
+        return acc;
+      },
+      []
+    );
+
+    const serviceBase = {
+      name: service.name,
+      environment: service.environment,
+      specVersion: service.specVersion,
+      version: service.version,
+      subsystem: service.subsystem,
+    };
+
+    const scopeList = serviceScopes
+      .filter((scope) => typeof scope !== 'string')
+      .map(
+        (scope) =>
+          ({
+            ...parseScopeName(scope),
+            ...{
+              service: {
+                ...serviceBase,
+                subsystem: service.subsystem,
+                operationIds: service.operations
+                  .filter((op) => op.scopes && op.scopes.includes(scope))
+                  .map((op) => op.operationId),
+              },
+            },
+          } as { service: ScopedServiceOperations } & ResourceScopeParts)
+      );
+
+    scopes.push(...scopeList);
+  });
+
+  // group the scopes by name to get all the ScopedServiceOperations
+  // to create the ResourceScopeEntry response
+  const scopeGroups: Record<string, ResourceScopeEntry> = {};
+  scopes.forEach((scope) => {
+    if (!scopeGroups[scope.name]) {
+      scopeGroups[scope.name] = {
+        name: scope.name,
+        description: scope.description,
+        namespace: scope.namespace,
+        resourceType: scope.resourceType,
+        subResourceTypes: scope.subResourceTypes,
+        action: scope.action,
+        services: [scope.service],
+      };
+    } else {
+      // if the scope already exists then we need to add the service to the existing entry
+      scopeGroups[scope.name].services.push(scope.service);
+    }
+  });
+  return Object.values(scopeGroups);
+}
+
+/**
+ * Scope format in BCNF format:
+ *
+ * scope           = namespace ":" resource { ":" resource } ":" action ;
+ * namespace       = identifier ;
+ * resource        = identifier ;
+ * action          = identifier ;
+ * identifier      = letter { letter | digit | "-" | "_" } ;
+ * letter          = "a"…"z" ;
+ * digit           = "0"…"9" ;
+ *
+ * @param scope
+ * @returns
+ */
+function parseScopeName(
+  // service: ServiceCatalogEntry,
+  // operation: { operationId: string },
+  scope: ResourceScope
+): ResourceScopeParts {
+  const parts = scope.name.split(':');
+  // parse based on the BCNF format defined above, which should have at least 3 parts: {namespace}:{resourceType}:{action}
+  assertAndRaiseValidateError(
+    parts.length >= 3,
+    'Invalid scope format',
+    'inputs.scope',
+    'scope should be in format: namespace ":" resource { ":" resource } ":" action'
+  );
+
+  return {
+    name: scope.name,
+    description: scope.description,
+    namespace: parts[0],
+    resourceType: parts[1],
+    subResourceTypes:
+      parts.length > 3 ? parts.slice(2, parts.length - 1) : undefined,
+    action: parts[parts.length - 1],
+  };
+}
+
+export async function EnrichWithAccess(
+  ctx: any,
+  subsystemEntry: SubsystemEntry
+): Promise<void> {
+  if (!subsystemEntry.gateway?.id) {
+    logger.warn(
+      'Subsystem entry does not have a gateway id, skipping access enrichment'
+    );
+    return;
+  }
+
+  const roles = await getSubsystemRoles(ctx, subsystemEntry.clientId);
+  subsystemEntry.access = roles;
 }
 
 export async function EnrichWithRuntimeGroup(
@@ -172,15 +332,23 @@ export async function EnrichWithRuntimeGroup(
   );
 
   // lookup runtime group based on domain
-  const host = orgNamespace.permDomains[0];
   const rgService = new RuntimeGroupService();
-  const runtimeGroup = await rgService.findRuntimeGroupByUniqueHost(ctx, host);
-  subsystemEntry.runtimeGroup = {
-    name: runtimeGroup.name,
-    host,
-    sdxEndpoint: runtimeGroup.sdxEndpoint,
-    consumerEndpoint: runtimeGroup.consumerEndpoint,
-  };
+  const runtimeGroups = await rgService.findHostedRuntimeGroupsByName(
+    ctx,
+    subsystemEntry.organization.name,
+    orgNamespace.permRuntimeGroup
+  );
+  subsystemEntry.runtimeGroups = runtimeGroups.map((rg) => ({
+    name: rg.name,
+    environment: rg.environment,
+    host: rg.host,
+    sdxEndpoint: rg.sdxEndpoint,
+    consumerEndpoint: rg.consumerEndpoint,
+  }));
+}
+
+export function BuildClientID(subsystemEntry: SubsystemEntry): string {
+  return `${subsystemEntry.member?.memberClass}.${subsystemEntry.member?.memberId}.${subsystemEntry.name}`;
 }
 
 export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
@@ -189,7 +357,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
   return {
     name: c.name,
     description: c.description,
-    clientId: `LAB.${member.memberClass}.${member.memberId}.${c.name}`,
+    clientId: `${member.memberClass}.${member.memberId}.${c.name}`,
     organization: {
       name: c.organization.name,
       title: c.organization.title,
@@ -199,10 +367,15 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     gateway: {
       id: c.namespace,
     },
+    integrationClientIds: c.integrations.map((i) => i.integrationClientId),
   };
 }
 
-export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
+export function BuildServiceName(
+  subsystemRecord: Subsystem,
+  environment: string,
+  oas: any
+): string {
   const specService = new OpenAPISpecService();
 
   const serviceName = specService.titleToServiceName(oas.info?.title || '');
@@ -213,37 +386,35 @@ export function BuildServiceName(subsystemRecord: Subsystem, oas: any): string {
     subsystemRecord.organization.tags
   );
 
-  return `LAB.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
+  const env = environment.toLocaleUpperCase();
+
+  return `${env}.${member.memberClass}.${member.memberId}.${serviceName}.${serviceVersion}`;
 }
 
-export function ExtractClientIdFromServiceId(serviceId: string): string {
-  const parts = serviceId.split('.');
-  assertAndRaiseValidateError(
-    parts.length >= 5 && parts.length <= 6,
-    'Invalid service id format',
-    'inputs.service_id',
-    'service id should be in format {env}.{member_class}.{member_id}.{subsystem_name}.{service_name}(.{version})'
-  );
-
-  return `${parts[0]}.${parts[1]}.${parts[2]}.${parts[3]}`;
-}
-
-export function ParseClientId(id: string): any {
+export function ParseClientId(id: string): {
+  member: {
+    memberClass: string;
+    memberId: string;
+  };
+  subsystem: {
+    name: string;
+  };
+} {
   const parts = id.split('.');
   assertAndRaiseValidateError(
-    parts.length === 4 && parts[0] === 'LAB',
+    parts.length === 3,
     'Invalid client id format',
     'inputs.client_id',
-    'client id should be in format LAB.{member_class}.{member_id}.{subsystem_name}'
+    'client id should be in format {member_class}.{member_id}.{subsystem_name}'
   );
 
   return {
     member: {
-      memberClass: parts[1],
-      memberId: parts[2],
+      memberClass: parts[0],
+      memberId: parts[1],
     },
     subsystem: {
-      name: parts[3],
+      name: parts[2],
     },
   };
 }

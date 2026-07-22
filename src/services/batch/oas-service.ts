@@ -1,8 +1,5 @@
 import { Keystone } from '@keystonejs/keystone';
-import {
-  deleteRecordByInternalId,
-  getRecords,
-} from '../../batch/feed-worker';
+import { deleteRecordByInternalId, getRecords } from '../../batch/feed-worker';
 import { BatchResult } from '../../batch/types';
 import { strict as assert } from 'assert';
 import {

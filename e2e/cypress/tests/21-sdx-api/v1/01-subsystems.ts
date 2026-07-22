@@ -1,9 +1,12 @@
+import { v4 as uuidv4 } from 'uuid'
+
 import {
   clientIdForSubsystem,
   createConnection,
   createRuntimeGroup,
   createSubsystem,
   createSubsystemAndOASService,
+  createSubsystemGateway,
   uniqueSubsystemName,
 } from '../../../support/sdx-commands'
 
@@ -13,6 +16,11 @@ describe('SDX Subsystem', () => {
   before(() => {
     cy.buildOrgGatewayDatasetAndProduct().then((data) => {
       workingData = data
+
+      const rg = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 6)
+      workingData['runtimeGroupId'] = rg.toLowerCase()
+
+      workingData['env'] = 'dev'
     })
   })
 
@@ -45,10 +53,10 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - deletes related OAS services when no active connections or gateway config exist', () => {
-      const { org } = workingData
+      const { org, env } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
         cy.setQueryString({ force: false })
         cy.callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
@@ -180,33 +188,37 @@ describe('SDX Subsystem', () => {
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - active client connection request exists', () => {
-      const { org } = workingData
+      const { org, runtimeGroupId, env } = workingData
       const subsystemName = uniqueSubsystemName()
 
-      createSubsystemAndOASService(org, subsystemName, (service: any) => {
-        createConnection(org, service.subsystem.clientId, service.name, () => {
-          cy.setQueryString({ force: false })
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${service.subsystem.name}`,
-            'DELETE',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(422)
-            expect(body.message).to.be.equal(
-              'Subsystem cannot be deleted because it has active connection requests as a client'
-            )
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
+        createRuntimeGroup(org, runtimeGroupId, env)
+
+        createSubsystemGateway(org, runtimeGroupId, service.subsystem.name, () => {
+          createConnection(org, service.subsystem.clientId, service.name, () => {
+            cy.setQueryString({ force: false })
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/subsystems/${service.subsystem.name}`,
+              'DELETE',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.message).to.be.equal(
+                'Subsystem cannot be deleted because it has active connection requests as a client'
+              )
+            })
           })
         })
       })
     })
 
     it('DELETE /organizations/{org}/subsystems/{name} - active provider connection request exists', () => {
-      const { org } = workingData
+      const { org, env } = workingData
       const clientSubsystemName = uniqueSubsystemName()
       const providerSubsystemName = uniqueSubsystemName()
 
       createSubsystem(org, clientSubsystemName, () => {
-        createSubsystemAndOASService(org, providerSubsystemName, (service: any) => {
+        createSubsystemAndOASService(org, providerSubsystemName, env, (service: any) => {
           createConnection(
             org,
             clientIdForSubsystem(org, clientSubsystemName),
@@ -225,43 +237,6 @@ describe('SDX Subsystem', () => {
               })
             }
           )
-        })
-      })
-    })
-
-    it('DELETE /organizations/{org}/subsystems/{name} - gateway configuration exists', () => {
-      const { org } = workingData
-      const subsystemName = uniqueSubsystemName()
-      const runtimeGroupName = `rg${Cypress._.random(100000, 999999)}`
-
-      createSubsystem(org, subsystemName, () => {
-        createRuntimeGroup(
-          org,
-          runtimeGroupName,
-          `http://internal.${runtimeGroupName}.servers.sdx`
-        )
-
-        cy.setRequestBody({
-          runtimeGroupName,
-        })
-        cy.callAPI(
-          `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
-          'PUT'
-        ).then(({ apiRes: { status, body } }: any) => {
-          expect(status, body.message).to.be.equal(200)
-          expect(body).to.have.property('gatewayId')
-
-          cy.setQueryString({ force: false })
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
-            'DELETE',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(422)
-            expect(body.message).to.be.equal(
-              'Subsystem cannot be deleted because gateway configuration exists'
-            )
-          })
         })
       })
     })

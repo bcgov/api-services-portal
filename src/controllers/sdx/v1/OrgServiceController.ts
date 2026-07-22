@@ -30,7 +30,7 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
-import { assertEqual } from '../../ioc/assert';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ExpressRequest } from './types';
 
@@ -67,6 +67,7 @@ export class GatewayServiceController extends Controller {
   public async createOASService(
     @Path() org: string,
     @Query() subsystem: string,
+    @Query() environment: string,
     @Body() body: any,
     @Request() request: ExpressRequest & { rawBody: Buffer }
   ): Promise<BatchResult> {
@@ -95,6 +96,7 @@ export class GatewayServiceController extends Controller {
       subsystem,
       spec: rawBody,
       state: 'active',
+      environment,
     };
 
     const final = await LoadOpenAPISpec(context, input);
@@ -205,6 +207,11 @@ export class GatewayServiceController extends Controller {
       'Not authorized to access this service'
     );
 
+    assertIsDefined(
+      entry.spec,
+      'spec',
+      'No OpenAPI specification found for this service'
+    );
     return YAML.parse(entry.spec);
   }
 

@@ -1,5 +1,5 @@
 const {
-  deleteRecordByInternalId,
+  deleteRecordByInternalIdThrowErrors,
 } = require('../../../batch/feed-worker');
 const {
   ConnectionService,
@@ -13,6 +13,7 @@ const {
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
+  deleteRecordByInternalIdThrowErrors: jest.fn(),
   getRecords: jest.fn(),
   removeKeys: jest.fn((record) => record),
   syncRecordsThrowErrors: jest.fn(),
@@ -141,7 +142,7 @@ describe('ConnectionService', () => {
         serviceConfigCount: 0,
       });
 
-      deleteRecordByInternalId.mockResolvedValue({
+      deleteRecordByInternalIdThrowErrors.mockResolvedValue({
         status: 200,
         result: 'deleted',
         id: '123',
@@ -160,7 +161,7 @@ describe('ConnectionService', () => {
         clientSubsystem,
         serviceSpec
       );
-      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+      expect(deleteRecordByInternalIdThrowErrors).toHaveBeenCalledWith(
         context,
         'ConnectionRequest',
         '123'
@@ -188,7 +189,7 @@ describe('ConnectionService', () => {
       ).rejects.toThrow(
         'Connection request cannot be deleted because client gateway configuration still exists for tag ns.sdx-client-gateway.123.c'
       );
-      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
     });
 
     it('rejects delete when service gateway config still exists', async () => {
@@ -206,7 +207,7 @@ describe('ConnectionService', () => {
       ).rejects.toThrow(
         'Connection request cannot be deleted because service gateway configuration still exists for tag ns.sdx-service-gateway.123.p'
       );
-      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
     });
 
     it('rejects delete with both tags when client and service gateway config still exist', async () => {
@@ -224,7 +225,7 @@ describe('ConnectionService', () => {
       ).rejects.toThrow(
         'Connection request cannot be deleted because client gateway configuration still exists for tag ns.sdx-client-gateway.123.c and service gateway configuration still exists for tag ns.sdx-service-gateway.123.p'
       );
-      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export function uniqueSubsystemName(): string {
   return `SUBSYS-${Cypress._.random(100000, 999999)}`
 }
@@ -6,7 +8,7 @@ export function clientIdForSubsystem(org: any, subsystemName: string): string {
   const memberClass = org.tags[0].split(':')[1]
   const memberId = org.tags[1].split(':')[1]
 
-  return `LAB.${memberClass}.${memberId}.${subsystemName}`
+  return `${memberClass}.${memberId}.${subsystemName}`
 }
 
 export function createSubsystem(org: any, subsystemName: string, next: any) {
@@ -16,12 +18,56 @@ export function createSubsystem(org: any, subsystemName: string, next: any) {
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
       expect(status, body.reason || body.message).to.be.equal(200)
+
       next(body)
     }
   )
 }
 
-export function createOASService(org: any, subsystemName: string, next: any) {
+export function updateSubsystemIntegrationClients(
+  org: any,
+  subsystemName: string,
+  clients: string[],
+  next: any
+) {
+  cy.setRequestBody({
+    name: subsystemName,
+    integrations: clients.map((c) => ({ integrationClientId: c })),
+  })
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
+    ({ apiRes: { status, body } }: any) => {
+      expect(status, body.reason || body.message).to.be.equal(200)
+
+      next(body)
+    }
+  )
+}
+
+export function createSubsystemGateway(
+  org: any,
+  runtimeGroupName: string,
+  subsystemName: string,
+  next: any
+) {
+  cy.setRequestBody({
+    runtimeGroupName,
+  })
+  cy.callAPI(
+    `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
+    'PUT'
+  ).then(({ apiRes: { status, body } }: any) => {
+    expect(status, body.message).to.be.equal(200)
+    expect(body).to.have.property('gatewayId')
+    next(body)
+  })
+}
+
+export function createOASService(
+  org: any,
+  subsystemName: string,
+  environment: string,
+  next: any
+) {
   cy.fixture('toys.v1.yaml', null).then((text: any) => {
     expect(Cypress.Buffer.isBuffer(text)).to.be.true
 
@@ -33,7 +79,7 @@ export function createOASService(org: any, subsystemName: string, next: any) {
     cy.setRequestBodyRaw(body)
     cy.setHeader('Content-Type', 'application/octet-stream')
     cy.callAPI(
-      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}`,
+      `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=${environment}`,
       'PUT',
       false
     ).then(({ apiRes: { status, body } }: any) => {
@@ -53,9 +99,14 @@ export function createOASService(org: any, subsystemName: string, next: any) {
   })
 }
 
-export function createSubsystemAndOASService(org: any, subsystemName: string, next: any) {
+export function createSubsystemAndOASService(
+  org: any,
+  subsystemName: string,
+  environment: string,
+  next: any
+) {
   createSubsystem(org, subsystemName, () => {
-    createOASService(org, subsystemName, next)
+    createOASService(org, subsystemName, environment, next)
   })
 }
 
@@ -68,6 +119,9 @@ export function createConnection(
   cy.setRequestBody({
     clientId,
     serviceId,
+    policyVersion: 'SDX.R0.00',
+    environment: 'dev',
+    isActive: true,
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
@@ -82,18 +136,182 @@ export function createConnection(
 export function createRuntimeGroup(
   org: any,
   runtimeGroupName: string,
-  consumerEndpoint: string
+  environment: string,
+  consumerEndpoint?: string,
+  sdxEndpoint?: string
 ) {
   cy.setRequestBody({
     name: runtimeGroupName,
+    environment,
     hostedOrganizations: [org.name],
     consumerEndpoint,
+    sdxEndpoint,
   })
-  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT').then(
-    ({ apiRes: { status, body } }: any) => {
+  return cy
+    .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
+    .then(({ apiRes: { status, body } }: any) => {
       expect(status, body.message).to.be.equal(200)
+
+      cy.clearRequestBody()
+      return cy
+        .callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupName}/gateway`,
+          'PUT'
+        )
+        .then(({ apiRes: { status, body } }: any) => {
+          //expect(status).to.be.equal(200)
+          //expect(body).to.have.property('gatewayId')
+
+          // provision default routes
+          return applyRuntimeGroupPattern(
+            org.name,
+            runtimeGroupName,
+            environment,
+            'apply'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            // expect(JSON.stringify(body)).to.be.equal('applied')
+
+            // just have to wait because it takes a bit of time to propogate the changes
+            cy.wait(10000)
+          })
+        })
+    })
+}
+
+export function updateRuntimeGroupAddHostedOrg(
+  org: any,
+  runtimeGroupName: string,
+  environment: string,
+  hostedOrg: string
+) {
+  // get the runtime-group first, and then append the new hostOrganization
+  return cy
+    .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups?filter=owned`, 'GET')
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      const runtimeGroup = body.find((rg: any) => rg.name === runtimeGroupName)
+      expect(runtimeGroup, `Runtime group ${runtimeGroupName} not found`).to.exist
+
+      const hostedOrganizations = runtimeGroup.hostedOrganizations || []
+      if (!hostedOrganizations.includes(hostedOrg)) {
+        hostedOrganizations.push(hostedOrg)
+      }
+      cy.setRequestBody({
+        name: runtimeGroupName,
+        environment,
+        hostedOrganizations,
+        sdxEndpoint: runtimeGroup.sdxEndpoint,
+        consumerEndpoint: runtimeGroup.consumerEndpoint,
+      })
+      return cy
+        .callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
+        .then(({ apiRes: { status, body } }: any) => {
+          expect(status, body.message).to.be.equal(200)
+        })
+    })
+}
+
+export function new_service(org: any, subsystemName: string, next: any) {
+  const rg = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 6)
+
+  const payload = {
+    name: subsystemName,
+  }
+  cy.setRequestBody(payload)
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/subsystems`, 'PUT').then(
+    ({ apiRes: { status } }: any) => {
+      expect(status).to.be.equal(200)
+
+      // create runtime group and add subsystem gateway
+      createRuntimeGroup(org, rg, 'dev').then(() => {
+        createSubsystemGateway(org, rg, subsystemName, () => {
+          cy.get('@toys.v1').then((text: any) => {
+            expect(Cypress.Buffer.isBuffer(text)).to.be.true
+            const body = text.toString()
+            expect(body).to.include('openapi: 3.1.1')
+
+            cy.setRequestBodyRaw(body)
+            cy.setHeader('Content-Type', 'application/octet-stream')
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=dev`,
+              'PUT',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              // expect(status).to.be.equal(200)
+              expect(JSON.stringify(body)).to.include('created')
+              cy.callAPI(
+                `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
+                'GET',
+                false
+              ).then(({ apiRes: { status, body } }: any) => {
+                expect(status).to.be.equal(200)
+                assert(body.length > 0, 'Expected at least one service in response')
+                next(body[0])
+              })
+            })
+          })
+        })
+      })
     }
   )
+}
+
+export function createJanisOrgAndAccess() {
+  const org = {
+    name: 'user-janis',
+    title: 'User Janis',
+    description: '',
+    extSource: 'custom',
+    extRecordHash: '0000',
+    tags: ['member_class:USR', 'member_id:JANIS'],
+    orgUnits: [],
+  }
+  cy.setRequestBody(org)
+  return cy
+    .callAPI('ds/api/v3/organizations/ca.bc.gov', 'PUT')
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+
+      const orgAccess = {
+        name: org.name,
+        parent: `/ca.bc.gov`,
+        members: [
+          {
+            member: {
+              email: 'janis@testmail.com',
+            },
+            roles: ['organization-admin', 'system-admin'],
+          },
+        ],
+      }
+      cy.setRequestBody(orgAccess)
+
+      // Set permissions for the new Org
+      cy.callAPI(`ds/api/v3/organizations/ca.bc.gov/access`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(204)
+        }
+      )
+    })
+}
+
+export async function sdxFetchCall(options: {
+  method: string
+  path: string
+  body?: string
+}): Promise<{ status: number; body: any }> {
+  return await fetch(`http://kong-sdx-edge0.localtest.me:9080${options.path}`, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: options.body,
+  }).then(async (response) => {
+    const status = response.status
+    const body = await response.json().catch(() => ({}))
+    return { status, body }
+  })
 }
 
 export const publicKeyPemA = `-----BEGIN PUBLIC KEY-----
@@ -116,10 +334,10 @@ S2jKMiCW1pr8CU26fbma7xHNoLGimmenkAqRhXiONSxKnsmGgoZvaFQzpqGKGxWc
 dQIDAQAB
 -----END PUBLIC KEY-----`
 
-export function orgGatewayKeyName(org: { tags: string[] }): string {
+export function orgGatewayKeyName(env: string, org: { tags: string[] }): string {
   const memberClass = org.tags[0].split(':')[1].toLowerCase()
   const memberId = org.tags[1].split(':')[1].toLowerCase()
-  return `sdx.keys.${memberClass}.${memberId}.org:0`
+  return `sdx.keys.${memberClass}.${memberId}.org.${env}:0`
 }
 
 export function subsystemGatewayKeyName(clientId: string): string {
@@ -146,34 +364,76 @@ export function registerOrgGateway(orgName: string) {
 
 export function applyOrgPublicKeyPattern(
   orgName: string,
+  environment: string,
   publicKeyPem: string,
-  action: 'apply' | 'remove' = 'apply'
+  action: 'apply' | 'delete' = 'apply'
 ) {
   cy.setRequestBody({
-    pattern: 'sdx-keys.r1',
     parameters: {
       organization: orgName,
-      public_key_pem: publicKeyPem,
+      environment: environment,
+      publicKeyPem: publicKeyPem,
     },
   })
-  cy.setQueryString({ action, dryRun: 'false' })
-  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/pattern`, 'PUT')
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
 }
 
 export function applySubsystemPublicKeyPattern(
   orgName: string,
   clientId: string,
+  environment: string,
   publicKeyPem: string,
-  action: 'apply' | 'remove' = 'apply'
+  action: 'apply' | 'delete' = 'apply'
 ) {
   cy.setRequestBody({
-    pattern: 'sdx-keys.r1',
     parameters: {
       organization: orgName,
-      client_id: clientId,
-      public_key_pem: publicKeyPem,
+      environment: environment,
+      clientId: clientId,
+      publicKeyPem: publicKeyPem,
     },
   })
-  cy.setQueryString({ action, dryRun: 'false' })
-  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/pattern`, 'PUT')
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
+}
+
+export function applyRuntimeGroupPattern(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      organization: orgName,
+      runtimeGroupName: runtimeGroupName,
+      environment: environment,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-runtime-group.r1`,
+    'PUT'
+  )
+}
+
+export function applyServicePattern(
+  orgName: string,
+  serviceId: string,
+  environment: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      serviceId: serviceId,
+      environment: environment,
+      upstreamUrl: 'http://upstream-mock-api.localtest.me:2025',
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-service.r1`,
+    'PUT'
+  )
 }
