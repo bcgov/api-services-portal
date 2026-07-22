@@ -8,12 +8,17 @@ on:
 jobs:
   comment:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Set KEBAB_CASE_BRANCH
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           # Convert github.head_ref to kebab case
-          kebab_case=$(echo "${{ github.head_ref }}" | sed 's/_/-/g; s/\//-/g')
-          echo "::set-output name=KEBAB_CASE_BRANCH::${kebab_case}"
+          kebab_case=$(echo "$HEAD_REF" | sed 's/_/-/g; s/\//-/g')
+          echo "KEBAB_CASE_BRANCH=${kebab_case}" >> "$GITHUB_OUTPUT"
         id: set-branch-id
 
       - name: Check the KEBAB_CASE_BRANCH output
@@ -21,7 +26,7 @@ jobs:
 
       - name: PR Description
         if: startsWith(github.head_ref, 'feature/') == true
-        uses: bcgov-nr/action-pr-description-add@v1.1.1
+        uses: bcgov-nr/action-pr-description-add@v2.0.1
         with:
           add_markdown: |
             ---

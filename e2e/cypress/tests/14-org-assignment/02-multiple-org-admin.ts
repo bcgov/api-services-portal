@@ -1,7 +1,9 @@
+import keycloakGroupPage from '../../pageObjects/keycloakGroup'
 import keycloakUsersPage from '../../pageObjects/keycloakUsers'
 
 describe('Give a user org admin access at organization level', () => {
   const user = new keycloakUsersPage()
+  const groups = new keycloakGroupPage()
 
   before(() => {
     cy.visit(Cypress.env('KEYCLOAK_URL'))
@@ -25,10 +27,7 @@ describe('Give a user org admin access at organization level', () => {
   })
 
   it('Navigate to Users Page', () => {
-    cy.wait(10000)
-    cy.get('[id=nav-toggle').click()
-    cy.contains('Users').click()
-    cy.get('[id=nav-toggle').click()
+    user.visitUsers()
   })
 
   it('Search Wendy (Credential Issuer) from the user list', () => {
@@ -38,11 +37,11 @@ describe('Give a user org admin access at organization level', () => {
   })
 
   it('Navigate to Groups tab', () => {
-    cy.get(user.groupsTab).click({ force:true })
+    groups.openGroupsTab()
   })
 
   it('Set the user to the Organization Unit', () => {
-    user.setUserToOrganization('ministry-of-health')
+    groups.setUserToOrganization('ministry-of-health')
   })
 
   after(() => {

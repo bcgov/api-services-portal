@@ -1,9 +1,12 @@
 const { Slug, Text, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { StructuredActivityService } = require('../services/workflow');
+const {
+  logSubsystemActivityFromHook,
+} = require('../services/workflow/org-activity');
 const { newNamespaceID } = require('../services/identifiers');
 const { SubsystemService } = require('../services/batch/subsystem');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -23,6 +26,11 @@ module.exports = {
       isRequired: false,
     },
     organization: { type: Relationship, ref: 'Organization' },
+    integrations: {
+      type: Relationship,
+      ref: 'SubsystemIntegration.subsystem',
+      many: true,
+    },
     slug: {
       type: Slug,
       adminConfig: {
@@ -50,39 +58,49 @@ module.exports = {
       resolvedData.namespace = `sdx-${newNamespaceID()}`;
       return resolvedData;
     },
-    validateInput: ({ resolvedData, operation }) => {
+    validateInput: ({ resolvedData, operation, existingItem }) => {
       if (operation == 'create') {
         new SubsystemService().validateSubsystem(resolvedData['name']);
       }
+      if (operation == 'update') {
+        // if the "integrationId" existingItem is already set, it should not be updated
+        if (
+          'integrationId' in resolvedData &&
+          existingItem.integrationId &&
+          resolvedData.integrationId !== existingItem.integrationId
+        ) {
+          throw new Error(
+            'Integration ID cannot be updated once set. Please contact support if you need to change the integration ID.'
+          );
+        }
+      }
     },
     afterDelete: async function ({ existingItem, context }) {
-      await new StructuredActivityService(
+      await logSubsystemActivityFromHook(
         context,
-        existingItem.namespace
-      ).logListActivity(
-        true,
         'delete',
-        'subsystem',
-        {
-          subsystem: existingItem,
-        },
-        '{actor} {action} {entity} {subsystem}'
-      );
+        existingItem,
+        existingItem
+      ).catch((e) => {
+        logger.error('[OrgActivity] subsystem delete %s', e);
+      });
     },
 
-    afterChange: async function ({ operation, updatedItem, context }) {
-      await new StructuredActivityService(
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      context,
+    }) {
+      const hookOperation = operation === 'create' ? 'create' : 'update';
+      await logSubsystemActivityFromHook(
         context,
-        updatedItem.namespace
-      ).logListActivity(
-        true,
-        operation,
-        'subsystem',
-        {
-          subsystem: updatedItem,
-        },
-        '{actor} {action} {entity} {subsystem}'
-      );
+        hookOperation,
+        existingItem,
+        updatedItem
+      ).catch((e) => {
+        logger.error('[OrgActivity] subsystem change %s', e);
+      });
     },
   },
 };

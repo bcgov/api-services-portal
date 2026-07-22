@@ -19,11 +19,17 @@ export function scopesToRoles(
   if (scopes.includes('Access.Manage')) {
     _roles.push('access-manager');
   }
+  if (scopes.includes('Connection.Manage')) {
+    _roles.push('connection-manager');
+  }
   if (scopes.includes('System.Manage')) {
     _roles.push('system-owner');
   }
   if (scopes.includes('GatewayConfig.Publish')) {
     _roles.push('config-publisher');
+  }
+  if (scopes.includes('GatewayPattern.Publish')) {
+    _roles.push('pattern-publisher');
   }
 
   _roles.push('portal-user');

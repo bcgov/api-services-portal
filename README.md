@@ -64,22 +64,43 @@ Use the following configuration to run the Portal locally (outside of Docker) ag
 
 1. Follow [local deployment instructions](#local-deployment) and run `docker compose up`.
 1. In `/src` run `npm install`.
-
    1. If using Node version > 17, run `npm install --legacy-peer-deps`
 
-1. Turn off the docker compose Portal and OAuth2 Proxy: `docker stop apsportal oauth2-proxy`
+1. Switch to local-dev mode: stop `apsportal` and `oauth2-proxy`, then recreate `gwa-api` and `feeder` with `docker-compose.dev.yml` so they point at the host for local development.
 
-1. Start the OAuth2 Proxy locally:
+   ```sh
+   docker compose stop apsportal oauth2-proxy provisioner
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d \
+     --force-recreate --no-deps gwa-api feeder
+   ```
+
+   To switch back to full compose later, recreate without the overlay:
+
+   ```sh
+   docker compose up -d --force-recreate apsportal oauth2-proxy gwa-api feeder provisioner
+   ```
+
+1. Start the OAuth2 Proxy locally (from the repo root):
 
 ```sh
-# mac
+# macOS — proxy shares the host network stack
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
-
-# WSL
-hostip=$(hostname -I | awk '{print $1}')
 
 docker run -ti --rm --name proxy --net=host \
   --add-host portal.localtest.me:$hostip \
+  --add-host keycloak.localtest.me:$hostip \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.yaml:/oauth2.yaml \
+  -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
+  quay.io/oauth2-proxy/oauth2-proxy:v7.8.1 \
+  --alpha-config /oauth2.yaml --config /oauth2.config
+```
+
+```sh
+# WSL — publish 4180 to the host so Windows browsers can use localhost:4180;
+# host-gateway sends portal.localtest.me / keycloak.localtest.me to the WSL host
+docker run -ti --rm --name proxy -p 4180:4180 \
+  --add-host portal.localtest.me:host-gateway \
+  --add-host keycloak.localtest.me:host-gateway \
   -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.yaml:/oauth2.yaml \
   -v `pwd`/local/oauth2-proxy/oauth2-proxy-dev.cfg:/oauth2.config \
   quay.io/oauth2-proxy/oauth2-proxy:v7.8.1 \
@@ -101,6 +122,16 @@ docker run -ti --rm --name proxy --net=host \
    ```
 
 1. The Portal is now live at http://oauth2proxy.localtest.me:4180 and should auto-update on code changes.
+
+1. Start the provisioner
+
+   ```sh
+   cd provisioner-api
+   set -a; source .env.local; set +a;
+   npm run dev | npx pino-pretty
+   ```
+
+The provisioner is now live at http://provisioner.localtest.me:3030 and should auto-update on code changes.
 
 ## Design
 

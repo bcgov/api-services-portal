@@ -16,6 +16,7 @@ const { ApiHealthApp } = require('./api-health');
 const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
+const { JsonHandlerApp } = require('./api-json-handler');
 
 const { OpsMetrics } = require('./services/report/ops-metrics');
 
@@ -152,6 +153,8 @@ for (const _list of [
   'RuntimeGroup',
   'ServiceAccess',
   'Subsystem',
+  'SubsystemIntegration',
+  'Task',
   'TemporaryIdentity',
   'User',
 ]) {
@@ -279,6 +282,7 @@ const apps = [
     pages: pages,
     enableDefaultRoute: false,
   }),
+  new JsonHandlerApp(),
   new NextApp({ dir: 'nextapp' }),
 ];
 
@@ -403,7 +407,8 @@ const configureExpress = (app: any) => {
       helpLinks: {
         helpDeskUrl: process.env.NEXT_PUBLIC_HELP_DESK_URL,
         helpTeamsAlertsUrl: process.env.NEXT_PUBLIC_HELP_TEAMS_ALERTS_URL,
-        helpTeamsOperationsUrl: process.env.NEXT_PUBLIC_HELP_TEAMS_OPERATIONS_URL,
+        helpTeamsOperationsUrl:
+          process.env.NEXT_PUBLIC_HELP_TEAMS_OPERATIONS_URL,
         helpTeamsAccessRequestUrl:
           process.env.NEXT_PUBLIC_HELP_TEAMS_ACCESS_REQUEST_URL,
         helpIssueUrl: process.env.NEXT_PUBLIC_HELP_ISSUE_URL,

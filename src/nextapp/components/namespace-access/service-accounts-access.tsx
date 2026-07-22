@@ -234,12 +234,14 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
       >
         {(d: UmaPolicy, index) => (
           <Tr key={index} data-testid={`nsa-sa-table-row-${index}`}>
-            <Td>{d.name}</Td>
+            <Td>{d.clients.join(', ')}</Td>
             <Td>
               <Wrap>
                 {d.scopes.map((t) => (
                   <WrapItem key={t}>
-                    <Tag variant="outline">{t.replace(/Namespace/g, 'Gateway')}</Tag>
+                    <Tag variant="outline">
+                      {t.replace(/Namespace/g, 'Gateway')}
+                    </Tag>
                   </WrapItem>
                 ))}
               </Wrap>

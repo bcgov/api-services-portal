@@ -77,9 +77,12 @@ export class KeycloakGroupService {
     parentGroupName: string,
     groupName: string
   ): Promise<{ created: boolean; id: string }> {
-    const group = (await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS })).find(
-      (group: GroupRepresentation) => group.name == parentGroupName
-    );
+    const group = (
+      await this.kcAdminClient.groups.find({
+        first: 0,
+        max: MAX_GROUPS_RESULTS,
+      })
+    ).find((group: GroupRepresentation) => group.name == parentGroupName);
     return await this.createIfMissingForParentGroup(group, groupName);
   }
 
@@ -97,7 +100,7 @@ export class KeycloakGroupService {
     parentGroup: GroupRepresentation,
     groupName: string
   ): Promise<{ created: boolean; id: string }> {
-    const subGroups = await this.subGroups(parentGroup);
+    const subGroups = await this.subGroups(parentGroup, groupName);
 
     const match = subGroups.filter(
       (group: GroupRepresentation) => group.name == groupName
@@ -119,7 +122,10 @@ export class KeycloakGroupService {
   }
 
   public async getAllGroups() {
-    return this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
+    return this.kcAdminClient.groups.find({
+      first: 0,
+      max: MAX_GROUPS_RESULTS,
+    });
   }
 
   public async search(
@@ -149,7 +155,11 @@ export class KeycloakGroupService {
     briefRepresentation: boolean = true
   ) {
     return (
-      await this.kcAdminClient.groups.find({ briefRepresentation, first: 0, max: MAX_GROUPS_RESULTS })
+      await this.kcAdminClient.groups.find({
+        briefRepresentation,
+        first: 0,
+        max: MAX_GROUPS_RESULTS,
+      })
     ).filter((group: GroupRepresentation) => group.name == parentGroupName);
   }
 
@@ -161,11 +171,14 @@ export class KeycloakGroupService {
   public async hasGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
-      : await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
+      : await this.kcAdminClient.groups.find({
+          first: 0,
+          max: MAX_GROUPS_RESULTS,
+        });
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
-    const groupSubGroups = await this.subGroups(groups.pop());
+    const groupSubGroups = await this.subGroups(groups.pop(), groupName);
 
     if (
       groupSubGroups.filter(
@@ -193,16 +206,19 @@ export class KeycloakGroupService {
   }
 
   private async subGroups(
-    group: GroupRepresentation
+    group: GroupRepresentation,
+    childGroupName: string
   ): Promise<GroupRepresentation[]> {
     return this.kcAdminClient.groups.listSubGroups({
       parentId: group.id,
+      search: childGroupName,
       first: 0,
       max: MAX_GROUPS_RESULTS,
+      briefRepresentation: false,
     });
   }
 
-  private getSubGroupsFull(
+  public getSubGroupsFull(
     parentGroup: GroupRepresentation
   ): Promise<GroupRepresentation[]> {
     const key = parentGroup.id;
@@ -228,7 +244,10 @@ export class KeycloakGroupService {
   public async getGroup(parentGroupName: string, groupName: string) {
     const listOfGroups = this.allGroups
       ? this.allGroups
-      : await this.kcAdminClient.groups.find({ first: 0, max: MAX_GROUPS_RESULTS });
+      : await this.kcAdminClient.groups.find({
+          first: 0,
+          max: MAX_GROUPS_RESULTS,
+        });
     const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
@@ -238,9 +257,9 @@ export class KeycloakGroupService {
       logger.error('[getGroup] Parent group MISSING %s', parentGroupName);
       return null;
     }
-    const subGroups = await this.getSubGroupsFull(parentGroup);
+    const subGroups = await this.subGroups(parentGroup, groupName);
 
-    logger.debug('SubGroups = %j', subGroups);
+    logger.debug('SubGroups = %j', subGroups.length);
     const grp = subGroups.find(
       (group: GroupRepresentation) => group.name == groupName
     );

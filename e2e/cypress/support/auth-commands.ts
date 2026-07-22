@@ -4,6 +4,7 @@ import LoginPage from '../pageObjects/login'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
 import { checkElementExists } from './e2e'
+import { request } from 'http'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
@@ -658,6 +659,8 @@ Cypress.Commands.add(
           apiRes: apiResponse,
         }
         // cy.addToAstraScanIdList(response2.body.status)
+        queryString = undefined
+        requestBody = undefined
         return responseData
       })
   }
@@ -745,6 +748,25 @@ Cypress.Commands.add('gqlQuery', (query, variables = {}) => {
       })
   })
 })
+
+Cypress.Commands.add(
+  'makeSDXCall',
+  (options: { method: string; path: string; body?: string }) => {
+    return cy
+      .request({
+        url: 'http://kong-sdx-edge0.localtest.me:9080' + options.path,
+        method: options.method,
+        failOnStatusCode: false,
+        body: options.body,
+      })
+      .then((res) => {
+        if (res.body instanceof ArrayBuffer) {
+          res.body = JSON.parse(new TextDecoder().decode(res.body))
+        }
+        return res
+      })
+  }
+)
 
 Cypress.Commands.add('makeAPIRequestForScanResult', (scanID: string) => {
   return cy.request({

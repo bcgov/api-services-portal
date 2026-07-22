@@ -47,6 +47,7 @@ const models: TsoaRoute.Models = {
             "result": {"dataType":"string","required":true},
             "reason": {"dataType":"string"},
             "id": {"dataType":"string"},
+            "refKey": {"dataType":"string"},
             "ownedBy": {"dataType":"string"},
             "childResults": {"dataType":"array","array":{"dataType":"refObject","ref":"BatchResult"}},
         },
@@ -291,7 +292,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Namespace": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"ref":"Maybe_Array_Maybe_UmaScope___"},"displayName":{"ref":"Maybe_Scalars-at-String_"},"name":{"dataType":"string","required":true},"id":{"ref":"Maybe_Scalars-at-String_"},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permRoutePaths":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"ref":"Maybe_Array_Maybe_UmaScope___"},"displayName":{"ref":"Maybe_Scalars-at-String_"},"name":{"dataType":"string","required":true},"id":{"ref":"Maybe_Scalars-at-String_"},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NamespaceInput": {
@@ -373,6 +374,8 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
             "enabled": {"dataType":"boolean","required":true},
+            "permDataPlane": {"dataType":"string"},
+            "permDomains": {"dataType":"array","array":{"dataType":"string"}},
             "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -1362,6 +1365,7 @@ export function RegisterRoutes(app: express.Router) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"GroupMembership"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

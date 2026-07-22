@@ -14,10 +14,11 @@ jobs:
     name: Delete workflow runs
     runs-on: ubuntu-latest
     permissions:
-      actions: write    
+      actions: write
+      contents: read
     steps:
       - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}

@@ -7,7 +7,7 @@ record:
   title: 'Ministry of Health'
   tags: []
   description: 'The Ministry of Health has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.'
-  extSource: ''
+  extSource: 'ckan'
   extRecordHash: ''
   namespace: newplatform
   orgUnits:
@@ -17,7 +17,7 @@ record:
       title: 'Planning and Innovation Division'
       tags: []
       description: ''
-      extSource: ''
+      extSource: 'ckan'
       extRecordHash: ''
     - id: 319b3297-846d-4b97-8095-ceb3ec505fdf
       name: public-health
@@ -25,5 +25,5 @@ record:
       title: 'Public Health'
       tags: []
       description: ''
-      extSource: ''
+      extSource: 'ckan'
       extRecordHash: ''

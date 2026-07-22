@@ -5,6 +5,9 @@ import express from 'express';
 import Keycloak from 'keycloak-connect';
 import GetRequestAuthToken from './auth-token';
 import { ForbiddenError } from './forbidden-error';
+import { KeystoneService } from '../controllers/ioc/keystoneInjector';
+import { container, inject, injectable } from 'tsyringe';
+import { AuthMiddle } from './auth-sdx-middle';
 
 const logger = Logger('auth-tsoa');
 
@@ -40,7 +43,32 @@ export function expressAuthentication(
   securityName: string,
   scopes?: string[]
 ): Promise<any> {
-  return new Promise((resolve: any, reject: any) => {
+  const authMiddle = container.resolve(AuthMiddle);
+
+  return new Promise(async (resolve: any, reject: any) => {
+    let sdxGatewayId: string;
+
+    if (
+      scopes?.find(
+        (s) => s === 'GatewayPattern.Publish' || s === 'Connection.Manage'
+      )
+    ) {
+      const gatewayId = await authMiddle.lookupGatewayId(
+        request.params.org,
+        request.params.pattern,
+        request.body
+      );
+      if (gatewayId) {
+        sdxGatewayId = gatewayId;
+      } else {
+        return reject(
+          new ForbiddenError('permission_denied', {
+            message: `Unable to find gateway detail from pattern '${request.params.pattern}'`,
+          })
+        );
+      }
+    }
+
     verifyJWT(request, null, (err: any) => {
       if (err) {
         logger.debug('ERROR Verifying JWT ' + err);
@@ -52,7 +80,9 @@ export function expressAuthentication(
           return resolve(request.oauth_user);
         }
         let resource: string;
-        if ('orgUnit' in request.params) {
+        if (sdxGatewayId) {
+          resource = sdxGatewayId;
+        } else if ('orgUnit' in request.params) {
           resource = `org/${request.params.orgUnit}`;
         } else if ('org' in request.params) {
           resource = `org/${request.params.org}`;

@@ -22,6 +22,8 @@ export async function getOrganizations(context: any): Promise<Organization[]> {
                         title
                         tags
                         description
+                        publicBodyId
+                        extSource
                         orgUnits {
                           name
                           title
@@ -49,6 +51,8 @@ export async function getOrganization(
                         title
                         description
                         tags
+                        publicBodyId
+                        extSource
                     }
                 }`,
     variables: { name },
@@ -95,6 +99,19 @@ export async function getOrganizationUnit(
   }
   const orgs = result.data?.allOrganizations ?? [];
   return orgs.length === 0 ? null : orgs[0];
+}
+
+export async function lookupOrganizationNameById(
+  context: any,
+  orgId: string
+): Promise<string | undefined> {
+  const result = await context.executeGraphQL({
+    query: `query OrganizationNameById($id: ID!) {
+      allOrganizations(where: { id: $id }, first: 1) { name }
+    }`,
+    variables: { id: orgId },
+  });
+  return result.data?.allOrganizations?.[0]?.name;
 }
 
 export function parseOrganizationMemberDetails(

@@ -35,7 +35,10 @@ export interface CreateNamespaceArgs {
   displayName?: string;
   dataPlane?: string;
   domains?: string[];
+  runtimeGroupName?: string;
   routePaths?: string[];
+  assignedScopes?: string[];
+  includeSDXScopes?: boolean;
 }
 
 export async function CreateNamespace(
@@ -83,6 +86,10 @@ export async function CreateNamespace(
     'Content.Publish',
     'CredentialIssuer.Admin',
   ];
+  if (args.includeSDXScopes) {
+    scopes.push('Connection.Manage');
+    scopes.push('GatewayPattern.Publish');
+  }
   const res = <ResourceSetInput>{
     name: newNS,
     displayName,
@@ -98,7 +105,7 @@ export async function CreateNamespace(
       envCtx.issuerEnvConfig.issuerUrl,
       envCtx.accessToken
     );
-    for (const scope of [
+    for (const scope of args.assignedScopes || [
       'Namespace.Manage',
       'CredentialIssuer.Admin',
       'GatewayConfig.Publish',
@@ -139,6 +146,9 @@ export async function CreateNamespace(
     }
     if (args.domains) {
       gwGroup.attributes['perm-domains'] = args.domains;
+    }
+    if (args.runtimeGroupName) {
+      gwGroup.attributes['perm-runtime-group'] = [args.runtimeGroupName];
     }
     if (args.routePaths) {
       gwGroup.attributes['perm-route-paths'] = args.routePaths;

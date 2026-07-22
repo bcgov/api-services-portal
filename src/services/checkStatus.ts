@@ -22,7 +22,7 @@ export async function checkStatus(res: any) {
     try {
       const errors = JSON.parse(body);
       error.reason = errors?.error ?? '';
-      error.description = errors?.error_description ?? '';
+      error.description = (errors?.error_description || errors?.results) ?? '';
       logger.error('Added reason to error: %j', error);
     } catch (e) {
       logger.error('Not able to parse error response (%s)', e);

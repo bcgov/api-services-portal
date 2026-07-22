@@ -136,7 +136,8 @@ module.exports = {
               );
 
               const client = new GWAService(process.env.GWA_API_URL);
-              const defaultSettings = await client.getDefaultNamespaceSettings();
+              const defaultSettings =
+                await client.getDefaultNamespaceSettings();
 
               const merged = await backfillGroupAttributes(
                 selectedNS,
@@ -220,7 +221,8 @@ module.exports = {
               );
 
               const client = new GWAService(process.env.GWA_API_URL);
-              const defaultSettings = await client.getDefaultNamespaceSettings();
+              const defaultSettings =
+                await client.getDefaultNamespaceSettings();
 
               const merged = await backfillGroupAttributes(
                 args.ns,
@@ -264,10 +266,11 @@ module.exports = {
                 process.env.GWA_PROD_ENV_SLUG
               );
 
-              const tokenResult: TokenExchangeResult = await doClientLoginForCredentialIssuer(
-                noauthContext,
-                prodEnv.id
-              );
+              const tokenResult: TokenExchangeResult =
+                await doClientLoginForCredentialIssuer(
+                  noauthContext,
+                  prodEnv.id
+                );
 
               const kcprotectApi = new UMAResourceRegistrationService(
                 tokenResult.resourceRegistrationEndpoint,
@@ -470,6 +473,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              args.includeSDXScopes = false;
               const rset = await CreateNamespace(context, args);
               return rset;
             },

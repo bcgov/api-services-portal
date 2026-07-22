@@ -118,12 +118,12 @@ import { o } from '../util';
     const res = await kc.getGroupPermissionsByResource(resourceId);
     o(res);
   }
-  if (false) {
-    await kc.createOrUpdateOrgPermission(org, [
-      'Namespace.View',
-      'Namepsace.Manage',
-    ]);
-  }
+  // if (false) {
+  //   await kc.createOrUpdateOrgPermission(org, [
+  //     'Namespace.View',
+  //     'Namepsace.Manage',
+  //   ]);
+  // }
   // await kc.createOrUpdateGroupPermission(
   //   {
   //     name: 'databc',

@@ -6,6 +6,8 @@ const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const { externallySourced } = require('../components/ExternalSource')
 
 const { EnforcementPoint } = require('../authz/enforcement')
+const { logOrganizationActivityFromHook } = require('../services/workflow/org-activity');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -33,10 +35,39 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    // Optional reference to a Public Body from the authoritative
+    // data registry (FOIPPA).  When set it MUST be unique across all
+    // Organizations, but multiple Organizations may have a NULL value
+    // (i.e. not all Organizations are Public Bodies).
+    publicBodyId: {
+        type: Text,
+        isRequired: false,
+        isUnique: true,
+    },
     orgUnits: { type: Relationship, ref: "OrganizationUnit", many: true }
   },
   access: EnforcementPoint,
   plugins: [
     externallySourced(),
-  ]
+  ],
+  hooks: {
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      originalInput,
+      context,
+    }) {
+      const hookOperation = operation === 'create' ? 'create' : 'update';
+      await logOrganizationActivityFromHook(
+        context,
+        hookOperation,
+        existingItem,
+        updatedItem,
+        originalInput
+      ).catch((e) => {
+        logger.error('[OrgActivity] organization change %s', e);
+      });
+    },
+  },
 }

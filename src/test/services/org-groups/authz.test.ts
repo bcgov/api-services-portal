@@ -13,7 +13,7 @@ describe('Org Group Access Service', function () {
 
     const kc = new OrgAuthzService(uma2);
 
-    await kc.createIfMissingResource('databc');
+    await kc.createIfMissingResource('organization', 'databc');
   });
 
   it('it should createIfMissingResource', async function () {
@@ -23,7 +23,10 @@ describe('Org Group Access Service', function () {
 
     const kc = new OrgAuthzService(uma2);
 
-    const result = await kc.createIfMissingResource('newresource');
+    const result = await kc.createIfMissingResource(
+      'organization',
+      'newresource'
+    );
     expect(result.created).toBe(true);
     expect(result.id).toBe('0001');
   });

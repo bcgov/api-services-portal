@@ -1,3 +1,6 @@
+const { transform } = require('lodash');
+const { type } = require('os');
+
 const metadata = {
   Organization: {
     query: 'allOrganizations',
@@ -8,6 +11,7 @@ const metadata = {
       'title',
       'tags',
       'description',
+      'publicBodyId',
       'orgUnits',
       'extSource',
       'extRecordHash',
@@ -18,6 +22,7 @@ const metadata = {
         name: 'connectExclusiveListCreate',
         list: 'OrganizationUnit',
         syncFirst: true,
+        refKey: 'extForeignKey',
       },
     },
   },
@@ -384,15 +389,34 @@ const metadata = {
       },
     },
   },
+  // Application: {
+  //   query: 'allApplications',
+  //   refKey: 'appId',
+  //   sync: ['name', 'description'],
+  //   transformations: {
+  //     owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+  //     organization: {
+  //       name: 'connectOne',
+  //       key: 'org',
+  //       list: 'allOrganizations',
+  //       refKey: 'name',
+  //     },
+  //     organizationUnit: {
+  //       name: 'connectOne',
+  //       key: 'sub_org',
+  //       list: 'allOrganizationUnits',
+  //       refKey: 'name',
+  //     },
+  //   },
+  // },
   Application: {
     query: 'allApplications',
     refKey: 'appId',
-    sync: ['name', 'description'],
+    compositeRefKey: ['name', 'namespace'],
+    sync: ['name', 'description', 'namespace'],
     transformations: {
-      owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
       organization: {
         name: 'connectOne',
-        key: 'org',
         list: 'allOrganizations',
         refKey: 'name',
       },
@@ -410,6 +434,7 @@ const metadata = {
     compositeRefKey: [
       'title',
       'version',
+      'environment',
       {
         key: 'organization',
         whereClause: 'organization: { name: $organization }',
@@ -421,9 +446,12 @@ const metadata = {
       'title',
       'version',
       'spec',
+      'specVersion',
       'summary',
       'description',
+      'environment',
       'operations',
+      'annotations',
       'namespace',
       'organization',
       'subsystem',
@@ -459,22 +487,51 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace'],
+    sync: ['name', 'description', 'organization', 'namespace', 'integrations'],
     transformations: {
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
         refKey: 'name',
       },
+      integrations: {
+        name: 'connectExclusiveListCreate',
+        list: 'SubsystemIntegration',
+        syncFirst: true,
+        refKey: 'integrationClientId',
+      },
     },
     example: {
       name: 'my-new-subsystem',
     },
   },
+  SubsystemIntegration: {
+    ownedBy: 'subsystem',
+    query: 'allSubsystemIntegrations',
+    refKey: 'integrationClientId',
+    sync: ['integrationClientId', 'subsystemId'],
+    transformations: {},
+  },
+  Task: {
+    query: 'allTasks',
+    refKey: 'ref',
+    sync: ['ref', 'title', 'type', 'status', 'jsonBlob'],
+    transformations: {
+      jsonBlob: { name: 'toString' },
+    },
+    validations: {
+      status: {
+        type: 'enum',
+        values: ['pending', 'approved', 'rejected', 'processed'],
+      },
+    },
+  },
   RuntimeGroup: {
     query: 'allRuntimeGroups',
-    refKey: 'name',
+    compositeRefKey: ['name', 'environment'],
     sync: [
+      'name',
+      'environment',
       'host',
       'sdxEndpoint',
       'consumerEndpoint',
@@ -495,9 +552,10 @@ const metadata = {
       },
     },
     example: {
-      name: 'my-runtime-group',
+      name: 'edge1',
+      environment: 'dev',
       gatewayId: 'gw-abc',
-      host: 'runtime-group.my-domain.sdx',
+      host: 'edge1.dev.servers.sdx',
       sdxEndpoint: '10.10.10.10:443',
       consumerEndpoint: '10.0.0.11:6443',
       hostedOrganizations: [
@@ -508,10 +566,27 @@ const metadata = {
   },
   ConnectionRequest: {
     query: 'allConnectionRequests',
-    refKey: 'slug',
+    refKey: 'id',
     compositeRefKey: ['clientId', 'serviceId'],
-    sync: ['clientId', 'serviceId', 'isApproved', 'isActive'],
-    transformations: {},
+    sync: [
+      'clientId',
+      'serviceId',
+      'isApproved',
+      'isActive',
+      'scopes',
+      'policyVersion',
+      'environment',
+      'requesterDetails',
+      'clientResources',
+      'serviceResources',
+      'provisionerStatus',
+    ],
+    transformations: {
+      requesterDetails: { name: 'toString' },
+      clientResources: { name: 'toString' },
+      serviceResources: { name: 'toString' },
+      provisionerStatus: { name: 'toString' },
+    },
     example: {
       clientId: 'client-123',
       serviceId: 'service-456',
@@ -521,6 +596,16 @@ const metadata = {
     validations: {
       isApproved: { type: 'boolean' },
       isActive: { type: 'boolean' },
+      provisionerStatus: { type: 'entity', entity: 'ProvisionerStatus' },
+    },
+  },
+  ProvisionerStatus: {
+    transient: true,
+    refKey: 'name',
+    sync: ['message', 'status'],
+    transformations: {},
+    validations: {
+      status: { type: 'enum', values: ['pending', 'provisioned', 'failed'] },
     },
   },
   Product: {
@@ -535,6 +620,11 @@ const metadata = {
         list: 'Environment',
         syncFirst: true,
         refKey: 'appId',
+      },
+      organization: {
+        name: 'connectOne',
+        list: 'allOrganizations',
+        refKey: 'name',
       },
     },
     example: {
