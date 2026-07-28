@@ -260,6 +260,128 @@ components:
                 parameters:
                     service_name: my-service
                     service_url: 'https://httpbun.com'
+        GatewayConsumerCredential:
+            description: "Credential response modeled on NewCredential.\nFields present depend on flow / authenticator."
+            properties:
+                flow:
+                    type: string
+                clientId:
+                    type: string
+                clientSecret:
+                    type: string
+                issuer:
+                    type: string
+                tokenEndpoint:
+                    type: string
+                apiKey:
+                    type: string
+                clientPublicKey:
+                    type: string
+                clientPrivateKey:
+                    type: string
+            required:
+                - flow
+            type: object
+            additionalProperties: false
+            example:
+                flow: kong-api-key-acl
+                clientId: 23C4F461-A1B2C3D4E5F
+                apiKey: abcdef0123456789
+        IssueGatewayConsumerApplication:
+            properties:
+                appId:
+                    type: string
+                    description: "Reuse an existing Application in this gateway (multi-env).\nWhen set, name/description are ignored."
+                name:
+                    type: string
+                    description: 'Required when creating a new Application'
+                description:
+                    type: string
+            type: object
+            additionalProperties: false
+        IssueGatewayConsumerPlugin:
+            properties:
+                name:
+                    type: string
+                config:
+                    properties: {}
+                    additionalProperties: {}
+                    type: object
+                service:
+                    properties:
+                        name:
+                            type: string
+                    type: object
+                route:
+                    properties:
+                        name:
+                            type: string
+                    type: object
+            required:
+                - name
+            type: object
+            additionalProperties: false
+        IssueGatewayConsumerControls:
+            properties:
+                defaultClientScopes:
+                    items:
+                        type: string
+                    type: array
+                defaultOptionalScopes:
+                    items:
+                        type: string
+                    type: array
+                roles:
+                    items:
+                        type: string
+                    type: array
+                aclGroups:
+                    items:
+                        type: string
+                    type: array
+                clientGenCertificate:
+                    type: boolean
+                clientCertificate:
+                    type: string
+                jwksUrl:
+                    type: string
+                plugins:
+                    items:
+                        $ref: '#/components/schemas/IssueGatewayConsumerPlugin'
+                    type: array
+            type: object
+            additionalProperties: false
+        IssueGatewayConsumerRequest:
+            properties:
+                environmentAppId:
+                    type: string
+                    description: 'Environment.appId from GET /gateways/{gateway}/products'
+                application:
+                    $ref: '#/components/schemas/IssueGatewayConsumerApplication'
+                labels:
+                    properties: {}
+                    additionalProperties:
+                        type: string
+                    type: object
+                    description: 'Optional labels for filtering on the Consumers page, e.g. { "issued-by": "notify" }'
+                controls:
+                    $ref: '#/components/schemas/IssueGatewayConsumerControls'
+                    description: 'Optional controls; validity depends on the environment flow'
+            required:
+                - environmentAppId
+                - application
+            type: object
+            additionalProperties: false
+            example:
+                environmentAppId: 23C4F461
+                application:
+                    name: notify-tenant-a
+                    description: 'Tenant A'
+                labels:
+                    issued-by: notify
+                controls:
+                    aclGroups:
+                        - notify-tenant-a
         Gateway:
             properties:
                 gatewayId:
@@ -594,6 +716,8 @@ components:
                     items:
                         type: string
                     type: array
+                permRuntimeGroup:
+                    type: string
                 updatedAt:
                     type: number
                     format: double
@@ -670,6 +794,8 @@ components:
                     items:
                         $ref: '#/components/schemas/Environment'
                     type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
             type: object
             additionalProperties: false
             example:
@@ -1006,6 +1132,77 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/GatewayPatternConfigRequest'
+    '/gateways/{gatewayId}/consumers':
+        post:
+            operationId: issue-gateway-consumer
+            responses:
+                '201':
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GatewayConsumerCredential'
+            description: "Issue a new consumer credential for a product environment in this gateway.\n\nCreates Application (owner optional), Consumer and ServiceAccess records.\nApplications can be reused across environments by passing `application.appId`.\n\n> `Required Scope:` CredentialIssuer.Generate"
+            summary: 'Issue consumer credential'
+            tags:
+                - 'Gateway Consumers'
+            security:
+                -
+                    jwt:
+                        - CredentialIssuer.Generate
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/IssueGatewayConsumerRequest'
+    '/gateways/{gatewayId}/consumers/{clientId}':
+        put:
+            operationId: regenerate-gateway-consumer
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GatewayConsumerCredential'
+            description: "Regenerate credentials in place for an existing consumer (same clientId).\n\nCurrently the only supported action is `regenerate`.\nDELETE / revoke via API is a follow-up; revoke via the Consumers page for now.\n\n> `Required Scope:` CredentialIssuer.Generate"
+            summary: 'Regenerate consumer credential'
+            tags:
+                - 'Gateway Consumers'
+            security:
+                -
+                    jwt:
+                        - CredentialIssuer.Generate
+            parameters:
+                -
+                    in: path
+                    name: gatewayId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: clientId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    description: 'Must be `regenerate`'
+                    in: query
+                    name: action
+                    required: true
+                    schema:
+                        type: string
+                        enum:
+                            - regenerate
     /gateways/report:
         get:
             operationId: report
@@ -1870,3 +2067,6 @@ tags:
     -
         name: 'Authorization Profiles'
         description: 'Configure the integration to external Identity Providers'
+    -
+        name: 'Gateway Consumers'
+        description: 'Issue and regenerate consumer credentials for services in a gateway'

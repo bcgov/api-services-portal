@@ -64,6 +64,65 @@ export async function lookupCredentialReferenceByServiceAccess(
   return result.data.allServiceAccesses[0];
 }
 
+export async function lookupServiceAccessByName(
+  context: any,
+  name: string,
+  namespace: string
+): Promise<ServiceAccess> {
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByName($name: String!, $ns: String!) {
+                    allServiceAccesses(where: {
+                      name: $name,
+                      productEnvironment: { product: { namespace: $ns } }
+                    }) {
+                        id
+                        name
+                        consumerType
+                        namespace
+                        productEnvironment {
+                            id
+                            name
+                            appId
+                            flow
+                            product {
+                              namespace
+                            }
+                            credentialIssuer {
+                                id
+                                clientAuthenticator
+                            }
+                        }
+                        application {
+                          id
+                          appId
+                          name
+                        }
+                        consumer {
+                            id
+                            username
+                            customId
+                            extForeignKey
+                            namespace
+                        }
+                        credentialReference
+                    }
+                }`,
+    variables: { name, ns: namespace },
+  });
+  logger.debug('[lookupServiceAccessByName] result %j', result);
+  assert.strictEqual(
+    result.data.allServiceAccesses.length,
+    1,
+    `ServiceAccess not found for clientId ${name} in gateway ${namespace}`
+  );
+
+  const access = result.data.allServiceAccesses[0];
+  if (access.credentialReference) {
+    access.credentialReference = JSON.parse(access.credentialReference);
+  }
+  return access;
+}
+
 export async function lookupDetailedServiceAccessesByNS(
   context: any,
   ns: string

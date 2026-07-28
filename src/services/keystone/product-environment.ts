@@ -185,6 +185,7 @@ export async function lookupEnvironmentsByNS(
                         product {
                           id
                           name
+                          namespace
                         }
                         legal {
                           reference
@@ -199,6 +200,25 @@ export async function lookupEnvironmentsByNS(
                           resourceType
                           resourceAccessScope
                           environmentDetails
+                          clientAuthenticator
+                          clientId
+                          inheritFrom {
+                            environmentDetails
+                          }
+                        }
+                        services {
+                            name
+                            plugins {
+                                name
+                                config
+                            }
+                            routes {
+                                name
+                                plugins {
+                                    name
+                                    config
+                                }
+                            }
                         }
                     }
                 }`,
@@ -209,6 +229,21 @@ export async function lookupEnvironmentsByNS(
     result.data.allEnvironments.length
   );
   return result.data.allEnvironments;
+}
+
+export async function lookupEnvironmentByAppIdInNamespace(
+  context: any,
+  environmentAppId: string,
+  namespace: string
+): Promise<Environment> {
+  const envs = await lookupEnvironmentsByNS(context, namespace);
+  const match = envs.find((e) => e.appId === environmentAppId);
+  assert.strictEqual(
+    match != null,
+    true,
+    `Environment not found for appId ${environmentAppId} in gateway ${namespace}`
+  );
+  return match;
 }
 
 export async function lookupEnvironmentAndIssuerById(

@@ -16,6 +16,9 @@ export function scopesToRoles(
   if (scopes.includes('CredentialIssuer.Admin')) {
     _roles.push('credential-admin');
   }
+  if (scopes.includes('CredentialIssuer.Generate')) {
+    _roles.push('credential-issuer');
+  }
   if (scopes.includes('Access.Manage')) {
     _roles.push('access-manager');
   }

@@ -146,6 +146,8 @@ export async function lookupKongConsumerByCustomId(
     query: `query FindConsumerByUsername($where: GatewayConsumerWhereInput) {
                     allGatewayConsumers(where: $where) {
                         id
+                        username
+                        customId
                         extForeignKey
                     }
                 }`,

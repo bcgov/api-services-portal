@@ -10,7 +10,7 @@ export {
 
 export { recordActivity, recordActivityWithBlob } from './activity';
 
-export { lookupApplication, lookupMyApplicationsById } from './application';
+export { lookupApplication, lookupMyApplicationsById, lookupApplicationByAppId, addApplication } from './application';
 
 export { deleteRecord, deleteRecords } from './common-delete-record';
 
@@ -44,6 +44,8 @@ export {
   lookupEnvironmentAndIssuerById,
   lookupProductEnvironmentServices,
   lookupProductEnvironmentServicesBySlug,
+  lookupEnvironmentsByNS,
+  lookupEnvironmentByAppIdInNamespace,
   lookupProduct,
   lookupProductDataset,
 } from './product-environment';
@@ -53,6 +55,7 @@ export {
   deleteServiceAccess,
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
+  lookupServiceAccessByName,
   lookupServiceAccessesByConsumer,
   lookupServiceAccessesByNamespace,
   lookupServiceAccessesByEnvironment,

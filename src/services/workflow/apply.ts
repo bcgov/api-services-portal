@@ -282,7 +282,7 @@ export const Apply = async (
   }
 };
 
-interface SetupAuthorizationInput {
+export interface SetupAuthorizationInput {
   flow: string;
   namespace: string;
   controls: RequestControls;
@@ -293,7 +293,7 @@ interface SetupAuthorizationInput {
   consumer: GatewayConsumer;
 }
 
-async function setupAuthorizationAndEnable(
+export async function setupAuthorizationAndEnable(
   subjectContext: any,
   context: any,
   prodEnv: Environment,
