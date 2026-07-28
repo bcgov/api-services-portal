@@ -21,14 +21,11 @@ jest.mock('../../../services/keycloak', () => ({
   KeycloakClientService: jest.fn(),
 }));
 
-const lookupServiceAccessByName =
-  keystone.lookupServiceAccessByName as jest.Mock;
-const linkCredRefsToServiceAccess =
-  keystone.linkCredRefsToServiceAccess as jest.Mock;
-const replaceApiKey = kongReplace.replaceApiKey as jest.Mock;
-const getEnvironmentContext =
-  getNamespaces.getEnvironmentContext as jest.Mock;
-const KeycloakClientServiceMock = KeycloakClientService as jest.Mock;
+const lookupServiceAccessByName = keystone.lookupServiceAccessByName;
+const linkCredRefsToServiceAccess = keystone.linkCredRefsToServiceAccess;
+const replaceApiKey = kongReplace.replaceApiKey;
+const getEnvironmentContext = getNamespaces.getEnvironmentContext;
+const KeycloakClientServiceMock = KeycloakClientService;
 
 const GATEWAY = 'notify';
 const CLIENT_ID = '23C4F461-A1B2C3D4E5F';

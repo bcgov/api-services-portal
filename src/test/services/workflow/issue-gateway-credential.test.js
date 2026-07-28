@@ -1,16 +1,8 @@
-import {
-  issueGatewayCredential,
-  IssueGatewayCredentialInput,
-} from '../../../services/workflow/issue-gateway-credential';
+import { issueGatewayCredential } from '../../../services/workflow/issue-gateway-credential';
 import * as keystone from '../../../services/keystone';
 import * as apply from '../../../services/workflow/apply';
 import * as consumerMgmt from '../../../services/workflow/consumer-management';
 import * as kongApiKey from '../../../services/workflow/kong-api-key';
-import * as clientCredentials from '../../../services/workflow/client-credentials';
-import * as updateCredential from '../../../services/workflow/update-credential';
-import { FeederService } from '../../../services/feeder';
-import { KongConsumerService } from '../../../services/kong';
-import { AddClientConsumer } from '../../../services/workflow/add-client-consumer';
 
 jest.mock('../../../services/keystone', () => ({
   lookupEnvironmentByAppIdInNamespace: jest.fn(),
@@ -87,26 +79,23 @@ jest.mock('../../../services/workflow/types', () => {
 });
 
 const lookupEnvironmentByAppIdInNamespace =
-  keystone.lookupEnvironmentByAppIdInNamespace as jest.Mock;
+  keystone.lookupEnvironmentByAppIdInNamespace;
 const lookupProductEnvironmentServices =
-  keystone.lookupProductEnvironmentServices as jest.Mock;
-const lookupApplicationByAppId =
-  keystone.lookupApplicationByAppId as jest.Mock;
-const addApplication = keystone.addApplication as jest.Mock;
-const lookupKongConsumerByCustomId =
-  keystone.lookupKongConsumerByCustomId as jest.Mock;
-const addServiceAccess = keystone.addServiceAccess as jest.Mock;
-const deleteServiceAccess = keystone.deleteServiceAccess as jest.Mock;
-const setupAuthorizationAndEnable =
-  apply.setupAuthorizationAndEnable as jest.Mock;
-const saveConsumerLabels = consumerMgmt.saveConsumerLabels as jest.Mock;
-const registerApiKey = kongApiKey.registerApiKey as jest.Mock;
+  keystone.lookupProductEnvironmentServices;
+const lookupApplicationByAppId = keystone.lookupApplicationByAppId;
+const addApplication = keystone.addApplication;
+const lookupKongConsumerByCustomId = keystone.lookupKongConsumerByCustomId;
+const addServiceAccess = keystone.addServiceAccess;
+const deleteServiceAccess = keystone.deleteServiceAccess;
+const setupAuthorizationAndEnable = apply.setupAuthorizationAndEnable;
+const saveConsumerLabels = consumerMgmt.saveConsumerLabels;
+const registerApiKey = kongApiKey.registerApiKey;
 
 const GATEWAY = 'notify';
 const ENV_APP_ID = '23C4F461';
 const APP_APP_ID = 'A1B2C3D4E5F';
 
-function apiKeyEnvironment(overrides: any = {}) {
+function apiKeyEnvironment(overrides = {}) {
   return {
     id: 'env-1',
     appId: ENV_APP_ID,
@@ -120,7 +109,7 @@ function apiKeyEnvironment(overrides: any = {}) {
 }
 
 function buildContext() {
-  const sudoCtx = { sudo: undefined as undefined };
+  const sudoCtx = { sudo: undefined };
   return {
     authedItem: { namespace: GATEWAY },
     sudo: () => sudoCtx,
@@ -155,7 +144,7 @@ beforeEach(() => {
 
 describe('issueGatewayCredential', function () {
   it('creates application, issues API key, enables access, and saves labels', async function () {
-    const input: IssueGatewayCredentialInput = {
+    const input = {
       environmentAppId: ENV_APP_ID,
       application: { name: 'notify-tenant-a', description: 'Tenant A' },
       labels: { 'issued-by': 'notify' },

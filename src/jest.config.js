@@ -1,7 +1,7 @@
 module.exports = {
   verbose: true,
   testEnvironment: 'node',
-  testMatch: ['**/?(*.)+(test.{js,jsx,ts,tsx})'],
+  testMatch: ['**/?(*.)+(test.{js,jsx})'],
   collectCoverageFrom: ['services/**/*.js', 'services/**/*.ts'],
   coveragePathIgnorePatterns: ['.*/__mocks__/.*', '.*/@types/.*'],
   coverageDirectory: '__coverage__',
