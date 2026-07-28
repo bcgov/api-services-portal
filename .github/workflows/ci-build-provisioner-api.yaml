@@ -6,12 +6,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
-
-env:
-  REGISTRY: ghcr.io
-  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
   build:
@@ -28,6 +22,19 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v2
+
+      - name: Image meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}/provisioner-svc
+
+      - name: Set DEPLOY_ID
+        run: |
+          echo '::set-output name=DEPLOY_ID::${{ steps.meta.outputs.version }}'
+          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}'
+          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
+        id: set-deploy-id
 
       - name: Install oc
         uses: redhat-actions/oc-installer@v1
@@ -67,7 +74,7 @@ jobs:
             maxSurge: 50%
 
           image:
-            repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner
+            repository: ghcr.io/bcgov/api-services-portal/provisioner-svc
             tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
             pullPolicy: Always
 
