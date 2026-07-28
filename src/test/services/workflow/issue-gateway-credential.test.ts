@@ -20,6 +20,7 @@ jest.mock('../../../services/keystone', () => ({
   lookupKongConsumerByCustomId: jest.fn(),
   lookupCredentialIssuerById: jest.fn(),
   addServiceAccess: jest.fn(),
+  deleteServiceAccess: jest.fn(),
 }));
 
 jest.mock('../../../services/workflow/apply', () => ({
@@ -95,6 +96,7 @@ const addApplication = keystone.addApplication as jest.Mock;
 const lookupKongConsumerByCustomId =
   keystone.lookupKongConsumerByCustomId as jest.Mock;
 const addServiceAccess = keystone.addServiceAccess as jest.Mock;
+const deleteServiceAccess = keystone.deleteServiceAccess as jest.Mock;
 const setupAuthorizationAndEnable =
   apply.setupAuthorizationAndEnable as jest.Mock;
 const saveConsumerLabels = consumerMgmt.saveConsumerLabels as jest.Mock;
@@ -135,6 +137,7 @@ beforeEach(() => {
     name: 'notify-tenant-a',
     namespace: GATEWAY,
   });
+  lookupKongConsumerByCustomId.mockReset();
   lookupKongConsumerByCustomId
     .mockResolvedValueOnce(undefined) // duplicate check
     .mockResolvedValue({
@@ -193,6 +196,10 @@ describe('issueGatewayCredential', function () {
       'consumer-1',
       [{ labelGroup: 'issued-by', values: ['notify'] }]
     );
+    expect(saveConsumerLabels.mock.invocationCallOrder[0]).toBeLessThan(
+      setupAuthorizationAndEnable.mock.invocationCallOrder[0]
+    );
+    expect(deleteServiceAccess).not.toHaveBeenCalled();
     expect(result).toEqual({
       flow: 'kong-api-key-acl',
       clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
@@ -268,5 +275,41 @@ describe('issueGatewayCredential', function () {
         application: { appId: 'MISSINGAPPID' },
       })
     ).rejects.toThrow(/not found in gateway/);
+  });
+
+  it('cleans up created records when authorization setup fails', async function () {
+    setupAuthorizationAndEnable.mockRejectedValueOnce(
+      new Error('authorization failed')
+    );
+
+    await expect(
+      issueGatewayCredential(buildContext(), GATEWAY, {
+        environmentAppId: ENV_APP_ID,
+        application: { name: 'notify-tenant-a' },
+      })
+    ).rejects.toThrow('authorization failed');
+
+    expect(deleteServiceAccess).toHaveBeenCalledWith(
+      expect.anything(),
+      'sa-1'
+    );
+  });
+
+  it('cleans up without activating access when label persistence fails', async function () {
+    saveConsumerLabels.mockRejectedValueOnce(new Error('labels failed'));
+
+    await expect(
+      issueGatewayCredential(buildContext(), GATEWAY, {
+        environmentAppId: ENV_APP_ID,
+        application: { name: 'notify-tenant-a' },
+        labels: { 'issued-by': 'notify' },
+      })
+    ).rejects.toThrow('labels failed');
+
+    expect(setupAuthorizationAndEnable).not.toHaveBeenCalled();
+    expect(deleteServiceAccess).toHaveBeenCalledWith(
+      expect.anything(),
+      'sa-1'
+    );
   });
 });

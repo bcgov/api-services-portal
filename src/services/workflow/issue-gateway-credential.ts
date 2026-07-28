@@ -3,6 +3,7 @@ import { strict as assert } from 'assert';
 import {
   addApplication,
   addServiceAccess,
+  deleteServiceAccess,
   lookupApplicationByAppId,
   lookupCredentialIssuerById,
   lookupEnvironmentByAppIdInNamespace,
@@ -141,30 +142,45 @@ export async function issueGatewayCredential(
     controls
   );
 
-  await setupAuthorizationAndEnable(
-    context,
-    noauthContext,
-    productEnvironment,
-    {
-      flow: productEnvironment.flow,
-      namespace: gatewayId,
-      controls,
-      environmentName: productEnvironment.name,
-      environmentAppId: productEnvironment.appId,
-      credentialIssuerId: productEnvironment.credentialIssuer?.id,
-      serviceAccessId,
-      consumer,
+  try {
+    if (input.labels && Object.keys(input.labels).length > 0) {
+      const labels: ConsumerLabel[] = Object.entries(input.labels).map(
+        ([labelGroup, value]) => ({
+          labelGroup,
+          values: [value],
+        })
+      );
+      await saveConsumerLabels(noauthContext, gatewayId, consumer.id, labels);
     }
-  );
 
-  if (input.labels && Object.keys(input.labels).length > 0) {
-    const labels: ConsumerLabel[] = Object.entries(input.labels).map(
-      ([labelGroup, value]) => ({
-        labelGroup,
-        values: [value],
-      })
+    await setupAuthorizationAndEnable(
+      context,
+      noauthContext,
+      productEnvironment,
+      {
+        flow: productEnvironment.flow,
+        namespace: gatewayId,
+        controls,
+        environmentName: productEnvironment.name,
+        environmentAppId: productEnvironment.appId,
+        credentialIssuerId: productEnvironment.credentialIssuer?.id,
+        serviceAccessId,
+        consumer,
+      }
     );
-    await saveConsumerLabels(noauthContext, gatewayId, consumer.id, labels);
+  } catch (error) {
+    try {
+      // Deleting the inactive ServiceAccess invokes the existing cleanup hooks
+      // for its Keystone consumer and external Kong/IdP credentials.
+      await deleteServiceAccess(noauthContext, serviceAccessId);
+    } catch (cleanupError) {
+      logger.error(
+        '[issueGatewayCredential] Failed to clean up %s after issuance error: %s',
+        clientId,
+        cleanupError
+      );
+    }
+    throw error;
   }
 
   logger.info(
