@@ -54,6 +54,10 @@ export class AuthMiddle {
       return await this.lookupSubsystemGateway(org, body.parameters.clientId);
     }
 
+    if (pattern === 'sdx-p2p-consumer.r1' && body.parameters?.clientId) {
+      return await this.lookupSubsystemGateway(org, body.parameters.clientId);
+    }
+
     if (
       pattern === 'sdx-runtime-group.r1' &&
       body.parameters?.runtimeGroupName
@@ -69,8 +73,14 @@ export class AuthMiddle {
       return await this.lookupServiceGateway(org, body.parameters.serviceId);
     }
 
+    if (pattern === 'sdx-p2p-provider.r1' && body.parameters?.serviceId) {
+      return await this.lookupServiceGateway(org, body.parameters.serviceId);
+    }
+
     const validPatterns = [
       'sdx-keys.r1',
+      'sdx-p2p-consumer.r1',
+      'sdx-p2p-provider.r1',
       'sdx-runtime-group.r1',
       'sdx-service.r1',
       'sdx-subsystem.r1',
