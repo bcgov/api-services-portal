@@ -1,0 +1,13 @@
+{
+  "name": "sdx-techdocs-test-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Restish-based runner that exercises the SDX TechDocs onboarding flow (org, runtime group, subsystem, service, connection) end to end with generated test data.",
+  "main": "run.js",
+  "scripts": {
+    "start": "node run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
