@@ -46,13 +46,26 @@ function generateTestData() {
  *     oauth2 security scheme plus per-operation `security:` requirements
  *     with distinct scopes on `/hello` (read) and `/ping` (write) (ERR-029:
  *     these are never converted into runtime per-operation enforcement).
- *   - `options.invalid` - `true` to omit the required `info.title`, which
- *     the OAS validator will reject for an ordinary content reason - used
- *     to demonstrate ERR-015 without depending on the unrelated Spectral
- *     null-guard crash (ERR-016, a different repo's bug).
+ *   - `options.invalid` - `true` to omit the required `info.title`: the OAS
+ *     validator rejects this normally (HTTP 200, `valid: false`, real
+ *     findings) - a well-behaved rule violation, contrast with `nullEnum`.
+ *   - `options.nullEnum` - `true` to add a `nullable: true` property whose
+ *     `enum` includes a literal `null` entry. Confirmed locally: this
+ *     reliably crashes the OAS validator's Spectral engine (`500 Spectral
+ *     validation engine internal error`) - the same `duplicated-entry-in-
+ *     enum` null-guard regression ERR-016 describes. That's a validator/
+ *     rulesets bug in a different repo, but it's the only reliable way
+ *     found to make the validator's HTTP call itself fail non-2xx (as
+ *     opposed to succeeding with `valid: false`), which is what triggers
+ *     ERR-015's masking in openapi-spec-validation-service.ts.
  */
 function generateFakeOpenApiSpec({ suffix, subsystemName }, options = {}) {
   const infoTitle = options.invalid ? '' : `  title: SDX Test Service ${suffix}\n`;
+  const statusSchema = options.nullEnum
+    ? `                    type: string
+                    nullable: true
+                    enum: [null, "ok", "error"]`
+    : '                    type: string';
   const contactBlock = options.contact
     ? `  contact:\n${Object.entries(options.contact)
         .map(([k, v]) => `    ${k}: ${JSON.stringify(v)}`)
@@ -122,7 +135,7 @@ ${pingSecurity}      responses:
                 type: object
                 properties:
                   status:
-                    type: string
+${statusSchema}
 components:
 ${securitySchemesBlock}`;
 }

@@ -126,8 +126,19 @@ against anything shared.
 | `err-024` | Activation reports success before/regardless of whether provisioning succeeds |
 | `err-025` | The R0 policy schema rejects the implemented `useSni` provider parameter |
 | `err-029` | OAS per-operation security scopes aren't converted into runtime enforcement |
-| `err-031` | Updating an existing integration connection crashes the provisioner (local docker-compose only) |
-| `err-032` | A provider `serviceResources` update reports `no-change` despite persisting |
+| `err-032` | A provider `serviceResources` update reports `no-change` despite persisting (not reliably reproduced locally - see the file's header comment) |
+
+`err-031` (updating an existing integration connection crashes the
+provisioner) is **not yet implemented** as a live scenario: reproducing it
+needs an approved `SubsystemIntegration` link between a subsystem and an
+`integrationClientId`, and there's no public restish/REST operation to
+create or approve that link (`src/lists/SubsystemIntegration.js` requires
+"SDX Operator" approval with no exposed self-service path found so far).
+The root cause is already identified directly from source though -
+`provisioner-api/src/services/integration-access-service.ts`'s update
+branch spreads the read model into the write request and is missing an
+`await` on the upsert call, so a scope change on an existing connection
+crashes the provisioner process with an unhandled promise rejection.
 
 ### `org.access` and the local docker-compose stack
 

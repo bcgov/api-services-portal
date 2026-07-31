@@ -18,7 +18,7 @@ const tests = {
   'err-024': () => require('./tests/err-024'),
   'err-025': () => require('./tests/err-025'),
   'err-029': () => require('./tests/err-029'),
-  'err-031': () => require('./tests/err-031'),
+  // 'err-031' - not yet implemented, see README.md's "Error scenarios" section.
   'err-032': () => require('./tests/err-032'),
 };
 
