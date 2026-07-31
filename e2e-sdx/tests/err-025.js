@@ -10,15 +10,20 @@
  * it. Activation with `useSni` set fails Cedar context parsing with
  * "record attribute `useSni` should not exist according to the schema".
  * This scenario supplies `requesterDetails` explicitly (unlike ERR-023) to
- * isolate this specific failure. Because of ERR-024, the failure isn't
- * visible through the API either - same observable symptom as ERR-023/024:
- * activation "succeeds" and provisionerStatus never populates. (Confirm
- * the exact Cedar rejection message directly via `docker logs provisioner`
- * if you need first-hand evidence beyond this API-level symptom.)
+ * isolate this specific failure.
+ *
+ * Because of ERR-024 (not fixing provisionerStatus population), the public
+ * API can't distinguish success from failure here - activation always
+ * reports success and provisionerStatus never populates either way. This
+ * reads the local docker-compose `provisioner` container's own logs
+ * (lib/provisioner-logs.js) for the Cedar policy check result, which *is*
+ * a genuine pass/fail signal (only works against the local stack this
+ * scenario already requires).
  */
 
 const { setupApprovedConnection } = require('../lib/steps/scenario-helpers');
 const connection = require('../lib/steps/connection');
+const { findPolicyCheckResult } = require('../lib/provisioner-logs');
 
 function buildSteps(ctx) {
   return [
@@ -26,28 +31,29 @@ function buildSteps(ctx) {
     connection.openProviderConnection(ctx, { extra: { useSni: 'true' } }),
     connection.openConsumerConnection(ctx),
     connection.activateConnection(ctx),
-    connection.listConnections(ctx, {
-      id: 'connection.list.post-activate',
-      onResult: (res) => {
-        const list = Array.isArray(res.json) ? res.json : [];
-        const match = list.find(
-          (c) => c.clientId === ctx.state.captured.clientId && c.serviceId === ctx.state.captured.serviceId
-        );
-        const status = match && match.provisionerStatus;
-        const statusStr = JSON.stringify(status);
-        console.log(`Read-back isActive=${match && match.isActive}, provisionerStatus=${statusStr}`);
-        if (!status || statusStr === '{}') {
+    {
+      id: 'assert.err-025',
+      title: 'Check the provisioner logs for the Cedar policy check result',
+      fatal: false,
+      run: async () => {
+        const result = findPolicyCheckResult(ctx.state.captured.clientId);
+        if (!result.found) {
           console.log(
-            'CONFIRMED [ERR-025]: activation reported success with useSni set on the ' +
-              'provider pattern, but provisionerStatus never populated - consistent with ' +
-              'the documented Cedar rejection ("record attribute `useSni` should not exist ' +
-              'according to the schema"), only visible in provisioner logs, not this API.'
+            'UNEXPECTED [ERR-025]: no "Policy check" log line found for this clientId in the ' +
+              'last 30s of `docker logs provisioner` - check the container is running locally ' +
+              'and reachable, or inspect logs/*.log for the activation response directly.'
+          );
+        } else if (!result.passed) {
+          console.log(
+            `CONFIRMED [ERR-025]: provisioner logged a failed policy check: ${result.reason}`
           );
         } else {
-          console.log(`RESOLVED (or partially) [ERR-025]: provisionerStatus is now populated: ${statusStr}.`);
+          console.log(
+            `RESOLVED [ERR-025]: provisioner logged a passed policy check with useSni set: ${result.reason}`
+          );
         }
       },
-    }),
+    },
   ];
 }
 

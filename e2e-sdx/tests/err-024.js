@@ -17,10 +17,19 @@
  * already committed and returned before the provisioner call has actually
  * finished, let alone failed.
  *
- * This scenario activates a connection and shows the HTTP response reports
- * success unconditionally, while a fresh read-back can't distinguish
- * "provisioning succeeded" from "provisioning hasn't finished/failed" -
- * there's no `provisionerStatus` signal to check either way.
+ * The fix (feature/err-024-activation-status) makes postConnectionRequestChangeEvent
+ * return/re-throw its fetch chain instead of swallowing it - it does
+ * *not* additionally populate provisionerStatus (see that branch's commit
+ * message for why). So the real test here is whether a provisioning
+ * failure now surfaces as an error on the *activation call itself*, not
+ * whether provisionerStatus changes.
+ *
+ * Needs a failure trigger that's independent of the other fixed issues
+ * (ERR-023/025's triggers no longer fail once those are fixed!). Uses
+ * `policyVersion: SDX.R1.00` instead: its Cedar schema requires a much
+ * richer requesterDetails (client/service privacyZone, scopes) that this
+ * scenario's plain R0-shaped connection doesn't provide, so R1 policy
+ * evaluation should reliably fail regardless of any other fix's state.
  */
 
 const { setupApprovedConnection } = require('../lib/steps/scenario-helpers');
@@ -28,39 +37,45 @@ const connection = require('../lib/steps/connection');
 
 function buildSteps(ctx) {
   return [
-    ...setupApprovedConnection(ctx),
+    ...setupApprovedConnection(ctx, { requestOverrides: { body: { policyVersion: 'SDX.R1.00' } } }),
+    connection.openProviderConnection(ctx),
+    connection.openConsumerConnection(ctx),
     connection.activateConnection(ctx, {
+      fatal: false,
       onResult: (res) => {
         console.log(
           `Activation response: HTTP call succeeded, result="${res.json && res.json.result}" - ` +
-            'this is reported *regardless* of whether the fire-and-forget provisioner call ' +
-            'underneath has completed, let alone succeeded.'
+            'even though the underlying provisioner call is expected to fail SDX.R1.00 Cedar ' +
+            'policy evaluation (this connection lacks the richer requesterDetails R1 requires).'
         );
       },
     }),
-    connection.listConnections(ctx, {
-      id: 'connection.list.post-activate',
-      onResult: (res) => {
-        const list = Array.isArray(res.json) ? res.json : [];
-        const match = list.find(
-          (c) => c.clientId === ctx.state.captured.clientId && c.serviceId === ctx.state.captured.serviceId
-        );
-        const status = match && match.provisionerStatus;
-        const statusStr = JSON.stringify(status);
-        console.log(`Read-back provisionerStatus: ${statusStr}`);
-        if (!status || statusStr === '{}' || statusStr === 'null') {
+    {
+      id: 'assert.err-024',
+      title: 'Assert whether activation failure now surfaces on the activation call itself',
+      fatal: false,
+      run: async () => {
+        const step = ctx.state.steps['connection.activate'] || {};
+        if (step.status === 'skipped') {
           console.log(
-            'CONFIRMED [ERR-024]: activation reported success and the connection is ' +
-              `isActive=${match && match.isActive}, but provisionerStatus is ${statusStr} - ` +
-              'there is no way to tell from the API whether provisioning actually succeeded.'
+            `RESOLVED [ERR-024]: connection.activate itself failed/errored ("${step.error}") - ` +
+              'the underlying provisioning failure now propagates to the mutation response ' +
+              'instead of being silently swallowed and reported as success.'
           );
         } else {
           console.log(
-            `RESOLVED (or in progress) [ERR-024]: provisionerStatus is now populated: ${statusStr}.`
+            'CONFIRMED [ERR-024]: connection.activate reported success (HTTP 200/"updated") ' +
+              'even though the underlying provisioning is expected to fail - activation still ' +
+              "returns before/regardless of the provisioner call's actual outcome. (This is " +
+              'expected given the fix\'s documented scope: it makes the await meaningful and ' +
+              'the failure observable in provisioner logs/activity, but KeystoneJS may complete ' +
+              'the mutation response before an afterChange hook rejection can change its status - ' +
+              'see whether logs/connection.activate.log or the provisioner container logs show ' +
+              'the failure being surfaced anywhere else.)'
           );
         }
       },
-    }),
+    },
   ];
 }
 

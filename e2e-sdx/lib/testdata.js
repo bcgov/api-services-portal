@@ -80,7 +80,8 @@ function generateFakeOpenApiSpec({ suffix, subsystemName }, options = {}) {
     ${options.security.scheme || 'oauth2'}:
       type: oauth2
       flows:
-        clientCredentials:
+        authorizationCode:
+          authorizationUrl: https://identity.example.com/auth
           tokenUrl: https://identity.example.com/token
           scopes:
             ${options.security.scopes?.read || 'read'}: Read access
