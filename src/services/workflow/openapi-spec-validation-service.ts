@@ -50,6 +50,33 @@ export class OpenAPISpecValidationServiceUnavailableError extends Error {
   }
 }
 
+/**
+ * ERR-015: the validator responded (it's reachable), but rejected the
+ * request itself - a Spectral engine crash, a malformed-body 400, an
+ * unsupported version/ruleset, etc. This is distinct from
+ * OpenAPISpecValidationServiceUnavailableError, which is now reserved for
+ * genuine connectivity failures (timeouts, aborts, network errors -
+ * fetchWithTimeout's catch block below). Conflating the two previously
+ * sent operators chasing availability/network issues for problems that
+ * were actually in the validator engine or rules runtime.
+ */
+export class OpenAPISpecValidationEngineError extends Error {
+  public status: number;
+  public statusText: string;
+  public body?: string;
+
+  constructor(status: number, statusText: string, body?: string) {
+    super(
+      `OAS validation service rejected the request: ${status} ${statusText}` +
+        (body ? ` - ${body}` : '')
+    );
+    this.name = 'OpenAPISpecValidationEngineError';
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+  }
+}
+
 export class OpenAPISpecValidationService {
   private validationApiUrl: string;
   private version?: string;
@@ -119,9 +146,7 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new OpenAPISpecValidationServiceUnavailableError(
-        `OAS validation service unavailable: ${res.status} ${res.statusText}`
-      );
+      throw new OpenAPISpecValidationEngineError(res.status, res.statusText, body);
     }
 
     return (await res.json()) as OpenAPISpecValidationResult;
@@ -203,9 +228,7 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new OpenAPISpecValidationServiceUnavailableError(
-        `OAS validation service unavailable: ${res.status} ${res.statusText}`
-      );
+      throw new OpenAPISpecValidationEngineError(res.status, res.statusText, body);
     }
 
     const body = (await res.json()) as { versions?: string[] };
@@ -233,9 +256,7 @@ export class OpenAPISpecValidationService {
         res.statusText,
         body
       );
-      throw new OpenAPISpecValidationServiceUnavailableError(
-        `OAS validation service unavailable: ${res.status} ${res.statusText}`
-      );
+      throw new OpenAPISpecValidationEngineError(res.status, res.statusText, body);
     }
 
     const body = (await res.json()) as { rulesets?: string[] };

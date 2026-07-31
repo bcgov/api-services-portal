@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const {
   OpenAPISpecValidationError,
   OpenAPISpecValidationServiceUnavailableError,
+  OpenAPISpecValidationEngineError,
   OpenAPISpecValidationService,
 } = require('../../../services/workflow/openapi-spec-validation-service');
 
@@ -353,7 +354,7 @@ describe('OpenAPISpecValidationService', () => {
     );
   });
 
-  it('throws a service unavailable error when the validation service request fails', async () => {
+  it('throws a validation engine error (not a service-unavailable error) when the validation request itself is rejected', async () => {
     fetch.mockResolvedValue({
       ok: false,
       status: 404,
@@ -366,13 +367,18 @@ describe('OpenAPISpecValidationService', () => {
       'missing-version'
     );
 
+    await expect(service.validateRuleset('{}')).rejects.toBeInstanceOf(
+      OpenAPISpecValidationEngineError
+    );
     await expect(service.validateRuleset('{}')).rejects.toMatchObject({
-      name: 'OpenAPISpecValidationServiceUnavailableError',
-      message: 'OAS validation service unavailable: 404 Not Found',
+      name: 'OpenAPISpecValidationEngineError',
+      status: 404,
+      statusText: 'Not Found',
+      body: '{"error":"not_found"}',
     });
   });
 
-  it('throws a service unavailable error when the selected default ruleset is not found by the validation service', async () => {
+  it('throws a validation engine error (not a service-unavailable error) when the validation service rejects the posted spec', async () => {
     fetch
       .mockResolvedValueOnce({
         ok: true,
@@ -382,9 +388,9 @@ describe('OpenAPISpecValidationService', () => {
       })
       .mockResolvedValueOnce({
         ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        text: async () => '{"error":"ruleset_not_found"}',
+        status: 500,
+        statusText: 'Internal Server Error',
+        text: async () => '{"detail":"Spectral validation engine internal error"}',
       });
 
     const service = new OpenAPISpecValidationService(
@@ -393,8 +399,9 @@ describe('OpenAPISpecValidationService', () => {
     );
 
     await expect(service.validateRuleset('{}')).rejects.toMatchObject({
-      name: 'OpenAPISpecValidationServiceUnavailableError',
-      message: 'OAS validation service unavailable: 404 Not Found',
+      name: 'OpenAPISpecValidationEngineError',
+      status: 500,
+      statusText: 'Internal Server Error',
     });
     expect(fetch).toHaveBeenNthCalledWith(
       2,

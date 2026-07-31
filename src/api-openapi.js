@@ -212,6 +212,21 @@ class ApiOpenapiApp {
           code: 'validation_service_unavailable',
           message: 'OAS validation service unavailable',
         });
+      } else if (err?.name === 'OpenAPISpecValidationEngineError') {
+        // ERR-015: the validator was reachable but rejected the request
+        // itself (e.g. an internal engine crash, a malformed-body 400) -
+        // distinct from genuine unavailability above. Preserve its real
+        // status/diagnostic text instead of reporting a generic 503.
+        logger.error(
+          `Caught OpenAPI Spec Validation Engine Error for ${req.path}:`,
+          err.message
+        );
+        return res.status(502).json({
+          code: 'validation_engine_error',
+          message: err.message,
+          validatorStatus: err.status,
+          validatorBody: err.body,
+        });
       } else if (err instanceof ValidateError) {
         logger.error(
           `Caught Validation Error for ${req.path} '%s' %j`,
