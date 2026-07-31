@@ -30,7 +30,6 @@ import {
   replaceKey,
   transformAllRefID,
 } from '../../../batch/feed-worker';
-import { getRoutePathPrefix } from '../../../services/utils';
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -167,12 +166,20 @@ export class OrgSubsystemController extends Controller {
 
     const client = GetSubsystemEntryForSubsystem(subsystem);
 
-    const routePathPrefix = getRoutePathPrefix(client.clientId);
-
+    // ERR-018: this namespace's perm-route-paths allow-list previously
+    // scoped to a synthetic /sdx/0/{clientId} prefix (getRoutePathPrefix)
+    // that no generated service-pattern route (sdx-service.r1's Kong
+    // routes come straight from the OAS operation paths, unprefixed) ever
+    // actually matched - the two were generated from unrelated
+    // conventions. The runtime group and its hosted services aren't known
+    // yet at subsystem-registration time, so there's no set of concrete
+    // operation paths to scope this to in advance either. Permit any path
+    // under this namespace instead of a prefix that nothing published
+    // here would ever satisfy.
     const result = await CreateNamespaceForSubsystem(context, {
       subsystem: client,
       runtimeGroupName: body.runtimeGroupName,
-      routePaths: [routePathPrefix],
+      routePaths: ['/'],
     });
 
     assertEqual(
