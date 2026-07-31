@@ -171,7 +171,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             headers: {
               'X-Client-Id': [`${clientLocator}`],
             },
-            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
             strip_path: true,
           },
           {
@@ -184,7 +184,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             headers: {
               'X-Client-Id': [`${clientLocator}`],
             },
-            protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
+            protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
             plugins: [
               {
                 name: 'request-termination',
