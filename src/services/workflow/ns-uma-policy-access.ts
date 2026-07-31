@@ -45,9 +45,22 @@ export async function createUmaPolicy(
  * registration but 409-conflicts ("Policy ... already exists") on any
  * retry once CreateNamespace itself became a reconcile instead of
  * create-only - reusing the existing namespace resource still hit this
- * unconditional create. Checks for an existing policy for this
- * resource+client first and reconciles (updateUmaPolicy) instead of
- * blindly creating.
+ * unconditional create.
+ *
+ * Tries create first and, on a 409 from that create call, treats it as
+ * already-correctly-configured rather than an error.
+ *
+ * This deliberately doesn't attempt a full reconcile (diffing and
+ * re-applying scopes via updateUmaPolicy): that path also depends on
+ * listPolicies, and live testing found the UMA protection API's list
+ * endpoint (GET .../uma-policy?resource=...) rejects the same
+ * envCtx.accessToken the create POST accepts, with `invalid_bearer_token`,
+ * in this environment - a separate, pre-existing gap in this Keycloak
+ * client's protection-API permissions, not something introduced here.
+ * Treating 409-already-exists as success avoids that broken call and
+ * fixes the actual reported symptom (registration retry always failing);
+ * it just can't detect or repair a policy whose scopes have drifted from
+ * what a fresh registration would create.
  */
 export async function upsertUmaPolicy(
   context: any,
@@ -55,33 +68,20 @@ export async function upsertUmaPolicy(
   resourceId: string,
   policy: Policy
 ) {
-  // Both branches below (createUmaPolicy/updateUmaPolicy) already call
-  // enforceAccessToResource themselves - not duplicated here.
-  const policyApi = new UMAPolicyService(
-    envCtx.uma2.policy_endpoint,
-    envCtx.accessToken
-  );
-
-  const existing = (await policyApi.listPolicies({ resource: resourceId }))
-    .filter((p) => policy.clients?.every((c) => p.clients?.includes(c)))
-    .pop();
-
-  if (existing) {
+  try {
+    return await createUmaPolicy(context, envCtx, resourceId, policy);
+  } catch (err) {
+    const statusCode = (err as any)?.errors?.[0]?.statusCode;
+    if (statusCode !== 409) {
+      throw err;
+    }
     logger.debug(
-      '[upsertUmaPolicy] existing policy found for %s, reconciling: %j',
+      '[upsertUmaPolicy] policy already exists for %s, treating as already-configured: %j',
       resourceId,
-      existing
+      policy
     );
-    return await updateUmaPolicy(
-      context,
-      envCtx,
-      resourceId,
-      policy.clients![0],
-      policy.scopes
-    );
+    return { name: policy.name };
   }
-
-  return await createUmaPolicy(context, envCtx, resourceId, policy);
 }
 
 export async function updateUmaPolicy(
