@@ -92,7 +92,7 @@ export class ProvisionerService {
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
     action: 'apply' | 'delete'
-  ): Promise<void> {
+  ): Promise<ConnectionRequestChangeEventResponse> {
     // credentials will be using the gwa admin
 
     const payload = {
@@ -113,7 +113,15 @@ export class ProvisionerService {
 
     const body = JSON.stringify(payload);
 
-    fetch(
+    // ERR-024: this fetch chain was previously not returned/awaited, so
+    // this method (despite being `async`) resolved as soon as the request
+    // was *started*, not when it completed - the afterChange hook's
+    // `await` on this call was therefore meaningless, and any provisioner
+    // failure was only ever logged, never surfaced to the caller. Now
+    // returned/re-thrown so the caller's existing `await` genuinely waits
+    // for the provisioner and a failure propagates instead of being
+    // swallowed.
+    return fetch(
       `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
       {
         method: 'POST',
@@ -133,10 +141,12 @@ export class ProvisionerService {
           r.failed,
           r
         );
+        return r;
       })
       .catch((err) => {
         logger.error('Provisioner Sent: %s', body);
         logger.error('Provisioner Error: %s', err);
+        throw err;
       });
   }
 
