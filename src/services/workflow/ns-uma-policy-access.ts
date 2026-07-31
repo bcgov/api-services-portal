@@ -39,6 +39,51 @@ export async function createUmaPolicy(
   return umaPolicy;
 }
 
+/**
+ * ERR-014 (follow-on): createSDXNamespace unconditionally called
+ * createUmaPolicy after CreateNamespace, which is fine on first
+ * registration but 409-conflicts ("Policy ... already exists") on any
+ * retry once CreateNamespace itself became a reconcile instead of
+ * create-only - reusing the existing namespace resource still hit this
+ * unconditional create. Checks for an existing policy for this
+ * resource+client first and reconciles (updateUmaPolicy) instead of
+ * blindly creating.
+ */
+export async function upsertUmaPolicy(
+  context: any,
+  envCtx: EnvironmentContext,
+  resourceId: string,
+  policy: Policy
+) {
+  // Both branches below (createUmaPolicy/updateUmaPolicy) already call
+  // enforceAccessToResource themselves - not duplicated here.
+  const policyApi = new UMAPolicyService(
+    envCtx.uma2.policy_endpoint,
+    envCtx.accessToken
+  );
+
+  const existing = (await policyApi.listPolicies({ resource: resourceId }))
+    .filter((p) => policy.clients?.every((c) => p.clients?.includes(c)))
+    .pop();
+
+  if (existing) {
+    logger.debug(
+      '[upsertUmaPolicy] existing policy found for %s, reconciling: %j',
+      resourceId,
+      existing
+    );
+    return await updateUmaPolicy(
+      context,
+      envCtx,
+      resourceId,
+      policy.clients![0],
+      policy.scopes
+    );
+  }
+
+  return await createUmaPolicy(context, envCtx, resourceId, policy);
+}
+
 export async function updateUmaPolicy(
   context: any,
   envCtx: EnvironmentContext,
