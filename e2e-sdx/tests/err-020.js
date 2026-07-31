@@ -27,23 +27,30 @@ function buildSteps(ctx) {
       run: async () => {
         const step = ctx.state.steps['connection.request'] || {};
         // The terse `error` message (from describeFailure's last-stdout-line
-        // heuristic) isn't reliable here since this response has no
-        // top-level `.message` - read the full transcript instead.
+        // heuristic) isn't reliable here since neither response shape (the
+        // original generic one or the fixed field-specific one) puts the
+        // useful text on a top-level `.message` alone - read the full
+        // transcript instead.
         const log = fs.readFileSync(path.join(ctx.runDir, 'logs', 'connection.request.log'), 'utf8');
+        const hasPolicyVersionField = /"fields"\s*:\s*\{\s*"policyVersion"/.test(log);
         const reasonMatch = log.match(/"reason":\s*"([^"]*)"/);
-        const reason = reasonMatch ? reasonMatch[1] : '(no "reason" field found)';
+        const genericReason = reasonMatch ? reasonMatch[1] : null;
 
         if (step.status !== 'skipped') {
           console.log(
             `UNEXPECTED [ERR-020]: connection.request ended with status "${step.status}" - ` +
               'omitting policyVersion may no longer cause a failure at all.'
           );
-        } else if (/policyversion/i.test(reason)) {
-          console.log(`RESOLVED [ERR-020]: connection.request failed with a policyVersion-specific reason: "${reason}".`);
+        } else if (hasPolicyVersionField) {
+          console.log(
+            'RESOLVED [ERR-020]: connection.request failed with a field-specific ' +
+              'error naming "policyVersion" (see logs/connection.request.log).'
+          );
         } else {
           console.log(
-            `CONFIRMED [ERR-020]: connection.request failed with a generic reason - "${reason}" - ` +
-              'that never names policyVersion as the missing field.'
+            `CONFIRMED [ERR-020]: connection.request failed with a generic reason - ` +
+              `"${genericReason || '(see logs/connection.request.log)'}" - that never names ` +
+              'policyVersion as the missing field.'
           );
         }
       },
