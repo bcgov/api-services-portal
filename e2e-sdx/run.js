@@ -20,6 +20,7 @@ const tests = {
   'err-029': () => require('./tests/err-029'),
   // 'err-031' - not yet implemented, see README.md's "Error scenarios" section.
   'err-032': () => require('./tests/err-032'),
+  'enh-002': () => require('./tests/enh-002'),
 };
 
 engine.main({ tests, argv: process.argv.slice(2) }).catch((err) => {

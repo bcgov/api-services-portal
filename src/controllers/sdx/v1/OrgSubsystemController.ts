@@ -21,6 +21,10 @@ import {
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
+import { getSubsystemRoles } from '../../../services/workflow/get-subsystem-roles';
+import { putSubsystemAccess as putSubsystemAccessWorkflow } from '../../../services/workflow/put-subsystem-access';
+import { SystemRoles } from '../../../services/org-groups/sys-group-access';
+import { GroupMember } from '../../../services/org-groups/types';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { SubsystemInput } from './types';
@@ -183,5 +187,81 @@ export class OrgSubsystemController extends Controller {
     );
 
     return { gatewayId: client.gateway!.id };
+  }
+
+  /**
+   * Retrieves RBAC role membership (System Owner, Tech Lead, Access Manager)
+   * for the specified subsystem.
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve RBAC role membership for a subsystem
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param request - HTTP request object for context creation
+   */
+  @Get('/{name}/access')
+  @OperationId('getSubsystemAccess')
+  @Security('jwt', ['System.Manage'])
+  public async getSubsystemAccess(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<GroupMember[]> {
+    const ctx = this.keystone.createContext(request);
+
+    const subsysService = new SubsystemService();
+    const subsystem = await subsysService.findSubsystemByName(ctx, org, name);
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+
+    return (await getSubsystemRoles(ctx, client.clientId)) ?? [];
+  }
+
+  /**
+   * Changes RBAC role membership (System Owner, Tech Lead, Access Manager)
+   * for the specified subsystem. This is a full sync: members omitted from
+   * `members` are removed from any of these roles they currently hold, and
+   * members included are granted exactly the roles listed.
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Change RBAC role membership for a subsystem
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param body - The complete desired set of role members
+   * @param request - HTTP request object for context creation
+   */
+  @Put('/{name}/access')
+  @OperationId('putSubsystemAccess')
+  @Security('jwt', ['System.Manage'])
+  public async putSubsystemAccess(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { members: GroupMember[] },
+    @Request() request: any
+  ): Promise<void> {
+    const allRoles: string[] = body.members.reduce(
+      (acc: string[], m: GroupMember) => acc.concat(m.roles),
+      []
+    );
+    const unsupported = [
+      ...new Set(allRoles.filter((r) => !SystemRoles.includes(r))),
+    ];
+    assertEqual(
+      unsupported.length === 0,
+      true,
+      'members',
+      `Unsupported role(s): ${unsupported.join(', ')}. Supported roles: ${SystemRoles.join(', ')}`
+    );
+
+    const ctx = this.keystone.createContext(request, true);
+
+    const subsysService = new SubsystemService();
+    const subsystem = await subsysService.findSubsystemByName(ctx, org, name);
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+
+    await putSubsystemAccessWorkflow(ctx, client.clientId, body.members);
   }
 }

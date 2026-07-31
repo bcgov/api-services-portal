@@ -98,9 +98,60 @@ function verifySubsystemClient(ctx, overrides = {}) {
   };
 }
 
+/**
+ * "Retrieve RBAC role membership for a subsystem" (get-subsystem-access).
+ * ENH-002.
+ */
+function getSubsystemAccess(ctx, overrides = {}) {
+  const { state } = ctx;
+  const td = state.testData;
+  return {
+    id: overrides.id || 'subsystem.access.get',
+    title: 'Get subsystem RBAC role membership',
+    fatal: overrides.fatal !== undefined ? overrides.fatal : false,
+    run: async () => {
+      const res = await ctx.call(
+        overrides.id || 'subsystem.access.get',
+        state.sdxAlias,
+        ['get-subsystem-access', td.orgName, td.subsystemName]
+      );
+      if (overrides.onResult) await overrides.onResult(res, ctx);
+    },
+  };
+}
+
+/**
+ * "Change RBAC role membership for a subsystem" (put-subsystem-access).
+ * ENH-002. `overrides.members` is a static `GroupMember[]` body known at
+ * build time; scenarios needing a body built from a previous step's
+ * captured result (e.g. the member reference `get-subsystem-access`
+ * returned) should call `ctx.call('put-subsystem-access', ...)` directly
+ * instead, inside a custom step's `run`.
+ */
+function putSubsystemAccess(ctx, overrides = {}) {
+  const { state } = ctx;
+  const td = state.testData;
+  return {
+    id: overrides.id || 'subsystem.access.put',
+    title: 'Change subsystem RBAC role membership',
+    fatal: overrides.fatal !== undefined ? overrides.fatal : false,
+    run: async () => {
+      const res = await ctx.call(
+        overrides.id || 'subsystem.access.put',
+        state.sdxAlias,
+        ['put-subsystem-access', td.orgName, td.subsystemName],
+        { body: { members: overrides.members || [] } }
+      );
+      if (overrides.onResult) await overrides.onResult(res, ctx);
+    },
+  };
+}
+
 module.exports = {
   createSubsystem,
   listAvailableRuntimeGroups,
   subsystemGateway,
   verifySubsystemClient,
+  getSubsystemAccess,
+  putSubsystemAccess,
 };

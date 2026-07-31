@@ -127,6 +127,7 @@ against anything shared.
 | `err-025` | The R0 policy schema rejects the implemented `useSni` provider parameter |
 | `err-029` | OAS per-operation security scopes aren't converted into runtime enforcement |
 | `err-032` | A provider `serviceResources` update reports `no-change` despite persisting (not reliably reproduced locally - see the file's header comment) |
+| `enh-002` | No supported operation to change a subsystem's RBAC role membership (System Owner / Access Manager / Tech Lead) after registration |
 
 `err-031` (updating an existing integration connection crashes the
 provisioner) is **not yet implemented** as a live scenario: reproducing it
