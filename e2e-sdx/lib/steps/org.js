@@ -97,4 +97,31 @@ function orgGateway(ctx, overrides = {}) {
   };
 }
 
-module.exports = { ROOT_ORG_DOMAIN, createOrg, orgAccess, orgGateway };
+/**
+ * "List organizations in the catalog" (organization-list). ENH-001.
+ *
+ * Pass `overrides.includeAccess: true` to add `--include-access`, which
+ * enriches each organization entry with its RBAC role membership.
+ */
+function listOrganizations(ctx, overrides = {}) {
+  const { state } = ctx;
+  return {
+    id: overrides.id || 'org.list',
+    title: overrides.title || 'List organizations',
+    fatal: overrides.fatal !== undefined ? overrides.fatal : false,
+    run: async () => {
+      const args = ['organization-list'];
+      if (overrides.includeAccess) args.push('--include-access');
+      const res = await ctx.call(overrides.id || 'org.list', state.sdxAlias, args);
+      if (overrides.onResult) await overrides.onResult(res, ctx);
+    },
+  };
+}
+
+module.exports = {
+  ROOT_ORG_DOMAIN,
+  createOrg,
+  orgAccess,
+  orgGateway,
+  listOrganizations,
+};

@@ -40,6 +40,7 @@ import {
   getOrganizationMemberDetails,
   getOrganizations,
 } from '../../../services/keystone/organization';
+import { getOrganizationRoles } from '../../../services/workflow/get-organization-roles';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import assert from 'assert';
 import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
@@ -92,11 +93,25 @@ export class CatalogController extends Controller {
       .map((o) => parseBlobString(o));
   }
 
+  /**
+   * Retrieve the list of organizations available in the SDX catalog.
+   *
+   * `includeAccess` does not require an authenticated caller - RBAC role
+   * membership is read directly from Keycloak using the portal's own
+   * service credentials, the same way subsystem `access` is already
+   * resolved for `/catalog/subsystems/{name}?includeAccess=true`.
+   *
+   * @summary List organizations in the catalog
+   * @param includeAccess - When true, include each organization's RBAC role membership
+   */
   @Get('/organizations')
   @OperationId('organization-list')
-  public async listOrganizations(): Promise<any[]> {
-    const orgs = await getOrganizations(this.keystone.sudo());
-    return orgs
+  public async listOrganizations(
+    @Query('includeAccess') includeAccess: boolean = false
+  ): Promise<any[]> {
+    const ctx = this.keystone.sudo();
+    const orgs = await getOrganizations(ctx);
+    const entries = orgs
       .map((o) => ({
         name: o.name,
         title: o.title,
@@ -104,8 +119,17 @@ export class CatalogController extends Controller {
         publicBodyId: o.publicBodyId,
         member: getOrganizationMemberDetails(o.tags),
       }))
-      .filter((o) => o.member !== undefined)
-      .map((o) => removeEmpty(o));
+      .filter((o) => o.member !== undefined);
+
+    if (includeAccess) {
+      await Promise.all(
+        entries.map(async (o: any) => {
+          o.access = await getOrganizationRoles(ctx, o.name);
+        })
+      );
+    }
+
+    return entries.map((o) => removeEmpty(o));
   }
 
   /**

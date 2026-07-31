@@ -127,6 +127,7 @@ against anything shared.
 | `err-025` | The R0 policy schema rejects the implemented `useSni` provider parameter |
 | `err-029` | OAS per-operation security scopes aren't converted into runtime enforcement |
 | `err-032` | A provider `serviceResources` update reports `no-change` despite persisting (not reliably reproduced locally - see the file's header comment) |
+| `enh-001` | `/catalog/organizations` has no `includeAccess` parameter to return RBAC role membership, unlike the subsystem catalog (requires `--member-email` set to a real local user - see the file's header comment) |
 
 `err-031` (updating an existing integration connection crashes the
 provisioner) is **not yet implemented** as a live scenario: reproducing it
