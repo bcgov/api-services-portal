@@ -1,23 +1,23 @@
 import type { FastifyBaseLogger } from 'fastify';
-import type { StepCaApiClient } from '../clients/step-ca/index.js';
-import type { TokenResponse } from '../clients/step-ca/types.js';
+import type { CaTokenApiClient } from '../clients/ca-token/index.js';
+import type { TokenResponse } from '../clients/ca-token/types.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 import { BadRequestError } from '../errors/api-errors.js';
 
 /**
- * Drives step-ca. Keyed by environment because each environment has its own
- * step-ca instance (`step_ca_url`).
+ * Drives the CA's one-time-use token issuer. Keyed by environment because
+ * each environment has its own issuer instance (`ca_token_url`).
  */
-export class StepCaService {
+export class CaTokenService {
   constructor(
     private readonly sdxMember: SdxMemberApiClient,
-    private readonly api: StepCaApiClient,
+    private readonly api: CaTokenApiClient,
     private readonly logger?: FastifyBaseLogger
   ) {}
 
   /**
    * Requests a one-time-use certificate-signing token for a runtime group
-   * from the environment's step-ca instance.
+   * from the environment's CA token issuer.
    */
   async generateToken(
     org: string,
@@ -26,7 +26,7 @@ export class StepCaService {
   ): Promise<TokenResponse> {
     this.logger?.debug(
       { runtimeGroup, environment },
-      'StepCaService.generateToken'
+      'CaTokenService.generateToken'
     );
 
     // 'owned' (not 'available'): the token is for the org's own edge server,

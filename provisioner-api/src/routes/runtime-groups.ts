@@ -64,7 +64,7 @@ export const registerRuntimeGroupsRoutes: FastifyPluginAsyncTypebox = async (
         operationId: 'createRuntimeGroupCertSignToken',
         description:
           'Requests a new one-time-use certificate-signing token from ' +
-          "step-ca for the runtime group's target environment.",
+          "the CA token issuer for the runtime group's target environment.",
         security,
         params: Type.Object({
           org: Type.String({

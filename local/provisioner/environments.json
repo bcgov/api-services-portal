@@ -5,7 +5,7 @@
     "gwa_api_url": "http://gwa-api.localtest.me:2000/v2",
     "kong_admin_url": "http://kong-sdx-admin0.localtest.me:9081",
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
-    "step_ca_url": "http://step-token-api.localtest.me:2020"
+    "ca_token_url": "http://step-token-api.localtest.me:2020"
   },
   "cyp": {
     "client_id": "sdx-provisioner",
@@ -13,6 +13,6 @@
     "gwa_api_url": "http://gwa-api.localtest.me:2000/v2",
     "kong_admin_url": "http://kong-sdx-admin0.localtest.me:9081",
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
-    "step_ca_url": "http://step-token-api.localtest.me:2020"
+    "ca_token_url": "http://step-token-api.localtest.me:2020"
   }
 }

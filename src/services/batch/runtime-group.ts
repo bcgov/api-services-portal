@@ -288,8 +288,8 @@ class RuntimeGroupService {
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
     // The provisioner resolves the runtime group's environment to the
-    // correct step-ca instance; each environment (dev/test/prod) has its
-    // own certificate authority, so this cannot be handled locally.
+    // correct CA token issuer instance; each environment (dev/test/prod) has
+    // its own certificate authority, so this cannot be handled locally.
     const provisionerService = new ProvisionerService(
       process.env.PROVISIONER_URL!
     );

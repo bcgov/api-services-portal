@@ -4,29 +4,31 @@ import type { EnvironmentsConfig } from '../../config/environments.js';
 import type { TokenRequest, TokenResponse } from './types.js';
 
 /**
- * Client for the step-ca one-time-use token issuer. Each environment
- * (`dev`, `test`, `prod`, …) has its own step-ca instance, resolved per
- * request from the environments config (`step_ca_url`). Unauthenticated —
- * the issuer is reached over an internal network.
+ * Client for the CA's one-time-use token issuer (not the CA itself - a
+ * separate service that mints tokens the CA later accepts for certificate
+ * signing). Each environment (`dev`, `test`, `prod`, …) has its own
+ * instance, resolved per request from the environments config
+ * (`ca_token_url`). Unauthenticated — the issuer is reached over an
+ * internal network.
  */
-export class StepCaApiClient {
+export class CaTokenApiClient {
   constructor(
     private readonly environments: EnvironmentsConfig,
     private readonly logger?: FastifyBaseLogger
   ) {
     const configured = Object.entries(environments)
-      .filter(([, cfg]) => Boolean(cfg.step_ca_url))
+      .filter(([, cfg]) => Boolean(cfg.ca_token_url))
       .map(([name]) => name);
     this.logger?.info(
       { environments: configured.length ? configured : 'none' },
-      'StepCaApiClient initialized'
+      'CaTokenApiClient initialized'
     );
   }
 
   /**
-   * `Request token` — POST {step_ca_url}/tokens
+   * `Request token` — POST {ca_token_url}/tokens
    *
-   * Asks the environment's step-ca instance to issue a one-time-use
+   * Asks the environment's CA token issuer to issue a one-time-use
    * certificate-signing token for the given subject/SANs.
    */
   requestToken(
@@ -35,7 +37,7 @@ export class StepCaApiClient {
   ): Promise<TokenResponse> {
     this.logger?.debug(
       { environment, subject: input.subject, san: input.san },
-      'Requesting step-ca token'
+      'Requesting CA token'
     );
     return this.request(environment, 'POST', 'tokens', input);
   }
@@ -43,8 +45,8 @@ export class StepCaApiClient {
   // --- transport ----------------------------------------------------------
 
   /**
-   * Issues a request against the step-ca instance for the given environment.
-   * `path` is resolved relative to that environment's `step_ca_url`.
+   * Issues a request against the CA token issuer for the given environment.
+   * `path` is resolved relative to that environment's `ca_token_url`.
    */
   private async request<T>(
     environment: string,
@@ -52,13 +54,13 @@ export class StepCaApiClient {
     path: string,
     body?: unknown
   ): Promise<T> {
-    const baseUrl = this.environments[environment]?.step_ca_url;
+    const baseUrl = this.environments[environment]?.ca_token_url;
     if (!baseUrl) {
       throw withDetails(
         new BadGatewayError(
-          `step-ca is not configured for environment '${environment}'`
+          `CA token issuer is not configured for environment '${environment}'`
         ),
-        { environment, missing: 'step_ca_url' }
+        { environment, missing: 'ca_token_url' }
       );
     }
 
@@ -70,16 +72,16 @@ export class StepCaApiClient {
       headers['content-type'] = 'application/json';
     }
 
-    this.logger?.debug({ environment, method, url }, 'step-ca fetch');
+    this.logger?.debug({ environment, method, url }, 'CA token fetch');
 
     const res = await fetch(url, { method, body: payload, headers }).catch(
       (err) => {
         this.logger?.error(
           { err, environment, method, url },
-          'step-ca request failed'
+          'CA token request failed'
         );
         throw withDetails(
-          new BadGatewayError('step-ca request failed'),
+          new BadGatewayError('CA token request failed'),
           { environment, method, url }
         );
       }
@@ -89,10 +91,10 @@ export class StepCaApiClient {
       const detail = await safeText(res);
       this.logger?.error(
         { environment, method, url, status: res.status, detail },
-        'step-ca returned an error'
+        'CA token issuer returned an error'
       );
       throw withDetails(
-        new BadGatewayError(`step-ca responded ${res.status}`),
+        new BadGatewayError(`CA token issuer responded ${res.status}`),
         {
           environment,
           method,

@@ -45,6 +45,6 @@ export const pathSummaries: Record<
   '/runtime-groups/{name}/environments/{env}/csr-sign-token': {
     summary: 'Runtime group certificate-signing token generation',
     description:
-      "Requests a new one-time-use certificate-signing token from step-ca for the runtime group's target environment.",
+      "Requests a new one-time-use certificate-signing token from the CA token issuer for the runtime group's target environment.",
   },
 };

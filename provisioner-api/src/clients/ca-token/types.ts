@@ -1,5 +1,5 @@
 /**
- * Types for the step-ca one-time-use token issuer. Hand-maintained to mirror
+ * Types for the CA's one-time-use token issuer. Hand-maintained to mirror
  * the issuer's `/tokens` endpoint contract.
  */
 

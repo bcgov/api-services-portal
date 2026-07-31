@@ -42,18 +42,18 @@ function findPolicyCheckResult(clientId, sinceSeconds = 30) {
 }
 
 /**
- * Finds the most recent "Requesting step-ca token" debug line mentioning the
- * given host, if any. Emitted only by provisioner-api's `StepCaApiClient`
+ * Finds the most recent "Requesting CA token" debug line mentioning the
+ * given host, if any. Emitted only by provisioner-api's `CaTokenApiClient`
  * (ERR-034's fix) - its absence means the token request never reached the
- * provisioner, i.e. apsportal called step-ca directly instead. Returns
- * `{ found }`.
+ * provisioner, i.e. apsportal called the CA token issuer directly instead.
+ * Returns `{ found }`.
  */
-function findStepCaTokenLog(host, sinceSeconds = 30) {
+function findCaTokenLog(host, sinceSeconds = 30) {
   const logs = recentProvisionerLogs(sinceSeconds);
   const found = logs
     .split('\n')
-    .some((l) => l.includes('Requesting step-ca token') && l.includes(host));
+    .some((l) => l.includes('Requesting CA token') && l.includes(host));
   return { found };
 }
 
-module.exports = { recentProvisionerLogs, findPolicyCheckResult, findStepCaTokenLog };
+module.exports = { recentProvisionerLogs, findPolicyCheckResult, findCaTokenLog };

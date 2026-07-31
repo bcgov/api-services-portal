@@ -185,7 +185,7 @@ describe('SDX Runtime Groups', () => {
             'POST'
           ).then(({ apiRes: { status, body } }: any) => {
             // ERR-034: token generation is now routed through the provisioner
-            // (StepCaService), which validates sdxEndpoint itself and reports
+            // (CaTokenService), which validates sdxEndpoint itself and reports
             // failures as a generic misconfig_error/500, the same way every
             // other provisioner-routed call (e.g. CSR generation) already
             // does - not as the portal's own 422 validation error.
