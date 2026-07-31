@@ -58,11 +58,22 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request);
 
-    // For R0 policy, force the requester details to be the user making this request
-    if (input.policyVersion === 'SDX.R0.00' && input.requesterDetails) {
-      input.requesterDetails.requester = {
-        name: request.user.name,
-        email: request.user.email,
+    // For R0 policy, force the requester details to be the user making
+    // this request. ERR-023: previously only overwrote `requester` when
+    // the caller already sent a truthy `requesterDetails` object - an
+    // omitted `requesterDetails` (the documented DevHub example) instead
+    // fell through to ConnectionRequest.js's invalid persistence default
+    // ('{}'), which the SDX.R0.00 Cedar schema rejects at activation
+    // ("expected the record to have an attribute `requester`, but it does
+    // not"). Now populated unconditionally whenever this request declares
+    // the R0 policy, so the field is never left in that invalid shape.
+    if (input.policyVersion === 'SDX.R0.00') {
+      input.requesterDetails = {
+        ...(input.requesterDetails || {}),
+        requester: {
+          name: request.user.name,
+          email: request.user.email,
+        },
       };
     }
 
