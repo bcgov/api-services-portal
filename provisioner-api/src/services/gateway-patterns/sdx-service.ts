@@ -145,6 +145,22 @@ export class SDXServicePattern implements PatternProcessor {
           },
           protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
           strip_path: false,
+          // ERR-029: OAS-declared per-operation scopes were metadata only -
+          // the only runtime auth plugin generated was one blanket
+          // jwt-keycloak on the whole *service*, using a single static
+          // `token.scope` upgrade config with no per-operation
+          // differentiation. This attaches jwt-keycloak per *route*
+          // instead, once the `token` upgrade is enabled, restricting each
+          // operation's route to its own OAS-declared scopes (falling back
+          // to the static configured scope when an operation declares
+          // none).
+          ...(upgrades.hasOwnProperty('token')
+            ? {
+                plugins: [
+                  upgradeToJWTKeycloak(tags, data, inputs as SDXServiceConfig, op),
+                ],
+              }
+            : {}),
         };
       }
     );
@@ -201,9 +217,9 @@ export class SDXServicePattern implements PatternProcessor {
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
-          ...(upgrades.hasOwnProperty('token')
-            ? [upgradeToJWTKeycloak(tags, data, inputs as SDXServiceConfig)]
-            : []),
+          // jwt-keycloak moved to per-route generation above (ERR-029) so
+          // each operation gets its own OAS-declared scope instead of one
+          // blanket service-wide check.
           ...(upgrades.hasOwnProperty('counter_sign')
             ? [upgradeToTrustKMS(tags, data)]
             : []),
@@ -218,9 +234,20 @@ export class SDXServicePattern implements PatternProcessor {
 function upgradeToJWTKeycloak(
   tags: string[],
   data: SDXServicePatternData,
-  inputs: SDXServiceConfig
+  inputs: SDXServiceConfig,
+  op?: { scopes?: { name: string; description?: string }[] }
 ) {
   const jwtKeycloakConfig = inputs.upgrades.token;
+
+  // Prefer the operation's own OAS-declared scopes (ERR-029); fall back to
+  // the statically configured `token.scope` for operations that declare
+  // none, so a subsystem can still enforce a blanket scope where no
+  // finer-grained one is available.
+  const operationScopes = (op?.scopes || []).map((s) => s.name);
+  const scope =
+    operationScopes.length > 0
+      ? operationScopes.join(' ')
+      : jwtKeycloakConfig?.scope;
 
   return {
     name: 'jwt-keycloak',
@@ -228,7 +255,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
-      scope: jwtKeycloakConfig?.scope,
+      scope,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:
