@@ -41,6 +41,25 @@ export class GroupAccessService {
     const granted: Record<string, Set<string>> = {};
     const revoked: Record<string, Set<string>> = {};
 
+    // PLAT-001: previously any role name not in OrganizationRoles was
+    // silently dropped from the sync loop below, so e.g. `roles:
+    // ["system-owner"]` (a valid *system-level* role, not a supported
+    // *organization*-level one) 204'd without assigning anything. Fail
+    // fast and name the offending role(s) instead.
+    const unsupportedRoles = Array.from(
+      new Set(
+        (groupMembership.members ?? [])
+          .flatMap((member) => member.roles ?? [])
+          .filter((role) => !OrganizationRoles.includes(role))
+      )
+    );
+    assert.strictEqual(
+      unsupportedRoles.length === 0,
+      true,
+      `Unsupported organization role(s): ${unsupportedRoles.join(', ')}. ` +
+        `Supported organization roles are: ${OrganizationRoles.join(', ')}.`
+    );
+
     const access = buildGroupAccess(
       groupMembership.name,
       groupMembership.parent,
