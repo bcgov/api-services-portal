@@ -89,6 +89,28 @@ export class ProvisionerService {
     return res;
   }
 
+  public async postCertSignToken(
+    org: string,
+    runtimeGroup: string,
+    environment: string
+  ): Promise<{ token: string }> {
+    logger.debug(
+      'Calling %s',
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/csr-sign-token`
+    );
+
+    const res = await fetch(
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/csr-sign-token`,
+      {
+        method: 'POST',
+      }
+    )
+      .then(checkStatus)
+      .then((r) => r.json());
+
+    return res;
+  }
+
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
     action: 'apply' | 'delete'

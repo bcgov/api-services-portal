@@ -12,6 +12,7 @@ import {
 } from './config.js';
 import { FeedApiClient } from './feed/index.js';
 import { SdxOperatorApiClient } from './sdx-operator/index.js';
+import { StepCaApiClient } from './step-ca/index.js';
 import {
   loadEnvironments,
   type EnvironmentsConfig,
@@ -31,6 +32,7 @@ export interface Clients {
   css: OAuthClient;
   feed: FeedApiClient;
   sdxOperator: SdxOperatorApiClient;
+  stepCa: StepCaApiClient;
 }
 
 function childLogger(
@@ -116,5 +118,6 @@ export function buildClients(logger?: FastifyBaseLogger): Clients {
     css: buildSecretClient('css', 'CSS', logger),
     feed: new FeedApiClient(process.env.FEED_URL, logger),
     sdxOperator: new SdxOperatorApiClient(environments, logger),
+    stepCa: new StepCaApiClient(environments, logger),
   };
 }

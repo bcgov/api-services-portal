@@ -256,7 +256,7 @@ export class RuntimeGroupController extends Controller {
       'Runtime Group not found for the specified environment'
     );
 
-    const token = await service.generateCertSignRequestToken(rg);
+    const token = await service.generateCertSignRequestToken(org, rg);
 
     return { token };
   }

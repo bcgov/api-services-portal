@@ -45,6 +45,22 @@ export const CsrResponse = Type.Object(
   }
 );
 
+/**
+ * The step-ca issuer's response to a one-time-use certificate-signing token
+ * request.
+ */
+export const CertSignTokenResponse = Type.Object(
+  {
+    token: Type.String({
+      description: 'One-time-use certificate-signing token issued by step-ca.',
+    }),
+  },
+  {
+    $id: 'CertSignTokenResponse',
+    additionalProperties: false,
+  }
+);
+
 export type TCsrRequest = Static<typeof CsrRequest>;
 
-export const runtimeGroupSchemas = [CsrRequest, CsrResponse];
+export const runtimeGroupSchemas = [CsrRequest, CsrResponse, CertSignTokenResponse];

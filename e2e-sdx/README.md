@@ -127,6 +127,7 @@ against anything shared.
 | `err-025` | The R0 policy schema rejects the implemented `useSni` provider parameter |
 | `err-029` | OAS per-operation security scopes aren't converted into runtime enforcement |
 | `err-032` | A provider `serviceResources` update reports `no-change` despite persisting (not reliably reproduced locally - see the file's header comment) |
+| `err-034` | `generate-one-time-use-token` calls step-ca directly from apsportal instead of through the provisioner's per-environment config |
 
 `err-031` (updating an existing integration connection crashes the
 provisioner) is **not yet implemented** as a live scenario: reproducing it

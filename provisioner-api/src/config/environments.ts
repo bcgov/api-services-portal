@@ -28,6 +28,12 @@ export type EnvironmentConfig = {
    * {@link SdxOperatorApiClient} for CSR generation.
    */
   operator_edge_url?: string;
+  /**
+   * Base URL of this environment's step-ca one-time-use token issuer (e.g.
+   * `https://step-ca.dev.example.gov.bc.ca`). Consumed by the
+   * {@link StepCaApiClient} for certificate-signing token generation.
+   */
+  step_ca_url?: string;
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
@@ -107,12 +113,14 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'client_id', name, path);
     optionalString(entry, 'gwa_api_url', name, path);
     optionalString(entry, 'operator_edge_url', name, path);
+    optionalString(entry, 'step_ca_url', name, path);
     result[name] = {
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
       kong_admin_url: entry.kong_admin_url as string,
       gwa_api_url: entry.gwa_api_url as string | undefined,
       operator_edge_url: entry.operator_edge_url as string | undefined,
+      step_ca_url: entry.step_ca_url as string | undefined,
     };
   }
   return result;

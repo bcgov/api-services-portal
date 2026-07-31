@@ -14,7 +14,7 @@ import { RuntimeGroup as KeystoneRuntimeGroup } from '../keystone/types';
 import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
-import { StepTokenService } from '../certificate-authority/step-token';
+import { ProvisionerService } from '../provisioner';
 import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('batch.runtime-group');
@@ -284,43 +284,29 @@ class RuntimeGroupService {
   };
 
   generateCertSignRequestToken = async (
+    org: string,
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
-    let sdxEndpoint: URL;
-    try {
-      sdxEndpoint = new URL(runtimeGroup.sdxEndpoint);
-    } catch (err) {
-      logger.error(
-        "Invalid SDX endpoint URL '%s' for runtime group '%s'",
-        runtimeGroup.sdxEndpoint,
-        runtimeGroup.name
-      );
-    }
-    assert.strictEqual(
-      sdxEndpoint !== undefined,
-      true,
-      'A valid SDX Endpoint URL is required for requesting a token'
+    // The provisioner resolves the runtime group's environment to the
+    // correct step-ca instance; each environment (dev/test/prod) has its
+    // own certificate authority, so this cannot be handled locally.
+    const provisionerService = new ProvisionerService(
+      process.env.PROVISIONER_URL!
     );
-
-    // The subject alternative names (SANs) for the certificate should include
-    // the runtime group's host and the SDX endpoint hostname (if different)
-    // to ensure the certificate is valid for both.
-    const san = [runtimeGroup.host];
-    if (sdxEndpoint.hostname !== runtimeGroup.host) {
-      san.push(sdxEndpoint.hostname);
-    }
-    const stepTokenService = new StepTokenService(process.env.STEP_TOKEN_URL);
 
     logger.debug(
-      "Requesting token for runtime group '%s' with SANs: %o",
+      "Requesting certificate-signing token for runtime group '%s' in environment '%s'",
       runtimeGroup.name,
-      san
+      runtimeGroup.environment
     );
 
-    return await stepTokenService.requestOneTimeUseToken({
-      subject: runtimeGroup.host,
-      san,
-    });
+    const { token } = await provisionerService.postCertSignToken(
+      org,
+      runtimeGroup.name,
+      runtimeGroup.environment
+    );
+
+    return token;
   };
 }
 

@@ -10,6 +10,7 @@ import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
 import { ActivityService } from './activity-service.js';
 import { SdxOperatorService } from './sdx-operator-service.js';
+import { StepCaService } from './step-ca-service.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 import { loadEnvironments } from '../config/environments.js';
 
@@ -21,6 +22,7 @@ export {
   CommonSsoService,
   PatternsEvaluatorService,
   SdxOperatorService,
+  StepCaService,
 };
 
 export interface Services {
@@ -34,6 +36,7 @@ export interface Services {
   patternsEvaluator: PatternsEvaluatorService;
   resourceDispatcher: ResourceDispatcher;
   sdxOperator: SdxOperatorService;
+  stepCa: StepCaService;
 }
 
 function child(
@@ -103,6 +106,11 @@ export function buildServices(
       new SdxMemberApiClient(clients.sdx, child(logger, 'sdxMember')),
       clients.sdxOperator,
       child(logger, 'sdxOperator')
+    ),
+    stepCa: new StepCaService(
+      new SdxMemberApiClient(clients.sdx, child(logger, 'sdxMember')),
+      clients.stepCa,
+      child(logger, 'stepCa')
     ),
   };
 }

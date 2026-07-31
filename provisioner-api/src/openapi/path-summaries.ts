@@ -42,4 +42,9 @@ export const pathSummaries: Record<
     description:
       "Requests a new key pair and CSR from the runtime group's edge server for the target environment.",
   },
+  '/runtime-groups/{name}/environments/{env}/csr-sign-token': {
+    summary: 'Runtime group certificate-signing token generation',
+    description:
+      "Requests a new one-time-use certificate-signing token from step-ca for the runtime group's target environment.",
+  },
 };
