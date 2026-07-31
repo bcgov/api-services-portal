@@ -43,6 +43,7 @@ import {
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import assert from 'assert';
 import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
+import { publishOpenApiSpec } from '../../../services/workflow/openapi-spec-publisher';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -310,6 +311,6 @@ export class CatalogController extends Controller {
   ): Promise<any> {
     const ctx = this.keystone.sudo();
     const entry = await GetCatalogByName(ctx, name, true);
-    return YAML.parse(entry.spec);
+    return publishOpenApiSpec(YAML.parse(entry.spec), entry);
   }
 }

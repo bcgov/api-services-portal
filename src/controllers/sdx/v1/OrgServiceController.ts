@@ -30,6 +30,7 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
+import { publishOpenApiSpec } from '../../../services/workflow/openapi-spec-publisher';
 import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ExpressRequest } from './types';
@@ -212,7 +213,7 @@ export class GatewayServiceController extends Controller {
       'spec',
       'No OpenAPI specification found for this service'
     );
-    return YAML.parse(entry.spec);
+    return publishOpenApiSpec(YAML.parse(entry.spec), entry);
   }
 
   /**
