@@ -63,7 +63,8 @@ namespace SDX {
                         oauth_token_url: String,
                         kong_admin_url: String,
                         gwa_api_url: String,
-                        operator_edge_url: String
+                        operator_edge_url: String,
+                        ca_token_url: String
                     }
                 }
             }
