@@ -184,10 +184,14 @@ describe('SDX Runtime Groups', () => {
             `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${newRuntimeGroupId}/environments/${payload.environment}/tokens`,
             'POST'
           ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(422)
-            expect(body.message).to.be.equal(
-              'A valid SDX Endpoint URL is required for requesting a token'
-            )
+            // ERR-034: token generation is now routed through the provisioner
+            // (StepCaService), which validates sdxEndpoint itself and reports
+            // failures as a generic misconfig_error/500, the same way every
+            // other provisioner-routed call (e.g. CSR generation) already
+            // does - not as the portal's own 422 validation error.
+            expect(status).to.be.equal(500)
+            expect(body.code).to.be.equal('misconfig_error')
+            expect(body.message).to.be.equal('[400] undefined (Bad request)')
           })
         }
       )
