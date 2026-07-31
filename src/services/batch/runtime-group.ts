@@ -179,9 +179,22 @@ class RuntimeGroupService {
       'Runtime group does not exist'
     );
 
-    return runtimeGroups.filter((rg) =>
+    const hostedByOrg = runtimeGroups.filter((rg) =>
       rg.hostedOrganizations.some((o: any) => o.name === org)
     );
+
+    // ERR-013: a runtime group existing by *name* is not the same as it
+    // hosting *this* organization - previously an empty filtered result
+    // here was returned as-is, so callers (e.g. registerSubsystemGateway)
+    // proceeded to create a namespace with no host domain instead of
+    // being rejected.
+    assert.strictEqual(
+      hostedByOrg.length > 0,
+      true,
+      `Runtime group '${name}' does not host organization '${org}'`
+    );
+
+    return hostedByOrg;
   };
 
   findOrgRuntimeGroupsByName = async (
