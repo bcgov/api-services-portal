@@ -46,12 +46,12 @@ export class GroupAccessService {
     // ["system-owner"]` (a valid *system-level* role, not a supported
     // *organization*-level one) 204'd without assigning anything. Fail
     // fast and name the offending role(s) instead.
+    const submittedRoles: string[] = (groupMembership.members ?? []).reduce(
+      (acc: string[], member: GroupMember) => acc.concat(member.roles ?? []),
+      []
+    );
     const unsupportedRoles = Array.from(
-      new Set(
-        (groupMembership.members ?? [])
-          .flatMap((member) => member.roles ?? [])
-          .filter((role) => !OrganizationRoles.includes(role))
-      )
+      new Set(submittedRoles.filter((role: string) => !OrganizationRoles.includes(role)))
     );
     assert.strictEqual(
       unsupportedRoles.length === 0,
