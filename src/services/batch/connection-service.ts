@@ -18,7 +18,7 @@ import { ConnectionRequestInput } from '../../controllers/sdx/v1/types';
 import { SubsystemService } from './subsystem';
 import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
-import { assertEqual } from '../../controllers/ioc/assert';
+import { assertEqual, assertIsDefined } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
 
 const logger = Logger('batch.connection');
@@ -86,6 +86,33 @@ class ConnectionService {
         true,
         'clientId',
         'Only client subsystems can create connection requests for their own organization'
+      );
+    }
+
+    // policyVersion is only meaningful (and required) when *creating* a
+    // connection request - consumer-open/provider-open/approve/deactivate
+    // all reuse this same upsert endpoint to patch a single field on an
+    // already-created connection, and never send it. ERR-020: the DevHub
+    // example and the public schema both treat it as optional, but the
+    // provisioner requires it once a connection is activated, and the
+    // resulting failure was a generic create-failed with no indication
+    // policyVersion was the missing field.
+    const existing = await getRecords(
+      context,
+      'ConnectionRequest',
+      undefined,
+      [],
+      {
+        query: '$clientId: String, $serviceId: String',
+        clause: '{ clientId: $clientId, serviceId: $serviceId }',
+        variables: { clientId: body.clientId, serviceId: body.serviceId },
+      }
+    );
+    if (existing.length === 0) {
+      assertIsDefined(
+        body.policyVersion,
+        'policyVersion',
+        'policyVersion is required when creating a new connection request'
       );
     }
 
