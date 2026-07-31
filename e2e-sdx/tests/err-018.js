@@ -4,63 +4,95 @@
  * ERR-018 - The subsystem route allow-list doesn't match service-pattern
  * routes.
  *
- * The subsystem namespace's `perm-route-paths` allow-list is a single
+ * The subsystem namespace's `perm-route-paths` allow-list was a single
  * value built by src/services/utils.ts's getRoutePathPrefix(clientId) =>
  * `/sdx/0/${clientId}`. provisioner-api's sdx-service.ts `eval()` (125-150)
  * generates actual Kong route paths straight from each OAS operation's
  * path (via convertPath), with no `/sdx/0/{clientId}` prefix at all - the
- * two are structurally incompatible. This is only not a live publication
+ * two were structurally incompatible. This is only not a live publication
  * blocker because DEV's `sdx-edge` currently runs with
- * `enforce-route-paths` off; it's still observable at `preview` time
- * (no `apply`, so this is safe to run repeatedly).
+ * `enforce-route-paths` off.
+ *
+ * Fix direction (decided by the team, not this scenario): relax the
+ * namespace allow-list rather than prefix every generated service route -
+ * the runtime group and its hosted services aren't known yet at
+ * subsystem-registration time, so there's no concrete operation-path set
+ * to scope the allow-list to in advance anyway. `registerSubsystemGateway`
+ * now registers `perm-route-paths: ['/']` instead of the synthetic
+ * clientId-scoped prefix.
+ *
+ * There's no public API to read back a namespace's `perm-route-paths`
+ * Keycloak group attribute, so this reads the local docker-compose
+ * `apsportal` container's own debug logs (the `[kc.group] [updateGroup]`
+ * line logged when the namespace group is created) for the actual
+ * registered value.
  */
 
-const { setupService } = require('../lib/steps/scenario-helpers');
+const { execFileSync } = require('child_process');
+const { setupSubsystem } = require('../lib/steps/scenario-helpers');
 const service = require('../lib/steps/service');
+
+function findRegisteredRoutePaths(gatewayId, sinceSeconds = 30) {
+  let logs = '';
+  try {
+    logs = execFileSync('docker', ['logs', 'apsportal', '--since', `${sinceSeconds}s`], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch {
+    return null;
+  }
+  const lines = logs
+    .split('\n')
+    .filter((l) => l.includes('[updateGroup]') && l.includes(`"name":"${gatewayId}"`));
+  const last = lines.pop();
+  if (!last) return null;
+  const match = last.match(/"perm-route-paths":(\[[^\]]*\])/);
+  return match ? JSON.parse(match[1]) : null;
+}
 
 function buildSteps(ctx) {
   return [
-    ...setupService(ctx),
+    ...setupSubsystem(ctx),
+    service.createService(ctx),
+    service.locateService(ctx),
     service.previewServicePattern(ctx),
     {
       id: 'assert.err-018',
-      title: "Compare previewed Kong route paths against the namespace's /sdx/0/{clientId} allow-list",
+      title: "Check the namespace's registered perm-route-paths against previewed service routes",
       fatal: false,
       run: async () => {
         const { state } = ctx;
-        const clientId = state.captured.clientId;
-        const allowedPrefix = `/sdx/0/${clientId}`;
+        const gatewayId = state.captured.subsystemGatewayId;
+        const routePaths = findRegisteredRoutePaths(gatewayId);
         const preview = state.captured.servicePatternPreview || {};
-        const routes = collectRoutePaths(preview);
+        const previewedPaths = collectRoutePaths(preview);
 
-        if (!routes.length) {
+        if (!routePaths) {
           console.log(
-            'UNEXPECTED [ERR-018]: no route paths found in the preview response - see ' +
-              'logs/service.pattern-preview.log to inspect its actual shape.'
+            'UNEXPECTED [ERR-018]: no "[updateGroup]" log line found for this namespace in the ' +
+              'last 30s of `docker logs apsportal` - check the container is running locally with ' +
+              'debug logging, or inspect the log directly.'
           );
           return;
         }
 
-        const mismatched = routes.filter(
-          (p) => p !== allowedPrefix && !p.startsWith(`${allowedPrefix}/`)
-        );
-        console.log(`Namespace allow-list prefix: ${allowedPrefix}`);
-        console.log(`Previewed route paths: ${JSON.stringify(routes)}`);
-        if (mismatched.length === routes.length) {
+        console.log(`Registered perm-route-paths: ${JSON.stringify(routePaths)}`);
+        console.log(`Previewed route paths: ${JSON.stringify(previewedPaths)}`);
+
+        if (routePaths.length === 1 && routePaths[0] === `/sdx/0/${state.captured.clientId}`) {
           console.log(
-            `CONFIRMED [ERR-018]: none of the previewed route paths are prefixed by ` +
-              `"${allowedPrefix}" - the namespace allow-list and generated service routes ` +
-              'use incompatible conventions.'
+            'CONFIRMED [ERR-018]: the namespace is still scoped to the synthetic ' +
+              `"/sdx/0/${state.captured.clientId}" prefix, which none of the previewed service ` +
+              'routes are published under.'
           );
-        } else if (mismatched.length === 0) {
+        } else if (routePaths.includes('/')) {
           console.log(
-            `RESOLVED [ERR-018]: every previewed route path is now prefixed by "${allowedPrefix}".`
+            'RESOLVED [ERR-018]: the namespace allow-list is now permissive ("/"), so it no ' +
+              "longer conflicts with whatever paths a service's OAS operations actually publish."
           );
         } else {
-          console.log(
-            `PARTIAL [ERR-018]: ${mismatched.length}/${routes.length} previewed route paths ` +
-              `are not prefixed by "${allowedPrefix}": ${JSON.stringify(mismatched)}`
-          );
+          console.log(`PARTIAL/UNEXPECTED [ERR-018]: registered perm-route-paths is ${JSON.stringify(routePaths)}.`);
         }
       },
     },
