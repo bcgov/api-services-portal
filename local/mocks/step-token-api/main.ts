@@ -63,6 +63,15 @@ Deno.serve({ port: 2020 }, async (req: Request) => {
     });
   }
 
+  if (url.pathname === '/tokens' && req.method === 'GET') {
+    const [count] = db.query('SELECT COUNT(*) FROM tokens')[0] as [number];
+
+    return new Response(JSON.stringify({ count }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   return new Response(JSON.stringify({ error: 'Not Found' }), {
     status: 404,
     headers: { 'Content-Type': 'application/json' },

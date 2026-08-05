@@ -14,7 +14,7 @@ import { RuntimeGroup as KeystoneRuntimeGroup } from '../keystone/types';
 import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
-import { StepTokenService } from '../certificate-authority/step-token';
+import { ProvisionerService } from '../provisioner';
 import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('batch.runtime-group');
@@ -284,6 +284,7 @@ class RuntimeGroupService {
   };
 
   generateCertSignRequestToken = async (
+    org: string,
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
     let sdxEndpoint: URL;
@@ -309,18 +310,29 @@ class RuntimeGroupService {
     if (sdxEndpoint.hostname !== runtimeGroup.host) {
       san.push(sdxEndpoint.hostname);
     }
-    const stepTokenService = new StepTokenService(process.env.STEP_TOKEN_URL);
+
+    // The provisioner resolves the target step-ca instance from the runtime
+    // group's environment, rather than the portal calling a single, global
+    // step-ca directly.
+    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
 
     logger.debug(
-      "Requesting token for runtime group '%s' with SANs: %o",
+      "Requesting token for runtime group '%s' (environment '%s') with SANs: %o",
       runtimeGroup.name,
+      runtimeGroup.environment,
       san
     );
 
-    return await stepTokenService.requestOneTimeUseToken({
-      subject: runtimeGroup.host,
-      san,
-    });
+    const { token } = await provisioner.postCertToken(
+      org,
+      runtimeGroup.name,
+      runtimeGroup.environment,
+      {
+        subject: runtimeGroup.host,
+        san,
+      }
+    );
+    return token;
   };
 }
 

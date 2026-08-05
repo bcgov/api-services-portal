@@ -47,4 +47,53 @@ export const CsrResponse = Type.Object(
 
 export type TCsrRequest = Static<typeof CsrRequest>;
 
-export const runtimeGroupSchemas = [CsrRequest, CsrResponse];
+/**
+ * Body for a certificate-signing token request against a runtime group's
+ * environment-specific CA (step-ca). Mirrors the CA's `/tokens` payload.
+ */
+export const CertTokenRequest = Type.Object(
+  {
+    subject: Type.String({
+      description: 'Certificate subject (the runtime group host).',
+      examples: ['my-rg.dev.servers.sdx'],
+    }),
+    san: Type.Array(Type.String(), {
+      description: 'Subject alternative names for the certificate.',
+      examples: [['my-rg.dev.servers.sdx']],
+    }),
+  },
+  {
+    $id: 'CertTokenRequest',
+    additionalProperties: false,
+    examples: [
+      {
+        subject: 'my-rg.dev.servers.sdx',
+        san: ['my-rg.dev.servers.sdx'],
+      },
+    ],
+  }
+);
+
+/**
+ * The CA's response to a certificate-signing token request.
+ */
+export const CertTokenResponse = Type.Object(
+  {
+    token: Type.String({
+      description: 'One-time-use certificate-signing token issued by the CA.',
+    }),
+  },
+  {
+    $id: 'CertTokenResponse',
+    additionalProperties: false,
+  }
+);
+
+export type TCertTokenRequest = Static<typeof CertTokenRequest>;
+
+export const runtimeGroupSchemas = [
+  CsrRequest,
+  CsrResponse,
+  CertTokenRequest,
+  CertTokenResponse,
+];

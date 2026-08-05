@@ -10,6 +10,7 @@ import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
 import { ActivityService } from './activity-service.js';
 import { SdxOperatorService } from './sdx-operator-service.js';
+import { CaTokenService } from './ca-token-service.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 import { loadEnvironments } from '../config/environments.js';
 
@@ -21,6 +22,7 @@ export {
   CommonSsoService,
   PatternsEvaluatorService,
   SdxOperatorService,
+  CaTokenService,
 };
 
 export interface Services {
@@ -34,6 +36,7 @@ export interface Services {
   patternsEvaluator: PatternsEvaluatorService;
   resourceDispatcher: ResourceDispatcher;
   sdxOperator: SdxOperatorService;
+  caToken: CaTokenService;
 }
 
 function child(
@@ -104,5 +107,6 @@ export function buildServices(
       clients.sdxOperator,
       child(logger, 'sdxOperator')
     ),
+    caToken: new CaTokenService(clients.caToken, child(logger, 'caToken')),
   };
 }
