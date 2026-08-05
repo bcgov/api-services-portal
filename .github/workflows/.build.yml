@@ -25,9 +25,9 @@ jobs:
 
       - name: Set DEPLOY_ID
         run: |
-          echo '::set-output name=DEPLOY_ID::${{ steps.meta.outputs.version }}'
-          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}'
-          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
+          echo "DEPLOY_ID=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "APP_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}" >> "$GITHUB_OUTPUT"
+          echo "APP_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}" >> "$GITHUB_OUTPUT"
         id: set-deploy-id
 
       - name: Get deploy ID
@@ -50,6 +50,7 @@ jobs:
           context: ${{ inputs.context }}
           file: ${{ inputs.context }}/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           build-args: |
             APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
