@@ -150,6 +150,10 @@ export class NamespaceService {
     assert.strictEqual(groupExists, false, 'Namespace already exists');
   }
 
+  async namespaceExists(ns: string): Promise<boolean> {
+    return this.groupService.hasGroup('ns', ns);
+  }
+
   async listAssignedNamespacesByOrg(org: string): Promise<OrgNamespace[]> {
     const groups = await this.groupService.getGroups('ns', false);
     assert.strictEqual(

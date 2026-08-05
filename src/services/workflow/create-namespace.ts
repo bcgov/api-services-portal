@@ -39,6 +39,14 @@ export interface CreateNamespaceArgs {
   routePaths?: string[];
   assignedScopes?: string[];
   includeSDXScopes?: boolean;
+  /**
+   * When true, an existing namespace with this exact name is treated as an
+   * in-progress/partially-completed registration to resume rather than a
+   * conflict to reject. Only safe when `name` is a stable, pre-allocated
+   * identifier (e.g. a Subsystem's own `namespace`) that can never
+   * legitimately collide with a different owner's namespace.
+   */
+  allowResume?: boolean;
 }
 
 export async function CreateNamespace(
@@ -67,7 +75,15 @@ export async function CreateNamespace(
     envCtx.issuerEnvConfig.clientId,
     envCtx.issuerEnvConfig.clientSecret
   );
-  await nsService.checkNamespaceAvailable(newNS);
+  const resuming = args.allowResume && (await nsService.namespaceExists(newNS));
+  if (!resuming) {
+    await nsService.checkNamespaceAvailable(newNS);
+  } else {
+    logger.info(
+      '[CreateNamespace] Namespace %s already exists, resuming registration',
+      newNS
+    );
+  }
 
   // This function gets all resources but also sets the accessToken in envCtx
   // which we need to create the resource set
@@ -98,7 +114,10 @@ export async function CreateNamespace(
     ownerManagedAccess: true,
   };
 
-  const rset = await resourceApi.createResourceSet(res);
+  const existingRset = resuming
+    ? await resourceApi.findResourceByName(newNS)
+    : undefined;
+  const rset = existingRset || (await resourceApi.createResourceSet(res));
 
   if (isUserBasedResourceOwners(envCtx) == false) {
     const permissionApi = new KeycloakPermissionTicketService(
@@ -111,7 +130,7 @@ export async function CreateNamespace(
       'GatewayConfig.Publish',
       'Access.Manage',
     ]) {
-      await permissionApi.createPermission(
+      await permissionApi.createOrUpdatePermission(
         rset.id,
         envCtx.subjectUuid,
         true,
@@ -128,9 +147,13 @@ export async function CreateNamespace(
     envCtx.issuerEnvConfig.clientSecret
   );
 
-  const { id, created } = await kcGroupService.createIfMissing('ns', newNS);
+  const { id } = await kcGroupService.createIfMissing('ns', newNS);
 
-  if (created) {
+  {
+    // Reconcile attributes unconditionally (not just on first create) so a
+    // resumed registration still lands on the fully-configured end state,
+    // even if an earlier attempt died after the group was created but
+    // before attributes were applied.
     const gwGroup = await kcGroupService.getGroupById(id);
     if (args.org) {
       gwGroup.attributes['org'] = [args.org];
