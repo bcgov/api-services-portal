@@ -39,6 +39,37 @@ export async function createUmaPolicy(
   return umaPolicy;
 }
 
+export async function createUmaPolicyIfMissing(
+  context: any,
+  envCtx: EnvironmentContext,
+  resourceId: string,
+  policy: Policy
+) {
+  logger.debug('[createUmaPolicyIfMissing] %s %j', resourceId, policy);
+
+  await enforceAccessToResource(envCtx, resourceId);
+
+  const policyApi = new UMAPolicyService(
+    envCtx.uma2.policy_endpoint,
+    envCtx.accessToken
+  );
+
+  const existing = (await policyApi.listPolicies({ resource: resourceId }))
+    .filter((p) => policy.clients?.every((c) => p.clients?.includes(c)))
+    .pop();
+
+  if (existing) {
+    logger.debug(
+      '[createUmaPolicyIfMissing] %s already has a policy for %j, skipping create',
+      resourceId,
+      policy.clients
+    );
+    return existing;
+  }
+
+  return createUmaPolicy(context, envCtx, resourceId, policy);
+}
+
 export async function updateUmaPolicy(
   context: any,
   envCtx: EnvironmentContext,

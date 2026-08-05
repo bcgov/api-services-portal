@@ -12,7 +12,10 @@ import { CreateNamespace, CreateNamespaceArgs } from './create-namespace';
 import assert from '../user-assert';
 import { EnvironmentContext, getEnvironmentContext } from './get-namespaces';
 import { lookupProductEnvironmentServicesBySlug } from '../keystone';
-import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
+import {
+  createUmaPolicyIfMissing,
+  updateUmaPolicy,
+} from './ns-uma-policy-access';
 import { SysGroupAccessService } from '../org-groups/sys-group-access';
 import { GroupAccessService } from '../org-groups';
 
@@ -296,6 +299,7 @@ async function createSDXNamespace(
     'GatewayPattern.Publish',
   ];
   args.includeSDXScopes = true;
+  args.allowResume = true;
 
   const resourceSet = await CreateNamespace(context, args);
 
@@ -308,7 +312,7 @@ async function createSDXNamespace(
     scopes: ['GatewayConfig.Publish', 'Namespace.Manage'],
   };
 
-  const umaResult = await createUmaPolicy(
+  const umaResult = await createUmaPolicyIfMissing(
     context,
     envCtx,
     resourceSet.id,
