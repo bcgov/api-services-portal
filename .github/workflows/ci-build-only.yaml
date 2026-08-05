@@ -10,7 +10,16 @@ env:
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
-  build:
+  build-provisioner:
+    uses: ./.github/workflows/.build.yml
+    permissions:
+      contents: read
+      packages: write # 🚀 Crucial permission needed to push to ghcr.io
+    with:
+      name: provisioner-svc
+      context: ./provisioner-api
+
+  build-others:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,4 +93,3 @@ jobs:
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
-
