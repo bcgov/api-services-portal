@@ -8,13 +8,15 @@ import { v4 as uuidv4 } from 'uuid'
 // The local stack runs two independent CA mocks so that "per-environment
 // routing" is something this test can actually observe from the outside:
 //   - environment 'dev' -> step-token-api.localtest.me:2020   (internally)
-//   - environment 'cyp' -> step-token-api-2.localtest.me:2020 (internally)
-// (see local/provisioner/environments.json - those internal aliases are what
-// the *provisioner* resolves and calls). This test itself runs on the host,
-// where both mocks resolve to 127.0.0.1 and are distinguished only by their
-// published host port (2020 vs 2022, see docker-compose.yml), not by
-// hostname. Each mock exposes `GET /tokens` returning how many tokens it has
-// issued so far.
+//   - environment 'cyp' -> step-token-api-2.localtest.me:2022 (internally)
+// (see local/provisioner/environments.json - those internal hostname:port
+// combinations are what the *provisioner* resolves and calls; each mock
+// listens on its own internal port so the two are genuinely distinct
+// endpoints on the docker network, not just distinguished by host port
+// mapping). This test itself runs on the host, where both mocks resolve to
+// 127.0.0.1 and are reached via their published host ports, which happen to
+// match the internal ones (2020 and 2022, see docker-compose.yml). Each mock
+// exposes `GET /tokens` returning how many tokens it has issued so far.
 //
 // Under the bug, the portal ignores the runtime group's environment and
 // always calls a single global CA, so a token request for the 'cyp'

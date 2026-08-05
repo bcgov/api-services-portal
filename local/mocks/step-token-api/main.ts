@@ -17,6 +17,12 @@ db.execute(`
 
 const secret = new TextEncoder().encode('secret-that-no-one-knows');
 
+// Listen port, passed as the first CLI arg so a second instance of this same
+// script (a second CA mock, for SP136's per-environment routing) can run on
+// its own internal port rather than sharing 2020 and being distinguished
+// only by the host port mapping.
+const port = Number(Deno.args[0]) || 2020;
+
 async function generateToken(payload: any): Promise<string> {
   const jwt = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -26,7 +32,7 @@ async function generateToken(payload: any): Promise<string> {
   return jwt;
 }
 
-Deno.serve({ port: 2020 }, async (req: Request) => {
+Deno.serve({ port }, async (req: Request) => {
   const url = new URL(req.url);
 
   if (url.pathname === '/tokens' && req.method === 'POST') {
