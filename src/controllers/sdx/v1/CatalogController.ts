@@ -43,6 +43,8 @@ import {
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import assert from 'assert';
 import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
+import { GroupAccessService } from '../../../services/org-groups';
+import { getGwaProductEnvironment } from '../../../services/workflow';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -94,9 +96,12 @@ export class CatalogController extends Controller {
 
   @Get('/organizations')
   @OperationId('organization-list')
-  public async listOrganizations(): Promise<any[]> {
-    const orgs = await getOrganizations(this.keystone.sudo());
-    return orgs
+  public async listOrganizations(
+    @Query('includeAccess') includeAccess: boolean = false
+  ): Promise<any[]> {
+    const ctx = this.keystone.sudo();
+    const orgs = await getOrganizations(ctx);
+    const result: any[] = orgs
       .map((o) => ({
         name: o.name,
         title: o.title,
@@ -104,8 +109,25 @@ export class CatalogController extends Controller {
         publicBodyId: o.publicBodyId,
         member: getOrganizationMemberDetails(o.tags),
       }))
-      .filter((o) => o.member !== undefined)
-      .map((o) => removeEmpty(o));
+      .filter((o) => o.member !== undefined);
+
+    if (includeAccess) {
+      const prodEnv = await getGwaProductEnvironment(ctx, false);
+      const groupAccessService = new GroupAccessService(prodEnv.uma2);
+      await groupAccessService.login(
+        prodEnv.issuerEnvConfig.clientId!,
+        prodEnv.issuerEnvConfig.clientSecret!
+      );
+
+      for (const org of result) {
+        const membership = await groupAccessService.getGroupMembership(
+          org.name
+        );
+        org.access = membership?.members ?? [];
+      }
+    }
+
+    return result.map((o) => removeEmpty(o));
   }
 
   /**
