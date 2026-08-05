@@ -13,7 +13,6 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     env:
-      GIT_CLONE_PROTECTION_ACTIVE: false
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v7
