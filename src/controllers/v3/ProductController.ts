@@ -79,14 +79,17 @@ export class ProductController extends Controller {
    * > `Required Scope:` Namespace.Manage
    *
    * @summary Get Products
-   * @param ns
+   * @param gatewayId
    * @param request
    * @returns
    */
   @Get('/products')
   @OperationId('get-products')
   @Security('jwt', ['Namespace.Manage'])
-  public async get(@Request() request: any): Promise<Product[]> {
+  public async get(
+    @Path() gatewayId: string,
+    @Request() request: any
+  ): Promise<Product[]> {
     const ctx = this.keystone.createContext(request);
     const records: KSProduct[] = await getRecords(
       ctx,
