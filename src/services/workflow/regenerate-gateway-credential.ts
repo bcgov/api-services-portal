@@ -127,7 +127,9 @@ export async function regenerateGatewayCredential(
         },
       });
 
-      await kcClientService.uploadCertificate(client.id, publicKey);
+      // Match update-credential / issue paths: set jwt.credential.public.key
+      // via attributes rather than the multipart upload-certificate endpoint.
+      await kcClientService.updateCertificate(client, publicKey);
       newCredential.clientPrivateKey = privateKey;
       newCredential.clientPublicKey = publicKey;
     } else {
