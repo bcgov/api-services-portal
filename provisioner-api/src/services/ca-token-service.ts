@@ -32,8 +32,11 @@ export class CaTokenService {
       'CaTokenService.generateCertToken'
     );
 
+    // The certificate is being minted for a runtime group the org owns
+    // (unlike the CSR flow, which resolves against hosted/available runtime
+    // groups), so look it up with the 'owned' filter.
     const rgList = await this.sdxMember.listRuntimeGroups(org, {
-      filter: 'available',
+      filter: 'owned',
     });
     const rg = rgList.find(
       (rg) => rg.name === runtimeGroup && rg.environment === environment
