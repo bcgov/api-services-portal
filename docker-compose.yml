@@ -504,6 +504,7 @@ services:
       - --allow-write
       - --allow-read
       - /app/main.ts
+      - '2020'
     # Needed when running portal outside of docker compose
     ports:
       - 2020:2020
@@ -513,6 +514,34 @@ services:
       aps-net:
         aliases:
           - step-token-api.localtest.me
+
+  # Second, independent instance of the same CA token mock so that
+  # per-environment routing through the provisioner (SP136) is observable
+  # locally: each environment's `ca_token_url` can point at a distinct CA.
+  # Runs on its own internal port (2022) rather than sharing 2020 with the
+  # first instance, since containers reached from inside the docker network
+  # (the provisioner) use the container's internal port, not the host
+  # port mapping.
+  mocks-step-token-api-2:
+    image: denoland/deno:2.7.12
+    container_name: mocks-step-token-api-2
+    command:
+      - deno
+      - run
+      - --allow-net=:2022,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+      - '2022'
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2022:2022
+    volumes:
+      - ./local/mocks/step-token-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - step-token-api-2.localtest.me
 
   mocks-sdx-edge-api:
     image: denoland/deno:2.7.12
