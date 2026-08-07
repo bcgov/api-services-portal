@@ -19,6 +19,7 @@ import {
   issueGatewayCredential,
   regenerateGatewayCredential,
 } from '../../services/workflow';
+import { removeEmpty } from '../../batch/feed-worker';
 import {
   GatewayConsumerCredential,
   IssueGatewayConsumerRequest,
@@ -67,7 +68,7 @@ export class GatewayConsumersController extends Controller {
     });
 
     this.setStatus(201);
-    return credential;
+    return removeEmpty(credential) as GatewayConsumerCredential;
   }
 
   /**
@@ -104,6 +105,11 @@ export class GatewayConsumersController extends Controller {
     );
 
     const ctx = this.keystone.createContext(request, true);
-    return regenerateGatewayCredential(ctx, gatewayId, clientId);
+    const credential = await regenerateGatewayCredential(
+      ctx,
+      gatewayId,
+      clientId
+    );
+    return removeEmpty(credential) as GatewayConsumerCredential;
   }
 }
