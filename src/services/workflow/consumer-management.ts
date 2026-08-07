@@ -413,7 +413,8 @@ export async function getConsumerProdEnvAccess(
   }
 
   // request?: AccessRequest;
-  // lookup request based on ServiceAccess record
+  // lookup request based on ServiceAccess record.
+  // Self-issued credentials create ServiceAccess without an AccessRequest.
   if (access.serviceAccessId) {
     access.request = await getAccessRequestByNamespaceServiceAccess(
       context,
@@ -421,21 +422,23 @@ export async function getConsumerProdEnvAccess(
       access.serviceAccessId
     );
 
-    const activity = await getActivityByRefId(
-      context,
-      `accessRequest:${access.request.id}`
-    );
-    logger.debug('Activity %j', activity);
+    if (access.request) {
+      const activity = await getActivityByRefId(
+        context,
+        `accessRequest:${access.request.id}`
+      );
+      logger.debug('Activity %j', activity);
 
-    const match: Activity[] = activity.filter(
-      (a: Activity) => a.action === 'rejected' || a.action === 'approved'
-    );
-    if (match.length > 0) {
-      const context = JSON.parse(match[0].context);
-      access.requestApprover = {
-        id: '',
-        name: context.params.actor,
-      };
+      const match: Activity[] = activity.filter(
+        (a: Activity) => a.action === 'rejected' || a.action === 'approved'
+      );
+      if (match.length > 0) {
+        const context = JSON.parse(match[0].context);
+        access.requestApprover = {
+          id: '',
+          name: context.params.actor,
+        };
+      }
     }
   }
 
