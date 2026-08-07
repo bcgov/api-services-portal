@@ -1,4 +1,3 @@
-import { assertAndRaiseValidateError } from '../../../services/gateway-patterns/evaluator';
 import {
   Controller,
   Example,
@@ -45,6 +44,7 @@ import assert from 'assert';
 import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
 import { GroupAccessService } from '../../../services/org-groups';
 import { getGwaProductEnvironment } from '../../../services/workflow';
+import { GroupMember } from '../../../services/org-groups/types';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -96,12 +96,9 @@ export class CatalogController extends Controller {
 
   @Get('/organizations')
   @OperationId('organization-list')
-  public async listOrganizations(
-    @Query('includeAccess') includeAccess: boolean = false
-  ): Promise<any[]> {
-    const ctx = this.keystone.sudo();
-    const orgs = await getOrganizations(ctx);
-    const result: any[] = orgs
+  public async listOrganizations(): Promise<any[]> {
+    const orgs = await getOrganizations(this.keystone.sudo());
+    return orgs
       .map((o) => ({
         name: o.name,
         title: o.title,
@@ -109,7 +106,34 @@ export class CatalogController extends Controller {
         publicBodyId: o.publicBodyId,
         member: getOrganizationMemberDetails(o.tags),
       }))
-      .filter((o) => o.member !== undefined);
+      .filter((o) => o.member !== undefined)
+      .map((o) => removeEmpty(o));
+  }
+
+  /**
+   * Retrieve details for a specific organization in the catalog by name.
+   *
+   * @summary Retrieve details for an organization
+   * @param name - Organization name
+   */
+  @Get('/organizations/{name}')
+  @OperationId('organization-get')
+  public async getOrganization(
+    @Path('name') name: string,
+    @Query('includeAccess') includeAccess: boolean = false
+  ): Promise<any> {
+    const ctx = this.keystone.sudo();
+    const orgs = await getOrganizations(ctx);
+    const match = orgs.find((o) => o.name === name);
+    assert.strictEqual(typeof match === 'undefined', false, 'Organization not found');
+
+    const result: any = {
+      name: match!.name,
+      title: match!.title,
+      description: match!.description,
+      publicBodyId: match!.publicBodyId,
+      member: getOrganizationMemberDetails(match!.tags),
+    };
 
     if (includeAccess) {
       const prodEnv = await getGwaProductEnvironment(ctx, false);
@@ -119,15 +143,18 @@ export class CatalogController extends Controller {
         prodEnv.issuerEnvConfig.clientSecret!
       );
 
-      for (const org of result) {
-        const membership = await groupAccessService.getGroupMembership(
-          org.name
-        );
-        org.access = membership?.members ?? [];
-      }
+      const membership = await groupAccessService.getGroupMembership(
+        result.name
+      );
+      result.access = membership
+        ? (removeKeys(membership.members as GroupMember[], [
+            'id',
+            'username',
+          ]) as GroupMember[])
+        : [];
     }
 
-    return result.map((o) => removeEmpty(o));
+    return removeEmpty(result);
   }
 
   /**

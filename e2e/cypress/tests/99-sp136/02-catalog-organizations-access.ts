@@ -7,38 +7,33 @@ describe('SP136 - Catalog organizations includeAccess', () => {
     })
   })
 
-  it('GET /catalog/organizations - does not include access by default', () => {
-    const { org } = workingData
-
-    cy.callAPI('ds/api/sdx/v1/catalog/organizations', 'GET').then(
-      ({ apiRes: { status, body } }: any) => {
-        expect(status).to.be.equal(200)
-
-        const entry = body.find((o: any) => o.name === org.name)
-        expect(entry, 'expected the created organization to be in the catalog')
-          .to.exist
-        expect(entry).to.not.have.property('access')
-      }
-    )
-  })
-
-  it('GET /catalog/organizations?includeAccess=true - includes the RBAC roles granted on the organization', () => {
+  it('GET /catalog/organizations/{name} - does not include access by default', () => {
     const { org } = workingData
 
     cy.callAPI(
-      'ds/api/sdx/v1/catalog/organizations?includeAccess=true',
+      `ds/api/sdx/v1/catalog/organizations/${org.name}`,
       'GET'
     ).then(({ apiRes: { status, body } }: any) => {
       expect(status).to.be.equal(200)
+      expect(body.name).to.be.equal(org.name)
+      expect(body).to.not.have.property('access')
+    })
+  })
 
-      const entry = body.find((o: any) => o.name === org.name)
-      expect(entry, 'expected the created organization to be in the catalog')
-        .to.exist
-      expect(entry.access).to.be.an('array')
+  it('GET /catalog/organizations/{name}?includeAccess=true - includes the RBAC roles granted on the organization', () => {
+    const { org } = workingData
+
+    cy.callAPI(
+      `ds/api/sdx/v1/catalog/organizations/${org.name}?includeAccess=true`,
+      'GET'
+    ).then(({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+      expect(body.name).to.be.equal(org.name)
+      expect(body.access).to.be.an('array')
 
       // buildOrgGatewayDatasetAndProduct() grants janis@testmail.com
       // organization-admin + system-admin at the org level as a side effect
-      const creator = entry.access.find(
+      const creator = body.access.find(
         (m: any) =>
           m.member.email === 'janis@testmail.com' &&
           ['organization-admin', 'system-admin'].every((role) =>
