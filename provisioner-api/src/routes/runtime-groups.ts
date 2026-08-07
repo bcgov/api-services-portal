@@ -12,7 +12,7 @@ const RUNTIME_GROUP_DESC =
 const ENVIRONMENT_DESC =
   'Target environment (for example `dev`, `test`, or `prod`) whose edge server the request is routed to.';
 
-const security = [{ jwt: [] }];
+const security = [] as any[];
 
 export const registerRuntimeGroupsRoutes: FastifyPluginAsyncTypebox = async (
   app
