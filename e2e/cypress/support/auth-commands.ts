@@ -345,8 +345,9 @@ Cypress.Commands.add('logout', () => {
 
 Cypress.Commands.add('keycloakLogout', () => {
   cy.log('< Logging out')
-  cy.get('[data-testid=options-toggle]').click()
-  cy.contains('Sign out').click()
+  // Success/error toasts often cover the kebab menu after group membership changes
+  cy.get('[data-testid=options-toggle]').click({ force: true })
+  cy.contains('Sign out').click({ force: true })
   cy.log('> Logging out')
 })
 
