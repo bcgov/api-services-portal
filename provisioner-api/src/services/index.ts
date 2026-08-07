@@ -107,6 +107,10 @@ export function buildServices(
       clients.sdxOperator,
       child(logger, 'sdxOperator')
     ),
-    caToken: new CaTokenService(clients.caToken, child(logger, 'caToken')),
+    caToken: new CaTokenService(
+      new SdxMemberApiClient(clients.sdx, child(logger, 'sdxMember')),
+      clients.caToken,
+      child(logger, 'caToken')
+    ),
   };
 }

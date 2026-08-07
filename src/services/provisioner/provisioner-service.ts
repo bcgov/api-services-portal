@@ -13,11 +13,6 @@ type CSRRequest = {
   requester_email: string;
 };
 
-type CertTokenRequest = {
-  subject: string;
-  san: string[];
-};
-
 type CertTokenResponse = {
   token: string;
 };
@@ -101,8 +96,7 @@ export class ProvisionerService {
   public async postCertToken(
     org: string,
     runtimeGroup: string,
-    environment: string,
-    certTokenRequest: CertTokenRequest
+    environment: string
   ): Promise<CertTokenResponse> {
     logger.debug(
       'Calling %s',
@@ -113,10 +107,6 @@ export class ProvisionerService {
       `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/cert-token`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(certTokenRequest),
       }
     )
       .then(checkStatus)

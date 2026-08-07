@@ -4,7 +4,6 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   CsrRequest,
   CsrResponse,
-  CertTokenRequest,
   CertTokenResponse,
 } from '../schemas/runtime-groups.js';
 
@@ -66,7 +65,9 @@ export const registerRuntimeGroupsRoutes: FastifyPluginAsyncTypebox = async (
         description:
           'Requests a one-time-use certificate-signing token from the ' +
           "target environment's CA (step-ca), resolved from that " +
-          'environment configuration rather than a single, global CA.',
+          'environment configuration rather than a single, global CA. ' +
+          'The certificate subject and SANs are derived from the runtime ' +
+          'group named in the path.',
         security,
         params: Type.Object({
           org: Type.String({
@@ -82,7 +83,6 @@ export const registerRuntimeGroupsRoutes: FastifyPluginAsyncTypebox = async (
             examples: ['dev'],
           }),
         }),
-        body: Type.Ref(CertTokenRequest),
         response: { 200: Type.Ref(CertTokenResponse) },
       },
     },
@@ -91,7 +91,6 @@ export const registerRuntimeGroupsRoutes: FastifyPluginAsyncTypebox = async (
         org: req.params.org,
         name: req.params.name,
         environment: req.params.env,
-        request: req.body,
       })
   );
 };

@@ -287,50 +287,23 @@ class RuntimeGroupService {
     org: string,
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
-    let sdxEndpoint: URL;
-    try {
-      sdxEndpoint = new URL(runtimeGroup.sdxEndpoint);
-    } catch (err) {
-      logger.error(
-        "Invalid SDX endpoint URL '%s' for runtime group '%s'",
-        runtimeGroup.sdxEndpoint,
-        runtimeGroup.name
-      );
-    }
-    assert.strictEqual(
-      sdxEndpoint !== undefined,
-      true,
-      'A valid SDX Endpoint URL is required for requesting a token'
-    );
-
-    // The subject alternative names (SANs) for the certificate should include
-    // the runtime group's host and the SDX endpoint hostname (if different)
-    // to ensure the certificate is valid for both.
-    const san = [runtimeGroup.host];
-    if (sdxEndpoint.hostname !== runtimeGroup.host) {
-      san.push(sdxEndpoint.hostname);
-    }
-
     // The provisioner resolves the target step-ca instance from the runtime
     // group's environment, rather than the portal calling a single, global
-    // step-ca directly.
+    // step-ca directly. It also derives the certificate subject and SANs
+    // from the runtime group named in the path, so they don't need to be
+    // passed here.
     const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
 
     logger.debug(
-      "Requesting token for runtime group '%s' (environment '%s') with SANs: %o",
+      "Requesting token for runtime group '%s' (environment '%s')",
       runtimeGroup.name,
-      runtimeGroup.environment,
-      san
+      runtimeGroup.environment
     );
 
     const { token } = await provisioner.postCertToken(
       org,
       runtimeGroup.name,
-      runtimeGroup.environment,
-      {
-        subject: runtimeGroup.host,
-        san,
-      }
+      runtimeGroup.environment
     );
     return token;
   };

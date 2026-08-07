@@ -1,10 +1,7 @@
 import type { Services } from '../services/index.js';
 import type { CsrResponse } from '../clients/sdx-operator/index.js';
 import type { CaTokenResponse } from '../clients/ca-token/index.js';
-import type {
-  TCsrRequest,
-  TCertTokenRequest,
-} from '../schemas/runtime-groups.js';
+import type { TCsrRequest } from '../schemas/runtime-groups.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 
 export interface CreateCsrInput {
@@ -18,7 +15,6 @@ export interface GenerateCertTokenInput {
   org: string;
   name: string;
   environment: string;
-  request: TCertTokenRequest;
 }
 
 export class RuntimeGroupsController {
@@ -44,8 +40,9 @@ export class RuntimeGroupsController {
       'RuntimeGroupsController.generateCertToken'
     );
     return await this.services.caToken.generateCertToken(
-      input.environment,
-      input.request
+      input.org,
+      input.name,
+      input.environment
     );
   }
 }
