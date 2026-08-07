@@ -34,7 +34,7 @@ export class CaTokenApiClient {
     input: CaTokenRequest
   ): Promise<CaTokenResponse> {
     this.logger?.debug({ environment, subject: input.subject }, 'Requesting CA token');
-    return this.request(environment, 'POST', 'tokens', input);
+    return this.request(environment, 'POST', 'tokens', isCaTokenResponse, input);
   }
 
   // --- transport ----------------------------------------------------------
@@ -47,6 +47,7 @@ export class CaTokenApiClient {
     environment: string,
     method: string,
     path: string,
+    isValid: (value: unknown) => value is T,
     body?: unknown
   ): Promise<T> {
     const baseUrl = this.environments[environment]?.ca_token_url;
@@ -100,8 +101,27 @@ export class CaTokenApiClient {
       );
     }
 
-    return parseJson<T>(res);
+    const result = await parseJson<unknown>(res);
+    if (!isValid(result)) {
+      this.logger?.error(
+        { environment, method, url, received: result },
+        'CA token endpoint returned an unexpected response shape'
+      );
+      throw withDetails(
+        new BadGatewayError('CA token endpoint returned an unexpected response shape'),
+        { environment, method, url, received: result }
+      );
+    }
+    return result;
   }
+}
+
+function isCaTokenResponse(value: unknown): value is CaTokenResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { token?: unknown }).token === 'string'
+  );
 }
 
 async function safeText(res: Response): Promise<string> {
