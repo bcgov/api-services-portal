@@ -359,6 +359,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                     }
                     application {
                       name
+                      description
                       owner {
                         name
                         provider
