@@ -52,6 +52,7 @@ export {
 
 export {
   addServiceAccess,
+  countServiceAccessesByApplication,
   deleteServiceAccess,
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,

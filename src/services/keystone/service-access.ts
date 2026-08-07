@@ -30,8 +30,10 @@ export async function lookupCredentialReferenceByServiceAccess(
                             }
                         }
                         application {
+                          id
                           name
                           owner {
+                            id
                             name
                             username
                             email
@@ -534,4 +536,24 @@ export async function deleteServiceAccess(
     variables: { serviceAccessId },
   });
   logger.debug('[deleteServiceAccess] RESULT %j', result);
+}
+
+export async function countServiceAccessesByApplication(
+  context: any,
+  applicationId: string
+): Promise<number> {
+  const result = await context.executeGraphQL({
+    query: `query CountServiceAccessesByApplication($applicationId: ID!) {
+                    allServiceAccesses(where: { application: { id: $applicationId } }) {
+                        id
+                    }
+                }`,
+    variables: { applicationId },
+  });
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  return result.data.allServiceAccesses.length;
 }

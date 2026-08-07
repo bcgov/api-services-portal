@@ -57,7 +57,10 @@ import {
   lookupServiceAccessesByConsumer,
   lookupEnvironmentAndIssuerById,
   getConsumerLabels,
+  countServiceAccessesByApplication,
+  deleteRecord,
   deleteServiceAccess,
+  lookupCredentialReferenceByServiceAccess,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { KongConsumerService } from '../kong';
@@ -765,7 +768,32 @@ export async function revokeAllConsumerAccess(
   );
 
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
+  const serviceAccess = await lookupCredentialReferenceByServiceAccess(
+    context,
+    serviceAccessId
+  );
+  const application = serviceAccess.application;
+
   await deleteServiceAccess(context, serviceAccessId);
+
+  // Self-issued Applications are ownerless. Delete them when this was the
+  // last ServiceAccess so they are not left orphaned. Keep apps that are
+  // developer-owned or still reused across other environments.
+  if (application?.id && !application.owner) {
+    const remaining = await countServiceAccessesByApplication(
+      context,
+      application.id
+    );
+    if (remaining === 0) {
+      logger.info(
+        '[revokeAllConsumerAccess] Deleting ownerless Application %s',
+        application.id
+      );
+      await deleteRecord(context, 'Application', { id: application.id }, [
+        'id',
+      ]);
+    }
+  }
 
   await new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
     true,
