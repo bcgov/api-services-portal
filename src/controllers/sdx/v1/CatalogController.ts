@@ -8,7 +8,6 @@ import {
   Request,
   Response,
   Route,
-  Security,
   SuccessResponse,
   Tags,
 } from 'tsoa';
@@ -336,12 +335,11 @@ export class CatalogController extends Controller {
    */
   @Get('/services/{name}')
   @OperationId('getOASService')
-  @Security('jwt', [])
   public async getOASService(
     @Path('name') name: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.sudo();
     return await GetCatalogByName(ctx, name, false);
   }
 

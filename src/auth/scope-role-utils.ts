@@ -23,7 +23,10 @@ export function scopesToRoles(
     _roles.push('connection-manager');
   }
   if (scopes.includes('System.Manage')) {
-    _roles.push('system-owner');
+    _roles.push('system-admin');
+  }
+  if (scopes.includes('Subsystem.Manage')) {
+    _roles.push('subsystem-manager');
   }
   if (scopes.includes('GatewayConfig.Publish')) {
     _roles.push('config-publisher');

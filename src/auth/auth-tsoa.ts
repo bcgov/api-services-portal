@@ -48,11 +48,7 @@ export function expressAuthentication(
   return new Promise(async (resolve: any, reject: any) => {
     let sdxGatewayId: string;
 
-    if (
-      scopes?.find(
-        (s) => s === 'GatewayPattern.Publish' || s === 'Connection.Manage'
-      )
-    ) {
+    if (scopes?.find((s) => s === 'GatewayPattern.Publish')) {
       const gatewayId = await authMiddle.lookupGatewayId(
         request.params.org,
         request.params.pattern,
@@ -67,9 +63,43 @@ export function expressAuthentication(
           })
         );
       }
+    } else if (scopes?.find((s) => s === 'Connection.Manage')) {
+      // Approval (and any other serviceId-bearing call) resolves to that
+      // service's gateway. Listing has no serviceId to resolve from and is
+      // handled below via a discovery-based check instead.
+      if (request.body?.serviceId) {
+        const gatewayId = await authMiddle.lookupGatewayId(
+          request.params.org,
+          request.params.pattern,
+          request.body
+        );
+        if (gatewayId) {
+          sdxGatewayId = gatewayId;
+        } else {
+          return reject(
+            new ForbiddenError('permission_denied', {
+              message: `Unable to find gateway detail for service '${request.body.serviceId}'`,
+            })
+          );
+        }
+      }
+    } else if (scopes?.find((s) => s === 'Subsystem.Manage')) {
+      // oas-services get/spec/delete resolve to that service's own gateway (`name`);
+      // oas-services create resolves to the target subsystem's gateway (`subsystem`);
+      // connection create resolves via `body.serviceId`; connection delete resolves
+      // via `id`, looked up to that connection's own serviceId. List (either
+      // endpoint) has no identifying resource and is handled below via a
+      // discovery-based check instead.
+      sdxGatewayId = await authMiddle.lookupSubsystemManageGatewayId(
+        request.params.org,
+        request.params.name,
+        request.query?.subsystem,
+        request.body?.serviceId,
+        request.params.id
+      );
     }
 
-    verifyJWT(request, null, (err: any) => {
+    verifyJWT(request, null, async (err: any) => {
       if (err) {
         logger.debug('ERROR Verifying JWT ' + err);
         return reject(err);
@@ -79,6 +109,29 @@ export function expressAuthentication(
         if (scopes.length == 0) {
           return resolve(request.oauth_user);
         }
+
+        const discoveryScope = scopes.find(
+          (s) => s === 'Subsystem.Manage' || s === 'Connection.Manage'
+        );
+        if (discoveryScope && !sdxGatewayId) {
+          // List has no single resource to check against - "authorized" here
+          // means "holds this scope on at least one gateway." The controller
+          // independently re-discovers and filters by that same set to
+          // decide what to actually return.
+          const namespaces = await authMiddle.getPermittedNamespacesForScope(
+            request,
+            [discoveryScope]
+          );
+          if (namespaces.length === 0) {
+            return reject(
+              new ForbiddenError('permission_denied', {
+                message: `Missing required scope: ${discoveryScope}`,
+              })
+            );
+          }
+          return resolve({ ...request.oauth_user, scope: discoveryScope });
+        }
+
         let resource: string;
         if (sdxGatewayId) {
           resource = sdxGatewayId;

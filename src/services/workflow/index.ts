@@ -47,6 +47,7 @@ export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 export {
   getGwaProductEnvironment,
   getMyNamespaces,
+  getPermittedNamespaceNames,
   injectResSvrAccessTokenToContext,
   getResourceServerContext,
   getEnvironmentContext,

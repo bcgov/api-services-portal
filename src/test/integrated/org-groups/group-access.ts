@@ -49,7 +49,7 @@ import { removeKeys } from '../../../batch/feed-worker';
       members: [
         {
           member: { email: 'janis@testmail.com' },
-          roles: ['organization-admin', 'system-owner'],
+          roles: ['organization-admin', 'subsystem-owner'],
         },
       ],
     };

@@ -24,7 +24,7 @@ const logger = Logger('org-groups');
 enum RoleGroups {
   'organization-admin',
   'system-admin',
-  'system-owner',
+  'subsystem-owner',
   'tech-lead',
   'access-manager',
 }
@@ -570,6 +570,52 @@ export class OrgGroupService {
         user.attributes?.display_name?.[0] ||
         user.firstName + ' ' + user.lastName,
     }));
+  }
+
+  /**
+   * Resolves each of the given member references (by email or id) against Keycloak,
+   * without throwing on an individual lookup failure - used to validate a full member
+   * list up front, before any group/policy/permission/membership mutations start.
+   */
+  public async resolveMembers(
+    members: UserReference[],
+    validIdentityProviders: string[]
+  ): Promise<{ resolved: UserReference[]; unresolved: UserReference[] }> {
+    const resolved: UserReference[] = [];
+    const unresolved: UserReference[] = [];
+
+    await Promise.all(
+      members.map(async (u) => {
+        try {
+          if (u.email) {
+            const id = await this.userKeycloakService.lookupUserIdByEmail(
+              u.email,
+              false,
+              validIdentityProviders
+            );
+            if (id) {
+              resolved.push({ email: u.email, id });
+              return;
+            }
+          } else if (u.id) {
+            const user = await this.userKeycloakService.lookupUserById(u.id);
+            if (user) {
+              resolved.push({ email: user.email, id: u.id });
+              return;
+            }
+          }
+        } catch (err) {
+          logger.debug(
+            '[resolveMembers] failed to resolve %j: %s',
+            u,
+            err.message
+          );
+        }
+        unresolved.push(u);
+      })
+    );
+
+    return { resolved, unresolved };
   }
 
   public async syncMembers(
