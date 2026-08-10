@@ -89,6 +89,7 @@ export async function CreateNamespace(
   if (args.includeSDXScopes) {
     scopes.push('Connection.Manage');
     scopes.push('GatewayPattern.Publish');
+    scopes.push('Subsystem.Manage');
   }
   const res = <ResourceSetInput>{
     name: newNS,

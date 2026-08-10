@@ -24,7 +24,7 @@ const logger = Logger('org-groups');
 enum RoleGroups {
   'organization-admin',
   'system-admin',
-  'system-owner',
+  'subsystem-owner',
   'tech-lead',
   'access-manager',
 }

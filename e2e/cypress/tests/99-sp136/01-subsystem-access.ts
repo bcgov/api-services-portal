@@ -40,7 +40,7 @@ describe('SP136 - Subsystem RBAC access', () => {
           // registering the gateway grants the acting user all three
           // subsystem roles as a side effect - confirm that is visible here
           const creator = body.members.find((m: any) =>
-            ['system-owner', 'tech-lead', 'access-manager'].every((role) =>
+            ['subsystem-owner', 'tech-lead', 'access-manager'].every((role) =>
               m.roles.includes(role)
             )
           )

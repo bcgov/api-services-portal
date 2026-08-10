@@ -200,17 +200,32 @@ describe('Organization', () => {
           },
         ],
       },
-      'system-owner': {
-        label: 'System Owner',
-        permissions: [],
+      'subsystem-owner': {
+        label: 'Subsystem Owner',
+        permissions: [
+          {
+            resourceType: 'namespace',
+            scopes: ['Namespace.Manage', 'Namespace.View', 'Subsystem.Manage', 'GatewayPattern.Publish'],
+          },
+        ],
       },
       'tech-lead': {
         label: 'System Technical Lead',
-        permissions: [],
+        permissions: [
+          {
+            resourceType: 'namespace',
+            scopes: ['Namespace.View', 'Subsystem.Manage', 'GatewayPattern.Publish'],
+          },
+        ],
       },
       'access-manager': {
         label: 'Access Manager',
-        permissions: [],
+        permissions: [
+          {
+            resourceType: 'namespace',
+            scopes: ['Namespace.View', 'Connection.Manage'],
+          },
+        ],
       },
     }
 

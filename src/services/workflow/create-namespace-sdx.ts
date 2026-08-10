@@ -110,11 +110,13 @@ export async function CreateNamespaceForRuntimeGroup(
     args.runtimeGroupName
   );
 
+  const rg = runtimeGroups[0];
+
   const envCtx = await getEnvCtx(context);
 
   // Create the namespace with SDX edge configuration
   const resourceSet = await createSDXNamespace(context, envCtx, {
-    name: runtimeGroups[0].namespace,
+    name: rg.namespace,
     org: args.organization,
     orgUnit: undefined,
     orgEnabled: false,
@@ -134,6 +136,18 @@ export async function CreateNamespaceForRuntimeGroup(
     '[CreateNamespaceForRuntimeGroup] Created Namespace %s for Runtime Group %s',
     resourceSet.name,
     args.runtimeGroupName
+  );
+
+  // Setup the roles for the runtime group and assign this user
+  // the 'tech-lead' and 'subsystem-owner' roles by default
+  const runtimeId = rg.name as string;
+
+  await prepareRoleAssignments(
+    envCtx,
+    'runtime',
+    runtimeId,
+    resourceSet.name,
+    ['tech-lead', 'subsystem-owner']
   );
 
   return resourceSet;
@@ -213,7 +227,7 @@ export async function CreateNamespaceForSubsystem(
     'subsystem',
     subsystemId,
     resourceSet.name,
-    ['tech-lead', 'access-manager', 'system-owner']
+    ['tech-lead', 'access-manager', 'subsystem-owner']
   );
 
   return resourceSet;
@@ -248,7 +262,7 @@ async function prepareRoleAssignments(
     type,
     {
       name: systemId,
-      parent: '/systems',
+      parent: type == "subsystem" ? '/systems' : '/runtimes',
       members: [
         {
           member: { id: envCtx.subjectUuid },
@@ -272,11 +286,13 @@ async function prepareRoleAssignments(
   );
   const namespaceRolesResult = await ga.assignSystemRolesToNamespace(
     gatewayId,
+    type,
     systemId
   );
   logger.debug(
-    "Assigned System Roles to Namespace '%s': %o",
+    "Assigned System Roles to Namespace '%s' for type '%s': %o",
     gatewayId,
+    type,
     namespaceRolesResult
   );
 }
@@ -287,14 +303,12 @@ async function createSDXNamespace(
   args: CreateNamespaceArgs
 ): Promise<ResourceSet> {
   // A user should only be getting Namespace.View, but due to how the getResources
-  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
-  // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
-  // as a default
-  args.assignedScopes = [
-    'Namespace.Manage',
-    'Connection.Manage',
-    'GatewayPattern.Publish',
-  ];
+  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step.
+  // Connection.Manage and GatewayPattern.Publish are deliberately not granted directly here -
+  // the creator is assigned all three subsystem RBAC roles below (prepareRoleAssignments),
+  // which already grants those scopes on this same namespace via the role-based permissions
+  // in roles.ts (access-manager -> Connection.Manage, tech-lead/subsystem-owner -> GatewayPattern.Publish).
+  args.assignedScopes = ['Namespace.Manage'];
   args.includeSDXScopes = true;
 
   const resourceSet = await CreateNamespace(context, args);

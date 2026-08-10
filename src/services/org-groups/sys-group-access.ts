@@ -6,7 +6,7 @@ import { GroupMembership } from './types';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { strict as assert } from 'assert';
 
-export const SystemRoles = ['system-owner', 'tech-lead', 'access-manager'];
+export const SystemRoles = ['subsystem-owner', 'tech-lead', 'access-manager'];
 
 export class SysGroupAccessService {
   private orgGroupService;
@@ -47,7 +47,7 @@ export class SysGroupAccessService {
 
     // CreateIfMissing the Resource for the "org unit" (if this GroupAccess is for an Org Unit)
     // CreateIfMissing the Authorization Scopes for: GroupAccess.Manage, Namespace.Assign, Dataset.Manage
-    await this.orgAuthzService.createIfMissingResource('system', access.name);
+    await this.orgAuthzService.createIfMissingResource(type, access.name);
 
     for (const groupRole of access.roles.filter((r) =>
       SystemRoles.includes(r.name)
@@ -70,8 +70,8 @@ export class SysGroupAccessService {
       for (const perm of groupRole.permissions) {
         assert.strictEqual(
           perm.resource,
-          `org/${orgGroup.name}`,
-          'Invalid organization resource in permission'
+          `${type === 'subsystem' ? 'sys' : 'rg'}/${orgGroup.name}`,
+          'Invalid subsystem/runtime-group resource in permission'
         );
         await this.orgGroupService.createOrUpdateGroupPermission(
           orgGroup,
