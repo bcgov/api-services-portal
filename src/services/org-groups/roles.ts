@@ -26,7 +26,7 @@ export const PredefinedRolePermissions = {
     permissions: [
       {
         resourceType: 'namespace',
-        scopes: ['Namespace.Manage', 'Namespace.View', 'Subsystem.Manage', 'GatewayPattern.Publish'],
+        scopes: ['Namespace.View', 'Subsystem.Manage'],
       },
     ],
   },

@@ -15,8 +15,18 @@ import { lookupProductEnvironmentServicesBySlug } from '../keystone';
 import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
 import { SysGroupAccessService } from '../org-groups/sys-group-access';
 import { GroupAccessService } from '../org-groups';
+import { KeycloakPermissionTicketService } from '../keycloak';
 
 const logger = Logger('wf.CreateNamespaceSDX');
+
+// Scopes granted directly to the namespace creator so they can perform the
+// UMA policy creation step in createSDXNamespace (see the comment there).
+// Callers that assign the SDX subsystem/runtime RBAC roles afterward
+// (prepareRoleAssignments) revoke these once that role assignment is done,
+// since the roles grant the creator equivalent namespace permissions via
+// roles.ts. Callers with no such role assignment (e.g.
+// CreateNamespaceForOrganization) keep them.
+const NAMESPACE_CREATOR_DIRECT_SCOPES = ['Namespace.Manage'];
 
 /**
  * Arguments for creating a namespace for an organization.
@@ -57,7 +67,10 @@ export async function CreateNamespaceForOrganization(
 
   const envCtx = await getEnvCtx(context);
 
-  // Create the namespace with SDX edge configuration
+  // Create the namespace with SDX edge configuration. There is no
+  // subsequent RBAC role assignment for the org-level namespace, so the
+  // creator keeps the directly assigned scopes granted during namespace
+  // creation (see NAMESPACE_CREATOR_DIRECT_SCOPES).
   const resourceSet = await createSDXNamespace(context, envCtx, {
     name: gatewayId,
     org: organization,
@@ -150,6 +163,15 @@ export async function CreateNamespaceForRuntimeGroup(
     ['tech-lead', 'subsystem-owner']
   );
 
+  // Now that the creator has been assigned RBAC roles on the namespace,
+  // the direct scopes granted during namespace creation are redundant -
+  // the roles above already grant equivalent permissions via roles.ts.
+  await revokeAssignedScopes(
+    envCtx,
+    resourceSet.id,
+    NAMESPACE_CREATOR_DIRECT_SCOPES
+  );
+
   return resourceSet;
 }
 
@@ -230,6 +252,15 @@ export async function CreateNamespaceForSubsystem(
     ['tech-lead', 'access-manager', 'subsystem-owner']
   );
 
+  // Now that the creator has been assigned RBAC roles on the namespace,
+  // the direct scopes granted during namespace creation are redundant -
+  // the roles above already grant equivalent permissions via roles.ts.
+  await revokeAssignedScopes(
+    envCtx,
+    resourceSet.id,
+    NAMESPACE_CREATOR_DIRECT_SCOPES
+  );
+
   return resourceSet;
 }
 
@@ -308,7 +339,7 @@ async function createSDXNamespace(
   // the creator is assigned all three subsystem RBAC roles below (prepareRoleAssignments),
   // which already grants those scopes on this same namespace via the role-based permissions
   // in roles.ts (access-manager -> Connection.Manage, tech-lead/subsystem-owner -> GatewayPattern.Publish).
-  args.assignedScopes = ['Namespace.Manage'];
+  args.assignedScopes = NAMESPACE_CREATOR_DIRECT_SCOPES;
   args.includeSDXScopes = true;
 
   const resourceSet = await CreateNamespace(context, args);
@@ -337,4 +368,34 @@ async function createSDXNamespace(
   );
 
   return resourceSet;
+}
+
+async function revokeAssignedScopes(
+  envCtx: EnvironmentContext,
+  resourceId: string,
+  assignedScopes?: string[]
+) {
+  const permissionApi = new KeycloakPermissionTicketService(
+    envCtx.openid.issuer,
+    envCtx.accessToken
+  );
+
+  const perms = await permissionApi.listPermissions({
+    resourceId,
+    requester: envCtx.subjectUuid,
+    returnNames: true,
+  });
+
+  const revocable = perms.filter((perm) =>
+    (assignedScopes || []).includes(perm.scopeName)
+  );
+
+  for (const perm of revocable) {
+    await permissionApi.deletePermission(perm.id);
+    logger.debug(
+      "Revoked direct permission '%s' on namespace resource '%s'",
+      perm.scopeName,
+      resourceId
+    );
+  }
 }
