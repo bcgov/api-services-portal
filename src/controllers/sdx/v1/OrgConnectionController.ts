@@ -55,8 +55,7 @@ export class OrgConnectionController extends Controller {
    */
   @Put()
   @OperationId('upsertConnection')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async upsertConnection(
     @Path() org: string,
     @Body() input: ConnectionRequestInput,
@@ -116,8 +115,7 @@ export class OrgConnectionController extends Controller {
    */
   @Get()
   @OperationId('listConnections')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Connection.Manage'])
+  @Security('jwt', ['System.Manage', 'Connection.Manage'])
   public async listConnections(
     @Path() org: string,
     @Request() request: any
@@ -174,8 +172,7 @@ export class OrgConnectionController extends Controller {
    */
   @Delete('/{id}')
   @OperationId('deleteConnection')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async deleteConnection(
     @Path() org: string,
     @Path('id') id: string,

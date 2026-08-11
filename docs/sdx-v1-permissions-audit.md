@@ -186,6 +186,48 @@ applies to the current request:
 If none of the above resolves (the list case for either endpoint), the request falls through to
 the discovery-based check described next rather than being rejected outright.
 
+### Deterministic scope OR (`System.Manage` **or** `Subsystem.Manage`/`Connection.Manage`)
+
+Every endpoint above that accepts more than one scope declares them as a **single**
+`@Security('jwt', [scopeA, scopeB])` decorator with a multi-element scopes array (e.g.
+`@Security('jwt', ['System.Manage', 'Subsystem.Manage'])` on `createOASService`/`delete`), not
+multiple stacked `@Security(...)` decorators. This matters because of how tsoa's generated
+`authenticateMiddleware` (`src/controllers/sdx/v1/routes.ts`) handles the two cases differently:
+
+- **Stacked decorators** (multiple separate `@Security(...)` calls on one method) each become an
+  independent call to `expressAuthentication`, and tsoa fires all of them **concurrently**,
+  taking whichever fulfills first via the `promise.any` polyfill — correct for the pass/fail
+  decision itself (`promise.any` does correctly implement "resolve on first fulfillment, reject
+  only if all reject"), but the concurrency means: every stacked check runs to completion
+  regardless of whether an earlier one already succeeded (wasted Keycloak/UMA2 round-trips, worse
+  for the more expensive `Subsystem.Manage`/`Connection.Manage` discovery-based checks); the
+  *value* returned to the controller as `request.user` is whichever check happened to settle
+  first in wall-clock time, not a deterministic/prioritized choice; and on total failure, the
+  403 message shown is whichever check happened to reject *last* (`failedAttempts.pop()` in the
+  generated code), not necessarily the most relevant one. This was the previous shape of every
+  OR'd endpoint in this doc and is why the response-filtering code in
+  `listOrganizationServices`/`listConnections` had to re-derive the caller's scopes from the raw
+  JWT claim instead of trusting the resolved `request.user`/`request.oauth_user.scope` — see
+  "Listing connections and oas-services with gateway-scoped permissions" below.
+- **A single decorator with a multi-scope array** results in exactly **one** call to
+  `expressAuthentication` per request (`Object.keys(secMethod).length === 1` in the generated
+  code takes the non-racing branch). `expressAuthentication` (`src/auth/auth-tsoa.ts`) now
+  implements the OR itself, sequentially: `authorizeAnyScope` tries each scope in array order via
+  `authorizeScope`, returning on the first success and only falling through to the next scope on
+  failure; if every scope fails, it throws one `ForbiddenError` listing every scope that was
+  tried and why. Declaring `System.Manage` first means the common case (an org-wide admin) never
+  pays for `Subsystem.Manage`'s extra gateway-resolution/UMA2-discovery work, and the winning
+  scope — and therefore `request.user`/`request.permissions` — is now deterministic rather than a
+  function of network timing.
+
+All multi-scope endpoints in this document were migrated to the single-decorator form as part of
+this fix; `expressAuthentication`'s scope-resolution logic (`resolveGatewayIdForScope`,
+`resolveGenericResource`, `enforcePermission`) was factored out to be reusable per-scope rather
+than assuming a single resource shared across an entire call's scopes list. This is shared,
+non-generated code used by every `sdx/v1` (and `v1`/`v2`/`v3`) controller, so the fix applies
+everywhere `expressAuthentication` is used, not just the endpoints that currently declare
+multiple scopes.
+
 ### Listing connections and oas-services with gateway-scoped permissions
 
 `GET /organizations/{org}/oas-services` (`listOrganizationServices`) and
@@ -201,13 +243,13 @@ both endpoints use the same two-step, discovery-based design across `src/auth/au
    `oas-services`; no `body.serviceId` for `connections`), `AuthMiddle.getPermittedNamespacesForScope`
    performs a UMA2 permission-ticket exchange (`requestTicket` + `getPermittedResourcesUsingTicket`,
    evaluated against the caller's own bearer token) asking Keycloak "which gateway namespaces
-   does this caller hold [that scope] on, if any." A non-empty result passes that security
-   branch (OR'd with the `System.Manage` branch); an empty result rejects with 403.
+   does this caller hold [that scope] on, if any." A non-empty result passes that scope's check
+   (tried after `System.Manage`, per "Deterministic scope OR" below — `System.Manage` alone
+   already grants access without ever reaching this discovery call); an empty result on the last
+   scope tried rejects with 403.
 2. **Response filtering** (`OrgServiceController.listOrganizationServices` /
    `OrgConnectionController.listConnections`): each controller independently re-derives the
-   same thing — first checking the caller's raw JWT `scope` claim (`request.oauth_user.scope`,
-   not the racy resolved `request.user.scope`, since two stacked `@Security` checks run
-   concurrently and a caller holding both scopes could have either one "win") for
+   same thing — checking the caller's raw JWT `scope` claim (`request.oauth_user.scope`) for
    `System.Manage`. If present, it returns the full unfiltered list (existing behavior,
    unchanged). If absent, it calls the same discovery flow itself (`getPermittedNamespaceNames`,
    exported from `src/services/workflow/get-namespaces.ts`) to get the caller's permitted
@@ -221,13 +263,22 @@ both endpoints use the same two-step, discovery-based design across `src/auth/au
      the provider service's name, not a relationship. Connections are inherently
      provider-gateway-scoped this way; there's no client-side equivalent for `Connection.Manage`.
 
+   Reading the raw `request.oauth_user.scope` claim here (rather than the resolved
+   `request.user.scope` the auth middleware settled on) is no longer needed to dodge a race —
+   see "Deterministic scope OR" below, the auth middleware itself is now race-free — but it's
+   kept because it answers a genuinely different question: "does this caller hold `System.Manage`
+   *at all*," not "which scope happened to authorize this particular request." A caller holding
+   both scopes is now deterministically authorized via `System.Manage` (tried first), so in
+   practice `request.user.scope` would give the same answer today, but the explicit claim check
+   doesn't depend on that ordering staying stable.
+
 This means two Keycloak round-trips for a scope-only list call (one to authorize, one to
-filter) rather than one — deliberately not shared across the request, since the authorization
-check and the response-filtering check run in a race with the `System.Manage` branch and aren't
-guaranteed to both complete before the controller runs. `getMyNamespaces` in the same file
-already did the identical two-step UMA2 flow (ticket → resource ids → resource details) for the
-namespaces report; `getPermittedResourceIds` was extracted out of it so both that and the new
-`getPermittedNamespaceNames` share the ticket-exchange logic.
+filter) rather than one — not shared across the request, since the authorization check happens
+in the auth middleware (`auth-tsoa.ts`, before the controller method even runs) and the
+response-filtering check happens independently inside the controller. `getMyNamespaces` in the
+same file already did the identical two-step UMA2 flow (ticket → resource ids → resource
+details) for the namespaces report; `getPermittedResourceIds` was extracted out of it so both
+that and the new `getPermittedNamespaceNames` share the ticket-exchange logic.
 
 ## Inconsistencies & recommendations
 
@@ -261,7 +312,7 @@ namespaces report; `getPermittedResourceIds` was extracted out of it so both tha
    Keystone roles) no longer share an ambiguous name.
 
 3. **Connections CRUD is inconsistently scoped — `[resolved]`.** `listConnections` now also
-   accepts `Connection.Manage` (stacked `@Security`), including a real, working list: approval
+   accepts `Connection.Manage` (multi-scope `@Security`), including a real, working list: approval
    still resolves via `body.serviceId`, and a bare list call now goes through the same
    discovery-based gate + response-filtering used by `Subsystem.Manage`/`listOrganizationServices`
    (see "Listing connections and oas-services with gateway-scoped permissions" above) — a
@@ -282,7 +333,7 @@ namespaces report; `getPermittedResourceIds` was extracted out of it so both tha
 5. **All-or-nothing admin model within an org — `[partially addressed]`.** `Subsystem.Manage`
    (all of `oas-services`, plus connection create/delete) and `Connection.Manage` (connection
    approval + list) now both give gateway-scoped alternatives to `System.Manage` (additive, via
-   stacked `@Security` — existing `system-admin` holders are unaffected), including real,
+   multi-scope `@Security` — existing `system-admin` holders are unaffected), including real,
    filtered listing where a list operation exists — a scope-only holder gets back just their own
    gateways' data via the shared UMA2 discovery pattern (see "Listing connections and
    oas-services with gateway-scoped permissions" above), not the whole org's and not a 403. This
