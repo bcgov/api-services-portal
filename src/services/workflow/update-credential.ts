@@ -12,8 +12,6 @@ import { CredentialReference, NewCredential, RequestControls } from './types';
 import { fetchWithTimeout } from '../utils';
 
 import { createPublicKey } from 'crypto';
-import dns from 'dns';
-import net from 'net';
 
 const logger = Logger('wf.UpdCreds');
 
@@ -116,138 +114,19 @@ export const IsCertificateValid = (cert: string): boolean => {
   }
 };
 
-const JWKS_MAX_REDIRECTS = 3;
-const BLOCKED_JWKS_HOSTNAMES = new Set([
-  'localhost',
-  'metadata.google.internal',
-]);
-
-function isDisallowedIpAddress(ip: string): boolean {
-  if (net.isIPv4(ip)) {
-    const parts = ip.split('.').map(Number);
-    const [a, b] = parts;
-    if (a === 0 || a === 10 || a === 127) return true;
-    if (a === 169 && b === 254) return true; // link-local
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true; // shared address space
-    if (a >= 224) return true; // multicast / reserved
-    return false;
-  }
-
-  if (net.isIPv6(ip)) {
-    const normalized = ip.toLowerCase();
-    if (normalized === '::1' || normalized === '::') return true;
-    if (normalized.startsWith('::ffff:')) {
-      return isDisallowedIpAddress(normalized.slice('::ffff:'.length));
-    }
-    // Unique local fc00::/7
-    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
-    // Link-local fe80::/10
-    if (/^fe[89ab]/i.test(normalized)) return true;
-    return false;
-  }
-
-  return true;
-}
-
-async function assertSafeJwksUrl(rawUrl: string): Promise<URL> {
-  let parsed: URL;
-  try {
-    parsed = new URL(rawUrl);
-  } catch (ex) {
-    throw new Error('JWKS Url is not a valid URL');
-  }
-
-  assert.strictEqual(
-    parsed.protocol,
-    'https:',
-    'JWKS Url must use HTTPS'
-  );
-  assert.strictEqual(
-    parsed.username === '' && parsed.password === '',
-    true,
-    'JWKS Url must not include credentials'
-  );
-
-  const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  assert.strictEqual(
-    BLOCKED_JWKS_HOSTNAMES.has(hostname),
-    false,
-    'JWKS Url host is not allowed'
-  );
-
-  if (net.isIP(hostname)) {
-    assert.strictEqual(
-      isDisallowedIpAddress(hostname),
-      false,
-      'JWKS Url host is not allowed'
-    );
-  } else {
-    const addresses = await dns.promises.lookup(hostname, {
-      all: true,
-      verbatim: true,
-    });
-    assert.strictEqual(
-      addresses.length > 0,
-      true,
-      'JWKS Url host could not be resolved'
-    );
-    for (const addr of addresses) {
-      assert.strictEqual(
-        isDisallowedIpAddress(addr.address),
-        false,
-        'JWKS Url resolves to a disallowed address'
-      );
-    }
-  }
-
-  return parsed;
-}
-
-/**
- * Validate a JWKS URL is reachable JSON and is not an SSRF vector.
- * Requires HTTPS, blocks loopback/private/link-local destinations, and
- * re-validates each redirect target before following it.
- */
 export const IsJWKSURLValid = async (url: string): Promise<boolean> => {
   try {
-    let current = url;
+    new URL(url);
 
-    for (let hop = 0; hop <= JWKS_MAX_REDIRECTS; hop++) {
-      await assertSafeJwksUrl(current);
+    const options = { timeout: 2000 };
 
-      const response = await fetchWithTimeout(current, {
-        timeout: 2000,
-        redirect: 'manual',
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-      });
+    const response = await fetchWithTimeout(url, options);
+    assert.strictEqual(response.ok, true, 'Failed to get JWKS document');
 
-      if (response.status >= 300 && response.status < 400) {
-        assert.strictEqual(
-          hop < JWKS_MAX_REDIRECTS,
-          true,
-          'JWKS Url exceeded redirect limit'
-        );
-        const location = response.headers.get('location');
-        assert.strictEqual(
-          Boolean(location),
-          true,
-          'JWKS redirect missing Location header'
-        );
-        current = new URL(location as string, current).toString();
-        continue;
-      }
-
-      assert.strictEqual(response.ok, true, 'Failed to get JWKS document');
-      await response.json();
-      return true;
-    }
-
-    return false;
+    await response.json();
+    return true;
   } catch (ex) {
-    logger.debug('[ValidateJWKSURL] Failed %s', ex);
+    logger.debug('[ValidateCertificate] Failed %s', ex);
     return false;
   }
 };
