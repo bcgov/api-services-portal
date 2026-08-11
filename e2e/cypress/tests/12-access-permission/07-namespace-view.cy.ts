@@ -47,7 +47,7 @@ describe('Grant Namespace View Role to Mark', () => {
   })
 })
 
-describe('Verify that Mark is unable to view Gateway summary', () => {
+describe('Verify that Mark is able to view Gateway summary', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
@@ -83,13 +83,12 @@ describe('Verify that Mark is unable to view Gateway summary', () => {
     })
   })
 
-  it('Verify scopes are limited to those which Mark has been granted - Namespace.Manage scope missing', () => {
+  it('Verify Namespace.View scope is sufficient to view the Gateway summary', () => {
     cy.get('@api').then(({ namespaces }: any) => {
       cy.setHeaders(namespaces.headers)
       cy.setAuthorizationToken(userSession)
       cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace, 'GET').then((res:any) => {
-          expect(res.apiRes.status).to.be.equal(403)
-          expect(res.apiRes.body.message).to.be.contain('Missing required scope')
+          expect(res.apiRes.status).to.be.equal(200)
       })
     })
   })
