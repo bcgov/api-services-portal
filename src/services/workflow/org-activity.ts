@@ -853,6 +853,41 @@ export class OrgActivityService {
     });
   }
 
+  async logUpdateSubsystemAccess(
+    success: boolean,
+    data: {
+      subsystemName: string;
+      subject_email: string;
+      subject: string;
+      roles: string;
+    }
+  ): Promise<void> {
+    const resource = {
+      kind: OrgActivityResourceKind.Subsystem,
+      value: data.subsystemName,
+    };
+    return this.recordOrgActivity({
+      success,
+      message:
+        '{actor} {action} {subject} subsystem access on {subsystemName} in {organization}: {roles}',
+      params: {
+        action: 'updated',
+        entity: 'SubsystemAccess',
+        actor: this.getActorName(),
+        organization: this.orgName,
+        subsystemName: data.subsystemName,
+        subject_email: data.subject_email,
+        subject: data.subject,
+        roles: data.roles,
+      },
+      resource,
+      filterResources: [
+        resource,
+        { kind: OrgActivityResourceKind.User, value: data.subject_email },
+      ],
+    });
+  }
+
   async logServicePublished(
     success: boolean,
     data: { serviceName: string; subsystemName: string }
@@ -1149,6 +1184,40 @@ export async function logOrganizationAccessChanges(
       ),
       resource,
       orgUnit,
+    });
+  }
+}
+
+/**
+ * Records one activity entry per member whose subsystem RBAC role
+ * membership changed (subsystem-owner/tech-lead/access-manager) — the
+ * subsystem-scoped counterpart to logOrganizationAccessChanges above.
+ */
+export async function logSubsystemAccessChanges(
+  context: any,
+  orgName: string,
+  subsystemName: string,
+  changes: {
+    granted: Record<string, string[]>;
+    revoked: Record<string, string[]>;
+  },
+  resolveDisplayName: (email: string) => Promise<string>
+): Promise<void> {
+  const orgActivity = new OrgActivityService(context, orgName);
+  const emails = new Set([
+    ...Object.keys(changes.granted || {}),
+    ...Object.keys(changes.revoked || {}),
+  ]);
+
+  for (const email of emails) {
+    await orgActivity.logUpdateSubsystemAccess(true, {
+      subsystemName,
+      subject_email: email,
+      subject: await resolveDisplayName(email),
+      roles: signRoleDelta(
+        changes.granted[email] ?? [],
+        changes.revoked[email] ?? []
+      ),
     });
   }
 }
