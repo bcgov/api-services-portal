@@ -1286,10 +1286,8 @@ paths:
             security:
                 -
                     jwt:
-                        - Namespace.View
-                -
-                    jwt:
                         - Namespace.Manage
+                        - Namespace.View
             parameters:
                 -
                     in: path

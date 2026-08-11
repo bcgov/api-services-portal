@@ -125,8 +125,7 @@ export class NamespaceController extends Controller {
    */
   @Get('/{ns}')
   @OperationId('namespace-profile')
-  @Security('jwt', ['Namespace.View'])
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.Manage', 'Namespace.View'])
   public async profile(
     @Path() ns: string,
     @Request() request: any
