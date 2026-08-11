@@ -22,16 +22,14 @@ import { v4 as uuidv4 } from 'uuid'
 // always calls a single global CA, so a token request for the 'cyp'
 // runtime group never reaches the second mock - its count never moves.
 
-const DEV_CA_URL = 'http://localhost:2020'
-const CYP_CA_URL = 'http://localhost:2022'
+const DEV_CA_URL = 'http://step-token-api.localtest.me:2020'
+const CYP_CA_URL = 'http://step-token-api-2.localtest.me:2022'
 
 function tokenCount(caUrl: string) {
-  return cy
-    .request({ url: `${caUrl}/tokens`, method: 'GET' })
-    .then((res) => {
-      expect(res.status).to.be.equal(200)
-      return res.body.count as number
-    })
+  return cy.request({ url: `${caUrl}/tokens`, method: 'GET' }).then((res) => {
+    expect(res.status).to.be.equal(200)
+    return res.body.count as number
+  })
 }
 
 function shortId(): string {
@@ -91,9 +89,10 @@ describe('SP136 - Runtime group certificate-signing token routes through the pro
     })
 
     tokenCount(DEV_CA_URL).then((count) => {
-      expect(count, "dev CA should have issued the 'dev' runtime group's token").to.be.equal(
-        devBaseline + 1
-      )
+      expect(
+        count,
+        "dev CA should have issued the 'dev' runtime group's token"
+      ).to.be.equal(devBaseline + 1)
     })
     tokenCount(CYP_CA_URL).then((count) => {
       expect(
@@ -131,9 +130,10 @@ describe('SP136 - Runtime group certificate-signing token routes through the pro
     // single global STEP_TOKEN_URL (the 'dev' CA), so the 'cyp' CA's count
     // never moves and this expectation fails.
     tokenCount(CYP_CA_URL).then((count) => {
-      expect(count, "cyp CA should have issued the 'cyp' runtime group's token").to.be.equal(
-        cypBaseline + 1
-      )
+      expect(
+        count,
+        "cyp CA should have issued the 'cyp' runtime group's token"
+      ).to.be.equal(cypBaseline + 1)
     })
     tokenCount(DEV_CA_URL).then((count) => {
       expect(
