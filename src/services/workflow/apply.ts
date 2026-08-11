@@ -366,7 +366,12 @@ export async function setupAuthorizationAndEnable(
     if (controls.roles) {
       clientScopes.push('roles');
     }
-    await kcClientService.syncAndApply(clientId, clientScopes, []);
+    const optionalScopes = controls.defaultOptionalScopes || [];
+    await kcClientService.syncAndApply(
+      clientId,
+      clientScopes,
+      optionalScopes
+    );
 
     if (controls.roles) {
       const clientRolesService = new KeycloakClientRolesService(

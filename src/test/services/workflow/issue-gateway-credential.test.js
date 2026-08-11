@@ -9,6 +9,8 @@ jest.mock('../../../services/keystone', () => ({
   lookupProductEnvironmentServices: jest.fn(),
   lookupApplicationByAppId: jest.fn(),
   addApplication: jest.fn(),
+  deleteApplication: jest.fn(),
+  deleteRecord: jest.fn(),
   lookupKongConsumerByCustomId: jest.fn(),
   lookupCredentialIssuerById: jest.fn(),
   addServiceAccess: jest.fn(),
@@ -40,15 +42,18 @@ jest.mock('../../../services/workflow/add-client-consumer', () => ({
   AddClientConsumer: jest.fn().mockResolvedValue('consumer-pk-1'),
 }));
 
+const mockForceSync = jest.fn().mockResolvedValue(undefined);
 jest.mock('../../../services/feeder', () => ({
   FeederService: jest.fn().mockImplementation(() => ({
-    forceSync: jest.fn().mockResolvedValue(undefined),
+    forceSync: mockForceSync,
   })),
 }));
 
+const mockDeleteConsumer = jest.fn().mockResolvedValue(undefined);
 jest.mock('../../../services/kong', () => ({
   KongConsumerService: jest.fn().mockImplementation(() => ({
     createKongConsumer: jest.fn().mockResolvedValue({ id: 'kong-1' }),
+    deleteConsumer: mockDeleteConsumer,
   })),
 }));
 
@@ -56,7 +61,14 @@ jest.mock('../../../services/keycloak', () => ({
   getOpenidFromIssuer: jest.fn().mockResolvedValue({
     issuer: 'https://idp/realms/x',
     token_endpoint: 'https://idp/token',
+    registration_endpoint: 'https://idp/reg',
   }),
+  KeycloakTokenService: jest.fn().mockImplementation(() => ({
+    getKeycloakSession: jest.fn().mockResolvedValue('token'),
+  })),
+  KeycloakClientRegistrationService: jest.fn().mockImplementation(() => ({
+    deleteClientRegistration: jest.fn().mockResolvedValue(undefined),
+  })),
 }));
 
 jest.mock('../../../services/keystone/gateway-service', () => ({
@@ -84,6 +96,8 @@ const lookupProductEnvironmentServices =
   keystone.lookupProductEnvironmentServices;
 const lookupApplicationByAppId = keystone.lookupApplicationByAppId;
 const addApplication = keystone.addApplication;
+const deleteApplication = keystone.deleteApplication;
+const deleteRecord = keystone.deleteRecord;
 const lookupKongConsumerByCustomId = keystone.lookupKongConsumerByCustomId;
 const addServiceAccess = keystone.addServiceAccess;
 const deleteServiceAccess = keystone.deleteServiceAccess;
@@ -108,6 +122,22 @@ function apiKeyEnvironment(overrides = {}) {
   };
 }
 
+function clientCredentialsEnvironment(authenticator, overrides = {}) {
+  return {
+    id: 'env-cc',
+    appId: ENV_APP_ID,
+    name: 'dev',
+    flow: 'client-credentials',
+    product: { namespace: GATEWAY, name: 'Notify' },
+    credentialIssuer: {
+      id: 'issuer-1',
+      clientAuthenticator: authenticator,
+    },
+    services: [],
+    ...overrides,
+  };
+}
+
 function buildContext() {
   const sudoCtx = { sudo: undefined };
   return {
@@ -118,6 +148,8 @@ function buildContext() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockForceSync.mockResolvedValue(undefined);
+  mockDeleteConsumer.mockResolvedValue(undefined);
   lookupEnvironmentByAppIdInNamespace.mockResolvedValue(apiKeyEnvironment());
   lookupProductEnvironmentServices.mockResolvedValue(apiKeyEnvironment());
   addApplication.mockResolvedValue({
@@ -126,6 +158,8 @@ beforeEach(() => {
     name: 'notify-tenant-a',
     namespace: GATEWAY,
   });
+  deleteApplication.mockResolvedValue(undefined);
+  deleteRecord.mockResolvedValue(undefined);
   lookupKongConsumerByCustomId.mockReset();
   lookupKongConsumerByCustomId
     .mockResolvedValueOnce(undefined) // duplicate check
@@ -140,6 +174,12 @@ beforeEach(() => {
     consumerPK: 'consumer-1',
   });
   addServiceAccess.mockResolvedValue('sa-1');
+  keystone.lookupCredentialIssuerById.mockResolvedValue({
+    id: 'issuer-1',
+    mode: 'auto',
+    flow: 'client-credentials',
+    clientAuthenticator: 'client-secret',
+  });
 });
 
 describe('issueGatewayCredential', function () {
@@ -189,6 +229,7 @@ describe('issueGatewayCredential', function () {
       setupAuthorizationAndEnable.mock.invocationCallOrder[0]
     );
     expect(deleteServiceAccess).not.toHaveBeenCalled();
+    expect(deleteApplication).not.toHaveBeenCalled();
     expect(result).toEqual({
       flow: 'kong-api-key-acl',
       clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
@@ -216,6 +257,7 @@ describe('issueGatewayCredential', function () {
       GATEWAY
     );
     expect(result.clientId).toBe(`${ENV_APP_ID}-${APP_APP_ID}`);
+    expect(deleteApplication).not.toHaveBeenCalled();
   });
 
   it('rejects when application already has access to the environment', async function () {
@@ -231,6 +273,8 @@ describe('issueGatewayCredential', function () {
         application: { name: 'notify-tenant-a' },
       })
     ).rejects.toThrow(/already has access/);
+
+    expect(deleteApplication).toHaveBeenCalledWith(expect.anything(), 'app-1');
   });
 
   it('rejects unsupported flows', async function () {
@@ -244,6 +288,8 @@ describe('issueGatewayCredential', function () {
         application: { name: 'x' },
       })
     ).rejects.toThrow(/does not support credential issuance/);
+
+    expect(addApplication).not.toHaveBeenCalled();
   });
 
   it('requires application.name when creating', async function () {
@@ -266,7 +312,7 @@ describe('issueGatewayCredential', function () {
     ).rejects.toThrow(/not found in gateway/);
   });
 
-  it('cleans up created records when authorization setup fails', async function () {
+  it('cleans up ServiceAccess and new Application when authorization setup fails', async function () {
     setupAuthorizationAndEnable.mockRejectedValueOnce(
       new Error('authorization failed')
     );
@@ -282,6 +328,7 @@ describe('issueGatewayCredential', function () {
       expect.anything(),
       'sa-1'
     );
+    expect(deleteApplication).toHaveBeenCalledWith(expect.anything(), 'app-1');
   });
 
   it('cleans up without activating access when label persistence fails', async function () {
@@ -300,5 +347,147 @@ describe('issueGatewayCredential', function () {
       expect.anything(),
       'sa-1'
     );
+    expect(deleteApplication).toHaveBeenCalledWith(expect.anything(), 'app-1');
+  });
+
+  it('rolls back partial credential resources when forceSync fails before ServiceAccess', async function () {
+    mockForceSync.mockRejectedValueOnce(new Error('forceSync failed'));
+
+    await expect(
+      issueGatewayCredential(buildContext(), GATEWAY, {
+        environmentAppId: ENV_APP_ID,
+        application: { name: 'notify-tenant-a' },
+      })
+    ).rejects.toThrow('forceSync failed');
+
+    expect(addServiceAccess).not.toHaveBeenCalled();
+    expect(deleteRecord).toHaveBeenCalledWith(
+      expect.anything(),
+      'GatewayConsumer',
+      { id: 'consumer-1' },
+      ['id']
+    );
+    expect(mockDeleteConsumer).toHaveBeenCalledWith('kong-1');
+    expect(deleteApplication).toHaveBeenCalledWith(expect.anything(), 'app-1');
+  });
+
+  it('does not delete a reused Application when issuance fails', async function () {
+    lookupApplicationByAppId.mockResolvedValue({
+      id: 'app-1',
+      appId: APP_APP_ID,
+      name: 'notify-tenant-a',
+      namespace: GATEWAY,
+    });
+    setupAuthorizationAndEnable.mockRejectedValueOnce(
+      new Error('authorization failed')
+    );
+
+    await expect(
+      issueGatewayCredential(buildContext(), GATEWAY, {
+        environmentAppId: ENV_APP_ID,
+        application: { appId: APP_APP_ID },
+      })
+    ).rejects.toThrow('authorization failed');
+
+    expect(deleteServiceAccess).toHaveBeenCalledWith(
+      expect.anything(),
+      'sa-1'
+    );
+    expect(deleteApplication).not.toHaveBeenCalled();
+  });
+
+  describe('client-credentials signing controls', function () {
+    beforeEach(() => {
+      keystone.lookupCredentialIssuerById.mockResolvedValue({
+        id: 'issuer-1',
+        mode: 'auto',
+        flow: 'client-credentials',
+        clientAuthenticator: 'client-jwt',
+      });
+    });
+
+    it('rejects client-jwt without certificate controls', async function () {
+      const env = clientCredentialsEnvironment('client-jwt');
+      lookupEnvironmentByAppIdInNamespace.mockResolvedValue(env);
+      lookupProductEnvironmentServices.mockResolvedValue(env);
+
+      await expect(
+        issueGatewayCredential(buildContext(), GATEWAY, {
+          environmentAppId: ENV_APP_ID,
+          application: { name: 'jwt-app' },
+          controls: {},
+        })
+      ).rejects.toThrow(
+        /client-jwt requires clientGenCertificate or clientCertificate/
+      );
+
+      expect(addApplication).not.toHaveBeenCalled();
+    });
+
+    it('rejects client-jwt with both generated and supplied certificates', async function () {
+      const env = clientCredentialsEnvironment('client-jwt');
+      lookupEnvironmentByAppIdInNamespace.mockResolvedValue(env);
+      lookupProductEnvironmentServices.mockResolvedValue(env);
+
+      await expect(
+        issueGatewayCredential(buildContext(), GATEWAY, {
+          environmentAppId: ENV_APP_ID,
+          application: { name: 'jwt-app' },
+          controls: {
+            clientGenCertificate: true,
+            clientCertificate: 'PEM',
+          },
+        })
+      ).rejects.toThrow(
+        /Provide only one of clientGenCertificate or clientCertificate/
+      );
+    });
+
+    it('rejects jwksUrl combined with clientGenCertificate for jwks authenticator', async function () {
+      const env = clientCredentialsEnvironment('client-jwt-jwks-url');
+      lookupEnvironmentByAppIdInNamespace.mockResolvedValue(env);
+      lookupProductEnvironmentServices.mockResolvedValue(env);
+      keystone.lookupCredentialIssuerById.mockResolvedValue({
+        id: 'issuer-1',
+        mode: 'auto',
+        flow: 'client-credentials',
+        clientAuthenticator: 'client-jwt-jwks-url',
+      });
+
+      await expect(
+        issueGatewayCredential(buildContext(), GATEWAY, {
+          environmentAppId: ENV_APP_ID,
+          application: { name: 'jwks-app' },
+          controls: {
+            jwksUrl: 'https://example.com/jwks.json',
+            clientGenCertificate: true,
+          },
+        })
+      ).rejects.toThrow(
+        /client-jwt-jwks-url does not accept clientGenCertificate/
+      );
+    });
+
+    it('rejects client-secret requests that include jwt signing controls', async function () {
+      const env = clientCredentialsEnvironment('client-secret');
+      lookupEnvironmentByAppIdInNamespace.mockResolvedValue(env);
+      lookupProductEnvironmentServices.mockResolvedValue(env);
+      keystone.lookupCredentialIssuerById.mockResolvedValue({
+        id: 'issuer-1',
+        mode: 'auto',
+        flow: 'client-credentials',
+        clientAuthenticator: 'client-secret',
+      });
+
+      await expect(
+        issueGatewayCredential(buildContext(), GATEWAY, {
+          environmentAppId: ENV_APP_ID,
+          application: { name: 'secret-app' },
+          controls: { clientGenCertificate: true },
+        })
+      ).rejects.toThrow(
+        /client-secret authenticator does not accept jwksUrl, clientCertificate, or clientGenCertificate/
+      );
+    });
   });
 });

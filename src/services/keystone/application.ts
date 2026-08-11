@@ -92,6 +92,27 @@ export async function addApplication(
   return result.data.createApplication;
 }
 
+export async function deleteApplication(
+  context: any,
+  id: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation DeleteApplication($id: ID!) {
+                    deleteApplication(id: $id) {
+                        id
+                    }
+                }`,
+    variables: { id },
+  });
+  logger.debug('[deleteApplication] result %j', result);
+  assertEqual(
+    'errors' in result,
+    false,
+    'application',
+    `Failed to delete Application ${JSON.stringify(result.errors || result)}`
+  );
+}
+
 export async function lookupMyApplicationsById(
   context: any,
   id: string

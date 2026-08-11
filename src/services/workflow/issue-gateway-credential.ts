@@ -3,6 +3,8 @@ import { strict as assert } from 'assert';
 import {
   addApplication,
   addServiceAccess,
+  deleteApplication,
+  deleteRecord,
   deleteServiceAccess,
   lookupApplicationByAppId,
   lookupCredentialIssuerById,
@@ -29,7 +31,11 @@ import { registerClient } from './client-credentials';
 import { registerApiKey } from './kong-api-key';
 import { AddClientConsumer } from './add-client-consumer';
 import { IsCertificateValid, IsJWKSURLValid } from './update-credential';
-import { getOpenidFromIssuer } from '../keycloak';
+import {
+  getOpenidFromIssuer,
+  KeycloakClientRegistrationService,
+  KeycloakTokenService,
+} from '../keycloak';
 import { isBlank } from './common';
 import { setupAuthorizationAndEnable } from './apply';
 import { saveConsumerLabels } from './consumer-management';
@@ -79,9 +85,7 @@ export async function issueGatewayCredential(
 
   const controls: RequestControls = { ...(input.controls || {}) };
   const noauthContext =
-    typeof context.sudo === 'function'
-      ? context.sudo()
-      : context;
+    typeof context.sudo === 'function' ? context.sudo() : context;
 
   const environment = await lookupEnvironmentByAppIdInNamespace(
     noauthContext,
@@ -115,34 +119,40 @@ export async function issueGatewayCredential(
   await validateIssuerForFlow(noauthContext, productEnvironment);
   await validateControls(controls, productEnvironment);
 
-  const application = await resolveApplication(
-    noauthContext,
-    gatewayId,
-    input.application
-  );
-
-  const clientId = `${productEnvironment.appId}-${application.appId}`;
-
-  const existingConsumer = await lookupKongConsumerByCustomId(
-    noauthContext,
-    clientId,
-    false
-  );
-  assert.strictEqual(
-    typeof existingConsumer === 'undefined',
-    true,
-    'This application already has access to this environment'
-  );
-
-  const { newCredential, serviceAccessId, consumer } = await createCredential(
-    noauthContext,
-    productEnvironment,
-    application,
-    clientId,
-    controls
-  );
+  let application: Application | undefined;
+  let createdNewApplication = false;
+  let serviceAccessId: string | undefined;
 
   try {
+    application = await resolveApplication(
+      noauthContext,
+      gatewayId,
+      input.application
+    );
+    createdNewApplication = !Boolean(input.application.appId);
+
+    const clientId = `${productEnvironment.appId}-${application.appId}`;
+
+    const existingConsumer = await lookupKongConsumerByCustomId(
+      noauthContext,
+      clientId,
+      false
+    );
+    assert.strictEqual(
+      typeof existingConsumer === 'undefined',
+      true,
+      'This application already has access to this environment'
+    );
+
+    const created = await createCredential(
+      noauthContext,
+      productEnvironment,
+      application,
+      clientId,
+      controls
+    );
+    serviceAccessId = created.serviceAccessId;
+
     if (input.labels && Object.keys(input.labels).length > 0) {
       const labels: ConsumerLabel[] = Object.entries(input.labels).map(
         ([labelGroup, value]) => ({
@@ -150,7 +160,12 @@ export async function issueGatewayCredential(
           values: [value],
         })
       );
-      await saveConsumerLabels(noauthContext, gatewayId, consumer.id, labels);
+      await saveConsumerLabels(
+        noauthContext,
+        gatewayId,
+        created.consumer.id,
+        labels
+      );
     }
 
     await setupAuthorizationAndEnable(
@@ -165,31 +180,60 @@ export async function issueGatewayCredential(
         environmentAppId: productEnvironment.appId,
         credentialIssuerId: productEnvironment.credentialIssuer?.id,
         serviceAccessId,
-        consumer,
+        consumer: created.consumer,
       }
     );
+
+    logger.info(
+      '[issueGatewayCredential] Issued %s for gateway %s',
+      clientId,
+      gatewayId
+    );
+
+    return created.newCredential;
   } catch (error) {
+    await rollbackIssuance(noauthContext, {
+      serviceAccessId,
+      createdNewApplication,
+      application,
+    });
+    throw error;
+  }
+}
+
+async function rollbackIssuance(
+  context: any,
+  state: {
+    serviceAccessId?: string;
+    createdNewApplication: boolean;
+    application?: Application;
+  }
+) {
+  if (state.serviceAccessId) {
     try {
-      // Deleting the inactive ServiceAccess invokes the existing cleanup hooks
-      // for its Keystone consumer and external Kong/IdP credentials.
-      await deleteServiceAccess(noauthContext, serviceAccessId);
+      // Deleting ServiceAccess invokes existing cleanup hooks for its
+      // Keystone consumer and external Kong/IdP credentials.
+      await deleteServiceAccess(context, state.serviceAccessId);
     } catch (cleanupError) {
       logger.error(
-        '[issueGatewayCredential] Failed to clean up %s after issuance error: %s',
-        clientId,
+        '[issueGatewayCredential] Failed to clean up ServiceAccess %s: %s',
+        state.serviceAccessId,
         cleanupError
       );
     }
-    throw error;
   }
 
-  logger.info(
-    '[issueGatewayCredential] Issued %s for gateway %s',
-    clientId,
-    gatewayId
-  );
-
-  return newCredential;
+  if (state.createdNewApplication && state.application?.id) {
+    try {
+      await deleteApplication(context, state.application.id);
+    } catch (cleanupError) {
+      logger.error(
+        '[issueGatewayCredential] Failed to clean up Application %s: %s',
+        state.application.id,
+        cleanupError
+      );
+    }
+  }
 }
 
 async function resolveApplication(
@@ -261,7 +305,11 @@ async function validateIssuerForFlow(
   }
 
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-  assert.strictEqual(openid != null, true, 'Discovery URL invalid for Credential Issuer');
+  assert.strictEqual(
+    openid != null,
+    true,
+    'Discovery URL invalid for Credential Issuer'
+  );
 
   const clientRegistration = issuerEnvConfig.clientRegistration;
   assert.strictEqual(
@@ -287,13 +335,17 @@ async function validateControls(
   controls: RequestControls,
   productEnvironment: Environment
 ) {
-  if (controls.jwksUrl) {
+  const hasJwks = Boolean(controls.jwksUrl);
+  const hasCertificate = Boolean(controls.clientCertificate);
+  const hasGeneratedCert = Boolean(controls.clientGenCertificate);
+
+  if (hasJwks) {
     assert.strictEqual(
       await IsJWKSURLValid(controls.jwksUrl),
       true,
       'JWKS Url failed validation'
     );
-  } else if (controls.clientCertificate) {
+  } else if (hasCertificate) {
     assert.strictEqual(
       IsCertificateValid(controls.clientCertificate),
       true,
@@ -301,13 +353,69 @@ async function validateControls(
     );
   }
 
-  if (
-    productEnvironment.flow === 'client-credentials' &&
-    productEnvironment.credentialIssuer?.clientAuthenticator ===
-      'client-jwt-jwks-url'
-  ) {
-    // Caller may supply jwksUrl or certificate depending on authenticator; soft check only
+  if (productEnvironment.flow !== 'client-credentials') {
+    return;
   }
+
+  const authenticator =
+    productEnvironment.credentialIssuer?.clientAuthenticator;
+
+  assert.strictEqual(
+    Boolean(authenticator),
+    true,
+    'Credential Issuer clientAuthenticator is not configured for this Product Environment'
+  );
+
+  if (authenticator === 'client-secret') {
+    assert.strictEqual(
+      hasJwks || hasCertificate || hasGeneratedCert,
+      false,
+      'client-secret authenticator does not accept jwksUrl, clientCertificate, or clientGenCertificate'
+    );
+    return;
+  }
+
+  if (authenticator === 'client-jwt') {
+    assert.strictEqual(
+      hasJwks,
+      false,
+      'client-jwt authenticator does not accept jwksUrl'
+    );
+    assert.strictEqual(
+      hasGeneratedCert || hasCertificate,
+      true,
+      'client-jwt requires clientGenCertificate or clientCertificate'
+    );
+    assert.strictEqual(
+      hasGeneratedCert && hasCertificate,
+      false,
+      'Provide only one of clientGenCertificate or clientCertificate'
+    );
+    return;
+  }
+
+  if (authenticator === 'client-jwt-jwks-url') {
+    assert.strictEqual(
+      hasGeneratedCert,
+      false,
+      'client-jwt-jwks-url does not accept clientGenCertificate'
+    );
+    assert.strictEqual(
+      hasJwks || hasCertificate,
+      true,
+      'client-jwt-jwks-url requires jwksUrl or clientCertificate'
+    );
+    assert.strictEqual(
+      hasJwks && hasCertificate,
+      false,
+      'Provide only one of jwksUrl or clientCertificate'
+    );
+    return;
+  }
+
+  throw new Error(
+    `Unsupported clientAuthenticator '${authenticator}' for credential issuance`
+  );
 }
 
 async function createCredential(
@@ -325,137 +433,251 @@ async function createCredential(
   const flow = productEnvironment.flow;
   const nickname = clientId;
 
-  if (flow == 'kong-api-key-acl' || flow == 'kong-api-key-only') {
-    const newApiKey = await registerApiKey(
-      context,
-      clientId,
-      nickname,
-      application
-    );
+  let serviceAccessId: string | undefined;
+  let kongConsumerExtId: string | undefined;
+  let keystoneConsumerId: string | undefined;
+  let keycloakClientCreated = false;
 
-    await feederApi.forceSync('kong', 'consumer', newApiKey.consumer.id);
-
-    const credentialReference: CredentialReference = {
-      keyAuthPK: newApiKey.apiKey.keyAuthPK,
-      clientId,
-    };
-
-    const aclEnabled = flow == 'kong-api-key-acl';
-    const serviceAccessId = await addServiceAccess(
-      context,
-      clientId,
-      false,
-      aclEnabled,
-      'client',
-      credentialReference,
-      null,
-      newApiKey.consumerPK,
-      productEnvironment,
-      application
-    );
-
-    const consumer = await lookupKongConsumerByCustomId(context, clientId);
-
-    return {
-      newCredential: {
-        flow,
-        apiKey: newApiKey.apiKey.apiKey,
+  try {
+    if (flow == 'kong-api-key-acl' || flow == 'kong-api-key-only') {
+      const newApiKey = await registerApiKey(
+        context,
         clientId,
-      } as NewCredential,
-      serviceAccessId,
-      consumer,
-    };
-  }
+        nickname,
+        application
+      );
+      kongConsumerExtId = newApiKey.consumer.id;
+      keystoneConsumerId = newApiKey.consumerPK;
 
-  if (flow == 'client-credentials') {
-    const clientSigning: any = { publicKey: null, privateKey: null };
+      await feederApi.forceSync('kong', 'consumer', newApiKey.consumer.id);
 
-    if (controls.clientGenCertificate) {
-      const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-          type: 'spki',
-          format: 'pem',
-        },
-        privateKeyEncoding: {
-          type: 'pkcs8',
-          format: 'pem',
-        },
-      });
-      clientSigning.publicKey = publicKey;
-      clientSigning.privateKey = privateKey;
-      controls.clientCertificate = clientSigning.publicKey;
+      const credentialReference: CredentialReference = {
+        keyAuthPK: newApiKey.apiKey.keyAuthPK,
+        clientId,
+      };
+
+      const aclEnabled = flow == 'kong-api-key-acl';
+      serviceAccessId = await addServiceAccess(
+        context,
+        clientId,
+        false,
+        aclEnabled,
+        'client',
+        credentialReference,
+        null,
+        newApiKey.consumerPK,
+        productEnvironment,
+        application
+      );
+
+      const consumer = await lookupKongConsumerByCustomId(context, clientId);
+
+      return {
+        newCredential: {
+          flow,
+          apiKey: newApiKey.apiKey.apiKey,
+          clientId,
+        } as NewCredential,
+        serviceAccessId,
+        consumer,
+      };
     }
 
-    const newClient = await registerClient(
-      context,
-      productEnvironment.name,
-      productEnvironment.credentialIssuer.id,
-      controls,
-      clientId
-    );
+    if (flow == 'client-credentials') {
+      const clientSigning: any = { publicKey: null, privateKey: null };
 
-    const kongApi = new KongConsumerService(process.env.KONG_URL);
-    const kongConsumer = await kongApi.createKongConsumer(
-      nickname,
-      clientId,
-      application
-    );
-    const consumerPK = await AddClientConsumer(
-      context,
-      nickname,
-      clientId,
-      kongConsumer.id
-    );
+      if (controls.clientGenCertificate) {
+        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+          modulusLength: 4096,
+          publicKeyEncoding: {
+            type: 'spki',
+            format: 'pem',
+          },
+          privateKeyEncoding: {
+            type: 'pkcs8',
+            format: 'pem',
+          },
+        });
+        clientSigning.publicKey = publicKey;
+        clientSigning.privateKey = privateKey;
+        controls.clientCertificate = clientSigning.publicKey;
+      }
 
-    await feederApi.forceSync('kong', 'consumer', kongConsumer.id);
+      const newClient = await registerClient(
+        context,
+        productEnvironment.name,
+        productEnvironment.credentialIssuer.id,
+        controls,
+        clientId
+      );
+      keycloakClientCreated = true;
 
-    const credentialReference: CredentialReference = {
-      id: newClient.client.id,
-      clientId: newClient.client.clientId,
-      clientCertificate: controls.clientCertificate,
-      jwksUrl: controls.jwksUrl,
-      issuer:
-        controls.jwksUrl || controls.clientCertificate
-          ? newClient.openid.issuer
-          : null,
-      tokenEndpoint: newClient.openid.token_endpoint,
-    };
+      const kongApi = new KongConsumerService(process.env.KONG_URL);
+      const kongConsumer = await kongApi.createKongConsumer(
+        nickname,
+        clientId,
+        application
+      );
+      kongConsumerExtId = kongConsumer.id;
+      keystoneConsumerId = await AddClientConsumer(
+        context,
+        nickname,
+        clientId,
+        kongConsumer.id
+      );
 
-    const serviceAccessId = await addServiceAccess(
-      context,
-      clientId,
-      false,
-      false,
-      'client',
-      credentialReference,
-      null,
-      consumerPK,
-      productEnvironment,
-      application
-    );
+      await feederApi.forceSync('kong', 'consumer', kongConsumer.id);
 
-    const consumer = await lookupKongConsumerByCustomId(context, clientId);
-
-    return {
-      newCredential: {
-        flow: productEnvironment.flow,
+      const credentialReference: CredentialReference = {
+        id: newClient.client.id,
         clientId: newClient.client.clientId,
-        clientSecret: controls.clientGenCertificate
-          ? null
-          : newClient.client.clientSecret,
+        clientCertificate: controls.clientCertificate,
+        jwksUrl: controls.jwksUrl,
         issuer:
           controls.jwksUrl || controls.clientCertificate
             ? newClient.openid.issuer
             : null,
         tokenEndpoint: newClient.openid.token_endpoint,
-        clientPublicKey: clientSigning.publicKey,
-        clientPrivateKey: clientSigning.privateKey,
-      } as NewCredential,
-      serviceAccessId,
-      consumer,
-    };
+      };
+
+      serviceAccessId = await addServiceAccess(
+        context,
+        clientId,
+        false,
+        false,
+        'client',
+        credentialReference,
+        null,
+        keystoneConsumerId,
+        productEnvironment,
+        application
+      );
+
+      const consumer = await lookupKongConsumerByCustomId(context, clientId);
+
+      return {
+        newCredential: {
+          flow: productEnvironment.flow,
+          clientId: newClient.client.clientId,
+          clientSecret: controls.clientGenCertificate
+            ? null
+            : newClient.client.clientSecret,
+          issuer:
+            controls.jwksUrl || controls.clientCertificate
+              ? newClient.openid.issuer
+              : null,
+          tokenEndpoint: newClient.openid.token_endpoint,
+          clientPublicKey: clientSigning.publicKey,
+          clientPrivateKey: clientSigning.privateKey,
+        } as NewCredential,
+        serviceAccessId,
+        consumer,
+      };
+    }
+
+    throw new Error(`Unsupported flow: ${flow}`);
+  } catch (error) {
+    if (serviceAccessId) {
+      try {
+        await deleteServiceAccess(context, serviceAccessId);
+      } catch (cleanupError) {
+        logger.error(
+          '[createCredential] Failed to clean up ServiceAccess %s: %s',
+          serviceAccessId,
+          cleanupError
+        );
+      }
+    } else {
+      await cleanupPartialCredentialResources(context, productEnvironment, {
+        clientId,
+        kongConsumerExtId,
+        keystoneConsumerId,
+        keycloakClientCreated,
+      });
+    }
+    throw error;
+  }
+}
+
+async function cleanupPartialCredentialResources(
+  context: any,
+  productEnvironment: Environment,
+  partial: {
+    clientId: string;
+    kongConsumerExtId?: string;
+    keystoneConsumerId?: string;
+    keycloakClientCreated: boolean;
+  }
+) {
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
+
+  if (partial.keystoneConsumerId) {
+    try {
+      await deleteRecord(
+        context,
+        'GatewayConsumer',
+        { id: partial.keystoneConsumerId },
+        ['id']
+      );
+    } catch (cleanupError) {
+      logger.error(
+        '[createCredential] Failed to clean up Keystone consumer %s: %s',
+        partial.keystoneConsumerId,
+        cleanupError
+      );
+    }
   }
 
-  throw new Error(`Unsupported flow: ${flow}`);
+  if (partial.kongConsumerExtId) {
+    try {
+      await kongApi.deleteConsumer(partial.kongConsumerExtId);
+    } catch (cleanupError) {
+      logger.error(
+        '[createCredential] Failed to clean up Kong consumer %s: %s',
+        partial.kongConsumerExtId,
+        cleanupError
+      );
+    }
+  }
+
+  if (
+    partial.keycloakClientCreated &&
+    productEnvironment.flow === 'client-credentials' &&
+    productEnvironment.credentialIssuer?.id
+  ) {
+    try {
+      const issuer = await lookupCredentialIssuerById(
+        context,
+        productEnvironment.credentialIssuer.id
+      );
+      const issuerEnvConfig = getIssuerEnvironmentConfig(
+        issuer,
+        productEnvironment.name
+      );
+      const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+      const token =
+        issuerEnvConfig.clientRegistration == 'anonymous'
+          ? null
+          : issuerEnvConfig.clientRegistration == 'managed'
+          ? await new KeycloakTokenService(
+              openid.token_endpoint
+            ).getKeycloakSession(
+              issuerEnvConfig.clientId,
+              issuerEnvConfig.clientSecret
+            )
+          : issuerEnvConfig.initialAccessToken;
+
+      await new KeycloakClientRegistrationService(
+        issuerEnvConfig.issuerUrl,
+        openid.registration_endpoint,
+        token
+      ).deleteClientRegistration(partial.clientId);
+    } catch (cleanupError) {
+      logger.error(
+        '[createCredential] Failed to clean up Keycloak client %s: %s',
+        partial.clientId,
+        cleanupError
+      );
+    }
+  }
 }

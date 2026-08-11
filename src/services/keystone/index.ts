@@ -10,7 +10,13 @@ export {
 
 export { recordActivity, recordActivityWithBlob } from './activity';
 
-export { lookupApplication, lookupMyApplicationsById, lookupApplicationByAppId, addApplication } from './application';
+export {
+  lookupApplication,
+  lookupMyApplicationsById,
+  lookupApplicationByAppId,
+  addApplication,
+  deleteApplication,
+} from './application';
 
 export { deleteRecord, deleteRecords } from './common-delete-record';
 

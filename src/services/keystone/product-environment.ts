@@ -42,6 +42,7 @@ export async function lookupProductEnvironmentServices(
                               environmentDetails
                             }
                             clientId
+                            clientAuthenticator
                         }
                         services {
                             name
