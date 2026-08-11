@@ -34,7 +34,7 @@ checked against (Keycloak/UMA2 resolves the resource dynamically per-request —
 | GET `/organizations/{org}/connections` | OrgConnection.listConnections | `System.Manage` **or** `Connection.Manage` | Organization for `System.Manage` (returns every connection); for `Connection.Manage`, discovery-based across every gateway the caller holds it on — the response is filtered to connections for services on those gateways (see "Listing connections and oas-services with gateway-scoped permissions" below) |
 | DELETE `/organizations/{org}/connections/{id}` | OrgConnection.deleteConnection | `System.Manage` **or** `Subsystem.Manage` | Organization; or **Gateway** (service) via `{id}` looked up to that connection's own `serviceId` |
 | PUT `/organizations/{org}/connections/approval` | OrgConnection.updateConnectionApproval | `Connection.Manage` | **Gateway** (service) |
-| PUT `/organizations/{org}/patterns/{pattern}` | OrgGateways.provisionConfigFromPattern | `GatewayPattern.Publish` | **Gateway** (dynamic) |
+| PUT `/organizations/{org}/patterns/{pattern}` | OrgGateways.provisionConfigFromPattern | `System.Manage` **or** `GatewayPattern.Publish` **(fixed — see Inconsistency #7)** | Organization; or **Gateway** (dynamic) |
 | PUT `/organizations/{org}/gateway` | OrgGateways.registerOrganizationGateway | `System.Manage` | Organization |
 | POST `/organizations/{org}/keys` | OrgKeys.createNewKey | `System.Manage` | Organization |
 | PUT `/organizations/{org}/runtime-groups` | RuntimeGroup.createRuntimeGroup | `System.Manage` | Organization |
@@ -60,9 +60,9 @@ checked against (Keycloak/UMA2 resolves the resource dynamically per-request —
 
 | Role (Keycloak client role, from scope) | Source scope | What it gets in sdx/v1 |
 |---|---|---|
-| `system-admin` | `System.Manage` | Full CRUD across virtually the entire API for the org(s) they hold this on: subsystems, runtime groups, keys, OAS services, connections (except approval), org gateway registration, org activity, and (as of SP136) subsystem RBAC access. This is the de-facto "org admin" role (see `PredefinedRolePermissions['system-admin']` in `src/services/org-groups/roles.ts` and `OrganizationRoles` in `src/services/org-groups/group-access.ts`). |
+| `system-admin` | `System.Manage` | Full CRUD across virtually the entire API for the org(s) they hold this on: subsystems, runtime groups, keys, OAS services, connections (except approval), org gateway registration, org activity, pattern-based gateway config provisioning (as of the fix in Inconsistency #7), and (as of SP136) subsystem RBAC access. This is the de-facto "org admin" role (see `PredefinedRolePermissions['system-admin']` in `src/services/org-groups/roles.ts` and `OrganizationRoles` in `src/services/org-groups/group-access.ts`). |
 | `connection-manager` | `Connection.Manage` | Connection **approval**, scoped to the specific service's gateway. Can now also **list** connections (`GET /organizations/{org}/connections`) — a `connection-manager`-only holder gets back connections for services on the gateways they hold the scope on, not the whole org's, via the same discovery-based filtering as `Subsystem.Manage` (see below). Still cannot create or delete connections. |
-| `pattern-publisher` | `GatewayPattern.Publish` | Gateway config provisioning via pre-defined patterns, scoped to whatever gateway (org/subsystem/runtime-group/service) the pattern targets. |
+| `pattern-publisher` | `GatewayPattern.Publish` | Gateway config provisioning via pre-defined patterns, scoped to whatever gateway (org/subsystem/runtime-group/service) the pattern targets — `system-admin` (`System.Manage`) is now an org-wide alternative (see Inconsistency #7), needed in particular for org-scoped patterns (e.g. `sdx-keys.r1` with no `clientId`/`runtimeGroupName`), since nothing ever grants `GatewayPattern.Publish` on the org gateway itself to a human caller. |
 | `subsystem-manager` | `Subsystem.Manage` **(new)** | Full CRUD on `oas-services` (create/list/get/spec/delete) **and** create/delete on `connections`, all scoped to the target service's or subsystem's gateway at the sdx/v1 REST layer — an alternative to `system-admin` for delegating subsystem-level management without full org-wide `System.Manage`. Listing (`oas-services` only — `connections` listing uses `Connection.Manage` instead) works too: a `Subsystem.Manage`-only holder gets back just the services on gateways they hold the scope on, not the whole org's (see "Listing connections and oas-services with gateway-scoped permissions" below). `scopesToRoles()` (`src/auth/scope-role-utils.ts`) synthesizes this as the `subsystem-manager` role, and `src/authz/matrix.csv` grants it create/update/delete on `OpenAPISpec` and `ConnectionRequest` **without any namespace filter** — i.e. a JWT/M2M caller with `Subsystem.Manage` hits the Keystone GraphQL API directly (bypassing sdx/v1's per-gateway UMA2 checks entirely) gets **blanket**, org-wide CRUD on every subsystem's services/connections, not just gateways it holds the scope on. This mirrors how `system-admin`'s matrix.csv rows are also unfiltered — the same scope means "this one gateway" via sdx/v1 REST but "everything" via direct GraphQL access; see Inconsistency #6. |
 | `organization-admin` | `GroupAccess.Manage` (also gets `Namespace.Assign`, `Dataset.Manage`) | Nothing in sdx/v1 — no v1 endpoint requires `GroupAccess.Manage`. Instead this is the *role-administration* role: it's what lets a user grant/revoke `organization-admin` and `system-admin` themselves, via `GET/PUT /organizations/{org}/roles` and `GET/PUT /organizations/{org}/access` on `src/controllers/v3/OrganizationController.ts`. Distinct from `system-admin`, which does the org's operational CRUD but doesn't inherently manage who else holds these roles. |
 | *(any caller, incl. anonymous)* | — | Read all public catalog listings, including individual OAS specs and, as of this change, individual service detail (`GET /catalog/services/{name}` is now public — see Inconsistency #4). |
@@ -362,3 +362,27 @@ that and the new `getPermittedNamespaceNames` share the ticket-exchange logic.
    case for anything that talks to Keystone's GraphQL API directly. Worth documenting explicitly
    as "this scope is only gateway-scoped through sdx/v1; a direct GraphQL/M2M client with it is
    effectively org-wide," or tightening `matrix.csv` with a namespace filter to match.
+
+7. **`system-admin` couldn't provision org-scoped gateway patterns — `[fixed]`.**
+   `provisionConfigFromPattern` (`PUT /organizations/{org}/patterns/{pattern}`) was declared with
+   `@Security('jwt', ['GatewayPattern.Publish'])` only, despite its own docstring claiming
+   `Required Scope: System.Manage`. For subsystem/runtime-group/service-targeted patterns this
+   was fine — `GatewayPattern.Publish` on that gateway is granted to the creator via the
+   `subsystem-owner`/`tech-lead` roles (see roles table above). But for **org-scoped** patterns —
+   `pattern === 'sdx-keys.r1'` with neither `body.parameters.clientId` nor `runtimeGroupName` set
+   (see `scope`/`targetName` derivation in the controller) — the resource being checked is the
+   org's own gateway namespace, and nothing anywhere grants `GatewayPattern.Publish` on an
+   org-level gateway to a human caller: `CreateNamespaceForOrganization` (unlike the subsystem/
+   runtime-group namespace-creation paths) never calls `prepareRoleAssignments`, so there's no
+   role-based grant, and the org creator's direct grant is `Namespace.Manage` only (see "Gateway
+   registration side effects" above). Confirmed via a manual `PUT
+   .../patterns/sdx-keys.r1?action=apply` call (no `clientId`/`runtimeGroupName` in the body) from
+   a `system-admin`-only user returning a 403. Fixed by adding `System.Manage` as an alternative
+   scope (`@Security('jwt', ['System.Manage', 'GatewayPattern.Publish'])`, `System.Manage` tried
+   first since it resolves to the cheap `org/{org}` check rather than the pattern-based gateway
+   lookup) — matching the endpoint's own docstring and the org-wide-fallback pattern used
+   everywhere else in this doc, rather than inventing a new org-gateway role-grant mechanism. This
+   is the second instance of the same underlying failure mode as the `matrix.csv` gap that blocked
+   `system-admin` from creating `ConnectionRequest`/`OpenAPISpec` records (a documented/intended
+   `System.Manage` alternative that the actual enforcement layer never wired up) — worth an
+   audit of the remaining multi-scope endpoints to check none of the others have the same gap.

@@ -91,14 +91,14 @@ export class OrgGatewaysController extends Controller {
   }
 
   /**
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or GatewayPattern.Publish
    *
    * @summary Provision gateway config from pre-defined patterns
    * @produces application/yaml
    */
   @Put('/patterns/{pattern}')
   @OperationId('provisionConfigFromPattern')
-  @Security('jwt', ['GatewayPattern.Publish'])
+  @Security('jwt', ['System.Manage', 'GatewayPattern.Publish'])
   @SuccessResponse('200', 'OK')
   @Example<any>({
     documents: [
