@@ -35,6 +35,13 @@ import { getRoutePathPrefix } from '../../../services/utils';
 import { GroupAccessService } from '../../../services/org-groups';
 import { SysGroupAccessService } from '../../../services/org-groups/sys-group-access';
 import { GroupMember, GroupMembership } from '../../../services/org-groups/types';
+import {
+  buildOrgAccessDisplayNameResolver,
+  logSubsystemAccessChanges,
+} from '../../../services/workflow/org-activity';
+import { Logger } from '../../../logger';
+
+const logger = Logger('controller.org-subsystem');
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -277,7 +284,7 @@ export class OrgSubsystemController extends Controller {
       envConfig.clientSecret
     );
 
-    await sysGroupAccessService.createOrUpdateGroupAccess(
+    const changes = await sysGroupAccessService.createOrUpdateGroupAccess(
       'subsystem',
       {
         name: client.clientId,
@@ -285,6 +292,22 @@ export class OrgSubsystemController extends Controller {
         members: body.members,
       },
       ['idir']
+    );
+
+    const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
+      envConfig.issuerUrl,
+      envConfig.clientId,
+      envConfig.clientSecret
+    );
+
+    await logSubsystemAccessChanges(
+      context,
+      org,
+      name,
+      changes,
+      resolveDisplayName
+    ).catch((e) =>
+      logger.error('[OrgActivity] subsystem access changes %s', e)
     );
   }
 }
