@@ -384,6 +384,7 @@ const models: TsoaRoute.Models = {
             "enabled": {"dataType":"boolean","required":true},
             "permDataPlane": {"dataType":"string"},
             "permDomains": {"dataType":"array","array":{"dataType":"string"}},
+            "permRuntimeGroup": {"dataType":"string"},
             "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -429,6 +430,7 @@ const models: TsoaRoute.Models = {
             "gatewayId": {"dataType":"string"},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
+            "organization": {"ref":"OrganizationRefID"},
         },
         "additionalProperties": false,
     },
@@ -804,7 +806,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v3/gateways/:gatewayId',
-            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+            authenticateMiddleware([{"jwt":["Namespace.View"]},{"jwt":["Namespace.Manage"]}]),
 
             async function NamespaceController_profile(request: any, response: any, next: any) {
             const args = {
