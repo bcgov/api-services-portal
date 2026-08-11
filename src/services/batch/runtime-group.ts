@@ -287,6 +287,18 @@ class RuntimeGroupService {
     org: string,
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
+    let validSdxEndpoint = true;
+    try {
+      new URL(runtimeGroup.sdxEndpoint);
+    } catch {
+      validSdxEndpoint = false;
+    }
+    assert.strictEqual(
+      validSdxEndpoint,
+      true,
+      'A valid SDX Endpoint URL is required for requesting a token'
+    );
+
     // The provisioner resolves the target step-ca instance from the runtime
     // group's environment, rather than the portal calling a single, global
     // step-ca directly. It also derives the certificate subject and SANs

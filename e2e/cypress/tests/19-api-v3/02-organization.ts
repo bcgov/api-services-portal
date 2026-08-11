@@ -205,7 +205,7 @@ describe('Organization', () => {
         permissions: [
           {
             resourceType: 'namespace',
-            scopes: ['Namespace.Manage', 'Namespace.View', 'Subsystem.Manage', 'GatewayPattern.Publish'],
+            scopes: ['Namespace.View', 'Subsystem.Manage'],
           },
         ],
       },
