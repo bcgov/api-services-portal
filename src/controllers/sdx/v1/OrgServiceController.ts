@@ -68,8 +68,7 @@ export class GatewayServiceController extends Controller {
    */
   @Put()
   @OperationId('createOASService')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async createOASService(
     @Path() org: string,
     @Query() subsystem: string,
@@ -140,8 +139,7 @@ export class GatewayServiceController extends Controller {
    */
   @Get()
   @OperationId('listOrganizationOASServices')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async listOrganizationServices(
     @Path() org: string,
     @Request() request: any
@@ -189,8 +187,7 @@ export class GatewayServiceController extends Controller {
    */
   @Get('/{name}')
   @OperationId('getOrganizationOASService')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async getOrganizationOASService(
     @Path() org: string,
     @Path('name') name: string,
@@ -223,8 +220,7 @@ export class GatewayServiceController extends Controller {
    */
   @Get('/{name}/oas-spec')
   @OperationId('getOrganizationServiceSpec')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async getOrganizationServiceSpec(
     @Path() org: string,
     @Path('name') name: string,
@@ -261,8 +257,7 @@ export class GatewayServiceController extends Controller {
    */
   @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')
-  @Security('jwt', ['System.Manage'])
-  @Security('jwt', ['Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async delete(
     @Path() org: string,
     @Path('name') name: string,
