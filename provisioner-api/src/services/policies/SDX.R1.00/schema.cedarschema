@@ -65,7 +65,7 @@ namespace SDX {
                         gwa_api_url: String,
                         operator_edge_url: String,
                         ca_token_url: String,
-                        public_url: String
+                        public_url?: String
                     }
                 }
             }
