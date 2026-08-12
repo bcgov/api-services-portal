@@ -35,6 +35,14 @@ export type EnvironmentConfig = {
    * issuance. Each environment has its own step-ca instance.
    */
   ca_token_url?: string;
+  /**
+   * Public-facing base URL for this environment's SDX JWKS endpoints (e.g.
+   * `https://sdx.gov.bc.ca`), used to build the `jwks_uri` gateway plugin
+   * config peers use to verify signed requests/responses. Unlike
+   * `operator_edge_url`, this must be reachable by whichever party is
+   * verifying the signature, not just from the internal SDX network.
+   */
+  public_url?: string;
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
@@ -115,6 +123,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'gwa_api_url', name, path);
     optionalString(entry, 'operator_edge_url', name, path);
     optionalString(entry, 'ca_token_url', name, path);
+    optionalString(entry, 'public_url', name, path);
     result[name] = {
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
@@ -122,6 +131,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
       gwa_api_url: entry.gwa_api_url as string | undefined,
       operator_edge_url: entry.operator_edge_url as string | undefined,
       ca_token_url: entry.ca_token_url as string | undefined,
+      public_url: entry.public_url as string | undefined,
     };
   }
   return result;

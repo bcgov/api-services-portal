@@ -7,8 +7,8 @@ import type {
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
-
-const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'https://sdx.gov.bc.ca';
+import { loadEnvironments } from '../../config/environments.js';
+import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 
 export interface SDXServiceConfig {
   serviceId: string;
@@ -284,6 +284,17 @@ function upgradeToACL(tags: string[], data: SDXServicePatternData) {
 function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
   const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name!}:0`;
   const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
+  const environment = data.subsystemRuntimeGroup.environment!;
+
+  const publicUrl = loadEnvironments()[environment]?.public_url;
+  if (!publicUrl) {
+    throw withDetails(
+      new BadGatewayError(
+        `SDX public URL is not configured for environment '${environment}'`
+      ),
+      { environment, missing: 'public_url' }
+    );
+  }
 
   return {
     name: 'trust-sign',
@@ -294,7 +305,7 @@ function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: 'ES256',
-      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
+      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
   };
