@@ -1,0 +1,18 @@
+name: Review PR
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+
+jobs:
+  review:
+    uses: bcgov/aps-devops/.github/workflows/pr-multi-review.yml@main
+    with:
+      pr_number: ${{ inputs.pr_number }}
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
