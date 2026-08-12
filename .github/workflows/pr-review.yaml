@@ -8,7 +8,7 @@ on:
 
 jobs:
   review:
-    uses: bcgov/aps-devops/.github/workflows/pr-multi-review.yml@main
+    uses: bcgov/aps-devops/.github/workflows/pr-multi-review.yml@pr-multi-review
     with:
       pr_number: ${{ inputs.pr_number }}
     secrets: inherit
