@@ -3,8 +3,7 @@ import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
-import { loadEnvironments } from '../../config/environments.js';
-import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
+import { getRequiredEnvironmentField } from '../../config/environments.js';
 
 export interface SDXRuntimeGroupPatternConfig {
   organization: string;
@@ -72,17 +71,9 @@ export class SDXRuntimeGroupPattern implements PatternProcessor {
     const consumerUrl = new URL(data.runtimeGroup.consumerEndpoint!);
     const consumerHost = consumerUrl.hostname;
 
-    const operatorEdgeUrl = loadEnvironments()[inputs.environment]
-      ?.operator_edge_url;
-    if (!operatorEdgeUrl) {
-      throw withDetails(
-        new BadGatewayError(
-          `SDX Operator edge server is not configured for environment '${inputs.environment}'`
-        ),
-        { environment: inputs.environment, missing: 'operator_edge_url' }
-      );
-    }
-    const routeHostUrl = new URL(operatorEdgeUrl);
+    const routeHostUrl = new URL(
+      getRequiredEnvironmentField(inputs.environment, 'operator_edge_url')
+    );
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 

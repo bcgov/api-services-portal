@@ -44,6 +44,11 @@ export const ERROR_META: Record<string, ProblemMeta> = {
     title: 'Internal server error',
     type: `${TYPE_BASE}internal-error`,
   },
+  CONFIGURATION_ERROR: {
+    status: 500,
+    title: 'Configuration error',
+    type: `${TYPE_BASE}configuration-error`,
+  },
   BAD_GATEWAY: {
     status: 502,
     title: 'Bad gateway',
@@ -77,6 +82,7 @@ export const UnprocessableEntityError = createError(
   422
 );
 export const InternalError = createError('INTERNAL_ERROR', '%s', 500);
+export const ConfigurationError = createError('CONFIGURATION_ERROR', '%s', 500);
 export const BadGatewayError = createError('BAD_GATEWAY', '%s', 502);
 export const ServiceUnavailableError = createError(
   'SERVICE_UNAVAILABLE',

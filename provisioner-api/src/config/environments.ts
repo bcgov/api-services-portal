@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { ConfigurationError, withDetails } from '../errors/api-errors.js';
 
 /**
  * Per-environment configuration. Sourced entirely from the external file named
@@ -100,6 +101,33 @@ export function loadEnvironments(): EnvironmentsConfig {
 /** Resets the cached config. Intended for tests. */
 export function resetEnvironmentsCache(): void {
   cached = undefined;
+}
+
+const REQUIRED_FIELD_LABELS: Partial<Record<keyof EnvironmentConfig, string>> = {
+  operator_edge_url: 'SDX Operator edge server',
+  public_url: 'SDX public URL',
+};
+
+/**
+ * Looks up a per-environment config field that a gateway pattern needs to
+ * build its plugin config, throwing a {@link ConfigurationError} (rather than
+ * failing further downstream with a less specific error) if it's absent.
+ */
+export function getRequiredEnvironmentField(
+  environment: string,
+  field: keyof EnvironmentConfig
+): string {
+  const value = loadEnvironments()[environment]?.[field];
+  if (!value) {
+    const label = REQUIRED_FIELD_LABELS[field] ?? field;
+    throw withDetails(
+      new ConfigurationError(
+        `${label} is not configured for environment '${environment}'`
+      ),
+      { environment, missing: field }
+    );
+  }
+  return value;
 }
 
 function validate(parsed: unknown, path: string): EnvironmentsConfig {
