@@ -4,8 +4,8 @@ import type { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { OAuthClient } from '../../clients/oauth.js';
-
-const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
+import { loadEnvironments } from '../../config/environments.js';
+import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
@@ -188,7 +188,7 @@ export class SDXKeysPattern implements PatternProcessor {
     } as SDXKeysPatternData;
   }
 
-  eval(_: Record<string, string>, data: SDXKeysPatternData) {
+  eval(inputs: SDXKeyConfig, data: SDXKeysPatternData) {
     const profile = data.profile;
 
     let tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
@@ -223,7 +223,17 @@ export class SDXKeysPattern implements PatternProcessor {
       });
     }
 
-    const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
+    const operatorEdgeUrl = loadEnvironments()[inputs.environment]
+      ?.operator_edge_url;
+    if (!operatorEdgeUrl) {
+      throw withDetails(
+        new BadGatewayError(
+          `SDX Operator edge server is not configured for environment '${inputs.environment}'`
+        ),
+        { environment: inputs.environment, missing: 'operator_edge_url' }
+      );
+    }
+    const routeHostUrl = new URL(operatorEdgeUrl);
 
     const info = {
       kind: 'Information',
