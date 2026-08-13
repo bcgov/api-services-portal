@@ -526,8 +526,6 @@ async function createCredential(
         kongConsumer.id
       );
 
-      await feederApi.forceSync('kong', 'consumer', kongConsumer.id);
-
       const credentialReference: CredentialReference = {
         id: newClient.client.id,
         clientId: newClient.client.clientId,

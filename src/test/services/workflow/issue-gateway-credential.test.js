@@ -3,6 +3,7 @@ import * as keystone from '../../../services/keystone';
 import * as apply from '../../../services/workflow/apply';
 import * as consumerMgmt from '../../../services/workflow/consumer-management';
 import * as kongApiKey from '../../../services/workflow/kong-api-key';
+import * as clientCredentials from '../../../services/workflow/client-credentials';
 
 jest.mock('../../../services/keystone', () => ({
   lookupEnvironmentByAppIdInNamespace: jest.fn(),
@@ -104,6 +105,7 @@ const deleteServiceAccess = keystone.deleteServiceAccess;
 const setupAuthorizationAndEnable = apply.setupAuthorizationAndEnable;
 const saveConsumerLabels = consumerMgmt.saveConsumerLabels;
 const registerApiKey = kongApiKey.registerApiKey;
+const registerClient = clientCredentials.registerClient;
 
 const GATEWAY = 'notify';
 const ENV_APP_ID = '23C4F461';
@@ -172,6 +174,17 @@ beforeEach(() => {
     apiKey: { apiKey: 'secret-api-key', keyAuthPK: 'key-pk' },
     consumer: { id: 'kong-1' },
     consumerPK: 'consumer-1',
+  });
+  registerClient.mockResolvedValue({
+    openid: {
+      issuer: 'https://idp/realms/x',
+      token_endpoint: 'https://idp/token',
+    },
+    client: {
+      id: 'keycloak-1',
+      clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
+      clientSecret: 'client-secret',
+    },
   });
   addServiceAccess.mockResolvedValue('sa-1');
   keystone.lookupCredentialIssuerById.mockResolvedValue({
@@ -394,6 +407,29 @@ describe('issueGatewayCredential', function () {
       'sa-1'
     );
     expect(deleteApplication).not.toHaveBeenCalled();
+  });
+
+  it('does not repeat the feeder sync after adding a client consumer', async function () {
+    const env = clientCredentialsEnvironment('client-secret');
+    lookupEnvironmentByAppIdInNamespace.mockResolvedValue(env);
+    lookupProductEnvironmentServices.mockResolvedValue(env);
+
+    const result = await issueGatewayCredential(buildContext(), GATEWAY, {
+      environmentAppId: ENV_APP_ID,
+      application: { name: 'client-app' },
+      controls: {},
+    });
+
+    expect(mockForceSync).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      flow: 'client-credentials',
+      clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
+      clientSecret: 'client-secret',
+      issuer: null,
+      tokenEndpoint: 'https://idp/token',
+      clientPublicKey: null,
+      clientPrivateKey: null,
+    });
   });
 
   describe('client-credentials signing controls', function () {
