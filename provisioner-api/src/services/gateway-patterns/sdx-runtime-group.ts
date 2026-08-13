@@ -3,8 +3,7 @@ import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import type { RuntimeGroup } from '../../clients/sdx-member/index.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
-
-const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
+import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXRuntimeGroupPatternConfig {
   organization: string;
@@ -72,7 +71,12 @@ export class SDXRuntimeGroupPattern implements PatternProcessor {
     const consumerUrl = new URL(data.runtimeGroup.consumerEndpoint!);
     const consumerHost = consumerUrl.hostname;
 
-    const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
+    const operatorEdgeUrl = getRequiredEnvUrl(
+      inputs.environment,
+      'operator_edge_url',
+      'SDX Operator edge server'
+    );
+    const routeHostUrl = new URL(operatorEdgeUrl);
 
     let tags = [`ns.${gw}.${nsQualifier}`, 'sdx'];
 

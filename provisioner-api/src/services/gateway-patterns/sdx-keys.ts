@@ -4,8 +4,7 @@ import type { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { OAuthClient } from '../../clients/oauth.js';
-
-const OPERATOR_CONSUMER_URL = process.env.SDX_OPERATOR_CONSUMER_URL!;
+import { getRequiredEnvUrl } from '../../config/environments.js';
 
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
@@ -188,7 +187,7 @@ export class SDXKeysPattern implements PatternProcessor {
     } as SDXKeysPatternData;
   }
 
-  eval(_: Record<string, string>, data: SDXKeysPatternData) {
+  eval(inputs: SDXKeyConfig, data: SDXKeysPatternData) {
     const profile = data.profile;
 
     let tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
@@ -223,7 +222,12 @@ export class SDXKeysPattern implements PatternProcessor {
       });
     }
 
-    const routeHostUrl = new URL(OPERATOR_CONSUMER_URL);
+    const operatorEdgeUrl = getRequiredEnvUrl(
+      inputs.environment,
+      'operator_edge_url',
+      'SDX Operator edge server'
+    );
+    const routeHostUrl = new URL(operatorEdgeUrl);
 
     const info = {
       kind: 'Information',

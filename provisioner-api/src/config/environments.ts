@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { InternalError, withDetails } from '../errors/api-errors.js';
 
 /**
  * Per-environment configuration. Sourced entirely from the external file named
@@ -35,6 +36,14 @@ export type EnvironmentConfig = {
    * issuance. Each environment has its own step-ca instance.
    */
   ca_token_url?: string;
+  /**
+   * Public-facing base URL for this environment's SDX JWKS endpoints (e.g.
+   * `https://sdx.gov.bc.ca`), used to build the `jwks_uri` gateway plugin
+   * config peers use to verify signed requests/responses. Unlike
+   * `operator_edge_url`, this must be reachable by whichever party is
+   * verifying the signature, not just from the internal SDX network.
+   */
+  public_url?: string;
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
@@ -94,6 +103,31 @@ export function resetEnvironmentsCache(): void {
   cached = undefined;
 }
 
+/**
+ * Looks up a required per-environment URL field (`operator_edge_url` or
+ * `public_url`), throwing a descriptive InternalError — this is a server-side
+ * misconfiguration, not an upstream/gateway failure — if `environment` is
+ * unspecified or the field isn't configured for it.
+ */
+export function getRequiredEnvUrl(
+  environment: string | undefined,
+  field: 'operator_edge_url' | 'public_url',
+  description: string
+): string {
+  const url = environment
+    ? loadEnvironments()[environment]?.[field]
+    : undefined;
+  if (!url) {
+    throw withDetails(
+      new InternalError(
+        `${description} is not configured for environment '${environment}'`
+      ),
+      { environment, missing: field }
+    );
+  }
+  return url;
+}
+
 function validate(parsed: unknown, path: string): EnvironmentsConfig {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     throw new Error(
@@ -102,7 +136,9 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
   }
 
   const result: EnvironmentsConfig = {};
-  for (const [name, value] of Object.entries(parsed as Record<string, unknown>)) {
+  for (const [name, value] of Object.entries(
+    parsed as Record<string, unknown>
+  )) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       throw new Error(
         `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' must be an object`
@@ -115,6 +151,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'gwa_api_url', name, path);
     optionalString(entry, 'operator_edge_url', name, path);
     optionalString(entry, 'ca_token_url', name, path);
+    optionalString(entry, 'public_url', name, path);
     result[name] = {
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
@@ -122,6 +159,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
       gwa_api_url: entry.gwa_api_url as string | undefined,
       operator_edge_url: entry.operator_edge_url as string | undefined,
       ca_token_url: entry.ca_token_url as string | undefined,
+      public_url: entry.public_url as string | undefined,
     };
   }
   return result;
