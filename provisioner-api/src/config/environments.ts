@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { BadGatewayError, withDetails } from '../errors/api-errors.js';
 
 /**
  * Per-environment configuration. Sourced entirely from the external file named
@@ -100,6 +101,40 @@ export function loadEnvironments(): EnvironmentsConfig {
 /** Resets the cached config. Intended for tests. */
 export function resetEnvironmentsCache(): void {
   cached = undefined;
+}
+
+/**
+ * Looks up the SDX Operator edge server URL for `environment`, throwing a
+ * `BadGatewayError` if that environment isn't configured with one.
+ */
+export function getRequiredOperatorEdgeUrl(environment: string): string {
+  const url = loadEnvironments()[environment]?.operator_edge_url;
+  if (!url) {
+    throw withDetails(
+      new BadGatewayError(
+        `SDX Operator edge server is not configured for environment '${environment}'`
+      ),
+      { environment, missing: 'operator_edge_url' }
+    );
+  }
+  return url;
+}
+
+/**
+ * Looks up the SDX public URL for `environment`, throwing a
+ * `BadGatewayError` if that environment isn't configured with one.
+ */
+export function getRequiredPublicUrl(environment: string): string {
+  const url = loadEnvironments()[environment]?.public_url;
+  if (!url) {
+    throw withDetails(
+      new BadGatewayError(
+        `SDX public URL is not configured for environment '${environment}'`
+      ),
+      { environment, missing: 'public_url' }
+    );
+  }
+  return url;
 }
 
 function validate(parsed: unknown, path: string): EnvironmentsConfig {

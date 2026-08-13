@@ -10,7 +10,7 @@ import {
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-import { loadEnvironments } from '../../config/environments.js';
+import { getRequiredPublicUrl } from '../../config/environments.js';
 import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
@@ -300,19 +300,17 @@ function upgradeToTrustSign(
   data: SDXP2PProviderPatternData,
   inputs: SDXP2PProviderPatternConfig
 ) {
-  const environment = data.serviceRG.environment!;
+  const environment = data.serviceRG.environment;
+  if (!environment) {
+    throw withDetails(
+      new BadGatewayError('SDX service runtime group is missing an environment'),
+      { runtimeGroup: data.serviceRG.name }
+    );
+  }
   const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${environment}:0`;
   const keySetName = `sdx.edge.${data.serviceRG.name}.${environment}`;
 
-  const publicUrl = loadEnvironments()[environment]?.public_url;
-  if (!publicUrl) {
-    throw withDetails(
-      new BadGatewayError(
-        `SDX public URL is not configured for environment '${environment}'`
-      ),
-      { environment, missing: 'public_url' }
-    );
-  }
+  const publicUrl = getRequiredPublicUrl(environment);
 
   return {
     name: 'trust-sign',

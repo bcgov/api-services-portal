@@ -7,8 +7,7 @@ import type {
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
-import { loadEnvironments } from '../../config/environments.js';
-import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
+import { getRequiredPublicUrl } from '../../config/environments.js';
 
 export interface SDXServiceConfig {
   serviceId: string;
@@ -286,15 +285,7 @@ function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
   const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
   const environment = data.subsystemRuntimeGroup.environment!;
 
-  const publicUrl = loadEnvironments()[environment]?.public_url;
-  if (!publicUrl) {
-    throw withDetails(
-      new BadGatewayError(
-        `SDX public URL is not configured for environment '${environment}'`
-      ),
-      { environment, missing: 'public_url' }
-    );
-  }
+  const publicUrl = getRequiredPublicUrl(environment);
 
   return {
     name: 'trust-sign',
