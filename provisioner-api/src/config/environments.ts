@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { InternalError, withDetails } from '../errors/api-errors.js';
 
 /**
  * Per-environment configuration. Sourced entirely from the external file named
@@ -102,6 +103,31 @@ export function resetEnvironmentsCache(): void {
   cached = undefined;
 }
 
+/**
+ * Looks up a required per-environment URL field (`operator_edge_url` or
+ * `public_url`), throwing a descriptive InternalError — this is a server-side
+ * misconfiguration, not an upstream/gateway failure — if `environment` is
+ * unspecified or the field isn't configured for it.
+ */
+export function getRequiredEnvUrl(
+  environment: string | undefined,
+  field: 'operator_edge_url' | 'public_url',
+  description: string
+): string {
+  const url = environment
+    ? loadEnvironments()[environment]?.[field]
+    : undefined;
+  if (!url) {
+    throw withDetails(
+      new InternalError(
+        `${description} is not configured for environment '${environment}'`
+      ),
+      { environment, missing: field }
+    );
+  }
+  return url;
+}
+
 function validate(parsed: unknown, path: string): EnvironmentsConfig {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     throw new Error(
@@ -110,7 +136,9 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
   }
 
   const result: EnvironmentsConfig = {};
-  for (const [name, value] of Object.entries(parsed as Record<string, unknown>)) {
+  for (const [name, value] of Object.entries(
+    parsed as Record<string, unknown>
+  )) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       throw new Error(
         `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' must be an object`
