@@ -47,4 +47,21 @@ export const CsrResponse = Type.Object(
 
 export type TCsrRequest = Static<typeof CsrRequest>;
 
-export const runtimeGroupSchemas = [CsrRequest, CsrResponse];
+/**
+ * The CA's response to a certificate-signing token request. The subject and
+ * SANs are derived server-side from the runtime group named in the path, so
+ * no request body is needed.
+ */
+export const CertTokenResponse = Type.Object(
+  {
+    token: Type.String({
+      description: 'One-time-use certificate-signing token issued by the CA.',
+    }),
+  },
+  {
+    $id: 'CertTokenResponse',
+    additionalProperties: false,
+  }
+);
+
+export const runtimeGroupSchemas = [CsrRequest, CsrResponse, CertTokenResponse];

@@ -116,7 +116,7 @@ export class NamespaceController extends Controller {
 
   /**
    * Get details about the namespace, such as permissions for what the namespace can do.
-   * > `Required Scope:` Namespace.Manage
+   * > `Required Scope:` Namespace.Manage or Namespace.View
    *
    * @summary Namespace Summary
    * @param ns
@@ -125,7 +125,7 @@ export class NamespaceController extends Controller {
    */
   @Get('/{ns}')
   @OperationId('namespace-profile')
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.Manage', 'Namespace.View'])
   public async profile(
     @Path() ns: string,
     @Request() request: any

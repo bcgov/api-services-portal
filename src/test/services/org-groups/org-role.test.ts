@@ -15,12 +15,27 @@ roles:
           - Namespace.View
   - name: system-admin
     permissions: []
-  - name: system-owner
-    permissions: []
+  - name: subsystem-owner
+    permissions:
+      - resource: platform
+        scopes:
+          - Namespace.Manage
+          - Namespace.View
+          - Subsystem.Manage
+          - GatewayPattern.Publish
   - name: tech-lead
-    permissions: []
+    permissions:
+      - resource: platform
+        scopes:
+          - Namespace.View
+          - Subsystem.Manage
+          - GatewayPattern.Publish
   - name: access-manager
-    permissions: []
+    permissions:
+      - resource: platform
+        scopes:
+          - Namespace.View
+          - Connection.Manage
 `;
 
     const answer = buildGroupAccess(
@@ -48,7 +63,7 @@ roles:
       - resource: org/databc
         scopes:
           - System.Manage
-  - name: system-owner
+  - name: subsystem-owner
     permissions: []
   - name: tech-lead
     permissions: []

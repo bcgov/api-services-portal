@@ -48,8 +48,8 @@ describe('Org Group Access Service', function () {
     expect(roles.sort()).toEqual([
       'access-manager',
       'organization-admin',
+      'subsystem-owner',
       'system-admin',
-      'system-owner',
       'tech-lead',
     ]);
   });

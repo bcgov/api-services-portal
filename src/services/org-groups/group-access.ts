@@ -179,9 +179,11 @@ export class GroupAccessService {
 
   async assignSystemRolesToNamespace(
     namespace: string,
+    type: 'subsystem' | 'runtime',
     sys: string
   ): Promise<boolean> {
-    const access = buildGroupAccess(sys, `/systems`, 'namespace', namespace);
+    const parent = type === 'subsystem' ? `/systems` : `/runtimes`;
+    const access = buildGroupAccess(sys, parent, 'namespace', namespace);
 
     // for each role, update the group permissions
     for (const groupRole of access.roles.filter((r) =>
