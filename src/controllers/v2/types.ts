@@ -264,7 +264,7 @@ export interface Application {
   appId?: string; // Primary Key
   name?: string;
   description?: string;
-  namespace?: string;
+  owner?: UserRefID;
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }
@@ -287,12 +287,9 @@ export interface OpenAPISpec {
   title?: string;
   version?: string;
   spec?: string;
-  specVersion?: string;
   summary?: string;
   description?: string;
-  environment?: string;
   operations?: string;
-  annotations?: string;
   namespace?: string;
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
@@ -310,40 +307,15 @@ export interface Subsystem {
   description?: string;
   namespace?: string;
   organization?: OrganizationRefID;
-  integrations?: SubsystemIntegration[];
-}
-
-
-/**
- * @tsoaModel
- *
- */  
-export interface SubsystemIntegration {
-  integrationClientId?: string; // Primary Key
-  subsystemId?: string;
-}
-
-
-/**
- * @tsoaModel
- *
- */  
-export interface Task {
-  ref?: string; // Primary Key
-  title?: string;
-  type?: string;
-  status?: "pending" | "approved" | "rejected" | "processed";
-  jsonBlob?: any; // toString
 }
 
 
 /**
  * @tsoaModel
  * @example {
- *   "name": "edge1",
- *   "environment": "dev",
+ *   "name": "my-runtime-group",
  *   "gatewayId": "gw-abc",
- *   "host": "edge1.dev.servers.sdx",
+ *   "host": "runtime-group.my-domain.sdx",
  *   "sdxEndpoint": "10.10.10.10:443",
  *   "consumerEndpoint": "10.0.0.11:6443",
  *   "hostedOrganizations": [
@@ -353,8 +325,7 @@ export interface Task {
  * }
  */  
 export interface RuntimeGroup {
-  name?: string;
-  environment?: string;
+  name?: string; // Primary Key
   host?: string;
   sdxEndpoint?: string;
   consumerEndpoint?: string;
@@ -374,29 +345,11 @@ export interface RuntimeGroup {
  * }
  */  
 export interface ConnectionRequest {
-  id?: string; // Primary Key
+  slug?: string; // Primary Key
   clientId?: string;
   serviceId?: string;
   isApproved?: boolean;
   isActive?: boolean;
-  scopes?: string;
-  policyVersion?: string;
-  environment?: string;
-  provisionerStatus?: ProvisionerStatus;
-  requesterDetails?: any; // toString
-  clientResources?: any; // toString
-  serviceResources?: any; // toString
-}
-
-
-/**
- * @tsoaModel
- *
- */  
-export interface ProvisionerStatus {
-  name?: string; // Primary Key
-  message?: string;
-  status?: "pending" | "provisioned" | "failed";
 }
 
 
@@ -423,7 +376,6 @@ export interface Product {
   namespace?: string;
   dataset?: DraftDatasetRefID;
   environments?: Environment[];
-  organization?: OrganizationRefID;
 }
 
 
