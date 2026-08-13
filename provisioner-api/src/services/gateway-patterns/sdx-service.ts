@@ -284,7 +284,15 @@ function upgradeToACL(tags: string[], data: SDXServicePatternData) {
 function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
   const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name!}:0`;
   const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
-  const environment = data.subsystemRuntimeGroup.environment!;
+  const { environment } = data.subsystemRuntimeGroup;
+  if (!environment) {
+    throw withDetails(
+      new BadGatewayError(
+        `Runtime group '${data.subsystemRuntimeGroup.name}' is missing its environment`
+      ),
+      { missing: 'environment' }
+    );
+  }
 
   const publicUrl = loadEnvironments()[environment]?.public_url;
   if (!publicUrl) {

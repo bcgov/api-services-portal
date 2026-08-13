@@ -340,7 +340,15 @@ function upgradeToTrustSign(
   data: SDXP2PConsumerPatternData,
   inputs: SDXP2PConsumerPatternConfig
 ) {
-  const environment = data.clientRuntimeGroup.environment!;
+  const { environment } = data.clientRuntimeGroup;
+  if (!environment) {
+    throw withDetails(
+      new BadGatewayError(
+        `Client runtime group '${data.clientRuntimeGroup.name}' is missing its environment`
+      ),
+      { missing: 'environment' }
+    );
+  }
   const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${environment}:0`;
   const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}.${environment}`;
 
