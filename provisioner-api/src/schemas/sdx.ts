@@ -67,11 +67,28 @@ const ResourceServerServiceAccess = Type.Object(
   }
 );
 
+const AllowedResourceServerServiceAccess = Type.Object(
+  {
+    scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
+    name: Type.String({ examples: ['claims-svc'] }),
+    status: Type.Union([Type.Literal('approved'), Type.Literal('pending')], {
+      examples: ['approved'],
+    }),
+  },
+  {
+    additionalProperties: false,
+    examples: [
+      { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
+    ],
+  }
+);
+
 export const ResourceServerAccess = Type.Object(
   {
     environment: Type.String({ examples: ['dev'] }),
-    subsystemId: Type.String({ examples: ['claims'] }),
-    services: Type.Array(ResourceServerServiceAccess),
+    id: Type.String({ examples: ['claims'] }),
+    privacyZone: Type.String({ examples: ['public'] }),
+    services: Type.Array(AllowedResourceServerServiceAccess),
   },
   {
     $id: 'ResourceServerAccess',
@@ -79,8 +96,15 @@ export const ResourceServerAccess = Type.Object(
     examples: [
       {
         environment: 'dev',
-        subsystemId: 'MIN.CITZ.SYS-1',
-        services: [{ scopes: ['Claims.Read'], name: 'MIN.CITZ.MY-API.v1' }],
+        id: 'MIN.CITZ.SYS-1',
+        privacyZone: 'public',
+        services: [
+          {
+            scopes: ['Claims.Read'],
+            name: 'MIN.CITZ.MY-API.v1',
+            status: 'approved',
+          },
+        ],
       },
     ],
   }
@@ -104,8 +128,11 @@ export const IntegrationAccessRequest = Type.Object(
         resourceServers: [
           {
             environment: 'dev',
-            subsystemId: '1234',
-            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+            id: '1234',
+            privacyZone: 'public',
+            services: [
+              { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
+            ],
           },
         ],
       },
@@ -136,8 +163,7 @@ export const NewIntegrationAccessRequestResponse = Type.Object(
 
 const NewIntegrationAccessResourceServer = Type.Object(
   {
-    clientId: Type.String({ examples: ['partner-app-claims'] }),
-    privacyZone: Type.String({ examples: ['public'] }),
+    id: Type.String({ examples: ['MIN.CITZ.MY-SVC'] }),
     environment: Type.String({ examples: ['dev'] }),
     services: Type.Array(ResourceServerServiceAccess),
   },
@@ -145,11 +171,9 @@ const NewIntegrationAccessResourceServer = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
-        privacyZone: 'public',
-        clientId: 'partner-app-claims',
+        id: 'MIN.CITZ.MY-SVC',
         environment: 'dev',
-        id: 'claims',
+        services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
       },
     ],
   }
@@ -176,10 +200,8 @@ export const NewIntegrationAccessRequest = Type.Object(
         resourceServers: [
           {
             services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
-            privacyZone: 'public',
-            clientId: 'partner-app-claims',
             environment: 'dev',
-            id: 'claims',
+            id: 'MIN.CITZ.MY-SVC',
           },
         ],
       },

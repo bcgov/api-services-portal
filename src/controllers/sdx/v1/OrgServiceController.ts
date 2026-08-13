@@ -10,7 +10,7 @@ import {
   Request,
   Route,
   Security,
-  Tags
+  Tags,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
@@ -146,7 +146,7 @@ export class GatewayServiceController extends Controller {
   ): Promise<ServiceCatalogEntry[]> {
     const ctx = this.keystone.createContext(request);
 
-    const callerScopes = (request.oauth_user?.scope || '').split(' ');
+    const callerScopes = request.user.scope || [];
     const hasOrgWideAccess = callerScopes.includes('System.Manage');
 
     if (hasOrgWideAccess) {
