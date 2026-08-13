@@ -11,8 +11,7 @@ import {
   type EnrichedSubsystemEntry,
 } from './utils.js';
 import { Organization } from '../../clients/directory/index.js';
-import { loadEnvironments } from '../../config/environments.js';
-import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
+import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PConsumerPatternConfig {
   connId: string;
@@ -340,19 +339,15 @@ function upgradeToTrustSign(
   data: SDXP2PConsumerPatternData,
   inputs: SDXP2PConsumerPatternConfig
 ) {
-  const environment = data.clientRuntimeGroup.environment!;
+  const environment = data.clientRuntimeGroup.environment;
   const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${environment}:0`;
   const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}.${environment}`;
 
-  const publicUrl = loadEnvironments()[environment]?.public_url;
-  if (!publicUrl) {
-    throw withDetails(
-      new BadGatewayError(
-        `SDX public URL is not configured for environment '${environment}'`
-      ),
-      { environment, missing: 'public_url' }
-    );
-  }
+  const publicUrl = getRequiredEnvUrl(
+    environment,
+    'public_url',
+    'SDX public URL'
+  );
 
   return {
     name: 'trust-sign',
