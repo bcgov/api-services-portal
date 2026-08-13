@@ -114,9 +114,13 @@ export function getRequiredEnvUrl(
   field: 'operator_edge_url' | 'public_url',
   description: string
 ): string {
-  const url = environment
-    ? loadEnvironments()[environment]?.[field]
-    : undefined;
+  if (!environment) {
+    throw withDetails(
+      new InternalError(`${description} could not be resolved: no environment specified`),
+      { environment, missing: field }
+    );
+  }
+  const url = loadEnvironments()[environment]?.[field];
   if (!url) {
     throw withDetails(
       new InternalError(
