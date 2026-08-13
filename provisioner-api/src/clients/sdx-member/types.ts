@@ -10,6 +10,7 @@ export interface SubsystemEntry {
   name: string;
   description?: string;
   clientId: string;
+  privacyZone?: string;
   organization?: {
     orgUnit?: string;
     title?: string;

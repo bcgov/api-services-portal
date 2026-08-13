@@ -123,7 +123,7 @@ export class OrgConnectionController extends Controller {
     const ctx = this.keystone.createContext(request);
     const connectionService = new ConnectionService();
 
-    const callerScopes = (request.oauth_user?.scope || '').split(' ');
+    const callerScopes = request.user.scope || [];
     const hasOrgWideAccess = callerScopes.includes('System.Manage');
 
     let records;

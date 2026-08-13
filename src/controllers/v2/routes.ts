@@ -422,6 +422,7 @@ const models: TsoaRoute.Models = {
             "namespace": {"dataType":"string"},
             "dataset": {"ref":"DraftDatasetRefID"},
             "environments": {"dataType":"array","array":{"dataType":"refObject","ref":"Environment"}},
+            "organization": {"ref":"OrganizationRefID"},
         },
         "additionalProperties": false,
     },
