@@ -312,6 +312,38 @@ export const getRecords = async function (
   );
 };
 
+export const listConnectionRequestsFeedWorker = async (
+  context: any,
+  _req: any,
+  res: any
+) => {
+  const records = await new BatchService(context).listAllPages(
+    'allConnectionRequests',
+    [
+      'clientId',
+      'serviceId',
+      'isApproved',
+      'isActive',
+      'policyVersion',
+      'environment',
+      'requesterDetails',
+      'clientResources',
+      'serviceResources',
+      'provisionerStatus',
+    ]
+  );
+  res.json(
+    records.map((record) =>
+      parseJsonString(record, [
+        'requesterDetails',
+        'clientResources',
+        'serviceResources',
+        'provisionerStatus',
+      ])
+    )
+  );
+};
+
 export const getRecordById = async function (
   context: any,
   feedEntity: string,
