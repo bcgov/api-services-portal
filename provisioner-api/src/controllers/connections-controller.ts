@@ -5,9 +5,12 @@ import type {
   TResourceResult,
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import { Activity } from '../clients/feed/types.js';
+import type {
+  Activity,
+  ProvisionerStatus,
+} from '../clients/feed/types.js';
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestError, InternalError } from '../errors/api-errors.js';
+import { InternalError } from '../errors/api-errors.js';
 
 export class ConnectionsController {
   constructor(
@@ -24,14 +27,22 @@ export class ConnectionsController {
       connectionRequest.serviceId
     );
 
+    if (action === 'apply') {
+      await this.updateProvisionerStatus(
+        connectionRequest,
+        'pending',
+        'Provisioning started.'
+      );
+    }
+
+    let response: TConnectionChangeResponse;
     try {
-      const resourceSets =
-        await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
-          id,
-          action,
-          service,
-          connectionRequest
-        );
+      const resourceSets = await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
+        id,
+        action,
+        service,
+        connectionRequest
+      );
 
       const results: TResourceResult[] = [];
 
@@ -71,7 +82,7 @@ export class ConnectionsController {
           await this.logActivity(action, connectionRequest, service, results);
         }
 
-        return {
+        response = {
           applied: results.filter((r) => r.status === 'applied').length,
           failed: results.filter((r) => r.status === 'failed').length,
           skipped: results.filter((r) => r.status === 'skipped').length,
@@ -84,6 +95,9 @@ export class ConnectionsController {
         'Error processing connection request change'
       );
       if (action !== 'diff' && action !== 'preview') {
+        if (action === 'apply') {
+          await this.updateFailedStatusAfterException(connectionRequest);
+        }
         await this.logActivity(
           action,
           connectionRequest,
@@ -97,6 +111,63 @@ export class ConnectionsController {
       } else {
         throw err;
       }
+    }
+
+    if (action === 'apply') {
+      const unsuccessful = response.failed + response.skipped;
+      if (unsuccessful > 0) {
+        const providers = response.results
+          .filter((result) => result.status !== 'applied')
+          .map((result) => result.provider)
+          .join(', ');
+        await this.updateProvisionerStatus(
+          connectionRequest,
+          'failed',
+          `Provisioning failed for ${unsuccessful} provider batch${
+            unsuccessful === 1 ? '' : 'es'
+          }${providers ? `: ${providers}` : ''}.`
+        );
+      } else {
+        await this.updateProvisionerStatus(
+          connectionRequest,
+          'provisioned',
+          `Provisioned ${response.applied} provider batch${
+            response.applied === 1 ? '' : 'es'
+          } successfully.`
+        );
+      }
+    }
+
+    return response;
+  }
+
+  private async updateProvisionerStatus(
+    connectionRequest: TConnectionChangeRequest,
+    status: ProvisionerStatus['status'],
+    message: string
+  ): Promise<void> {
+    await this.services.connectionStatus.update(
+      connectionRequest.clientId,
+      connectionRequest.serviceId,
+      status,
+      message
+    );
+  }
+
+  private async updateFailedStatusAfterException(
+    connectionRequest: TConnectionChangeRequest
+  ): Promise<void> {
+    try {
+      await this.updateProvisionerStatus(
+        connectionRequest,
+        'failed',
+        'Provisioning failed unexpectedly. See provisioner logs for details.'
+      );
+    } catch (statusError) {
+      this.logger?.error(
+        { err: statusError, connectionRequest },
+        'Unable to record failed provisioner status'
+      );
     }
   }
 
@@ -123,7 +194,9 @@ export class ConnectionsController {
           ? 'failed'
           : 'success',
       name: 'N/A',
-      message: `Connection ${connectionRequest.clientId} → ${connectionRequest.serviceId} ${action === 'apply' ? 'provisioned' : 'removed'}`,
+      message: `Connection ${connectionRequest.clientId} → ${
+        connectionRequest.serviceId
+      } ${action === 'apply' ? 'provisioned' : 'removed'}`,
       refId: '',
       context: {
         message: 'Connection {client} → {service} {action}',
