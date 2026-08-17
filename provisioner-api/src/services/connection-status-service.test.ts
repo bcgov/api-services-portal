@@ -16,7 +16,13 @@ test('updates only the connection provisioner status through the feed API', asyn
     'client-1',
     'service-1',
     'failed',
-    'Provisioning failed.'
+    'Provisioning failed.',
+    {
+      endpoint: 'https://consumer.example/sdx/0/client-1',
+      spec: '/catalog/services/service-1/oas-spec',
+      status: 'incorrect',
+      message: 'Information must not replace the status message.',
+    }
   );
 
   assert.deepEqual(updates, [
@@ -24,6 +30,8 @@ test('updates only the connection provisioner status through the feed API', asyn
       clientId: 'client-1',
       serviceId: 'service-1',
       provisionerStatus: {
+        endpoint: 'https://consumer.example/sdx/0/client-1',
+        spec: '/catalog/services/service-1/oas-spec',
         status: 'failed',
         message: 'Provisioning failed.',
       },

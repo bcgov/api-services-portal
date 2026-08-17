@@ -20,7 +20,8 @@ describe('listConnectionRequestsFeedWorker', () => {
                   requesterDetails: '{"scopes":["read"]}',
                   clientResources: '{}',
                   serviceResources: '{}',
-                  provisionerStatus: '{"status":"pending"}',
+                  provisionerStatus:
+                    '{"status":"provisioned","endpoint":"https://consumer.example/sdx/0/client-1","spec":"/catalog/services/service-1/oas-spec"}',
                 },
               ],
             },
@@ -47,7 +48,11 @@ describe('listConnectionRequestsFeedWorker', () => {
         requesterDetails: { scopes: ['read'] },
         clientResources: {},
         serviceResources: {},
-        provisionerStatus: { status: 'pending' },
+        provisionerStatus: {
+          status: 'provisioned',
+          endpoint: 'https://consumer.example/sdx/0/client-1',
+          spec: '/catalog/services/service-1/oas-spec',
+        },
       }),
     ]);
   });

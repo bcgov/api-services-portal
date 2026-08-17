@@ -48,8 +48,16 @@ function setup(
         clientId: string,
         serviceId: string,
         status: string,
-        message: string
-      ) => statusUpdates.push({ clientId, serviceId, status, message }),
+        message: string,
+        information?: Record<string, unknown>
+      ) =>
+        statusUpdates.push({
+          clientId,
+          serviceId,
+          status,
+          message,
+          ...(information ? { information } : {}),
+        }),
     },
     patternsEvaluator: {
       buildResourcesUsingConnectionRequest: async () => {
@@ -110,6 +118,38 @@ test('apply writes pending and provisioned statuses', async () => {
       },
     ]
   );
+});
+
+test('apply copies produced Information data into provisioned status', async () => {
+  const { controller, statusUpdates } = setup({
+    results: [
+      {
+        provider: 'info',
+        status: 'applied',
+        details: {
+          endpoint: 'https://consumer.example/sdx/0/client-1',
+        },
+      },
+      {
+        provider: 'info',
+        status: 'applied',
+        details: {
+          spec: '/catalog/services/service-1/oas-spec',
+        },
+      },
+    ],
+  });
+
+  await controller.onConnectionRequestChange(
+    'connection-1',
+    connectionRequest,
+    'apply'
+  );
+
+  assert.deepEqual(statusUpdates[1].information, {
+    endpoint: 'https://consumer.example/sdx/0/client-1',
+    spec: '/catalog/services/service-1/oas-spec',
+  });
 });
 
 test('apply writes failed after partial provider failure', async () => {

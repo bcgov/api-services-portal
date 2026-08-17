@@ -133,7 +133,8 @@ export class ConnectionsController {
           'provisioned',
           `Provisioned ${response.applied} provider batch${
             response.applied === 1 ? '' : 'es'
-          } successfully.`
+          } successfully.`,
+          this.collectProvisionerInformation(response.results)
         );
       }
     }
@@ -144,14 +145,31 @@ export class ConnectionsController {
   private async updateProvisionerStatus(
     connectionRequest: TConnectionChangeRequest,
     status: ProvisionerStatus['status'],
-    message: string
+    message: string,
+    information?: Record<string, unknown>
   ): Promise<void> {
     await this.services.connectionStatus.update(
       connectionRequest.clientId,
       connectionRequest.serviceId,
       status,
-      message
+      message,
+      information
     );
+  }
+
+  private collectProvisionerInformation(
+    results: TResourceResult[]
+  ): Record<string, unknown> {
+    return results.reduce<Record<string, unknown>>((information, result) => {
+      if (
+        result.provider === 'info' &&
+        result.status === 'applied' &&
+        isRecord(result.details)
+      ) {
+        Object.assign(information, result.details);
+      }
+      return information;
+    }, {});
   }
 
   private async updateFailedStatusAfterException(
@@ -222,4 +240,8 @@ export class ConnectionsController {
 
     await this.services.activity.publishActivity(activity);
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

@@ -15,12 +15,13 @@ export class ConnectionStatusService {
     clientId: string,
     serviceId: string,
     status: ProvisionerStatus['status'],
-    message?: string
+    message?: string,
+    information: Record<string, unknown> = {}
   ): Promise<void> {
     const update: ConnectionProvisionerStatusUpdate = {
       clientId,
       serviceId,
-      provisionerStatus: { status, message },
+      provisionerStatus: { ...information, status, message },
     };
     this.logger?.debug({ update }, 'Updating connection provisioner status');
     await this.feedApiClient.putConnectionProvisionerStatus(update);

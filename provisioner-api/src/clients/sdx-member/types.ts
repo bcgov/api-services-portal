@@ -102,6 +102,7 @@ export interface ConnectionRequest {
 export interface ProvisionerStatus {
   status: 'pending' | 'provisioned' | 'failed';
   message?: string;
+  [information: string]: unknown;
 }
 
 export interface GatewayPatternConfigRequest {
