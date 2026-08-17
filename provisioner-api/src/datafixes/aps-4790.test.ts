@@ -29,19 +29,21 @@ test('recognizes persisted provisioner status objects and JSON strings', () => {
   assert.equal(hasProvisionerStatus('not-json'), false);
 });
 
-test('applies each active legacy connection once', async () => {
-  const applied: Array<{ id: string; action: string }> = [];
+test('applies each active legacy connection once without isActive', async () => {
+  const applied: Array<{ id: string; connection: object }> = [];
   const legacy = connection();
 
   const summary = await runAps4790Datafix({
     listConnections: async () => [legacy, legacy],
-    applyConnection: async (id) => {
-      applied.push({ id, action: 'apply' });
+    applyConnection: async (id, input) => {
+      applied.push({ id, connection: input });
       return { applied: 1, failed: 0, skipped: 0, results: [] };
     },
   });
 
-  assert.deepEqual(applied, [{ id: 'connection-1', action: 'apply' }]);
+  assert.equal(applied.length, 1);
+  assert.equal(applied[0].id, 'connection-1');
+  assert.equal('isActive' in applied[0].connection, false);
   assert.deepEqual(summary, {
     connections: 1,
     candidates: 1,

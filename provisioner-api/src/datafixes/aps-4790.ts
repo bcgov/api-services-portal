@@ -85,7 +85,6 @@ export async function runAps4790Datafix(
       clientId: connection.clientId,
       serviceId: connection.serviceId,
       isApproved: connection.isApproved,
-      isActive: connection.isActive,
       environment: connection.environment,
       policyVersion: connection.policyVersion,
       requesterDetails: connection.requesterDetails,
