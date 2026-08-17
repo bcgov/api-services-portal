@@ -83,6 +83,7 @@ export class SdxMemberService {
             .map((s) => ({
               name: s.name,
               title: s.title,
+              version: s.version,
               scopes: Array.from(
                 s.operations
                   .reduce((acc: Map<string, string>, op) => {

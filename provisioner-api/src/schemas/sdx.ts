@@ -16,6 +16,7 @@ const SubsystemService = Type.Object(
     ),
     title: Type.String({ examples: ['Claims Service'] }),
     name: Type.String({ examples: ['claims-svc'] }),
+    version: Type.String({ examples: ['1.0.0'] }),
   },
   {
     additionalProperties: false,
@@ -25,6 +26,7 @@ const SubsystemService = Type.Object(
         scopes: [{ label: 'Claims.Read', description: 'Read claim records' }],
         title: 'Claims Service',
         name: 'claims-svc',
+        version: '1.0.0',
       },
     ],
   }
@@ -59,6 +61,7 @@ export const SubsystemEnvironment = Type.Object(
             ],
             title: 'Claims Service',
             name: 'claims-svc',
+            version: '1.0.0',
           },
         ],
       },
