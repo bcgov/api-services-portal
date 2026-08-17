@@ -56,7 +56,7 @@ export interface ConnectionRequestInput {
   serviceId: string;
   isApproved?: boolean;
   isActive?: boolean;
-  environment?: 'lab' | 'mck' | 'dev' | 'tst' | 'prd' | 'sbx';
+  environment?: string;
   policyVersion?: string;
   requesterDetails?: any;
   clientResources?: any;
