@@ -15,6 +15,8 @@ const RESOURCE_SERVERS_ONLY_DESC =
 const ENVIRONMENT_DESC =
   'Target environment (for example `dev`, `test`, or `prod`) the subsystems are scoped to.';
 const CLIENT_ID_DESC = 'Identifier of the OAuth Integration Client ID';
+const STATUS_DESC =
+  'Filters the returned services to those with the given access status.';
 
 const SUBSYSTEM_ID_DESC =
   'Identifier of the subsystem the request is scoped to.';
@@ -59,9 +61,7 @@ const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
           id: 'claims',
           environment: 'dev',
           privacyZone: 'public',
-          services: [
-            { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
-          ],
+          services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
         },
       ],
     },
@@ -93,6 +93,13 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
               description: ENVIRONMENT_DESC,
               examples: ['dev'],
             }),
+            status: Type.Union(
+              [Type.Literal('approved'), Type.Literal('pending')],
+              {
+                description: STATUS_DESC,
+                examples: ['approved'],
+              }
+            ),
           }),
 
           response: { 200: AllowedServicesResponse },
@@ -102,6 +109,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
         app.controllers.integration.getIntegrationAllowedServices({
           integrationClientId: req.params.clientId,
           environment: req.query.environment,
+          status: req.query.status,
         })
     );
 

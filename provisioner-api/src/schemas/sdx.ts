@@ -84,15 +84,10 @@ const AllowedResourceServerServiceAccess = Type.Object(
   {
     scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
     name: Type.String({ examples: ['claims-svc'] }),
-    status: Type.Union([Type.Literal('approved'), Type.Literal('pending')], {
-      examples: ['approved'],
-    }),
   },
   {
     additionalProperties: false,
-    examples: [
-      { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
-    ],
+    examples: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
   }
 );
 
@@ -115,7 +110,6 @@ export const ResourceServerAccess = Type.Object(
           {
             scopes: ['Claims.Read'],
             name: 'MIN.CITZ.MY-API.v1',
-            status: 'approved',
           },
         ],
       },
@@ -144,7 +138,7 @@ export const IntegrationAccessRequest = Type.Object(
             id: '1234',
             privacyZone: 'public',
             services: [
-              { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
+              { scopes: ['Claims.Read'], name: 'claims-svc' },
             ],
           },
         ],

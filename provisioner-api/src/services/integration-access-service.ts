@@ -217,7 +217,8 @@ export class IntegrationAccessService {
    */
   async buildIntegrationAllowedServices(
     integrationClientId: string,
-    environment: string
+    environment: string,
+    status: 'approved' | 'pending'
   ): Promise<TIntegrationAccessRequest> {
     // query the subsystem by an integrationClientId
     //
@@ -255,7 +256,8 @@ export class IntegrationAccessService {
       (c) =>
         c.clientId === subsystem.clientId &&
         c.environment === environment &&
-        c.requesterDetails.client?.clientId === integrationClientId
+        c.requesterDetails.client?.clientId === integrationClientId &&
+        c.isApproved === (status === 'approved')
     );
 
     this.logger?.debug('connections allowed %j', allowedConnections);
@@ -302,7 +304,6 @@ export class IntegrationAccessService {
         services: services.map((s) => ({
           name: s.serviceId!,
           scopes: (s.requesterDetails?.scopes || []) as string[],
-          status: s.isApproved ? 'approved' : 'pending',
         })),
       });
     }

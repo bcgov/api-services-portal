@@ -17,6 +17,7 @@ export interface CreateIntegrationAccessRequestInput {
 export interface GetSubsystemAllowedServicesInput {
   integrationClientId: string;
   environment: string;
+  status: 'approved' | 'pending';
 }
 
 export class IntegrationController {
@@ -30,7 +31,8 @@ export class IntegrationController {
   ): Promise<TIntegrationAccessRequest> {
     return this.services.integrationAccess.buildIntegrationAllowedServices(
       input.integrationClientId,
-      input.environment
+      input.environment,
+      input.status
     );
   }
 
