@@ -83,15 +83,16 @@ export class SdxMemberService {
             .map((s) => ({
               name: s.name,
               title: s.title,
-              scopes: s.operations.reduce(
-                (acc: { [name: string]: string }, op) => {
-                  op.scopes?.forEach((scope) => {
-                    acc[scope.name] = scope.description || '';
-                  });
-                  return acc;
-                },
-                {}
-              ),
+              scopes: Array.from(
+                s.operations
+                  .reduce((acc: Map<string, string>, op) => {
+                    op.scopes?.forEach((scope) => {
+                      acc.set(scope.name, scope.description || '');
+                    });
+                    return acc;
+                  }, new Map<string, string>())
+                  .entries()
+              ).map(([label, description]) => ({ label, description })),
               summary: s.summary || '',
             })),
         }))
