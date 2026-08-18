@@ -6084,6 +6084,7 @@ export type OpenApiSpec = {
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
   specVersion?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
   subsystem?: Maybe<Subsystem>;
 };
 
@@ -6101,6 +6102,7 @@ export type OpenApiSpecCreateInput = {
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
   specVersion?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
   subsystem?: Maybe<SubsystemRelateToOneInput>;
 };
 
@@ -6112,6 +6114,7 @@ export type OpenApiSpecUpdateInput = {
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
 };
 
 export type OpenApiSpecWhereInput = {

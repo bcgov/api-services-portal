@@ -15,6 +15,7 @@ export interface OpenAPISpecInput {
   environment: string;
   spec: string;
   state?: string;
+  upstreamUrl?: string;
 }
 
 export interface SpecOperations {
@@ -96,6 +97,9 @@ export const LoadOpenAPISpec = async (
   outSpec.version = oas.info?.version;
   outSpec.description = oas.info?.description;
   outSpec.ref = outSpec.name;
+  if (spec.upstreamUrl !== undefined) {
+    outSpec.upstreamUrl = spec.upstreamUrl;
+  }
   outSpec.operations = JSON.stringify(parseSpecOperations(oas));
 
   return outSpec;

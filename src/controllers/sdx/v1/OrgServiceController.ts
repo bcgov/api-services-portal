@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  FormField,
   Get,
   OperationId,
   Path,
@@ -11,6 +12,7 @@ import {
   Route,
   Security,
   Tags,
+  UploadedFile,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
@@ -64,17 +66,19 @@ export class GatewayServiceController extends Controller {
    *
    * @param org - Organization identifier
    * @param subsystem - Subsystem name under which the service will be categorized
+   * @param upstreamUrl - Upstream URL the gateway should route requests to for this service
    * @param request - HTTP request object for context creation
    */
   @Put()
-  @OperationId('createOASService')
+  @OperationId('upsertOASService')
   @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
-  public async createOASService(
+  public async upsertOASService(
     @Path() org: string,
     @Query() subsystem: string,
     @Query() environment: string,
     @Body() body: any,
-    @Request() request: ExpressRequest & { rawBody: Buffer }
+    @Request() request: ExpressRequest & { rawBody: Buffer },
+    @Query() upstreamUrl?: string
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request);
 
@@ -102,6 +106,7 @@ export class GatewayServiceController extends Controller {
       spec: rawBody,
       state: 'active',
       environment,
+      upstreamUrl,
     };
 
     const final = await LoadOpenAPISpec(context, input);

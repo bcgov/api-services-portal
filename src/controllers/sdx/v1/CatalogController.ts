@@ -273,8 +273,9 @@ export class CatalogController extends Controller {
   public async listCatalog(): Promise<ServiceCatalogEntry[]> {
     const ctx = this.keystone.sudo();
     const result = await GetCatalog(ctx);
-    result.map((o) => removeKeys(o, ['gateway']));
-    return result;
+    return result.map(
+      (o) => removeKeys(o, ['gateway', 'upstreamUrl']) as ServiceCatalogEntry
+    );
   }
 
   /**
@@ -340,7 +341,8 @@ export class CatalogController extends Controller {
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
     const ctx = this.keystone.sudo();
-    return await GetCatalogByName(ctx, name, false);
+    const entry = await GetCatalogByName(ctx, name, false);
+    return removeKeys(entry, ['upstreamUrl']) as ServiceCatalogEntry;
   }
 
   /**

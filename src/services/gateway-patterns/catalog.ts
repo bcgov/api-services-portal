@@ -83,6 +83,7 @@ export interface ServiceCatalogEntry {
   }[];
   spec?: string;
   specVersion: string;
+  upstreamUrl?: string;
   subsystem: SubsystemEntry;
 }
 
@@ -153,6 +154,7 @@ export async function GetCatalog(
       summary: c.summary,
       description: c.description,
       spec: includeSpec ? c.spec : undefined,
+      upstreamUrl: c.upstreamUrl,
       subsystem: {
         name: c.subsystem.name,
         description: c.subsystem.description,

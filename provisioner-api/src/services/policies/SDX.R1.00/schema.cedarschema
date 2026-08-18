@@ -57,7 +57,39 @@ namespace SDX {
                         }
                     }
                 },
-                serviceResources: {},
+                serviceResources?: {
+                    comment?: String,
+                    gatewayPatterns?: {
+                        "sdx-p2p-provider.r1": {
+                            upstreamUrl?: String,
+                            upgrades: {
+                                mtlsAuth?: {},
+                                mtlsAcl?: {},
+                                sign?: {
+                                    alg?: String
+                                },
+                                verify?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
+                                token?: {
+                                    allowedIss: Set<String>,
+                                    allowedAud?: String,
+                                    scope?: String,
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
+                                },
+                                acl?: {},
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
+                                }
+                            }
+                        }
+                    }
+                },
                 combinedScopes: Set<String>,
                 action: String,
                 globals: {

@@ -57,6 +57,7 @@ export interface ServiceCatalogEntry {
   environment: string;
   operations: ServiceCatalogOperation[];
   spec?: string;
+  upstreamUrl?: string;
   subsystem: SubsystemEntry;
 }
 

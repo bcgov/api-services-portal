@@ -933,6 +933,7 @@ CREATE TABLE public."OpenAPISpec" (
     spec text NOT NULL,
     annotations text,
     "specVersion" text NOT NULL,
+    "upstreamUrl" text,
     subsystem integer
 );
 

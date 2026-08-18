@@ -16,7 +16,6 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
   clientId: string;
   serviceId: string;
-  upstreamUrl: string;
   upgrades: ProviderUpgrades;
   useSni: string;
 }
@@ -56,6 +55,7 @@ export interface SDXP2PProviderPatternData {
   serviceSubsystem: EnrichedSubsystemEntry;
   clientRG: RuntimeGroup;
   serviceRG: RuntimeGroup;
+  upstreamUrl: string;
 }
 
 /**
@@ -97,6 +97,12 @@ export class SDXP2PProviderPattern implements PatternProcessor {
     const service = (await api.getOASService(
       inputs.serviceId
     )) as EnrichedServiceCatalogEntry;
+
+    const orgService = await api.getOrganizationOASService(
+      service.subsystem.organization.name,
+      service.name
+    );
+
     const serviceSubsystem = await api.getSubsystemClient(
       service.subsystem.organization.name,
       service.subsystem.name
@@ -124,6 +130,13 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       `Service subsystem does not have a runtime group for environment '${environment}'`
     );
 
+    const upstreamUrl = orgService.upstreamUrl || inputs.upstreamUrl;
+    assert.strictEqual(
+      Boolean(upstreamUrl),
+      true,
+      `Service '${inputs.serviceId}' does not have an upstreamUrl configured nor was it passed in as an input parameter.`
+    );
+
     return {
       gatewayId: service.subsystem.gateway.id,
       client,
@@ -131,6 +144,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
       clientRG: clientRG as RuntimeGroup,
       serviceRG: serviceRG as RuntimeGroup,
+      upstreamUrl: upstreamUrl as string,
     };
   }
 
@@ -145,7 +159,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
     const tags = [`ns.${providerGateway}.${inputs.connId}.p`, 'sdx'];
     const name = `sdx.p2p.${inputs.connId}.p.${serviceLocator}`;
 
-    const upstreamUrl = inputs.upstreamUrl;
+    const upstreamUrl = data.upstreamUrl;
 
     const upgrades: ProviderUpgrades = inputs.upgrades || {};
 

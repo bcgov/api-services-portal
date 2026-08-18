@@ -455,6 +455,7 @@ const metadata = {
       'namespace',
       'organization',
       'subsystem',
+      'upstreamUrl',
     ],
     transformations: {
       subsystem: {

@@ -10,7 +10,7 @@ import type {
  */
 export interface PolicyRequesterDetails {
   submissionId: string;
-  requester: { name: string };
+  requester: { name: string; email?: string };
   scopes: string[];
   client: { integrationId?: string; clientId: string; privacyZone?: string };
   service: { clientId: string; privacyZone?: string };

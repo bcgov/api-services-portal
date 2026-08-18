@@ -50,7 +50,6 @@ const defaults: PolicyDefaultsFn = (
   clientResources: {
     gatewayPatterns: {
       'sdx-p2p-consumer.r1': {
-        stripPath: true,
         upgrades: {
           sign: {},
           verify: {},
@@ -60,7 +59,19 @@ const defaults: PolicyDefaultsFn = (
       'sdx-p2p-consumer-access.r1': {},
     },
   },
-  serviceResources: {},
+  serviceResources: {
+    gatewayPatterns: {
+      'sdx-p2p-provider.r1': {
+        upgrades: {
+          mtlsAuth: {},
+          mtlsAcl: {},
+          sign: {},
+          verify: {},
+          counterSign: {},
+        },
+      },
+    },
+  },
 });
 
 export const SDXPolicy = {

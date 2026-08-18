@@ -294,6 +294,7 @@ export interface OpenAPISpec {
   operations?: string;
   annotations?: string;
   gatewayId?: string;
+  upstreamUrl?: string;
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
 }

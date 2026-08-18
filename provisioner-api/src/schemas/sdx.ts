@@ -181,9 +181,20 @@ const NewIntegrationAccessResourceServer = Type.Object(
   }
 );
 
+const NewIntegrationAccessRequester = Type.Object(
+  {
+    displayName: Type.String({ examples: ['Jane Doe'] }),
+    email: Type.String({ examples: ['user@example.gov.bc.ca'] }),
+  },
+  {
+    additionalProperties: false,
+    examples: [{ displayName: 'Jane Doe', email: 'user@example.gov.bc.ca' }],
+  }
+);
+
 export const NewIntegrationAccessRequest = Type.Object(
   {
-    requester: Type.String({ examples: ['user@example.gov.bc.ca'] }),
+    requester: NewIntegrationAccessRequester,
     clientId: Type.String({ examples: ['partner-app'] }),
     policyVersion: Type.String({ examples: ['SDX.R1.00'] }),
     privacyZone: Type.String({ examples: ['public'] }),
@@ -194,7 +205,10 @@ export const NewIntegrationAccessRequest = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        requester: 'user@example.gov.bc.ca',
+        requester: {
+          displayName: 'Jane Doe',
+          email: 'user@example.gov.bc.ca',
+        },
         clientId: 'partner-app',
         policyVersion: 'SDX.R1.00',
         privacyZone: 'public',

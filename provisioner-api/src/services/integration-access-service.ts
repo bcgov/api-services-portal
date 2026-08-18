@@ -86,7 +86,8 @@ export class IntegrationAccessService {
             const requesterDetails = {
               submissionId,
               requester: {
-                name: input.requester,
+                name: input.requester.displayName,
+                email: input.requester.email,
               },
               scopes: requestedService.scopes,
               client: {
