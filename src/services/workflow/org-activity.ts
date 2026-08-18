@@ -518,12 +518,11 @@ function gatewayKeyFilterResources(
 
 function gatewayPatternPublishMessage(
   targetName: string | undefined,
-  removed: boolean,
+  action: string,
   detail?: string
 ): string {
   const includeTarget = Boolean(targetName);
   const includeDetail = Boolean(detail);
-  const action = removed ? 'removed' : 'published';
   if (includeDetail) {
     return includeTarget
       ? `{actor} ${action} {pattern} for {targetName}: {detail}`
@@ -532,6 +531,24 @@ function gatewayPatternPublishMessage(
   return includeTarget
     ? `{actor} ${action} {pattern} for {targetName}`
     : `{actor} ${action} {pattern}`;
+}
+
+function gatewayPatternPublishAction(
+  operation: string | undefined,
+  removed: boolean
+): string {
+  switch (operation) {
+    case 'add':
+      return 'added';
+    case 'rotate':
+      return 'rotated';
+    case 'replace':
+      return 'replaced';
+    case 'delete':
+      return 'removed';
+    default:
+      return removed ? 'removed' : 'published';
+  }
 }
 
 export class OrgActivityService {
@@ -723,19 +740,25 @@ export class OrgActivityService {
       gatewayKeyName?: string;
       /** Deck/GWA output stored on apply for audit. */
       deckBlob?: string;
+      /** sdx-keys.r1 operation when using targeted add/rotate/replace/delete. */
+      operation?: 'add' | 'rotate' | 'replace' | 'delete' | 'publish';
+      addedKids?: string[];
+      removedKids?: string[];
+      retainedKids?: string[];
     }
   ): Promise<void> {
     const isRemove = data.removed === true;
+    const action = gatewayPatternPublishAction(data.operation, isRemove);
     const message = gatewayPatternPublishMessage(
       data.targetName,
-      isRemove,
+      action,
       data.detail
     );
 
     const entity = gatewayPatternPublishEntity(data.pattern, data.scope);
 
     const params: { [key: string]: string } = {
-      action: isRemove ? 'removed' : 'published',
+      action,
       entity,
       actor: this.getActorName(),
       organization: this.orgName,
@@ -749,6 +772,18 @@ export class OrgActivityService {
     }
     if (data.targetName) {
       params.targetName = data.targetName;
+    }
+    if (data.operation) {
+      params.operation = data.operation;
+    }
+    if (data.addedKids?.length) {
+      params.addedKids = data.addedKids.join(',');
+    }
+    if (data.removedKids?.length) {
+      params.removedKids = data.removedKids.join(',');
+    }
+    if (data.retainedKids?.length) {
+      params.retainedKids = data.retainedKids.join(',');
     }
 
     const resource = data.gatewayKeyName

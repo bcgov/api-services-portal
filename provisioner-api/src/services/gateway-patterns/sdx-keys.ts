@@ -1,10 +1,24 @@
 import crypto, { X509Certificate } from 'crypto';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
+import type { GatewayAdminService } from '../gateway-admin-service.js';
+import type { GatewayKey } from '../../clients/gateway-admin/types.js';
 import type { PatternProcessor } from '../patterns-evaluator.js';
 import { assert } from './utils.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import { OAuthClient } from '../../clients/oauth.js';
 import { getRequiredEnvUrl } from '../../config/environments.js';
+import {
+  BadRequestError,
+  UnprocessableEntityError,
+} from '../../errors/api-errors.js';
+  import {
+  buildKid,
+  jwkFromPublicPem,
+  jwkThumbprint,
+  kidSuffix,
+  parseJwk,
+  randomKeySuffix,
+  type JsonWebKey,
+} from './sdx-keys-crypto.js';
 
 function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
   const certArray = certs.split(/(?=-----BEGIN CERTIFICATE-----)/g);
@@ -14,6 +28,15 @@ function splitCertificates(certs: string, encoding: BufferEncoding): string[] {
     .filter((cert) => cert.length > 0);
 }
 
+export type SdxKeyOperation = 'add' | 'rotate' | 'replace' | 'delete';
+
+const KEY_OPERATIONS: readonly SdxKeyOperation[] = [
+  'add',
+  'rotate',
+  'replace',
+  'delete',
+];
+
 export interface SDXKeyConfig {
   organization: string;
   runtimeGroupName?: string;
@@ -22,11 +45,50 @@ export interface SDXKeyConfig {
   publicKeyPem?: string;
   certificatePem?: string[];
   caCerts?: string;
+  /** Targeted pattern operation. Omit for legacy whole-set publish. */
+  operation?: SdxKeyOperation;
+  /** Existing kid to replace or delete. */
+  targetKid?: string;
+  /** Optional caller-supplied kid (or suffix) for add/rotate/replace. */
+  kid?: string;
+}
+
+export interface KeyChangeRef {
+  kid: string;
+  name: string;
+}
+
+export interface KeySetChanges {
+  operation: SdxKeyOperation | 'publish';
+  added: KeyChangeRef[];
+  removed: KeyChangeRef[];
+  retained: KeyChangeRef[];
+}
+
+interface DesiredKey {
+  name: string;
+  kid: string;
+  jwk?: JsonWebKey;
+  publicKeyPem?: string;
+}
+
+interface ExistingKey {
+  name: string;
+  kid: string;
+  thumbprint: string;
+  jwk?: JsonWebKey;
+  publicKeyPem?: string;
+}
+
+interface IncomingKey {
+  jwk: JsonWebKey;
+  publicKeyPem: string;
+  thumbprint: string;
 }
 
 interface SDXKeysPatternData {
   jwkList: any[];
-  publicKeyPem: string;
+  publicKeyPem?: string;
   gatewayId: string;
   qualifier: string;
   profile: {
@@ -37,6 +99,13 @@ interface SDXKeysPatternData {
     value: string;
     keySetName: string;
   };
+  operation?: SdxKeyOperation;
+  desiredKeys?: DesiredKey[];
+  changes?: KeySetChanges;
+}
+
+export interface PatternInjectContext {
+  action?: string;
 }
 
 /**
@@ -46,6 +115,10 @@ interface SDXKeysPatternData {
  * - Organization signing keys
  * - Subsystem (client_id) signing keys
  *
+ * When `operation` is omitted, behaviour is unchanged: a single `:0` key (or
+ * index-based kids from `certificatePem[]`) is published. When `operation` is
+ * set, the pattern fetches the current keyset from the Kong control plane and
+ * emits the complete desired state for add / rotate / replace / delete.
  */
 export class SDXKeysPattern implements PatternProcessor {
   static ID = 'sdx-keys.r1';
@@ -53,18 +126,29 @@ export class SDXKeysPattern implements PatternProcessor {
 
   constructor(
     private readonly api: SdxMemberApiClient,
+    private readonly gatewayAdmin?: GatewayAdminService,
     private readonly logger?: FastifyBaseLogger
   ) {}
 
   id = () => SDXKeysPattern.ID;
   requiredParams = () => SDXKeysPattern.requiredParams;
-  deleteHandling = () => 'delete' as const;
+  deleteHandling = (data?: SDXKeysPatternData) =>
+    data?.operation ? ('apply' as const) : ('delete' as const);
 
-  async inject(inputs: SDXKeyConfig): Promise<SDXKeysPatternData> {
+  async inject(
+    inputs: SDXKeyConfig,
+    ctx?: PatternInjectContext
+  ): Promise<SDXKeysPatternData> {
+    const operation = parseOperation(inputs.operation);
+    if (operation && ctx?.action === 'delete') {
+      throw new BadRequestError(
+        'Query action=delete removes the entire key qualifier. For targeted deletion, use action=apply with operation=delete.'
+      );
+    }
+
     const profile: any = {};
 
     if (inputs.runtimeGroupName) {
-      // retrieve the runtime group details owned by the organization
       const owned = await this.api.listRuntimeGroups(inputs.organization, {
         filter: 'owned',
       });
@@ -84,7 +168,6 @@ export class SDXKeysPattern implements PatternProcessor {
       profile.value = `${inputs.runtimeGroupName}.${inputs.environment}`;
       profile.gatewayId = rg!.gatewayId;
     } else if (inputs.clientId) {
-      // retrieve the subsystem details for the client_id
       const subsystem = await this.api.getCatalogSubsystem(inputs.clientId);
 
       const orgSubsystem = await this.api.getSubsystemClient(
@@ -102,8 +185,6 @@ export class SDXKeysPattern implements PatternProcessor {
       profile.value = `${inputs.clientId}.${inputs.environment}`;
       profile.gatewayId = orgSubsystem.gateway?.id;
     } else {
-      // assume organization — resolve the member details from any subsystem
-      // belonging to the organization in the catalog.
       const organizations: any = await this.api.listOrganizations();
       const orgMember = organizations.find(
         (s: any) => s.name === inputs.organization && s.member
@@ -133,20 +214,11 @@ export class SDXKeysPattern implements PatternProcessor {
     let jwkList: any[] = [];
     let publicKeyPem = inputs.publicKeyPem;
 
-    // extract public key from certificate
-    if (inputs.certificatePem) {
+    if (!operation && inputs.certificatePem) {
       for (const [index, certPem] of inputs.certificatePem.entries()) {
-        // Create an X509Certificate instance
         const certs = splitCertificates(certPem, 'utf8');
-
         const cert = new crypto.X509Certificate(certs[0]);
-
-        // Access the publicKey object
         const publicKey = cert.publicKey;
-
-        // Export the public key to a desired format (e.g., PEM, DER, JWK)
-        // The 'type' can be 'pkcs1' (RSA only) or 'spki'
-        // The 'format' can be 'pem', 'der', or 'jwk'
         publicKeyPem = publicKey.export({
           type: 'spki',
           format: 'pem',
@@ -172,55 +244,68 @@ export class SDXKeysPattern implements PatternProcessor {
       }
     }
 
-    // assert.strictEqual(
-    //   profile.gateway_id !== undefined,
-    //   true,
-    //   'Missing key information to construct gateway_id'
-    // );
-
-    return {
+    const data: SDXKeysPatternData = {
       profile,
-      jwkList: jwkList,
-      publicKeyPem: publicKeyPem,
+      jwkList,
+      publicKeyPem,
       gatewayId: profile.gatewayId,
       qualifier: profile.qualifier,
-    } as SDXKeysPatternData;
+    };
+
+    if (operation) {
+      const incoming = parseIncomingKey(inputs);
+      if (
+        (operation === 'add' ||
+          operation === 'rotate' ||
+          operation === 'replace') &&
+        !incoming
+      ) {
+        throw new UnprocessableEntityError(
+          'publicKeyPem or certificatePem is required for add, rotate, and replace'
+        );
+      }
+      if (
+        (operation === 'replace' || operation === 'delete') &&
+        !inputs.targetKid
+      ) {
+        throw new UnprocessableEntityError(
+          'targetKid is required for replace and delete'
+        );
+      }
+
+      const existing = await this.loadExistingKeys(
+        profile.gatewayId,
+        inputs.environment,
+        `ns.${profile.gatewayId}.${profile.qualifier}`,
+        profile.keySetName
+      );
+
+      const { desiredKeys, changes } = applyOperation({
+        operation,
+        existing,
+        incoming,
+        profileName: profile.name,
+        kidBase: profile.kid,
+        targetKid: inputs.targetKid,
+        suppliedKid: inputs.kid,
+      });
+
+      data.operation = operation;
+      data.desiredKeys = desiredKeys;
+      data.changes = changes;
+    }
+
+    return data;
   }
 
   eval(inputs: SDXKeyConfig, data: SDXKeysPatternData) {
     const profile = data.profile;
-
-    let tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
-
-    let publicKeyPem = data.publicKeyPem;
-
+    const tags = [`ns.${data.gatewayId}.${profile.qualifier}`];
     const keySetName = profile.keySetName;
 
-    const keys: any = data.jwkList.map((jwk, index) => ({
-      kind: 'GatewayKey',
-      name: `${profile.name}:${index}`,
-      kid: jwk.kid,
-      set: {
-        name: keySetName,
-      },
-      jwk: JSON.stringify(jwk),
-      tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-    }));
-
-    if (keys.length === 0) {
-      keys.push({
-        kind: 'GatewayKey',
-        name: `${profile.name}:0`,
-        kid: `${profile.kid}:0`,
-        set: {
-          name: keySetName,
-        },
-        pem: {
-          public_key: `${publicKeyPem}`,
-        },
-        tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
-      });
-    }
+    const keys = data.desiredKeys
+      ? data.desiredKeys.map((key) => desiredKeyDocument(key, keySetName, tags, profile))
+      : legacyKeyDocuments(data, keySetName, tags, profile);
 
     const operatorEdgeUrl = getRequiredEnvUrl(
       inputs.environment,
@@ -235,21 +320,351 @@ export class SDXKeysPattern implements PatternProcessor {
         type: profile.type,
         set: keySetName,
         endpoint: `${routeHostUrl}keysets/${keySetName}/.well-known/jwks.json`,
+        ...(data.changes ? { changes: data.changes } : {}),
       },
     };
 
     return [
-      ...[info],
-      ...[
-        {
-          kind: 'GatewayKeySet',
-          name: keySetName,
-          tags,
-        },
-      ],
+      info,
+      {
+        kind: 'GatewayKeySet',
+        name: keySetName,
+        tags,
+      },
       ...keys,
     ];
   }
+
+  private async loadExistingKeys(
+    gatewayId: string,
+    environment: string,
+    tag: string,
+    keySetName: string
+  ): Promise<ExistingKey[]> {
+    if (!this.gatewayAdmin) {
+      throw new UnprocessableEntityError(
+        'Gateway key lookup is not configured; cannot apply a targeted key operation'
+      );
+    }
+
+    const response = await this.gatewayAdmin.getKeys(
+      gatewayId,
+      environment,
+      tag,
+      keySetName
+    );
+
+    return (response.keys ?? [])
+      .map((key) => toExistingKey(key))
+      .filter((key): key is ExistingKey => key !== undefined);
+  }
+}
+
+function parseOperation(
+  value: string | undefined
+): SdxKeyOperation | undefined {
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+  if ((KEY_OPERATIONS as readonly string[]).includes(value)) {
+    return value as SdxKeyOperation;
+  }
+  throw new UnprocessableEntityError(
+    `Unsupported sdx-keys.r1 operation '${value}'. Expected add, rotate, replace, or delete.`
+  );
+}
+
+function parseIncomingKey(inputs: SDXKeyConfig): IncomingKey | undefined {
+  if (inputs.certificatePem && inputs.certificatePem.length > 0) {
+    if (inputs.certificatePem.length > 1) {
+      throw new UnprocessableEntityError(
+        'operation accepts a single certificatePem entry'
+      );
+    }
+    const certs = splitCertificates(inputs.certificatePem[0], 'utf8');
+    const cert = new crypto.X509Certificate(certs[0]);
+    const publicKeyPem = cert.publicKey.export({
+      type: 'spki',
+      format: 'pem',
+    }) as string;
+    const jwk = jwkFromPublicPem(publicKeyPem);
+
+    if (inputs.caCerts) {
+      const caCerts = splitCertificates(inputs.caCerts, 'utf8');
+      const fullChain = [...certs, ...caCerts];
+      const result = verifyCertificateChain(fullChain);
+      assert.strictEqual(
+        result.valid,
+        true,
+        'Certificate chain verification failed: ' + result.error
+      );
+      (jwk as any).x5c = splitCertificates(fullChain.join('\n'), 'base64');
+    }
+
+    return {
+      jwk,
+      publicKeyPem,
+      thumbprint: jwkThumbprint(jwk),
+    };
+  }
+
+  if (inputs.publicKeyPem) {
+    const jwk = jwkFromPublicPem(inputs.publicKeyPem);
+    return {
+      jwk,
+      publicKeyPem: inputs.publicKeyPem,
+      thumbprint: jwkThumbprint(jwk),
+    };
+  }
+
+  return undefined;
+}
+
+function toExistingKey(key: GatewayKey): ExistingKey | undefined {
+  const kid = key.kid;
+  const name = key.name;
+  if (!kid || !name) {
+    return undefined;
+  }
+
+  const jwk = parseJwk(key.jwk);
+  const publicKeyPem = key.pem?.public_key;
+  let thumbprint: string | undefined;
+  try {
+    if (jwk) {
+      thumbprint = jwkThumbprint(jwk);
+    } else if (publicKeyPem) {
+      thumbprint = jwkThumbprint(jwkFromPublicPem(publicKeyPem));
+    }
+  } catch {
+    return undefined;
+  }
+  if (!thumbprint) {
+    return undefined;
+  }
+
+  return { name, kid, thumbprint, jwk, publicKeyPem };
+}
+
+function applyOperation(args: {
+  operation: SdxKeyOperation;
+  existing: ExistingKey[];
+  incoming?: IncomingKey;
+  profileName: string;
+  kidBase: string;
+  targetKid?: string;
+  suppliedKid?: string;
+}): { desiredKeys: DesiredKey[]; changes: KeySetChanges } {
+  const { operation, existing, incoming, profileName, kidBase } = args;
+
+  const asDesired = (key: ExistingKey): DesiredKey => ({
+    name: key.name,
+    kid: key.kid,
+    jwk: key.jwk,
+    publicKeyPem: key.publicKeyPem,
+  });
+  const asRef = (key: { kid: string; name: string }): KeyChangeRef => ({
+    kid: key.kid,
+    name: key.name,
+  });
+
+  if (operation === 'delete') {
+    const target = existing.find((key) => key.kid === args.targetKid);
+    if (!target) {
+      throw new UnprocessableEntityError(
+        `targetKid '${args.targetKid}' was not found in the current key set`
+      );
+    }
+    const retained = existing.filter((key) => key.kid !== args.targetKid);
+    if (retained.length === 0) {
+      throw new UnprocessableEntityError(
+        'Deleting the last key requires query action=delete to remove the entire key qualifier'
+      );
+    }
+    return {
+      desiredKeys: retained.map(asDesired),
+      changes: {
+        operation,
+        added: [],
+        removed: [asRef(target)],
+        retained: retained.map(asRef),
+      },
+    };
+  }
+
+  if (!incoming) {
+    throw new UnprocessableEntityError(
+      'publicKeyPem or certificatePem is required'
+    );
+  }
+
+  const duplicate = existing.find(
+    (key) => key.thumbprint === incoming.thumbprint
+  );
+
+  if (operation === 'add' || operation === 'rotate') {
+    if (duplicate) {
+      return {
+        desiredKeys: existing.map(asDesired),
+        changes: {
+          operation,
+          added: [],
+          removed: [],
+          retained: existing.map(asRef),
+        },
+      };
+    }
+
+    const newKey = newDesiredKey(
+      profileName,
+      kidBase,
+      incoming,
+      args.suppliedKid
+    );
+    return {
+      desiredKeys: [...existing.map(asDesired), newKey],
+      changes: {
+        operation,
+        added: [asRef(newKey)],
+        removed: [],
+        retained: existing.map(asRef),
+      },
+    };
+  }
+
+  // replace
+  const target = existing.find((key) => key.kid === args.targetKid);
+  if (!target) {
+    throw new UnprocessableEntityError(
+      `targetKid '${args.targetKid}' was not found in the current key set`
+    );
+  }
+
+  if (duplicate) {
+    const retained = existing.filter((key) => key.kid !== target.kid);
+    if (duplicate.kid === target.kid) {
+      return {
+        desiredKeys: existing.map(asDesired),
+        changes: {
+          operation,
+          added: [],
+          removed: [],
+          retained: existing.map(asRef),
+        },
+      };
+    }
+    return {
+      desiredKeys: retained.map(asDesired),
+      changes: {
+        operation,
+        added: [],
+        removed: [asRef(target)],
+        retained: retained.map(asRef),
+      },
+    };
+  }
+
+  const replacement = newDesiredKey(
+    profileName,
+    kidBase,
+    incoming,
+    args.suppliedKid
+  );
+  const retained = existing
+    .filter((key) => key.kid !== target.kid)
+    .map(asDesired);
+  return {
+    desiredKeys: [...retained, replacement],
+    changes: {
+      operation,
+      added: [asRef(replacement)],
+      removed: [asRef(target)],
+      retained: retained.map(asRef),
+    },
+  };
+}
+
+function newDesiredKey(
+  profileName: string,
+  kidBase: string,
+  incoming: IncomingKey,
+  suppliedKid?: string
+): DesiredKey {
+  const suffix = randomKeySuffix(
+    suppliedKid && !suppliedKid.startsWith('urn:') ? suppliedKid : undefined
+  );
+  const kid = suppliedKid?.startsWith('urn:')
+    ? suppliedKid
+    : buildKid(kidBase, suffix);
+  const nameSuffix = suppliedKid?.startsWith('urn:')
+    ? kidSuffix(kid, kidBase)
+    : suffix;
+  return {
+    name: `${profileName}:${nameSuffix}`,
+    kid,
+    jwk: incoming.jwk,
+    publicKeyPem: incoming.publicKeyPem,
+  };
+}
+
+function desiredKeyDocument(
+  key: DesiredKey,
+  keySetName: string,
+  tags: string[],
+  profile: SDXKeysPatternData['profile']
+) {
+  const doc: any = {
+    kind: 'GatewayKey',
+    name: key.name,
+    kid: key.kid,
+    set: { name: keySetName },
+    tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
+  };
+  if (key.jwk && (key.jwk as any).x5c) {
+    const jwk = { ...key.jwk, kid: key.kid };
+    doc.jwk = JSON.stringify(jwk);
+  } else if (key.publicKeyPem) {
+    doc.pem = { public_key: key.publicKeyPem };
+  } else if (key.jwk) {
+    const jwk = { ...key.jwk, kid: key.kid };
+    doc.jwk = JSON.stringify(jwk);
+  }
+  return doc;
+}
+
+function legacyKeyDocuments(
+  data: SDXKeysPatternData,
+  keySetName: string,
+  tags: string[],
+  profile: SDXKeysPatternData['profile']
+) {
+  const keys: any[] = data.jwkList.map((jwk, index) => ({
+    kind: 'GatewayKey',
+    name: `${profile.name}:${index}`,
+    kid: jwk.kid,
+    set: {
+      name: keySetName,
+    },
+    jwk: JSON.stringify(jwk),
+    tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
+  }));
+
+  if (keys.length === 0) {
+    keys.push({
+      kind: 'GatewayKey',
+      name: `${profile.name}:0`,
+      kid: `${profile.kid}:0`,
+      set: {
+        name: keySetName,
+      },
+      pem: {
+        public_key: `${data.publicKeyPem}`,
+      },
+      tags: [...tags, `type:${profile.type}`, `name:${profile.value}`],
+    });
+  }
+
+  return keys;
 }
 
 function verifyCertificateChain(chainPems: string[]): {
@@ -263,7 +678,6 @@ function verifyCertificateChain(chainPems: string[]): {
       const subject = certs[i];
       const issuer = certs[i + 1];
 
-      // Check issuer name matches
       if (subject.issuer !== issuer.subject) {
         return {
           valid: false,
@@ -271,13 +685,11 @@ function verifyCertificateChain(chainPems: string[]): {
         };
       }
 
-      // Verify signature
       if (!subject.verify(issuer.publicKey)) {
         return { valid: false, error: `Signature invalid at depth ${i}` };
       }
     }
 
-    // Check root is self-signed
     const root = certs[certs.length - 1];
     if (!root.verify(root.publicKey)) {
       return { valid: false, error: 'Root cert is not self-signed' };

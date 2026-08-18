@@ -3,6 +3,7 @@ import type {
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../../clients/sdx-member/index.js';
+import { getRequiredEnvUrl } from '../../config/environments.js';
 
 /**
  * A {@link SubsystemEntry} that the SDX Member catalog has fully enriched with
@@ -61,4 +62,54 @@ export const assert = {
 /** Build the SDX route path prefix for a given service/client locator. */
 export function getRoutePathPrefix(clientId: string): string {
   return `sdx/0/${clientId}`;
+}
+
+export function edgeKeySetName(
+  runtimeGroupName: string,
+  environment: string
+): string {
+  return `sdx.edge.${runtimeGroupName}.${environment}`;
+}
+
+export function edgeTrustSignPluginConfig(opts: {
+  direction: 'request' | 'response';
+  runtimeGroupName: string;
+  environment: string;
+  alg?: string;
+}): Record<string, unknown> {
+  const keySetName = edgeKeySetName(opts.runtimeGroupName, opts.environment);
+  const publicUrl = getRequiredEnvUrl(
+    opts.environment,
+    'public_url',
+    'SDX public URL'
+  );
+  return {
+    direction: opts.direction,
+    signature_header_key: 'X-Edge-Token',
+    keyset_name: keySetName,
+    private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+    alg: opts.alg || 'ES256',
+    jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
+    hash_alg: 'sha256',
+  };
+}
+
+export function edgeTokenExchangePluginConfig(opts: {
+  runtimeGroupName: string;
+  environment: string;
+  clientId?: string;
+  tokenEndpoint?: string;
+  scopes?: string[];
+  audience?: string;
+}): Record<string, unknown> {
+  return {
+    client_id: opts.clientId,
+    token_endpoint: opts.tokenEndpoint,
+    scopes: opts.scopes,
+    audience: opts.audience,
+    keyset_name: edgeKeySetName(opts.runtimeGroupName, opts.environment),
+    private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+    algorithm: 'ES256',
+    expiration: 60,
+  };
 }

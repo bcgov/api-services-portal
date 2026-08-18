@@ -29,6 +29,12 @@ export type PostPatternsResponse = {
   failed: number;
   results: any[];
   preview?: any[];
+  changes?: {
+    operation: string;
+    added: Array<{ kid: string; name: string }>;
+    removed: Array<{ kid: string; name: string }>;
+    retained: Array<{ kid: string; name: string }>;
+  };
 };
 
 export class ProvisionerService {

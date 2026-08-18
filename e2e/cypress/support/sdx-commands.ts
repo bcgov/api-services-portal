@@ -340,8 +340,41 @@ export function orgGatewayKeyName(env: string, org: { tags: string[] }): string 
   return `sdx.keys.${memberClass}.${memberId}.org.${env}:0`
 }
 
-export function subsystemGatewayKeyName(clientId: string): string {
-  return `sdx.keys.${clientId.toLowerCase()}.sys:0`
+export function subsystemGatewayKeyName(clientId: string, env = 'dev'): string {
+  return `sdx.keys.${clientId.toLowerCase()}.${env}.sys:0`
+}
+
+export function runtimeGroupGatewayKeyName(
+  runtimeGroupName: string,
+  env: string,
+  indexOrSuffix = '0'
+): string {
+  return `sdx.keys.${runtimeGroupName}.${env}.edge:${indexOrSuffix}`
+}
+
+export function applyRuntimeGroupPublicKeyPattern(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string,
+  publicKeyPem: string,
+  action: 'preview' | 'apply' | 'diff' | 'delete' = 'apply',
+  extras: {
+    operation?: 'add' | 'rotate' | 'replace' | 'delete'
+    targetKid?: string
+    kid?: string
+  } = {}
+) {
+  cy.setRequestBody({
+    parameters: {
+      organization: orgName,
+      environment,
+      runtimeGroupName,
+      ...(publicKeyPem ? { publicKeyPem } : {}),
+      ...extras,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
 }
 
 export function registerHostOrganization(name: string, memberId: string) {

@@ -6,11 +6,12 @@ import type {
 import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
+  edgeTokenExchangePluginConfig,
+  edgeTrustSignPluginConfig,
   getRoutePathPrefix,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
@@ -313,28 +314,15 @@ function upgradeToTrustSign(
   data: SDXP2PProviderPatternData,
   inputs: SDXP2PProviderPatternConfig
 ) {
-  const environment = data.serviceRG.environment;
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${environment}:0`;
-  const keySetName = `sdx.edge.${data.serviceRG.name}.${environment}`;
-
-  const publicUrl = getRequiredEnvUrl(
-    environment,
-    'public_url',
-    'SDX public URL'
-  );
-
   return {
     name: 'trust-sign',
     tags: tags,
-    config: {
+    config: edgeTrustSignPluginConfig({
       direction: 'response',
-      signature_header_key: 'X-Edge-Token',
-      keyid: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      runtimeGroupName: data.serviceRG.name!,
+      environment: data.serviceRG.environment!,
       alg: inputs.upgrades.sign?.alg || 'ES256',
-      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
-      hash_alg: 'sha256',
-    },
+    }),
   };
 }
 
@@ -358,21 +346,17 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${data.serviceRG.environment}:0`;
-
   return {
     name: 'token-exchange',
     tags: tags,
-    config: {
-      client_id: tokenExchangeConfig?.clientId,
-      token_endpoint: tokenExchangeConfig?.tokenEndpoint,
+    config: edgeTokenExchangePluginConfig({
+      runtimeGroupName: data.serviceRG.name!,
+      environment: data.serviceRG.environment!,
+      clientId: tokenExchangeConfig?.clientId,
+      tokenEndpoint: tokenExchangeConfig?.tokenEndpoint,
       scopes: tokenExchangeConfig?.scopes,
       audience: tokenExchangeConfig?.audience,
-      key_id: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      algorithm: 'ES256',
-      expiration: 60,
-    },
+    }),
   };
 }
 
@@ -386,6 +370,8 @@ function upgradeToTrustKMS(
 
   const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.serviceRG.environment}:0`;
 
+  // Org KMS keys keep a fixed :0 kid; random-kid rotation applies to edge
+  // signing keys (trust-sign / token-exchange), not trust-kms.
   return {
     name: 'trust-kms',
     tags: tags,

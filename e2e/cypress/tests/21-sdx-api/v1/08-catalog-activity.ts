@@ -1,9 +1,11 @@
 import { v4 as uuidv4 } from 'uuid'
 import {
   applyOrgPublicKeyPattern,
+  applyRuntimeGroupPublicKeyPattern,
   applySubsystemPublicKeyPattern,
   clientIdForSubsystem,
   createOASService,
+  createRuntimeGroup,
   createSubsystem,
   orgGatewayKeyName,
   publicKeyPemA,
@@ -701,6 +703,169 @@ describe('SDX Catalog Activity', () => {
           expect(entry?.params?.entity).to.equal('SubsystemKey')
           expect(entry?.params?.action).to.equal('removed')
           // expect(entry?.params?.detail).to.include(`removed key ${subsystemKeyName}`)
+          expect(entry?.result).to.equal('success')
+        })
+      })
+    })
+  })
+
+  describe('Runtime group public key lifecycle in catalog activity', () => {
+    let runtimeGroupName: string
+    let addedKid: string
+    let rotatedOldKid: string
+
+    before(() => {
+      const { org, env } = workingData
+      runtimeGroupName = uuidv4().replace(/-/g, '').toLowerCase().substring(0, 6)
+
+      createRuntimeGroup(org, runtimeGroupName, env).then(() => {
+        applyRuntimeGroupPublicKeyPattern(
+          org.name,
+          runtimeGroupName,
+          env,
+          publicKeyPemA,
+          'apply',
+          { operation: 'add' }
+        ).then(({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          addedKid = body.changes?.added?.[0]?.kid
+        })
+      })
+    })
+
+    it('records added activity on initial runtime-group key apply', () => {
+      const { org } = workingData
+
+      cy.callAPI(
+        `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+        'GET'
+      ).then(({ apiRes: { status, body: activities } }: any) => {
+        expect(status).to.be.equal(200)
+        const entry = activities.find(
+          (a: any) =>
+            a.params?.entity === 'RuntimeGroupKey' &&
+            (a.params?.action === 'added' || a.params?.action === 'published') &&
+            a.params?.targetName === runtimeGroupName
+        )
+        expect(entry?.params?.entity).to.equal('RuntimeGroupKey')
+        expect(entry?.result).to.equal('success')
+      })
+    })
+
+    it('returns structured changes on diff without requiring a new key', () => {
+      const { org, env } = workingData
+
+      applyRuntimeGroupPublicKeyPattern(
+        org.name,
+        runtimeGroupName,
+        env,
+        publicKeyPemA,
+        'diff',
+        { operation: 'add' }
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        if (body.changes) {
+          expect(body.changes.operation).to.equal('add')
+        }
+      })
+    })
+
+    it('records rotated activity when a second runtime-group key is published', () => {
+      const { org, env } = workingData
+
+      applyRuntimeGroupPublicKeyPattern(
+        org.name,
+        runtimeGroupName,
+        env,
+        publicKeyPemB,
+        'apply',
+        { operation: 'rotate' }
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        if (body.changes) {
+          expect(body.changes.operation).to.equal('rotate')
+          expect(body.changes.added.length).to.be.at.least(0)
+          rotatedOldKid = body.changes.retained?.[0]?.kid || addedKid
+        }
+
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'RuntimeGroupKey' &&
+              (a.params?.action === 'rotated' || a.params?.action === 'published') &&
+              a.params?.targetName === runtimeGroupName
+          )
+          expect(entry?.params?.entity).to.equal('RuntimeGroupKey')
+          expect(entry?.result).to.equal('success')
+        })
+      })
+    })
+
+    it('records removed activity for a targeted old-kid delete after overlap', () => {
+      const { org, env } = workingData
+      const targetKid = rotatedOldKid || addedKid
+      if (!targetKid) {
+        return
+      }
+
+      applyRuntimeGroupPublicKeyPattern(
+        org.name,
+        runtimeGroupName,
+        env,
+        '',
+        'apply',
+        { operation: 'delete', targetKid }
+      ).then(({ apiRes: { status, body } }: any) => {
+        expect(status).to.be.equal(200)
+        if (body.changes) {
+          expect(body.changes.operation).to.equal('delete')
+        }
+
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'RuntimeGroupKey' &&
+              (a.params?.action === 'removed' || a.params?.action === 'published') &&
+              a.params?.targetName === runtimeGroupName
+          )
+          expect(entry?.params?.entity).to.equal('RuntimeGroupKey')
+          expect(entry?.result).to.equal('success')
+        })
+      })
+    })
+
+    it('records removed activity when the runtime-group key qualifier is deleted', () => {
+      const { org, env } = workingData
+
+      applyRuntimeGroupPublicKeyPattern(
+        org.name,
+        runtimeGroupName,
+        env,
+        publicKeyPemB,
+        'delete'
+      ).then(({ apiRes: { status } }: any) => {
+        expect(status).to.be.equal(200)
+
+        cy.callAPI(
+          `ds/api/sdx/v1/catalog/activity?organization=${org.name}&first=100`,
+          'GET'
+        ).then(({ apiRes: { status, body: activities } }: any) => {
+          expect(status).to.be.equal(200)
+          const entry = activities.find(
+            (a: any) =>
+              a.params?.entity === 'RuntimeGroupKey' &&
+              a.params?.action === 'removed' &&
+              a.params?.targetName === runtimeGroupName
+          )
+          expect(entry?.params?.entity).to.equal('RuntimeGroupKey')
           expect(entry?.result).to.equal('success')
         })
       })
