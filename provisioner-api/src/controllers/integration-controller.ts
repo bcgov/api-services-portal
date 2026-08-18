@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SubsystemEntry } from '../clients/sdx-member/index.js';
 
 export interface CreateIntegrationAccessRequestInput {
-  integrationClientId: string;
+  integrationId: string;
   request: TNewIntegrationAccessRequest;
 }
 
@@ -44,7 +44,7 @@ export class IntegrationController {
 
     const subsystem =
       await this.services.sdxMember.getSubsystemByIntegrationClientId(
-        input.integrationClientId
+        input.integrationId
       );
 
     try {
@@ -52,6 +52,7 @@ export class IntegrationController {
         await this.services.integrationAccess.submitIntegrationAccessRequest(
           submissionId,
           subsystem,
+          input.integrationId,
           input.request
         );
       await this.logActivity(input, subsystem, result);
@@ -74,12 +75,12 @@ export class IntegrationController {
       action: 'update',
       result: error ? 'failed' : 'success',
       name: 'N/A',
-      message: `Integration access request for  ${request.integrationClientId} submitted`,
+      message: `Integration access request for  ${request.integrationId} submitted`,
       refId: '',
       context: {
         message: 'Integration access request for {client} {action}',
         params: {
-          client: request.integrationClientId,
+          client: request.integrationId,
           action: 'submitted',
         },
       },

@@ -1210,6 +1210,7 @@ CREATE TABLE public."Subsystem" (
     name text NOT NULL,
     namespace text NOT NULL,
     description text,
+    "privacyZone" text,
     organization integer,
     slug text
 );

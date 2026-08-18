@@ -16,6 +16,7 @@ namespace SDX {
                 environment: String,
                 requesterDetails: {
                     client: {
+                        integrationId: String,
                         clientId: String,
                         privacyZone: String
                     },
@@ -25,8 +26,7 @@ namespace SDX {
                     },
                     scopes: Set<String>,
                     service: {
-                        clientId: String,
-                        privacyZone: String
+                        clientId: String
                     },
                     submissionId: String
                 },
@@ -37,6 +37,8 @@ namespace SDX {
                             integrationClientId?: String,
                         },
                         "sdx-p2p-consumer.r1": {
+                            clientRuntimeOverride?: String,
+                            stripPath?: Bool,
                             upgrades: {
                                 sign?: {
                                     alg?: String
@@ -45,7 +47,7 @@ namespace SDX {
                                 counterSign?: {
                                     signatureAlgorithm?: String
                                 },
-                                tokenExchange: {
+                                tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
                                     audience: String,
@@ -55,6 +57,7 @@ namespace SDX {
                         }
                     }
                 },
+                serviceResources: {},
                 combinedScopes: Set<String>,
                 action: String,
                 globals: {

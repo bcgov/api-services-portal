@@ -26,15 +26,11 @@ export interface RequesterDetails {
 }
 
 export interface ClientResources {
-  gatewayPatterns: GatewayPatternInput[];
-}
-
-export interface GatewayPatternInput {
-  pattern: string;
-  parameters: Record<string, unknown>;
+  comment?: string;
+  gatewayPatterns: Record<string, Record<string, unknown>>;
 }
 
 export interface ServiceResources {
-  subsystemId: string;
-  gatewayPatterns: GatewayPatternInput[];
+  comment?: string;
+  gatewayPatterns?: Record<string, Record<string, unknown>>;
 }

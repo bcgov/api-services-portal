@@ -95,7 +95,6 @@ export const ResourceServerAccess = Type.Object(
   {
     environment: Type.String({ examples: ['dev'] }),
     id: Type.String({ examples: ['claims'] }),
-    privacyZone: Type.String({ examples: ['public'] }),
     services: Type.Array(AllowedResourceServerServiceAccess),
   },
   {
@@ -105,7 +104,6 @@ export const ResourceServerAccess = Type.Object(
       {
         environment: 'dev',
         id: 'MIN.CITZ.SYS-1',
-        privacyZone: 'public',
         services: [
           {
             scopes: ['Claims.Read'],
@@ -122,7 +120,7 @@ export const IntegrationAccessRequest = Type.Object(
     submissionId: Type.String({
       examples: ['9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a'],
     }),
-    clientId: Type.String({ examples: ['integration-42'] }),
+    clientId: Type.String({ examples: ['client-a-111'] }),
     resourceServers: Type.Array(Type.Ref(ResourceServerAccess)),
   },
   {
@@ -131,15 +129,12 @@ export const IntegrationAccessRequest = Type.Object(
     examples: [
       {
         submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
-        clientId: 'integration-42',
+        clientId: 'client-a-111',
         resourceServers: [
           {
             environment: 'dev',
             id: '1234',
-            privacyZone: 'public',
-            services: [
-              { scopes: ['Claims.Read'], name: 'claims-svc' },
-            ],
+            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
           },
         ],
       },
@@ -199,7 +194,6 @@ export const NewIntegrationAccessRequest = Type.Object(
     additionalProperties: false,
     examples: [
       {
-        integrationId: 'integration-42',
         requester: 'user@example.gov.bc.ca',
         clientId: 'partner-app',
         policyVersion: 'SDX.R1.00',

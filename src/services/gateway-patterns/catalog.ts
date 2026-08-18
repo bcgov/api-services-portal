@@ -26,6 +26,7 @@ export interface SubsystemEntry {
   name: string;
   description?: string;
   clientId: string;
+  privacyZone?: string;
   organization?: {
     name: string;
     description?: string;
@@ -358,6 +359,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     name: c.name,
     description: c.description,
     clientId: `${member.memberClass}.${member.memberId}.${c.name}`,
+    privacyZone: c.privacyZone,
     organization: {
       name: c.organization.name,
       title: c.organization.title,

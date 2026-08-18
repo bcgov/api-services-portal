@@ -309,6 +309,7 @@ export interface Subsystem {
   name?: string;
   description?: string;
   gatewayId?: string;
+  privacyZone?: string;
   organization?: OrganizationRefID;
   integrations?: SubsystemIntegration[];
 }

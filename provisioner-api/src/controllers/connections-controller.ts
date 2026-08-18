@@ -2,12 +2,14 @@ import type { Services } from '../services/index.js';
 import type {
   TConnectionChangeRequest,
   TConnectionChangeResponse,
+  TConnectionDefaultsResponse,
   TResourceResult,
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { Activity } from '../clients/feed/types.js';
 import { v4 as uuidv4 } from 'uuid';
 import { BadRequestError, InternalError } from '../errors/api-errors.js';
+import type { PolicyRequesterDetails } from '../services/policy-service.js';
 
 export class ConnectionsController {
   constructor(
@@ -98,6 +100,35 @@ export class ConnectionsController {
         throw err;
       }
     }
+  }
+
+  async getConnectionDefaults(
+    clientId: string,
+    serviceId: string,
+    policyVersion: string
+  ): Promise<TConnectionDefaultsResponse> {
+    const subsystem =
+      await this.services.sdxMember.api.getCatalogSubsystem(clientId);
+    const service =
+      await this.services.sdxMember.getSubsystemService(serviceId);
+
+    const requesterDetails: PolicyRequesterDetails = {
+      submissionId: '',
+      requester: { name: '' },
+      scopes: [],
+      client: { clientId, privacyZone: subsystem.privacyZone },
+      service: {
+        clientId: service.subsystem.clientId,
+        privacyZone: service.subsystem.privacyZone,
+      },
+    };
+
+    return this.services.policyEngine.getDefaultResources(
+      policyVersion,
+      subsystem,
+      service,
+      requesterDetails
+    ) as TConnectionDefaultsResponse;
   }
 
   private async logActivity(

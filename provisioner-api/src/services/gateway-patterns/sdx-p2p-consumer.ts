@@ -10,7 +10,6 @@ import {
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-import { Organization } from '../../clients/directory/index.js';
 import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PConsumerPatternConfig {

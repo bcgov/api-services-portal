@@ -104,10 +104,11 @@ export class OrgConnectionController extends Controller {
    * List connection requests for the specified organization.
    *
    * Callers with org-wide `System.Manage` see every connection touching the org. Callers who
-   * only hold `Connection.Manage` (no `System.Manage`) instead see only connections for
-   * services belonging to the subsystem gateways they've been granted `Connection.Manage` on.
+   * only hold `Connection.Manage` and/or `Subsystem.Manage` (no `System.Manage`) instead see
+   * only connections for services belonging to the subsystem gateways they've been granted
+   * either of those scopes on.
    *
-   * > `Required Scope:` System.Manage or Connection.Manage
+   * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
    *
    * @param org
    * @param request
@@ -115,7 +116,7 @@ export class OrgConnectionController extends Controller {
    */
   @Get()
   @OperationId('listConnections')
-  @Security('jwt', ['System.Manage', 'Connection.Manage'])
+  @Security('jwt', ['System.Manage', 'Connection.Manage', 'Subsystem.Manage'])
   public async listConnections(
     @Path() org: string,
     @Request() request: any
@@ -134,6 +135,7 @@ export class OrgConnectionController extends Controller {
       await injectResSvrAccessTokenToContext(envCtx);
       const namespaces = await getPermittedNamespaceNames(envCtx, [
         'Connection.Manage',
+        'Subsystem.Manage',
       ]);
       if (namespaces.length === 0) {
         return [];

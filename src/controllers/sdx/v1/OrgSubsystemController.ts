@@ -34,7 +34,10 @@ import {
 import { getRoutePathPrefix } from '../../../services/utils';
 import { GroupAccessService } from '../../../services/org-groups';
 import { SysGroupAccessService } from '../../../services/org-groups/sys-group-access';
-import { GroupMember, GroupMembership } from '../../../services/org-groups/types';
+import {
+  GroupMember,
+  GroupMembership,
+} from '../../../services/org-groups/types';
 import {
   buildOrgAccessDisplayNameResolver,
   logSubsystemAccessChanges,
@@ -236,10 +239,12 @@ export class OrgSubsystemController extends Controller {
       client.clientId
     );
 
+    const members = membership?.members?.map(
+      (m) => removeKeys(m, ['id', 'username']) as GroupMember
+    );
+
     return {
-      name,
-      parent: '/systems',
-      members: membership?.members ?? [],
+      members: members ?? [],
     };
   }
 

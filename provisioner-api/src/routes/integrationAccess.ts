@@ -60,7 +60,6 @@ const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
         {
           id: 'claims',
           environment: 'dev',
-          privacyZone: 'public',
           services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
         },
       ],
@@ -73,7 +72,7 @@ const security = [] as any[];
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {
     app.get(
-      '/integrations/:clientId/allowed-services',
+      '/integrations/:integrationId/allowed-services',
       {
         schema: {
           tags: ['Integration Requests'],
@@ -83,7 +82,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
             'Returns the details of an integration access request with approved access to SDX services.',
           security,
           params: Type.Object({
-            clientId: Type.String({
+            integrationId: Type.String({
               description: CLIENT_ID_DESC,
               examples: ['claims'],
             }),
@@ -91,13 +90,13 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           querystring: Type.Object({
             environment: Type.String({
               description: ENVIRONMENT_DESC,
-              examples: ['dev'],
+              examples: ['apsdev'],
             }),
             status: Type.Union(
               [Type.Literal('approved'), Type.Literal('pending')],
               {
                 description: STATUS_DESC,
-                examples: ['approved'],
+                examples: ['pending'],
               }
             ),
           }),
@@ -107,14 +106,14 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
       },
       async (req) =>
         app.controllers.integration.getIntegrationAllowedServices({
-          integrationClientId: req.params.clientId,
+          integrationClientId: req.params.integrationId,
           environment: req.query.environment,
           status: req.query.status,
         })
     );
 
     app.post(
-      '/integrations/:clientId/access-requests',
+      '/integrations/:integrationId/access-requests',
       {
         schema: {
           tags: ['Integration Requests'],
@@ -124,7 +123,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
             'Submits a new integration access request for a partner authorization integration. Approval triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
-            clientId: Type.String({
+            integrationId: Type.String({
               description: INTEGRATION_ID_DESC,
               examples: ['claims'],
             }),
@@ -133,33 +132,34 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
           callbacks: {
             provisionAllowedServices: {
-              '/integrations/{$request.params#/clientId}/allowed-services': {
-                put: {
-                  requestBody: {
-                    required: true,
-                    content: {
-                      'application/json': {
-                        schema: {
-                          $ref: '#/components/schemas/IntegrationAccessRequest',
+              '/requests/{$request.params#/integrationId}/sdx-allowed-services':
+                {
+                  put: {
+                    requestBody: {
+                      required: true,
+                      content: {
+                        'application/json': {
+                          schema: {
+                            $ref: '#/components/schemas/IntegrationAccessRequest',
+                          },
                         },
                       },
                     },
-                  },
-                  responses: {
-                    '200': {
-                      description:
-                        'Partner acknowledged receipt of the provisioning instruction.',
+                    responses: {
+                      '200': {
+                        description:
+                          'Partner acknowledged receipt of the provisioning instruction.',
+                      },
                     },
                   },
                 },
-              },
             },
           },
         },
       },
       async (req) =>
         app.controllers.integration.createIntegrationAccessRequest({
-          integrationClientId: req.params.clientId,
+          integrationId: req.params.integrationId,
           request: req.body,
         })
     );

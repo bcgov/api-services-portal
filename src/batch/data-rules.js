@@ -487,7 +487,14 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace', 'integrations'],
+    sync: [
+      'name',
+      'description',
+      'organization',
+      'namespace',
+      'integrations',
+      'privacyZone',
+    ],
     transformations: {
       organization: {
         name: 'connectOne',

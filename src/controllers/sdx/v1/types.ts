@@ -7,6 +7,7 @@ import { SubsystemIntegration } from '../../v3/types';
 export interface SubsystemInput {
   name: string;
   description?: string;
+  privacyZone?: string;
   environments?: string[];
   integrations?: SubsystemIntegration[];
 }
