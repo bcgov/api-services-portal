@@ -93,11 +93,16 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
 
-    return new ConnectionService().upsertConnection(ctx, org, {
+    const data: ConnectionRequestInput = {
       clientId: input.clientId,
       serviceId: input.serviceId,
       isApproved: input.isApproved,
-    });
+    };
+    if (input.isActive !== null) {
+      data['isActive'] = input.isActive;
+    }
+
+    return new ConnectionService().upsertConnection(ctx, org, data);
   }
 
   /**
