@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import {
+  applyFixtureEdgeSigningKey,
   applyServicePattern,
   createJanisOrgAndAccess,
   createRuntimeGroup,
@@ -31,13 +32,17 @@ describe('SDX E2E Tests', () => {
           'http://kong-sdx-edge0.localtest.me:9080',
           'https://kong-sdx-edge0.localtest.me:9443'
         ).then(() => {
-          // docker compose spins up one runtime group "rg0"
-          // but for this org to use the "rg0" runtime group, we need to add the org to the hostedOrganizations list for rg0
-          return updateRuntimeGroupAddHostedOrg(
-            { name: 'user-janis' },
-            'rg0',
-            workingData.env,
-            workingData.org.name
+          return applyFixtureEdgeSigningKey('user-janis', 'rg0', workingData.env).then(
+            () => {
+              // docker compose spins up one runtime group "rg0"
+              // but for this org to use the "rg0" runtime group, we need to add the org to the hostedOrganizations list for rg0
+              return updateRuntimeGroupAddHostedOrg(
+                { name: 'user-janis' },
+                'rg0',
+                workingData.env,
+                workingData.org.name
+              )
+            }
           )
         })
       })
@@ -46,12 +51,16 @@ describe('SDX E2E Tests', () => {
 
   describe('Basic connection', () => {
     it('PUT /organizations/{org}/connections', () => {
-      const { org, gateway, dataset, datasetId, product, env } = workingData
+      const { org, datasetId, env } = workingData
+      const subsystemName = uniqueSubsystemName()
+      const integrationClientId = `client-${datasetId}-${uuidv4()
+        .replace(/-/g, '')
+        .substring(0, 8)}`
 
       // create a new subsystem and publish a new OAS Service in dev
       createSubsystemAndOASService(
         org,
-        `SUBSYS-${datasetId.toUpperCase()}`,
+        subsystemName,
         env,
         (service: any) => {
           const clientId = service.subsystem.clientId
@@ -62,7 +71,7 @@ describe('SDX E2E Tests', () => {
             updateSubsystemIntegrationClients(
               org,
               service.subsystem.name,
-              [`client-${datasetId}`],
+              [integrationClientId],
               () => {
                 // now create a connection between the subsystem and the service
                 // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
@@ -81,7 +90,7 @@ describe('SDX E2E Tests', () => {
                       name: 'Janis',
                     },
                     client: {
-                      clientId: `client-${datasetId}`,
+                      clientId: integrationClientId,
                     },
                   },
                   clientResources: {

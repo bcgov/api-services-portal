@@ -265,6 +265,7 @@ services:
     command: sh -c "apk add --no-cache openssl >/dev/null && sh /gen/gen-cluster-certs.sh"
     volumes:
       - ./local/kong/gen-cluster-certs.sh:/gen/gen-cluster-certs.sh:ro
+      - ./local/kong/sdx-edge-signing-cert:/gen/sdx-edge-signing-cert:ro
       - tls-certs:/certs
     networks:
       - aps-net

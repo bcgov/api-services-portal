@@ -352,6 +352,26 @@ export function runtimeGroupGatewayKeyName(
   return `sdx.keys.${runtimeGroupName}.${env}.edge:${indexOrSuffix}`
 }
 
+/** Publish the compose fixture signing public key into a runtime-group keyset. */
+export function applyFixtureEdgeSigningKey(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string
+) {
+  return cy.fixture('sdx-edge-signing-public.pem').then((publicKeyPem: string) => {
+    return applyRuntimeGroupPublicKeyPattern(
+      orgName,
+      runtimeGroupName,
+      environment,
+      publicKeyPem.trim(),
+      'apply',
+      { operation: 'add' }
+    ).then(({ apiRes: { status, body } }: any) => {
+      expect(status, body?.reason || body?.message).to.be.equal(200)
+    })
+  })
+}
+
 export function applyRuntimeGroupPublicKeyPattern(
   orgName: string,
   runtimeGroupName: string,
