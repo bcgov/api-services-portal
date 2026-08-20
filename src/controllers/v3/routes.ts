@@ -13,6 +13,8 @@ import { EndpointsController } from './EndpointsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GatewayConfigController } from './GatewayConfigController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { GatewayConsumersController } from './GatewayConsumersController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { NamespaceController } from './GatewayController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GatewayDirectoryController } from './GatewayDirectoryController';
@@ -165,6 +167,68 @@ const models: TsoaRoute.Models = {
         "properties": {
             "pattern": {"dataType":"string","required":true},
             "parameters": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GatewayConsumerCredential": {
+        "dataType": "refObject",
+        "properties": {
+            "flow": {"dataType":"string","required":true},
+            "clientId": {"dataType":"string"},
+            "clientSecret": {"dataType":"string"},
+            "issuer": {"dataType":"string"},
+            "tokenEndpoint": {"dataType":"string"},
+            "apiKey": {"dataType":"string"},
+            "clientPublicKey": {"dataType":"string"},
+            "clientPrivateKey": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IssueGatewayConsumerApplication": {
+        "dataType": "refObject",
+        "properties": {
+            "appId": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "description": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IssueGatewayConsumerPlugin": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "config": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"}},
+            "service": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string"}}},
+            "route": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string"}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IssueGatewayConsumerControls": {
+        "dataType": "refObject",
+        "properties": {
+            "defaultClientScopes": {"dataType":"array","array":{"dataType":"string"}},
+            "defaultOptionalScopes": {"dataType":"array","array":{"dataType":"string"}},
+            "roles": {"dataType":"array","array":{"dataType":"string"}},
+            "aclGroups": {"dataType":"array","array":{"dataType":"string"}},
+            "clientGenCertificate": {"dataType":"boolean"},
+            "clientCertificate": {"dataType":"string"},
+            "jwksUrl": {"dataType":"string"},
+            "plugins": {"dataType":"array","array":{"dataType":"refObject","ref":"IssueGatewayConsumerPlugin"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IssueGatewayConsumerRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "environmentAppId": {"dataType":"string","required":true},
+            "application": {"ref":"IssueGatewayConsumerApplication","required":true},
+            "labels": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"}},
+            "controls": {"ref":"IssueGatewayConsumerControls"},
         },
         "additionalProperties": false,
     },
@@ -740,6 +804,69 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.generateConfigFromPattern.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/ds/api/v3/gateways/:gatewayId/consumers',
+            authenticateMiddleware([{"jwt":["CredentialIssuer.Generate"]}]),
+
+            async function GatewayConsumersController_issue(request: any, response: any, next: any) {
+            const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"IssueGatewayConsumerRequest"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GatewayConsumersController>(GatewayConsumersController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.issue.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v3/gateways/:gatewayId/consumers/:clientId',
+            authenticateMiddleware([{"jwt":["CredentialIssuer.Generate"]}]),
+
+            async function GatewayConsumersController_regenerate(request: any, response: any, next: any) {
+            const args = {
+                    gatewayId: {"in":"path","name":"gatewayId","required":true,"dataType":"string"},
+                    clientId: {"in":"path","name":"clientId","required":true,"dataType":"string"},
+                    action: {"in":"query","name":"action","required":true,"dataType":"enum","enums":["regenerate"]},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GatewayConsumersController>(GatewayConsumersController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.regenerate.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

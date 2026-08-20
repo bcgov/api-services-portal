@@ -85,6 +85,7 @@ export async function CreateNamespace(
     'Access.Manage',
     'Content.Publish',
     'CredentialIssuer.Admin',
+    'CredentialIssuer.Generate',
   ];
   if (args.includeSDXScopes) {
     scopes.push('Connection.Manage');
