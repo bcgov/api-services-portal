@@ -87,7 +87,11 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
           'acl',
         ],
         acls: access.resourceServers
-          .map((rs) => rs.services.map((s) => s.name))
+          .map((rs) =>
+            rs.services
+              .filter((s) => s.status === 'approved')
+              .map((s) => s.name)
+          )
           .flat()
           .map((serviceName) => ({
             group: serviceName,

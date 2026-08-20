@@ -66,6 +66,22 @@ export class IntegrationAccessService {
         // evaluate each service in the RS
         const servicePromises = requestedResourceServer.services.map(
           async (requestedService) => {
+            // check that the scopes requested are part of the OpenAPI/AsyncAPI specification
+            const spec = await this.api.getOASService(requestedService.name);
+
+            // make sure the environments are valid
+            if (spec.environment !== requestedResourceServer.environment) {
+              throw new BadRequestError(
+                `Requested service '${requestedService.name}' environment '${spec.environment}' does not match requested resource server environment '${requestedResourceServer.environment}'`
+              );
+            }
+            // make sure the requested resource server id matches the service's subsystem
+            if (requestedResourceServer.id !== spec.subsystem.clientId) {
+              throw new BadRequestError(
+                `Requested service '${requestedService.name}' belongs to subsystem '${spec.subsystem.clientId}' which does not match requested resource server id '${requestedResourceServer.id}'`
+              );
+            }
+
             const requesterDetails = {
               submissionId,
               requester: {
@@ -77,20 +93,10 @@ export class IntegrationAccessService {
                 privacyZone: input.privacyZone,
               },
               service: {
-                clientId: requestedResourceServer.clientId,
-                privacyZone: requestedResourceServer.privacyZone,
+                clientId: spec.subsystem.clientId,
+                privacyZone: spec.subsystem.privacyZone,
               },
             };
-
-            // check that the scopes requested are part of the OpenAPI/AsyncAPI specification
-            const spec = await this.api.getOASService(requestedService.name);
-
-            // make sure the environments are valid
-            if (spec.environment !== requestedResourceServer.environment) {
-              throw new BadRequestError(
-                `Requested service '${requestedService.name}' environment '${spec.environment}' does not match requested resource server environment '${requestedResourceServer.environment}'`
-              );
-            }
             // make sure requested scopes exist in the specification for the service
             requestedService.scopes.forEach((scope) => {
               const operations = spec.operations || [];
@@ -233,9 +239,10 @@ export class IntegrationAccessService {
     }
 
     this.logger?.debug(
-      'Matched %s to subsystem = %s',
+      'Matched %s to subsystem = %s, org = %s',
       integrationClientId,
-      subsystem.clientId
+      subsystem.clientId,
+      subsystem.organization?.name
     );
 
     // get all the approved connection requests for the subsystem client ID
@@ -246,8 +253,6 @@ export class IntegrationAccessService {
     this.logger?.debug('Connections = %j', connections);
     const allowedConnections = connections.filter(
       (c) =>
-        c.isApproved &&
-        c.isActive &&
         c.clientId === subsystem.clientId &&
         c.environment === environment &&
         c.requesterDetails.client?.clientId === integrationClientId
@@ -257,7 +262,10 @@ export class IntegrationAccessService {
 
     // group by the s.serviceResources.subsystemId
     // and then for each subsystem, popupate the resourceServer object
-    const servicesBySubsystem: Record<string, typeof allowedConnections> = {};
+    const servicesBySubsystem: Record<
+      string,
+      { privacyZone?: string; connections: typeof allowedConnections }
+    > = {};
     for (const s of allowedConnections) {
       const service = (await this.api.getOASService(
         s.serviceId!
@@ -265,9 +273,12 @@ export class IntegrationAccessService {
 
       const subsystemId = service.subsystem.clientId;
       if (!servicesBySubsystem[subsystemId]) {
-        servicesBySubsystem[subsystemId] = [];
+        servicesBySubsystem[subsystemId] = {
+          privacyZone: service.subsystem.privacyZone,
+          connections: [],
+        };
       }
-      servicesBySubsystem[subsystemId].push(s);
+      servicesBySubsystem[subsystemId].connections.push(s);
     }
 
     this.logger?.debug('servicesBySubsystem %j', servicesBySubsystem);
@@ -280,22 +291,18 @@ export class IntegrationAccessService {
     // and then construct the TIntegrationAccessRequest object
 
     const resourceServers: TResourceServerAccess[] = [];
-    for (const [subsystemId, services] of Object.entries(servicesBySubsystem)) {
-      // const subsystemDetail = await this.api.getCatalogSubsystem(subsystemId);
-      // if (!subsystemDetail) {
-      //   this.logger?.warn(
-      //     `Subsystem detail not found for subsystemId ${subsystemId}`
-      //   );
-      //   continue;
-      // }
-      // const orgName = subsystemDetail.organization?.name || 'unknown';
-
+    for (const [
+      subsystemId,
+      { privacyZone, connections: services },
+    ] of Object.entries(servicesBySubsystem)) {
       resourceServers.push({
-        subsystemId: subsystemId,
+        id: subsystemId,
         environment: environment,
+        privacyZone: privacyZone || '',
         services: services.map((s) => ({
           name: s.serviceId!,
           scopes: (s.requesterDetails?.scopes || []) as string[],
+          status: s.isApproved ? 'approved' : 'pending',
         })),
       });
     }

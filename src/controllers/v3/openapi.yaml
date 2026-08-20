@@ -1277,7 +1277,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Gateway'
-            description: "Get details about the gateway, such as permissions for what the gateway is setup with.\n> `Required Scope:` Gateway.Manage"
+            description: "Get details about the gateway, such as permissions for what the gateway is setup with.\n> `Required Scope:` Gateway.Manage or Gateway.View"
             summary: 'Gateway Summary'
             tags:
                 - Gateways
@@ -1285,6 +1285,7 @@ paths:
                 -
                     jwt:
                         - Namespace.Manage
+                        - Namespace.View
             parameters:
                 -
                     in: path

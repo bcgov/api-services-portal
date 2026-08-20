@@ -270,6 +270,58 @@ class ConnectionService {
     return records;
   };
 
+  /**
+   * Lists connections for services belonging to the given subsystem gateway
+   * namespaces (rather than the whole org) - used to scope the list to just
+   * what a Connection.Manage-only caller (no org-wide System.Manage) has been
+   * granted, mirroring GatewayServiceController's Subsystem.Manage list filtering.
+   */
+  listConnectionsByServiceNamespaces = async (
+    context: Keystone,
+    org: string,
+    namespaces: string[]
+  ): Promise<KeystoneConnectionRequest[]> => {
+    const serviceIds = await this.getServiceIdsForNamespaces(
+      context,
+      org,
+      namespaces
+    );
+    if (serviceIds.length === 0) {
+      return [];
+    }
+
+    const batchClause = {
+      query: '$serviceIds: [String]',
+      clause: '{ serviceId_in: $serviceIds }',
+      variables: { serviceIds },
+    };
+
+    const records: KeystoneConnectionRequest[] = await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      batchClause
+    );
+    return records;
+  };
+
+  private getServiceIdsForNamespaces = async (
+    context: Keystone,
+    org: string,
+    namespaces: string[]
+  ): Promise<string[]> => {
+    const result: any = await (context as any).executeGraphQL({
+      query: `query ServicesByNamespaces($org: String!, $namespaces: [String]) {
+        allOpenAPISpecs(where: { organization: { name: $org }, namespace_in: $namespaces }) {
+          name
+        }
+      }`,
+      variables: { org, namespaces },
+    });
+    return (result.data?.allOpenAPISpecs || []).map((s: any) => s.name);
+  };
+
   listConnectionsByClientId = async (
     context: Keystone,
     clientId: string

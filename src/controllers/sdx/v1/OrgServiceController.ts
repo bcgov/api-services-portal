@@ -10,7 +10,7 @@ import {
   Request,
   Route,
   Security,
-  Tags
+  Tags,
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
@@ -30,6 +30,11 @@ import {
   LoadOpenAPISpec,
   OpenAPISpecInput,
 } from '../../../services/workflow/openapi-spec-loader';
+import {
+  getGwaProductEnvironment,
+  getPermittedNamespaceNames,
+  injectResSvrAccessTokenToContext,
+} from '../../../services/workflow';
 import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ExpressRequest } from './types';
@@ -53,7 +58,7 @@ export class GatewayServiceController extends Controller {
    * This endpoint processes the specification, creates necessary configurations, and registers
    * the service within the SDX environment.
    *
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @summary Create or update an OAS service
    *
@@ -63,7 +68,7 @@ export class GatewayServiceController extends Controller {
    */
   @Put()
   @OperationId('createOASService')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async createOASService(
     @Path() org: string,
     @Query() subsystem: string,
@@ -122,7 +127,11 @@ export class GatewayServiceController extends Controller {
    * Retrieves a list of OAS services associated with the specified organization. Each service entry includes
    * details such as its name, title, version, summary, description, and associated subsystem information.
    *
-   * > `Required Scope:` System.Manage
+   * Callers with org-wide `System.Manage` see every service in the organization. Callers who
+   * only hold `Subsystem.Manage` (no `System.Manage`) instead see only the services whose
+   * gateway they've been granted `Subsystem.Manage` on.
+   *
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @summary Retrieve a list of OAS services
    * @param org - Organization identifier
@@ -130,17 +139,38 @@ export class GatewayServiceController extends Controller {
    */
   @Get()
   @OperationId('listOrganizationOASServices')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async listOrganizationServices(
     @Path() org: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry[]> {
     const ctx = this.keystone.createContext(request);
 
+    const callerScopes = request.user.scope || [];
+    const hasOrgWideAccess = callerScopes.includes('System.Manage');
+
+    if (hasOrgWideAccess) {
+      const batchClause = {
+        query: '$org: String',
+        clause: '{ organization: { name: $org } }',
+        variables: { org },
+      };
+      return await GetCatalog(ctx, false, batchClause);
+    }
+
+    const envCtx = await getGwaProductEnvironment(ctx, true);
+    await injectResSvrAccessTokenToContext(envCtx);
+    const namespaces = await getPermittedNamespaceNames(envCtx, [
+      'Subsystem.Manage',
+    ]);
+    if (namespaces.length === 0) {
+      return [];
+    }
+
     const batchClause = {
-      query: '$org: String',
-      clause: '{ organization: { name: $org } }',
-      variables: { org },
+      query: '$org: String, $namespaces: [String]',
+      clause: '{ organization: { name: $org }, namespace_in: $namespaces }',
+      variables: { org, namespaces },
     };
     return await GetCatalog(ctx, false, batchClause);
   }
@@ -148,7 +178,7 @@ export class GatewayServiceController extends Controller {
   /**
    * Retrieves the details of a specific OAS service associated with the specified organization.
    *
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @summary Retrieve an OAS service
    * @param org - Organization identifier
@@ -157,7 +187,7 @@ export class GatewayServiceController extends Controller {
    */
   @Get('/{name}')
   @OperationId('getOrganizationOASService')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async getOrganizationOASService(
     @Path() org: string,
     @Path('name') name: string,
@@ -181,7 +211,7 @@ export class GatewayServiceController extends Controller {
    * obtain the full specification details for a service, which can be used for various purposes such as
    * client generation, documentation, or analysis.
    *
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @summary Retrieve a Service OpenAPI Specification in JSON format
    * @param org - Organization identifier
@@ -190,7 +220,7 @@ export class GatewayServiceController extends Controller {
    */
   @Get('/{name}/oas-spec')
   @OperationId('getOrganizationServiceSpec')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async getOrganizationServiceSpec(
     @Path() org: string,
     @Path('name') name: string,
@@ -218,7 +248,7 @@ export class GatewayServiceController extends Controller {
   /**
    * Deletes an OAS service.  Must have no active connection requests.
    *
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @summary Delete an OAS service
    * @param org - Organization identifier
@@ -227,7 +257,7 @@ export class GatewayServiceController extends Controller {
    */
   @Delete('/{name}')
   @OperationId('deleteOrganizationOASService')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async delete(
     @Path() org: string,
     @Path('name') name: string,

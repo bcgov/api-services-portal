@@ -2,11 +2,12 @@ import { Uma2WellKnown } from '../keycloak';
 import { OrgAuthzService } from './authz';
 import { NamespaceService } from './namespace';
 import { OrganizationGroup, OrgGroupService } from './org-group-service';
-import { GroupMembership } from './types';
+import { GroupMembership, UserReference } from './types';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { strict as assert } from 'assert';
+import { ValidateError } from 'tsoa';
 
-export const SystemRoles = ['system-owner', 'tech-lead', 'access-manager'];
+export const SystemRoles = ['subsystem-owner', 'tech-lead', 'access-manager'];
 
 export class SysGroupAccessService {
   private orgGroupService;
@@ -38,6 +39,13 @@ export class SysGroupAccessService {
     const granted: Record<string, Set<string>> = {};
     const revoked: Record<string, Set<string>> = {};
 
+    if (syncMembers && groupMembership.members?.length) {
+      await this.assertMembersResolve(
+        groupMembership.members.map((m) => m.member),
+        validIdentityProviders
+      );
+    }
+
     const access = buildGroupAccess(
       groupMembership.name,
       groupMembership.parent,
@@ -47,7 +55,7 @@ export class SysGroupAccessService {
 
     // CreateIfMissing the Resource for the "org unit" (if this GroupAccess is for an Org Unit)
     // CreateIfMissing the Authorization Scopes for: GroupAccess.Manage, Namespace.Assign, Dataset.Manage
-    await this.orgAuthzService.createIfMissingResource('system', access.name);
+    await this.orgAuthzService.createIfMissingResource(type, access.name);
 
     for (const groupRole of access.roles.filter((r) =>
       SystemRoles.includes(r.name)
@@ -70,8 +78,8 @@ export class SysGroupAccessService {
       for (const perm of groupRole.permissions) {
         assert.strictEqual(
           perm.resource,
-          `org/${orgGroup.name}`,
-          'Invalid organization resource in permission'
+          `${type === 'subsystem' ? 'sys' : 'rg'}/${orgGroup.name}`,
+          'Invalid subsystem/runtime-group resource in permission'
         );
         await this.orgGroupService.createOrUpdateGroupPermission(
           orgGroup,
@@ -121,5 +129,39 @@ export class SysGroupAccessService {
         {}
       ),
     };
+  }
+
+  /**
+   * Resolves every requested member against Keycloak before any group/policy/permission
+   * mutations begin, so a partial member list never gets synced across roles when one
+   * entry is invalid. Throws a 400 (tsoa ValidateError) naming the unresolved member(s).
+   */
+  private async assertMembersResolve(
+    members: UserReference[],
+    validIdentityProviders: string[]
+  ): Promise<void> {
+    const unique = [
+      ...new Map(
+        members.map((m) => [m.email ?? m.id, m])
+      ).values(),
+    ];
+
+    const { unresolved } = await this.orgGroupService.resolveMembers(
+      unique,
+      validIdentityProviders
+    );
+
+    if (unresolved.length > 0) {
+      throw new ValidateError(
+        {
+          members: {
+            message: `Could not resolve member(s): ${unresolved
+              .map((u) => u.email ?? u.id)
+              .join(', ')}`,
+          },
+        },
+        'Validation Failed'
+      );
+    }
   }
 }

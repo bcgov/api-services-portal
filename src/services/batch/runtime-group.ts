@@ -14,7 +14,7 @@ import { RuntimeGroup as KeystoneRuntimeGroup } from '../keystone/types';
 import { BatchResult } from '../../batch/types';
 import { regExprValidation } from '../utils';
 import { Logger } from '../../logger';
-import { StepTokenService } from '../certificate-authority/step-token';
+import { ProvisionerService } from '../provisioner';
 import { assertIsDefined } from '../../controllers/ioc/assert';
 
 const logger = Logger('batch.runtime-group');
@@ -284,43 +284,40 @@ class RuntimeGroupService {
   };
 
   generateCertSignRequestToken = async (
+    org: string,
     runtimeGroup: KeystoneRuntimeGroup
   ): Promise<string> => {
-    let sdxEndpoint: URL;
+    let validSdxEndpoint = true;
     try {
-      sdxEndpoint = new URL(runtimeGroup.sdxEndpoint);
-    } catch (err) {
-      logger.error(
-        "Invalid SDX endpoint URL '%s' for runtime group '%s'",
-        runtimeGroup.sdxEndpoint,
-        runtimeGroup.name
-      );
+      new URL(runtimeGroup.sdxEndpoint);
+    } catch {
+      validSdxEndpoint = false;
     }
     assert.strictEqual(
-      sdxEndpoint !== undefined,
+      validSdxEndpoint,
       true,
       'A valid SDX Endpoint URL is required for requesting a token'
     );
 
-    // The subject alternative names (SANs) for the certificate should include
-    // the runtime group's host and the SDX endpoint hostname (if different)
-    // to ensure the certificate is valid for both.
-    const san = [runtimeGroup.host];
-    if (sdxEndpoint.hostname !== runtimeGroup.host) {
-      san.push(sdxEndpoint.hostname);
-    }
-    const stepTokenService = new StepTokenService(process.env.STEP_TOKEN_URL);
+    // The provisioner resolves the target step-ca instance from the runtime
+    // group's environment, rather than the portal calling a single, global
+    // step-ca directly. It also derives the certificate subject and SANs
+    // from the runtime group named in the path, so they don't need to be
+    // passed here.
+    const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
 
     logger.debug(
-      "Requesting token for runtime group '%s' with SANs: %o",
+      "Requesting token for runtime group '%s' (environment '%s')",
       runtimeGroup.name,
-      san
+      runtimeGroup.environment
     );
 
-    return await stepTokenService.requestOneTimeUseToken({
-      subject: runtimeGroup.host,
-      san,
-    });
+    const { token } = await provisioner.postCertToken(
+      org,
+      runtimeGroup.name,
+      runtimeGroup.environment
+    );
+    return token;
   };
 }
 

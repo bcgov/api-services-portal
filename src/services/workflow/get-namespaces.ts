@@ -67,6 +67,29 @@ export async function getMyNamespaces(
   }));
 }
 
+/**
+ * Asks Keycloak (via a UMA2 permission-ticket exchange, evaluated against
+ * `envCtx.subjectToken`) which gateway `namespace` resources the calling user
+ * has been granted the given scope(s) on. Returns the resource `name`s (the
+ * gateway id, e.g. `sdx-xxxx`) rather than internal Keycloak resource ids, so
+ * callers can filter Keystone list queries (e.g. `namespace_in`) directly.
+ */
+export async function getPermittedNamespaceNames(
+  envCtx: EnvironmentContext,
+  scopes: string[]
+): Promise<string[]> {
+  const resourceIds = await getPermittedResourceIds(envCtx, scopes);
+  if (resourceIds.length === 0) {
+    return [];
+  }
+  const resourcesApi = new UMAResourceRegistrationService(
+    envCtx.uma2.resource_registration_endpoint,
+    envCtx.accessToken
+  );
+  const namespaces = await resourcesApi.listResourcesByIdList(resourceIds);
+  return namespaces.map((ns: ResourceSet) => ns.name);
+}
+
 export async function getEnvironmentContext(
   context: any,
   prodEnvId: string,
@@ -159,7 +182,25 @@ export async function getNamespaceResourceSetDetails(
 }
 
 async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
-  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
+  return getPermittedResourceIds(envCtx, [
+    'Namespace.View',
+    'Namespace.Manage',
+    'CredentialIssuer.Admin',
+    'Access.Manage',
+  ]);
+}
+
+/**
+ * Requests a UMA2 permission ticket for the given scope(s) (no specific
+ * resource - Keycloak returns every resource the subject is granted on) and
+ * exchanges it, on behalf of `envCtx.subjectToken`, for the resource ids the
+ * caller actually holds those scopes on.
+ */
+async function getPermittedResourceIds(
+  envCtx: EnvironmentContext,
+  scopes: string[]
+): Promise<string[]> {
+  logger.debug('[getPermittedResourceIds] for %s scopes=%j', envCtx.prodEnv.id, scopes);
 
   const permApi = new UMAPermissionService(
     envCtx.uma2.permission_endpoint,
@@ -167,12 +208,7 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   );
   const permTicket = await permApi.requestTicket([
     {
-      resource_scopes: [
-        'Namespace.View',
-        'Namespace.Manage',
-        'CredentialIssuer.Admin',
-        'Access.Manage',
-      ],
+      resource_scopes: scopes,
     },
   ]);
   const tokenApi = new UMA2TokenService(envCtx.uma2.token_endpoint);
@@ -181,7 +217,7 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
     permTicket
   );
   logger.debug(
-    '[getNamespaceResourceSets] (ResSvrBased) RETURN %j',
+    '[getPermittedResourceIds] (ResSvrBased) RETURN %j',
     allowedResources
   );
   return allowedResources.map((res) => res.rsid);
