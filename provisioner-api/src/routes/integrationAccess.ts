@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 import {
   IntegrationAccessRequest,
+  IntegrationStatus,
   NewIntegrationAccessRequest,
   NewIntegrationAccessRequestResponse,
   SubsystemEnvironment,
@@ -71,6 +72,31 @@ const security = [] as any[];
 
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {
+    app.get(
+      '/integrations/:integrationId',
+      {
+        schema: {
+          tags: ['Integration Requests'],
+          summary: 'Get integration status',
+          operationId: 'getIntegrationStatus',
+          description:
+            'Returns whether an integration is registered as an SDX subsystem, and its subsystem attributes if so.',
+          security,
+          params: Type.Object({
+            integrationId: Type.String({
+              description: CLIENT_ID_DESC,
+              examples: ['claims'],
+            }),
+          }),
+          response: { 200: Type.Ref(IntegrationStatus) },
+        },
+      },
+      async (req) =>
+        app.controllers.integration.getIntegrationStatus({
+          integrationId: req.params.integrationId,
+        })
+    );
+
     app.get(
       '/integrations/:integrationId/allowed-services',
       {

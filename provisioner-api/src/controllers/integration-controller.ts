@@ -1,6 +1,7 @@
 import type { Services } from '../services/index.js';
 import type {
   TIntegrationAccessRequest,
+  TIntegrationStatus,
   TNewIntegrationAccessRequest,
   TNewIntegrationAccessRequestResponse,
 } from '../schemas/sdx.js';
@@ -20,11 +21,21 @@ export interface GetSubsystemAllowedServicesInput {
   status: 'approved' | 'pending';
 }
 
+export interface GetIntegrationStatusInput {
+  integrationId: string;
+}
+
 export class IntegrationController {
   constructor(
     private readonly services: Services,
     private readonly logger?: FastifyBaseLogger
   ) {}
+
+  async getIntegrationStatus(
+    input: GetIntegrationStatusInput
+  ): Promise<TIntegrationStatus> {
+    return this.services.sdxMember.getIntegrationStatus(input.integrationId);
+  }
 
   async getIntegrationAllowedServices(
     input: GetSubsystemAllowedServicesInput

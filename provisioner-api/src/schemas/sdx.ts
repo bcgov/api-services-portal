@@ -69,6 +69,39 @@ export const SubsystemEnvironment = Type.Object(
   }
 );
 
+export const IntegrationStatus = Type.Object(
+  {
+    status: Type.Union(
+      [Type.Literal('registered'), Type.Literal('unregistered')],
+      { examples: ['registered'] }
+    ),
+    id: Type.Optional(Type.String({ examples: ['claims'] })),
+    name: Type.Optional(Type.String({ examples: ['Claims'] })),
+    organization: Type.Optional(
+      Type.String({ examples: ['ministry-of-health'] })
+    ),
+    description: Type.Optional(
+      Type.String({
+        examples: ['Authoritative source for benefit claim records.'],
+      })
+    ),
+  },
+  {
+    $id: 'IntegrationStatus',
+    additionalProperties: false,
+    examples: [
+      {
+        status: 'registered',
+        id: 'claims',
+        name: 'Claims',
+        organization: 'ministry-of-health',
+        description: 'Authoritative source for benefit claim records.',
+      },
+      { status: 'unregistered' },
+    ],
+  }
+);
+
 const ResourceServerServiceAccess = Type.Object(
   {
     scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
@@ -225,6 +258,7 @@ export const NewIntegrationAccessRequest = Type.Object(
 );
 
 export type TSubsystemEnvironment = Static<typeof SubsystemEnvironment>;
+export type TIntegrationStatus = Static<typeof IntegrationStatus>;
 export type TResourceServerAccess = Static<typeof ResourceServerAccess>;
 export type TIntegrationAccessRequest = Static<typeof IntegrationAccessRequest>;
 export type TNewIntegrationAccessRequest = Static<
@@ -236,6 +270,7 @@ export type TNewIntegrationAccessRequestResponse = Static<
 
 export const sdxSchemas = [
   SubsystemEnvironment,
+  IntegrationStatus,
   ResourceServerAccess,
   IntegrationAccessRequest,
   NewIntegrationAccessRequest,

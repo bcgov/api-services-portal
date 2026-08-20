@@ -8,6 +8,7 @@ import {
 import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
 import {
   TIntegrationAccessRequest,
+  TIntegrationStatus,
   TSubsystemEnvironment,
 } from '../schemas/sdx.js';
 
@@ -49,6 +50,35 @@ export class SdxMemberService {
       );
     }
     return subsystem;
+  }
+
+  /**
+   * Reports whether an integration client is registered as an SDX
+   * subsystem, and its attributes if so.
+   *
+   * @param integrationClientId
+   * @returns TIntegrationStatus
+   */
+  async getIntegrationStatus(
+    integrationClientId: string
+  ): Promise<TIntegrationStatus> {
+    const subsystems = await this.api.listCatalogSubsystems({
+      integrationClientId,
+    });
+
+    if (!subsystems || subsystems.length === 0) {
+      return { status: 'unregistered' };
+    }
+
+    const subsystem = subsystems[0];
+
+    return {
+      status: 'registered',
+      id: subsystem.clientId,
+      name: subsystem.name,
+      organization: subsystem.organization?.name || 'unknown',
+      description: subsystem.description || '',
+    };
   }
 
   /**
