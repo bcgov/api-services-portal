@@ -86,7 +86,7 @@ class SubsystemService {
   lookupSubsystemIntegration = async (
     context: Keystone,
     integrationClientId: string
-  ): Promise<KeystoneSubsystemIntegration> => {
+  ): Promise<KeystoneSubsystemIntegration | undefined> => {
     const records: KeystoneSubsystemIntegration[] = await getRecords(
       context,
       'SubsystemIntegration',
@@ -99,11 +99,6 @@ class SubsystemService {
       }
     );
 
-    assert.strictEqual(
-      records.length == 0,
-      false,
-      'No subsystems found for integration'
-    );
     return records.pop();
   };
 

@@ -174,10 +174,12 @@ export class CatalogController extends Controller {
         integrationClientId
       );
 
-      records = await new SubsystemService().listSubsystemsByIntegration(
-        ctx,
-        intg.id
-      );
+      records = intg
+        ? await new SubsystemService().listSubsystemsByIntegration(
+            ctx,
+            intg.id
+          )
+        : [];
     } else {
       records = await new SubsystemService().listSubsystems(ctx);
     }

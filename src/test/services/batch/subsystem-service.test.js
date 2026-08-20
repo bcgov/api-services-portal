@@ -248,4 +248,35 @@ describe('SubsystemService', () => {
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });
   });
+
+  describe('lookupSubsystemIntegration', () => {
+    const context = {};
+
+    it('returns the matching integration record when one exists', async () => {
+      const service = new SubsystemService();
+      const integration = { id: 'integration-123', integrationClientId: 'CLIENT-A' };
+
+      getRecords.mockResolvedValueOnce([integration]);
+
+      const result = await service.lookupSubsystemIntegration(
+        context,
+        'CLIENT-A'
+      );
+
+      expect(result).toEqual(integration);
+    });
+
+    it('returns undefined instead of throwing when no integration matches', async () => {
+      const service = new SubsystemService();
+
+      getRecords.mockResolvedValueOnce([]);
+
+      const result = await service.lookupSubsystemIntegration(
+        context,
+        'UNKNOWN-CLIENT'
+      );
+
+      expect(result).toBeUndefined();
+    });
+  });
 });
