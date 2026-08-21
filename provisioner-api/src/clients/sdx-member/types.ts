@@ -83,6 +83,7 @@ export interface ConnectionRequestInput {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  provisionerStatus?: ProvisionerStatus;
 }
 
 export interface ConnectionRequest {
@@ -96,6 +97,15 @@ export interface ConnectionRequest {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  provisionerStatus?: ProvisionerStatus;
+}
+
+export interface ProvisionerStatus {
+  status: 'pending' | 'provisioned' | 'failed';
+  message?: string;
+  endpoint?: string;
+  spec?: string;
+  [information: string]: unknown;
 }
 
 export interface GatewayPatternConfigRequest {

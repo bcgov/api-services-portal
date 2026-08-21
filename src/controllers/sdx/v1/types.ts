@@ -65,6 +65,8 @@ export interface ConnectionRequestInput {
   provisionerStatus?: {
     message: string;
     status: 'pending' | 'provisioned' | 'failed';
+    endpoint?: string;
+    spec?: string;
   };
 }
 

@@ -97,8 +97,12 @@ export class PatternsEvaluatorService {
         combinedScopes.push(connection.requesterDetails.service.privacyZone);
       }
 
+      const {
+        provisionerStatus: _provisionerStatus,
+        ...policyConnection
+      } = connection;
       const policyContext = {
-        ...connection,
+        ...policyConnection,
         combinedScopes,
         action,
         globals: {

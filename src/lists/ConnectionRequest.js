@@ -16,6 +16,9 @@ const { ConnectionService } = require('../services/batch/connection-service');
 const {
   ProvisionerService,
 } = require('../services/provisioner/provisioner-service');
+const {
+  shouldNotifyProvisioner,
+} = require('../services/provisioner/connection-change');
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -171,12 +174,18 @@ module.exports = {
       }
     },
 
-    afterChange: async function ({ operation, updatedItem }) {
+    afterChange: async function ({ operation, existingItem, updatedItem }) {
       logger.debug(
         'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',
         operation,
         updatedItem
       );
+      if (!shouldNotifyProvisioner(operation, existingItem, updatedItem)) {
+        logger.debug(
+          'Skipping provisioner callback because provisioning fields did not change'
+        );
+        return;
+      }
       const provisionerService = new ProvisionerService(
         process.env.PROVISIONER_URL
       );
