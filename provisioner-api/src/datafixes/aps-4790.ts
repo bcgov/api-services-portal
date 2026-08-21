@@ -21,12 +21,12 @@ export interface Aps4790DatafixSummary {
   failed: number;
 }
 
-const PROVISIONER_STATUSES = new Set(['pending', 'provisioned', 'failed']);
+const TERMINAL_PROVISIONER_STATUSES = new Set(['provisioned', 'failed']);
 
-export function hasProvisionerStatus(value: unknown): boolean {
+export function hasTerminalProvisionerStatus(value: unknown): boolean {
   if (typeof value === 'string') {
     try {
-      return hasProvisionerStatus(JSON.parse(value));
+      return hasTerminalProvisionerStatus(JSON.parse(value));
     } catch {
       return false;
     }
@@ -36,7 +36,7 @@ export function hasProvisionerStatus(value: unknown): boolean {
     return false;
   }
 
-  return PROVISIONER_STATUSES.has(
+  return TERMINAL_PROVISIONER_STATUSES.has(
     (value as { status?: unknown }).status as string
   );
 }
@@ -57,7 +57,7 @@ export async function runAps4790Datafix(
   const candidates = [...connections.values()].filter(
     (connection) =>
       connection.isActive === true &&
-      !hasProvisionerStatus(connection.provisionerStatus)
+      !hasTerminalProvisionerStatus(connection.provisionerStatus)
   );
 
   const summary: Aps4790DatafixSummary = {

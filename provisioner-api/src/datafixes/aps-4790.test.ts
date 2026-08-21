@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { ConnectionRequest } from '../clients/feed/types.js';
-import { hasProvisionerStatus, runAps4790Datafix } from './aps-4790.js';
+import {
+  hasTerminalProvisionerStatus,
+  runAps4790Datafix,
+} from './aps-4790.js';
 
 function connection(
   overrides: Partial<ConnectionRequest> = {}
@@ -22,11 +25,15 @@ function connection(
   };
 }
 
-test('recognizes persisted provisioner status objects and JSON strings', () => {
-  assert.equal(hasProvisionerStatus({ status: 'pending' }), true);
-  assert.equal(hasProvisionerStatus('{"status":"provisioned"}'), true);
-  assert.equal(hasProvisionerStatus({}), false);
-  assert.equal(hasProvisionerStatus('not-json'), false);
+test('recognizes only terminal provisioner status objects and JSON strings', () => {
+  assert.equal(hasTerminalProvisionerStatus({ status: 'pending' }), false);
+  assert.equal(
+    hasTerminalProvisionerStatus('{"status":"provisioned"}'),
+    true
+  );
+  assert.equal(hasTerminalProvisionerStatus({ status: 'failed' }), true);
+  assert.equal(hasTerminalProvisionerStatus({}), false);
+  assert.equal(hasTerminalProvisionerStatus('not-json'), false);
 });
 
 test('applies each active legacy connection once without isActive', async () => {
@@ -52,16 +59,18 @@ test('applies each active legacy connection once without isActive', async () => 
   });
 });
 
-test('skips inactive and already-statused connection requests', async () => {
+test('retries pending connections and skips inactive or terminal requests', async () => {
   const applied: string[] = [];
 
   const summary = await runAps4790Datafix({
     listConnections: async () => [
       connection({ id: 'inactive', isActive: false }),
+      connection({ id: 'pending', provisionerStatus: { status: 'pending' } }),
       connection({
-        id: 'complete',
+        id: 'provisioned',
         provisionerStatus: { status: 'provisioned' },
       }),
+      connection({ id: 'failed', provisionerStatus: { status: 'failed' } }),
     ],
     applyConnection: async (id) => {
       applied.push(id);
@@ -69,8 +78,8 @@ test('skips inactive and already-statused connection requests', async () => {
     },
   });
 
-  assert.deepEqual(applied, []);
-  assert.equal(summary.candidates, 0);
+  assert.deepEqual(applied, ['pending']);
+  assert.equal(summary.candidates, 1);
 });
 
 test('continues after a connection fails and reports a nonzero failure count', async () => {
