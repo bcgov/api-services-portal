@@ -589,6 +589,8 @@ components:
                     items:
                         type: string
                     type: array
+                permRuntimeGroup:
+                    type: string
                 updatedAt:
                     type: number
                     format: double
@@ -1277,7 +1279,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Namespace'
-            description: "Get details about the namespace, such as permissions for what the namespace can do.\n> `Required Scope:` Namespace.Manage"
+            description: "Get details about the namespace, such as permissions for what the namespace can do.\n> `Required Scope:` Namespace.Manage or Namespace.View"
             summary: 'Namespace Summary'
             tags:
                 - Namespaces
@@ -1285,6 +1287,7 @@ paths:
                 -
                     jwt:
                         - Namespace.Manage
+                        - Namespace.View
             parameters:
                 -
                     in: path
@@ -1568,7 +1571,7 @@ paths:
                                 required:
                                     - result
                                 type: object
-            description: "Assign a Namespace to an Organization Unit.\n\nOnly Organizations sourced from the BC Data Catalogue\n(`extSource: \"ckan\"`) may be assigned to a Namespace.  Organizations\nsourced from SDX or created as \"custom\" entries are intentionally\nrejected so that namespace-to-organization mappings stay aligned\nwith the authoritative public-body data registry.  This mirrors the\nfilter applied to the _Add Organization_ dropdown in the UI so\ndirect API callers cannot bypass it.\n\n> `Required Scope:` Namespace.Assign"
+            description: "Assign a Namespace to an Organization Unit.\n\nOnly BC Data Catalogue organizations (`extSource: \"ckan\"`) may be assigned;\nSDX and custom organizations are rejected.\n\n> `Required Scope:` Namespace.Assign"
             tags:
                 - Organizations
             security:

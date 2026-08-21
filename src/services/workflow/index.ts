@@ -47,6 +47,7 @@ export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 export {
   getGwaProductEnvironment,
   getMyNamespaces,
+  getPermittedNamespaceNames,
   injectResSvrAccessTokenToContext,
   getResourceServerContext,
   getEnvironmentContext,
@@ -63,3 +64,7 @@ export {
 export { MigrateAuthzUser, MigratePortalUser } from './migrate-user';
 
 export { UpdateCredentials } from './update-credential';
+
+export { issueGatewayCredential } from './issue-gateway-credential';
+export { regenerateGatewayCredential } from './regenerate-gateway-credential';
+export { setupAuthorizationAndEnable } from './apply';

@@ -6,7 +6,7 @@ import {
   ConnectionChangeResponse,
 } from '../schemas/resources.js';
 
-const security = [{ jwt: [] }];
+const security = [] as any[];
 
 export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
   app

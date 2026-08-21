@@ -46,7 +46,7 @@ module.exports = {
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     owner: {
       type: Relationship,
-      isRequired: true,
+      isRequired: false,
       ref: 'User',
       access: { update: false },
     },
@@ -67,7 +67,10 @@ module.exports = {
         } else {
           resolvedData['appId'] = newApplicationID();
         }
-        resolvedData['owner'] = context.authedItem.userId;
+        // Portal users get owner auto-set; gateway issuer / service accounts omit owner
+        if (context.authedItem?.userId) {
+          resolvedData['owner'] = context.authedItem.userId;
+        }
       }
       return resolvedData;
     },

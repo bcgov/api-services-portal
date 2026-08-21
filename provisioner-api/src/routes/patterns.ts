@@ -10,7 +10,7 @@ import {
   ApplyResourcesResponse,
 } from '../schemas/resources.js';
 
-const security = [{ jwt: [] }];
+const security = [] as any[];
 
 export const registerPatternsRoutes: FastifyPluginAsyncTypebox = async (
   app

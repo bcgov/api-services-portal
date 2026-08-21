@@ -54,16 +54,19 @@ const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
       clientId: 'integration-42',
       resourceServers: [
         {
-          subsystemId: 'claims',
+          id: 'claims',
           environment: 'dev',
-          services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+          privacyZone: 'public',
+          services: [
+            { scopes: ['Claims.Read'], name: 'claims-svc', status: 'approved' },
+          ],
         },
       ],
     },
   ],
 });
 
-const security = [{ jwt: [] }];
+const security = [] as any[];
 
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {

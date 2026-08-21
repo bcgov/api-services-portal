@@ -15,8 +15,18 @@ import { lookupProductEnvironmentServicesBySlug } from '../keystone';
 import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
 import { SysGroupAccessService } from '../org-groups/sys-group-access';
 import { GroupAccessService } from '../org-groups';
+import { KeycloakPermissionTicketService } from '../keycloak';
 
 const logger = Logger('wf.CreateNamespaceSDX');
+
+// Scopes granted directly to the namespace creator so they can perform the
+// UMA policy creation step in createSDXNamespace (see the comment there).
+// Callers that assign the SDX subsystem/runtime RBAC roles afterward
+// (prepareRoleAssignments) revoke these once that role assignment is done,
+// since the roles grant the creator equivalent namespace permissions via
+// roles.ts. Callers with no such role assignment (e.g.
+// CreateNamespaceForOrganization) keep them.
+const NAMESPACE_CREATOR_DIRECT_SCOPES = ['Namespace.Manage'];
 
 /**
  * Arguments for creating a namespace for an organization.
@@ -57,7 +67,10 @@ export async function CreateNamespaceForOrganization(
 
   const envCtx = await getEnvCtx(context);
 
-  // Create the namespace with SDX edge configuration
+  // Create the namespace with SDX edge configuration. There is no
+  // subsequent RBAC role assignment for the org-level namespace, so the
+  // creator keeps the directly assigned scopes granted during namespace
+  // creation (see NAMESPACE_CREATOR_DIRECT_SCOPES).
   const resourceSet = await createSDXNamespace(context, envCtx, {
     name: gatewayId,
     org: organization,
@@ -110,11 +123,13 @@ export async function CreateNamespaceForRuntimeGroup(
     args.runtimeGroupName
   );
 
+  const rg = runtimeGroups[0];
+
   const envCtx = await getEnvCtx(context);
 
   // Create the namespace with SDX edge configuration
   const resourceSet = await createSDXNamespace(context, envCtx, {
-    name: runtimeGroups[0].namespace,
+    name: rg.namespace,
     org: args.organization,
     orgUnit: undefined,
     orgEnabled: false,
@@ -134,6 +149,27 @@ export async function CreateNamespaceForRuntimeGroup(
     '[CreateNamespaceForRuntimeGroup] Created Namespace %s for Runtime Group %s',
     resourceSet.name,
     args.runtimeGroupName
+  );
+
+  // Setup the roles for the runtime group and assign this user
+  // the 'tech-lead' and 'subsystem-owner' roles by default
+  const runtimeId = rg.name as string;
+
+  await prepareRoleAssignments(
+    envCtx,
+    'runtime',
+    runtimeId,
+    resourceSet.name,
+    ['tech-lead', 'subsystem-owner']
+  );
+
+  // Now that the creator has been assigned RBAC roles on the namespace,
+  // the direct scopes granted during namespace creation are redundant -
+  // the roles above already grant equivalent permissions via roles.ts.
+  await revokeAssignedScopes(
+    envCtx,
+    resourceSet.id,
+    NAMESPACE_CREATOR_DIRECT_SCOPES
   );
 
   return resourceSet;
@@ -213,7 +249,16 @@ export async function CreateNamespaceForSubsystem(
     'subsystem',
     subsystemId,
     resourceSet.name,
-    ['tech-lead', 'access-manager', 'system-owner']
+    ['tech-lead', 'access-manager', 'subsystem-owner']
+  );
+
+  // Now that the creator has been assigned RBAC roles on the namespace,
+  // the direct scopes granted during namespace creation are redundant -
+  // the roles above already grant equivalent permissions via roles.ts.
+  await revokeAssignedScopes(
+    envCtx,
+    resourceSet.id,
+    NAMESPACE_CREATOR_DIRECT_SCOPES
   );
 
   return resourceSet;
@@ -248,7 +293,7 @@ async function prepareRoleAssignments(
     type,
     {
       name: systemId,
-      parent: '/systems',
+      parent: type == "subsystem" ? '/systems' : '/runtimes',
       members: [
         {
           member: { id: envCtx.subjectUuid },
@@ -272,11 +317,13 @@ async function prepareRoleAssignments(
   );
   const namespaceRolesResult = await ga.assignSystemRolesToNamespace(
     gatewayId,
+    type,
     systemId
   );
   logger.debug(
-    "Assigned System Roles to Namespace '%s': %o",
+    "Assigned System Roles to Namespace '%s' for type '%s': %o",
     gatewayId,
+    type,
     namespaceRolesResult
   );
 }
@@ -287,14 +334,12 @@ async function createSDXNamespace(
   args: CreateNamespaceArgs
 ): Promise<ResourceSet> {
   // A user should only be getting Namespace.View, but due to how the getResources
-  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step
-  // Grant "Connection.Manage" and "GatewayPattern.Publish" to the namespace for the SDX provisioner service account
-  // as a default
-  args.assignedScopes = [
-    'Namespace.Manage',
-    'Connection.Manage',
-    'GatewayPattern.Publish',
-  ];
+  // work, it wants the user to have Namespace.Manage to perform this umaPolicy creation step.
+  // Connection.Manage and GatewayPattern.Publish are deliberately not granted directly here -
+  // the creator is assigned all three subsystem RBAC roles below (prepareRoleAssignments),
+  // which already grants those scopes on this same namespace via the role-based permissions
+  // in roles.ts (access-manager -> Connection.Manage, tech-lead/subsystem-owner -> GatewayPattern.Publish).
+  args.assignedScopes = NAMESPACE_CREATOR_DIRECT_SCOPES;
   args.includeSDXScopes = true;
 
   const resourceSet = await CreateNamespace(context, args);
@@ -323,4 +368,34 @@ async function createSDXNamespace(
   );
 
   return resourceSet;
+}
+
+async function revokeAssignedScopes(
+  envCtx: EnvironmentContext,
+  resourceId: string,
+  assignedScopes?: string[]
+) {
+  const permissionApi = new KeycloakPermissionTicketService(
+    envCtx.openid.issuer,
+    envCtx.accessToken
+  );
+
+  const perms = await permissionApi.listPermissions({
+    resourceId,
+    requester: envCtx.subjectUuid,
+    returnNames: true,
+  });
+
+  const revocable = perms.filter((perm) =>
+    (assignedScopes || []).includes(perm.scopeName)
+  );
+
+  for (const perm of revocable) {
+    await permissionApi.deletePermission(perm.id);
+    logger.debug(
+      "Revoked direct permission '%s' on namespace resource '%s'",
+      perm.scopeName,
+      resourceId
+    );
+  }
 }

@@ -1,4 +1,3 @@
-import { assertAndRaiseValidateError } from '../../../services/gateway-patterns/evaluator';
 import {
   Controller,
   Example,
@@ -9,7 +8,6 @@ import {
   Request,
   Response,
   Route,
-  Security,
   SuccessResponse,
   Tags,
 } from 'tsoa';
@@ -43,6 +41,9 @@ import {
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import assert from 'assert';
 import { ResourceScope } from '../../../services/workflow/openapi-spec-loader';
+import { GroupAccessService } from '../../../services/org-groups';
+import { getGwaProductEnvironment } from '../../../services/workflow';
+import { GroupMember } from '../../../services/org-groups/types';
 
 interface MissingCredentialsJSON {
   code: 'credentials_required' | 'invalid_token';
@@ -106,6 +107,53 @@ export class CatalogController extends Controller {
       }))
       .filter((o) => o.member !== undefined)
       .map((o) => removeEmpty(o));
+  }
+
+  /**
+   * Retrieve details for a specific organization in the catalog by name.
+   *
+   * @summary Retrieve details for an organization
+   * @param name - Organization name
+   */
+  @Get('/organizations/{name}')
+  @OperationId('organization-get')
+  public async getOrganization(
+    @Path('name') name: string,
+    @Query('includeAccess') includeAccess: boolean = false
+  ): Promise<any> {
+    const ctx = this.keystone.sudo();
+    const orgs = await getOrganizations(ctx);
+    const match = orgs.find((o) => o.name === name);
+    assert.strictEqual(typeof match === 'undefined', false, 'Organization not found');
+
+    const result: any = {
+      name: match!.name,
+      title: match!.title,
+      description: match!.description,
+      publicBodyId: match!.publicBodyId,
+      member: getOrganizationMemberDetails(match!.tags),
+    };
+
+    if (includeAccess) {
+      const prodEnv = await getGwaProductEnvironment(ctx, false);
+      const groupAccessService = new GroupAccessService(prodEnv.uma2);
+      await groupAccessService.login(
+        prodEnv.issuerEnvConfig.clientId!,
+        prodEnv.issuerEnvConfig.clientSecret!
+      );
+
+      const membership = await groupAccessService.getGroupMembership(
+        result.name
+      );
+      result.access = membership
+        ? (removeKeys(membership.members as GroupMember[], [
+            'id',
+            'username',
+          ]) as GroupMember[])
+        : [];
+    }
+
+    return removeEmpty(result);
   }
 
   /**
@@ -287,12 +335,11 @@ export class CatalogController extends Controller {
    */
   @Get('/services/{name}')
   @OperationId('getOASService')
-  @Security('jwt', [])
   public async getOASService(
     @Path('name') name: string,
     @Request() request: any
   ): Promise<ServiceCatalogEntry> {
-    const ctx = this.keystone.createContext(request);
+    const ctx = this.keystone.sudo();
     return await GetCatalogByName(ctx, name, false);
   }
 

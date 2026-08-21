@@ -173,12 +173,33 @@ const ConsumerPage: React.FC<
                       icon={<Icon as={IoLayers} color="bc-blue" />}
                       bg="bc-gray"
                     />
-                    <Text ml={2}>{application?.name}</Text>
+                    <Box ml={2}>
+                      <Text>{application?.name}</Text>
+                      {application?.description && (
+                        <Text
+                          mt={1}
+                          color="bc-component"
+                          fontSize="sm"
+                          opacity={0.8}
+                        >
+                          {application.description}
+                        </Text>
+                      )}
+                    </Box>
                   </Flex>
                 </Detail>
                 <Detail title="Application Owner">
-                  {consumer.owner && (
+                  {consumer.owner ? (
                     <ProfileCard data={consumer.owner} overflow="hidden" />
+                  ) : (
+                    <Text
+                      color="bc-component"
+                      fontStyle="italic"
+                      opacity={0.6}
+                      data-testid="consumer-application-owner-empty"
+                    >
+                      Application administered by this gateway
+                    </Text>
                   )}
                 </Detail>
               </Flex>
@@ -306,6 +327,7 @@ const query = gql`
       }
       application {
         name
+        description
       }
       owner {
         name
