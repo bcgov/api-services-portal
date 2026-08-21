@@ -60,6 +60,10 @@
       {
         "name": "Authorization Profiles",
         "description": "Configure the integration to external Identity Providers"
+      },
+      {
+        "name": "Gateway Consumers",
+        "description": "Issue and regenerate consumer credentials for services in a gateway"
       }
     ]
   },

@@ -199,6 +199,8 @@ const permissionHelpTextLookup = {
   'Content.Publish': 'Can update the documentation on the portal.',
   'CredentialIssuer.Admin':
     'Can create Authorization Profiles so that they are available to be used when configuring Product Environments.',
+  'CredentialIssuer.Generate':
+    'Can issue and regenerate consumer credentials for services in this gateway via the Credential Issuer API.',
   'GatewayConfig.Publish':
     'Can publish gateway configuration to Kong and to view the status of the upstreams.',
   'Namespace.Manage':

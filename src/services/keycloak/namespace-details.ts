@@ -178,15 +178,22 @@ export async function getResource(
   );
   const namespaces = await resourcesApi.listResourcesByIdList(resourceIds);
 
-  return namespaces
-    .filter((ns) => ns.name === selectedNS)
-    .map((ns: ResourceSet) => ({
-      id: ns.id,
-      name: ns.name,
-      displayName: ns.displayName || `Gateway ${ns.name}`,
-      scopes: ns.resource_scopes,
-    }))
-    .pop();
+  const match = namespaces.find((ns) => ns.name === selectedNS);
+  if (!match) {
+    return undefined;
+  }
+
+  // Lazily add CredentialIssuer.Generate to existing gateway UMA resources
+  const updated = await resourcesApi.ensureResourceScopes(match, [
+    'CredentialIssuer.Generate',
+  ]);
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    displayName: updated.displayName || `Gateway ${updated.name}`,
+    scopes: updated.resource_scopes,
+  };
 }
 
 export function generateDisplayName(context: any, gatewayId: string): string {
