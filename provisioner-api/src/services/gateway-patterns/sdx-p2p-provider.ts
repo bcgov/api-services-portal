@@ -10,9 +10,7 @@ import {
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-
-// TODO: clean this up a bit!
-const SDX_PUBLIC_URL = process.env.SDX_PUBLIC_URL || 'http://sdx.public.url';
+import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
@@ -301,8 +299,15 @@ function upgradeToTrustSign(
   data: SDXP2PProviderPatternData,
   inputs: SDXP2PProviderPatternConfig
 ) {
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${data.serviceRG.environment}:0`;
-  const keySetName = `sdx.edge.${data.serviceRG.name}.${data.serviceRG.environment}`;
+  const environment = data.serviceRG.environment;
+  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${environment}:0`;
+  const keySetName = `sdx.edge.${data.serviceRG.name}.${environment}`;
+
+  const publicUrl = getRequiredEnvUrl(
+    environment,
+    'public_url',
+    'SDX public URL'
+  );
 
   return {
     name: 'trust-sign',
@@ -313,7 +318,7 @@ function upgradeToTrustSign(
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
       alg: inputs.upgrades.sign?.alg || 'ES256',
-      jwks_uri: `${SDX_PUBLIC_URL}/keysets/${keySetName}/.well-known/jwks.json`,
+      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },
   };

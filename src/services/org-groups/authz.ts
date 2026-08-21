@@ -57,7 +57,7 @@ export class OrgAuthzService {
   }
 
   async createIfMissingResource(
-    type: 'organization' | 'system',
+    type: 'organization' | 'subsystem' | 'runtime',
     org: string
   ): Promise<{ id: string; created: boolean }> {
     logger.debug('[createIfMissingResource] %s', org);
@@ -67,7 +67,7 @@ export class OrgAuthzService {
       this.accessToken
     );
 
-    const resourceName = `${type === 'organization' ? 'org' : 'sys'}/${org}`;
+    const resourceName = `${type === 'organization' ? 'org' : type === 'subsystem' ? 'sys' : 'rg'}/${org}`;
 
     const res = await svc.findResourceByName(resourceName);
     if (res) {

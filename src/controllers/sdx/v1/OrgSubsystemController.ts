@@ -21,6 +21,7 @@ import {
   SubsystemEntry,
 } from '../../../services/gateway-patterns/catalog';
 import { CreateNamespaceForSubsystem } from '../../../services/workflow/create-namespace-sdx';
+import { getGwaProductEnvironment } from '../../../services/workflow';
 import { assertEqual } from '../../ioc/assert';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { SubsystemInput } from './types';
@@ -31,6 +32,16 @@ import {
   transformAllRefID,
 } from '../../../batch/feed-worker';
 import { getRoutePathPrefix } from '../../../services/utils';
+import { GroupAccessService } from '../../../services/org-groups';
+import { SysGroupAccessService } from '../../../services/org-groups/sys-group-access';
+import { GroupMember, GroupMembership } from '../../../services/org-groups/types';
+import {
+  buildOrgAccessDisplayNameResolver,
+  logSubsystemAccessChanges,
+} from '../../../services/workflow/org-activity';
+import { Logger } from '../../../logger';
+
+const logger = Logger('controller.org-subsystem');
 
 @injectable()
 @Route('/organizations/{org}/subsystems')
@@ -183,5 +194,120 @@ export class OrgSubsystemController extends Controller {
     );
 
     return { gatewayId: client.gateway!.id };
+  }
+
+  /**
+   * Retrieves the subsystem-level RBAC role assignments (System Owner,
+   * Technical Lead, Access Manager) for the specified subsystem.
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Retrieve subsystem RBAC access
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param request - HTTP request object for context creation
+   * @returns Promise resolving to the subsystem's RBAC role membership
+   */
+  @Get('/{name}/access')
+  @OperationId('getSubsystemAccess')
+  @Security('jwt', ['System.Manage'])
+  public async getAccess(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<GroupMembership> {
+    const context = this.keystone.createContext(request, true);
+
+    const subsystem = await new SubsystemService().findSubsystemByName(
+      context,
+      org,
+      name
+    );
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+
+    const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+    const envConfig = prodEnv.issuerEnvConfig;
+
+    const groupAccessService = new GroupAccessService(prodEnv.uma2);
+    await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
+
+    const membership = await groupAccessService.getGroupMembership(
+      client.clientId
+    );
+
+    return {
+      name,
+      parent: '/systems',
+      members: membership?.members ?? [],
+    };
+  }
+
+  /**
+   * Updates the subsystem-level RBAC role assignments (System Owner,
+   * Technical Lead, Access Manager) for the specified subsystem. Replaces
+   * the full membership for each role with what is provided.
+   *
+   * > `Required Scope:` System.Manage
+   *
+   * @summary Update subsystem RBAC access
+   *
+   * @param org - Organization identifier
+   * @param name - Subsystem name
+   * @param body - Desired RBAC role membership for the subsystem
+   * @param request - HTTP request object for context creation
+   */
+  @Put('/{name}/access')
+  @OperationId('putSubsystemAccess')
+  @Security('jwt', ['System.Manage'])
+  public async putAccess(
+    @Path() org: string,
+    @Path() name: string,
+    @Body() body: { members: GroupMember[] },
+    @Request() request: any
+  ): Promise<void> {
+    const context = this.keystone.createContext(request, true);
+
+    const subsystem = await new SubsystemService().findSubsystemByName(
+      context,
+      org,
+      name
+    );
+    const client = GetSubsystemEntryForSubsystem(subsystem);
+
+    const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+    const envConfig = prodEnv.issuerEnvConfig;
+
+    const sysGroupAccessService = new SysGroupAccessService(prodEnv.uma2);
+    await sysGroupAccessService.login(
+      envConfig.clientId,
+      envConfig.clientSecret
+    );
+
+    const changes = await sysGroupAccessService.createOrUpdateGroupAccess(
+      'subsystem',
+      {
+        name: client.clientId,
+        parent: '/systems',
+        members: body.members,
+      },
+      ['idir']
+    );
+
+    const resolveDisplayName = await buildOrgAccessDisplayNameResolver(
+      envConfig.issuerUrl,
+      envConfig.clientId,
+      envConfig.clientSecret
+    );
+
+    await logSubsystemAccessChanges(
+      context,
+      org,
+      name,
+      changes,
+      resolveDisplayName
+    ).catch((e) =>
+      logger.error('[OrgActivity] subsystem access changes %s', e)
+    );
   }
 }

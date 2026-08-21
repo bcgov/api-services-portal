@@ -25,6 +25,11 @@ import {
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
 import { Logger } from '../../../logger';
+import {
+  getGwaProductEnvironment,
+  getPermittedNamespaceNames,
+  injectResSvrAccessTokenToContext,
+} from '../../../services/workflow';
 
 const logger = Logger('controller.org-connection');
 
@@ -41,7 +46,7 @@ export class OrgConnectionController extends Controller {
 
   /**
    * Add or update a connection request
-   * > `Required Scope:` System.Manage
+   * > `Required Scope:` System.Manage or Subsystem.Manage
    *
    * @param org
    * @param input
@@ -50,7 +55,7 @@ export class OrgConnectionController extends Controller {
    */
   @Put()
   @OperationId('upsertConnection')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async upsertConnection(
     @Path() org: string,
     @Body() input: ConnectionRequestInput,
@@ -95,18 +100,50 @@ export class OrgConnectionController extends Controller {
     });
   }
 
+  /**
+   * List connection requests for the specified organization.
+   *
+   * Callers with org-wide `System.Manage` see every connection touching the org. Callers who
+   * only hold `Connection.Manage` (no `System.Manage`) instead see only connections for
+   * services belonging to the subsystem gateways they've been granted `Connection.Manage` on.
+   *
+   * > `Required Scope:` System.Manage or Connection.Manage
+   *
+   * @param org
+   * @param request
+   * @returns
+   */
   @Get()
   @OperationId('listConnections')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Connection.Manage'])
   public async listConnections(
     @Path() org: string,
     @Request() request: any
   ): Promise<ConnectionRequest[]> {
     const ctx = this.keystone.createContext(request);
-    const records = await new ConnectionService().listConnectionsByOrganization(
-      ctx,
-      org
-    );
+    const connectionService = new ConnectionService();
+
+    const callerScopes = request.user.scope || [];
+    const hasOrgWideAccess = callerScopes.includes('System.Manage');
+
+    let records;
+    if (hasOrgWideAccess) {
+      records = await connectionService.listConnectionsByOrganization(ctx, org);
+    } else {
+      const envCtx = await getGwaProductEnvironment(ctx, true);
+      await injectResSvrAccessTokenToContext(envCtx);
+      const namespaces = await getPermittedNamespaceNames(envCtx, [
+        'Connection.Manage',
+      ]);
+      if (namespaces.length === 0) {
+        return [];
+      }
+      records = await connectionService.listConnectionsByServiceNamespaces(
+        ctx,
+        org,
+        namespaces
+      );
+    }
 
     return records
       .map((o) => removeEmpty(o))
@@ -124,9 +161,18 @@ export class OrgConnectionController extends Controller {
       );
   }
 
+  /**
+   * Delete a connection request
+   * > `Required Scope:` System.Manage or Subsystem.Manage
+   *
+   * @param org
+   * @param id
+   * @param request
+   * @returns
+   */
   @Delete('/{id}')
   @OperationId('deleteConnection')
-  @Security('jwt', ['System.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
   public async deleteConnection(
     @Path() org: string,
     @Path('id') id: string,

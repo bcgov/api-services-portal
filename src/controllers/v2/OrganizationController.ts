@@ -189,13 +189,8 @@ export class OrganizationController extends Controller {
   /**
    * Assign a Namespace to an Organization Unit.
    *
-   * Only Organizations sourced from the BC Data Catalogue
-   * (`extSource: "ckan"`) may be assigned to a Namespace.  Organizations
-   * sourced from SDX or created as "custom" entries are intentionally
-   * rejected so that namespace-to-organization mappings stay aligned
-   * with the authoritative public-body data registry.  This mirrors the
-   * filter applied to the _Add Organization_ dropdown in the UI so
-   * direct API callers cannot bypass it.
+   * Only BC Data Catalogue organizations (`extSource: "ckan"`) may be assigned;
+   * SDX and custom organizations are rejected.
    *
    * > `Required Scope:` Namespace.Assign
    */

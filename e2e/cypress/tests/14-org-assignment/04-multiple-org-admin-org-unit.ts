@@ -31,83 +31,75 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Add another org unit', () => {
-    const parentGroupName = 'ministry-of-health'
+    const parentPath = 'organization-admin/ca.bc.gov/ministry-of-health'
     const newGroupName = 'health-protection'
 
-    let authToken: string = ''
-    let parentGroupId: string = ''
-    let baseUrl: string = ''
+    let authToken = ''
+    let baseUrl = ''
 
-    // Intercept API calls to capture Bearer token from request headers
-    cy.intercept('GET', '**/groups/**', (req) => {
-      if (req.headers['authorization']) {
-        const authHeader = req.headers['authorization'] as string
-        if (authHeader.startsWith('Bearer ')) {
-          authToken = authHeader.replace('Bearer ', '')
-        }
+    // Capture admin bearer token from any admin API call
+    cy.intercept('GET', '**/admin/realms/**', (req) => {
+      const authHeader = req.headers['authorization']
+      if (
+        typeof authHeader === 'string' &&
+        authHeader.startsWith('Bearer ')
+      ) {
+        authToken = authHeader.replace('Bearer ', '')
       }
-      req.continue()
-    }).as('groupsApi')
-
-    // Navigate to groups and click on parent group to trigger API call
-    cy.get(groups.groupSearchInput, { timeout: 20000 })
-      .should('be.visible')
-      .clear()
-      .type(parentGroupName)
-      .type('{enter}')
-    cy.get('button', { timeout: 15000 })
-      .contains(parentGroupName)
-      .should('be.visible')
-      .click()
-
-    // Wait for API call and extract group ID and base URL from intercepted request
-    cy.wait('@groupsApi', { timeout: 10000 }).then((interception: any) => {
-      const url = interception.request.url
-      // Extract group ID from URL: /groups/{id}/children
-      const groupIdMatch = url.match(/\/groups\/([a-f0-9-]+)/)
-      if (groupIdMatch && groupIdMatch[1]) {
-        parentGroupId = groupIdMatch[1]
-      }
-
-      // Extract base URL from intercepted request (e.g., http://keycloak.localtest.me:9081)
-      const baseUrlMatch = url.match(/^(https?:\/\/[^\/]+)/)
-      if (baseUrlMatch && baseUrlMatch[1]) {
+      const baseUrlMatch = req.url.match(/^(https?:\/\/[^/]+)/)
+      if (baseUrlMatch) {
         baseUrl = baseUrlMatch[1]
       }
-    })
+      req.continue()
+    }).as('adminApi')
 
-    // Create the child group via API
+    // Trigger an authenticated admin call from the Groups UI
+    cy.get(groups.groupSearchInput, { timeout: 20000 })
+      .first()
+      .should('be.visible')
+      .clear()
+      .type('ministry-of-health')
+      .type('{enter}')
+    cy.wait('@adminApi', { timeout: 15000 })
+
     cy.then(() => {
-      if (!authToken) {
-        throw new Error('Could not retrieve Bearer token')
-      }
+      expect(authToken, 'Keycloak admin bearer token').to.be.a('string').and
+        .not.be.empty
+      expect(baseUrl, 'Keycloak base URL').to.be.a('string').and.not.be.empty
 
-      if (!parentGroupId) {
-        throw new Error(`Could not find parent group ID for ${parentGroupName}`)
-      }
-
-      if (!baseUrl) {
-        throw new Error('Could not extract base URL from intercepted request')
-      }
-
-      // Construct API URL using base URL from intercepted request
-      const apiUrl = `${baseUrl}/auth/admin/realms/master/groups/${parentGroupId}/children`
-
+      // Resolve parent by path so we never create health-protection under the wrong group
       cy.request({
-        method: 'POST',
-        url: apiUrl,
+        method: 'GET',
+        url: `${baseUrl}/auth/admin/realms/master/group-by-path/${parentPath}`,
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`,
         },
-        body: {
-          name: newGroupName,
-          description: '',
-        },
-      }).then((createResponse) => {
-        expect(createResponse.status).to.be.oneOf([200, 201])
-        cy.log(`Successfully created group ${newGroupName} via API`)
+      }).then((parentRes) => {
+        expect(parentRes.status).to.eq(200)
+        const parentGroupId = parentRes.body.id
+        expect(parentGroupId, 'ministry-of-health group id').to.be.a('string')
+
+        cy.request({
+          method: 'POST',
+          url: `${baseUrl}/auth/admin/realms/master/groups/${parentGroupId}/children`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: {
+            name: newGroupName,
+            description: '',
+          },
+          failOnStatusCode: false,
+        }).then((createResponse) => {
+          // 409 when the org unit already exists from a previous run
+          expect(createResponse.status).to.be.oneOf([200, 201, 409])
+          cy.log(
+            `Create group ${newGroupName} under ${parentPath} -> ${createResponse.status}`
+          )
+        })
       })
     })
   })
@@ -127,7 +119,9 @@ describe('Give a user org admin access at organization unit level', () => {
   })
 
   it('Leave existing org unit', () => {
-    groups.leaveGroup('ministry-of-health')
+    // From 02 Wendy is in ministry-of-health; on re-runs she may already be in health-protection
+    groups.leaveGroupIfPresent('ministry-of-health')
+    groups.leaveGroupIfPresent('health-protection')
   })
 
   it('Set the user(Wendy) to the Organization Unit', () => {

@@ -118,6 +118,45 @@ export class UMAResourceRegistrationService {
     });
   }
 
+  /**
+   * Ensure the resource has the given scopes (adds any that are missing).
+   * Returns the refreshed ResourceSet when scopes were added; otherwise the original.
+   */
+  public async ensureResourceScopes(
+    resource: ResourceSet,
+    requiredScopes: string[]
+  ): Promise<ResourceSet> {
+    const current = (resource.resource_scopes || []).map((s) => s.name);
+    const missing = requiredScopes.filter((s) => !current.includes(s));
+    if (missing.length === 0) {
+      return resource;
+    }
+
+    const scopes = [...current, ...missing];
+    logger.info(
+      '[ensureResourceScopes] Adding scopes %j to resource %s',
+      missing,
+      resource.name
+    );
+    await this.updateResourceSet({
+      _id: resource.id,
+      name: resource.name,
+      displayName: resource.displayName,
+      type: resource.type,
+      uris: resource.uris,
+      icon_uri: resource.icon_uri,
+      scopes,
+      owner: resource.owner,
+      ownerManagedAccess: resource.ownerManagedAccess,
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    return this.getResourceSet(resource.id);
+  }
+
   public async deleteResourceSet(rid: string) {
     const url = `${this.resourceRegistrationEndpoint}/${rid}`;
     logger.debug('[deleteResourceSet] URL %s', url);

@@ -14,6 +14,7 @@ export async function lookupApplication(
                         id
                         appId
                         name
+                        namespace
                         owner {
                           name
                         }
@@ -23,6 +24,93 @@ export async function lookupApplication(
   });
   logger.debug('[lookupApplication] result %j', result);
   return result.data.allApplications[0];
+}
+
+export async function lookupApplicationByAppId(
+  context: any,
+  appId: string,
+  namespace?: string
+): Promise<Application> {
+  const where: any = { appId };
+  if (namespace) {
+    where.namespace = namespace;
+  }
+  const result = await context.executeGraphQL({
+    query: `query GetApplicationByAppId($where: ApplicationWhereInput!) {
+                    allApplications(where: $where) {
+                        id
+                        appId
+                        name
+                        namespace
+                        description
+                        owner {
+                          name
+                        }
+                    }
+                }`,
+    variables: { where },
+  });
+  logger.debug('[lookupApplicationByAppId] result %j', result);
+  return result.data.allApplications[0];
+}
+
+export async function addApplication(
+  context: any,
+  data: {
+    name: string;
+    description?: string;
+    namespace?: string;
+    appId?: string;
+  }
+): Promise<Application> {
+  const result = await context.executeGraphQL({
+    query: `mutation CreateApplication($data: ApplicationCreateInput!) {
+                    createApplication(data: $data) {
+                        id
+                        appId
+                        name
+                        namespace
+                        description
+                    }
+                }`,
+    variables: {
+      data: {
+        name: data.name,
+        description: data.description || '',
+        namespace: data.namespace,
+        ...(data.appId ? { appId: data.appId } : {}),
+      },
+    },
+  });
+  logger.debug('[addApplication] result %j', result);
+  assertEqual(
+    'errors' in result,
+    false,
+    'application',
+    `Failed to create Application ${JSON.stringify(result.errors || result)}`
+  );
+  return result.data.createApplication;
+}
+
+export async function deleteApplication(
+  context: any,
+  id: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation DeleteApplication($id: ID!) {
+                    deleteApplication(id: $id) {
+                        id
+                    }
+                }`,
+    variables: { id },
+  });
+  logger.debug('[deleteApplication] result %j', result);
+  assertEqual(
+    'errors' in result,
+    false,
+    'application',
+    `Failed to delete Application ${JSON.stringify(result.errors || result)}`
+  );
 }
 
 export async function lookupMyApplicationsById(

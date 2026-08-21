@@ -30,8 +30,10 @@ export async function lookupCredentialReferenceByServiceAccess(
                             }
                         }
                         application {
+                          id
                           name
                           owner {
+                            id
                             name
                             username
                             email
@@ -62,6 +64,65 @@ export async function lookupCredentialReferenceByServiceAccess(
     result.data.allServiceAccesses[0].credentialReference
   );
   return result.data.allServiceAccesses[0];
+}
+
+export async function lookupServiceAccessByName(
+  context: any,
+  name: string,
+  namespace: string
+): Promise<ServiceAccess> {
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByName($name: String!, $ns: String!) {
+                    allServiceAccesses(where: {
+                      name: $name,
+                      productEnvironment: { product: { namespace: $ns } }
+                    }) {
+                        id
+                        name
+                        consumerType
+                        namespace
+                        productEnvironment {
+                            id
+                            name
+                            appId
+                            flow
+                            product {
+                              namespace
+                            }
+                            credentialIssuer {
+                                id
+                                clientAuthenticator
+                            }
+                        }
+                        application {
+                          id
+                          appId
+                          name
+                        }
+                        consumer {
+                            id
+                            username
+                            customId
+                            extForeignKey
+                            namespace
+                        }
+                        credentialReference
+                    }
+                }`,
+    variables: { name, ns: namespace },
+  });
+  logger.debug('[lookupServiceAccessByName] result %j', result);
+  assert.strictEqual(
+    result.data.allServiceAccesses.length,
+    1,
+    `ServiceAccess not found for clientId ${name} in gateway ${namespace}`
+  );
+
+  const access = result.data.allServiceAccesses[0];
+  if (access.credentialReference) {
+    access.credentialReference = JSON.parse(access.credentialReference);
+  }
+  return access;
 }
 
 export async function lookupDetailedServiceAccessesByNS(
@@ -300,6 +361,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                     }
                     application {
                       name
+                      description
                       owner {
                         name
                         provider
@@ -474,4 +536,24 @@ export async function deleteServiceAccess(
     variables: { serviceAccessId },
   });
   logger.debug('[deleteServiceAccess] RESULT %j', result);
+}
+
+export async function countServiceAccessesByApplication(
+  context: any,
+  applicationId: string
+): Promise<number> {
+  const result = await context.executeGraphQL({
+    query: `query CountServiceAccessesByApplication($applicationId: ID!) {
+                    allServiceAccesses(where: { application: { id: $applicationId } }) {
+                        id
+                    }
+                }`,
+    variables: { applicationId },
+  });
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  return result.data.allServiceAccesses.length;
 }

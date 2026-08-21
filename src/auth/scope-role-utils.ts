@@ -16,6 +16,9 @@ export function scopesToRoles(
   if (scopes.includes('CredentialIssuer.Admin')) {
     _roles.push('credential-admin');
   }
+  if (scopes.includes('CredentialIssuer.Generate')) {
+    _roles.push('credential-issuer');
+  }
   if (scopes.includes('Access.Manage')) {
     _roles.push('access-manager');
   }
@@ -23,7 +26,10 @@ export function scopesToRoles(
     _roles.push('connection-manager');
   }
   if (scopes.includes('System.Manage')) {
-    _roles.push('system-owner');
+    _roles.push('system-admin');
+  }
+  if (scopes.includes('Subsystem.Manage')) {
+    _roles.push('subsystem-manager');
   }
   if (scopes.includes('GatewayConfig.Publish')) {
     _roles.push('config-publisher');

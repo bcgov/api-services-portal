@@ -13,6 +13,10 @@ type CSRRequest = {
   requester_email: string;
 };
 
+type CertTokenResponse = {
+  token: string;
+};
+
 type ConnectionRequestChangeEventResponse = {
   applied: number;
   failed: number;
@@ -81,6 +85,28 @@ export class ProvisionerService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(csrRequest),
+      }
+    )
+      .then(checkStatus)
+      .then((r) => r.json());
+
+    return res;
+  }
+
+  public async postCertToken(
+    org: string,
+    runtimeGroup: string,
+    environment: string
+  ): Promise<CertTokenResponse> {
+    logger.debug(
+      'Calling %s',
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/cert-token`
+    );
+
+    const res = await fetch(
+      `${this.provisionerUrl}/organizations/${org}/runtime-groups/${runtimeGroup}/environments/${environment}/cert-token`,
+      {
+        method: 'POST',
       }
     )
       .then(checkStatus)

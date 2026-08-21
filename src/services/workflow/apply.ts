@@ -282,7 +282,7 @@ export const Apply = async (
   }
 };
 
-interface SetupAuthorizationInput {
+export interface SetupAuthorizationInput {
   flow: string;
   namespace: string;
   controls: RequestControls;
@@ -293,7 +293,7 @@ interface SetupAuthorizationInput {
   consumer: GatewayConsumer;
 }
 
-async function setupAuthorizationAndEnable(
+export async function setupAuthorizationAndEnable(
   subjectContext: any,
   context: any,
   prodEnv: Environment,
@@ -366,7 +366,12 @@ async function setupAuthorizationAndEnable(
     if (controls.roles) {
       clientScopes.push('roles');
     }
-    await kcClientService.syncAndApply(clientId, clientScopes, []);
+    const optionalScopes = controls.defaultOptionalScopes || [];
+    await kcClientService.syncAndApply(
+      clientId,
+      clientScopes,
+      optionalScopes
+    );
 
     if (controls.roles) {
       const clientRolesService = new KeycloakClientRolesService(

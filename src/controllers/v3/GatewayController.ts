@@ -132,7 +132,7 @@ export class NamespaceController extends Controller {
 
   /**
    * Get details about the gateway, such as permissions for what the gateway is setup with.
-   * > `Required Scope:` Gateway.Manage
+   * > `Required Scope:` Gateway.Manage or Gateway.View
    *
    * @summary Gateway Summary
    * @param ns
@@ -141,7 +141,7 @@ export class NamespaceController extends Controller {
    */
   @Get('/{gatewayId}')
   @OperationId('gateway-profile')
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.Manage', 'Namespace.View'])
   public async profile(
     @Path() gatewayId: string,
     @Request() request: any

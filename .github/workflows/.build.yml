@@ -1,0 +1,61 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      context:
+        required: true
+        type: string
+        default: '.'
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Image meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ inputs.name }}
+
+      - name: Set DEPLOY_ID
+        run: |
+          echo "DEPLOY_ID=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "APP_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}" >> "$GITHUB_OUTPUT"
+          echo "APP_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}" >> "$GITHUB_OUTPUT"
+        id: set-deploy-id
+
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: false
+
+      - name: Create image
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.context }}/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
