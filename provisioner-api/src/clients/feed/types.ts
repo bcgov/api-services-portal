@@ -29,6 +29,8 @@ export interface Application {
 export interface ProvisionerStatus {
   status: 'pending' | 'provisioned' | 'failed';
   message?: string;
+  endpoint?: string;
+  spec?: string;
   [information: string]: unknown;
 }
 

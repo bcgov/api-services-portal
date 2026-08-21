@@ -397,6 +397,8 @@ export interface ProvisionerStatus {
   name?: string; // Primary Key
   message?: string;
   status?: "pending" | "provisioned" | "failed";
+  endpoint?: string;
+  spec?: string;
 }
 
 
