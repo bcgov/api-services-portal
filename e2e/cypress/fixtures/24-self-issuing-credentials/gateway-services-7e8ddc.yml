@@ -1,0 +1,398 @@
+services:
+- name: sic-apikeyonly-dev-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-apikeyonly-dev-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-apikeyonly-dev-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: key-auth
+    tags: [ ns.gw-2a401 ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+
+- name: sic-apikeyonly-test-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-apikeyonly-test-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-apikeyonly-test-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: key-auth
+    tags: [ ns.gw-2a401 ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+
+- name: sic-apikeyacl-dev-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-apikeyacl-dev-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-apikeyacl-dev-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: key-auth
+    tags: [ ns.gw-2a401 ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+  - name: acl
+    tags: [ ns.gw-2a401 ]
+    config:
+      hide_groups_header: true
+      allow:
+      - "137B30FF"
+
+- name: sic-apikeyacl-test-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-apikeyacl-test-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-apikeyacl-test-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: key-auth
+    tags: [ ns.gw-2a401 ]
+    protocols: [ http, https ]
+    config:
+      key_names: ["X-API-KEY"]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+  - name: acl
+    tags: [ ns.gw-2a401 ]
+    config:
+      hide_groups_header: true
+      allow:
+      - "47153526"
+
+- name: sic-clientsecret-dev-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientsecret-dev-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientsecret-dev-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
+- name: sic-clientsecret-test-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientsecret-test-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientsecret-test-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
+- name: sic-clientjwt-dev-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientjwt-dev-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientjwt-dev-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
+- name: sic-clientjwt-test-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientjwt-test-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientjwt-test-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
+- name: sic-clientjwks-dev-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientjwks-dev-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientjwks-dev-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
+- name: sic-clientjwks-test-7e8ddc
+  host: httpbun.com
+  tags: [ns.gw-2a401]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: sic-clientjwks-test-7e8ddc-route
+    tags: [ns.gw-2a401]
+    hosts:
+      - sic-clientjwks-test-7e8ddc.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.gw-2a401 ]
+    enabled: true
+    config:
+      allowed_iss:
+      - http://keycloak.localtest.me:9081/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      algorithm: RS256
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
