@@ -9,6 +9,7 @@ import { PatternsEvaluatorService } from './patterns-evaluator.js';
 import { IntegrationAccessService } from './integration-access-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
 import { ActivityService } from './activity-service.js';
+import { ConnectionStatusService } from './connection-status-service.js';
 import { SdxOperatorService } from './sdx-operator-service.js';
 import { CaTokenService } from './ca-token-service.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
@@ -16,6 +17,7 @@ import { loadEnvironments } from '../config/environments.js';
 
 export {
   ActivityService,
+  ConnectionStatusService,
   DirectoryService,
   SdxMemberService,
   GatewayAdminService,
@@ -27,6 +29,7 @@ export {
 
 export interface Services {
   activity: ActivityService;
+  connectionStatus: ConnectionStatusService;
   directory: DirectoryService;
   sdxMember: SdxMemberService;
   gatewayAdmin: GatewayAdminService;
@@ -53,6 +56,10 @@ export function buildServices(
   const environments = loadEnvironments();
   return {
     activity: new ActivityService(clients.feed, child(logger, 'activity')),
+    connectionStatus: new ConnectionStatusService(
+      clients.feed,
+      child(logger, 'connectionStatus')
+    ),
     directory: new DirectoryService(
       clients.aps,
       clients.feed,

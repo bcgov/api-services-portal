@@ -107,6 +107,10 @@ export class OrgConnectionController extends Controller {
    * only hold `Connection.Manage` (no `System.Manage`) instead see only connections for
    * services belonging to the subsystem gateways they've been granted `Connection.Manage` on.
    *
+   * `provisionerStatus` describes the most recent provisioning attempt. Deactivating a
+   * connection does not overwrite that history; use `isActive` as the authoritative current
+   * lifecycle state.
+   *
    * > `Required Scope:` System.Manage or Connection.Manage
    *
    * @param org
