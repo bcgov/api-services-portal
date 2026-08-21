@@ -38,3 +38,73 @@ test('updates only the connection provisioner status through the feed API', asyn
     },
   ]);
 });
+
+test('retries transient status update failures with backoff', async () => {
+  let attempts = 0;
+  const delays: number[] = [];
+  const feedClient = {
+    putConnectionProvisionerStatus: async () => {
+      attempts++;
+      if (attempts < 3) {
+        throw Object.assign(new Error('Feed unavailable'), {
+          details: { status: 503 },
+        });
+      }
+      return { status: 200, result: 'updated' };
+    },
+  } as unknown as FeedApiClient;
+
+  await new ConnectionStatusService(feedClient, undefined, {
+    initialDelayMs: 10,
+    sleep: async (delayMs) => {
+      delays.push(delayMs);
+    },
+  }).update('client-1', 'service-1', 'provisioned', 'Provisioned.');
+
+  assert.equal(attempts, 3);
+  assert.deepEqual(delays, [10, 20]);
+});
+
+test('propagates a transient status update failure after retries are exhausted', async () => {
+  let attempts = 0;
+  const feedClient = {
+    putConnectionProvisionerStatus: async () => {
+      attempts++;
+      throw Object.assign(new Error('Feed unavailable'), {
+        details: { status: 503 },
+      });
+    },
+  } as unknown as FeedApiClient;
+
+  await assert.rejects(
+    new ConnectionStatusService(feedClient, undefined, {
+      initialDelayMs: 0,
+      sleep: async () => {},
+    }).update('client-1', 'service-1', 'provisioned', 'Provisioned.'),
+    /Feed unavailable/
+  );
+
+  assert.equal(attempts, 3);
+});
+
+test('does not retry a non-transient status update failure', async () => {
+  let attempts = 0;
+  const feedClient = {
+    putConnectionProvisionerStatus: async () => {
+      attempts++;
+      throw Object.assign(new Error('Invalid status update'), {
+        details: { status: 400 },
+      });
+    },
+  } as unknown as FeedApiClient;
+
+  await assert.rejects(
+    new ConnectionStatusService(feedClient, undefined, {
+      initialDelayMs: 0,
+      sleep: async () => {},
+    }).update('client-1', 'service-1', 'failed', 'Provisioning failed.'),
+    /Invalid status update/
+  );
+
+  assert.equal(attempts, 1);
+});
