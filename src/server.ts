@@ -30,7 +30,7 @@ const {
   putFeedWorker,
   deleteFeedWorker,
   getFeedWorker,
-  listConnectionRequestsFeedWorker,
+  listFeedWorker,
 } = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked');
 
@@ -322,9 +322,9 @@ const configureExpress = (app: any) => {
       res.status(400).json({ result: 'error', error: '' + err });
     });
   });
-  app.get('/feed/ConnectionRequest', (req: any, res: any) => {
+  app.get('/feed/:entity', (req: any, res: any) => {
     const context = keystone.createContext({ skipAccessControl: true });
-    listConnectionRequestsFeedWorker(context, req, res).catch((err: any) => {
+    listFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
     });

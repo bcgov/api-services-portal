@@ -312,35 +312,31 @@ export const getRecords = async function (
   );
 };
 
-export const listConnectionRequestsFeedWorker = async (
+export const listFeedWorker = async (
   context: any,
-  _req: any,
+  req: any,
   res: any
 ) => {
-  const records = await new BatchService(context).listAllPages(
-    'allConnectionRequests',
-    [
-      'clientId',
-      'serviceId',
-      'isApproved',
-      'isActive',
-      'policyVersion',
-      'environment',
-      'requesterDetails',
-      'clientResources',
-      'serviceResources',
-      'provisionerStatus',
-    ]
+  const feedEntity = req.params['entity'];
+  assert.strictEqual(feedEntity in metadata, true);
+
+  const md = (metadata as any)[feedEntity];
+  const fields = buildQueryResponse(md).filter(
+    (field) => field !== 'id'
   );
-  res.json(
-    records.map((record) =>
-      parseJsonString(record, [
-        'requesterDetails',
-        'clientResources',
-        'serviceResources',
-        'provisionerStatus',
-      ])
+  const jsonFields = Object.entries(md.transformations)
+    .filter(([, transformInfo]: [string, any]) =>
+      ['toString', 'toStringDefaultArray'].includes(transformInfo.name)
     )
+    .map(([field]) => field);
+
+  const records = await new BatchService(context).listAllPages(
+    md.query,
+    fields
+  );
+
+  res.json(
+    records.map((record) => parseJsonString(record, jsonFields))
   );
 };
 
