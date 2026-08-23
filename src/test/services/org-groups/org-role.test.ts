@@ -19,10 +19,8 @@ roles:
     permissions:
       - resource: platform
         scopes:
-          - Namespace.Manage
           - Namespace.View
           - Subsystem.Manage
-          - GatewayPattern.Publish
   - name: tech-lead
     permissions:
       - resource: platform

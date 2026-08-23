@@ -130,6 +130,27 @@ export const ConnectionChangeRequest = Type.Object(
   }
 );
 
+/**
+ * The baseline `clientResources`/`serviceResources` a new connection
+ * request should be built from for a given policy version.
+ */
+export const ConnectionDefaultsResponse = Type.Object(
+  {
+    clientResources: Type.Any(),
+    serviceResources: Type.Any(),
+  },
+  {
+    $id: 'ConnectionDefaultsResponse',
+    additionalProperties: false,
+    examples: [
+      {
+        clientResources: { gatewayPatterns: {} },
+        serviceResources: { gatewayPatterns: {} },
+      },
+    ],
+  }
+);
+
 const ResourceResult = Type.Object(
   {
     provider: Type.String({
@@ -311,6 +332,9 @@ export type TApplyResourcesRequest = Static<typeof ApplyResourcesRequest>;
 export type TApplyResourcesResponse = Static<typeof ApplyResourcesResponse>;
 export type TConnectionChangeRequest = Static<typeof ConnectionChangeRequest>;
 export type TConnectionChangeResponse = Static<typeof ConnectionChangeResponse>;
+export type TConnectionDefaultsResponse = Static<
+  typeof ConnectionDefaultsResponse
+>;
 export type TApplyPatternRequest = Static<typeof ApplyPatternRequest>;
 
 export const resourceSchemas = [
@@ -319,6 +343,7 @@ export const resourceSchemas = [
   ApplyResourcesResponse,
   ConnectionChangeRequest,
   ConnectionChangeResponse,
+  ConnectionDefaultsResponse,
   ApplyPatternRequest,
   GatewayResource,
 ];

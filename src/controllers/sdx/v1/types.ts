@@ -7,6 +7,7 @@ import { SubsystemIntegration } from '../../v3/types';
 export interface SubsystemInput {
   name: string;
   description?: string;
+  privacyZone?: string;
   environments?: string[];
   integrations?: SubsystemIntegration[];
 }
@@ -56,7 +57,7 @@ export interface ConnectionRequestInput {
   serviceId: string;
   isApproved?: boolean;
   isActive?: boolean;
-  environment?: 'lab' | 'mck' | 'dev' | 'tst' | 'prd' | 'sbx';
+  environment?: string;
   policyVersion?: string;
   requesterDetails?: any;
   clientResources?: any;
@@ -64,6 +65,8 @@ export interface ConnectionRequestInput {
   provisionerStatus?: {
     message: string;
     status: 'pending' | 'provisioned' | 'failed';
+    endpoint?: string;
+    spec?: string;
   };
 }
 

@@ -1,7 +1,7 @@
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
-import { type EnrichedSubsystemEntry } from './utils.js';
+import { assert, type EnrichedSubsystemEntry } from './utils.js';
 import { IntegrationAccessService } from '../integration-access-service.js';
 import { TIntegrationAccessRequest } from '../../schemas/sdx.js';
 
@@ -61,9 +61,16 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
     const allowedAccess =
       await this.integrationAccessService.buildIntegrationAllowedServices(
         inputs.integrationClientId ||
-          connection?.requesterDetails.client?.clientId,
-        connection?.environment!
+          connection?.requesterDetails.client?.integrationId,
+        connection?.environment!,
+        'approved'
       );
+
+    assert.strictEqual(
+      Boolean(allowedAccess.clientId),
+      true,
+      `No client ID available for integration access for consumer ${inputs.clientId}`
+    );
 
     return {
       gatewayId: orgClient.gateway.id,
@@ -87,11 +94,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
           'acl',
         ],
         acls: access.resourceServers
-          .map((rs) =>
-            rs.services
-              .filter((s) => s.status === 'approved')
-              .map((s) => s.name)
-          )
+          .map((rs) => rs.services.map((s) => s.name))
           .flat()
           .map((serviceName) => ({
             group: serviceName,

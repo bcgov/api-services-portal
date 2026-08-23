@@ -9,15 +9,15 @@ import { PatternProcessor } from '../patterns-evaluator.js';
 import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
 import { getRequiredEnvUrl } from '../../config/environments.js';
 
-export interface SDXServiceConfig {
+export interface SDXServiceOpsConfig {
   serviceId: string;
   upstreamUrl: string;
   useSni: string;
   environment: string;
-  upgrades: ServiceUpgrades;
+  upgrades: ServiceOpsUpgrades;
 }
 
-interface ServiceUpgrades {
+interface ServiceOpsUpgrades {
   mtlsAuth: {};
   mtlsAcl: {
     allow: string[];
@@ -51,8 +51,8 @@ interface SDXServicePatternData {
  * This pattern will provision default routes for the subsystem
  *
  */
-export class SDXServicePattern implements PatternProcessor {
-  static ID = 'sdx-service.r1';
+export class SDXServiceOpsPattern implements PatternProcessor {
+  static ID = 'sdx-service-ops.r1';
   static requiredParams = ['serviceId', 'environment', 'upstreamUrl'];
 
   constructor(
@@ -60,11 +60,11 @@ export class SDXServicePattern implements PatternProcessor {
     private readonly logger?: FastifyBaseLogger
   ) {}
 
-  id = () => SDXServicePattern.ID;
-  requiredParams = () => SDXServicePattern.requiredParams;
+  id = () => SDXServiceOpsPattern.ID;
+  requiredParams = () => SDXServiceOpsPattern.requiredParams;
   deleteHandling = () => 'delete' as const;
 
-  async inject(inputs: SDXServiceConfig): Promise<SDXServicePatternData> {
+  async inject(inputs: SDXServiceOpsConfig): Promise<SDXServicePatternData> {
     const { api } = this;
 
     // get all the services for this subsystem from the service catalog
@@ -109,7 +109,7 @@ export class SDXServicePattern implements PatternProcessor {
     };
   }
 
-  eval(inputs: SDXServiceConfig, data: SDXServicePatternData) {
+  eval(inputs: SDXServiceOpsConfig, data: SDXServicePatternData) {
     const service = data.service;
 
     let tags = [
@@ -123,25 +123,32 @@ export class SDXServicePattern implements PatternProcessor {
 
     const upgrades = inputs.upgrades || {};
 
-    const routes = [{ operationId: 'all' }].map((op) => {
-      return {
-        name: `sdx.sys.${serviceLocator}.${op.operationId}`,
-        tags: [
-          ...tags,
-          `service:${serviceLocator}`,
-          `operation:${op.operationId}`,
-        ],
-        hosts: [serviceHost],
-        snis: inputs.useSni === 'false' ? [] : [serviceHost],
-        paths: ['/'],
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        headers: {
-          'X-Service-Id': [serviceLocator],
-        },
-        protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
-        strip_path: false,
-      };
-    });
+    const routes = (service.operations || [{ operationId: 'all' }]).map(
+      (op) => {
+        return {
+          name: `sdx.sys.${serviceLocator}.${op.operationId}`,
+          tags: [
+            ...tags,
+            `service:${serviceLocator}`,
+            `operation:${op.operationId}`,
+          ],
+          hosts: [serviceHost],
+          snis: inputs.useSni === 'false' ? [] : [serviceHost],
+          paths: [
+            op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
+          ],
+          methods:
+            op.operationId === 'all'
+              ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+              : [op.method],
+          headers: {
+            'X-Service-Id': [serviceLocator],
+          },
+          protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
+          strip_path: false,
+        };
+      }
+    );
 
     const serviceRoutes = [
       {
@@ -186,17 +193,17 @@ export class SDXServicePattern implements PatternProcessor {
             ? [upgradeToMTLSAuth(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('mtlsAcl')
-            ? [upgradeToMTLSACL(tags, data, inputs as SDXServiceConfig)]
+            ? [upgradeToMTLSACL(tags, data, inputs as SDXServiceOpsConfig)]
             : []),
           ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
           ...(upgrades.hasOwnProperty('sign')
-            ? [upgradeToTrustSign(tags, data, inputs as SDXServiceConfig)]
+            ? [upgradeToTrustSign(tags, data, inputs as SDXServiceOpsConfig)]
             : []),
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
             : []),
           ...(upgrades.hasOwnProperty('token')
-            ? [upgradeToJWTKeycloak(tags, data, inputs as SDXServiceConfig)]
+            ? [upgradeToJWTKeycloak(tags, data, inputs as SDXServiceOpsConfig)]
             : []),
           ...(upgrades.hasOwnProperty('counter_sign')
             ? [upgradeToTrustKMS(tags, data)]
@@ -212,7 +219,7 @@ export class SDXServicePattern implements PatternProcessor {
 function upgradeToJWTKeycloak(
   tags: string[],
   data: SDXServicePatternData,
-  inputs: SDXServiceConfig
+  inputs: SDXServiceOpsConfig
 ) {
   const jwtKeycloakConfig = inputs.upgrades.token;
 
@@ -250,7 +257,7 @@ function upgradeToMTLSAuth(tags: string[], data: SDXServicePatternData) {
 function upgradeToMTLSACL(
   tags: string[],
   data: SDXServicePatternData,
-  inputs: SDXServiceConfig
+  inputs: SDXServiceOpsConfig
 ) {
   const allow = inputs.upgrades.mtlsAcl.allow || [];
   const headerName =
@@ -278,7 +285,7 @@ function upgradeToACL(tags: string[], data: SDXServicePatternData) {
 function upgradeToTrustSign(
   tags: string[],
   data: SDXServicePatternData,
-  inputs: SDXServiceConfig
+  inputs: SDXServiceOpsConfig
 ) {
   const environment = data.subsystemRuntimeGroup.environment;
   const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name}:${environment}:0`;

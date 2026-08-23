@@ -25,3 +25,31 @@ export interface Application {
   description?: string;
   namespace: string;
 }
+
+export interface ProvisionerStatus {
+  status: 'pending' | 'provisioned' | 'failed';
+  message?: string;
+  endpoint?: string;
+  spec?: string;
+  [information: string]: unknown;
+}
+
+export interface ConnectionRequest {
+  id?: string;
+  clientId?: string;
+  serviceId?: string;
+  isApproved?: boolean;
+  isActive?: boolean;
+  policyVersion?: string;
+  environment?: string;
+  requesterDetails?: any;
+  clientResources?: any;
+  serviceResources?: any;
+  provisionerStatus?: ProvisionerStatus | string;
+}
+
+export interface ConnectionProvisionerStatusUpdate {
+  clientId: string;
+  serviceId: string;
+  provisionerStatus: ProvisionerStatus;
+}

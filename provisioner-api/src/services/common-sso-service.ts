@@ -41,9 +41,9 @@ export class CommonSsoService {
   async provisionAllowedServices(
     request: TIntegrationAccessRequest
   ): Promise<void> {
-    const path = `/integrations/${encodeURIComponent(
+    const path = `/requests/${encodeURIComponent(
       request.clientId
-    )}/allowed-services`;
+    )}/sdx-allowed-services`;
 
     const res = await this.client
       .fetch(path, {

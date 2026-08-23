@@ -33,7 +33,9 @@ const ResourceServersListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
         services: [
           {
             description: 'Read-only access to claim data.',
-            scopes: { 'Claims.Read': 'Read claim records' },
+            scopes: [
+              { label: 'Claims.Read', description: 'Read claim records' },
+            ],
             title: 'Claims Service',
             name: 'claims-svc',
           },

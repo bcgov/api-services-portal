@@ -933,6 +933,7 @@ CREATE TABLE public."OpenAPISpec" (
     spec text NOT NULL,
     annotations text,
     "specVersion" text NOT NULL,
+    "upstreamUrl" text,
     subsystem integer
 );
 
@@ -1210,6 +1211,7 @@ CREATE TABLE public."Subsystem" (
     name text NOT NULL,
     namespace text NOT NULL,
     description text,
+    "privacyZone" text,
     organization integer,
     slug text
 );

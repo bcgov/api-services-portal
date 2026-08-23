@@ -93,21 +93,31 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
 
-    return new ConnectionService().upsertConnection(ctx, org, {
+    const data: ConnectionRequestInput = {
       clientId: input.clientId,
       serviceId: input.serviceId,
       isApproved: input.isApproved,
-    });
+    };
+    if (input.isActive !== null) {
+      data['isActive'] = input.isActive;
+    }
+
+    return new ConnectionService().upsertConnection(ctx, org, data);
   }
 
   /**
    * List connection requests for the specified organization.
    *
    * Callers with org-wide `System.Manage` see every connection touching the org. Callers who
-   * only hold `Connection.Manage` (no `System.Manage`) instead see only connections for
-   * services belonging to the subsystem gateways they've been granted `Connection.Manage` on.
+   * only hold `Connection.Manage` and/or `Subsystem.Manage` (no `System.Manage`) instead see
+   * only connections for services belonging to the subsystem gateways they've been granted
+   * either of those scopes on.
    *
-   * > `Required Scope:` System.Manage or Connection.Manage
+   * `provisionerStatus` describes the most recent provisioning attempt. Deactivating a
+   * connection does not overwrite that history; use `isActive` as the authoritative current
+   * lifecycle state.
+   *
+   * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
    *
    * @param org
    * @param request
@@ -115,7 +125,7 @@ export class OrgConnectionController extends Controller {
    */
   @Get()
   @OperationId('listConnections')
-  @Security('jwt', ['System.Manage', 'Connection.Manage'])
+  @Security('jwt', ['System.Manage', 'Connection.Manage', 'Subsystem.Manage'])
   public async listConnections(
     @Path() org: string,
     @Request() request: any
@@ -134,6 +144,7 @@ export class OrgConnectionController extends Controller {
       await injectResSvrAccessTokenToContext(envCtx);
       const namespaces = await getPermittedNamespaceNames(envCtx, [
         'Connection.Manage',
+        'Subsystem.Manage',
       ]);
       if (namespaces.length === 0) {
         return [];

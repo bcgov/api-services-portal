@@ -1226,6 +1226,156 @@
       "groups": []
     },
     {
+      "id": "0cb6114d-605d-44ef-a15a-a180e5773bc2",
+      "createdTimestamp": 1638573942142,
+      "username": "lisa@idir",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Lisa",
+      "lastName": "Lee",
+      "email": "lisa@testmail.com",
+      "attributes": {
+        "provider_user_guid": [
+          "110469E037C44A7ABDFAB15204A607C5"
+        ],
+        "identity_provider": [
+          "idir"
+        ],
+        "display_name": [
+          "Lisa, Lee CITZ:EX"
+        ],
+        "provider_username": [
+          "lisa"
+        ]
+      },
+      "credentials": [
+        {
+          "id": "4411551c-700c-48a4-a8c9-741089fc8123",
+          "type": "password",
+          "createdDate": 1638573942144,
+          "secretData": "{\"value\":\"ltS/DMUYOCSmZZRbf7rYFTpLa9cqQDewFO1jwRPczU99leiyGtOCsbdAPRmSvLVhOLnzqvcaua3B17ej2d6/7w==\",\"salt\":\"ZrR/QMSRwruFRU5FsPUgHQ==\"}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "uma_authorization",
+        "offline_access",
+        "api-manager",
+        "admin"
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "0cb6344d-605d-444f-a15a-a180e5773bc2",
+      "createdTimestamp": 1638573942142,
+      "username": "james@idir",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "James",
+      "lastName": "McDonald",
+      "email": "james@testmail.com",
+      "attributes": {
+        "provider_user_guid": [
+          "110469E117C84A7ABDFAB15204A607C5"
+        ],
+        "identity_provider": [
+          "idir"
+        ],
+        "display_name": [
+          "McDonald, James CITZ:EX"
+        ],
+        "provider_username": [
+          "james"
+        ]
+      },
+      "credentials": [
+        {
+          "id": "2881551c-700c-48a4-a8c9-741089fc8123",
+          "type": "password",
+          "createdDate": 1638573942144,
+          "secretData": "{\"value\":\"ltS/DMUYOCSmZZRbf7rYFTpLa9cqQDewFO1jwRPczU99leiyGtOCsbdAPRmSvLVhOLnzqvcaua3B17ej2d6/7w==\",\"salt\":\"ZrR/QMSRwruFRU5FsPUgHQ==\"}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "uma_authorization",
+        "offline_access",
+        "api-manager",
+        "admin"
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "0cb6344d-605d-44ef-a15a-a180e5773bc2",
+      "createdTimestamp": 1638573942142,
+      "username": "peter@idir",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Peter",
+      "lastName": "Finch",
+      "email": "peter@testmail.com",
+      "attributes": {
+        "provider_user_guid": [
+          "110469E037C84A7ABDFAB15204A607C5"
+        ],
+        "identity_provider": [
+          "idir"
+        ],
+        "display_name": [
+          "Finch, Peter CITZ:EX"
+        ],
+        "provider_username": [
+          "peter"
+        ]
+      },
+      "credentials": [
+        {
+          "id": "2211551c-700c-48a4-a8c9-741089fc8123",
+          "type": "password",
+          "createdDate": 1638573942144,
+          "secretData": "{\"value\":\"ltS/DMUYOCSmZZRbf7rYFTpLa9cqQDewFO1jwRPczU99leiyGtOCsbdAPRmSvLVhOLnzqvcaua3B17ej2d6/7w==\",\"salt\":\"ZrR/QMSRwruFRU5FsPUgHQ==\"}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "uma_authorization",
+        "offline_access",
+        "api-manager",
+        "admin"
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
+    },
+    {
       "id": "bf498a7b-b6e0-49bb-9ea8-0241d7792f01",
       "createdTimestamp": 1642463435902,
       "username": "olduser@idir",

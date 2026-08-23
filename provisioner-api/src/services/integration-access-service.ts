@@ -39,6 +39,7 @@ export class IntegrationAccessService {
   async submitIntegrationAccessRequest(
     submissionId: string,
     subsystem: SubsystemEntry,
+    integrationId: string,
     input: TNewIntegrationAccessRequest
   ): Promise<TNewIntegrationAccessRequestResponse> {
     const policyVersion = input.policyVersion || 'SDX.R1.00';
@@ -85,10 +86,12 @@ export class IntegrationAccessService {
             const requesterDetails = {
               submissionId,
               requester: {
-                name: input.requester,
+                name: input.requester.displayName,
+                email: input.requester.email,
               },
               scopes: requestedService.scopes,
               client: {
+                integrationId: integrationId,
                 clientId: input.clientId,
                 privacyZone: input.privacyZone,
               },
@@ -111,13 +114,13 @@ export class IntegrationAccessService {
               }
             });
 
-            const clientResources = {
-              gatewayPatterns: {},
-            };
-
-            const serviceResources = {
-              gatewayPatterns: {},
-            };
+            const { clientResources, serviceResources } =
+              this.policyService.getDefaultResources(
+                policyVersion,
+                subsystem,
+                spec,
+                requesterDetails
+              );
 
             // check if there is an existing connection for this service
             const existingConnection = existingConnections.find(
@@ -211,22 +214,23 @@ export class IntegrationAccessService {
 
   /**
    *
-   * @param integrationClientId
+   * @param integrationId
    * @param environment
    * @returns
    */
   async buildIntegrationAllowedServices(
-    integrationClientId: string,
-    environment: string
+    integrationId: string,
+    environment: string,
+    status: 'approved' | 'pending'
   ): Promise<TIntegrationAccessRequest> {
     // query the subsystem by an integrationClientId
     //
     const subsystems = await this.api.listCatalogSubsystems({
-      integrationClientId,
+      integrationClientId: integrationId,
     });
     if (!subsystems || subsystems.length === 0) {
       throw new BadRequestError(
-        `Subsystem with clientId ${integrationClientId} not found`
+        `Subsystem with integration ${integrationId} not found`
       );
     }
 
@@ -234,13 +238,13 @@ export class IntegrationAccessService {
     const subsystem = subsystems.pop();
     if (!subsystem) {
       throw new BadRequestError(
-        `Subsystem with clientId ${integrationClientId} not found`
+        `Subsystem with integration ${integrationId} not found`
       );
     }
 
     this.logger?.debug(
       'Matched %s to subsystem = %s, org = %s',
-      integrationClientId,
+      integrationId,
       subsystem.clientId,
       subsystem.organization?.name
     );
@@ -251,11 +255,23 @@ export class IntegrationAccessService {
       subsystem.organization?.name!
     );
     this.logger?.debug('Connections = %j', connections);
+
+    // get the clientId from the allowed connections
+    const clientId = connections.find(
+      (c) => c.requesterDetails.client?.clientId
+    )?.requesterDetails.client?.clientId;
+    if (!clientId) {
+      throw new NotFoundError(
+        `No connections found for integration ${integrationId} in environment ${environment}`
+      );
+    }
+
     const allowedConnections = connections.filter(
       (c) =>
         c.clientId === subsystem.clientId &&
         c.environment === environment &&
-        c.requesterDetails.client?.clientId === integrationClientId
+        c.requesterDetails.client?.integrationId === integrationId &&
+        c.isApproved === (status === 'approved')
     );
 
     this.logger?.debug('connections allowed %j', allowedConnections);
@@ -264,7 +280,7 @@ export class IntegrationAccessService {
     // and then for each subsystem, popupate the resourceServer object
     const servicesBySubsystem: Record<
       string,
-      { privacyZone?: string; connections: typeof allowedConnections }
+      { connections: typeof allowedConnections }
     > = {};
     for (const s of allowedConnections) {
       const service = (await this.api.getOASService(
@@ -274,7 +290,6 @@ export class IntegrationAccessService {
       const subsystemId = service.subsystem.clientId;
       if (!servicesBySubsystem[subsystemId]) {
         servicesBySubsystem[subsystemId] = {
-          privacyZone: service.subsystem.privacyZone,
           connections: [],
         };
       }
@@ -291,30 +306,27 @@ export class IntegrationAccessService {
     // and then construct the TIntegrationAccessRequest object
 
     const resourceServers: TResourceServerAccess[] = [];
-    for (const [
-      subsystemId,
-      { privacyZone, connections: services },
-    ] of Object.entries(servicesBySubsystem)) {
+    for (const [subsystemId, { connections: services }] of Object.entries(
+      servicesBySubsystem
+    )) {
       resourceServers.push({
         id: subsystemId,
         environment: environment,
-        privacyZone: privacyZone || '',
         services: services.map((s) => ({
           name: s.serviceId!,
           scopes: (s.requesterDetails?.scopes || []) as string[],
-          status: s.isApproved ? 'approved' : 'pending',
         })),
       });
     }
 
     this.logger?.debug(
       { resourceServers },
-      'Built resource servers for integration clientId %s',
-      integrationClientId
+      'Built resource servers for integration %s',
+      integrationId
     );
 
     return {
-      clientId: integrationClientId,
+      clientId: clientId,
       submissionId: submissionId,
       resourceServers: resourceServers,
     };

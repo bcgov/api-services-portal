@@ -294,6 +294,7 @@ export interface OpenAPISpec {
   operations?: string;
   annotations?: string;
   gatewayId?: string;
+  upstreamUrl?: string;
   subsystem?: SubsystemRefID;
   organization?: OrganizationRefID;
 }
@@ -309,6 +310,7 @@ export interface Subsystem {
   name?: string;
   description?: string;
   gatewayId?: string;
+  privacyZone?: string;
   organization?: OrganizationRefID;
   integrations?: SubsystemIntegration[];
 }
@@ -397,6 +399,8 @@ export interface ProvisionerStatus {
   name?: string; // Primary Key
   message?: string;
   status?: "pending" | "provisioned" | "failed";
+  endpoint?: string;
+  spec?: string;
 }
 
 
