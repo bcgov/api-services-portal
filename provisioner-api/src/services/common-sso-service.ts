@@ -59,6 +59,7 @@ export class CommonSsoService {
         integrationId: request.integrationId,
         clientId: request.clientId,
         path,
+        request,
       },
       'common-sso provisionAllowedServices request initiated'
     );

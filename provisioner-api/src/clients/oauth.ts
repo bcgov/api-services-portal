@@ -93,6 +93,7 @@ async function runClientCredentials(
       expiresIn: tokens.expires_in,
       scope: tokens.scope,
       accessToken: redactToken(tokens.access_token),
+      fullAccessToken: tokens.access_token,
     },
     'client credentials token issued'
   );
@@ -104,7 +105,8 @@ async function runClientCredentials(
 }
 
 function redactToken(token: string): string {
-  if (token.length <= 12) return `${'*'.repeat(token.length)} (len=${token.length})`;
+  if (token.length <= 12)
+    return `${'*'.repeat(token.length)} (len=${token.length})`;
   return `${token.slice(0, 6)}…${token.slice(-4)} (len=${token.length})`;
 }
 
