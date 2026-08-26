@@ -52,7 +52,16 @@ export class CommonSsoService {
   ): Promise<void> {
     const path = `/requests/${encodeURIComponent(
       request.integrationId
-    )}/sdx-allowed-services`;
+    )}/sdx-allowed-access`;
+
+    this.logger?.debug(
+      {
+        integrationId: request.integrationId,
+        clientId: request.clientId,
+        path,
+      },
+      'common-sso provisionAllowedServices request initiated'
+    );
 
     const res = await this.client
       .fetch(path, {
@@ -62,7 +71,11 @@ export class CommonSsoService {
       })
       .catch((err) => {
         this.logger?.error(
-          { err, integrationId: request.integrationId, clientId: request.clientId },
+          {
+            err,
+            integrationId: request.integrationId,
+            clientId: request.clientId,
+          },
           'common-sso provisionAllowedServices request failed'
         );
         throw withDetails(
