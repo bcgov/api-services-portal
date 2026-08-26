@@ -6,19 +6,12 @@ const {
 } = require('../authz/enforcement');
 const { UserAssertionError } = require('../services/user-assert');
 const { SubsystemService } = require('../services/batch/subsystem');
-const {
-  ExtractClientIdFromServiceId,
-} = require('../services/gateway-patterns/catalog');
 
 const { logger } = require('../logger');
 const { OpenAPISpecService } = require('../services/batch/oas-service');
-const { ConnectionService } = require('../services/batch/connection-service');
 const {
   ProvisionerService,
 } = require('../services/provisioner/provisioner-service');
-const {
-  shouldNotifyProvisioner,
-} = require('../services/provisioner/connection-change');
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -112,8 +105,25 @@ module.exports = {
   access: EnforcementPoint,
   plugins: [atTracking()],
   hooks: {
-    resolveInput: async ({ context, operation, resolvedData }) => {
+    resolveInput: async ({
+      context,
+      operation,
+      originalInput,
+      resolvedData,
+    }) => {
       logger.debug('Resolving input for ConnectionRequest: %j', resolvedData);
+
+      if (originalInput && 'provisionerStatus' in originalInput) {
+        const otherAttributes = Object.keys(originalInput).filter(
+          (key) => !['clientId', 'serviceId', 'provisionerStatus'].includes(key)
+        );
+        if (otherAttributes.length > 0) {
+          throw new Error(
+            'provisionerStatus must be updated on its own, without any other attributes'
+          );
+        }
+      }
+
       if (operation !== 'create') {
         return resolvedData;
       }
@@ -174,15 +184,15 @@ module.exports = {
       }
     },
 
-    afterChange: async function ({ operation, existingItem, updatedItem }) {
+    afterChange: async function ({ operation, originalInput, updatedItem }) {
       logger.debug(
         'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',
         operation,
         updatedItem
       );
-      if (!shouldNotifyProvisioner(operation, existingItem, updatedItem)) {
+      if (originalInput && 'provisionerStatus' in originalInput) {
         logger.debug(
-          'Skipping provisioner callback because provisioning fields did not change'
+          'Skipping provisioner callback because provisionerStatus was supplied directly'
         );
         return;
       }
