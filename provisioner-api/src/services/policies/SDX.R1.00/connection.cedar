@@ -43,19 +43,19 @@ unless {
     context.serviceId != ""
 };
 
-forbid ( // Deny if misconfiguration of token exchange
-    principal,
-    action == SDX::Action::"SubmitConnectionRequest",
-    resource is SDX::ConnectionRequest
-)
-unless {
-    context.clientResources has gatewayPatterns &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.clientId == context.globals.environment.client_id &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.tokenEndpoint == context.globals.environment.oauth_token_url &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.audience == context.requesterDetails.service.clientId &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes.contains(context.requesterDetails.service.privacyZone) &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes == context.combinedScopes
-};
+// forbid ( // Deny if misconfiguration of token exchange
+//     principal,
+//     action == SDX::Action::"SubmitConnectionRequest",
+//     resource is SDX::ConnectionRequest
+// )
+// unless {
+//     context.clientResources has gatewayPatterns &&
+//     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.clientId == context.globals.environment.client_id &&
+//     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.tokenEndpoint == context.globals.environment.oauth_token_url &&
+//     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.audience == context.requesterDetails.service.clientId &&
+//     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes.contains(context.requesterDetails.service.privacyZone) &&
+//     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes == context.combinedScopes
+// };
 
 forbid ( // Deny if connection request is not approved
     principal,
