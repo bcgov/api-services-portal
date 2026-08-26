@@ -7,6 +7,8 @@ const REFRESH_BUFFER_SECONDS = 30;
 export interface OAuthClient {
   readonly name: string;
   readonly baseUrl: string;
+  /** False when required configuration was missing (see `createUnconfiguredClient`). */
+  readonly configured: boolean;
   getToken(): Promise<string>;
   fetch(path: string, init?: RequestInit): Promise<Response>;
 }
@@ -33,10 +35,6 @@ export interface SignedJwtConfig extends CommonConfig {
   kid?: string;
 }
 
-export interface ClientSecretConfig extends CommonConfig {
-  clientSecret: string;
-}
-
 interface TokenCache {
   accessToken: string;
   expiresAt: number;
@@ -55,15 +53,6 @@ export function createSignedJwtClient(config: SignedJwtConfig): OAuthClient {
     return runClientCredentials(config, clientAuth);
   };
 
-  return buildClient(config, refresh);
-}
-
-export function createClientSecretClient(
-  config: ClientSecretConfig
-): OAuthClient {
-  const clientAuth = oauth.ClientSecretBasic(config.clientSecret);
-  const refresh = (): Promise<TokenCache> =>
-    runClientCredentials(config, clientAuth);
   return buildClient(config, refresh);
 }
 
@@ -158,6 +147,7 @@ function buildClient(
   return {
     name: config.name,
     baseUrl: config.baseUrl,
+    configured: true,
     getToken,
     fetch: doFetch,
   };
@@ -175,6 +165,7 @@ export function createUnconfiguredClient(
   return {
     name,
     baseUrl: '',
+    configured: false,
     getToken: fail,
     fetch: fail,
   };

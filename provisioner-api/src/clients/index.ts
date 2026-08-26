@@ -1,12 +1,10 @@
 import type { FastifyBaseLogger } from 'fastify';
 import {
-  createClientSecretClient,
   createSignedJwtClient,
   createUnconfiguredClient,
   type OAuthClient,
 } from './oauth.js';
 import {
-  loadClientSecretConfig,
   loadGwaEnvJwtConfig,
   loadSignedJwtConfig,
 } from './config.js';
@@ -60,24 +58,6 @@ function buildJwtClient(
   });
 }
 
-function buildSecretClient(
-  name: string,
-  prefix: string,
-  parent: FastifyBaseLogger | undefined
-): OAuthClient {
-  const result = loadClientSecretConfig(name, prefix);
-  if (!result.ok) {
-    return createUnconfiguredClient(
-      name,
-      `missing ${result.missing.join(', ')}`
-    );
-  }
-  return createClientSecretClient({
-    ...result.config,
-    logger: childLogger(parent, name),
-  });
-}
-
 /**
  * Builds a resolver that lazily creates (and caches) one GWA OAuth client per
  * environment from the environments config. Environments absent from the
@@ -115,7 +95,7 @@ export function buildClients(logger?: FastifyBaseLogger): Clients {
     aps: buildJwtClient('aps', 'APS', logger),
     sdx: buildJwtClient('sdx', 'SDX', logger),
     gwa: buildGwaClientResolver(environments, logger),
-    css: buildSecretClient('css', 'CSS', logger),
+    css: buildJwtClient('css', 'CSS', logger),
     feed: new FeedApiClient(process.env.FEED_URL, logger),
     sdxOperator: new SdxOperatorApiClient(environments, logger),
     caToken: new CaTokenApiClient(environments, logger),

@@ -25,12 +25,21 @@ export class CommonSsoService {
       { count: resources.length },
       'CommonSsoService.applyResources'
     );
-    // for (const resource of resources) {
-    //   await this.provisionAllowedServices(
-    //     resource as unknown as TIntegrationAccessRequest
-    //   );
-    // }
-    return { message: 'Common SSO disabled' };
+
+    if (!this.client.configured) {
+      this.logger?.warn(
+        { gatewayId, count: resources.length },
+        'common-sso client is not configured (CSS_CLIENT_ID missing) — skipping CSS dispatch'
+      );
+      return { message: 'common-sso client is not configured; skipped' };
+    }
+
+    for (const resource of resources) {
+      await this.provisionAllowedServices(
+        resource as unknown as TIntegrationAccessRequest
+      );
+    }
+    return { message: 'resources applied to Common SSO' };
   }
 
   /**
@@ -42,7 +51,7 @@ export class CommonSsoService {
     request: TIntegrationAccessRequest
   ): Promise<void> {
     const path = `/requests/${encodeURIComponent(
-      request.clientId
+      request.integrationId
     )}/sdx-allowed-services`;
 
     const res = await this.client
@@ -53,12 +62,12 @@ export class CommonSsoService {
       })
       .catch((err) => {
         this.logger?.error(
-          { err, integrationClientId: request.clientId },
+          { err, integrationId: request.integrationId, clientId: request.clientId },
           'common-sso provisionAllowedServices request failed'
         );
         throw withDetails(
           new BadGatewayError('common-sso provisionAllowedServices failed'),
-          { integrationClientId: request.clientId }
+          { integrationId: request.integrationId, clientId: request.clientId }
         );
       });
 
@@ -67,7 +76,8 @@ export class CommonSsoService {
       this.logger?.error(
         {
           status: res.status,
-          integrationClientId: request.clientId,
+          integrationId: request.integrationId,
+          clientId: request.clientId,
           detail,
         },
         'common-sso provisionAllowedServices returned non-2xx'
@@ -75,7 +85,8 @@ export class CommonSsoService {
       throw withDetails(
         new BadGatewayError('common-sso provisionAllowedServices failed'),
         {
-          integrationClientId: request.clientId,
+          integrationId: request.integrationId,
+          clientId: request.clientId,
           status: res.status,
         }
       );
@@ -83,7 +94,8 @@ export class CommonSsoService {
 
     this.logger?.info(
       {
-        integrationClientId: request.clientId,
+        integrationId: request.integrationId,
+        clientId: request.clientId,
         submissionId: request.submissionId,
       },
       'common-sso provisionAllowedServices delivered'

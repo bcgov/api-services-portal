@@ -326,6 +326,7 @@ export class IntegrationAccessService {
     );
 
     return {
+      integrationId: integrationId,
       clientId: clientId,
       submissionId: submissionId,
       resourceServers: resourceServers,

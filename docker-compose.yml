@@ -563,6 +563,26 @@ services:
         aliases:
           - sdx-edge-api.localtest.me
 
+  mocks-common-sso-api:
+    image: denoland/deno:2.7.12
+    container_name: mocks-common-sso-api
+    command:
+      - deno
+      - run
+      - --allow-net=:2026,deno.land
+      - --allow-write
+      - --allow-read
+      - /app/main.ts
+    # Needed when running portal outside of docker compose
+    ports:
+      - 2026:2026
+    volumes:
+      - ./local/mocks/common-sso-api/main.ts:/app/main.ts
+    networks:
+      aps-net:
+        aliases:
+          - common-sso-api.localtest.me
+
   mocks-upstream-api:
     image: denoland/deno:2.7.12
     container_name: mocks-upstream-api

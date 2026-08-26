@@ -1,7 +1,4 @@
-import type {
-  ClientSecretConfig,
-  SignedJwtConfig,
-} from './oauth.js';
+import type { SignedJwtConfig } from './oauth.js';
 import type { EnvironmentConfig } from '../config/environments.js';
 
 type Missing = { missing: string[] };
@@ -97,35 +94,6 @@ export function loadGwaEnvJwtConfig(
       kid: process.env.GWA_KID,
       scope: process.env.GWA_SCOPE,
       audience: process.env.GWA_AUDIENCE,
-      allowInsecure: allowInsecureRequests(),
-    },
-  };
-}
-
-export function loadClientSecretConfig(
-  name: string,
-  prefix: string
-): ClientLoadResult<ClientSecretConfig> {
-  const missing: Missing = { missing: [] };
-  const baseUrl = require_(`${prefix}_BASE_URL`, process.env[`${prefix}_BASE_URL`], missing);
-  const tokenUrl = require_(`${prefix}_TOKEN_URL`, process.env[`${prefix}_TOKEN_URL`], missing);
-  const clientId = require_(`${prefix}_CLIENT_ID`, process.env[`${prefix}_CLIENT_ID`], missing);
-  const clientSecret = require_(
-    `${prefix}_CLIENT_SECRET`,
-    process.env[`${prefix}_CLIENT_SECRET`],
-    missing
-  );
-  if (missing.missing.length > 0) return { ok: false, missing: missing.missing };
-  return {
-    ok: true,
-    config: {
-      name,
-      baseUrl: baseUrl!,
-      tokenUrl: tokenUrl!,
-      clientId: clientId!,
-      clientSecret: clientSecret!,
-      scope: process.env[`${prefix}_SCOPE`],
-      audience: process.env[`${prefix}_AUDIENCE`],
       allowInsecure: allowInsecureRequests(),
     },
   };
