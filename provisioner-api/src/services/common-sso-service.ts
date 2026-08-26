@@ -50,7 +50,7 @@ export class CommonSsoService {
   async provisionAllowedServices(
     request: TIntegrationAccessRequest
   ): Promise<void> {
-    const path = `/requests/${encodeURIComponent(
+    const path = `requests/${encodeURIComponent(
       request.integrationId
     )}/sdx-allowed-access`;
 
