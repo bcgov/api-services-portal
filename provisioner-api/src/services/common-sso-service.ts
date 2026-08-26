@@ -35,8 +35,10 @@ export class CommonSsoService {
     }
 
     for (const resource of resources) {
+      const doc: any = { ...resource };
+      delete doc.kind;
       await this.provisionAllowedServices(
-        resource as unknown as TIntegrationAccessRequest
+        doc as unknown as TIntegrationAccessRequest
       );
     }
     return { message: 'resources applied to Common SSO' };
