@@ -50,7 +50,7 @@ namespace SDX {
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
-                                    audience: String,
+                                    audience?: String,
                                     scopes: Set<String>
                                 }
                             }
@@ -85,6 +85,8 @@ namespace SDX {
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
+                                    audience?: String,
+                                    scopes: Set<String>
                                 }
                             }
                         }
