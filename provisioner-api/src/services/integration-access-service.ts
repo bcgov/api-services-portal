@@ -151,6 +151,8 @@ export class IntegrationAccessService {
                 // scopes and requesterDetails
                 requesterDetails.scopes = uniqueRequestedScopes;
 
+                delete existingConnection.id;
+
                 this.api.upsertConnection(subsystemOrgName, {
                   ...{
                     clientId: '',
