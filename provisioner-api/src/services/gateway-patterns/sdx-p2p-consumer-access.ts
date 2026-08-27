@@ -127,6 +127,9 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       'Generated %d GatewayConsumer documents for consumer access',
       documents.length
     );
+    if (inputs.integrationClientId) {
+      return documents as any[];
+    }
     return [...documents, buildIntegrationAllowAccess(inputs, data)] as any[];
   }
 }
