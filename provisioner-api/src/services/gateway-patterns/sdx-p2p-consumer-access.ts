@@ -15,7 +15,14 @@ export interface SDXP2PConsumerPatternConfig {
 export interface SDXP2PConsumerPatternData {
   gatewayId: string;
   client: EnrichedSubsystemEntry;
-  allowedAccess: TIntegrationAccessRequest;
+  allowedAccess: {
+    clientId: string;
+    resourceServers: Array<{
+      services: Array<{
+        name: string;
+      }>;
+    }>;
+  };
 }
 
 /**
@@ -58,25 +65,38 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       client.name
     )) as EnrichedSubsystemEntry;
 
-    const allowedAccess =
-      await this.integrationAccessService.buildIntegrationAllowedServices(
-        inputs.integrationClientId ||
+    // if the integrationClientId is explicitely specified, then
+    // no acl groups will be assigned to the client, acl groups
+    // only supported when requester details hold the integration Id
+    if (inputs.integrationClientId) {
+      return {
+        gatewayId: orgClient.gateway.id,
+        client: orgClient,
+        allowedAccess: {
+          clientId: inputs.integrationClientId,
+          resourceServers: [],
+        },
+      };
+    } else {
+      const allowedAccess =
+        await this.integrationAccessService.buildIntegrationAllowedServices(
           connection?.requesterDetails.client?.integrationId,
-        connection?.environment!,
-        'approved'
+          connection?.environment!,
+          'approved'
+        );
+
+      assert.strictEqual(
+        Boolean(allowedAccess.clientId),
+        true,
+        `No client ID available for integration access for consumer ${inputs.clientId}`
       );
 
-    assert.strictEqual(
-      Boolean(allowedAccess.clientId),
-      true,
-      `No client ID available for integration access for consumer ${inputs.clientId}`
-    );
-
-    return {
-      gatewayId: orgClient.gateway.id,
-      client: orgClient,
-      allowedAccess,
-    };
+      return {
+        gatewayId: orgClient.gateway.id,
+        client: orgClient,
+        allowedAccess,
+      };
+    }
   }
 
   eval(inputs: SDXP2PConsumerPatternConfig, data: SDXP2PConsumerPatternData) {
