@@ -151,16 +151,12 @@ export class IntegrationAccessService {
                 // scopes and requesterDetails
                 requesterDetails.scopes = uniqueRequestedScopes;
 
-                delete existingConnection.id;
-
-                this.api.upsertConnection(subsystemOrgName, {
-                  ...{
-                    clientId: '',
-                    serviceId: '',
-                    clientResources,
-                    serviceResources,
-                  },
-                  ...existingConnection,
+                // because we are updating the approved status to false, the related
+                // organization has to be specified correctly
+                // keep the clientResources and serviceResources unchanged
+                this.api.upsertConnection(spec.subsystem?.organization?.name!, {
+                  clientId: existingConnection.clientId!,
+                  serviceId: existingConnection.serviceId!,
                   isApproved: false,
                   requesterDetails,
                 });
