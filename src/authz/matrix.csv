@@ -28,6 +28,7 @@ Org - System Admin,,,ConnectionRequest,create,,"requesterDetails",,,system-admin
 Org - System Admin,,,ConnectionRequest,,"create,read","isApproved,isActive,environment,policyVersion,requesterDetails,provisionerStatus",,,system-admin,,,allow,
 Org - System Admin,,,ConnectionRequest,,"update,create","isActive",,,system-admin,,,allow,
 Org - System Admin (for provisioner),,,ConnectionRequest,,"update","requesterDetails",,,system-admin,,,allow,
+Org - System Admin (for provisioner),,,ConnectionRequest,,"update","isApproved",,,system-admin,,,allow,
 SDX Connection Manager,,,ConnectionRequest,,"update,delete",,,,connection-manager,,,allow,
 SDX Connection Manager,,,ConnectionRequest,,"update,create","isApproved,isActive",,,connection-manager,,,allow,
 SDX Connection Manager,,,ConnectionRequest,,"read","isApproved,isActive,environment,policyVersion,requesterDetails,provisionerStatus",,,connection-manager,,,allow,
