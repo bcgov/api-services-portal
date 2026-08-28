@@ -27,6 +27,7 @@ export interface ConsumerUpgrades {
     alg?: string;
   };
   verify: {};
+  acl: {};
   token: {
     allowedAud: string;
     allowedIss: string[];
@@ -323,7 +324,7 @@ function upgradeToACL(tags: string[], data: SDXP2PConsumerPatternData) {
     name: 'acl',
     tags: tags,
     config: {
-      allow: [`${data.service.name}`],
+      allow: [`${data.client.clientId}`],
     },
   };
 }

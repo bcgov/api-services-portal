@@ -103,6 +103,13 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
     const consumerGateway = data.client.gateway.id;
 
     const access = data.allowedAccess;
+
+    const groups = access.resourceServers
+      .map((rs) => rs.services.map((s) => s.name))
+      .flat();
+
+    groups.push(data.client.clientId);
+
     const documents = [
       {
         kind: 'GatewayConsumer',
@@ -113,12 +120,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
           'sdx',
           'acl',
         ],
-        acls: access.resourceServers
-          .map((rs) => rs.services.map((s) => s.name))
-          .flat()
-          .map((serviceName) => ({
-            group: serviceName,
-          })),
+        acls: groups.map((group) => ({ group })),
       },
     ];
 
