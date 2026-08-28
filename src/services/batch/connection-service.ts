@@ -201,17 +201,18 @@ class ConnectionService {
       connection.clientId
     );
 
-    assertEqual(
-      clientSubsystem.organization.name === org,
-      true,
-      'organization',
-      'Not authorized to access this connection request'
-    );
-
     const oasService = new OpenAPISpecService();
     const serviceSpec = await oasService.findOpenAPISpecByName(
       context,
       connection.serviceId
+    );
+
+    assertEqual(
+      clientSubsystem.organization.name === org ||
+        serviceSpec.subsystem!.organization.name === org,
+      true,
+      'organization',
+      `Organization ${org} not authorized to delete this connection request`
     );
 
     const status = await this.getConnectionDeleteStatus(
