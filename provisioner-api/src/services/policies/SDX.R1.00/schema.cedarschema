@@ -62,6 +62,7 @@ namespace SDX {
                     gatewayPatterns?: {
                         "sdx-p2p-provider.r1": {
                             upstreamUrl?: String,
+                            clientRuntimeOverride?: String,
                             upgrades: {
                                 mtlsAuth?: {},
                                 mtlsAcl?: {},

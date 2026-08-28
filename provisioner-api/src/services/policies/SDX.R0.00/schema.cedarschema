@@ -77,6 +77,7 @@ namespace SDX {
                         "sdx-p2p-provider.r1": {
                             upstreamUrl?: String,
                             useSni?: String,
+                            clientRuntimeOverride?: String,
                             upgrades: {
                                 mtlsAuth?: {},
                                 mtlsAcl?: {},

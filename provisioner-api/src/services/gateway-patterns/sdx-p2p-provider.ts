@@ -18,6 +18,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   serviceId: string;
   upgrades: ProviderUpgrades;
   useSni: string;
+  clientRuntimeOverride?: string;
 }
 
 interface ProviderUpgrades {
@@ -120,6 +121,57 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       `Client subsystem does not have a runtime group for environment '${environment}'`
     );
 
+    // if there is an override runtime group, try loading them
+    let overrideRG: RuntimeGroup | undefined = undefined;
+
+    if (inputs.clientRuntimeOverride) {
+      this.logger?.debug(
+        `${inputs.connId} : ${inputs.clientId} : Looking at clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+      );
+
+      // Runtime group format: MEMBER_CLASS.MEMBER_CODE.RGNAME
+      const parts = inputs.clientRuntimeOverride.split('.');
+      assert.strictEqual(
+        parts.length,
+        3,
+        `Invalid clientRuntimeOverride format: ${inputs.clientRuntimeOverride}. Expected format: MEMBER_CLASS.MEMBER_CODE.RGNAME`
+      );
+
+      const [memberClass, memberCode, rgName] = parts;
+      const orgs = await api.listOrganizations();
+      const orgForRG: any = orgs.find((org: any) => {
+        if (
+          org.member.memberClass === memberClass &&
+          org.member.memberId === memberCode
+        ) {
+          return true;
+        }
+      });
+      assert.strictEqual(
+        Boolean(orgForRG),
+        true,
+        `Organization not found for clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+      );
+
+      const orgRuntimeGroups = await api.listRuntimeGroups(orgForRG.name, {
+        filter: 'owned',
+      });
+
+      overrideRG = orgRuntimeGroups.find(
+        (rg) => rg.name === rgName && rg.environment === environment
+      );
+
+      if (!overrideRG) {
+        throw new Error(
+          `Runtime group not found for clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+        );
+      }
+
+      this.logger?.debug(
+        `${inputs.connId} : ${inputs.clientId} : Using clientRuntimeOverride: ${overrideRG.name} for environment: ${environment}`
+      );
+    }
+
     const serviceRG = serviceSubsystem.runtimeGroups?.find(
       (rg) => rg.environment === environment
     );
@@ -142,7 +194,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       client,
       service,
       serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
-      clientRG: clientRG as RuntimeGroup,
+      clientRG: overrideRG || (clientRG as RuntimeGroup),
       serviceRG: serviceRG as RuntimeGroup,
       upstreamUrl: upstreamUrl as string,
     };
