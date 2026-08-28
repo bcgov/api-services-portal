@@ -182,6 +182,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
+              'X-Service-Id': [`${serviceLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
             strip_path: true,
@@ -195,6 +196,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             methods: ['GET'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
+              'X-Service-Id': [`${serviceLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
             plugins: [
@@ -260,9 +262,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
-      scope: jwtKeycloakConfig?.scope
-        ? [jwtKeycloakConfig.scope]
-        : undefined,
+      scope: jwtKeycloakConfig?.scope ? [jwtKeycloakConfig.scope] : undefined,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:

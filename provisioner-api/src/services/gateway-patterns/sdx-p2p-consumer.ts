@@ -212,6 +212,9 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
           hosts: [routeHostUrl.hostname],
           paths: [`/${routePathPrefix}`],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
+          headers: {
+            'X-Client-Id': [`${clientLocator}`],
+          },
           name,
           strip_path: inputs.stripPath,
           protocols:
