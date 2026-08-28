@@ -260,7 +260,9 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
-      scope: jwtKeycloakConfig?.scope,
+      scope: jwtKeycloakConfig?.scope
+        ? [jwtKeycloakConfig.scope]
+        : undefined,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:
