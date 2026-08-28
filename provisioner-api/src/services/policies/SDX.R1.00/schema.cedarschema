@@ -28,7 +28,7 @@ namespace SDX {
                     scopes: Set<String>,
                     service: {
                         integrationId?: String,
-                        clientId: String
+                        clientId: String,
                         privacyZone?: String
                     },
                     submissionId: String
