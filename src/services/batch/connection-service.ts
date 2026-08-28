@@ -212,7 +212,7 @@ class ConnectionService {
         serviceSpec.subsystem!.organization.name === org,
       true,
       'organization',
-      `Organization ${org} not authorized to delete this connection request`
+      `Organization not related to this connection request`
     );
 
     const status = await this.getConnectionDeleteStatus(

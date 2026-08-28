@@ -165,7 +165,7 @@ describe('SDX Connection Requests (Sad Deletions)', () => {
           expect(status).to.be.equal(422)
           expect(body.message).to.be.equal('Validation Failed')
           expect(body.fields.organization.message).to.be.equal(
-            'Not authorized to access this connection request'
+            'Organization not related to this connection request'
           )
         })
       })
