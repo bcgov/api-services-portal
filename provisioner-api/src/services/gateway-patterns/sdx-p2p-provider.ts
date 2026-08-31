@@ -46,7 +46,21 @@ interface ProviderUpgrades {
     scopes: string[];
     audience: string;
   };
+  tokenClaimsResponse: {};
 }
+
+const TOKEN_CLAIMS_RESPONSE_FUNCTION = `
+local jwt = kong.ctx.shared and kong.ctx.shared.jwt_keycloak_token
+local claims = jwt and jwt.claims
+
+if not claims then
+  return kong.response.exit(500, {
+    message = "Verified token claims unavailable"
+  })
+end
+
+return kong.response.exit(200, claims)
+`;
 
 export interface SDXP2PProviderPatternData {
   gatewayId: string;
@@ -211,6 +225,32 @@ export class SDXP2PProviderPattern implements PatternProcessor {
               },
             ],
           },
+          ...(upgrades.hasOwnProperty('tokenClaimsResponse')
+            ? [
+                {
+                  name: `${name}.TOKEN-CLAIMS`,
+                  tags,
+                  hosts: [serviceHost],
+                  snis: inputs.useSni === 'false' ? [] : [serviceHost],
+                  paths: [`/${routePathPrefix}/token-claims`],
+                  methods: ['GET'],
+                  headers: {
+                    'X-Client-Id': [`${clientLocator}`],
+                  },
+                  protocols:
+                    inputs.use_sni === 'false' ? ['http'] : ['https'],
+                  plugins: [
+                    {
+                      name: 'post-function',
+                      tags,
+                      config: {
+                        access: [TOKEN_CLAIMS_RESPONSE_FUNCTION],
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
         ],
         plugins: [
           ...(upgrades.hasOwnProperty('mtlsAuth')
