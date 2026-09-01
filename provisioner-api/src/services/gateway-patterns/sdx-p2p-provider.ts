@@ -16,9 +16,9 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
   clientId: string;
   serviceId: string;
-  upstreamUrl: string;
   upgrades: ProviderUpgrades;
   useSni: string;
+  clientRuntimeOverride?: string;
 }
 
 interface ProviderUpgrades {
@@ -56,6 +56,7 @@ export interface SDXP2PProviderPatternData {
   serviceSubsystem: EnrichedSubsystemEntry;
   clientRG: RuntimeGroup;
   serviceRG: RuntimeGroup;
+  upstreamUrl: string;
 }
 
 /**
@@ -97,6 +98,12 @@ export class SDXP2PProviderPattern implements PatternProcessor {
     const service = (await api.getOASService(
       inputs.serviceId
     )) as EnrichedServiceCatalogEntry;
+
+    const orgService = await api.getOrganizationOASService(
+      service.subsystem.organization.name,
+      service.name
+    );
+
     const serviceSubsystem = await api.getSubsystemClient(
       service.subsystem.organization.name,
       service.subsystem.name
@@ -114,6 +121,57 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       `Client subsystem does not have a runtime group for environment '${environment}'`
     );
 
+    // if there is an override runtime group, try loading them
+    let overrideRG: RuntimeGroup | undefined = undefined;
+
+    if (inputs.clientRuntimeOverride) {
+      this.logger?.debug(
+        `${inputs.connId} : ${inputs.clientId} : Looking at clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+      );
+
+      // Runtime group format: MEMBER_CLASS.MEMBER_CODE.RGNAME
+      const parts = inputs.clientRuntimeOverride.split('.');
+      assert.strictEqual(
+        parts.length,
+        3,
+        `Invalid clientRuntimeOverride format: ${inputs.clientRuntimeOverride}. Expected format: MEMBER_CLASS.MEMBER_CODE.RGNAME`
+      );
+
+      const [memberClass, memberCode, rgName] = parts;
+      const orgs = await api.listOrganizations();
+      const orgForRG: any = orgs.find((org: any) => {
+        if (
+          org.member.memberClass === memberClass &&
+          org.member.memberId === memberCode
+        ) {
+          return true;
+        }
+      });
+      assert.strictEqual(
+        Boolean(orgForRG),
+        true,
+        `Organization not found for clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+      );
+
+      const orgRuntimeGroups = await api.listRuntimeGroups(orgForRG.name, {
+        filter: 'owned',
+      });
+
+      overrideRG = orgRuntimeGroups.find(
+        (rg) => rg.name === rgName && rg.environment === environment
+      );
+
+      if (!overrideRG) {
+        throw new Error(
+          `Runtime group not found for clientRuntimeOverride: ${inputs.clientRuntimeOverride}`
+        );
+      }
+
+      this.logger?.debug(
+        `${inputs.connId} : ${inputs.clientId} : Using clientRuntimeOverride: ${overrideRG.name} for environment: ${environment}`
+      );
+    }
+
     const serviceRG = serviceSubsystem.runtimeGroups?.find(
       (rg) => rg.environment === environment
     );
@@ -124,13 +182,21 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       `Service subsystem does not have a runtime group for environment '${environment}'`
     );
 
+    const upstreamUrl = orgService.upstreamUrl || inputs.upstreamUrl;
+    assert.strictEqual(
+      Boolean(upstreamUrl),
+      true,
+      `Service '${inputs.serviceId}' does not have an upstreamUrl configured nor was it passed in as an input parameter.`
+    );
+
     return {
       gatewayId: service.subsystem.gateway.id,
       client,
       service,
       serviceSubsystem: serviceSubsystem as EnrichedSubsystemEntry,
-      clientRG: clientRG as RuntimeGroup,
+      clientRG: overrideRG || (clientRG as RuntimeGroup),
       serviceRG: serviceRG as RuntimeGroup,
+      upstreamUrl: upstreamUrl as string,
     };
   }
 
@@ -145,7 +211,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
     const tags = [`ns.${providerGateway}.${inputs.connId}.p`, 'sdx'];
     const name = `sdx.p2p.${inputs.connId}.p.${serviceLocator}`;
 
-    const upstreamUrl = inputs.upstreamUrl;
+    const upstreamUrl = data.upstreamUrl;
 
     const upgrades: ProviderUpgrades = inputs.upgrades || {};
 
@@ -168,6 +234,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             methods: ['DELETE', 'GET', 'POST', 'PUT'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
+              'X-Service-Id': [`${serviceLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
             strip_path: true,
@@ -181,6 +248,7 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             methods: ['GET'],
             headers: {
               'X-Client-Id': [`${clientLocator}`],
+              'X-Service-Id': [`${serviceLocator}`],
             },
             protocols: inputs.use_sni === 'false' ? ['http'] : ['https'],
             plugins: [
@@ -246,7 +314,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
-      scope: jwtKeycloakConfig?.scope,
+      scope: jwtKeycloakConfig?.scope ? [jwtKeycloakConfig.scope] : undefined,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
       consumer_match_claim_custom_id:

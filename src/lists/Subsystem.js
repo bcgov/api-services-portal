@@ -1,6 +1,9 @@
 const { Slug, Text, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
-const { EnforcementPoint } = require('../authz/enforcement');
+const {
+  FieldEnforcementPoint,
+  EnforcementPoint,
+} = require('../authz/enforcement');
 const {
   logSubsystemActivityFromHook,
 } = require('../services/workflow/org-activity');
@@ -24,6 +27,11 @@ module.exports = {
       type: Markdown,
       isMultiline: true,
       isRequired: false,
+    },
+    privacyZone: {
+      type: Text,
+      isRequired: false,
+      access: FieldEnforcementPoint,
     },
     organization: { type: Relationship, ref: 'Organization' },
     integrations: {

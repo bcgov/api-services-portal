@@ -6,22 +6,32 @@ namespace SDX {
 
     action SubmitConnectionRequest
         appliesTo {
-            principal: User,
-            resource: ConnectionRequest,
+            principal: [User],
+            resource: [ConnectionRequest],
             context: {
                 clientId: String,
                 serviceId: String,
                 environment?: String,
                 isApproved: Bool,
+                isActive?: Bool,
                 policyVersion: String,
                 requesterDetails?: {
                     client?: {
-                        clientId: String
+                        integrationId?: String,
+                        clientId: String,
+                        privacyZone?: String
                     },
-                    requester: {
+                    requester?: {
                         name: String,
                         email?: String
-                    }
+                    },
+                    scopes?: Set<String>,
+                    service?: {
+                        integrationId?: String,
+                        clientId: String,
+                        privacyZone?: String
+                    },
+                    submissionId?: String
                 },
                 clientResources?: {
                     comment?: String,
@@ -54,7 +64,8 @@ namespace SDX {
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
-
+                                    audience?: String,
+                                    scopes?: Set<String>
                                 }
                             }
                         }
@@ -64,7 +75,9 @@ namespace SDX {
                     comment?: String,
                     gatewayPatterns?: {
                         "sdx-p2p-provider.r1": {
-                            upstreamUrl: String,
+                            upstreamUrl?: String,
+                            useSni?: String,
+                            clientRuntimeOverride?: String,
                             upgrades: {
                                 mtlsAuth?: {},
                                 mtlsAcl?: {},
@@ -88,6 +101,8 @@ namespace SDX {
                                 tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
+                                    audience?: String,
+                                    scopes?: Set<String>
                                 }
                             }
                         }
@@ -105,66 +120,6 @@ namespace SDX {
                         ca_token_url: String,
                         public_url: String
                     }
-                }
-            },
-        };
-
-    entity ConsumerPattern;
-
-    action ApplyConsumerPattern
-        appliesTo {
-            principal: User,
-            resource: ConsumerPattern,
-            context: {
-                conn_id: String,
-                client_id: String,
-                service_id: String,
-                tls_verify?: Bool,
-                upgrades?: {
-                    sign?: {},
-                    verify?: {},
-                    counter_sign?: {},
-                    token?: {
-                        allowed_aud: String,
-                        allowed_iss: String,
-                        scope?: String,
-                        consumer_match?: Bool,
-                        consumer_match_claim?: String,
-                        consumer_match_claim_custom_id?: Bool,
-                        consumer_match_ignore_not_found?: Bool
-                    },
-                    token_exchange?: {
-                        client_id: String,
-                        token_endpoint: String,
-
-                    }
-                }
-            }
-        };
-
-    entity ProviderPattern;
-
-    action ApplyProviderPattern
-        appliesTo {
-            principal: User,
-            resource: ProviderPattern,
-            context: {
-                conn_id: String,
-                client_id: String,
-                service_id: String,
-                upgrades?: {
-                    sign?: {},
-                    verify?: {},
-                    token?: {
-                        allowed_aud: String,
-                        allowed_iss: String,
-                        scope?: String,
-                        consumer_match?: Bool,
-                        consumer_match_claim?: String,
-                        consumer_match_claim_custom_id?: Bool,
-                        consumer_match_ignore_not_found?: Bool
-                    },
-                    dpop?: {}
                 }
             }
         };

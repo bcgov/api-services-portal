@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import type { ClientResources, ServiceResources } from './types.js';
+import type { PolicyDefaultsFn } from '../types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,8 +32,51 @@ rawPolicies.forEach((p) => {
   });
 });
 
+/**
+ * Baseline `clientResources`/`serviceResources` for a new connection request
+ * under this policy. Callers extend this as a base rather than building the
+ * gateway-pattern shape from scratch. The client subsystem, the requested
+ * service, and the requester details are available for policies that need
+ * to derive their defaults from them.
+ */
+const defaults: PolicyDefaultsFn = (
+  _subsystem,
+  _service,
+  _requesterDetails
+): {
+  clientResources: ClientResources;
+  serviceResources: ServiceResources;
+} => ({
+  clientResources: {
+    gatewayPatterns: {
+      'sdx-p2p-consumer.r1': {
+        upgrades: {
+          sign: {},
+          verify: {},
+          counterSign: {},
+        },
+      },
+      'sdx-p2p-consumer-access.r1': {},
+    },
+  },
+  serviceResources: {
+    gatewayPatterns: {
+      'sdx-p2p-provider.r1': {
+        upgrades: {
+          mtlsAuth: {},
+          mtlsAcl: {},
+          sign: {},
+          verify: {},
+          counterSign: {},
+        },
+      },
+    },
+  },
+});
+
 export const SDXPolicy = {
   id: 'SDX.R1.00',
   schema,
   policies,
+  defaults,
 };

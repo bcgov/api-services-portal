@@ -11,11 +11,13 @@ namespace SDX {
             context: {
                 clientId: String,
                 serviceId: String,
+                environment?: String,
                 isApproved: Bool,
+                isActive?: Bool,
                 policyVersion: String,
-                environment: String,
                 requesterDetails: {
                     client: {
+                        integrationId: String,
                         clientId: String,
                         privacyZone: String
                     },
@@ -25,8 +27,9 @@ namespace SDX {
                     },
                     scopes: Set<String>,
                     service: {
+                        integrationId?: String,
                         clientId: String,
-                        privacyZone: String
+                        privacyZone?: String
                     },
                     submissionId: String
                 },
@@ -37,6 +40,9 @@ namespace SDX {
                             integrationClientId?: String,
                         },
                         "sdx-p2p-consumer.r1": {
+                            clientRuntimeOverride?: String,
+                            stripPath?: Bool,
+                            tlsVerify?: String,
                             upgrades: {
                                 sign?: {
                                     alg?: String
@@ -45,10 +51,57 @@ namespace SDX {
                                 counterSign?: {
                                     signatureAlgorithm?: String
                                 },
-                                tokenExchange: {
+                                token?: {
+                                    allowedIss: Set<String>,
+                                    allowedAud?: String,
+                                    scope?: String,
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
+                                },
+                                acl?: {},
+                                tokenExchange?: {
                                     clientId: String,
                                     tokenEndpoint: String,
-                                    audience: String,
+                                    audience?: String,
+                                    scopes: Set<String>
+                                }
+                            }
+                        }
+                    }
+                },
+                serviceResources?: {
+                    comment?: String,
+                    gatewayPatterns?: {
+                        "sdx-p2p-provider.r1": {
+                            upstreamUrl?: String,
+                            useSni?: String,
+                            clientRuntimeOverride?: String,
+                            upgrades: {
+                                mtlsAuth?: {},
+                                mtlsAcl?: {},
+                                sign?: {
+                                    alg?: String
+                                },
+                                verify?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
+                                token?: {
+                                    allowedIss: Set<String>,
+                                    allowedAud?: String,
+                                    scope?: String,
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
+                                },
+                                acl?: {},
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
+                                    audience?: String,
                                     scopes: Set<String>
                                 }
                             }

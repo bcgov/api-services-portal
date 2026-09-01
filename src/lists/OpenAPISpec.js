@@ -50,6 +50,10 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    upstreamUrl: {
+      type: Text,
+      isRequired: false,
+    },
     spec: {
       type: Text,
       isRequired: true,

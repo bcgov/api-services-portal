@@ -30,6 +30,7 @@ const {
   putFeedWorker,
   deleteFeedWorker,
   getFeedWorker,
+  listFeedWorker,
 } = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked');
 
@@ -317,6 +318,13 @@ const configureExpress = (app: any) => {
   app.get('/feed/:entity/:refKey/:refKeyValue', (req: any, res: any) => {
     const context = keystone.createContext({ skipAccessControl: true });
     getFeedWorker(context, req, res).catch((err: any) => {
+      console.log(err);
+      res.status(400).json({ result: 'error', error: '' + err });
+    });
+  });
+  app.get('/feed/:entity', (req: any, res: any) => {
+    const context = keystone.createContext({ skipAccessControl: true });
+    listFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
     });

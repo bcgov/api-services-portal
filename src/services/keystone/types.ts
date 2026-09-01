@@ -6084,6 +6084,7 @@ export type OpenApiSpec = {
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
   specVersion?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
   subsystem?: Maybe<Subsystem>;
 };
 
@@ -6101,6 +6102,7 @@ export type OpenApiSpecCreateInput = {
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
   specVersion?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
   subsystem?: Maybe<SubsystemRelateToOneInput>;
 };
 
@@ -6112,6 +6114,7 @@ export type OpenApiSpecUpdateInput = {
   operations?: Maybe<Scalars['String']>;
   spec?: Maybe<Scalars['String']>;
   annotations?: Maybe<Scalars['String']>;
+  upstreamUrl?: Maybe<Scalars['String']>;
 };
 
 export type OpenApiSpecWhereInput = {
@@ -9577,6 +9580,7 @@ export type Subsystem = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  privacyZone?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   integrations: Array<SubsystemIntegration>;
   _integrationsMeta?: Maybe<_QueryMeta>;
@@ -9609,6 +9613,7 @@ export type SubsystemCreateInput = {
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  privacyZone?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   integrations?: Maybe<SubsystemIntegrationRelateToManyInput>;
   slug?: Maybe<Scalars['String']>;
@@ -9697,6 +9702,7 @@ export type SubsystemRelateToOneInput = {
 
 export type SubsystemUpdateInput = {
   description?: Maybe<Scalars['String']>;
+  privacyZone?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   integrations?: Maybe<SubsystemIntegrationRelateToManyInput>;
   slug?: Maybe<Scalars['String']>;
@@ -9767,6 +9773,24 @@ export type SubsystemWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  privacyZone?: Maybe<Scalars['String']>;
+  privacyZone_not?: Maybe<Scalars['String']>;
+  privacyZone_contains?: Maybe<Scalars['String']>;
+  privacyZone_not_contains?: Maybe<Scalars['String']>;
+  privacyZone_starts_with?: Maybe<Scalars['String']>;
+  privacyZone_not_starts_with?: Maybe<Scalars['String']>;
+  privacyZone_ends_with?: Maybe<Scalars['String']>;
+  privacyZone_not_ends_with?: Maybe<Scalars['String']>;
+  privacyZone_i?: Maybe<Scalars['String']>;
+  privacyZone_not_i?: Maybe<Scalars['String']>;
+  privacyZone_contains_i?: Maybe<Scalars['String']>;
+  privacyZone_not_contains_i?: Maybe<Scalars['String']>;
+  privacyZone_starts_with_i?: Maybe<Scalars['String']>;
+  privacyZone_not_starts_with_i?: Maybe<Scalars['String']>;
+  privacyZone_ends_with_i?: Maybe<Scalars['String']>;
+  privacyZone_not_ends_with_i?: Maybe<Scalars['String']>;
+  privacyZone_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  privacyZone_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */

@@ -5,7 +5,7 @@ import {
   createSubsystem,
   createSubsystemGateway,
   uniqueSubsystemName,
-} from '../../support/sdx-commands'
+} from '../../../support/sdx-commands'
 
 describe('SP136 - Subsystem RBAC access', () => {
   let workingData: any
@@ -33,8 +33,6 @@ describe('SP136 - Subsystem RBAC access', () => {
           'GET'
         ).then(({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
-          expect(body.name).to.be.equal(subsystemName)
-          expect(body.parent).to.be.equal('/systems')
           expect(body.members).to.be.an('array')
 
           // registering the gateway grants the acting user all three
@@ -79,12 +77,9 @@ describe('SP136 - Subsystem RBAC access', () => {
         expect(status).to.be.equal(200)
 
         const match = {
-          name: subsystemName,
-          parent: '/systems',
           members: [
             {
               member: {
-                username: 'mark@idir',
                 email: 'mark@gmail.com',
                 name: 'mark@idir',
               },

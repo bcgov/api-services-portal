@@ -455,6 +455,7 @@ const metadata = {
       'namespace',
       'organization',
       'subsystem',
+      'upstreamUrl',
     ],
     transformations: {
       subsystem: {
@@ -487,7 +488,14 @@ const metadata = {
         whereClause: 'organization: { name: $organization }',
       },
     ],
-    sync: ['name', 'description', 'organization', 'namespace', 'integrations'],
+    sync: [
+      'name',
+      'description',
+      'organization',
+      'namespace',
+      'integrations',
+      'privacyZone',
+    ],
     transformations: {
       organization: {
         name: 'connectOne',
@@ -602,7 +610,7 @@ const metadata = {
   ProvisionerStatus: {
     transient: true,
     refKey: 'name',
-    sync: ['message', 'status'],
+    sync: ['message', 'status', 'endpoint', 'spec'],
     transformations: {},
     validations: {
       status: { type: 'enum', values: ['pending', 'provisioned', 'failed'] },

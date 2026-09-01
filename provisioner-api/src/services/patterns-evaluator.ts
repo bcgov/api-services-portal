@@ -10,6 +10,7 @@ import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
 import { SDXServicePattern } from './gateway-patterns/sdx-service.js';
+import { SDXServiceOpsPattern } from './gateway-patterns/sdx-service-ops.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
 import { BadRequestError, withDetails } from '../errors/api-errors.js';
 import { PolicyService } from './policy-service.js';
@@ -67,6 +68,7 @@ export class PatternsEvaluatorService {
       [SDXP2PProviderPattern.ID]: new SDXP2PProviderPattern(sdx, logger),
       [SDXRuntimeGroupPattern.ID]: new SDXRuntimeGroupPattern(sdx, logger),
       [SDXServicePattern.ID]: new SDXServicePattern(sdx, logger),
+      [SDXServiceOpsPattern.ID]: new SDXServiceOpsPattern(sdx, logger),
       [SDXSubsystemPattern.ID]: new SDXSubsystemPattern(sdx, logger),
     };
   }
@@ -95,8 +97,12 @@ export class PatternsEvaluatorService {
         combinedScopes.push(connection.requesterDetails.service.privacyZone);
       }
 
+      const {
+        provisionerStatus: _provisionerStatus,
+        ...policyConnection
+      } = connection;
       const policyContext = {
-        ...connection,
+        ...policyConnection,
         combinedScopes,
         action,
         globals: {

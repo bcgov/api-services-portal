@@ -24,7 +24,9 @@ interface ServiceUpgrades {
     certificateHeaderName?: string;
   };
   acl: {};
-  sign: {};
+  sign: {
+    alg?: string;
+  };
   verify: {};
   token: {
     allowedAud: string;
@@ -121,32 +123,25 @@ export class SDXServicePattern implements PatternProcessor {
 
     const upgrades = inputs.upgrades || {};
 
-    const routes = (service.operations || [{ operationId: 'all' }]).map(
-      (op) => {
-        return {
-          name: `sdx.sys.${serviceLocator}.${op.operationId}`,
-          tags: [
-            ...tags,
-            `service:${serviceLocator}`,
-            `operation:${op.operationId}`,
-          ],
-          hosts: [serviceHost],
-          snis: inputs.useSni === 'false' ? [] : [serviceHost],
-          paths: [
-            op.operationId === 'all' ? '/' : convertPath(op.path).kongPath,
-          ],
-          methods:
-            op.operationId === 'all'
-              ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-              : [op.method],
-          headers: {
-            'X-Service-Id': [serviceLocator],
-          },
-          protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
-          strip_path: false,
-        };
-      }
-    );
+    const routes = [{ operationId: 'all' }].map((op) => {
+      return {
+        name: `sdx.sys.${serviceLocator}.${op.operationId}`,
+        tags: [
+          ...tags,
+          `service:${serviceLocator}`,
+          `operation:${op.operationId}`,
+        ],
+        hosts: [serviceHost],
+        snis: inputs.useSni === 'false' ? [] : [serviceHost],
+        paths: ['/'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        headers: {
+          'X-Service-Id': [serviceLocator],
+        },
+        protocols: inputs.useSni === 'false' ? ['http'] : ['https'],
+        strip_path: false,
+      };
+    });
 
     const serviceRoutes = [
       {
@@ -187,15 +182,15 @@ export class SDXServicePattern implements PatternProcessor {
         ],
 
         plugins: [
-          ...(upgrades.hasOwnProperty('mtls_auth')
+          ...(upgrades.hasOwnProperty('mtlsAuth')
             ? [upgradeToMTLSAuth(tags, data)]
             : []),
-          ...(upgrades.hasOwnProperty('mtls_acl')
+          ...(upgrades.hasOwnProperty('mtlsAcl')
             ? [upgradeToMTLSACL(tags, data, inputs as SDXServiceConfig)]
             : []),
           ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
           ...(upgrades.hasOwnProperty('sign')
-            ? [upgradeToTrustSign(tags, data)]
+            ? [upgradeToTrustSign(tags, data, inputs as SDXServiceConfig)]
             : []),
           ...(upgrades.hasOwnProperty('verify')
             ? [upgradeToTrustVerify(tags, data)]
@@ -280,10 +275,14 @@ function upgradeToACL(tags: string[], data: SDXServicePatternData) {
   };
 }
 
-function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
-  const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name!}:0`;
-  const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name!}`;
+function upgradeToTrustSign(
+  tags: string[],
+  data: SDXServicePatternData,
+  inputs: SDXServiceConfig
+) {
   const environment = data.subsystemRuntimeGroup.environment;
+  const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name}:${environment}:0`;
+  const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name}.${environment}`;
 
   const publicUrl = getRequiredEnvUrl(
     environment,
@@ -299,7 +298,7 @@ function upgradeToTrustSign(tags: string[], data: SDXServicePatternData) {
       signature_header_key: 'X-Edge-Token',
       keyid: kid,
       private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      alg: 'ES256',
+      alg: inputs.upgrades.sign?.alg || 'ES256',
       jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
       hash_alg: 'sha256',
     },

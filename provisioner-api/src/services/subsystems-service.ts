@@ -8,6 +8,7 @@ import {
 import { BadRequestError, NotFoundError } from '../errors/api-errors.js';
 import {
   TIntegrationAccessRequest,
+  TIntegrationStatus,
   TSubsystemEnvironment,
 } from '../schemas/sdx.js';
 
@@ -52,6 +53,35 @@ export class SdxMemberService {
   }
 
   /**
+   * Reports whether an integration client is registered as an SDX
+   * subsystem, and its attributes if so.
+   *
+   * @param integrationClientId
+   * @returns TIntegrationStatus
+   */
+  async getIntegrationStatus(
+    integrationClientId: string
+  ): Promise<TIntegrationStatus> {
+    const subsystems = await this.api.listCatalogSubsystems({
+      integrationClientId,
+    });
+
+    if (!subsystems || subsystems.length === 0) {
+      return { status: 'unregistered' };
+    }
+
+    const subsystem = subsystems[0];
+
+    return {
+      status: 'registered',
+      id: subsystem.clientId,
+      name: subsystem.name,
+      organization: subsystem.organization?.name || 'unknown',
+      description: subsystem.description || '',
+    };
+  }
+
+  /**
    *
    * @param environment
    * @param resourceServersOnly
@@ -83,15 +113,17 @@ export class SdxMemberService {
             .map((s) => ({
               name: s.name,
               title: s.title,
-              scopes: s.operations.reduce(
-                (acc: { [name: string]: string }, op) => {
-                  op.scopes?.forEach((scope) => {
-                    acc[scope.name] = scope.description || '';
-                  });
-                  return acc;
-                },
-                {}
-              ),
+              version: s.version,
+              scopes: Array.from(
+                s.operations
+                  .reduce((acc: Map<string, string>, op) => {
+                    op.scopes?.forEach((scope) => {
+                      acc.set(scope.name, scope.description || '');
+                    });
+                    return acc;
+                  }, new Map<string, string>())
+                  .entries()
+              ).map(([label, description]) => ({ label, description })),
               summary: s.summary || '',
             })),
         }))

@@ -28,4 +28,14 @@ module.exports = {
     },
   },
   access: EnforcementPoint,
+  hooks: {
+    resolveInput: async ({ context, operation, resolvedData }) => {
+      // if integrationClientId is a number, convert to string
+      if (typeof resolvedData.integrationClientId === 'number') {
+        resolvedData.integrationClientId =
+          resolvedData.integrationClientId.toString();
+      }
+      return resolvedData;
+    },
+  },
 };

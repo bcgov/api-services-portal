@@ -91,14 +91,13 @@ Four authenticated HTTP clients are available on `app.clients`:
 | `aps`  | OIDC client-credentials with `private_key_jwt`     | `APS_`         |
 | `sdx`  | OIDC client-credentials with `private_key_jwt`     | `SDX_`         |
 | `gwa`  | OIDC client-credentials with `private_key_jwt`     | `GWA_`         |
-| `css`  | OIDC client-credentials with `client_secret_basic` | `CSS_`         |
+| `css`  | OIDC client-credentials with `private_key_jwt`     | `CSS_`         |
 
 Built on [`oauth4webapi`](https://github.com/panva/oauth4webapi) + [`jose`](https://github.com/panva/jose) (web-standard fetch, no legacy deps). Tokens are cached in-memory until 30 seconds before `expires_in`, with single-flight refresh.
 
-See `.env.example` for the full env-var contract. Each prefix needs `*_BASE_URL`, `*_TOKEN_URL`, `*_CLIENT_ID`, plus either:
+See `.env.example` for the full env-var contract. Each prefix needs `*_BASE_URL`, `*_TOKEN_URL`, `*_CLIENT_ID`, `*_JWK_PATH` pointing at a standard JWK JSON file holding the private signing key used for the `private_key_jwt` client assertion. Optional: `*_KEY_ALG` (defaults to the JWK's `alg`, then `RS256`), `*_KID` (defaults to the JWK's `kid`), `*_SCOPE`, `*_AUDIENCE`.
 
-- **signed-JWT clients (APS/SDX/GWA):** `*_JWK_PATH` pointing at a standard JWK JSON file holding the private signing key. Optional: `*_KEY_ALG` (defaults to the JWK's `alg`, then `RS256`), `*_KID` (defaults to the JWK's `kid`), `*_SCOPE`, `*_AUDIENCE`.
-- **client-secret client (CSS):** `*_CLIENT_SECRET`. Optional: `*_SCOPE`, `*_AUDIENCE`.
+For CSS specifically, `CSS_CLIENT_ID` doubles as the feature switch: if it (or any other `CSS_*` variable) is left unset, the `css` client stays unconfigured and `CommonSsoService` skips CSS dispatch with a warning instead of failing the request.
 
 The JWK file is a standard JSON Web Key containing a private key (it must include the `d` parameter); symmetric keys are rejected. A matching public JWK is registered with the authorization server for `private_key_jwt` verification.
 

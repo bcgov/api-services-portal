@@ -4,6 +4,7 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   ConnectionChangeRequest,
   ConnectionChangeResponse,
+  ConnectionDefaultsResponse,
 } from '../schemas/resources.js';
 
 const security = [] as any[];
@@ -11,6 +12,34 @@ const security = [] as any[];
 export const registerResourcesRoutes: FastifyPluginAsyncTypebox = async (
   app
 ) => {
+  app.get(
+    '/connection-defaults',
+    {
+      schema: {
+        tags: ['Resource Provisioning'],
+        summary: 'Get default connection resources',
+        operationId: 'getConnectionDefaults',
+        description:
+          'Returns the baseline clientResources and serviceResources a new connection request for the given client, service, and policy version should be built from.',
+        security,
+        querystring: Type.Object({
+          clientId: Type.String({ examples: ['LAB.MIN.FOOD.MY-UI'] }),
+          serviceId: Type.String({
+            examples: ['LAB.MIN.FOOD.CASE-MANAGEMENT.v1'],
+          }),
+          policyVersion: Type.String({ examples: ['SDX.R1.00'] }),
+        }),
+        response: { 200: Type.Ref(ConnectionDefaultsResponse) },
+      },
+    },
+    async (req) =>
+      app.controllers.connections.getConnectionDefaults(
+        req.query.clientId,
+        req.query.serviceId,
+        req.query.policyVersion
+      )
+  );
+
   app.post(
     '/connections/:id',
     {

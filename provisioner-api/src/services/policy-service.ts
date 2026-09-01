@@ -6,6 +6,17 @@ import { SDXPolicy as SDX_R0_00_Policy } from './policies/SDX.R0.00/index.js';
 import { SDXPolicy as SDX_R1_00_Policy } from './policies/SDX.R1.00/index.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { BadRequestError } from '../errors/api-errors.js';
+import type {
+  ServiceCatalogEntry,
+  SubsystemEntry,
+} from '../clients/sdx-member/index.js';
+import type {
+  PolicyDefaultResources,
+  PolicyDefaultsFn,
+  PolicyRequesterDetails,
+} from './policies/types.js';
+
+export type { PolicyDefaultResources, PolicyRequesterDetails };
 
 export class PolicyService {
   constructor(private readonly logger?: FastifyBaseLogger) {}
@@ -28,11 +39,34 @@ export class PolicyService {
       ctx as unknown as Record<string, CedarValueJson>
     );
   }
+
+  /**
+   * The baseline `clientResources`/`serviceResources` a new connection
+   * request should be built from for the given policy version. The client
+   * subsystem, the service being connected to, and the requester details
+   * are passed through so a policy's defaults can be derived from them.
+   */
+  getDefaultResources(
+    policyVersion: string,
+    subsystem: SubsystemEntry,
+    service: ServiceCatalogEntry,
+    requesterDetails: PolicyRequesterDetails
+  ): PolicyDefaultResources {
+    const policy = POLICY_REGISTRY[policyVersion];
+    if (!policy) {
+      throw new BadRequestError(`Policy ${policyVersion} not found in registry`);
+    }
+    return policy.defaults(subsystem, service, requesterDetails);
+  }
 }
 
 const POLICY_REGISTRY: Record<
   string,
-  { schema: string; policies: Record<string, string> }
+  {
+    schema: string;
+    policies: Record<string, string>;
+    defaults: PolicyDefaultsFn;
+  }
 > = {
   'SDX.R0.00': SDX_R0_00_Policy,
   'SDX.R1.00': SDX_R1_00_Policy,

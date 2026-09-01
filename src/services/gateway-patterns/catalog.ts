@@ -26,6 +26,7 @@ export interface SubsystemEntry {
   name: string;
   description?: string;
   clientId: string;
+  privacyZone?: string;
   organization?: {
     name: string;
     description?: string;
@@ -82,6 +83,7 @@ export interface ServiceCatalogEntry {
   }[];
   spec?: string;
   specVersion: string;
+  upstreamUrl?: string;
   subsystem: SubsystemEntry;
 }
 
@@ -152,6 +154,7 @@ export async function GetCatalog(
       summary: c.summary,
       description: c.description,
       spec: includeSpec ? c.spec : undefined,
+      upstreamUrl: c.upstreamUrl,
       subsystem: {
         name: c.subsystem.name,
         description: c.subsystem.description,
@@ -358,6 +361,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     name: c.name,
     description: c.description,
     clientId: `${member.memberClass}.${member.memberId}.${c.name}`,
+    privacyZone: c.privacyZone,
     organization: {
       name: c.organization.name,
       title: c.organization.title,

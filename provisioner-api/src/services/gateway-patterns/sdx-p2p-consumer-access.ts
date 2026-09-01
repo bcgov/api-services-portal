@@ -1,7 +1,7 @@
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
-import { type EnrichedSubsystemEntry } from './utils.js';
+import { assert, type EnrichedSubsystemEntry } from './utils.js';
 import { IntegrationAccessService } from '../integration-access-service.js';
 import { TIntegrationAccessRequest } from '../../schemas/sdx.js';
 
@@ -15,7 +15,14 @@ export interface SDXP2PConsumerPatternConfig {
 export interface SDXP2PConsumerPatternData {
   gatewayId: string;
   client: EnrichedSubsystemEntry;
-  allowedAccess: TIntegrationAccessRequest;
+  allowedAccess: {
+    clientId: string;
+    resourceServers: Array<{
+      services: Array<{
+        name: string;
+      }>;
+    }>;
+  };
 }
 
 /**
@@ -58,24 +65,51 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       client.name
     )) as EnrichedSubsystemEntry;
 
-    const allowedAccess =
-      await this.integrationAccessService.buildIntegrationAllowedServices(
-        inputs.integrationClientId ||
-          connection?.requesterDetails.client?.clientId,
-        connection?.environment!
+    // if the integrationClientId is explicitely specified, then
+    // no acl groups will be assigned to the client, acl groups
+    // only supported when requester details hold the integration Id
+    if (inputs.integrationClientId) {
+      return {
+        gatewayId: orgClient.gateway.id,
+        client: orgClient,
+        allowedAccess: {
+          clientId: inputs.integrationClientId,
+          resourceServers: [],
+        },
+      };
+    } else {
+      const allowedAccess =
+        await this.integrationAccessService.buildIntegrationAllowedServices(
+          connection?.requesterDetails.client?.integrationId,
+          connection?.environment!,
+          'approved'
+        );
+
+      assert.strictEqual(
+        Boolean(allowedAccess.clientId),
+        true,
+        `No client ID available for integration access for consumer ${inputs.clientId}`
       );
 
-    return {
-      gatewayId: orgClient.gateway.id,
-      client: orgClient,
-      allowedAccess,
-    };
+      return {
+        gatewayId: orgClient.gateway.id,
+        client: orgClient,
+        allowedAccess,
+      };
+    }
   }
 
   eval(inputs: SDXP2PConsumerPatternConfig, data: SDXP2PConsumerPatternData) {
     const consumerGateway = data.client.gateway.id;
 
     const access = data.allowedAccess;
+
+    const groups = access.resourceServers
+      .map((rs) => rs.services.map((s) => s.name))
+      .flat();
+
+    groups.push(data.client.clientId);
+
     const documents = [
       {
         kind: 'GatewayConsumer',
@@ -86,16 +120,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
           'sdx',
           'acl',
         ],
-        acls: access.resourceServers
-          .map((rs) =>
-            rs.services
-              .filter((s) => s.status === 'approved')
-              .map((s) => s.name)
-          )
-          .flat()
-          .map((serviceName) => ({
-            group: serviceName,
-          })),
+        acls: groups.map((group) => ({ group })),
       },
     ];
 
@@ -104,6 +129,9 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       'Generated %d GatewayConsumer documents for consumer access',
       documents.length
     );
+    if (inputs.integrationClientId) {
+      return documents as any[];
+    }
     return [...documents, buildIntegrationAllowAccess(inputs, data)] as any[];
   }
 }

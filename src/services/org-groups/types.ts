@@ -27,6 +27,7 @@ export interface GroupPermission {
 export interface UserReference {
   id?: string;
   email?: string;
+  name?: string; // can be passed along but not used for lookups; only for display purposes
 }
 
 export interface OrgNamespace {
