@@ -150,6 +150,7 @@ export const ResourceServerAccess = Type.Object(
 
 export const IntegrationAccessRequest = Type.Object(
   {
+    integrationId: Type.String({ examples: ['9f3c2f3a-int-4c79-8e34'] }),
     submissionId: Type.String({
       examples: ['9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a'],
     }),
@@ -161,6 +162,7 @@ export const IntegrationAccessRequest = Type.Object(
     additionalProperties: false,
     examples: [
       {
+        integrationId: '9f3c2f3a-int-4c79-8e34',
         submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
         clientId: 'client-a-111',
         resourceServers: [

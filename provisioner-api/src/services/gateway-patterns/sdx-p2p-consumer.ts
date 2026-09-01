@@ -28,6 +28,7 @@ export interface ConsumerUpgrades {
     alg?: string;
   };
   verify: {};
+  acl: {};
   token: {
     allowedAud: string;
     allowedIss: string[];
@@ -213,6 +214,9 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
           hosts: [routeHostUrl.hostname],
           paths: [`/${routePathPrefix}`],
           methods: ['DELETE', 'GET', 'POST', 'PUT'],
+          headers: {
+            'X-Client-Id': [`${clientLocator}`],
+          },
           name,
           strip_path: inputs.stripPath,
           protocols:
@@ -321,7 +325,7 @@ function upgradeToACL(tags: string[], data: SDXP2PConsumerPatternData) {
     name: 'acl',
     tags: tags,
     config: {
-      allow: [`${data.service.name}`],
+      allow: [`${data.client.clientId}`],
     },
   };
 }

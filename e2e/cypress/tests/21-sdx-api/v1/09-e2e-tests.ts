@@ -53,9 +53,10 @@ describe('SDX E2E Tests', () => {
     it('PUT /organizations/{org}/connections', () => {
       const { org, datasetId, env } = workingData
       const subsystemName = uniqueSubsystemName()
-      const integrationClientId = `client-${datasetId}-${uuidv4()
+      const integrationId = uuidv4()
         .replace(/-/g, '')
-        .substring(0, 8)}`
+        .substring(0, 8);
+      const integrationClientId = `client-${datasetId}-${integrationId}`
 
       // create a new subsystem and publish a new OAS Service in dev
       createSubsystemAndOASService(
@@ -71,7 +72,7 @@ describe('SDX E2E Tests', () => {
             updateSubsystemIntegrationClients(
               org,
               service.subsystem.name,
-              [integrationClientId],
+              [integrationId],
               () => {
                 // now create a connection between the subsystem and the service
                 // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
@@ -90,6 +91,7 @@ describe('SDX E2E Tests', () => {
                       name: 'Janis',
                     },
                     client: {
+                      integrationId: integrationId,
                       clientId: integrationClientId,
                     },
                   },
@@ -147,6 +149,7 @@ describe('SDX E2E Tests', () => {
                     // connection is approved; the provisioner runs asynchronously
                     // and kong control plane also pushes out changes to the data planes
                     // async, so do some retries until we get a good response
+                    cy.setHeader('X-Client-Id', clientId)
                     cy.makeSDXCall({
                       method: 'GET',
                       path: `/sdx/0/${serviceId}/ping`,
@@ -175,6 +178,7 @@ describe('SDX E2E Tests', () => {
                       // connection is de-activated; the provisioner runs asynchronously
                       // and kong control plane also pushes out changes to the data planes
                       // async, so do some retries until we get a good response
+                      cy.setHeader('X-Client-Id', clientId)
                       cy.makeSDXCall({
                         method: 'GET',
                         path: `/sdx/0/${serviceId}/ping`,

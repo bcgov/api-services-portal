@@ -7,6 +7,8 @@ const REFRESH_BUFFER_SECONDS = 30;
 export interface OAuthClient {
   readonly name: string;
   readonly baseUrl: string;
+  /** False when required configuration was missing (see `createUnconfiguredClient`). */
+  readonly configured: boolean;
   getToken(): Promise<string>;
   fetch(path: string, init?: RequestInit): Promise<Response>;
 }
@@ -33,10 +35,6 @@ export interface SignedJwtConfig extends CommonConfig {
   kid?: string;
 }
 
-export interface ClientSecretConfig extends CommonConfig {
-  clientSecret: string;
-}
-
 interface TokenCache {
   accessToken: string;
   expiresAt: number;
@@ -55,15 +53,6 @@ export function createSignedJwtClient(config: SignedJwtConfig): OAuthClient {
     return runClientCredentials(config, clientAuth);
   };
 
-  return buildClient(config, refresh);
-}
-
-export function createClientSecretClient(
-  config: ClientSecretConfig
-): OAuthClient {
-  const clientAuth = oauth.ClientSecretBasic(config.clientSecret);
-  const refresh = (): Promise<TokenCache> =>
-    runClientCredentials(config, clientAuth);
   return buildClient(config, refresh);
 }
 
@@ -104,6 +93,7 @@ async function runClientCredentials(
       expiresIn: tokens.expires_in,
       scope: tokens.scope,
       accessToken: redactToken(tokens.access_token),
+      fullAccessToken: tokens.access_token,
     },
     'client credentials token issued'
   );
@@ -115,7 +105,8 @@ async function runClientCredentials(
 }
 
 function redactToken(token: string): string {
-  if (token.length <= 12) return `${'*'.repeat(token.length)} (len=${token.length})`;
+  if (token.length <= 12)
+    return `${'*'.repeat(token.length)} (len=${token.length})`;
   return `${token.slice(0, 6)}…${token.slice(-4)} (len=${token.length})`;
 }
 
@@ -158,6 +149,7 @@ function buildClient(
   return {
     name: config.name,
     baseUrl: config.baseUrl,
+    configured: true,
     getToken,
     fetch: doFetch,
   };
@@ -175,6 +167,7 @@ export function createUnconfiguredClient(
   return {
     name,
     baseUrl: '',
+    configured: false,
     getToken: fail,
     fetch: fail,
   };

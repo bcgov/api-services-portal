@@ -174,7 +174,7 @@ export class OrgConnectionController extends Controller {
 
   /**
    * Delete a connection request
-   * > `Required Scope:` System.Manage or Subsystem.Manage
+   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
    *
    * @param org
    * @param id
@@ -183,7 +183,7 @@ export class OrgConnectionController extends Controller {
    */
   @Delete('/{id}')
   @OperationId('deleteConnection')
-  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage', 'Connection.Manage'])
   public async deleteConnection(
     @Path() org: string,
     @Path('id') id: string,
