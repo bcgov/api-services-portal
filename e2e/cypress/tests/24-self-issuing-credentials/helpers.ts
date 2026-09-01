@@ -107,8 +107,7 @@ export function keyAuthAclPluginYaml(namespace: string, appId: string): string {
     tags: [ ns.${namespace} ]
     config:
       hide_groups_header: true
-      allow:
-      - "${appId}"
+      allow: [ "${appId}" ]
 `
 }
 
@@ -170,6 +169,7 @@ export function serviceYamlItem(
     strip_path: false
     https_redirect_status_code: 426
     path_handling: v0
+
 ${pluginYaml.trimEnd()}
 `
 }
@@ -334,14 +334,21 @@ export function configureGwaHost(): void {
 export function publishConfigWithToken(
   gatewayId: string,
   token: string,
-  relativeFixturePath: string
+  relativeFixturePath: string | string[]
 ): void {
+  const paths = (Array.isArray(relativeFixturePath)
+    ? relativeFixturePath
+    : [relativeFixturePath]
+  )
+    .map((p) => `./cypress/fixtures/${p}`)
+    .join(' ')
+
   cy.executeCliCommand(`gwa config set --gateway ${gatewayId}`).then(() => {
     cy.executeCliCommand(`gwa config set --token ${token}`).then((setToken) => {
       expect(setToken.stdout || setToken.stderr || '').to.contain(
         'Config settings saved'
       )
-      cy.exec(`gwa pg ./cypress/fixtures/${relativeFixturePath}`, {
+      cy.exec(`gwa pg ${paths}`, {
         timeout: 60000,
         failOnNonZeroExit: false,
       }).then((pub) => {
