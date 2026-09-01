@@ -45,7 +45,11 @@ export interface SDXKeyConfig {
   publicKeyPem?: string;
   certificatePem?: string[];
   caCerts?: string;
-  /** Targeted pattern operation. Omit for legacy whole-set publish. */
+  /**
+   * Targeted pattern operation. For runtime groups, omit defaults to `add`.
+   * Org and subsystem omit still publishes a single `:0` key. Query
+   * `action=delete` with no operation still wipes the whole qualifier.
+   */
   operation?: SdxKeyOperation;
   /** Existing kid to replace or delete. */
   targetKid?: string;
@@ -115,10 +119,12 @@ export interface PatternInjectContext {
  * - Organization signing keys
  * - Subsystem (client_id) signing keys
  *
- * When `operation` is omitted, behaviour is unchanged: a single `:0` key (or
- * index-based kids from `certificatePem[]`) is published. When `operation` is
- * set, the pattern fetches the current keyset from the Kong control plane and
- * emits the complete desired state for add / rotate / replace / delete.
+ * When `operation` is omitted on a runtime group (and query action is not
+ * `delete`), the pattern defaults to `add`: a random kid is published after
+ * reading the current keyset. Org and subsystem callers that omit `operation`
+ * still publish a single `:0` key (or index-based kids from `certificatePem[]`)
+ * because `trust-kms` still pins `:0`. Explicit `operation` fetches the current
+ * keyset and emits the complete desired state.
  */
 export class SDXKeysPattern implements PatternProcessor {
   static ID = 'sdx-keys.r1';
@@ -139,12 +145,7 @@ export class SDXKeysPattern implements PatternProcessor {
     inputs: SDXKeyConfig,
     ctx?: PatternInjectContext
   ): Promise<SDXKeysPatternData> {
-    const operation = parseOperation(inputs.operation);
-    if (operation && ctx?.action === 'delete') {
-      throw new BadRequestError(
-        'Query action=delete removes the entire key qualifier. For targeted deletion, use action=apply with operation=delete.'
-      );
-    }
+    const operation = resolveOperation(inputs, ctx);
 
     const profile: any = {};
 
@@ -372,6 +373,29 @@ function parseOperation(
   throw new UnprocessableEntityError(
     `Unsupported sdx-keys.r1 operation '${value}'. Expected add, rotate, replace, or delete.`
   );
+}
+
+function resolveOperation(
+  inputs: SDXKeyConfig,
+  ctx?: PatternInjectContext
+): SdxKeyOperation | undefined {
+  const operation = parseOperation(inputs.operation);
+  if (operation && ctx?.action === 'delete') {
+    throw new BadRequestError(
+      'Query action=delete removes the entire key qualifier. For targeted deletion, use action=apply with operation=delete.'
+    );
+  }
+  if (operation) {
+    return operation;
+  }
+  if (ctx?.action === 'delete') {
+    return undefined;
+  }
+  // Edge signing keys: omitted operation is add, not the legacy :0 kid.
+  if (inputs.runtimeGroupName) {
+    return 'add';
+  }
+  return undefined;
 }
 
 function parseIncomingKey(inputs: SDXKeyConfig): IncomingKey | undefined {

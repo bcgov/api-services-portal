@@ -17,8 +17,9 @@ Query `action` is unchanged:
 | `delete` | Delete the **entire** key qualifier (key set + all keys) |
 
 An optional body parameter `operation` selects a targeted, state-aware update.
-When `operation` is omitted, `sdx-keys.r1` keeps its previous behaviour: a
-single key named `{name}:0` with kid `{urn}:0`.
+When `operation` is omitted on a **runtime group**, the pattern defaults to
+`add` (random kid, current keyset). Org and subsystem callers that omit
+`operation` still publish a single key named `{name}:0` with kid `{urn}:0`.
 
 | `parameters.operation` | Effect |
 | --- | --- |
@@ -122,11 +123,12 @@ updated plugin image **before** applying those pattern changes.
 1. GWA key-read endpoint (`GET /v2/namespaces/{ns}/keys`)
 2. Kong image with automatic kid resolution (`trust-sign` / `token-exchange`)
 3. Portal / provisioner `sdx-keys.r1` operations and pattern `keyset_name`
-4. Enable random-kid rotations (`operation=add|rotate|…`)
+4. Enable random-kid rotations (`operation=add|rotate|…`; omitted runtime-group
+   `operation` is `add`)
 5. Runtime chart flags for staged secrets and separate restart
 
-Keep explicit `keyid` and legacy no-`operation` publishes available until every
-runtime group runs the compatible plugin.
+Keep explicit `keyid` until every runtime group runs the compatible plugin.
+Org and subsystem `:0` publishes remain for `trust-kms`.
 
 ## Plugin audit
 

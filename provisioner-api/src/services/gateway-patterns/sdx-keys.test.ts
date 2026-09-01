@@ -73,7 +73,7 @@ function existingKey(pem: string, kid: string, name: string) {
 const KID_RE =
   /^urn:ca:bc:sdx:edge:myrg:dev:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-test('legacy apply still emits index :0 kid', async () => {
+test('omitted operation on a runtime group defaults to add', async () => {
   const pem = publicPem();
   const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
   const inputs = {
@@ -85,9 +85,43 @@ test('legacy apply still emits index :0 kid', async () => {
   const data = await pattern.inject(inputs);
   const docs = pattern.eval(inputs, data);
   const key = docs.find((d) => d.kind === 'GatewayKey');
-  assert.equal(key.kid, 'urn:ca:bc:sdx:edge:myrg:dev:0');
-  assert.equal(key.name, 'sdx.keys.myrg.dev.edge:0');
+  assert.equal(data.operation, 'add');
+  assert.equal(data.changes?.operation, 'add');
+  assert.equal(data.changes?.added.length, 1);
+  assert.match(data.changes!.added[0].kid, KID_RE);
+  assert.equal(key.kid, data.changes!.added[0].kid);
+  assert.notEqual(key.kid, 'urn:ca:bc:sdx:edge:myrg:dev:0');
+});
+
+test('omitted operation on an organization still emits :0 kid', async () => {
+  const pem = publicPem();
+  const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
+  const inputs = {
+    organization: 'my-org',
+    environment: 'dev',
+    publicKeyPem: pem,
+  };
+  const data = await pattern.inject(inputs);
+  const key = pattern.eval(inputs, data).find((d) => d.kind === 'GatewayKey');
   assert.equal(data.operation, undefined);
+  assert.equal(key.kid, 'urn:ca:bc:sdx:org:min.citz:dev:0');
+  assert.equal(key.name, 'sdx.keys.min.citz.org.dev:0');
+});
+
+test('omitted operation on a subsystem still emits :0 kid', async () => {
+  const pem = publicPem();
+  const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
+  const inputs = {
+    organization: 'my-org',
+    environment: 'dev',
+    clientId: 'LAB.MIN.FOOD.MY-UI',
+    publicKeyPem: pem,
+  };
+  const data = await pattern.inject(inputs);
+  const key = pattern.eval(inputs, data).find((d) => d.kind === 'GatewayKey');
+  assert.equal(data.operation, undefined);
+  assert.equal(key.kid, 'urn:ca:bc:sdx:sys:lab.min.food.my-ui:dev:0');
+  assert.equal(key.name, 'sdx.keys.lab.min.food.my-ui.dev.sys:0');
 });
 
 test('add publishes a random kid when the keyset is empty', async () => {
@@ -364,14 +398,18 @@ test('certificatePem add uses the certificate public key', async () => {
   }
 });
 
-test('legacy deleteHandling remains delete', async () => {
+test('query action=delete without operation still uses delete handling', async () => {
   const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
-  const data = await pattern.inject({
-    organization: 'my-org',
-    environment: 'dev',
-    runtimeGroupName: 'myrg',
-    publicKeyPem: publicPem(),
-  });
+  const data = await pattern.inject(
+    {
+      organization: 'my-org',
+      environment: 'dev',
+      runtimeGroupName: 'myrg',
+      publicKeyPem: publicPem(),
+    },
+    { action: 'delete' }
+  );
+  assert.equal(data.operation, undefined);
   assert.equal(pattern.deleteHandling(data), 'delete');
 });
 
