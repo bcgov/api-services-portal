@@ -62,7 +62,7 @@ describe('SDX E2E Tests', () => {
             updateSubsystemIntegrationClients(
               org,
               service.subsystem.name,
-              [`client-${datasetId}`],
+              [`${datasetId}`],
               () => {
                 // now create a connection between the subsystem and the service
                 // using policy SDX.R0.00, which is a simple point-to-point connection with no upgrades
@@ -81,6 +81,7 @@ describe('SDX E2E Tests', () => {
                       name: 'Janis',
                     },
                     client: {
+                      integrationId: datasetId,
                       clientId: `client-${datasetId}`,
                     },
                   },
@@ -138,6 +139,7 @@ describe('SDX E2E Tests', () => {
                     // connection is approved; the provisioner runs asynchronously
                     // and kong control plane also pushes out changes to the data planes
                     // async, so do some retries until we get a good response
+                    cy.setHeader('X-Client-Id', clientId)
                     cy.makeSDXCall({
                       method: 'GET',
                       path: `/sdx/0/${serviceId}/ping`,
@@ -166,6 +168,7 @@ describe('SDX E2E Tests', () => {
                       // connection is de-activated; the provisioner runs asynchronously
                       // and kong control plane also pushes out changes to the data planes
                       // async, so do some retries until we get a good response
+                      cy.setHeader('X-Client-Id', clientId)
                       cy.makeSDXCall({
                         method: 'GET',
                         path: `/sdx/0/${serviceId}/ping`,

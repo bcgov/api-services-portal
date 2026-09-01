@@ -4,10 +4,7 @@ const PORT = 2026;
 
 async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  const match = url.pathname.match(
-    /^\/requests\/([^/]+)\/sdx-allowed-services$/
-  );
-
+  const match = url.pathname.match(/^\/requests\/([^/]+)\/sdx-allowed-access$/);
   if (match && req.method === 'PUT') {
     const integrationId = decodeURIComponent(match[1]);
     let payload: unknown;
@@ -19,15 +16,15 @@ async function handler(req: Request): Promise<Response> {
 
     console.log(
       yaml.stringify({
-        request: `PUT /requests/${integrationId}/sdx-allowed-services`,
+        request: `PUT /requests/${integrationId}/sdx-allowed-access`,
         payload,
       })
     );
 
-    return new Response(
-      JSON.stringify({ integrationId, status: 'accepted' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ integrationId, status: 'accepted' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   return new Response('Not Found', { status: 404 });
