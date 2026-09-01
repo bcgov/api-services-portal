@@ -109,6 +109,29 @@ test('add publishes a random kid when the keyset is empty', async () => {
   assert.equal(keys[0].kid, data.changes!.added[0].kid);
 });
 
+test('rotate of an already published public key is rejected', async () => {
+  const pem = publicPem();
+  const kid =
+    'urn:ca:bc:sdx:edge:myrg:dev:11111111-1111-4111-8111-111111111111';
+  const pattern = new SDXKeysPattern(
+    memberApi(),
+    gatewayAdmin([
+      existingKey(pem, kid, 'sdx.keys.myrg.dev.edge:11111111-1111-4111-8111-111111111111'),
+    ])
+  );
+  await assert.rejects(
+    () =>
+      pattern.inject({
+        organization: 'my-org',
+        environment: 'dev',
+        runtimeGroupName: 'myrg',
+        publicKeyPem: pem,
+        operation: 'rotate',
+      }),
+    /already published/
+  );
+});
+
 test('add is idempotent for the same public key', async () => {
   const pem = publicPem();
   const kid =

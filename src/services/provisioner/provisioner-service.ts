@@ -2,8 +2,8 @@ import fetch from 'node-fetch';
 import { ConnectionRequest } from '../keystone/types';
 import { Logger } from '../../logger';
 import {
-  IssuerMisconfigDetail,
   IssuerMisconfigError,
+  issuerMisconfigFromHttpError,
 } from '../issuerMisconfigError';
 
 const logger = Logger('services.provisioner');
@@ -211,23 +211,11 @@ async function checkStatus(res: any) {
   if (res.ok) {
     return res;
   } else {
-    const error: IssuerMisconfigDetail = {
-      reason: 'provisioner_error',
-      description: '',
-      status: `${res.status} ${res.statusText}`,
-      statusCode: res.status,
-    };
     logger.error('Error - %d %s', res.status, res.statusText);
     const body = await res.text();
-
     logger.error('ERROR ' + body);
-    try {
-      const payload = JSON.parse(body);
-      error.reason = JSON.stringify(payload.details);
-      error.description = payload.title;
-    } catch (e) {
-      logger.error('Not able to parse error response (%s)', e);
-    }
-    throw new IssuerMisconfigError(error);
+    throw new IssuerMisconfigError(
+      issuerMisconfigFromHttpError(res.status, res.statusText, body)
+    );
   }
 }

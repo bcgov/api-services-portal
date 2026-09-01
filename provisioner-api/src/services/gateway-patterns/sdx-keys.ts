@@ -502,6 +502,12 @@ function applyOperation(args: {
     (key) => key.thumbprint === incoming.thumbprint
   );
 
+  if (operation === 'rotate' && duplicate) {
+    throw new UnprocessableEntityError(
+      `operation=rotate requires a new public key; this material is already published as '${duplicate.kid}'`
+    );
+  }
+
   if (operation === 'add' || operation === 'rotate') {
     if (duplicate) {
       return {
