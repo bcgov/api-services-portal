@@ -759,6 +759,7 @@ Cypress.Commands.add(
         method: options.method,
         failOnStatusCode: false,
         body: options.body,
+        headers: headers,
       })
       .then((res) => {
         if (res.body instanceof ArrayBuffer) {

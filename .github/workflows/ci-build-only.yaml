@@ -2,7 +2,7 @@ name: Build and Deploy Refactor
 
 on:
   push:
-    branches: [hotfix/*, task/*]
+    branches: [tmp/*, hotfix/*, task/*]
 
 env:
   REGISTRY: ghcr.io
