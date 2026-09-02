@@ -492,13 +492,12 @@ describe('OrgActivityService', function () {
       pattern: 'sdx-keys.r1',
       scope: 'runtime-group',
       targetName: 'my-edge-rg',
-      gatewayKeyName:
-        'sdx.keys.my-edge-rg.dev.edge:11111111-1111-4111-8111-111111111111',
+      gatewayKeyName: 'sdx.keys.my-edge-rg.dev.edge:11111111',
       operation: 'rotate',
-      addedKids: ['urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111-1111-4111-8111-111111111111'],
+      addedKids: ['urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111'],
       retainedKids: ['urn:ca:bc:sdx:edge:my-edge-rg:dev:0'],
       detail:
-        'added urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111-1111-4111-8111-111111111111; retained urn:ca:bc:sdx:edge:my-edge-rg:dev:0',
+        'added urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111; retained urn:ca:bc:sdx:edge:my-edge-rg:dev:0',
       deckBlob: 'results: creating key\n',
     });
 
@@ -508,7 +507,7 @@ describe('OrgActivityService', function () {
     const ctx = JSON.parse(call.activityContext);
     expect(ctx.params.operation).toBe('rotate');
     expect(ctx.params.addedKids).toContain(
-      'urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111-1111-4111-8111-111111111111'
+      'urn:ca:bc:sdx:edge:my-edge-rg:dev:11111111'
     );
     expect(call.message).toContain('Admin rotated sdx-keys.r1 for my-edge-rg');
   });

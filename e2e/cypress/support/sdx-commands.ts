@@ -352,6 +352,10 @@ export function runtimeGroupGatewayKeyName(
   return `sdx.keys.${runtimeGroupName}.${env}.edge:${indexOrSuffix}`
 }
 
+/** JWT kid for a newly published runtime-group (edge) key. */
+export const EDGE_KEY_KID_RE =
+  /^urn:ca:bc:sdx:edge:[a-z0-9-]+:[a-z0-9]+:[0-9a-f]{8}$/i
+
 /** Publish the compose fixture signing public key into a runtime-group keyset. */
 export function applyFixtureEdgeSigningKey(
   orgName: string,

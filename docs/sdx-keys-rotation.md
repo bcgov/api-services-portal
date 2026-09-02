@@ -34,11 +34,10 @@ When `operation` is omitted on a **runtime group**, the pattern defaults to
 Do not combine query `action=delete` with `operation`. Query `delete` wipes the
 qualifier; targeted deletion is `action=apply` with `operation=delete`.
 
-New kids for runtime groups use:
-
-```
-urn:ca:bc:sdx:edge:{runtimeGroup}:{environment}:{uuid}
-```
+New kids for runtime groups are `{urn}:{8-hex}` (first eight hex digits of a
+UUID, unique within the keyset). A caller may still supply a full
+`urn:ca:bc:sdx:edge:…` kid to address an existing key. Org and subsystem
+publishes that omit `operation` keep `{urn}:0`.
 
 The provisioner fetches the current keyset from the Kong control plane through
 GWA (`GET /v2/namespaces/{namespace}/keys`) and emits the **complete** desired
@@ -47,7 +46,7 @@ state. The apply response includes structured, non-secret `changes`:
 ```json
 {
   "operation": "rotate",
-  "added": [{ "kid": "urn:ca:bc:sdx:edge:myrg:dev:…", "name": "sdx.keys.myrg.dev.edge:…" }],
+  "added": [{ "kid": "urn:ca:bc:sdx:edge:myrg:dev:8875a149", "name": "sdx.keys.myrg.dev.edge:8875a149" }],
   "removed": [],
   "retained": [{ "kid": "urn:ca:bc:sdx:edge:myrg:dev:0", "name": "sdx.keys.myrg.dev.edge:0" }]
 }

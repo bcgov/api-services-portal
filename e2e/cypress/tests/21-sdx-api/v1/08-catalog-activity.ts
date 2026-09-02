@@ -7,6 +7,7 @@ import {
   createOASService,
   createRuntimeGroup,
   createSubsystem,
+  EDGE_KEY_KID_RE,
   orgGatewayKeyName,
   publicKeyPemA,
   publicKeyPemB,
@@ -729,6 +730,12 @@ describe('SDX Catalog Activity', () => {
         ).then(({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
           addedKid = body.changes?.added?.[0]?.kid
+          expect(addedKid, JSON.stringify(body.changes)).to.match(EDGE_KEY_KID_RE)
+          expect(body.changes.added[0].name).to.eq(
+            `sdx.keys.${runtimeGroupName}.${env}.edge:${addedKid.slice(
+              addedKid.lastIndexOf(':') + 1
+            )}`
+          )
         })
       })
     })
@@ -784,7 +791,9 @@ describe('SDX Catalog Activity', () => {
         expect(status).to.be.equal(200)
         if (body.changes) {
           expect(body.changes.operation).to.equal('rotate')
-          expect(body.changes.added.length).to.be.at.least(0)
+          expect(body.changes.added.length).to.be.at.least(1)
+          expect(body.changes.added[0].kid).to.match(EDGE_KEY_KID_RE)
+          expect(body.changes.added[0].kid).to.not.equal(addedKid)
           rotatedOldKid = body.changes.retained?.[0]?.kid || addedKid
         }
 

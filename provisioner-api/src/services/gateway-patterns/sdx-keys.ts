@@ -10,7 +10,7 @@ import {
   BadRequestError,
   UnprocessableEntityError,
 } from '../../errors/api-errors.js';
-  import {
+import {
   buildKid,
   jwkFromPublicPem,
   jwkThumbprint,
@@ -53,7 +53,7 @@ export interface SDXKeyConfig {
   operation?: SdxKeyOperation;
   /** Existing kid to replace or delete. */
   targetKid?: string;
-  /** Optional caller-supplied kid (or suffix) for add/rotate/replace. */
+  /** Optional JWT kid. New keys use `{urn}:{8-hex}`; a full URN is kept as-is. */
   kid?: string;
 }
 
@@ -120,8 +120,8 @@ export interface PatternInjectContext {
  * - Subsystem (client_id) signing keys
  *
  * When `operation` is omitted on a runtime group (and query action is not
- * `delete`), the pattern defaults to `add`: a random kid is published after
- * reading the current keyset. Org and subsystem callers that omit `operation`
+ * `delete`), the pattern defaults to `add`: a kid `{urn}:{8-hex}` is published
+ * after reading the current keyset. Org and subsystem callers that omit `operation`
  * still publish a single `:0` key (or index-based kids from `certificatePem[]`)
  * because `trust-kms` still pins `:0`. Explicit `operation` fetches the current
  * keyset and emits the complete desired state.
@@ -549,7 +549,8 @@ function applyOperation(args: {
       profileName,
       kidBase,
       incoming,
-      args.suppliedKid
+      args.suppliedKid,
+      existing
     );
     return {
       desiredKeys: [...existing.map(asDesired), newKey],
@@ -598,7 +599,8 @@ function applyOperation(args: {
     profileName,
     kidBase,
     incoming,
-    args.suppliedKid
+    args.suppliedKid,
+    existing.filter((key) => key.kid !== target.kid)
   );
   const retained = existing
     .filter((key) => key.kid !== target.kid)
@@ -618,19 +620,37 @@ function newDesiredKey(
   profileName: string,
   kidBase: string,
   incoming: IncomingKey,
-  suppliedKid?: string
+  suppliedKid: string | undefined,
+  occupied: ExistingKey[]
 ): DesiredKey {
-  const suffix = randomKeySuffix(
-    suppliedKid && !suppliedKid.startsWith('urn:') ? suppliedKid : undefined
-  );
-  const kid = suppliedKid?.startsWith('urn:')
-    ? suppliedKid
-    : buildKid(kidBase, suffix);
-  const nameSuffix = suppliedKid?.startsWith('urn:')
-    ? kidSuffix(kid, kidBase)
-    : suffix;
+  if (suppliedKid?.startsWith('urn:')) {
+    return {
+      name: `${profileName}:${kidSuffix(suppliedKid, kidBase)}`,
+      kid: suppliedKid,
+      jwk: incoming.jwk,
+      publicKeyPem: incoming.publicKeyPem,
+    };
+  }
+
+  let suffix = randomKeySuffix(suppliedKid);
+  let kid = buildKid(kidBase, suffix);
+  if (!suppliedKid) {
+    for (let attempt = 0; attempt < 16; attempt++) {
+      if (!occupied.some((key) => key.kid === kid)) {
+        break;
+      }
+      suffix = randomKeySuffix();
+      kid = buildKid(kidBase, suffix);
+    }
+    if (occupied.some((key) => key.kid === kid)) {
+      throw new UnprocessableEntityError(
+        'Unable to allocate a unique key id in this key set'
+      );
+    }
+  }
+
   return {
-    name: `${profileName}:${nameSuffix}`,
+    name: `${profileName}:${suffix}`,
     kid,
     jwk: incoming.jwk,
     publicKeyPem: incoming.publicKeyPem,

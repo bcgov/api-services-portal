@@ -70,8 +70,7 @@ function existingKey(pem: string, kid: string, name: string) {
   };
 }
 
-const KID_RE =
-  /^urn:ca:bc:sdx:edge:myrg:dev:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const KID_RE = /^urn:ca:bc:sdx:edge:myrg:dev:[0-9a-f]{8}$/i;
 
 test('omitted operation on a runtime group defaults to add', async () => {
   const pem = publicPem();
@@ -90,7 +89,10 @@ test('omitted operation on a runtime group defaults to add', async () => {
   assert.equal(data.changes?.added.length, 1);
   assert.match(data.changes!.added[0].kid, KID_RE);
   assert.equal(key.kid, data.changes!.added[0].kid);
-  assert.notEqual(key.kid, 'urn:ca:bc:sdx:edge:myrg:dev:0');
+  assert.equal(
+    key.name,
+    `sdx.keys.myrg.dev.edge:${key.kid.slice(key.kid.lastIndexOf(':') + 1)}`
+  );
 });
 
 test('omitted operation on an organization still emits :0 kid', async () => {
@@ -330,7 +332,7 @@ test('query action=delete cannot be combined with operation', async () => {
   );
 });
 
-test('supplied kid is reused', async () => {
+test('supplied URN kid is reused', async () => {
   const pem = publicPem();
   const kid = 'urn:ca:bc:sdx:edge:myrg:dev:fixed-kid';
   const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
@@ -343,6 +345,22 @@ test('supplied kid is reused', async () => {
     kid,
   });
   assert.equal(data.changes?.added[0].kid, kid);
+});
+
+test('supplied suffix is prefixed with the profile URN', async () => {
+  const pem = publicPem();
+  const suffix = '11111111';
+  const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
+  const data = await pattern.inject({
+    organization: 'my-org',
+    environment: 'dev',
+    runtimeGroupName: 'myrg',
+    publicKeyPem: pem,
+    operation: 'add',
+    kid: suffix,
+  });
+  assert.equal(data.changes?.added[0].kid, `urn:ca:bc:sdx:edge:myrg:dev:${suffix}`);
+  assert.equal(data.changes?.added[0].name, `sdx.keys.myrg.dev.edge:${suffix}`);
 });
 
 test('jwk thumbprints match equivalent PEM material', () => {

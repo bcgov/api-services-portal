@@ -67,10 +67,16 @@ export function parseJwk(
   return jwk as JsonWebKey;
 }
 
+export const KEY_SUFFIX_LENGTH = 8;
+
 export function randomKeySuffix(supplied?: string): string {
-  return supplied && supplied.length > 0 ? supplied : crypto.randomUUID();
+  if (supplied && supplied.length > 0) {
+    return supplied;
+  }
+  return crypto.randomUUID().replace(/-/g, '').slice(0, KEY_SUFFIX_LENGTH);
 }
 
+/** JWT kid: profile URN plus suffix, unless the caller already supplied a URN. */
 export function buildKid(base: string, suffix: string): string {
   if (suffix.startsWith('urn:')) {
     return suffix;
