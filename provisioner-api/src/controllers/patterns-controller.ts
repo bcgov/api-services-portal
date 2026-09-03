@@ -48,6 +48,7 @@ export class PatternsController {
       await this.services.patternsEvaluator.buildResourcesUsingPattern({
         patternName: input.pattern,
         parameters: input.parameters,
+        action: input.action,
       });
 
     const action = input.action;
@@ -59,15 +60,20 @@ export class PatternsController {
         skipped: 0,
         results: [],
         preview: resource.documents,
+        ...(resource._changes ? { changes: resource._changes } : {}),
       };
     }
 
     const resources = resource.documents as unknown as TResource[];
+    const dispatchAction =
+      resource._delete_handling === 'apply' && action === 'delete'
+        ? 'apply'
+        : action;
     const results = await this.dispatcher.dispatch(
       resource._gateway_id!,
       input.parameters['environment'] as string,
       resources,
-      action
+      dispatchAction
     );
 
     await this.logActivity(input, resource, results);
@@ -77,6 +83,7 @@ export class PatternsController {
       failed: results.filter((r) => r.status === 'failed').length,
       skipped: results.filter((r) => r.status === 'skipped').length,
       results,
+      ...(resource._changes ? { changes: resource._changes } : {}),
     };
   }
 

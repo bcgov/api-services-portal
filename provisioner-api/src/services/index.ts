@@ -54,6 +54,11 @@ export function buildServices(
   logger?: FastifyBaseLogger
 ): Services {
   const environments = loadEnvironments();
+  const gatewayAdmin = new GatewayAdminService(
+    clients.gwa,
+    environments,
+    child(logger, 'gatewayAdmin')
+  );
   return {
     activity: new ActivityService(clients.feed, child(logger, 'activity')),
     connectionStatus: new ConnectionStatusService(
@@ -66,11 +71,7 @@ export function buildServices(
       child(logger, 'directory')
     ),
     sdxMember: new SdxMemberService(clients.sdx, child(logger, 'sdxMember')),
-    gatewayAdmin: new GatewayAdminService(
-      clients.gwa,
-      environments,
-      child(logger, 'gatewayAdmin')
-    ),
+    gatewayAdmin,
     commonSso: new CommonSsoService(clients.css, child(logger, 'commonSso')),
     integrationAccess: new IntegrationAccessService(
       clients.sdx,
@@ -84,6 +85,7 @@ export function buildServices(
         clients.sdx,
         child(logger, 'integrationAccess')
       ),
+      gatewayAdmin,
       child(logger, 'patternsEvaluator')
     ),
     resourceDispatcher: new ResourceDispatcher(
@@ -97,11 +99,7 @@ export function buildServices(
           clients.sdx,
           child(logger, 'sdxMember')
         ),
-        gatewayAdmin: new GatewayAdminService(
-          clients.gwa,
-          environments,
-          child(logger, 'gatewayAdmin')
-        ),
+        gatewayAdmin,
         commonSso: new CommonSsoService(
           clients.css,
           child(logger, 'commonSso')

@@ -4,6 +4,7 @@ import type { EnvironmentsConfig } from '../config/environments.js';
 import type { TResource } from '../schemas/resources.js';
 import {
   GatewayAdminApiClient,
+  GatewayKeysResponse,
   GatewayResource,
   PublishGatewayConfigInput,
 } from '../clients/gateway-admin/index.js';
@@ -78,6 +79,23 @@ export class GatewayAdminService {
       'GatewayAdminService.getResources'
     );
     return this.api.getResources(environment, gatewayId, tag);
+  }
+
+  /**
+   * Returns Kong keys and key sets for a gateway namespace, filtered by
+   * qualifier tag and optional key-set name. Private material is excluded.
+   */
+  async getKeys(
+    gatewayId: string,
+    environment: string,
+    tag?: string,
+    keySet?: string
+  ): Promise<GatewayKeysResponse> {
+    this.logger?.debug(
+      { gatewayId, environment, tag, keySet },
+      'GatewayAdminService.getKeys'
+    );
+    return this.api.getKeys(environment, gatewayId, { tag, keySet });
   }
 
   /**

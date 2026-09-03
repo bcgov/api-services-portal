@@ -30,6 +30,36 @@ export interface GatewayResource {
   entity_name: string;
 }
 
+/** Public Kong key material. Private fields are never populated. */
+export interface GatewayKey {
+  id?: string;
+  name?: string;
+  kid?: string;
+  tags?: string[];
+  set?: { id?: string; name?: string };
+  pem?: { public_key?: string };
+  jwk?: string | Record<string, unknown>;
+}
+
+/** Kong key set without nested private material. */
+export interface GatewayKeySet {
+  id?: string;
+  name?: string;
+  tags?: string[];
+  keys?: GatewayKey[];
+}
+
+/** Response of GET /namespaces/{namespace}/keys. */
+export interface GatewayKeysResponse {
+  key_sets: GatewayKeySet[];
+  keys: GatewayKey[];
+}
+
+export interface GetGatewayKeysInput {
+  tag?: string;
+  keySet?: string;
+}
+
 export interface NamespaceAttributes {
   'perm-domains'?: string[];
 }

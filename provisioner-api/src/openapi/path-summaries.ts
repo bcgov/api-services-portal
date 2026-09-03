@@ -37,6 +37,11 @@ export const pathSummaries: Record<
     description:
       'Lists the tagged gateway entities belonging to the gateway (namespace).',
   },
+  '/gateways/{gateway}/keys': {
+    summary: 'Gateway keys and key sets',
+    description:
+      'Returns Kong keys and key sets for the gateway. Private key material is never returned.',
+  },
   '/runtime-groups/{name}/environments/{env}/csr': {
     summary: 'Runtime group CSR generation',
     description:

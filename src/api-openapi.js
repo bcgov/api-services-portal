@@ -18,7 +18,11 @@ const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
 const { UserAssertionError } = require('./services/user-assert');
-const { IssuerMisconfigError } = require('./services/issuerMisconfigError');
+const {
+  IssuerMisconfigError,
+  httpStatusForIssuerMisconfig,
+  clientMessageForIssuerMisconfig,
+} = require('./services/issuerMisconfigError');
 
 const logger = Logger('dsapi');
 
@@ -184,9 +188,9 @@ class ApiOpenapiApp {
       } else if (err instanceof IssuerMisconfigError) {
         const errmsg = JSON.parse(err.message);
         logger.warn(`Caught Misconfig Error for ${req.path}: %j`, errmsg);
-        return res.status(500).json({
+        return res.status(httpStatusForIssuerMisconfig(errmsg)).json({
           code: 'misconfig_error',
-          message: `[${errmsg?.statusCode}] ${errmsg?.reason} (${errmsg?.description})`,
+          message: clientMessageForIssuerMisconfig(errmsg),
         });
       } else if (err?.name === 'OpenAPISpecValidationError' && err?.result) {
         logger.warn(

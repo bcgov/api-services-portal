@@ -340,8 +340,65 @@ export function orgGatewayKeyName(env: string, org: { tags: string[] }): string 
   return `sdx.keys.${memberClass}.${memberId}.org.${env}:0`
 }
 
-export function subsystemGatewayKeyName(clientId: string): string {
-  return `sdx.keys.${clientId.toLowerCase()}.sys:0`
+export function subsystemGatewayKeyName(clientId: string, env = 'dev'): string {
+  return `sdx.keys.${clientId.toLowerCase()}.${env}.sys:0`
+}
+
+export function runtimeGroupGatewayKeyName(
+  runtimeGroupName: string,
+  env: string,
+  indexOrSuffix = '0'
+): string {
+  return `sdx.keys.${runtimeGroupName}.${env}.edge:${indexOrSuffix}`
+}
+
+/** JWT kid for a newly published runtime-group (edge) key. */
+export const EDGE_KEY_KID_RE =
+  /^urn:ca:bc:sdx:edge:[a-z0-9-]+:[a-z0-9]+:[0-9a-f]{8}$/i
+
+/** Publish the compose fixture signing public key into a runtime-group keyset. */
+export function applyFixtureEdgeSigningKey(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string
+) {
+  return cy.fixture('sdx-edge-signing-public.pem').then((publicKeyPem: string) => {
+    return applyRuntimeGroupPublicKeyPattern(
+      orgName,
+      runtimeGroupName,
+      environment,
+      publicKeyPem.trim(),
+      'apply',
+      { operation: 'add' }
+    ).then(({ apiRes: { status, body } }: any) => {
+      expect(status, body?.reason || body?.message).to.be.equal(200)
+    })
+  })
+}
+
+export function applyRuntimeGroupPublicKeyPattern(
+  orgName: string,
+  runtimeGroupName: string,
+  environment: string,
+  publicKeyPem: string,
+  action: 'preview' | 'apply' | 'diff' | 'delete' = 'apply',
+  extras: {
+    operation?: 'add' | 'rotate' | 'replace' | 'delete'
+    targetKid?: string
+    kid?: string
+  } = {}
+) {
+  cy.setRequestBody({
+    parameters: {
+      organization: orgName,
+      environment,
+      runtimeGroupName,
+      ...(publicKeyPem ? { publicKeyPem } : {}),
+      ...extras,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(`ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-keys.r1`, 'PUT')
 }
 
 export function registerHostOrganization(name: string, memberId: string) {

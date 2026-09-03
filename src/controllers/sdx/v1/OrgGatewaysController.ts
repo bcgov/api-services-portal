@@ -54,32 +54,6 @@ interface ValidateErrorJSON {
 
 type SdxGatewayKeyScope = 'organization' | 'subsystem' | 'runtime-group';
 
-/** Kong key tags use `type:client` for subsystem-scoped keys (see sdx-keys.r1). */
-const GATEWAY_KEY_TAG_BY_SCOPE: Record<SdxGatewayKeyScope, string> = {
-  organization: 'organization',
-  subsystem: 'client',
-  'runtime-group': 'runtime-group',
-};
-
-type GatewayKeyDocument = {
-  name: string;
-  kid?: string;
-  tags?: string[];
-  pem?: { public_key?: string };
-  jwk?: string;
-  set?: { name?: string };
-};
-
-function isGatewayKeyInScopes(
-  key: GatewayKeyDocument,
-  scopes: readonly SdxGatewayKeyScope[]
-): boolean {
-  const tags = key.tags ?? [];
-  return scopes.some((scope) =>
-    tags.includes(`type:${GATEWAY_KEY_TAG_BY_SCOPE[scope]}`)
-  );
-}
-
 @injectable()
 @Route('/organizations/{org}')
 @Tags('Gateways')
@@ -165,6 +139,10 @@ export class OrgGatewaysController extends Controller {
       let scope: SdxGatewayKeyScope | undefined;
       let targetName: string | undefined;
       let gatewayKeyName: string | undefined;
+      let operation: 'add' | 'rotate' | 'replace' | 'delete' | 'publish' | undefined;
+      let addedKids: string[] | undefined;
+      let removedKids: string[] | undefined;
+      let retainedKids: string[] | undefined;
 
       if (pattern === 'sdx-keys.r1') {
         scope = body.parameters.runtimeGroupName
@@ -175,15 +153,35 @@ export class OrgGatewaysController extends Controller {
         targetName =
           body.parameters.runtimeGroupName ?? body.parameters.clientId ?? org;
 
-        // const scopedKeys = incomingKeys.filter((key) =>
-        //   isGatewayKeyInScopes(key, [scope])
-        // );
-        // gatewayKeyName = scopedKeys[0]?.name;
+        const changes = result.changes;
+        if (changes) {
+          operation = changes.operation as typeof operation;
+          addedKids = changes.added.map((k) => k.kid);
+          removedKids = changes.removed.map((k) => k.kid);
+          retainedKids = changes.retained.map((k) => k.kid);
+          gatewayKeyName =
+            changes.added[0]?.name ??
+            changes.removed[0]?.name ??
+            changes.retained[0]?.name;
+          const parts: string[] = [];
+          if (changes.added.length) {
+            parts.push(
+              `added ${changes.added.map((k) => k.kid).join(', ')}`
+            );
+          }
+          if (changes.removed.length) {
+            parts.push(
+              `removed ${changes.removed.map((k) => k.kid).join(', ')}`
+            );
+          }
+          if (changes.retained.length) {
+            parts.push(
+              `retained ${changes.retained.map((k) => k.kid).join(', ')}`
+            );
+          }
+          detail = parts.join('; ');
+        }
 
-        // const keyVerb = removed ? 'removed' : 'published';
-        // detail = scopedKeys
-        //   .map((key) => `${keyVerb} key ${key.name}`)
-        //   .join('; ');
         if (!removed) {
           deckBlob = YAML.dump(result, { noRefs: true });
         }
@@ -200,6 +198,10 @@ export class OrgGatewaysController extends Controller {
           targetName,
           gatewayKeyName,
           deckBlob,
+          operation,
+          addedKids,
+          removedKids,
+          retainedKids,
         })
         .catch((e) =>
           logger.error('[OrgActivity] gateway pattern publish %s', e)
