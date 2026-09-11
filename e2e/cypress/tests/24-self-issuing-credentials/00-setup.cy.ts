@@ -213,7 +213,8 @@ describe('24 Self-issuing credentials — setup', () => {
       expect(apiRes.status).to.eq(200)
       const products = apiRes.body as any[]
 
-      const serviceItems: string[] = []
+      const apiKeyItems: string[] = []
+      const jwtItems: string[] = []
 
       productDefs.forEach((def) => {
         const product = products.find((p) => p.name === def.name)
@@ -232,20 +233,31 @@ describe('24 Self-issuing credentials — setup', () => {
         })
 
         envs.forEach((env) => {
-          let pluginYaml = ''
           if (def.flow === 'kong-api-key-only') {
-            pluginYaml = keyAuthPluginYaml(gatewayId)
+            apiKeyItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                keyAuthPluginYaml(gatewayId)
+              )
+            )
           } else if (def.flow === 'kong-api-key-acl') {
-            pluginYaml = keyAuthAclPluginYaml(gatewayId, env.environmentAppId)
+            apiKeyItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                keyAuthAclPluginYaml(gatewayId, env.environmentAppId)
+              )
+            )
           } else {
-            pluginYaml = jwtKeycloakPluginYaml(
-              gatewayId,
-              Cypress.env('OIDC_ISSUER')
+            jwtItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                jwtKeycloakPluginYaml(gatewayId, Cypress.env('OIDC_ISSUER'))
+              )
             )
           }
-          serviceItems.push(
-            serviceYamlItem(env.serviceName, gatewayId, pluginYaml)
-          )
         })
 
         flows[def.key] = {
@@ -258,10 +270,15 @@ describe('24 Self-issuing credentials — setup', () => {
         }
       })
 
-      const fixturePath = `${SUITE_FIXTURE_DIR}/gateway-services-${suffix}.yml`
+      const apiKeyPath = `${SUITE_FIXTURE_DIR}/gateway-services-apikey-${suffix}.yml`
+      const jwtPath = `${SUITE_FIXTURE_DIR}/gateway-services-jwt-${suffix}.yml`
       cy.writeFile(
-        `cypress/fixtures/${fixturePath}`,
-        buildServicesYaml(serviceItems)
+        `cypress/fixtures/${apiKeyPath}`,
+        buildServicesYaml(apiKeyItems)
+      )
+      cy.writeFile(
+        `cypress/fixtures/${jwtPath}`,
+        buildServicesYaml(jwtItems)
       ).then(() => {
         cy.request({
           method: 'POST',
@@ -275,11 +292,10 @@ describe('24 Self-issuing credentials — setup', () => {
           },
         }).then((tokenRes) => {
           expect(tokenRes.status).to.eq(200)
-          publishConfigWithToken(
-            gatewayId,
-            tokenRes.body.access_token,
-            fixturePath
-          )
+          publishConfigWithToken(gatewayId, tokenRes.body.access_token, [
+            apiKeyPath,
+            jwtPath,
+          ])
 
           // Issuance does not require portal env activation or service linkage;
           // Kong plugins published above are enough for upstream checks.

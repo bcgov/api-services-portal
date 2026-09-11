@@ -13,10 +13,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const contentDirectory = join(process.cwd(), 'nextapp', '_content');
 
   try {
-    const content = await fs.readFile(
+    const fileContent = await fs.readFile(
       join(contentDirectory, `${slug}.md`),
       'utf8'
     );
+    const currentYear = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Vancouver',
+      year: 'numeric',
+    }).format(new Date());
+    const content = fileContent.replace(/\{\{YEAR\}\}/g, currentYear);
 
     return {
       props: {
