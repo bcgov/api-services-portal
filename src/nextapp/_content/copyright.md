@@ -2,7 +2,7 @@
 
 The following policy governs the operation and management of the government's main website and all websites of ministries, and agencies reporting to ministries.
 
-Copyright © 2021, Province of British Columbia.
+Copyright © {{YEAR}}, Province of British Columbia.
 
 All rights reserved.
 
@@ -25,5 +25,3 @@ For the reproduction of materials found in the [BC Data Catalogue](http://catalo
 For more information, please read the [Frequently Asked Questions](https://www2.gov.bc.ca/gov/content/governments/services-for-government/policies-procedures/intellectual-property/frequently-asked-questions) or contact the [Intellectual Property Program](https://www2.gov.bc.ca/gov/content/governments/services-for-government/policies-procedures/intellectual-property/intellectual-property-program/intellectual-property-disposals).
 
 e-mail: QPIPPCopyright@gov.bc.ca
-
-phone: 250-216-8935
