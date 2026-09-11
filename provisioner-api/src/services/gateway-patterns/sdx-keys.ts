@@ -15,7 +15,6 @@ import {
   jwkFromPublicPem,
   jwkThumbprint,
   kidSuffix,
-  parseJwk,
   randomKeySuffix,
   type JsonWebKey,
 } from './sdx-keys-crypto.js';
@@ -355,9 +354,7 @@ export class SDXKeysPattern implements PatternProcessor {
       keySetName
     );
 
-    return (response.keys ?? [])
-      .map((key) => toExistingKey(key))
-      .filter((key): key is ExistingKey => key !== undefined);
+    return (response.keys ?? []).map((key) => toExistingKey(key));
   }
 }
 
@@ -444,30 +441,57 @@ function parseIncomingKey(inputs: SDXKeyConfig): IncomingKey | undefined {
   return undefined;
 }
 
-function toExistingKey(key: GatewayKey): ExistingKey | undefined {
-  const kid = key.kid;
-  const name = key.name;
-  if (!kid || !name) {
+function describeGatewayKey(key: GatewayKey): string {
+  const parts: string[] = [];
+  if (key.name) parts.push(`name='${key.name}'`);
+  if (key.kid) parts.push(`kid='${key.kid}'`);
+  if (key.id) parts.push(`id='${key.id}'`);
+  return parts.length > 0 ? parts.join(' ') : 'without name or kid';
+}
+
+function parseExistingJwk(key: GatewayKey): JsonWebKey | undefined {
+  if (key.jwk === undefined || key.jwk === null || key.jwk === '') {
     return undefined;
   }
+  if (typeof key.jwk === 'string') {
+    try {
+      return JSON.parse(key.jwk) as JsonWebKey;
+    } catch {
+      throw new UnprocessableEntityError(
+        `Existing gateway key ${describeGatewayKey(key)} has a malformed JWK and cannot be reconstructed`
+      );
+    }
+  }
+  return key.jwk as JsonWebKey;
+}
 
-  const jwk = parseJwk(key.jwk);
+function toExistingKey(key: GatewayKey): ExistingKey {
+  const identity = describeGatewayKey(key);
+  if (!key.kid || !key.name) {
+    throw new UnprocessableEntityError(
+      `Existing gateway key ${identity} is missing name or kid and cannot be included in the desired keyset`
+    );
+  }
+
+  const jwk = parseExistingJwk(key);
   const publicKeyPem = key.pem?.public_key;
-  let thumbprint: string | undefined;
   try {
+    let thumbprint: string | undefined;
     if (jwk) {
       thumbprint = jwkThumbprint(jwk);
     } else if (publicKeyPem) {
       thumbprint = jwkThumbprint(jwkFromPublicPem(publicKeyPem));
     }
-  } catch {
-    return undefined;
+    if (!thumbprint) {
+      throw new Error('no usable JWK or PEM public key');
+    }
+    return { name: key.name, kid: key.kid, thumbprint, jwk, publicKeyPem };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    throw new UnprocessableEntityError(
+      `Existing gateway key ${identity} cannot be reconstructed: ${reason}`
+    );
   }
-  if (!thumbprint) {
-    return undefined;
-  }
-
-  return { name, kid, thumbprint, jwk, publicKeyPem };
 }
 
 function applyOperation(args: {

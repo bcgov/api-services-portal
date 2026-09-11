@@ -74,27 +74,33 @@ updated plugin image **before** applying those pattern changes.
 
 1. Create a one-time CA token:
    `POST /organizations/{org}/runtime-groups/{name}/environments/{env}/tokens`
-2. Bootstrap / stage a **new** runtime-group key and CSR without restarting
-   Kong yet (`bootstrap.stageSecret=true`, which writes
-   `{release}-client-next` and skips `rollout restart`).
-3. Sign the CSR with the one-time token.
-4. Publish the new public key while retaining the old one:
+2. Stage a **new** runtime-group key without restarting Kong
+   (`bootstrap.stageSecret=true`). The chart Job generates the key and CSR,
+   signs with the one-time token (`step ca sign`), and stores only `tls.crt`
+   and `tls.key` on `{release}-client-next`.
+3. Extract `tls.crt` from that Secret and publish it as `certificatePem`
+   while retaining the old key:
+
+   ```
+   kubectl get secret ${RELEASE}-client-next \
+     -o jsonpath='{.data.tls\.crt}' | base64 -d
+   ```
 
    ```
    PUT .../patterns/sdx-keys.r1?action=apply
    { "parameters": { "runtimeGroupName", "environment", "operation": "rotate", "certificatePem": ["..."], "caCerts": "..." } }
    ```
 
-5. Verify the JWKS at
+4. Verify the JWKS at
    `{operator_edge_url}keysets/sdx.edge.{rg}.{env}/.well-known/jwks.json`
    contains **both** kids.
-6. Promote the staged secret to the live client/server secrets and perform a
+5. Promote the staged secret to the live client/server secrets and perform a
    rolling restart (`rotation.promote=true` on the sdx-edge chart).
-7. Verify a signed `X-Edge-Token` now carries the new random `kid`, matching
+6. Verify a signed `X-Edge-Token` now carries the new random `kid`, matching
    the mounted private key.
-8. Wait through the verifier grace period (`iss_key_grace_period`, default
+7. Wait through the verifier grace period (`iss_key_grace_period`, default
    300s on `trust-verify-signature`).
-9. Remove the old kid:
+8. Remove the old kid:
 
    ```
    PUT .../patterns/sdx-keys.r1?action=apply

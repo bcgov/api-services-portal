@@ -416,6 +416,108 @@ test('certificatePem add uses the certificate public key', async () => {
   }
 });
 
+function rotateWithExisting(keys: any[]) {
+  return new SDXKeysPattern(memberApi(), gatewayAdmin(keys)).inject({
+    organization: 'my-org',
+    environment: 'dev',
+    runtimeGroupName: 'myrg',
+    publicKeyPem: publicPem(),
+    operation: 'rotate',
+  });
+}
+
+test('rejects an existing key missing name or kid', async () => {
+  const pem = publicPem();
+  const good = existingKey(
+    pem,
+    'urn:ca:bc:sdx:edge:myrg:dev:good',
+    'sdx.keys.myrg.dev.edge:good'
+  );
+  await assert.rejects(
+    () => rotateWithExisting([{ ...good, kid: undefined }]),
+    /missing name or kid/
+  );
+  await assert.rejects(
+    () => rotateWithExisting([{ ...good, name: undefined }]),
+    /missing name or kid/
+  );
+});
+
+test('rejects an existing key with a malformed JWK', async () => {
+  const pem = publicPem();
+  await assert.rejects(
+    () =>
+      rotateWithExisting([
+        {
+          name: 'sdx.keys.myrg.dev.edge:bad',
+          kid: 'urn:ca:bc:sdx:edge:myrg:dev:bad',
+          jwk: '{not-json',
+          pem: { public_key: pem },
+        },
+      ]),
+    /malformed JWK/
+  );
+});
+
+test('rejects an existing key with an unsupported JWK type', async () => {
+  await assert.rejects(
+    () =>
+      rotateWithExisting([
+        {
+          name: 'sdx.keys.myrg.dev.edge:oct',
+          kid: 'urn:ca:bc:sdx:edge:myrg:dev:oct',
+          jwk: JSON.stringify({ kty: 'oct', k: 'YWJj' }),
+        },
+      ]),
+    /cannot be reconstructed/
+  );
+});
+
+test('rejects an existing key with unusable PEM and no JWK', async () => {
+  await assert.rejects(
+    () =>
+      rotateWithExisting([
+        {
+          name: 'sdx.keys.myrg.dev.edge:pem',
+          kid: 'urn:ca:bc:sdx:edge:myrg:dev:pem',
+          pem: { public_key: 'not-a-pem-key' },
+        },
+      ]),
+    /cannot be reconstructed/
+  );
+});
+
+test('rejects when any existing key in a mixed set cannot be reconstructed', async () => {
+  const goodPem = publicPem();
+  const good = existingKey(
+    goodPem,
+    'urn:ca:bc:sdx:edge:myrg:dev:0',
+    'sdx.keys.myrg.dev.edge:0'
+  );
+  await assert.rejects(
+    () =>
+      rotateWithExisting([
+        good,
+        { name: 'sdx.keys.myrg.dev.edge:drop', kid: 'urn:ca:bc:sdx:edge:myrg:dev:drop' },
+      ]),
+    /cannot be reconstructed/
+  );
+});
+
+test('reconstructs an existing key from PEM when JWK is absent', async () => {
+  const oldPem = publicPem();
+  const oldKid = 'urn:ca:bc:sdx:edge:myrg:dev:0';
+  const data = await rotateWithExisting([
+    {
+      name: 'sdx.keys.myrg.dev.edge:0',
+      kid: oldKid,
+      pem: { public_key: oldPem },
+    },
+  ]);
+  assert.equal(data.desiredKeys?.length, 2);
+  assert.equal(data.changes?.retained[0].kid, oldKid);
+});
+
 test('query action=delete without operation still uses delete handling', async () => {
   const pattern = new SDXKeysPattern(memberApi(), gatewayAdmin());
   const data = await pattern.inject(
