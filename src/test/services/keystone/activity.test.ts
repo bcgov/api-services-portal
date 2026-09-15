@@ -186,6 +186,18 @@ describe('getOrgActivity', function () {
     });
   });
 
+  it('includes runtime-group key lifecycle in the public catalog filter', function () {
+    expect(PUBLIC_ORG_ACTIVITY).toEqual(
+      expect.arrayContaining([
+        { action: 'published', type: 'RuntimeGroupKey' },
+        { action: 'added', type: 'RuntimeGroupKey' },
+        { action: 'rotated', type: 'RuntimeGroupKey' },
+        { action: 'replaced', type: 'RuntimeGroupKey' },
+        { action: 'removed', type: 'RuntimeGroupKey' },
+      ])
+    );
+  });
+
   it('does not add public filter when publicOnly is false', async function () {
     const ctx = mockOrgActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health', 20, 0, false);

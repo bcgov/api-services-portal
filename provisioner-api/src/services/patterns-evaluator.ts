@@ -9,6 +9,7 @@ import { SDXP2PConsumerAccessPattern } from './gateway-patterns/sdx-p2p-consumer
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
+import type { KeySetChanges } from './gateway-patterns/sdx-keys.js';
 import { SDXServicePattern } from './gateway-patterns/sdx-service.js';
 import { SDXServiceOpsPattern } from './gateway-patterns/sdx-service-ops.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
@@ -18,11 +19,13 @@ import { PolicyService } from './policy-service.js';
 import { loadEnvironments } from '../config/environments.js';
 import { SDXSubsystemPattern } from './gateway-patterns/sdx-subsystem.js';
 import { IntegrationAccessService } from './integration-access-service.js';
+import type { GatewayAdminService } from './gateway-admin-service.js';
 
 export interface PatternOutput {
   documents: any[];
   _delete_handling?: 'delete' | 'apply';
   _gateway_id?: string;
+  _changes?: KeySetChanges;
 }
 
 /**
@@ -35,13 +38,14 @@ export interface PatternProcessor {
   id: () => string;
   requiredParams: () => string[];
   eval: (inputs: any, data?: any) => any[];
-  inject?: (inputs: any) => Promise<any>;
+  inject?: (inputs: any, ctx?: { action?: string }) => Promise<any>;
   deleteHandling: (data?: any) => 'delete' | 'apply';
 }
 
 export interface GatewayPatternConfig {
   patternName: string;
   parameters: Record<string, any>;
+  action?: 'preview' | 'apply' | 'diff' | 'delete';
 }
 
 /**
@@ -55,10 +59,11 @@ export class PatternsEvaluatorService {
     private readonly policyService: PolicyService,
     sdx: SdxMemberApiClient,
     integrationAccessService: IntegrationAccessService,
+    gatewayAdmin?: GatewayAdminService,
     private readonly logger?: FastifyBaseLogger
   ) {
     this.patterns = {
-      [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, logger),
+      [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, gatewayAdmin, logger),
       [SDXP2PConsumerAccessPattern.ID]: new SDXP2PConsumerAccessPattern(
         sdx,
         integrationAccessService,
@@ -161,6 +166,7 @@ export class PatternsEvaluatorService {
           },
           ...gatewayPatterns[patternName],
         },
+        action,
       });
       results.push(patternResult);
     }
@@ -176,6 +182,7 @@ export class PatternsEvaluatorService {
   async buildResourcesUsingPattern({
     patternName,
     parameters,
+    action,
   }: GatewayPatternConfig): Promise<PatternOutput> {
     const pattern = this.patterns[patternName];
     if (!pattern) {
@@ -185,12 +192,13 @@ export class PatternsEvaluatorService {
     this.expectRequiredParams(parameters, pattern.requiredParams());
 
     if (pattern.inject) {
-      const data = await pattern.inject(parameters);
+      const data = await pattern.inject(parameters, { action });
       this.logger?.info('Pattern inject data for %s: %j', patternName, data);
       return {
         _gateway_id: data.gatewayId,
         _delete_handling: pattern.deleteHandling(data),
         documents: pattern.eval(parameters, data),
+        _changes: data.changes,
       };
     }
 

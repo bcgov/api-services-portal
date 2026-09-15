@@ -16,7 +16,11 @@
 #   sdx-edge-signing-cert/tls.*  - signing cert (KONG_SIGNING_CERT)
 #   kong-nginx-proxy-include/config - nginx proxy include snippet
 #
-# Idempotent: if the certs already exist on the volume, generation is skipped.
+# The signing cert is a committed RSA fixture (local/kong/sdx-edge-signing-cert)
+# so e2e can publish the matching public key into sdx.edge.rg0.dev.
+#
+# Cluster certs are idempotent: if they already exist on the volume, generation
+# is skipped. The signing fixture is always (re)installed.
 set -e
 
 CERT_DIR="${CERT_DIR:-/certs}"
@@ -24,11 +28,25 @@ DAYS="${DAYS:-3650}"
 # CN of the control-plane cert. Data planes must use this as
 # KONG_CLUSTER_SERVER_NAME and connect to it via KONG_CLUSTER_CONTROL_PLANE.
 CONTROL_PLANE_HOST="${CONTROL_PLANE_HOST:-kong-sdx-control}"
+SIGNING_FIXTURE="${SIGNING_FIXTURE:-/gen/sdx-edge-signing-cert}"
+
+install_signing_cert() {
+  if [ ! -f "$SIGNING_FIXTURE/tls.crt" ] || [ ! -f "$SIGNING_FIXTURE/tls.key" ]; then
+    echo "[tls-cert-gen] missing signing fixture at $SIGNING_FIXTURE" >&2
+    exit 1
+  fi
+  echo "[tls-cert-gen] installing fixture signing cert into sdx-edge-signing-cert ..."
+  mkdir -p "$CERT_DIR/sdx-edge-signing-cert"
+  cp -p "$SIGNING_FIXTURE/tls.crt" "$SIGNING_FIXTURE/tls.key" \
+    "$CERT_DIR/sdx-edge-signing-cert/"
+}
 
 if [ -f "$CERT_DIR/ca/ca.crt" ] && \
    [ -f "$CERT_DIR/sdx-edge-cluster-cert/tls.crt" ] && \
    [ -f "$CERT_DIR/sdx-edge-rg0/tls.crt" ]; then
-  echo "[tls-cert-gen] certs already present on tls-certs volume; skipping."
+  echo "[tls-cert-gen] cluster certs already present on tls-certs volume; skipping generation."
+  install_signing_cert
+  chmod -R a+rX "$CERT_DIR"
   exit 0
 fi
 
@@ -71,10 +89,9 @@ gen_pair "sdx-edge-rg0" "sdx-edge-rg0"
 # gen_pair "sdx-edge-signing-cert" "sdx-edge-signing"
 
 gen_pair "sdx-edge-server-cert" "rg0.dev.servers.sdx"
-mkdir "$CERT_DIR/sdx-edge-client-cert"
-mkdir "$CERT_DIR/sdx-edge-signing-cert"
-cp -p $CERT_DIR/sdx-edge-server-cert/* "$CERT_DIR/sdx-edge-client-cert/."
-cp -p $CERT_DIR/sdx-edge-server-cert/* "$CERT_DIR/sdx-edge-signing-cert/."
+mkdir -p "$CERT_DIR/sdx-edge-client-cert"
+cp -p "$CERT_DIR/sdx-edge-server-cert/"* "$CERT_DIR/sdx-edge-client-cert/."
+install_signing_cert
 
 
 # CA copies at the paths sdx.Dockerfile expects by default.

@@ -80,12 +80,11 @@ describe('SDX Organization Signing', () => {
         environment: 'cyp',
       })
       cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
-        ({ apiRes: { status, body, headers } }: any) => {
-          expect(status).to.be.equal(500)
+        ({ apiRes: { status, body } }: any) => {
+          expect(status, JSON.stringify(body)).to.be.equal(400)
+          expect(body.code).to.eq('misconfig_error')
           expect(body.message).to.include('[400]')
-          // expect(body.fields.environment.message).to.be.equal(
-          //   'Runtime Group not found for the specified environment'
-          // )
+          expect(body.message).to.match(/Runtime Group BLAH not found/i)
         }
       )
     })

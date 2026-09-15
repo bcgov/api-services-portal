@@ -14,7 +14,8 @@
     "spec:yaml": "tsx src/print-spec.ts --yaml --out openapi.yaml",
     "spec:json": "tsx src/print-spec.ts --out openapi.json",
     "lint:spec": "npm run --silent spec:yaml && spectral lint --ruleset ../.spectral.yaml --fail-severity=warn openapi.yaml",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/services/gateway-patterns/sdx-keys.test.ts && tsx src/config/environments.test.ts"
   },
   "dependencies": {
     "@cedar-policy/cedar-wasm": "^4.11.0",
