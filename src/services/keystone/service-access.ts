@@ -24,6 +24,10 @@ export async function lookupCredentialReferenceByServiceAccess(
                             name
                             additionalDetailsToRequest
                             flow
+                            product {
+                                name
+                                namespace
+                            }
                             credentialIssuer {
                                 id
                                 clientAuthenticator
@@ -87,6 +91,7 @@ export async function lookupServiceAccessByName(
                             appId
                             flow
                             product {
+                              name
                               namespace
                             }
                             credentialIssuer {
