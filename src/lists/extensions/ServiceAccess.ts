@@ -17,6 +17,13 @@ import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
 import { strict as assert } from 'assert';
 import { UpdateCredentials } from '../../services/workflow';
+import { Logger } from '../../logger';
+import {
+  credentialActivityData,
+  StructuredActivityService,
+} from '../../services/workflow/namespace-activity';
+
+const logger = Logger('gql.ServiceAccess');
 
 const typeCredentialReferenceUpdateInput = `
 input CredentialReferenceUpdateInput {
@@ -92,6 +99,8 @@ module.exports = {
                   apiKey: newApiKey.apiKey.apiKey,
                 } as NewCredential;
 
+                await recordRegeneratedCredential(context, serviceAccess, clientId);
+
                 return {
                   credential: JSON.stringify(newCredential),
                 };
@@ -154,6 +163,17 @@ module.exports = {
                   newCredential['clientPublicKey'] = publicKey;
                 }
 
+                if (
+                  clientAuthenticator === 'client-secret' ||
+                  clientAuthenticator === 'client-jwt'
+                ) {
+                  await recordRegeneratedCredential(
+                    context,
+                    serviceAccess,
+                    serviceAccess.consumer.customId
+                  );
+                }
+
                 return {
                   credential: JSON.stringify(newCredential),
                 };
@@ -168,3 +188,36 @@ module.exports = {
     },
   ],
 };
+
+async function recordRegeneratedCredential(
+  context: any,
+  serviceAccess: any,
+  clientId: string
+) {
+  const gatewayId = serviceAccess.productEnvironment?.product?.namespace;
+  // Developers can regenerate their own credential, and Activity create is
+  // limited to gateway managers. sudo() keeps authedItem, so the actor stays
+  // the portal user while the write is allowed.
+  const writeContext =
+    typeof context.sudo === 'function' ? context.sudo() : context;
+  try {
+    await new StructuredActivityService(
+      writeContext,
+      gatewayId
+    ).logRegenerateCredential(
+      true,
+      credentialActivityData({
+        clientId,
+        application: serviceAccess.application,
+        product: serviceAccess.productEnvironment?.product,
+        environment: serviceAccess.productEnvironment,
+      })
+    );
+  } catch (error) {
+    logger.error(
+      '[regenerateCredentials] Failed to record activity for %s: %s',
+      clientId,
+      error
+    );
+  }
+}
