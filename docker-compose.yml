@@ -88,6 +88,8 @@ services:
         - npm_token
     env_file:
       - .env.local
+    environment:
+      SDX_UI_URL: http://sdx-ui.localtest.me:5500
     ports:
       - 3000:3000
     networks:
@@ -395,6 +397,31 @@ services:
     volumes:
       - tls-certs:/etc/secrets:ro
     restart: on-failure:5
+
+  sdx-ui:
+    image: ghcr.io/bcgov/aps-devops/sdx-ui:${SDX_UI_TAG:-feature-sdxui-ape}
+    container_name: sdx-ui
+    depends_on:
+      - apsportal
+      - keycloak
+      - oauth2-proxy
+    environment:
+      PORT: '5500'
+      SDX_API_BASE: http://oauth2proxy.localtest.me:4180/ds/api/sdx/v1/catalog
+      SDX_API_ROOT: http://oauth2proxy.localtest.me:4180/ds/api/sdx/v1
+      OIDC_ISSUER: http://keycloak.localtest.me:9081/auth/realms/master
+      OIDC_CLIENT_ID: aps-portal
+      OIDC_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+      OIDC_REDIRECT_URI: http://sdx-ui.localtest.me:5500/auth/callback
+      SESSION_SECRET: local-sdx-ui-session
+    volumes:
+      - ./local/sdx-ui/config.yaml:/app/config.yaml:ro
+    ports:
+      - '5500:5500'
+    networks:
+      aps-net:
+        aliases:
+          - sdx-ui.localtest.me
 
   oas-validation-api:
     image: ${OAS_VALIDATION_API_IMAGE:-ghcr.io/bcgov/gwa-api/gwa-csit-oas-validation-api:dev}

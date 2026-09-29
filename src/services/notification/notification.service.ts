@@ -11,13 +11,25 @@ import { ConfigService } from '../config.service';
 
 const isEmpty = (str: string) => !str?.length;
 
+const escapeHtml = (value: string | number | boolean) =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
 export class NotificationService {
   private notifyConfig: NotificationConfig;
   constructor(private readonly config: ConfigService) {
     this.notifyConfig = this.config.getConfig().notification;
   }
 
-  private templateToContent(to: User, templateName: string) {
+  private templateToContent(
+    to: User,
+    templateName: string,
+    context: EmailNotification['context'] = {}
+  ) {
     const { logger } = this;
     const name = isEmpty(to.name) ? 'Portal User' : to.name;
 
@@ -26,7 +38,11 @@ export class NotificationService {
       path.resolve(__dirname, `templates/${templateName}.html`),
       'utf8'
     );
-    return template.replace('{{name}}', name);
+    return Object.entries({ name, ...context }).reduce(
+      (content, [key, value]) =>
+        content.split(`{{${key}}}`).join(escapeHtml(value)),
+      template
+    );
   }
 
   public async notify(user: User, email: EmailNotification) {
@@ -37,7 +53,11 @@ export class NotificationService {
       }
 
       //we don't notify the active user at all as they made the change
-      var emailContent = this.templateToContent(user, email.template);
+      var emailContent = this.templateToContent(
+        user,
+        email.template,
+        email.context
+      );
 
       var transportOpts = {
         host: this.notifyConfig.host,

@@ -98,8 +98,12 @@ export class OrgConnectionController extends Controller {
       serviceId: input.serviceId,
       isApproved: input.isApproved,
     };
-    if (input.isActive !== null) {
+    if (input.isActive != null) {
       data['isActive'] = input.isActive;
+    } else if (input.isApproved === false) {
+      // A rejected request must leave the pending/active state so the
+      // lifecycle transition can be persisted and distinguished from re-approval.
+      data['isActive'] = false;
     }
 
     return new ConnectionService().upsertConnection(ctx, org, data);

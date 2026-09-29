@@ -12,6 +12,9 @@ const { OpenAPISpecService } = require('../services/batch/oas-service');
 const {
   ProvisionerService,
 } = require('../services/provisioner/provisioner-service');
+const {
+  ConnectionRequestNotificationService,
+} = require('../services/notification/connection-request-notification.service');
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -184,7 +187,13 @@ module.exports = {
       }
     },
 
-    afterChange: async function ({ operation, originalInput, updatedItem }) {
+    afterChange: async function ({
+      operation,
+      existingItem,
+      originalInput,
+      updatedItem,
+      context,
+    }) {
       logger.debug(
         'After change hook for ConnectionRequest: operation=%s, updatedItem=%j',
         operation,
@@ -203,6 +212,17 @@ module.exports = {
         updatedItem,
         updatedItem.isActive ? 'apply' : 'delete'
       );
+
+      const notificationContext = context.createContext({
+        skipAccessControl: true,
+      });
+      await new ConnectionRequestNotificationService().notifyChange({
+        context: notificationContext,
+        operation,
+        existingItem,
+        originalInput,
+        updatedItem,
+      });
     },
   },
 };
