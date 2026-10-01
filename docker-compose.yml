@@ -414,6 +414,7 @@ services:
       SESSION_SECRET: local-sdx-ui-session
     volumes:
       - ./local/sdx-ui/config.yaml:/app/config.yaml:ro
+    restart: on-failure:5
     ports:
       - '5500:5500'
     networks:
