@@ -1,6 +1,23 @@
+jest.mock('../../services/keystone', () => ({
+  lookupProductEnvironmentServicesBySlug: jest.fn(),
+  lookupUsersByNamespace: jest.fn(),
+}));
+jest.mock('../../services/workflow/get-namespaces', () => ({
+  getEnvironmentContext: jest.fn(),
+}));
+jest.mock('../../services/org-groups/org-group-service', () => ({
+  OrgGroupService: jest.fn(),
+}));
+
+const {
+  lookupProductEnvironmentServicesBySlug,
+} = require('../../services/keystone');
+const { getEnvironmentContext } = require('../../services/workflow/get-namespaces');
+const { OrgGroupService } = require('../../services/org-groups/org-group-service');
 const {
   ConnectionRequestNotificationService,
   getConnectionNotificationEvent,
+  listSubsystemAccessManagers,
 } = require('../../services/notification/connection-request-notification.service');
 const {
   NotificationService,
@@ -64,6 +81,8 @@ describe('ConnectionRequestNotificationService', () => {
       { ...connection, isActive: false },
       { isActive: false },
     ],
+    [undefined, 'update', undefined, connection, {}],
+    [undefined, 'unknown', connection, connection, {}],
     // An approved connection was announced when it was deactivated
     [
       undefined,
@@ -397,6 +416,191 @@ describe('ConnectionRequestNotificationService', () => {
     );
   });
 
+  describe('requester and link edge cases', () => {
+    const newService = (overrides = {}) => {
+      const notify = jest.fn().mockResolvedValue(undefined);
+      const findService = jest.fn().mockResolvedValue({
+        namespace: 'service-gateway',
+        organization: { name: 'ministry-of-citz' },
+        subsystem: { clientId: 'LAB.MIN.CLIENT' },
+      });
+      const findAccessManagers = jest
+        .fn()
+        .mockResolvedValue([{ name: 'Manager', email: 'manager@example.com' }]);
+      const findRoleAccessManagers = jest.fn().mockResolvedValue([]);
+      const service = new ConnectionRequestNotificationService(
+        { notify },
+        overrides.findService || findService,
+        findAccessManagers,
+        findRoleAccessManagers,
+        overrides.findClient || findClient
+      );
+      return { service, notify, findRoleAccessManagers };
+    };
+
+    const created = (requesterDetails) => ({
+      context: {},
+      operation: 'create',
+      updatedItem: { ...connection, requesterDetails },
+    });
+
+    it('shows the requester as not specified when details are invalid JSON', async () => {
+      const { service, notify } = newService();
+
+      await service.notifyChange(created('not json'));
+
+      expect(notify).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          context: expect.objectContaining({
+            requestedBy: 'Not specified',
+            hasCssDetails: false,
+            cssClientId: 'Not specified',
+          }),
+        })
+      );
+    });
+
+    it('uses requesterEmail when there is no requester', async () => {
+      const { service, notify } = newService();
+
+      await service.notifyChange(
+        created(JSON.stringify({ requesterEmail: 'only@example.com' }))
+      );
+
+      expect(notify).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          context: expect.objectContaining({ requestedBy: 'only@example.com' }),
+        })
+      );
+    });
+
+    it('uses a requester string that is an email address as the email', async () => {
+      const { service, notify } = newService();
+
+      await service.notifyChange(
+        created(JSON.stringify({ requester: 'string@example.com' }))
+      );
+
+      expect(notify).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          context: expect.objectContaining({
+            requestedBy: 'string@example.com',
+          }),
+        })
+      );
+    });
+
+    it('does not link to an organization when the SDX UI url is not set', async () => {
+      delete process.env.SDX_UI_URL;
+      const { service, notify } = newService();
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(notify).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          context: expect.objectContaining({
+            connectionsUrl: '',
+            brochureUrl: '',
+          }),
+        })
+      );
+    });
+
+    it('links without an organization when the client cannot be found', async () => {
+      const { service, notify } = newService({
+        findClient: jest.fn().mockRejectedValue(new Error('Subsystem not found')),
+      });
+
+      await service.notifyChange({
+        context: {},
+        operation: 'update',
+        existingItem: connection,
+        updatedItem: { ...connection, isApproved: true },
+      });
+
+      expect(notify).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'requester@example.com' }),
+        expect.objectContaining({
+          context: expect.objectContaining({
+            connectionsUrl: 'http://sdx-ui.example.com/connections',
+          }),
+        })
+      );
+    });
+
+    it('does not notify access managers when the service has no namespace', async () => {
+      const { service, notify } = newService({
+        findService: jest.fn().mockResolvedValue({}),
+      });
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(notify).not.toHaveBeenCalled();
+    });
+
+    it('resolves the subsystem client id when the service subsystem has none', async () => {
+      const subsystem = {
+        name: 'SUBSYS',
+        namespace: 'gw',
+        privacyZone: 'citizen',
+        integrations: [],
+        organization: {
+          name: 'org',
+          title: 'Org',
+          description: 'd',
+          tags: JSON.stringify(['member_class:LAB', 'member_id:MIN']),
+        },
+      };
+      const { service, findRoleAccessManagers } = newService({
+        findService: jest.fn().mockResolvedValue({ namespace: 'gw', subsystem }),
+      });
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(findRoleAccessManagers).toHaveBeenCalledWith({}, 'LAB.MIN.SUBSYS');
+    });
+
+    it('skips role access managers when the service has no subsystem', async () => {
+      const { service, findRoleAccessManagers } = newService({
+        findService: jest.fn().mockResolvedValue({ namespace: 'gw' }),
+      });
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(findRoleAccessManagers).toHaveBeenCalledWith({}, undefined);
+    });
+
+    it('continues without role access managers when the subsystem client id cannot be resolved', async () => {
+      const { service, notify, findRoleAccessManagers } = newService({
+        findService: jest.fn().mockResolvedValue({
+          namespace: 'gw',
+          subsystem: { name: 'broken' },
+        }),
+      });
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(findRoleAccessManagers).toHaveBeenCalledWith({}, undefined);
+      expect(notify).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'manager@example.com' }),
+        expect.anything()
+      );
+    });
+
+    it('does not throw when sending the notification fails', async () => {
+      const { service, notify } = newService();
+      notify.mockRejectedValue(new Error('smtp down'));
+
+      await expect(
+        service.notifyChange(created(connection.requesterDetails))
+      ).resolves.toBeUndefined();
+    });
+  });
+
   it('does not notify for an unrelated update', async () => {
     const notify = jest.fn().mockResolvedValue(undefined);
     const service = new ConnectionRequestNotificationService({ notify });
@@ -409,5 +613,67 @@ describe('ConnectionRequestNotificationService', () => {
     });
 
     expect(notify).not.toHaveBeenCalled();
+  });
+});
+
+describe('listSubsystemAccessManagers', () => {
+  const context = {
+    createContext: jest.fn().mockReturnValue({ noauth: true }),
+  };
+  let login, backfillGroups, listMembersForLeafOnly;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    context.createContext.mockReturnValue({ noauth: true });
+    lookupProductEnvironmentServicesBySlug.mockResolvedValue({ id: 'env-1' });
+    getEnvironmentContext.mockResolvedValue({
+      uma2: { issuer: 'http://keycloak/realms/master' },
+      issuerEnvConfig: { clientId: 'gwa', clientSecret: 'secret' },
+    });
+    login = jest.fn().mockResolvedValue(undefined);
+    backfillGroups = jest.fn().mockResolvedValue(undefined);
+    listMembersForLeafOnly = jest
+      .fn()
+      .mockResolvedValue([{ name: 'Role Member', email: 'role@example.com' }]);
+    OrgGroupService.mockImplementation(() => ({
+      login,
+      backfillGroups,
+      listMembersForLeafOnly,
+    }));
+  });
+
+  it('returns no members without a client id', async () => {
+    expect(await listSubsystemAccessManagers(context)).toEqual([]);
+    expect(OrgGroupService).not.toHaveBeenCalled();
+  });
+
+  it('lists the members of the subsystem access-manager group', async () => {
+    const members = await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT');
+
+    expect(members).toEqual([{ name: 'Role Member', email: 'role@example.com' }]);
+    expect(OrgGroupService).toHaveBeenCalledWith('http://keycloak/realms/master');
+    expect(login).toHaveBeenCalledWith('gwa', 'secret');
+    expect(backfillGroups).toHaveBeenCalled();
+    expect(listMembersForLeafOnly).toHaveBeenCalledWith({
+      name: 'LAB.MIN.CLIENT',
+      parent: '/access-manager/systems',
+    });
+  });
+
+  it('returns no members when the environment has no UMA2 configuration', async () => {
+    getEnvironmentContext.mockResolvedValue({});
+
+    expect(await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')).toEqual(
+      []
+    );
+    expect(OrgGroupService).not.toHaveBeenCalled();
+  });
+
+  it('returns no members when the lookup fails', async () => {
+    listMembersForLeafOnly.mockRejectedValue(new Error('group not found'));
+
+    expect(await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')).toEqual(
+      []
+    );
   });
 });

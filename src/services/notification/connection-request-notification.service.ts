@@ -131,7 +131,10 @@ const subsystemClientId = (subsystem: any) => {
   }
 };
 
-const listSubsystemAccessManagers = async (context: any, clientId?: string) => {
+export const listSubsystemAccessManagers = async (
+  context: any,
+  clientId?: string
+) => {
   if (!clientId) {
     return [];
   }
