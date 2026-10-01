@@ -23,6 +23,11 @@ export type { PolicyDefaultResources, PolicyRequesterDetails };
 export class PolicyService {
   constructor(private readonly logger?: FastifyBaseLogger) {}
 
+  /** Returns whether the provisioner has an implementation for a policy. */
+  supportsPolicyVersion(policyVersion: string): boolean {
+    return Object.hasOwn(POLICY_REGISTRY, policyVersion);
+  }
+
   /**
    * Validate a Connection Request.
    */
