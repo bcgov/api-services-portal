@@ -5,6 +5,7 @@ import {
   lookupUsersByNamespace,
 } from '../keystone';
 import { OpenAPISpecService } from '../batch/oas-service';
+import { SubsystemService } from '../batch/subsystem';
 import { GetSubsystemEntryForSubsystem } from '../gateway-patterns/catalog';
 import { OrgGroupService } from '../org-groups/org-group-service';
 import { getEnvironmentContext } from '../workflow/get-namespaces';
@@ -32,14 +33,19 @@ export type ConnectionNotificationEvent =
 export const getConnectionNotificationEvent = (
   operation: string,
   existingItem: ConnectionRequest | undefined,
-  updatedItem: ConnectionRequest,
+  updatedItem: ConnectionRequest | undefined,
   originalInput: Partial<ConnectionRequest> = {}
 ): ConnectionNotificationEvent | undefined => {
   if (operation === 'create') {
     return 'created';
   }
 
-  if (operation !== 'update' || !existingItem) {
+  // The SDX UI rejects, cancels and revokes connections by deleting them
+  if (operation === 'delete' && existingItem) {
+    return existingItem.isApproved ? 'revoked' : 'rejected';
+  }
+
+  if (operation !== 'update' || !existingItem || !updatedItem) {
     return undefined;
   }
 
@@ -74,6 +80,33 @@ const parseRequesterDetails = (
   } catch {
     return undefined;
   }
+};
+
+type Requester = { name?: string; email?: string; username?: string };
+
+// R0 stores the requester as `{ name, email }`. R1 may store it as a plain
+// string (a name, or an email) with the email in `requesterEmail`.
+const resolveRequester = (details: any): Requester | undefined => {
+  const raw = details?.requester;
+  const requesterEmail = details?.requesterEmail;
+  if (typeof raw === 'string') {
+    return {
+      name: raw,
+      email: requesterEmail || (raw.includes('@') ? raw : undefined),
+    };
+  }
+  if (raw && typeof raw === 'object') {
+    return { ...raw, email: raw.email || requesterEmail };
+  }
+  return requesterEmail ? { email: requesterEmail } : undefined;
+};
+
+const describeRequester = (requester?: Requester) => {
+  const { name, email } = requester || {};
+  if (name && email && name !== email) {
+    return `${name} (${email})`;
+  }
+  return name || email || 'Not specified';
 };
 
 const subsystemClientId = (subsystem: any) => {
@@ -147,28 +180,33 @@ const brochureUrl = () => (process.env.SDX_UI_URL || '').replace(/\/$/, '');
 
 const connectionEmailCopy: Record<
   ConnectionNotificationEvent,
-  { headline: string; message: string }
+  { subject: string; headline: string; message: string }
 > = {
   created: {
+    subject: 'Connection Request',
     headline: 'Connection request waiting for approval',
     message:
       'A new connection request is waiting for your approval. Review the details below, then open the request in Secure Data Exchange.',
   },
   reapproval: {
+    subject: 'Connection Request',
     headline: 'Connection request needs approval again',
     message:
       'A connection request needs to be approved again because the requested access changed. Review the details below, then open the request in Secure Data Exchange.',
   },
   approved: {
+    subject: 'Connection Request Approved',
     headline: 'Connection request approved',
     message:
       'Your connection request was approved. The client can use this service.',
   },
   rejected: {
+    subject: 'Connection Request Rejected',
     headline: 'Connection request rejected',
     message: 'Your connection request was rejected.',
   },
   revoked: {
+    subject: 'Connection Revoked',
     headline: 'Connection revoked',
     message:
       'Your approved connection was revoked. The client no longer has access to this service.',
@@ -196,7 +234,9 @@ export class ConnectionRequestNotificationService {
     private readonly findService = (context: any, serviceId: string) =>
       new OpenAPISpecService().findOpenAPISpecByName(context, serviceId),
     private readonly findAccessManagers = lookupUsersByNamespace,
-    private readonly findRoleAccessManagers = listSubsystemAccessManagers
+    private readonly findRoleAccessManagers = listSubsystemAccessManagers,
+    private readonly findClient = (context: any, clientId: string) =>
+      new SubsystemService().findSubsystemByClientId(context, clientId),
   ) {}
 
   public async notifyChange({
@@ -210,7 +250,7 @@ export class ConnectionRequestNotificationService {
     operation: string;
     existingItem?: ConnectionRequest;
     originalInput?: Partial<ConnectionRequest>;
-    updatedItem: ConnectionRequest;
+    updatedItem?: ConnectionRequest;
   }) {
     const event = getConnectionNotificationEvent(
       operation,
@@ -222,41 +262,57 @@ export class ConnectionRequestNotificationService {
       return;
     }
 
+    // A deleted connection only has its state from before the delete
+    const item = updatedItem ?? existingItem;
     const template = 'connection-rqst';
     const requesterDetails = parseRequesterDetails(
-      updatedItem.requesterDetails
+      item.requesterDetails
     );
+    const requester = resolveRequester(requesterDetails);
 
     try {
-      let service;
-      try {
-        service = await this.findService(context, updatedItem.serviceId);
-      } catch (err) {
-        if (event === 'created' || event === 'reapproval') {
-          throw err;
+      const isManagerEvent = event === 'created' || event === 'reapproval';
+      // Access managers act on the request from the service organization;
+      // the requester follows it from the client organization.
+      const service = isManagerEvent
+        ? await this.findService(context, item.serviceId)
+        : undefined;
+      let linkOrg = service?.organization?.name;
+      if (!isManagerEvent) {
+        try {
+          const client = await this.findClient(context, item.clientId);
+          linkOrg = client?.organization?.name;
+        } catch (err) {
+          logger.warn(
+            'Unable to resolve the client organization for %s: %s',
+            item.clientId,
+            err
+          );
         }
-        logger.warn(
-          'Unable to resolve the connection page for %s: %s',
-          updatedItem.serviceId,
-          err
-        );
       }
+      const { subject, ...copy } = connectionEmailCopy[event];
+      const cssClient = requesterDetails?.client;
       const contextValues = {
-        cssClientId: requesterDetails?.client?.clientId || 'Not specified',
-        cssIntegrationId:
-          requesterDetails?.client?.integrationId || 'Not specified',
-        cssPrivacyZone:
-          requesterDetails?.client?.privacyZone || 'Not specified',
-        sdxClientId: updatedItem.clientId,
-        serviceId: updatedItem.serviceId,
-        environment: updatedItem.environment,
-        policyVersion: updatedItem.policyVersion,
-        connectionsUrl: connectionsUrl(service?.organization?.name),
+        // The CSS table is only shown when the request carries CSS client details
+        hasCssDetails: Boolean(
+          cssClient?.clientId ||
+            cssClient?.integrationId ||
+            cssClient?.privacyZone
+        ),
+        cssClientId: cssClient?.clientId || 'Not specified',
+        cssIntegrationId: cssClient?.integrationId || 'Not specified',
+        cssPrivacyZone: cssClient?.privacyZone || 'Not specified',
+        sdxClientId: item.clientId,
+        requestedBy: describeRequester(requester),
+        serviceId: item.serviceId,
+        environment: item.environment,
+        policyVersion: item.policyVersion,
+        connectionsUrl: connectionsUrl(linkOrg),
         brochureUrl: brochureUrl(),
-        ...connectionEmailCopy[event],
+        ...copy,
       };
 
-      if (event === 'created' || event === 'reapproval') {
+      if (isManagerEvent) {
         const namespace = service?.namespace || service?.subsystem?.namespace;
         if (!namespace) {
           logger.warn(
@@ -288,7 +344,7 @@ export class ConnectionRequestNotificationService {
                 },
                 {
                   template,
-                  subject: `Connection Request - ${updatedItem.serviceId}`,
+                  subject: `${subject} - ${item.serviceId}`,
                   context: contextValues,
                 }
               )
@@ -297,11 +353,6 @@ export class ConnectionRequestNotificationService {
         return;
       }
 
-      const rawRequester = requesterDetails?.requester;
-      const requester =
-        typeof rawRequester === 'string'
-          ? { email: rawRequester, name: rawRequester }
-          : rawRequester;
       if (!requester?.email) {
         logger.warn(
           'Unable to notify connection requester: requester email not found'
@@ -317,7 +368,7 @@ export class ConnectionRequestNotificationService {
         },
         {
           template,
-          subject: `Connection Request ${event} - ${updatedItem.serviceId}`,
+          subject: `${subject} - ${item.serviceId}`,
           context: contextValues,
         }
       );

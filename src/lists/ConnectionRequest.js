@@ -187,6 +187,17 @@ module.exports = {
       }
     },
 
+    afterDelete: async function ({ operation, existingItem, context }) {
+      const notificationContext = context.createContext({
+        skipAccessControl: true,
+      });
+      await new ConnectionRequestNotificationService().notifyChange({
+        context: notificationContext,
+        operation,
+        existingItem,
+      });
+    },
+
     afterChange: async function ({
       operation,
       existingItem,

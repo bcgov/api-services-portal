@@ -88,8 +88,6 @@ services:
         - npm_token
     env_file:
       - .env.local
-    environment:
-      SDX_UI_URL: http://sdx-ui.localtest.me:5500
     ports:
       - 3000:3000
     networks:

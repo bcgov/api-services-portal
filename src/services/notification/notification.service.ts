@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import juice from 'juice';
 import nodemailer from 'nodemailer';
 
 import { Logger } from '../../logger';
@@ -34,14 +35,26 @@ export class NotificationService {
     const name = isEmpty(to.name) ? 'Portal User' : to.name;
 
     logger.debug('Notification triggered [%s] %j', name, to);
-    const template = fs.readFileSync(
-      path.resolve(__dirname, `templates/${templateName}.html`),
-      'utf8'
-    );
-    return Object.entries({ name, ...context }).reduce(
-      (content, [key, value]) =>
-        content.split(`{{${key}}}`).join(escapeHtml(value)),
-      template
+    const values: EmailNotification['context'] = { name, ...context };
+    // {{#if key}}...{{/if}} blocks are kept only when the context value is truthy
+    const html = fs
+      .readFileSync(
+        path.resolve(__dirname, `templates/${templateName}.html`),
+        'utf8'
+      )
+      .replace(
+        /[ \t]*{{#if (\w+)}}\n?([\s\S]*?)[ \t]*{{\/if}}\n?/g,
+        (_block, key, content) => (values[key] ? content : '')
+      );
+    // Mail clients ignore linked stylesheets, so a template's companion .css
+    // file is inlined into style attributes before values are substituted
+    const stylesheet = path.resolve(__dirname, `templates/${templateName}.css`);
+    const template = fs.existsSync(stylesheet)
+      ? juice.inlineContent(html, fs.readFileSync(stylesheet, 'utf8'))
+      : html;
+    // Single pass so substituted values can never introduce new placeholders
+    return template.replace(/{{(\w+)}}/g, (placeholder, key) =>
+      key in values ? escapeHtml(values[key]) : placeholder
     );
   }
 

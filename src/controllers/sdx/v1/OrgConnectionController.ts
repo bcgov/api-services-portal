@@ -64,10 +64,13 @@ export class OrgConnectionController extends Controller {
     const ctx = this.keystone.createContext(request);
 
     // For R0 policy, force the requester details to be the user making this request
-    if (input.policyVersion === 'SDX.R0.00' && input.requesterDetails) {
-      input.requesterDetails.requester = {
-        name: request.user.name,
-        email: request.user.email,
+    if (input.policyVersion === 'SDX.R0.00') {
+      input.requesterDetails = {
+        ...input.requesterDetails,
+        requester: {
+          name: request.user.name,
+          email: request.user.email,
+        },
       };
     }
 
@@ -98,12 +101,8 @@ export class OrgConnectionController extends Controller {
       serviceId: input.serviceId,
       isApproved: input.isApproved,
     };
-    if (input.isActive != null) {
+    if (input.isActive !== null) {
       data['isActive'] = input.isActive;
-    } else if (input.isApproved === false) {
-      // A rejected request must leave the pending/active state so the
-      // lifecycle transition can be persisted and distinguished from re-approval.
-      data['isActive'] = false;
     }
 
     return new ConnectionService().upsertConnection(ctx, org, data);

@@ -4,345 +4,114 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{headline}}</title>
+    <!-- Styles live in connection-rqst.css and are inlined when the email is sent -->
   </head>
-  <body style="margin: 0; padding: 0; background-color: #f2f2f2">
+  <body>
     <table
+      class="wrapper"
       role="presentation"
       width="100%"
       cellpadding="0"
       cellspacing="0"
-      style="background-color: #f2f2f2"
     >
       <tr>
-        <td align="center" style="padding: 24px 12px">
+        <td class="wrapper-cell" align="center">
           <table
+            class="container"
             role="presentation"
             width="600"
             cellpadding="0"
             cellspacing="0"
-            style="width: 600px; max-width: 600px; background-color: #ffffff"
           >
             <tr>
-              <td style="background-color: #013366; padding: 22px 28px">
-                <p
-                  style="
-                    margin: 0;
-                    font-family: Arial, Helvetica, sans-serif;
-                    font-size: 12px;
-                    font-weight: bold;
-                    letter-spacing: 0.04em;
-                    color: #fcba19;
-                  "
-                >
-                  Secure Data Exchange
-                </p>
-                <h1
-                  style="
-                    margin: 8px 0 0;
-                    font-family: Arial, Helvetica, sans-serif;
-                    font-size: 22px;
-                    line-height: 1.3;
-                    font-weight: normal;
-                    color: #ffffff;
-                  "
-                >
-                  {{headline}}
-                </h1>
+              <td class="header">
+                <p class="eyebrow">Secure Data Exchange</p>
+                <h1 class="headline">{{headline}}</h1>
               </td>
             </tr>
             <tr>
-              <td
-                style="
-                  background-color: #fcba19;
-                  height: 4px;
-                  font-size: 0;
-                  line-height: 0;
-                "
-              >
-                &nbsp;
-              </td>
+              <td class="accent-bar">&nbsp;</td>
             </tr>
             <tr>
-              <td
-                style="
-                  padding: 28px;
-                  font-family: Arial, Helvetica, sans-serif;
-                  font-size: 16px;
-                  line-height: 1.5;
-                  color: #313132;
-                "
-              >
-                <p style="margin: 0 0 16px">Hi {{name}},</p>
-                <p style="margin: 0 0 24px">{{message}}</p>
+              <td class="content">
+                <p class="greeting">Hi {{name}},</p>
+                <p class="message">{{message}}</p>
                 <table
+                  class="button-table"
                   role="presentation"
                   cellpadding="0"
                   cellspacing="0"
-                  style="margin: 0 0 28px"
                 >
                   <tr>
-                    <td bgcolor="#013366" style="background-color: #013366">
-                      <a
-                        href="{{connectionsUrl}}"
-                        style="
-                          display: inline-block;
-                          padding: 12px 22px;
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 16px;
-                          font-weight: bold;
-                          line-height: 1.2;
-                          color: #ffffff;
-                          text-decoration: none;
-                        "
+                    <td class="button-cell" bgcolor="#013366">
+                      <a class="button" href="{{connectionsUrl}}"
                         >View request</a
                       >
                     </td>
                   </tr>
                 </table>
-                <p
-                  style="
-                    margin: 0 0 8px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    letter-spacing: 0.04em;
-                    color: #013366;
-                  "
-                >
-                  Common Single Sign-on
-                </p>
+
+                <p class="section-title">Secure Data Exchange</p>
                 <table
+                  class="details"
                   role="presentation"
                   width="100%"
                   cellpadding="0"
                   cellspacing="0"
-                  style="margin: 0 0 22px; border-collapse: collapse"
                 >
                   <tr>
-                    <td
-                      style="
-                        width: 140px;
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Client
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{cssClientId}}
-                    </td>
+                    <td class="label">Client</td>
+                    <td class="value mono">{{sdxClientId}}</td>
                   </tr>
                   <tr>
-                    <td
-                      style="
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Integration
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{cssIntegrationId}}
-                    </td>
+                    <td class="label">Requested by</td>
+                    <td class="value">{{requestedBy}}</td>
                   </tr>
                   <tr>
-                    <td
-                      style="
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        border-bottom: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Privacy zone
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        border-bottom: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{cssPrivacyZone}}
-                    </td>
+                    <td class="label">Service</td>
+                    <td class="value mono">{{serviceId}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Environment</td>
+                    <td class="value">{{environment}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Policy</td>
+                    <td class="value mono">{{policyVersion}}</td>
                   </tr>
                 </table>
-                <p
-                  style="
-                    margin: 0 0 8px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    letter-spacing: 0.04em;
-                    color: #013366;
-                  "
-                >
-                  Secure Data Exchange
-                </p>
+
+                {{#if hasCssDetails}}
+                <p class="section-title">Common Single Sign-on</p>
                 <table
+                  class="details"
                   role="presentation"
                   width="100%"
                   cellpadding="0"
                   cellspacing="0"
-                  style="margin: 0 0 8px; border-collapse: collapse"
                 >
                   <tr>
-                    <td
-                      style="
-                        width: 140px;
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Client
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{sdxClientId}}
-                    </td>
+                    <td class="label">Client</td>
+                    <td class="value mono">{{cssClientId}}</td>
                   </tr>
                   <tr>
-                    <td
-                      style="
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Service
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{serviceId}}
-                    </td>
+                    <td class="label">Integration</td>
+                    <td class="value mono">{{cssIntegrationId}}</td>
                   </tr>
                   <tr>
-                    <td
-                      style="
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Environment
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{environment}}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style="
-                        padding: 8px 12px 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        border-bottom: 1px solid #e8e8e8;
-                        font-family: Arial, Helvetica, sans-serif;
-                        font-size: 14px;
-                        color: #606060;
-                        vertical-align: top;
-                      "
-                    >
-                      Policy
-                    </td>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        border-top: 1px solid #e8e8e8;
-                        border-bottom: 1px solid #e8e8e8;
-                        font-family: Consolas, Menlo, monospace;
-                        font-size: 14px;
-                        color: #313132;
-                      "
-                    >
-                      {{policyVersion}}
-                    </td>
+                    <td class="label">Privacy zone</td>
+                    <td class="value mono">{{cssPrivacyZone}}</td>
                   </tr>
                 </table>
+                {{/if}}
               </td>
             </tr>
             <tr>
-              <td
-                style="
-                  padding: 20px 28px 24px;
-                  background-color: #f1f8fe;
-                  font-family: Arial, Helvetica, sans-serif;
-                  font-size: 14px;
-                  line-height: 1.5;
-                  color: #313132;
-                "
-              >
-                <p style="margin: 0 0 4px; font-weight: bold">
-                  API Program Services Team
-                </p>
-                <p style="margin: 0 0 12px; color: #606060">
-                  Province of British Columbia
-                </p>
-                <p style="margin: 0">
-                  <a
-                    href="{{brochureUrl}}"
-                    style="color: #1a5a96; text-decoration: underline"
-                    >Open Secure Data Exchange</a
-                  >
+              <td class="footer">
+                <p class="footer-team">API Program Services Team</p>
+                <p class="footer-org">Province of British Columbia</p>
+                <p class="footer-links">
+                  <a href="{{brochureUrl}}">Open Secure Data Exchange</a>
                 </p>
               </td>
             </tr>
