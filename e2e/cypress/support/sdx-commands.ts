@@ -114,14 +114,15 @@ export function createConnection(
   org: any,
   clientId: string,
   serviceId: string,
-  next: any
+  next: any,
+  options: { isActive?: boolean } = {}
 ) {
   cy.setRequestBody({
     clientId,
     serviceId,
     policyVersion: 'SDX.R0.00',
     environment: 'dev',
-    isActive: true,
+    isActive: options.isActive ?? true,
   })
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
     ({ apiRes: { status, body } }: any) => {
@@ -131,6 +132,83 @@ export function createConnection(
       next(body.id)
     }
   )
+}
+
+/**
+ * Updates an existing connection. Changing `isApproved` goes through the
+ * approval endpoint (service owner); anything else, such as `isActive`, goes
+ * through the connection endpoint (client side).
+ */
+export function updateConnection(
+  org: any,
+  clientId: string,
+  serviceId: string,
+  changes: { isApproved?: boolean; isActive?: boolean }
+) {
+  const path = `ds/api/sdx/v1/organizations/${org.name}/connections`
+  cy.setRequestBody({ clientId, serviceId, ...changes })
+  cy.callAPI('isApproved' in changes ? `${path}/approval` : path, 'PUT').then(
+    ({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      expect(body.result).to.be.equal('updated')
+    }
+  )
+}
+
+/**
+ * Waits until the provisioner reports the connection as provisioned. The
+ * provisioner only records status when applying, so this cannot be used to wait
+ * for a deactivated connection's configuration to be removed.
+ */
+export function waitForConnectionProvisioned(
+  org: any,
+  connectionId: string,
+  timeoutMs = 30000,
+  startedAt = Date.now()
+) {
+  cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'GET').then(
+    ({ apiRes: { status, body } }: any) => {
+      expect(status).to.be.equal(200)
+      const provisioner = body.find((c: any) => c.id === connectionId)
+        ?.provisionerStatus
+      if (provisioner?.status === 'provisioned') {
+        return
+      }
+      expect(provisioner?.status, provisioner?.message).to.not.equal('failed')
+      expect(Date.now() - startedAt, 'timed out waiting for provisioner').to.be
+        .lessThan(timeoutMs)
+      cy.wait(1000)
+      waitForConnectionProvisioned(org, connectionId, timeoutMs, startedAt)
+    }
+  )
+}
+
+/**
+ * Deletes a connection. It must be inactive, and the delete is refused while its
+ * gateway configuration still exists. The provisioner removes that configuration
+ * asynchronously after a deactivate, so retry until it is gone.
+ */
+export function deleteConnection(
+  org: any,
+  connectionId: string,
+  timeoutMs = 30000,
+  startedAt = Date.now()
+) {
+  cy.callAPI(
+    `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}`,
+    'DELETE'
+  ).then(({ apiRes: { status, body } }: any) => {
+    if (status === 200) {
+      return
+    }
+    expect(JSON.stringify(body), 'delete failed').to.include(
+      'configuration still exists'
+    )
+    expect(Date.now() - startedAt, 'timed out waiting for config removal').to.be
+      .lessThan(timeoutMs)
+    cy.wait(1000)
+    deleteConnection(org, connectionId, timeoutMs, startedAt)
+  })
 }
 
 export function createRuntimeGroup(

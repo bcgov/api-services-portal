@@ -81,6 +81,18 @@ declare global {
       mailpitWaitForEmail(query: string, timeout?: number): Chainable<MailpitMessage>
 
       /**
+       * Assert how many messages match the query. Waits first so that emails
+       * sent asynchronously by the last action have arrived, which also makes
+       * it usable to assert that no email was sent.
+       * @example cy.mailpitAssertMessageCount('subject:"Welcome"', 1)
+       */
+      mailpitAssertMessageCount(
+        query: string,
+        count: number,
+        waitMs?: number
+      ): Chainable<void>
+
+      /**
        * Assert that an email exists with specific criteria
        * @example cy.mailpitAssertEmail({ to: 'user@example.com', subject: 'Welcome' })
        */
@@ -168,6 +180,19 @@ Cypress.Commands.add(
     }
 
     return checkForEmail()
+  }
+)
+
+Cypress.Commands.add(
+  'mailpitAssertMessageCount',
+  (query: string, count: number, waitMs: number = 5000) => {
+    cy.wait(waitMs)
+    cy.mailpitSearchMessages(query).then((result) => {
+      expect(
+        result.messages.length,
+        `Expected ${count} message(s) matching: ${query}`
+      ).to.eq(count)
+    })
   }
 )
 

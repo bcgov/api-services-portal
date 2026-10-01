@@ -40,17 +40,24 @@ export const getConnectionNotificationEvent = (
     return 'created';
   }
 
-  // The SDX UI rejects, cancels and revokes connections by deleting them
-  if (operation === 'delete' && existingItem) {
-    return existingItem.isApproved ? 'revoked' : 'rejected';
+  // Each user action should send one email, but an active connection can only
+  // be removed by deactivating it and then deleting it. So an approved
+  // connection is announced as revoked when it is deactivated (access ends),
+  // and a pending request as rejected when it is deleted (the request is gone).
+  if (operation === 'delete') {
+    return existingItem && !existingItem.isApproved ? 'rejected' : undefined;
   }
 
   if (operation !== 'update' || !existingItem || !updatedItem) {
     return undefined;
   }
 
-  if (existingItem.isActive && !updatedItem.isActive) {
-    return existingItem.isApproved ? 'revoked' : 'rejected';
+  if (
+    existingItem.isActive &&
+    !updatedItem.isActive &&
+    existingItem.isApproved
+  ) {
+    return 'revoked';
   }
 
   if (

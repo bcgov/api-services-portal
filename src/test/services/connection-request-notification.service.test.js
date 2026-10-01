@@ -49,13 +49,6 @@ describe('ConnectionRequestNotificationService', () => {
       { isApproved: true },
     ],
     [
-      'rejected',
-      'update',
-      connection,
-      { ...connection, isActive: false },
-      { isApproved: false, isActive: false },
-    ],
-    [
       'revoked',
       'update',
       { ...connection, isApproved: true },
@@ -63,8 +56,17 @@ describe('ConnectionRequestNotificationService', () => {
       { isActive: false },
     ],
     ['rejected', 'delete', { ...connection, isActive: false }, undefined, {}],
+    // A pending request that is deactivated is only announced when it is deleted
     [
-      'revoked',
+      undefined,
+      'update',
+      connection,
+      { ...connection, isActive: false },
+      { isActive: false },
+    ],
+    // An approved connection was announced when it was deactivated
+    [
+      undefined,
       'delete',
       { ...connection, isApproved: true, isActive: false },
       undefined,
