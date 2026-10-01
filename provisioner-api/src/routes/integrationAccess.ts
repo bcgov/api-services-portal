@@ -158,7 +158,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
           callbacks: {
             provisionAllowedServices: {
-              '/requests/{$request.params#/integrationId}/sdx-allowed-services':
+              '/requests/{$request.params#/integrationId}/sdx-allowed-access':
                 {
                   put: {
                     requestBody: {
