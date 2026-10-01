@@ -2,6 +2,7 @@ import type {
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../../clients/sdx-member/index.js';
+import type { EnvironmentConfig } from '../../config/environments.js';
 
 /**
  * The requester context built for a single requested service, as passed to
@@ -26,3 +27,13 @@ export type PolicyDefaultsFn = (
   service: ServiceCatalogEntry,
   requesterDetails: PolicyRequesterDetails
 ) => PolicyDefaultResources;
+
+export interface PolicyPreflightContext {
+  environment: string | undefined;
+  environmentConfig: EnvironmentConfig | undefined;
+  service: ServiceCatalogEntry;
+  requesterDetails: PolicyRequesterDetails | undefined;
+}
+
+/** Validate policy-specific inputs before any gateway resource is built. */
+export type PolicyPreflightFn = (context: PolicyPreflightContext) => void;
