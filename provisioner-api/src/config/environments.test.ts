@@ -6,7 +6,11 @@
 import { writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { getRequiredEnvUrl, resetEnvironmentsCache } from './environments.js';
+import {
+  getRequiredEnvUrl,
+  loadEnvironments,
+  resetEnvironmentsCache,
+} from './environments.js';
 
 // ---------------------------------------------------------------------------
 // Tiny test runner
@@ -48,6 +52,10 @@ writeFileSync(
       oauth_token_url: 'https://oidc.example.gov.bc.ca/token',
       kong_admin_url: 'http://kong:8001',
       operator_edge_url: 'https://edge.dev.example.gov.bc.ca',
+      sdx_token_exchange_client_id: 'sdx-edge-exchange',
+      sdx_token_exchange_token_url:
+        'https://issuer.example.gov.bc.ca/realms/standard/protocol/openid-connect/token',
+      sdx_trusted_issuers: ['https://issuer.example.gov.bc.ca/realms/standard'],
     },
     test: {
       oauth_token_url: 'https://oidc.example.gov.bc.ca/token',
@@ -106,6 +114,42 @@ describe('getRequiredEnvUrl', () => {
     true,
     'throws when the environment is not in the config at all'
   );
+});
+
+describe('SDX R1 environment settings', () => {
+  const config = loadEnvironments();
+  expect(config.dev.sdx_token_exchange_client_id).toBe(
+    'sdx-edge-exchange',
+    'loads the dedicated edge exchange client separately'
+  );
+  expect(JSON.stringify(config.dev.sdx_trusted_issuers)).toBe(
+    JSON.stringify(['https://issuer.example.gov.bc.ca/realms/standard']),
+    'loads the trusted issuer list'
+  );
+
+  writeFileSync(
+    configPath,
+    JSON.stringify({
+      dev: {
+        oauth_token_url: 'https://oidc.example.gov.bc.ca/token',
+        kong_admin_url: 'http://kong:8001',
+        sdx_trusted_issuers: 'https://issuer.example.gov.bc.ca',
+      },
+    })
+  );
+  resetEnvironmentsCache();
+
+  let threw = false;
+  try {
+    loadEnvironments();
+  } catch (err) {
+    threw = true;
+    expect((err as Error).message.includes('array of strings')).toBe(
+      true,
+      'rejects a non-array trusted issuer value'
+    );
+  }
+  expect(threw).toBe(true, 'rejects malformed R1 environment settings');
 });
 
 unlinkSync(configPath);
