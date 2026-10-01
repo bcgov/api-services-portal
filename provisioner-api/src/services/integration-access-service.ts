@@ -28,6 +28,7 @@ interface NormalizedServiceRequest {
   name: string;
   providerId: string;
   scopes: string[];
+  version?: string;
 }
 
 interface PreparedServiceRequest extends NormalizedServiceRequest {
@@ -47,7 +48,10 @@ type PlannedConnectionChange =
       connection: ConnectionRequest;
       request: PreparedServiceRequest;
       serviceOrgName: string;
-      result: 'updated scopes, submitted for re-approval';
+      result:
+        | 'updated scopes, submitted for re-approval'
+        | 'updated version, submitted for re-approval'
+        | 'updated scopes and version, submitted for re-approval';
     }
   | {
       kind: 'reactivate';
@@ -55,6 +59,13 @@ type PlannedConnectionChange =
       request: PreparedServiceRequest;
       serviceOrgName: string;
       result: 'reactivated approved connection';
+    }
+  | {
+      kind: 'pin-version';
+      connection: ConnectionRequest;
+      request: PreparedServiceRequest;
+      serviceOrgName: string;
+      result: 'already approved' | 'pending approval';
     }
   | {
       kind: 'unchanged';
@@ -148,6 +159,7 @@ export class IntegrationAccessService {
         service: {
           clientId: service.subsystem.clientId,
           privacyZone: service.subsystem.privacyZone,
+          version: service.version,
         },
       };
 
@@ -198,13 +210,20 @@ export class IntegrationAccessService {
           serviceResources: request.defaults.serviceResources,
         });
         outcomes.push(outcome);
-      } else if (change.kind === 'update' || change.kind === 'reactivate') {
+      } else if (
+        change.kind === 'update' ||
+        change.kind === 'reactivate' ||
+        change.kind === 'pin-version'
+      ) {
         const reactivating = change.kind === 'reactivate';
+        const pinningVersion = change.kind === 'pin-version';
         const outcome = await this.api.upsertConnection(change.serviceOrgName, {
           clientId: change.connection.clientId!,
           serviceId: change.connection.serviceId!,
-          isApproved: reactivating,
-          isActive: reactivating,
+          isApproved: pinningVersion
+            ? change.connection.isApproved
+            : reactivating,
+          isActive: pinningVersion ? change.connection.isActive : reactivating,
           requesterDetails: request.requesterDetails,
         });
         outcomes.push(outcome);
@@ -350,7 +369,7 @@ export class IntegrationAccessService {
 
     const servicesBySubsystem = new Map<
       string,
-      Map<string, { name: string; scopes: string[] }>
+      Map<string, { name: string; scopes: string[]; version: string }>
     >();
 
     for (const connection of allowedConnections) {
@@ -382,10 +401,13 @@ export class IntegrationAccessService {
         }
 
         const scopes = normalizeStoredScopes(connection, serviceId);
+        const version =
+          connection.requesterDetails?.service?.version || service.version;
         const existingService = subsystemServices.get(serviceId);
         subsystemServices.set(serviceId, {
           name: serviceId,
           scopes: uniqueSorted([...(existingService?.scopes || []), ...scopes]),
+          version,
         });
       } catch (err) {
         if (
@@ -443,13 +465,27 @@ function normalizeRequestedServices(
     for (const requestedService of resourceServer.services) {
       const name = requireNonBlank(requestedService.name, 'Service name');
       const scopes = normalizeRequestedScopes(requestedService.scopes, name);
+      const version =
+        requestedService.version === undefined
+          ? undefined
+          : requireNonBlank(requestedService.version, 'Service version');
       const key = `${providerId}\u0000${environment}\u0000${name}`;
       const existing = requests.get(key);
 
       if (existing) {
+        if (
+          existing.version !== undefined &&
+          version !== undefined &&
+          existing.version !== version
+        ) {
+          throw new BadRequestError(
+            `Service '${name}' was requested with conflicting versions '${existing.version}' and '${version}'`
+          );
+        }
+        existing.version ??= version;
         existing.scopes = uniqueSorted([...existing.scopes, ...scopes]);
       } else {
-        requests.set(key, { providerId, environment, name, scopes });
+        requests.set(key, { providerId, environment, name, scopes, version });
       }
     }
   }
@@ -479,6 +515,11 @@ function validateRequestedService(
   if (service.subsystem.clientId !== requested.providerId) {
     throw new BadRequestError(
       `Requested service '${requested.name}' belongs to subsystem '${service.subsystem.clientId}' which does not match requested resource server id '${requested.providerId}'`
+    );
+  }
+  if (requested.version !== undefined && requested.version !== service.version) {
+    throw new BadRequestError(
+      `Requested service '${requested.name}' version '${requested.version}' does not match catalog version '${service.version}'`
     );
   }
 
@@ -554,7 +595,13 @@ function planConnectionChange(
   );
 
   const existingScopes = normalizeStoredScopes(existing, request.name);
-  if (sameStrings(existingScopes, request.scopes)) {
+  const scopesHaveChanged = !sameStrings(existingScopes, request.scopes);
+  const existingVersion = existing.requesterDetails?.service?.version;
+  const versionHasChanged =
+    existingVersion !== undefined && existingVersion !== request.service.version;
+  const legacyVersionNeedsPinning = existingVersion === undefined;
+
+  if (!scopesHaveChanged && !versionHasChanged) {
     if (existing.isApproved && existing.isActive === false) {
       return {
         kind: 'reactivate',
@@ -564,6 +611,15 @@ function planConnectionChange(
         result: 'reactivated approved connection',
       };
     }
+    if (legacyVersionNeedsPinning) {
+      return {
+        kind: 'pin-version',
+        connection: existing,
+        request,
+        serviceOrgName,
+        result: existing.isApproved ? 'already approved' : 'pending approval',
+      };
+    }
     return {
       kind: 'unchanged',
       request,
@@ -571,12 +627,19 @@ function planConnectionChange(
     };
   }
 
+  const changed = [
+    scopesHaveChanged ? 'scopes' : undefined,
+    versionHasChanged ? 'version' : undefined,
+  ].filter(Boolean);
   return {
     kind: 'update',
     connection: existing,
     request,
     serviceOrgName,
-    result: 'updated scopes, submitted for re-approval',
+    result: `updated ${changed.join(' and ')}, submitted for re-approval` as
+      | 'updated scopes, submitted for re-approval'
+      | 'updated version, submitted for re-approval'
+      | 'updated scopes and version, submitted for re-approval',
   };
 }
 
