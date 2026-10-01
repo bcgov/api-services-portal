@@ -1,5 +1,46 @@
 import { v4 as uuidv4 } from 'uuid'
 
+export const SDX_UI_URL = 'http://sdx-ui.localtest.me:5500'
+
+/**
+ * Clears the SDX UI session cookie and the Keycloak session it is based on.
+ * These persist in the Cypress browser between runs, so call this to make sure
+ * a spec starts logged out of the SDX UI.
+ */
+export function clearSdxUiSession() {
+  cy.clearCookies({ domain: 'sdx-ui.localtest.me' })
+  cy.clearCookies({ domain: 'keycloak.localtest.me' })
+}
+
+/**
+ * Logs in to the SDX UI without driving the browser through Keycloak. The UI
+ * runs its own authorization code flow and keeps a session cookie, so a token
+ * can't be handed to it. Instead, replay what the browser does: request a
+ * protected page, follow the redirect to the Keycloak login form, post the
+ * credentials, and follow the redirects back through the UI's callback. Cypress
+ * keeps the resulting session cookie, so `cy.visit` is then logged in.
+ *
+ * Any existing SDX UI session is cleared first, along with the Keycloak
+ * session: Keycloak would otherwise sign in silently and never show the login
+ * form.
+ */
+export function sdxUiLogin(
+  username: string = Cypress.env('DEV_USERNAME'),
+  password: string = Cypress.env('DEV_PASSWORD')
+) {
+  clearSdxUiSession()
+  cy.request(`${SDX_UI_URL}/connections`).then(({ body }) => {
+    const form = /id="kc-form-login"[^>]*action="([^"]*)"/.exec(body)
+    expect(form, 'Keycloak login form').to.not.be.null
+    cy.request({
+      method: 'POST',
+      url: form![1].replace(/&amp;/g, '&'),
+      form: true,
+      body: { username, password, credentialId: '' },
+    })
+  })
+}
+
 export function uniqueSubsystemName(): string {
   return `SUBSYS-${Cypress._.random(100000, 999999)}`
 }
@@ -169,14 +210,14 @@ export function waitForConnectionProvisioned(
   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'GET').then(
     ({ apiRes: { status, body } }: any) => {
       expect(status).to.be.equal(200)
-      const provisioner = body.find((c: any) => c.id === connectionId)
-        ?.provisionerStatus
+      const provisioner = body.find((c: any) => c.id === connectionId)?.provisionerStatus
       if (provisioner?.status === 'provisioned') {
         return
       }
       expect(provisioner?.status, provisioner?.message).to.not.equal('failed')
-      expect(Date.now() - startedAt, 'timed out waiting for provisioner').to.be
-        .lessThan(timeoutMs)
+      expect(Date.now() - startedAt, 'timed out waiting for provisioner').to.be.lessThan(
+        timeoutMs
+      )
       cy.wait(1000)
       waitForConnectionProvisioned(org, connectionId, timeoutMs, startedAt)
     }
@@ -201,11 +242,10 @@ export function deleteConnection(
     if (status === 200) {
       return
     }
-    expect(JSON.stringify(body), 'delete failed').to.include(
-      'configuration still exists'
+    expect(JSON.stringify(body), 'delete failed').to.include('configuration still exists')
+    expect(Date.now() - startedAt, 'timed out waiting for config removal').to.be.lessThan(
+      timeoutMs
     )
-    expect(Date.now() - startedAt, 'timed out waiting for config removal').to.be
-      .lessThan(timeoutMs)
     cy.wait(1000)
     deleteConnection(org, connectionId, timeoutMs, startedAt)
   })
@@ -431,8 +471,7 @@ export function runtimeGroupGatewayKeyName(
 }
 
 /** JWT kid for a newly published runtime-group (edge) key. */
-export const EDGE_KEY_KID_RE =
-  /^urn:ca:bc:sdx:edge:[a-z0-9-]+:[a-z0-9]+:[0-9a-f]{8}$/i
+export const EDGE_KEY_KID_RE = /^urn:ca:bc:sdx:edge:[a-z0-9-]+:[a-z0-9]+:[0-9a-f]{8}$/i
 
 /** Publish the compose fixture signing public key into a runtime-group keyset. */
 export function applyFixtureEdgeSigningKey(

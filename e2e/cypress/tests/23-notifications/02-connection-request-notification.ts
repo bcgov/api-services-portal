@@ -1,18 +1,21 @@
 import {
+  clearSdxUiSession,
   createConnection,
   deleteConnection,
   new_service,
+  SDX_UI_URL,
+  sdxUiLogin,
   updateConnection,
   waitForConnectionProvisioned,
 } from '../../support/sdx-commands'
-
-const sdxUiUrl = 'http://sdx-ui.localtest.me:5500'
 
 const emailSubject = (subject: string, serviceName: string) =>
   `subject:"${subject} - ${serviceName}"`
 
 describe('Notification Service - Connection Request Emails', () => {
   beforeEach(() => {
+    // The SDX UI session from a previous run would otherwise still be valid
+    clearSdxUiSession()
     cy.mailpitDeleteAllMessages()
     cy.fixture('toys.v1.yaml', null).as('toys.v1')
     cy.buildOrgGatewayDatasetAndProduct().then(({ org, datasetId }: any) => {
@@ -40,7 +43,7 @@ describe('Notification Service - Connection Request Emails', () => {
           expect(status).to.be.equal(200)
           expect(body.result).to.be.equal('created')
 
-          const expectedUrl = `${sdxUiUrl}/connections?org=${encodeURIComponent(
+          const expectedUrl = `${SDX_UI_URL}/connections?org=${encodeURIComponent(
             org.name
           )}`
           cy.mailpitWaitForEmail(
@@ -68,39 +71,14 @@ describe('Notification Service - Connection Request Emails', () => {
                 followRedirect: false,
                 failOnStatusCode: false,
               })
-              cy.origin(
-                sdxUiUrl,
-                { args: { expectedUrl } },
-                ({ expectedUrl }) => {
-                  cy.visit(expectedUrl)
-                }
-              )
-              cy.origin(
-                'http://keycloak.localtest.me:9081',
-                {
-                  args: {
-                    username: Cypress.env('DEV_USERNAME'),
-                    password: Cypress.env('DEV_PASSWORD'),
-                  },
-                },
-                ({ username, password }) => {
-                  cy.get('#username', { timeout: 20000 }).type(username)
-                  cy.get('#password').type(password, { log: false })
-                  cy.get('#kc-login').click()
-                }
-              )
-              cy.origin(
-                sdxUiUrl,
-                { args: { serviceName: service.name } },
-                ({ serviceName }) => {
-                  cy.contains(serviceName, { timeout: 20000 })
-                    .closest('article')
-                    .within(() => {
-                      cy.contains('Pending').should('be.visible')
-                      cy.contains('Approve / Reject').should('be.visible')
-                    })
-                }
-              )
+              sdxUiLogin()
+              cy.visit(expectedUrl)
+              cy.contains(service.name, { timeout: 20000 })
+                .closest('article')
+                .within(() => {
+                  cy.contains('Pending').should('be.visible')
+                  cy.contains('Approve / Reject').should('be.visible')
+                })
             })
           })
         }
