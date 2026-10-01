@@ -107,7 +107,7 @@ describe('Notification Service - Connection Request Emails', () => {
             cy.mailpitAssertMessageCount(
               emailSubject('Connection Revoked', serviceId),
               0,
-              0
+              1000
             )
           },
           { isActive: false }

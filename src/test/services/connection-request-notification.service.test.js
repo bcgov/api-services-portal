@@ -620,7 +620,7 @@ describe('listSubsystemAccessManagers', () => {
   const context = {
     createContext: jest.fn().mockReturnValue({ noauth: true }),
   };
-  let login, backfillGroups, listMembersForLeafOnly;
+  let login, listMembersForPath;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -631,14 +631,12 @@ describe('listSubsystemAccessManagers', () => {
       issuerEnvConfig: { clientId: 'gwa', clientSecret: 'secret' },
     });
     login = jest.fn().mockResolvedValue(undefined);
-    backfillGroups = jest.fn().mockResolvedValue(undefined);
-    listMembersForLeafOnly = jest
+    listMembersForPath = jest
       .fn()
       .mockResolvedValue([{ name: 'Role Member', email: 'role@example.com' }]);
     OrgGroupService.mockImplementation(() => ({
       login,
-      backfillGroups,
-      listMembersForLeafOnly,
+      listMembersForPath,
     }));
   });
 
@@ -653,11 +651,9 @@ describe('listSubsystemAccessManagers', () => {
     expect(members).toEqual([{ name: 'Role Member', email: 'role@example.com' }]);
     expect(OrgGroupService).toHaveBeenCalledWith('http://keycloak/realms/master');
     expect(login).toHaveBeenCalledWith('gwa', 'secret');
-    expect(backfillGroups).toHaveBeenCalled();
-    expect(listMembersForLeafOnly).toHaveBeenCalledWith({
-      name: 'LAB.MIN.CLIENT',
-      parent: '/access-manager/systems',
-    });
+    expect(listMembersForPath).toHaveBeenCalledWith(
+      '/access-manager/systems/LAB.MIN.CLIENT'
+    );
   });
 
   it('returns no members when the environment has no UMA2 configuration', async () => {
@@ -670,7 +666,7 @@ describe('listSubsystemAccessManagers', () => {
   });
 
   it('returns no members when the lookup fails', async () => {
-    listMembersForLeafOnly.mockRejectedValue(new Error('group not found'));
+    listMembersForPath.mockRejectedValue(new Error('keycloak unavailable'));
 
     expect(await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')).toEqual(
       []

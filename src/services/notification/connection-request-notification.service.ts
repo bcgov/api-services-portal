@@ -155,11 +155,9 @@ export const listSubsystemAccessManagers = async (
       envCtx.issuerEnvConfig.clientId,
       envCtx.issuerEnvConfig.clientSecret
     );
-    await orgGroupService.backfillGroups();
-    return await orgGroupService.listMembersForLeafOnly({
-      name: clientId,
-      parent: '/access-manager/systems',
-    });
+    return await orgGroupService.listMembersForPath(
+      `/access-manager/systems/${clientId}`
+    );
   } catch (err) {
     logger.warn(
       'Unable to list access-manager members for subsystem %s: %s',

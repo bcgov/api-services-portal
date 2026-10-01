@@ -16,6 +16,19 @@ const {
   ConnectionRequestNotificationService,
 } = require('../services/notification/connection-request-notification.service');
 
+// Fire and forget, like the provisioner event: sending email must not hold up
+// or fail the save. notifyChange logs its own failures; this is a safety net.
+const notifyChange = (context, args) => {
+  new ConnectionRequestNotificationService()
+    .notifyChange({
+      ...args,
+      context: context.createContext({ skipAccessControl: true }),
+    })
+    .catch((err) => {
+      logger.error('Connection request notification failed: %s', err);
+    });
+};
+
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
 between a consumer and provider.
@@ -188,14 +201,7 @@ module.exports = {
     },
 
     afterDelete: async function ({ operation, existingItem, context }) {
-      const notificationContext = context.createContext({
-        skipAccessControl: true,
-      });
-      await new ConnectionRequestNotificationService().notifyChange({
-        context: notificationContext,
-        operation,
-        existingItem,
-      });
+      notifyChange(context, { operation, existingItem });
     },
 
     afterChange: async function ({
@@ -224,11 +230,7 @@ module.exports = {
         updatedItem.isActive ? 'apply' : 'delete'
       );
 
-      const notificationContext = context.createContext({
-        skipAccessControl: true,
-      });
-      await new ConnectionRequestNotificationService().notifyChange({
-        context: notificationContext,
+      notifyChange(context, {
         operation,
         existingItem,
         originalInput,

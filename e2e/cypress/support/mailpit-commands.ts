@@ -81,15 +81,18 @@ declare global {
       mailpitWaitForEmail(query: string, timeout?: number): Chainable<MailpitMessage>
 
       /**
-       * Assert how many messages match the query. Waits first so that emails
-       * sent asynchronously by the last action have arrived, which also makes
-       * it usable to assert that no email was sent.
+       * Assert how many messages match the query. Emails are sent in the
+       * background, so this polls until at least `count` have arrived (up to
+       * `timeoutMs`), then waits `settleMs` so that an unexpected extra email has
+       * time to arrive before the exact count is asserted. With a count of 0 it
+       * only waits `settleMs`, so it can assert that no email was sent.
        * @example cy.mailpitAssertMessageCount('subject:"Welcome"', 1)
        */
       mailpitAssertMessageCount(
         query: string,
         count: number,
-        waitMs?: number
+        settleMs?: number,
+        timeoutMs?: number
       ): Chainable<void>
 
       /**
@@ -185,13 +188,38 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   'mailpitAssertMessageCount',
-  (query: string, count: number, waitMs: number = 5000) => {
-    cy.wait(waitMs)
+  (
+    query: string,
+    count: number,
+    settleMs: number = 3000,
+    timeoutMs: number = 20000
+  ) => {
+    const startTime = Date.now()
+
+    const waitForCount = (): Cypress.Chainable<any> =>
+      cy.mailpitSearchMessages(query).then((result) => {
+        if (
+          result.messages.length >= count ||
+          Date.now() - startTime > timeoutMs
+        ) {
+          return
+        }
+        return cy.wait(500).then(() => waitForCount())
+      })
+
+    if (count > 0) {
+      waitForCount()
+    }
+    cy.wait(settleMs)
     cy.mailpitSearchMessages(query).then((result) => {
-      expect(
-        result.messages.length,
-        `Expected ${count} message(s) matching: ${query}`
-      ).to.eq(count)
+      cy.mailpitGetMessages().then((all) => {
+        expect(
+          result.messages.length,
+          `Expected ${count} message(s) matching: ${query}. Mailbox: ${all.messages
+            .map((m) => m.Subject)
+            .join(' | ')}`
+        ).to.eq(count)
+      })
     })
   }
 )
