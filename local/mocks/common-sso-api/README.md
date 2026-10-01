@@ -14,7 +14,7 @@
 
 ### Requirements
 
-- create an API endpoint `PUT /requests/{integrationId}/sdx-allowed-services` that:
+- create an API endpoint `PUT /requests/{integrationId}/sdx-allowed-access` that:
   - accepts a JSON body (the `IntegrationAccessRequest` sent by the
     provisioner's `CommonSsoService.provisionAllowedServices`)
   - logs the path and payload as YAML to stdout
@@ -32,7 +32,7 @@ docker run -ti --rm -p 2026:2026 --name common-sso-mock \
 ## Calling API
 
 ```sh
-curl -v -X PUT http://localhost:2026/requests/int-123/sdx-allowed-services \
+curl -v -X PUT http://localhost:2026/requests/int-123/sdx-allowed-access \
   -H 'content-type: application/json' \
   -d '{"integrationId":"int-123","submissionId":"sub-1","clientId":"client-a","resourceServers":[]}'
 ```
