@@ -89,6 +89,10 @@ test('allows a fully configured R0 privacy-zone token-exchange request', () => {
         operator_edge_url: 'https://operator.example',
         ca_token_url: 'https://ca.example/token',
         public_url: 'https://portal.example',
+        sdx_token_exchange_client_id: 'r1-edge-client-is-ignored-by-r0',
+        sdx_token_exchange_token_url:
+          'https://issuer.example/realms/standard/protocol/openid-connect/token',
+        sdx_trusted_issuers: ['https://issuer.example/realms/standard'],
       },
     },
   });
