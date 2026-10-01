@@ -117,3 +117,38 @@ npm run spec:yaml   # writes openapi.yaml
 npm run spec:json   # writes openapi.json
 npm run lint:spec   # regenerates openapi.yaml and runs Spectral (fails on warn)
 ```
+
+## SDX R1 security configuration
+
+Each entry in the environments configuration may include these R1 fields:
+
+- `sdx_token_exchange_client_id` identifies the OAuth client used by the
+  consumer edge for RFC 8693 exchange. It must not reuse `client_id` merely
+  because that field already exists; `client_id` belongs to provisioner/GWA
+  control-plane authentication.
+- `sdx_trusted_issuers` lists the token issuers accepted at the consumer and
+  provider edges.
+- `sdx_token_exchange_token_url` identifies the exchange endpoint. It may be
+  omitted only when `oauth_token_url` is an endpoint below one of the trusted
+  issuer URLs.
+
+The available R1 preflight API validates these values and reports missing
+environment fields, invalid URLs, environment conflicts, and a requester
+provider identity that differs from the service catalog. The provider audience
+always comes from the catalog service subsystem's `clientId`. Approved service
+scopes and that subsystem's privacy-zone scope form the static exchange
+fallback.
+
+These settings are non-secret deployment configuration. APS platform
+operations owns the mapping from each SDX environment to the approved Common
+SSO realm and exchange client. The Common SSO owner provisions that client,
+registers the edge JWKS, and assigns its optional scopes. The exchange private
+key remains in the edge signing certificate mount; it does not belong in the
+environment JSON. Service owners maintain the provider subsystem identity and
+privacy zone in the SDX catalog.
+
+The new settings remain optional while environments are populated. Existing
+R0 behavior is unchanged. This task leaves the preflight out of the active
+request evaluator and does not add the R1 token, ACL, or exchange upgrades to
+route defaults. The policy-enforcement change will invoke the preflight before
+generating gateway resources.
