@@ -98,16 +98,17 @@ export function buildR1SecurityConfig({
   ]);
 
   if (
-    !explicitTokenEndpoint &&
     !trustedIssuers.some((issuer) => isEndpointForIssuer(tokenEndpoint, issuer))
   ) {
     throw withDetails(
       new InternalError(
-        `SDX.R1.00 security configuration for environment '${environmentName}' is contradictory: oauth_token_url is outside sdx_trusted_issuers; configure sdx_token_exchange_token_url explicitly`
+        `SDX.R1.00 security configuration for environment '${environmentName}' is contradictory: token endpoint is outside sdx_trusted_issuers`
       ),
       {
         environment: environmentName,
-        field: 'sdx_token_exchange_token_url',
+        field: explicitTokenEndpoint
+          ? 'sdx_token_exchange_token_url'
+          : 'oauth_token_url',
       }
     );
   }
@@ -147,6 +148,14 @@ export function buildR1SecurityConfig({
   }
 
   const authoritativePrivacyZone = nonBlank(service.subsystem?.privacyZone);
+  if (!authoritativePrivacyZone) {
+    throw withDetails(
+      new InternalError(
+        `SDX.R1.00 service '${service.name}' has no authoritative privacy zone`
+      ),
+      { environment: environmentName, field: 'service.subsystem.privacyZone' }
+    );
+  }
   const requestedPrivacyZone = nonBlank(requesterDetails?.service?.privacyZone);
   if (
     requestedPrivacyZone &&
