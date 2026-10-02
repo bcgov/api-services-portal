@@ -128,7 +128,7 @@ test('requires an explicit exchange endpoint when control-plane OAuth uses anoth
         service,
         requesterDetails,
       }),
-    /oauth_token_url is outside sdx_trusted_issuers/
+    /token endpoint is outside sdx_trusted_issuers/
   );
 });
 
@@ -167,6 +167,23 @@ test('rejects blank trusted issuer entries', () => {
   );
 });
 
+test('rejects an explicit exchange endpoint outside the trusted issuers', () => {
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: {
+          ...environment,
+          sdx_token_exchange_token_url:
+            'https://untrusted.example/realms/standard/protocol/openid-connect/token',
+        },
+        service,
+        requesterDetails,
+      }),
+    /token endpoint is outside sdx_trusted_issuers/
+  );
+});
+
 test('rejects an invalid exchange endpoint URL', () => {
   assert.throws(
     () =>
@@ -180,6 +197,22 @@ test('rejects an invalid exchange endpoint URL', () => {
         requesterDetails,
       }),
     /invalid URL in sdx_token_exchange_token_url/
+  );
+});
+
+test('requires an authoritative provider privacy zone', () => {
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: environment,
+        service: {
+          ...service,
+          subsystem: { ...providerSubsystem, privacyZone: '' },
+        },
+        requesterDetails,
+      }),
+    /has no authoritative privacy zone/
   );
 });
 
@@ -210,10 +243,10 @@ test('rejects every non-string or blank requested scope', () => {
           environment: 'dev',
           environmentConfig: environment,
           service,
-          requesterDetails: ({
+          requesterDetails: {
             ...requesterDetails,
             scopes: ['service:read', invalidScope],
-          } as unknown) as PolicyRequesterDetails,
+          } as unknown as PolicyRequesterDetails,
         }),
       /scopes must contain only nonblank strings/
     );
@@ -230,9 +263,11 @@ test('R1 defaults do not enable the new strict route settings yet', () => {
     service,
     requesterDetails
   );
-  const consumer = (defaults.clientResources as {
-    gatewayPatterns: Record<string, { upgrades?: Record<string, unknown> }>;
-  }).gatewayPatterns['sdx-p2p-consumer.r1'];
+  const consumer = (
+    defaults.clientResources as {
+      gatewayPatterns: Record<string, { upgrades?: Record<string, unknown> }>;
+    }
+  ).gatewayPatterns['sdx-p2p-consumer.r1'];
 
   assert.deepEqual(Object.keys(consumer.upgrades || {}).sort(), [
     'counterSign',
