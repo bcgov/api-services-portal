@@ -283,9 +283,17 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
     name: 'request-transformer',
     tags,
     config: {
+      remove: {
+        headers: [
+          'X-Client-Id',
+          'X-SDX-Client-Subsystem-Id',
+          'X-Service-Id',
+        ],
+      },
       add: {
         headers: [
           `X-Client-Id:${clientLocator}`,
+          `X-SDX-Client-Subsystem-Id:${clientLocator}`,
           `X-Service-Id:${serviceLocator}`,
         ],
       },
