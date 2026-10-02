@@ -3,7 +3,7 @@ import {
   KeycloakClientRegistrationService,
   ClientAuthenticator,
 } from '../../../services/keycloak';
-import { server } from '../../mocks/server';
+import { server } from 'test/mocks/server';
 
 const APIGW_ISSUER = 'https://provider/auth/realms/apigw';
 const APIGW_REGISTRATION =
