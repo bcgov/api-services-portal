@@ -30,7 +30,7 @@ function evaluateConsumerPattern() {
   );
 }
 
-test('sets the provider subsystem header from the provisioned connection', () => {
+test('replaces caller-supplied identity headers with provisioned values', () => {
   const resources = evaluateConsumerPattern();
   const transformer = resources[0].plugins.find(
     (plugin: { name: string }) => plugin.name === 'request-transformer'
@@ -39,6 +39,7 @@ test('sets the provider subsystem header from the provisioned connection', () =>
   assert.deepEqual(transformer.config.remove.headers, [
     'X-Client-Id',
     'X-SDX-Client-Subsystem-Id',
+    'X-Service-Id',
   ]);
   assert.ok(
     transformer.config.add.headers.includes(
@@ -46,6 +47,9 @@ test('sets the provider subsystem header from the provisioned connection', () =>
     )
   );
   assert.ok(transformer.config.add.headers.includes('X-Client-Id:TEST.CLIENT'));
+  assert.ok(
+    transformer.config.add.headers.includes('X-Service-Id:TEST.SERVICE.v1')
+  );
 });
 
 test('keeps the legacy client header as the consumer route selector', () => {
