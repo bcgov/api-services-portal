@@ -159,6 +159,38 @@ test('access requests reject a supplied version that differs from the catalog', 
   );
 });
 
+test('access requests reject a supplied blank version', async () => {
+  const service = serviceWithApi({
+    listConnections: async () => [],
+    getOASService: async () => catalogService,
+    upsertConnection: async () => ({ status: 200, result: 'created' }),
+  });
+  const versionedRequest = {
+    ...structuredClone(request),
+    resourceServers: [
+      {
+        ...structuredClone(request.resourceServers[0]),
+        services: [
+          {
+            ...structuredClone(request.resourceServers[0].services[0]),
+            version: '',
+          },
+        ],
+      },
+    ],
+  };
+
+  await assert.rejects(
+    service.submitIntegrationAccessRequest(
+      'submission-1',
+      consumerSubsystem,
+      'css-integration',
+      versionedRequest
+    ),
+    /version '' does not match catalog version '2\.4\.0'/
+  );
+});
+
 test('allowed-services responses contain the authoritative catalog version', async () => {
   const connection: ConnectionRequest = {
     clientId: consumerSubsystem.clientId,

@@ -73,7 +73,7 @@ export class IntegrationAccessService {
             // Older CSS callers may omit the version. When supplied, it must
             // identify the exact catalog service that will be authorized.
             if (
-              requestedService.version &&
+              requestedService.version !== undefined &&
               requestedService.version !== spec.version
             ) {
               throw new BadRequestError(
