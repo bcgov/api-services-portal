@@ -70,6 +70,17 @@ export class IntegrationAccessService {
             // check that the scopes requested are part of the OpenAPI/AsyncAPI specification
             const spec = await this.api.getOASService(requestedService.name);
 
+            // Older CSS callers may omit the version. When supplied, it must
+            // identify the exact catalog service that will be authorized.
+            if (
+              requestedService.version !== undefined &&
+              requestedService.version !== spec.version
+            ) {
+              throw new BadRequestError(
+                `Requested service '${requestedService.name}' version '${requestedService.version}' does not match catalog version '${spec.version}'`
+              );
+            }
+
             // make sure the environments are valid
             if (spec.environment !== requestedResourceServer.environment) {
               throw new BadRequestError(
@@ -280,12 +291,14 @@ export class IntegrationAccessService {
       string,
       { connections: typeof allowedConnections }
     > = {};
+    const serviceVersions = new Map<string, string>();
     for (const s of allowedConnections) {
       const service = (await this.api.getOASService(
         s.serviceId!
       )) as EnrichedServiceCatalogEntry;
 
       const subsystemId = service.subsystem.clientId;
+      serviceVersions.set(s.serviceId!, service.version);
       if (!servicesBySubsystem[subsystemId]) {
         servicesBySubsystem[subsystemId] = {
           connections: [],
@@ -312,6 +325,7 @@ export class IntegrationAccessService {
         environment: environment,
         services: services.map((s) => ({
           name: s.serviceId!,
+          version: serviceVersions.get(s.serviceId!)!,
           scopes: (s.requesterDetails?.scopes || []) as string[],
         })),
       });
