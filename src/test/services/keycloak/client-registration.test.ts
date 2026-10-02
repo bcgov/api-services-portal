@@ -96,9 +96,12 @@ describe('Keycloak Service', function () {
       expect(result.registrationAccessToken).toBe('token-123');
     });
 
-    it.each(['service_account', 'basic'])(
-      'rejects and deletes an apigw client when %s is missing from the create response',
-      async function (missing) {
+    it.each([
+      ['service_account', 'initial access token', 'initial-token'],
+      ['basic', 'anonymous registration', undefined],
+    ])(
+      'rejects and deletes an apigw client when %s is missing using %s',
+      async function (missing, _registrationMode, accessToken) {
         const deletes: { clientId: string; authorization: string }[] = [];
         const assigned = ['service_account', 'basic'].filter(
           (name) => name !== missing
@@ -126,7 +129,7 @@ describe('Keycloak Service', function () {
         const regsvc = new KeycloakClientRegistrationService(
           APIGW_ISSUER,
           APIGW_REGISTRATION,
-          'token'
+          accessToken
         );
         await expect(
           regsvc.clientRegistration(
@@ -140,7 +143,10 @@ describe('Keycloak Service', function () {
           )
         ).rejects.toThrow(/Required default scopes missing from client/);
         expect(deletes).toEqual([
-          { clientId: 'cid', authorization: 'bearer token' },
+          {
+            clientId: 'cid',
+            authorization: 'bearer new-registration-token',
+          },
         ]);
       }
     );
