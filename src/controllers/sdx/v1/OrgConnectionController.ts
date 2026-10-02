@@ -25,6 +25,7 @@ import {
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
 import { Logger } from '../../../logger';
+import { assertEqual } from '../../ioc/assert';
 import {
   getGwaProductEnvironment,
   getPermittedNamespaceNames,
@@ -78,7 +79,12 @@ export class OrgConnectionController extends Controller {
   }
 
   /**
-   * Update a connection request approval setting `isApproved`
+   * Approve a connection request (`isApproved: true`), or withdraw the approval of an
+   * approved connection (`isApproved: false`).
+   *
+   * To reject a pending request, delete it with
+   * `DELETE /organizations/{org}/connections/{id}`.
+   *
    * > `Required Scope:` Connection.Manage
    *
    * @param org
@@ -95,6 +101,21 @@ export class OrgConnectionController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
+    const connectionService = new ConnectionService();
+
+    if (input.isApproved === false) {
+      const existing = await connectionService.findConnection(
+        ctx,
+        input.clientId,
+        input.serviceId
+      );
+      assertEqual(
+        Boolean(existing) && !existing.isApproved,
+        false,
+        'isApproved',
+        'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+      );
+    }
 
     const data: ConnectionRequestInput = {
       clientId: input.clientId,
@@ -105,7 +126,7 @@ export class OrgConnectionController extends Controller {
       data['isActive'] = input.isActive;
     }
 
-    return new ConnectionService().upsertConnection(ctx, org, data);
+    return connectionService.upsertConnection(ctx, org, data);
   }
 
   /**

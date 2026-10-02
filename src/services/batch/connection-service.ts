@@ -72,7 +72,7 @@ class ConnectionService {
       body.environment = serviceSpec.environment as any;
     }
 
-    // if approving or explicitely rejecting the connection, validate the client and service belong to the same organization
+    // if approving or un-approving the connection, validate the service belongs to the specified organization
     if (body.isApproved === true || body.isApproved === false) {
       assertEqual(
         serviceSpec.organization.name === org,
@@ -96,6 +96,25 @@ class ConnectionService {
       body
     );
     return result;
+  };
+
+  findConnection = async (
+    context: Keystone,
+    clientId: string,
+    serviceId: string
+  ): Promise<KeystoneConnectionRequest | undefined> => {
+    const records: KeystoneConnectionRequest[] = await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      {
+        query: '$clientId: String, $serviceId: String',
+        clause: '{ clientId: $clientId, serviceId: $serviceId }',
+        variables: { clientId, serviceId },
+      }
+    );
+    return records.pop();
   };
 
   getConnectionById = async (
