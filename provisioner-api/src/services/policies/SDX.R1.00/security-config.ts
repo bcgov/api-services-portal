@@ -147,47 +147,6 @@ export function buildR1SecurityConfig({
     );
   }
 
-  const authoritativePrivacyZone = nonBlank(service.subsystem?.privacyZone);
-  if (!authoritativePrivacyZone) {
-    throw withDetails(
-      new InternalError(
-        `SDX.R1.00 service '${service.name}' has no authoritative privacy zone`
-      ),
-      { environment: environmentName, field: 'service.subsystem.privacyZone' }
-    );
-  }
-  const requestedPrivacyZone = nonBlank(requesterDetails?.service?.privacyZone);
-  if (
-    requestedPrivacyZone &&
-    requestedPrivacyZone !== authoritativePrivacyZone
-  ) {
-    throw requestError(
-      `requesterDetails.service.privacyZone '${requestedPrivacyZone}' does not match the authoritative service subsystem`,
-      environmentName,
-      'requesterDetails.service.privacyZone'
-    );
-  }
-
-  if (!Array.isArray(requesterDetails?.scopes)) {
-    throw requestError(
-      'requesterDetails.scopes must be an array for SDX.R1.00',
-      environmentName,
-      'requesterDetails.scopes'
-    );
-  }
-  if (requesterDetails.scopes.some((scope) => !nonBlank(scope))) {
-    throw requestError(
-      'requesterDetails.scopes must contain only nonblank strings',
-      environmentName,
-      'requesterDetails.scopes'
-    );
-  }
-
-  const scopes = uniqueNonBlank([
-    ...requesterDetails.scopes,
-    ...(authoritativePrivacyZone ? [authoritativePrivacyZone] : []),
-  ]);
-
   return {
     consumer: {
       token: {
@@ -202,7 +161,7 @@ export function buildR1SecurityConfig({
       tokenExchange: {
         clientId: exchangeClientId,
         tokenEndpoint,
-        scopes,
+        scopes: [],
         audience: providerAudience,
       },
     },

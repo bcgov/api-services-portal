@@ -135,17 +135,18 @@ Each entry in the environments configuration may include these R1 fields:
 The available R1 preflight API validates these values and reports missing
 environment fields, invalid URLs, environment conflicts, and a requester
 provider identity that differs from the service catalog. The provider audience
-always comes from the catalog service subsystem's `clientId`. Approved service
-scopes and that subsystem's privacy-zone scope form the static exchange
-fallback.
+always comes from the catalog service subsystem's `clientId`. Managed R1 route
+configuration leaves the static exchange-scope fallback empty because the
+verified original token is the sole source of requested scopes.
 
 These settings are non-secret deployment configuration. APS platform
-operations owns the mapping from each SDX environment to the approved Common
-SSO realm and exchange client. The Common SSO owner provisions that client,
-registers the edge JWKS, and assigns its optional scopes. The exchange private
-key remains in the edge signing certificate mount; it does not belong in the
-environment JSON. Service owners maintain the provider subsystem identity and
-privacy zone in the SDX catalog.
+operations may populate them only with an existing Common SSO realm and
+exchange client that already support the required audiences, JWKS, and scopes.
+The R1 solution must not require any CSS code, API, UI, deployment, client,
+realm, scope, or JWKS change. If the needed capability is unavailable in the
+existing CSS configuration, APS must revise the APS/SDX design instead of
+creating a CSS prerequisite. The exchange private key remains in the edge
+signing certificate mount; it does not belong in the environment JSON.
 
 The new settings remain optional while environments are populated. Existing
 R0 behavior is unchanged. This task leaves the preflight out of the active
