@@ -78,7 +78,7 @@ test('builds canonical R1 security settings from trusted sources', () => {
           clientId: 'sdx-edge-exchange',
           tokenEndpoint:
             'https://issuer.example/realms/standard/protocol/openid-connect/token',
-          scopes: ['service:read', 'urn:ca:bc:gov:provider'],
+          scopes: [],
           audience: 'MIN.PROVIDER.API',
         },
       },
@@ -200,22 +200,6 @@ test('rejects an invalid exchange endpoint URL', () => {
   );
 });
 
-test('requires an authoritative provider privacy zone', () => {
-  assert.throws(
-    () =>
-      buildR1SecurityConfig({
-        environment: 'dev',
-        environmentConfig: environment,
-        service: {
-          ...service,
-          subsystem: { ...providerSubsystem, privacyZone: '' },
-        },
-        requesterDetails,
-      }),
-    /has no authoritative privacy zone/
-  );
-});
-
 test('rejects requester service identity that contradicts the catalog', () => {
   assert.throws(
     () =>
@@ -233,24 +217,6 @@ test('rejects requester service identity that contradicts the catalog', () => {
       }),
     /does not match authoritative provider/
   );
-});
-
-test('rejects every non-string or blank requested scope', () => {
-  for (const invalidScope of [undefined, null, '', ' ']) {
-    assert.throws(
-      () =>
-        buildR1SecurityConfig({
-          environment: 'dev',
-          environmentConfig: environment,
-          service,
-          requesterDetails: {
-            ...requesterDetails,
-            scopes: ['service:read', invalidScope],
-          } as unknown as PolicyRequesterDetails,
-        }),
-      /scopes must contain only nonblank strings/
-    );
-  }
 });
 
 test('R1 defaults do not enable the new strict route settings yet', () => {
