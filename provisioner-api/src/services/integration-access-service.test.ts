@@ -107,6 +107,7 @@ function existingConnection(
     environment: 'dev',
     policyVersion: 'SDX.R1.00',
     isApproved: true,
+    isActive: true,
     requesterDetails: {
       submissionId: 'submission-100-a',
       requester: { name: 'Jane Doe', email: 'jane@example.test' },
@@ -458,6 +459,17 @@ test('does not derive callback metadata from unrelated connections', async () =>
         },
       }),
     ],
+  });
+
+  await assert.rejects(
+    service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
+    /No approved connections found for integration integration-a in environment dev/
+  );
+});
+
+test('does not return an approved connection that is inactive', async () => {
+  const { service } = createService({
+    connections: [existingConnection({ isActive: false })],
   });
 
   await assert.rejects(

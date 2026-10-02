@@ -265,7 +265,8 @@ export class IntegrationAccessService {
           connection.environment === normalizedEnvironment &&
           connection.requesterDetails?.client?.integrationId ===
             normalizedIntegrationId &&
-          connection.isApproved === (status === 'approved')
+          connection.isApproved === (status === 'approved') &&
+          (status === 'pending' || connection.isActive === true)
       )
       .sort(compareConnections);
 
