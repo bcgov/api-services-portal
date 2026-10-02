@@ -7,6 +7,9 @@ module.exports = {
   coverageDirectory: '__coverage__',
   coverageReporters: ['lcov', 'text-summary'],
   moduleDirectories: ['node_modules', 'nextapp/test', 'test'],
+  moduleNameMapper: {
+    '^test/(.*)$': '<rootDir>/test/$1',
+  },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
