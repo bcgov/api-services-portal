@@ -231,10 +231,13 @@ export class KeycloakClientRegistrationService {
     } as ClientRegResponse;
   }
 
-  public async deleteClientRegistration(clientId: string): Promise<void> {
+  public async deleteClientRegistration(
+    clientId: string,
+    accessToken: string = this.accessToken
+  ): Promise<void> {
     await fetch(`${this.registrationUrl}/${clientId}`, {
       method: 'delete',
-      headers: headers(this.accessToken) as any,
+      headers: headers(accessToken) as any,
     }).then(checkStatus);
   }
 
@@ -491,7 +494,10 @@ export class KeycloakClientRegistrationService {
     );
     if (clientId) {
       try {
-        await this.deleteClientRegistration(clientId);
+        await this.deleteClientRegistration(
+          clientId,
+          response.registrationAccessToken
+        );
       } catch (err) {
         logger.error(
           '[clientRegistration] Failed to delete client %s after missing scopes %s',
