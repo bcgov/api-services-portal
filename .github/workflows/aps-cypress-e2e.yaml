@@ -64,6 +64,18 @@ jobs:
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               echo "Cypress tests completed."
+
+              # Record why a container might have gone away during the run. Only
+              # state and resource numbers are printed, never container logs.
+              echo "::group::Container state"
+              docker ps -aq | xargs docker inspect --format \
+                '{{.Name}} status={{.State.Status}} exit={{.State.ExitCode}} oomkilled={{.State.OOMKilled}} restarts={{.RestartCount}} finished={{.State.FinishedAt}}'
+              echo "::endgroup::"
+              echo "::group::Resource usage"
+              free -m
+              docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}'
+              echo "::endgroup::"
+
               # cleanup
               docker compose down
               break

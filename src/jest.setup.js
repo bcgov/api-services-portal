@@ -2,6 +2,12 @@
 // Jest's node environment doesn't expose Node 22 globals (FormData, Headers, fetch, etc.)
 import { FormData } from 'formdata-node';
 import nodeFetch, { Headers, Request, Response } from 'node-fetch';
+// juice -> cheerio -> undici needs the web streams API at load time
+import { ReadableStream, WritableStream, TransformStream } from 'stream/web';
+
+global.ReadableStream = global.ReadableStream || ReadableStream;
+global.WritableStream = global.WritableStream || WritableStream;
+global.TransformStream = global.TransformStream || TransformStream;
 
 global.FormData = global.FormData || FormData;
 global.Headers = global.Headers || Headers;
@@ -10,6 +16,7 @@ global.Response = global.Response || Response;
 global.fetch = global.fetch || nodeFetch;
 process.env.OAS_VALIDATION_API_URL =
   process.env.OAS_VALIDATION_API_URL || 'http://validation.local';
+process.env.SDX_UI_URL = process.env.SDX_UI_URL || 'http://sdx-ui.local';
 import { setLogger } from 'react-query';
 import '@testing-library/jest-dom/extend-expect';
 

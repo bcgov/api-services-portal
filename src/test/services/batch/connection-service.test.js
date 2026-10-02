@@ -1,5 +1,6 @@
 const {
   deleteRecordByInternalIdThrowErrors,
+  getRecords,
 } = require('../../../batch/feed-worker');
 const {
   ConnectionService,
@@ -34,6 +35,40 @@ jest.mock('../../../services/batch/oas-service', () => ({
 describe('ConnectionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('findConnection', () => {
+    it('looks up the connection by client and service', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      const result = await new ConnectionService().findConnection(
+        {},
+        'LAB.MIN.CLIENT',
+        'LAB.MIN.SERVICE.v1'
+      );
+
+      expect(result).toEqual({ id: '1', isApproved: false });
+      expect(getRecords).toHaveBeenCalledWith(
+        {},
+        'ConnectionRequest',
+        'allConnectionRequests',
+        [],
+        expect.objectContaining({
+          variables: {
+            clientId: 'LAB.MIN.CLIENT',
+            serviceId: 'LAB.MIN.SERVICE.v1',
+          },
+        })
+      );
+    });
+
+    it('returns undefined when there is no connection', async () => {
+      getRecords.mockResolvedValue([]);
+
+      expect(
+        await new ConnectionService().findConnection({}, 'A', 'B')
+      ).toBeUndefined();
+    });
   });
 
   describe('buildConnectionConfigTags', () => {

@@ -276,29 +276,19 @@ module.exports = {
                 tokenResult.resourceRegistrationEndpoint,
                 tokenResult.accessToken
               );
-              const resOwnerResourceIds = await kcprotectApi.listResources({
+              const [namespaceId] = await kcprotectApi.listResources({
+                name: args.namespace,
+                exactName: true,
                 owner: tokenResult.clientUuid,
                 type: 'namespace',
               } as ResourceSetQuery);
+              assert.ok(namespaceId, `Namespace ${args.namespace} not found`);
 
-              const namespaces = await kcprotectApi.listResourcesByIdList(
-                resOwnerResourceIds
-              );
-
-              const matched = namespaces
-                .filter((ns) => ns.name == args.namespace)
-                .map((ns) => ({
-                  id: ns.id,
-                  name: ns.name,
-                  scopes: ns.resource_scopes,
-                  prodEnvId: prodEnv.id,
-                }));
-              const namespaceObj = matched[0];
               const permissionApi = new KeycloakPermissionTicketService(
                 tokenResult.issuer,
                 tokenResult.accessToken
               );
-              const params = { resourceId: namespaceObj.id, returnNames: true };
+              const params = { resourceId: namespaceId, returnNames: true };
               let permissions = await permissionApi.listPermissions(params);
               if (args.scopeName) {
                 const updatedPermissions = permissions.filter((perm) => {
