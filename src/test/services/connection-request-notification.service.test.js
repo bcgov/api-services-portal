@@ -12,8 +12,12 @@ jest.mock('../../services/org-groups/org-group-service', () => ({
 const {
   lookupProductEnvironmentServicesBySlug,
 } = require('../../services/keystone');
-const { getEnvironmentContext } = require('../../services/workflow/get-namespaces');
-const { OrgGroupService } = require('../../services/org-groups/org-group-service');
+const {
+  getEnvironmentContext,
+} = require('../../services/workflow/get-namespaces');
+const {
+  OrgGroupService,
+} = require('../../services/org-groups/org-group-service');
 const {
   ConnectionRequestNotificationService,
   getConnectionNotificationEvent,
@@ -493,26 +497,11 @@ describe('ConnectionRequestNotificationService', () => {
       );
     });
 
-    it('does not link to an organization when the SDX UI url is not set', async () => {
-      delete process.env.SDX_UI_URL;
-      const { service, notify } = newService();
-
-      await service.notifyChange(created(connection.requesterDetails));
-
-      expect(notify).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          context: expect.objectContaining({
-            connectionsUrl: '',
-            brochureUrl: '',
-          }),
-        })
-      );
-    });
-
     it('links without an organization when the client cannot be found', async () => {
       const { service, notify } = newService({
-        findClient: jest.fn().mockRejectedValue(new Error('Subsystem not found')),
+        findClient: jest
+          .fn()
+          .mockRejectedValue(new Error('Subsystem not found')),
       });
 
       await service.notifyChange({
@@ -556,7 +545,9 @@ describe('ConnectionRequestNotificationService', () => {
         },
       };
       const { service, findRoleAccessManagers } = newService({
-        findService: jest.fn().mockResolvedValue({ namespace: 'gw', subsystem }),
+        findService: jest
+          .fn()
+          .mockResolvedValue({ namespace: 'gw', subsystem }),
       });
 
       await service.notifyChange(created(connection.requesterDetails));
@@ -646,10 +637,17 @@ describe('listSubsystemAccessManagers', () => {
   });
 
   it('lists the members of the subsystem access-manager group', async () => {
-    const members = await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT');
+    const members = await listSubsystemAccessManagers(
+      context,
+      'LAB.MIN.CLIENT'
+    );
 
-    expect(members).toEqual([{ name: 'Role Member', email: 'role@example.com' }]);
-    expect(OrgGroupService).toHaveBeenCalledWith('http://keycloak/realms/master');
+    expect(members).toEqual([
+      { name: 'Role Member', email: 'role@example.com' },
+    ]);
+    expect(OrgGroupService).toHaveBeenCalledWith(
+      'http://keycloak/realms/master'
+    );
     expect(login).toHaveBeenCalledWith('gwa', 'secret');
     expect(listMembersForPath).toHaveBeenCalledWith(
       '/access-manager/systems/LAB.MIN.CLIENT'
@@ -659,17 +657,17 @@ describe('listSubsystemAccessManagers', () => {
   it('returns no members when the environment has no UMA2 configuration', async () => {
     getEnvironmentContext.mockResolvedValue({});
 
-    expect(await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')).toEqual(
-      []
-    );
+    expect(
+      await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')
+    ).toEqual([]);
     expect(OrgGroupService).not.toHaveBeenCalled();
   });
 
   it('returns no members when the lookup fails', async () => {
     listMembersForPath.mockRejectedValue(new Error('keycloak unavailable'));
 
-    expect(await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')).toEqual(
-      []
-    );
+    expect(
+      await listSubsystemAccessManagers(context, 'LAB.MIN.CLIENT')
+    ).toEqual([]);
   });
 });

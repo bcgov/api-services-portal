@@ -184,7 +184,13 @@ const contactsByEmail = (
   return Array.from(byEmail.values());
 };
 
-const brochureUrl = () => (process.env.SDX_UI_URL || '').replace(/\/$/, '');
+const brochureUrl = () => {
+  const url = process.env.SDX_UI_URL;
+  if (!url) {
+    throw new Error('SDX_UI_URL is required');
+  }
+  return url.replace(/\/$/, '');
+};
 
 const connectionEmailCopy: Record<
   ConnectionNotificationEvent,
@@ -222,12 +228,7 @@ const connectionEmailCopy: Record<
 };
 
 const connectionsUrl = (org?: string) => {
-  const baseUrl = brochureUrl();
-  if (!baseUrl) {
-    return '';
-  }
-
-  const url = new URL(`${baseUrl}/connections`);
+  const url = new URL(`${brochureUrl()}/connections`);
   if (org) {
     url.searchParams.set('org', org);
   }

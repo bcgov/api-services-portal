@@ -46,6 +46,12 @@ class ApiOpenapiApp {
       throw new Error('OAS_VALIDATION_API_URL is required');
     }
     assertHttpUrl('OAS_VALIDATION_API_URL', validationApiUrl);
+
+    const sdxUiUrl = process.env.SDX_UI_URL;
+    if (!sdxUiUrl) {
+      throw new Error('SDX_UI_URL is required');
+    }
+    assertHttpUrl('SDX_UI_URL', sdxUiUrl);
   }
 
   prepareV2(app) {
