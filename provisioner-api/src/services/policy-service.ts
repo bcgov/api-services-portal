@@ -21,6 +21,11 @@ export type { PolicyDefaultResources, PolicyRequesterDetails };
 export class PolicyService {
   constructor(private readonly logger?: FastifyBaseLogger) {}
 
+  /** Returns whether the provisioner has an implementation for a policy. */
+  supportsPolicyVersion(policyVersion: string): boolean {
+    return Object.hasOwn(POLICY_REGISTRY, policyVersion);
+  }
+
   /**
    * Validate a Connection Request.
    */
@@ -54,7 +59,9 @@ export class PolicyService {
   ): PolicyDefaultResources {
     const policy = POLICY_REGISTRY[policyVersion];
     if (!policy) {
-      throw new BadRequestError(`Policy ${policyVersion} not found in registry`);
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
     }
     return policy.defaults(subsystem, service, requesterDetails);
   }
