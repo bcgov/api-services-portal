@@ -3,7 +3,8 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import type { ClientResources, ServiceResources } from './types.js';
-import type { PolicyDefaultsFn } from '../types.js';
+import type { PolicyDefaultsFn, PolicyPreflightFn } from '../types.js';
+import { buildR1SecurityConfig } from './security-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -74,9 +75,14 @@ const defaults: PolicyDefaultsFn = (
   },
 });
 
+const preflight: PolicyPreflightFn = (context) => {
+  buildR1SecurityConfig(context);
+};
+
 export const SDXPolicy = {
   id: 'SDX.R1.00',
   schema,
   policies,
   defaults,
+  preflight,
 };
