@@ -562,3 +562,29 @@ export async function countServiceAccessesByApplication(
   );
   return result.data.allServiceAccesses.length;
 }
+
+/**
+ * Counts the ServiceAccess records for a consumer, other than the given one.
+ * A consumer can be shared by several ServiceAccess records (e.g. an SDX
+ * integration client used by all of its connections).
+ */
+export async function countOtherServiceAccessesByConsumer(
+  context: any,
+  consumerId: string,
+  serviceAccessId: string
+): Promise<number> {
+  const result = await context.executeGraphQL({
+    query: `query CountOtherServiceAccessesByConsumer($consumerId: ID!, $serviceAccessId: ID!) {
+                    allServiceAccesses(where: { consumer: { id: $consumerId }, id_not: $serviceAccessId }) {
+                        id
+                    }
+                }`,
+    variables: { consumerId, serviceAccessId },
+  });
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  return result.data.allServiceAccesses.length;
+}
