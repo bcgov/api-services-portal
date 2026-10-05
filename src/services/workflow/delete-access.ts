@@ -1,6 +1,7 @@
 import { strict as assert } from 'assert';
 
 import {
+  countOtherServiceAccessesByConsumer,
   deleteRecord,
   deleteRecords,
   lookupCredentialReferenceByServiceAccess,
@@ -131,6 +132,26 @@ export const DeleteAccess = async (context: any, keys: any) => {
       { serviceAccess: { id: serviceAccessId } },
       ['id']
     );
+
+    // A consumer shared with other ServiceAccess records (e.g. an SDX
+    // integration client used by several connections) keeps its
+    // GatewayConsumer, Kong consumer and IdP client for that other access
+    if (svc.consumer != null && svc.consumerType == 'client') {
+      const otherAccess = await countOtherServiceAccessesByConsumer(
+        context,
+        svc.consumer.id,
+        serviceAccessId
+      );
+      if (otherAccess > 0) {
+        logger.info(
+          '[DeleteAccess] Keeping consumer %s, used by %d other service accesses',
+          svc.consumer.username,
+          otherAccess
+        );
+        return;
+      }
+    }
+
     svc.consumer != null &&
       svc.consumerType == 'client' &&
       svc.consumer.username != 'anonymous' &&

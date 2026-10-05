@@ -19,6 +19,7 @@ export async function lookupConsumerPlugins(
                         customId
                         extForeignKey
                         namespace
+                        tags
                         plugins {
                           id
                           name
