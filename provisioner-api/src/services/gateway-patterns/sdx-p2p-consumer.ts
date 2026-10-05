@@ -317,6 +317,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
+      uri_param_names: [],
       scope: jwtKeycloakConfig?.scope,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
