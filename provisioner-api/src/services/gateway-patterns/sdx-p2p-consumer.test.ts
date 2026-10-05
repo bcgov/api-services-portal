@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SDXP2PConsumerPattern } from './sdx-p2p-consumer.js';
 
-function evaluateConsumerPattern() {
+function evaluateConsumerPattern(upgrades: Record<string, unknown> = {}) {
   const pattern = new SDXP2PConsumerPattern({} as never);
   return pattern.eval(
     {
@@ -10,7 +10,7 @@ function evaluateConsumerPattern() {
       clientId: 'TEST.CLIENT',
       serviceId: 'TEST.SERVICE.v1',
       stripPath: false,
-      upgrades: {},
+      upgrades,
     } as never,
     {
       client: {
@@ -58,4 +58,32 @@ test('keeps the legacy client header as the consumer route selector', () => {
   assert.deepEqual(resources[0].routes[0].headers, {
     'X-Client-Id': ['TEST.CLIENT'],
   });
+});
+
+test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
+  const resources = evaluateConsumerPattern({
+    token: {
+      allowedAud: 'TEST.CLIENT',
+      allowedIss: ['https://issuer.example'],
+    },
+    tokenExchange: {
+      clientId: 'sdx-client',
+      tokenEndpoint: 'https://issuer.example/token',
+      scopes: ['configured.scope'],
+      audience: 'TEST.PROVIDER',
+    },
+  });
+
+  const jwtPlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'jwt-keycloak'
+  );
+  assert.deepEqual(jwtPlugin.config.uri_param_names, []);
+
+  const tokenExchangePlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'token-exchange'
+  );
+  assert.equal(
+    tokenExchangePlugin.config.scope_source,
+    'verified_subject_token'
+  );
 });
