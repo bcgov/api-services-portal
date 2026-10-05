@@ -1,7 +1,11 @@
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type { SdxMemberApiClient } from '../../clients/sdx-member/index.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
-import { assert, type EnrichedSubsystemEntry } from './utils.js';
+import {
+  assert,
+  type EnrichedServiceCatalogEntry,
+  type EnrichedSubsystemEntry,
+} from './utils.js';
 import { IntegrationAccessService } from '../integration-access-service.js';
 import { TIntegrationAccessRequest } from '../../schemas/sdx.js';
 
@@ -14,7 +18,9 @@ export interface SDXP2PConsumerPatternConfig {
 
 export interface SDXP2PConsumerPatternData {
   gatewayId: string;
+  action?: string;
   client: EnrichedSubsystemEntry;
+  service: EnrichedServiceCatalogEntry;
   allowedAccess: {
     clientId: string;
     resourceServers: Array<{
@@ -47,7 +53,8 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
   };
 
   async inject(
-    inputs: SDXP2PConsumerPatternConfig
+    inputs: SDXP2PConsumerPatternConfig,
+    ctx?: { action?: string }
   ): Promise<SDXP2PConsumerPatternData> {
     const { api } = this;
 
@@ -65,13 +72,20 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       client.name
     )) as EnrichedSubsystemEntry;
 
+    // the provider side of the connection, for the ServiceAccess
+    const service = (await api.getOASService(
+      inputs.serviceId
+    )) as EnrichedServiceCatalogEntry;
+
     // if the integrationClientId is explicitely specified, then
     // no acl groups will be assigned to the client, acl groups
     // only supported when requester details hold the integration Id
     if (inputs.integrationClientId) {
       return {
         gatewayId: orgClient.gateway.id,
+        action: ctx?.action,
         client: orgClient,
+        service,
         allowedAccess: {
           clientId: inputs.integrationClientId,
           resourceServers: [],
@@ -93,7 +107,9 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
 
       return {
         gatewayId: orgClient.gateway.id,
+        action: ctx?.action,
         client: orgClient,
+        service,
         allowedAccess,
       };
     }
@@ -130,10 +146,44 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       documents.length
     );
     if (inputs.integrationClientId) {
-      return documents as any[];
+      return [...documents, buildServiceAccess(inputs, data)] as any[];
     }
-    return [...documents, buildIntegrationAllowAccess(inputs, data)] as any[];
+    return [
+      ...documents,
+      buildIntegrationAllowAccess(inputs, data),
+      buildServiceAccess(inputs, data),
+    ] as any[];
   }
+}
+
+/**
+ * Links the consumer to the provider subsystem's Product environment and the
+ * client subsystem's Application, so the consumer appears on the provider
+ * gateway's Consumers page.
+ *
+ * The consumer is shared by all of the integration's connections, so on
+ * delete the pattern may still be applied (see `deleteHandling`); this
+ * connection's ServiceAccess is removed either way.
+ */
+function buildServiceAccess(
+  inputs: SDXP2PConsumerPatternConfig,
+  data: SDXP2PConsumerPatternData
+) {
+  return {
+    kind: 'ServiceAccess',
+    name: `${inputs.connId}:${data.service.name}`,
+    consumer: data.allowedAccess.clientId,
+    application: {
+      name: data.client.name,
+      namespace: data.client.gateway.id,
+    },
+    product: {
+      gatewayId: data.service.subsystem.gateway.id,
+      name: data.service.subsystem.name,
+      environment: data.service.environment,
+    },
+    ...(data.action === 'delete' ? { _action: 'delete' as const } : {}),
+  };
 }
 
 function buildIntegrationAllowAccess(

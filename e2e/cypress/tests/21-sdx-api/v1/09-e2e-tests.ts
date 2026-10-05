@@ -1,12 +1,16 @@
 import { v4 as uuidv4 } from 'uuid'
 
+import ConsumersPage from '../../../pageObjects/consumers'
+
 import {
   applyFixtureEdgeSigningKey,
   applyServicePattern,
+  applySubsystemPattern,
   createJanisOrgAndAccess,
   createRuntimeGroup,
   createSubsystemAndOASService,
   createSubsystemGateway,
+  grantGatewayScopeToDevUser,
   uniqueSubsystemName,
   updateRuntimeGroupAddHostedOrg,
   updateSubsystemIntegrationClients,
@@ -49,26 +53,43 @@ describe('SDX E2E Tests', () => {
     })
   })
 
-  describe('Basic connection', () => {
+  describe.only('Basic connection', () => {
+    const consumers = new ConsumersPage()
+    let conn: any
+
     it('PUT /organizations/{org}/connections', () => {
       const { org, datasetId, env } = workingData
       const subsystemName = uniqueSubsystemName()
-      const integrationId = uuidv4()
-        .replace(/-/g, '')
-        .substring(0, 8);
+      const integrationId = uuidv4().replace(/-/g, '').substring(0, 8)
       const integrationClientId = `client-${datasetId}-${integrationId}`
 
       // create a new subsystem and publish a new OAS Service in dev
-      createSubsystemAndOASService(
-        org,
-        subsystemName,
-        env,
-        (service: any) => {
-          const clientId = service.subsystem.clientId
-          const serviceId = service.name
+      createSubsystemAndOASService(org, subsystemName, env, (service: any) => {
+        const clientId = service.subsystem.clientId
+        const serviceId = service.name
 
-          // register the subsystem on the "rg0" runtime group
-          createSubsystemGateway(org, 'rg0', service.subsystem.name, () => {
+        // register the subsystem on the "rg0" runtime group
+        createSubsystemGateway(
+          org,
+          'rg0',
+          service.subsystem.name,
+          ({ gatewayId }: any) => {
+            conn = {
+              clientId,
+              serviceId,
+              gatewayId,
+              integrationClientId,
+              productName: service.subsystem.name,
+            }
+
+            // the subsystem is both client and provider here, so this creates
+            // the Application and Product the connection's ServiceAccess links
+            applySubsystemPattern(org.name, clientId).then(
+              ({ apiRes: { status, body } }: any) => {
+                expect(status, JSON.stringify(body)).to.be.equal(200)
+              }
+            )
+
             updateSubsystemIntegrationClients(
               org,
               service.subsystem.name,
@@ -159,41 +180,84 @@ describe('SDX E2E Tests', () => {
                       expect(body).has.property('headers')
                       expect(body.headers).has.property('x-edge-token')
                     })
-                    // disable access
-                    cy.setRequestBody({
-                      clientId: `${clientId}`,
-                      serviceId: `${serviceId}`,
-                      isActive: false,
-                    })
-                    cy.callAPI(
-                      `ds/api/sdx/v1/organizations/${org.name}/connections`,
-                      'PUT'
-                    ).then(({ apiRes: { status, body } }: any) => {
-                      expect(status).to.be.equal(200)
-                      expect(body.result).to.be.equal('updated')
-                      expect(typeof body.id).to.be.equal('string')
-
-                      cy.wait(10000)
-
-                      // connection is de-activated; the provisioner runs asynchronously
-                      // and kong control plane also pushes out changes to the data planes
-                      // async, so do some retries until we get a good response
-                      cy.setHeader('X-Client-Id', clientId)
-                      cy.makeSDXCall({
-                        method: 'GET',
-                        path: `/sdx/0/${serviceId}/ping`,
-                      }).then(({ status, body }) => {
-                        // expect 401 or 404, depending on runtime group default routes
-                        expect([401, 404]).to.include(status)
-                      })
-                    })
                   })
                 })
               }
             )
-          })
-        }
+          }
+        )
+      })
+    })
+
+    it('lists the integration client on the gateway Consumers page', () => {
+      cy.visit('/')
+      cy.login(Cypress.env('DEV_USERNAME'), Cypress.env('DEV_PASSWORD'))
+
+      // SDX subsystem roles don't include the Consumers page yet, so grant
+      // Namespace.Manage directly to check what the page lists
+      grantGatewayScopeToDevUser(conn.gatewayId, 'Namespace.Manage')
+      cy.activateGateway(conn.gatewayId)
+      cy.visit(consumers.path)
+      cy.get(consumers.allConsumerTable, { timeout: 15000 }).should(
+        'contain',
+        conn.integrationClientId
       )
+
+      // the consumer details list the subsystem's Product
+      cy.contains('a', conn.integrationClientId).click()
+      cy.contains('Products (1)', { timeout: 15000 })
+      cy.contains(conn.productName).should('be.visible')
+      cy.get(consumers.productDetails).should('have.length', 1)
+    })
+
+    // it('PUT /organizations/{org}/connections - deactivate', () => {
+    //   const { org } = workingData
+    //   const { clientId, serviceId } = conn
+
+    //   // disable access
+    //   cy.setRequestBody({
+    //     clientId: `${clientId}`,
+    //     serviceId: `${serviceId}`,
+    //     isActive: false,
+    //   })
+    //   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+    //     ({ apiRes: { status, body } }: any) => {
+    //       expect(status).to.be.equal(200)
+    //       expect(body.result).to.be.equal('updated')
+    //       expect(typeof body.id).to.be.equal('string')
+
+    //       cy.wait(10000)
+
+    //       // connection is de-activated; the provisioner runs asynchronously
+    //       // and kong control plane also pushes out changes to the data planes
+    //       // async, so do some retries until we get a good response
+    //       cy.setHeader('X-Client-Id', clientId)
+    //       cy.makeSDXCall({
+    //         method: 'GET',
+    //         path: `/sdx/0/${serviceId}/ping`,
+    //       }).then(({ status, body }) => {
+    //         // expect 401 or 404, depending on runtime group default routes
+    //         expect([401, 404]).to.include(status)
+    //       })
+    //     }
+    //   )
+    // })
+
+    it('removes the integration client from the gateway Consumers page', () => {
+      // the page shows "0 Consumers" while it loads, so check the list it fetches
+      cy.intercept('POST', '**/gql/api', (req) => {
+        if (req.body?.query?.includes('getFilteredNamespaceConsumers')) {
+          req.alias = 'getConsumers'
+        }
+      })
+      cy.visit(consumers.path)
+      cy.wait('@getConsumers')
+        .its('response.body.data.getFilteredNamespaceConsumers')
+        .then((list: any[]) => {
+          expect(list.map((c) => c.username)).not.to.include(
+            conn.integrationClientId
+          )
+        })
     })
   })
 

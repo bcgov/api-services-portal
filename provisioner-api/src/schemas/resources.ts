@@ -10,6 +10,7 @@ export const RESOURCE_KINDS = [
   // APS (directory)
   'Product',
   'Application',
+  'ServiceAccess',
   // 'ConsumerLabels',
   // 'Activity',
   // SDX (sdxMember)
