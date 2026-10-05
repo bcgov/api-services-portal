@@ -521,6 +521,32 @@ describe('ConnectionRequestNotificationService', () => {
       );
     });
 
+    it('still notifies role access managers when the namespace lookup returns null', async () => {
+      const notify = jest.fn().mockResolvedValue(undefined);
+      const service = new ConnectionRequestNotificationService(
+        { notify },
+        jest.fn().mockResolvedValue({
+          namespace: 'service-gateway',
+          organization: { name: 'ministry-of-citz' },
+          subsystem: { clientId: 'LAB.MIN.CLIENT' },
+        }),
+        jest.fn().mockResolvedValue(null),
+        jest
+          .fn()
+          .mockResolvedValue([
+            { name: 'Role Manager', email: 'role@example.com' },
+          ])
+      );
+
+      await service.notifyChange(created(connection.requesterDetails));
+
+      expect(notify).toHaveBeenCalledTimes(1);
+      expect(notify).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'role@example.com' }),
+        expect.anything()
+      );
+    });
+
     it('does not notify access managers when the service has no namespace', async () => {
       const { service, notify } = newService({
         findService: jest.fn().mockResolvedValue({}),

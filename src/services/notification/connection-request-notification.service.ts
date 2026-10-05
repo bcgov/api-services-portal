@@ -176,7 +176,8 @@ const contactsByEmail = (
     string,
     { email?: string; name?: string; username?: string }
   >();
-  ticketContacts.concat(roleContacts).forEach((contact) => {
+  // A lookup that fails (e.g. lookupUsersByNamespace) can return null
+  (ticketContacts || []).concat(roleContacts || []).forEach((contact) => {
     if (contact && contact.email && !byEmail.has(contact.email)) {
       byEmail.set(contact.email, contact);
     }
@@ -212,7 +213,7 @@ const connectionEmailCopy: Record<
     subject: 'Connection Request Approved',
     headline: 'Connection request approved',
     message:
-      'Your connection request was approved. The client can use this service.',
+      'Your connection request was approved. The client can use this service once the connection is active.',
   },
   rejected: {
     subject: 'Connection Request Rejected',

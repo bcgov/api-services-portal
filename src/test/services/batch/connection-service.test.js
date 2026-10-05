@@ -1,6 +1,7 @@
 const {
   deleteRecordByInternalIdThrowErrors,
   getRecords,
+  syncRecordsThrowErrors,
 } = require('../../../batch/feed-worker');
 const {
   ConnectionService,
@@ -68,6 +69,119 @@ describe('ConnectionService', () => {
       expect(
         await new ConnectionService().findConnection({}, 'A', 'B')
       ).toBeUndefined();
+    });
+  });
+
+  describe('upsertConnection', () => {
+    const context = { createContext: jest.fn(() => ({ noauth: true })) };
+    const clientSubsystem = { organization: { name: 'ministry-of-client' } };
+    const serviceSpec = {
+      environment: 'dev',
+      organization: { name: 'ministry-of-service' },
+    };
+    const input = (overrides = {}) => ({
+      clientId: 'LAB.MIN.CLIENT',
+      serviceId: 'LAB.MIN.SERVICE.v1',
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      SubsystemService.mockImplementation(() => ({
+        findSubsystemByClientId: jest.fn().mockResolvedValue(clientSubsystem),
+      }));
+      OpenAPISpecService.mockImplementation(() => ({
+        findOpenAPISpecByName: jest.fn().mockResolvedValue(serviceSpec),
+      }));
+      syncRecordsThrowErrors.mockResolvedValue({ status: 200 });
+    });
+
+    it('lets the client organization resend the current approval with other changes', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: true }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({ isApproved: true, isActive: false })
+      );
+
+      expect(getRecords).toHaveBeenCalledWith(
+        { noauth: true },
+        'ConnectionRequest',
+        'allConnectionRequests',
+        [],
+        expect.anything()
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        context,
+        'ConnectionRequest',
+        undefined,
+        expect.not.objectContaining({ isApproved: expect.anything() })
+      );
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isActive: false,
+      });
+    });
+
+    it('lets the service organization resend the current approval', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: true }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: true, isActive: true })
+      );
+
+      expect(syncRecordsThrowErrors).toHaveBeenCalled();
+    });
+
+    it('rejects an approval change from the client organization', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-client',
+          input({ isApproved: true })
+        )
+      ).rejects.toThrow('Validation Failed');
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('treats isApproved on a new connection as an approval decision', async () => {
+      getRecords.mockResolvedValue([]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-client',
+          input({ isApproved: false })
+        )
+      ).rejects.toThrow('Validation Failed');
+    });
+
+    it('keeps an approval change from the service organization', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: true })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isApproved: true,
+      });
+    });
+
+    it('does not look up the connection when isApproved is not sent', async () => {
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({ isActive: false })
+      );
+
+      expect(getRecords).not.toHaveBeenCalled();
+      expect(syncRecordsThrowErrors).toHaveBeenCalled();
     });
   });
 

@@ -72,6 +72,23 @@ class ConnectionService {
       body.environment = serviceSpec.environment as any;
     }
 
+    // `isApproved` is only an approval decision when it changes the stored value.
+    // Callers such as the SDX UI Customize save resend the current value along
+    // with other changes, so an unchanged value is dropped rather than treated
+    // as approving or un-approving.
+    let isResentApproval = false;
+    if (typeof body.isApproved === 'boolean') {
+      const existing = await this.findConnection(
+        (context as any).createContext({ skipAccessControl: true }),
+        body.clientId,
+        body.serviceId
+      );
+      if (existing && Boolean(existing.isApproved) === body.isApproved) {
+        delete body.isApproved;
+        isResentApproval = true;
+      }
+    }
+
     // if approving or un-approving the connection, validate the service belongs to the specified organization
     if (body.isApproved === true || body.isApproved === false) {
       assertEqual(
@@ -79,6 +96,14 @@ class ConnectionService {
         true,
         'isApproved',
         'Cannot approve/reject connection request when service organization does not match the specified organization'
+      );
+    } else if (isResentApproval) {
+      assertEqual(
+        clientSubsystem.organization.name === org ||
+          serviceSpec.organization.name === org,
+        true,
+        'clientId',
+        'Only the client or service organization can update a connection request'
       );
     } else {
       assertEqual(
