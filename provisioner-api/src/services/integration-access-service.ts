@@ -50,6 +50,13 @@ type PlannedConnectionChange =
       result: 'updated scopes, submitted for re-approval';
     }
   | {
+      kind: 'reactivate';
+      connection: ConnectionRequest;
+      request: PreparedServiceRequest;
+      serviceOrgName: string;
+      result: 'reactivated approved connection';
+    }
+  | {
       kind: 'unchanged';
       request: PreparedServiceRequest;
       result: 'already approved' | 'pending approval';
@@ -191,11 +198,13 @@ export class IntegrationAccessService {
           serviceResources: request.defaults.serviceResources,
         });
         outcomes.push(outcome);
-      } else if (change.kind === 'update') {
+      } else if (change.kind === 'update' || change.kind === 'reactivate') {
+        const reactivating = change.kind === 'reactivate';
         const outcome = await this.api.upsertConnection(change.serviceOrgName, {
           clientId: change.connection.clientId!,
           serviceId: change.connection.serviceId!,
-          isApproved: false,
+          isApproved: reactivating,
+          isActive: reactivating,
           requesterDetails: request.requesterDetails,
         });
         outcomes.push(outcome);
@@ -218,7 +227,10 @@ export class IntegrationAccessService {
   async buildIntegrationAllowedServices(
     integrationId: string,
     environment: string,
-    status: 'approved' | 'pending'
+    status: 'approved' | 'pending',
+    options: {
+      skipMalformedConnections?: boolean;
+    } = {}
   ): Promise<TIntegrationAccessRequest> {
     const normalizedIntegrationId = requireNonBlank(
       integrationId,
@@ -258,37 +270,56 @@ export class IntegrationAccessService {
 
     // Filter to the exact integration and environment before deriving any
     // client or submission metadata. The member API does not guarantee order.
-    const allowedConnections = connections
+    const integrationConnections = connections
       .filter(
         (connection) =>
           connection.clientId === subsystem.clientId &&
           connection.environment === normalizedEnvironment &&
           connection.requesterDetails?.client?.integrationId ===
-            normalizedIntegrationId &&
-          connection.isApproved === (status === 'approved') &&
-          (status === 'pending' || connection.isActive === true)
+            normalizedIntegrationId
       )
       .sort(compareConnections);
 
-    if (allowedConnections.length === 0) {
+    if (integrationConnections.length === 0) {
       throw new NotFoundError(
-        `No ${status} connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
+        `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
       );
     }
 
-    this.logger?.debug('Connections allowed %j', allowedConnections);
-
-    const clientIds = uniqueSorted(
-      allowedConnections.map((connection) => {
+    const metadataConnections = integrationConnections.filter((connection) => {
+      try {
         const clientId = connection.requesterDetails?.client?.clientId;
         if (typeof clientId !== 'string' || clientId.trim().length === 0) {
           throw new ConflictError(
             `Connection '${connection.serviceId}' does not identify an OAuth client`
           );
         }
-        return clientId.trim();
-      })
+        return true;
+      } catch (err) {
+        if (
+          !options.skipMalformedConnections ||
+          !isMalformedConnectionError(err)
+        ) {
+          throw err;
+        }
+        this.logger?.warn(
+          { err, connectionId: connection.id, serviceId: connection.serviceId },
+          'Skipping malformed integration connection during revocation'
+        );
+        return false;
+      }
+    });
+
+    const clientIds = uniqueSorted(
+      metadataConnections.map((connection) =>
+        connection.requesterDetails!.client!.clientId!.trim()
+      )
     );
+    if (clientIds.length === 0) {
+      throw new ConflictError(
+        `Integration ${normalizedIntegrationId} has no usable OAuth client in environment ${normalizedEnvironment}`
+      );
+    }
     if (clientIds.length !== 1) {
       throw new ConflictError(
         `Integration ${normalizedIntegrationId} has connections for more than one OAuth client in environment ${normalizedEnvironment}`
@@ -296,7 +327,7 @@ export class IntegrationAccessService {
     }
 
     const submissionIds = uniqueSorted(
-      allowedConnections
+      metadataConnections
         .map((connection) => connection.requesterDetails?.submissionId)
         .filter(
           (submissionId): submissionId is string =>
@@ -309,44 +340,65 @@ export class IntegrationAccessService {
     // legacy fallback for records created before submission IDs were stored.
     const submissionId = submissionIds.at(-1) || 'unknown';
 
+    const allowedConnections = metadataConnections.filter(
+      (connection) =>
+        connection.isApproved === (status === 'approved') &&
+        (status === 'pending' || connection.isActive === true)
+    );
+
+    this.logger?.debug('Connections allowed %j', allowedConnections);
+
     const servicesBySubsystem = new Map<
       string,
       Map<string, { name: string; scopes: string[] }>
     >();
 
     for (const connection of allowedConnections) {
-      const serviceId = requireNonBlank(
-        connection.serviceId,
-        'Connection service ID'
-      );
-      const service = await this.api.getOASService(serviceId);
-      if (service.name !== serviceId) {
-        throw new BadRequestError(
-          `Catalog lookup for service '${serviceId}' returned '${service.name}'`
+      try {
+        const serviceId = requireNonBlank(
+          connection.serviceId,
+          'Connection service ID'
+        );
+        const service = await this.api.getOASService(serviceId);
+        if (service.name !== serviceId) {
+          throw new BadRequestError(
+            `Catalog lookup for service '${serviceId}' returned '${service.name}'`
+          );
+        }
+        if (service.environment !== normalizedEnvironment) {
+          throw new BadRequestError(
+            `Connection service '${serviceId}' environment '${service.environment}' does not match requested environment '${normalizedEnvironment}'`
+          );
+        }
+
+        const subsystemId = requireNonBlank(
+          service.subsystem.clientId,
+          `Provider subsystem for service '${serviceId}'`
+        );
+        let subsystemServices = servicesBySubsystem.get(subsystemId);
+        if (!subsystemServices) {
+          subsystemServices = new Map();
+          servicesBySubsystem.set(subsystemId, subsystemServices);
+        }
+
+        const scopes = normalizeStoredScopes(connection, serviceId);
+        const existingService = subsystemServices.get(serviceId);
+        subsystemServices.set(serviceId, {
+          name: serviceId,
+          scopes: uniqueSorted([...(existingService?.scopes || []), ...scopes]),
+        });
+      } catch (err) {
+        if (
+          !options.skipMalformedConnections ||
+          !isMalformedConnectionError(err)
+        ) {
+          throw err;
+        }
+        this.logger?.warn(
+          { err, connectionId: connection.id, serviceId: connection.serviceId },
+          'Skipping malformed integration connection during revocation'
         );
       }
-      if (service.environment !== normalizedEnvironment) {
-        throw new BadRequestError(
-          `Connection service '${serviceId}' environment '${service.environment}' does not match requested environment '${normalizedEnvironment}'`
-        );
-      }
-
-      const subsystemId = requireNonBlank(
-        service.subsystem.clientId,
-        `Provider subsystem for service '${serviceId}'`
-      );
-      let subsystemServices = servicesBySubsystem.get(subsystemId);
-      if (!subsystemServices) {
-        subsystemServices = new Map();
-        servicesBySubsystem.set(subsystemId, subsystemServices);
-      }
-
-      const scopes = normalizeStoredScopes(connection, serviceId);
-      const existingService = subsystemServices.get(serviceId);
-      subsystemServices.set(serviceId, {
-        name: serviceId,
-        scopes: uniqueSorted([...(existingService?.scopes || []), ...scopes]),
-      });
     }
 
     const resourceServers: TResourceServerAccess[] = Array.from(
@@ -496,19 +548,28 @@ function planConnectionChange(
     );
   }
 
+  const serviceOrgName = requireNonBlank(
+    request.service.subsystem.organization?.name,
+    `Organization for service '${request.name}'`
+  );
+
   const existingScopes = normalizeStoredScopes(existing, request.name);
   if (sameStrings(existingScopes, request.scopes)) {
+    if (existing.isApproved && existing.isActive === false) {
+      return {
+        kind: 'reactivate',
+        connection: existing,
+        request,
+        serviceOrgName,
+        result: 'reactivated approved connection',
+      };
+    }
     return {
       kind: 'unchanged',
       request,
       result: existing.isApproved ? 'already approved' : 'pending approval',
     };
   }
-
-  const serviceOrgName = requireNonBlank(
-    request.service.subsystem.organization?.name,
-    `Organization for service '${request.name}'`
-  );
 
   return {
     kind: 'update',
@@ -552,6 +613,10 @@ function normalizeStoredScopes(
     );
   }
   return uniqueSorted(normalized);
+}
+
+function isMalformedConnectionError(error: unknown): boolean {
+  return error instanceof BadRequestError || error instanceof ConflictError;
 }
 
 function requireNonBlank(value: unknown, label: string): string {
