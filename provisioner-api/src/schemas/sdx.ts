@@ -106,7 +106,9 @@ const ResourceServerServiceAccess = Type.Object(
   {
     scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
     name: Type.String({ examples: ['claims-svc'] }),
-    version: Type.Optional(Type.String({ examples: ['1.0.0'] })),
+    version: Type.Optional(
+      Type.String({ minLength: 1, examples: ['1.0.0'] })
+    ),
   },
   {
     additionalProperties: false,

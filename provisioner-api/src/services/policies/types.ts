@@ -13,7 +13,7 @@ export interface PolicyRequesterDetails {
   requester: { name: string; email?: string };
   scopes: string[];
   client: { integrationId?: string; clientId: string; privacyZone?: string };
-  service: { clientId: string; privacyZone?: string };
+  service: { clientId: string; privacyZone?: string; version?: string };
 }
 
 export type PolicyDefaultResources = {

@@ -66,6 +66,15 @@ const request = {
   ],
 };
 
+function requestWithVersion(version: string): any {
+  const versionedRequest = structuredClone(request);
+  versionedRequest.resourceServers[0].services[0] = {
+    ...versionedRequest.resourceServers[0].services[0],
+    version,
+  };
+  return versionedRequest;
+}
+
 function serviceWithApi(api: Record<string, unknown>) {
   const service = new IntegrationAccessService(client);
   (service as unknown as { api: Record<string, unknown> }).api = api;
@@ -125,6 +134,10 @@ test('access-request service version remains optional for existing callers', asy
   );
 
   assert.equal(upserts.length, 1);
+  assert.equal(
+    (upserts[0] as any).requesterDetails.service.version,
+    catalogService.version
+  );
 });
 
 test('access requests reject a supplied version that differs from the catalog', async () => {
@@ -133,20 +146,7 @@ test('access requests reject a supplied version that differs from the catalog', 
     getOASService: async () => catalogService,
     upsertConnection: async () => ({ status: 200, result: 'created' }),
   });
-  const versionedRequest = {
-    ...structuredClone(request),
-    resourceServers: [
-      {
-        ...structuredClone(request.resourceServers[0]),
-        services: [
-          {
-            ...structuredClone(request.resourceServers[0].services[0]),
-            version: '1.0.0',
-          },
-        ],
-      },
-    ],
-  };
+  const versionedRequest = requestWithVersion('1.0.0');
 
   await assert.rejects(
     service.submitIntegrationAccessRequest(
@@ -159,38 +159,75 @@ test('access requests reject a supplied version that differs from the catalog', 
   );
 });
 
-test('access requests reject a supplied blank version', async () => {
-  const service = serviceWithApi({
-    listConnections: async () => [],
-    getOASService: async () => catalogService,
-    upsertConnection: async () => ({ status: 200, result: 'created' }),
-  });
-  const versionedRequest = {
-    ...structuredClone(request),
-    resourceServers: [
-      {
-        ...structuredClone(request.resourceServers[0]),
-        services: [
-          {
-            ...structuredClone(request.resourceServers[0].services[0]),
-            version: '',
-          },
-        ],
-      },
-    ],
-  };
+test('route accepts a matching version and persists the reviewed version', async () => {
+  const app = await buildApp();
+  const upserts: any[] = [];
 
-  await assert.rejects(
-    service.submitIntegrationAccessRequest(
-      'submission-1',
-      consumerSubsystem,
-      'css-integration',
-      versionedRequest
-    ),
-    /version '' does not match catalog version '2\.4\.0'/
-  );
+  try {
+    await app.ready();
+    const services = app.services as any;
+    services.sdxMember.getSubsystemByIntegrationClientId = async () =>
+      consumerSubsystem;
+    services.integrationAccess.api = {
+      listConnections: async () => [],
+      getOASService: async () => catalogService,
+      upsertConnection: async (_organization: string, body: unknown) => {
+        upserts.push(body);
+        return { status: 200, result: 'created' };
+      },
+    };
+    services.integrationAccess.policyService = {
+      getDefaultResources: () => ({
+        clientResources: {},
+        serviceResources: {},
+      }),
+    };
+    services.activity.publishActivity = async () => undefined;
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/integrations/css-integration/access-requests',
+      payload: requestWithVersion('2.4.0'),
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(upserts.length, 1);
+    assert.equal(
+      upserts[0].requesterDetails.service.version,
+      catalogService.version
+    );
+  } finally {
+    await app.close();
+  }
 });
 
+test('route schema rejects a supplied blank version before the handler', async () => {
+  const app = await buildApp();
+  let called = false;
+
+  try {
+    await app.ready();
+    (app.controllers.integration as any).createIntegrationAccessRequest =
+      async () => {
+        called = true;
+        return { submissionId: 'unexpected', results: {} };
+      };
+
+    const blankRequest = requestWithVersion('');
+    assert.equal(Value.Check(NewIntegrationAccessRequest, blankRequest), false);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/integrations/css-integration/access-requests',
+      payload: blankRequest,
+    });
+
+    assert.equal(response.statusCode, 400);
+    assert.equal(called, false);
+  } finally {
+    await app.close();
+  }
+});
 test('allowed-services responses contain the authoritative catalog version', async () => {
   const connection: ConnectionRequest = {
     clientId: consumerSubsystem.clientId,
@@ -204,12 +241,19 @@ test('allowed-services responses contain the authoritative catalog version', asy
         integrationId: 'css-integration',
         clientId: 'css-client',
       },
+      service: {
+        clientId: catalogService.subsystem.clientId,
+        version: catalogService.version,
+      },
     },
   };
   const service = serviceWithApi({
     listCatalogSubsystems: async () => [consumerSubsystem],
     listConnections: async () => [connection],
-    getOASService: async () => catalogService,
+    getOASService: async () => ({
+      ...catalogService,
+      version: '3.0.0',
+    }),
   });
 
   const result = await service.buildIntegrationAllowedServices(
@@ -225,4 +269,46 @@ test('allowed-services responses contain the authoritative catalog version', asy
       scopes: ['Claims.Read'],
     },
   ]);
+});
+
+test('catalog version changes require reapproval for a pinned connection', async () => {
+  const upserts: any[] = [];
+  const service = serviceWithApi({
+    listConnections: async () => [
+      {
+        clientId: consumerSubsystem.clientId,
+        serviceId: catalogService.name,
+        isApproved: true,
+        requesterDetails: {
+          scopes: ['Claims.Read'],
+          service: {
+            clientId: catalogService.subsystem.clientId,
+            version: '1.0.0',
+          },
+        },
+      },
+    ],
+    getOASService: async () => catalogService,
+    upsertConnection: async (_organization: string, body: unknown) => {
+      upserts.push(body);
+      return { status: 200, result: 'updated' };
+    },
+  });
+
+  const result = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'css-integration',
+    request
+  );
+
+  assert.equal(
+    result.results[catalogService.name],
+    'updated version, submitted for re-approval'
+  );
+  assert.equal(upserts[0].isApproved, false);
+  assert.equal(
+    upserts[0].requesterDetails.service.version,
+    catalogService.version
+  );
 });

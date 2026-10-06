@@ -109,6 +109,7 @@ export class IntegrationAccessService {
               service: {
                 clientId: spec.subsystem.clientId,
                 privacyZone: spec.subsystem.privacyZone,
+                version: spec.version,
               },
             };
             // make sure requested scopes exist in the specification for the service
@@ -157,25 +158,50 @@ export class IntegrationAccessService {
                 uniqueExistingScopes.some(
                   (scope: string) => !uniqueRequestedScopes.includes(scope)
                 );
-              if (scopesHaveChanged) {
-                // if scopes have changed, mark the existing request as 'isApproved=false' and update its
-                // scopes and requesterDetails
+              const existingVersion =
+                existingConnection.requesterDetails?.service?.version;
+              const versionHasChanged =
+                existingVersion !== undefined &&
+                existingVersion !== spec.version;
+              const legacyVersionNeedsPinning = existingVersion === undefined;
+
+              if (scopesHaveChanged || versionHasChanged) {
                 requesterDetails.scopes = uniqueRequestedScopes;
 
-                // because we are updating the approved status to false, the related
-                // organization has to be specified correctly
-                // keep the clientResources and serviceResources unchanged
-                this.api.upsertConnection(spec.subsystem?.organization?.name!, {
-                  clientId: existingConnection.clientId!,
-                  serviceId: existingConnection.serviceId!,
-                  isApproved: false,
-                  requesterDetails,
-                });
+                // A changed reviewed version is an authorization change just
+                // like a scope change, so it must be approved again.
+                await this.api.upsertConnection(
+                  spec.subsystem?.organization?.name!,
+                  {
+                    clientId: existingConnection.clientId!,
+                    serviceId: existingConnection.serviceId!,
+                    isApproved: false,
+                    requesterDetails,
+                  }
+                );
 
+                const changed = [
+                  scopesHaveChanged ? 'scopes' : undefined,
+                  versionHasChanged ? 'version' : undefined,
+                ].filter(Boolean);
                 submission.results[requestedService.name] =
-                  'updated scopes, submitted for re-approval';
+                  `updated ${changed.join(' and ')}, submitted for re-approval`;
               } else {
-                // if scopes have not changed, do nothing
+                if (legacyVersionNeedsPinning) {
+                  // Preserve the approval state for legacy records, but pin
+                  // the catalog version on their next compatible submission.
+                  await this.api.upsertConnection(
+                    spec.subsystem?.organization?.name!,
+                    {
+                      clientId: existingConnection.clientId!,
+                      serviceId: existingConnection.serviceId!,
+                      isApproved: existingConnection.isApproved,
+                      isActive: existingConnection.isActive,
+                      requesterDetails,
+                    }
+                  );
+                }
+
                 if (existingConnection.isApproved) {
                   submission.results[requestedService.name] =
                     'already approved';
@@ -298,7 +324,10 @@ export class IntegrationAccessService {
       )) as EnrichedServiceCatalogEntry;
 
       const subsystemId = service.subsystem.clientId;
-      serviceVersions.set(s.serviceId!, service.version);
+      serviceVersions.set(
+        s.serviceId!,
+        s.requesterDetails?.service?.version || service.version
+      );
       if (!servicesBySubsystem[subsystemId]) {
         servicesBySubsystem[subsystemId] = {
           connections: [],
