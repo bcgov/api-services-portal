@@ -142,6 +142,45 @@ class ConnectionService {
     return records.pop();
   };
 
+  // R0 records the user who created the request as the requester. Later
+  // updates keep that requester, so notifications reach the original
+  // requester rather than whoever last changed the connection.
+  applyR0Requester = (
+    input: ConnectionRequestInput,
+    existing: KeystoneConnectionRequest | undefined,
+    caller: { name?: string; email?: string }
+  ): ConnectionRequestInput => {
+    const policyVersion = input.policyVersion ?? existing?.policyVersion;
+    if (
+      policyVersion !== 'SDX.R0.00' ||
+      (existing && !input.requesterDetails)
+    ) {
+      return input;
+    }
+
+    let existingRequester;
+    try {
+      const details =
+        typeof existing?.requesterDetails === 'string'
+          ? JSON.parse(existing.requesterDetails)
+          : existing?.requesterDetails;
+      existingRequester = details?.requester;
+    } catch {
+      existingRequester = undefined;
+    }
+
+    return {
+      ...input,
+      requesterDetails: {
+        ...input.requesterDetails,
+        requester: existingRequester ?? {
+          name: caller.name,
+          email: caller.email,
+        },
+      },
+    };
+  };
+
   getConnectionById = async (
     context: Keystone,
     id: string

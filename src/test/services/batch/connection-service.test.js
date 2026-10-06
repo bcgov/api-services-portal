@@ -72,6 +72,101 @@ describe('ConnectionService', () => {
     });
   });
 
+  describe('applyR0Requester', () => {
+    const caller = { name: 'Updater', email: 'updater@example.com' };
+    const r0 = (overrides = {}) => ({
+      clientId: 'LAB.MIN.CLIENT',
+      serviceId: 'LAB.MIN.SERVICE.v1',
+      policyVersion: 'SDX.R0.00',
+      ...overrides,
+    });
+    const existing = {
+      id: '1',
+      policyVersion: 'SDX.R0.00',
+      requesterDetails: JSON.stringify({
+        requester: { name: 'Original', email: 'original@example.com' },
+      }),
+    };
+
+    it('records the caller as the requester when the request is created', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ requesterDetails: { client: { clientId: 'css' } } }),
+        undefined,
+        caller
+      );
+
+      expect(result.requesterDetails).toEqual({
+        client: { clientId: 'css' },
+        requester: { name: 'Updater', email: 'updater@example.com' },
+      });
+    });
+
+    it('keeps the original requester when a different user updates the request', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({
+          requesterDetails: {
+            requester: { name: 'Spoofed', email: 'spoofed@example.com' },
+          },
+        }),
+        existing,
+        caller
+      );
+
+      expect(result.requesterDetails.requester).toEqual({
+        name: 'Original',
+        email: 'original@example.com',
+      });
+    });
+
+    it('leaves requesterDetails out of an update that does not send them', () => {
+      const input = r0({ isActive: false });
+
+      const result = new ConnectionService().applyR0Requester(
+        input,
+        existing,
+        caller
+      );
+
+      expect(result).toBe(input);
+      expect(result.requesterDetails).toBeUndefined();
+    });
+
+    it('uses the stored policy version when the update omits it', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ policyVersion: undefined, requesterDetails: {} }),
+        existing,
+        caller
+      );
+
+      expect(result.requesterDetails.requester.email).toBe(
+        'original@example.com'
+      );
+    });
+
+    it('records the caller when the stored request has no requester', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ requesterDetails: {} }),
+        { ...existing, requesterDetails: 'not json' },
+        caller
+      );
+
+      expect(result.requesterDetails.requester.email).toBe(
+        'updater@example.com'
+      );
+    });
+
+    it('does not change requests for other policy versions', () => {
+      const input = r0({
+        policyVersion: 'SDX.R1.00',
+        requesterDetails: { requester: 'someone@example.com' },
+      });
+
+      expect(
+        new ConnectionService().applyR0Requester(input, undefined, caller)
+      ).toBe(input);
+    });
+  });
+
   describe('upsertConnection', () => {
     const context = { createContext: jest.fn(() => ({ noauth: true })) };
     const clientSubsystem = { organization: { name: 'ministry-of-client' } };
