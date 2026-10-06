@@ -76,6 +76,10 @@ Routes are served under the OpenAPI server prefix `/ds/api/sdxpro/v1`:
 - `POST /ds/api/sdxpro/v1/subsystems/{id}/access-requests`
   - declares the `provisionAllowedServices` callback (`PUT` to the partner)
 
+### R1 access migration prerequisite
+
+Before enabling the R1 integration-access callback, complete the APS-4992 audit and migration of legacy connection records so every `requesterDetails` object has an explicit `scopes` array. Submission and normal apply paths intentionally fail closed when scope data is missing or malformed. Delete/revocation remains available and skips malformed legacy rows with a structured warning so stale access can still be removed.
+
 Docs and spec:
 
 - `http://localhost:3000/docs` — Scalar API Reference
@@ -86,12 +90,12 @@ Docs and spec:
 
 Four authenticated HTTP clients are available on `app.clients`:
 
-| Client | Auth                                               | Env-var prefix |
-| ------ | -------------------------------------------------- | -------------- |
-| `aps`  | OIDC client-credentials with `private_key_jwt`     | `APS_`         |
-| `sdx`  | OIDC client-credentials with `private_key_jwt`     | `SDX_`         |
-| `gwa`  | OIDC client-credentials with `private_key_jwt`     | `GWA_`         |
-| `css`  | OIDC client-credentials with `private_key_jwt`     | `CSS_`         |
+| Client | Auth                                           | Env-var prefix |
+| ------ | ---------------------------------------------- | -------------- |
+| `aps`  | OIDC client-credentials with `private_key_jwt` | `APS_`         |
+| `sdx`  | OIDC client-credentials with `private_key_jwt` | `SDX_`         |
+| `gwa`  | OIDC client-credentials with `private_key_jwt` | `GWA_`         |
+| `css`  | OIDC client-credentials with `private_key_jwt` | `CSS_`         |
 
 Built on [`oauth4webapi`](https://github.com/panva/oauth4webapi) + [`jose`](https://github.com/panva/jose) (web-standard fetch, no legacy deps). Tokens are cached in-memory until 30 seconds before `expires_in`, with single-flight refresh.
 

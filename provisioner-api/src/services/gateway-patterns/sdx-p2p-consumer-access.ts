@@ -47,7 +47,8 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
   };
 
   async inject(
-    inputs: SDXP2PConsumerPatternConfig
+    inputs: SDXP2PConsumerPatternConfig,
+    ctx?: { action?: string }
   ): Promise<SDXP2PConsumerPatternData> {
     const { api } = this;
 
@@ -82,7 +83,8 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
         await this.integrationAccessService.buildIntegrationAllowedServices(
           connection?.requesterDetails.client?.integrationId,
           connection?.environment!,
-          'approved'
+          'approved',
+          { skipMalformedConnections: ctx?.action === 'delete' }
         );
 
       assert.strictEqual(
