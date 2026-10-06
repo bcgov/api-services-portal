@@ -54,7 +54,7 @@ describe('SDX E2E Tests', () => {
     })
   })
 
-  describe.only('Basic connection', () => {
+  describe('Basic connection', () => {
     const consumers = new ConsumersPage()
     let conn: any
 
@@ -208,34 +208,34 @@ describe('SDX E2E Tests', () => {
       cy.get(consumers.productDetails).should('have.length', 1)
     })
 
-    // it('PUT /organizations/{org}/connections - deactivate', () => {
-    //   const { org } = workingData
-    //   const { clientId, serviceId } = conn
+    it('PUT /organizations/{org}/connections - deactivate', () => {
+      const { org } = workingData
+      const { clientId, serviceId } = conn
 
-    //   // disable access
-    //   cy.setRequestBody({
-    //     clientId: `${clientId}`,
-    //     serviceId: `${serviceId}`,
-    //     isActive: false,
-    //   })
-    //   cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-    //     ({ apiRes: { status, body } }: any) => {
-    //       expect(status).to.be.equal(200)
-    //       expect(body.result).to.be.equal('updated')
-    //       expect(typeof body.id).to.be.equal('string')
+      // disable access
+      cy.setRequestBody({
+        clientId: `${clientId}`,
+        serviceId: `${serviceId}`,
+        isActive: false,
+      })
+      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+        ({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(200)
+          expect(body.result).to.be.equal('updated')
+          expect(typeof body.id).to.be.equal('string')
 
-    //       // connection is de-activated; the provisioner runs asynchronously
-    //       // and kong control plane also pushes out changes to the data planes
-    //       // async, so retry until access is gone. Expect 401 or 404,
-    //       // depending on runtime group default routes
-    //       waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [401, 404]).then(
-    //         ({ status }: any) => {
-    //           expect([401, 404]).to.include(status)
-    //         }
-    //       )
-    //     }
-    //   )
-    // })
+          // connection is de-activated; the provisioner runs asynchronously
+          // and kong control plane also pushes out changes to the data planes
+          // async, so retry until access is gone. Expect 401 or 404,
+          // depending on runtime group default routes
+          waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [401, 404]).then(
+            ({ status }: any) => {
+              expect([401, 404]).to.include(status)
+            }
+          )
+        }
+      )
+    })
 
     it('removes the integration client from the gateway Consumers page', () => {
       // the page shows "0 Consumers" while it loads, so check the list it fetches
@@ -248,9 +248,7 @@ describe('SDX E2E Tests', () => {
       cy.wait('@getConsumers')
         .its('response.body.data.getFilteredNamespaceConsumers')
         .then((list: any[]) => {
-          expect(list.map((c) => c.username)).not.to.include(
-            conn.integrationClientId
-          )
+          expect(list.map((c) => c.username)).not.to.include(conn.integrationClientId)
         })
     })
   })
