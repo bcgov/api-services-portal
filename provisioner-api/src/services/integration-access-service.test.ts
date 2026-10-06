@@ -122,7 +122,11 @@ function existingConnection(
         clientId: 'oauth-client-a',
         privacyZone: 'citizen',
       },
-      service: { clientId: 'provider-a', privacyZone: 'health' },
+      service: {
+        clientId: 'provider-a',
+        privacyZone: 'health',
+        version: '1.0.0',
+      },
     },
     ...overrides,
   };
@@ -314,7 +318,11 @@ test('awaits a scope update and sends it to the provider organization', async ()
         clientId: 'oauth-client-a',
         privacyZone: 'citizen',
       },
-      service: { clientId: 'provider-a', privacyZone: 'health' },
+      service: {
+        clientId: 'provider-a',
+        privacyZone: 'health',
+        version: '1.0.0',
+      },
     },
   });
   assert.deepEqual(response.results, {
@@ -356,7 +364,11 @@ test('reactivates an approved inactive connection on an exact resubmission', asy
         clientId: 'oauth-client-a',
         privacyZone: 'citizen',
       },
-      service: { clientId: 'provider-a', privacyZone: 'health' },
+      service: {
+        clientId: 'provider-a',
+        privacyZone: 'health',
+        version: '1.0.0',
+      },
     },
   });
   assert.deepEqual(response.results, {
@@ -484,14 +496,24 @@ test('builds deterministic allowed services after filtering the exact integratio
         id: 'provider-a',
         environment: 'dev',
         services: [
-          { name: 'a-service', scopes: [] },
-          { name: 'b-service', scopes: ['alpha'] },
+          { name: 'a-service', scopes: [], version: '1.0.0' },
+          {
+            name: 'b-service',
+            scopes: ['alpha'],
+            version: '1.0.0',
+          },
         ],
       },
       {
         id: 'provider-z',
         environment: 'dev',
-        services: [{ name: 'z-service', scopes: ['read', 'write'] }],
+        services: [
+          {
+            name: 'z-service',
+            scopes: ['read', 'write'],
+            version: '1.0.0',
+          },
+        ],
       },
     ],
   });
@@ -580,7 +602,9 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
       {
         id: 'provider-a',
         environment: 'dev',
-        services: [{ name: 'service-a', scopes: ['read'] }],
+        services: [
+          { name: 'service-a', scopes: ['read'], version: '1.0.0' },
+        ],
       },
     ],
   });
