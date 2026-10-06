@@ -90,6 +90,7 @@ describe('SDX E2E Tests', () => {
                     requester: {
                       name: 'Janis',
                     },
+                    scopes: [],
                     client: {
                       integrationId: integrationId,
                       clientId: integrationClientId,

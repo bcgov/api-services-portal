@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
   BatchResult,
@@ -70,6 +71,7 @@ interface FakeApiOptions {
   connections?: ConnectionRequest[];
   subsystems?: SubsystemEntry[];
   upsert?: (org: string, input: ConnectionRequestInput) => Promise<BatchResult>;
+  logger?: FastifyBaseLogger;
 }
 
 function createService(options: FakeApiOptions = {}) {
@@ -92,7 +94,10 @@ function createService(options: FakeApiOptions = {}) {
     },
   } as unknown as SdxMemberApiClient;
 
-  const service = new IntegrationAccessService({} as OAuthClient);
+  const service = new IntegrationAccessService(
+    {} as OAuthClient,
+    options.logger
+  );
   Object.assign(service, { api });
   return { service, writes };
 }
@@ -299,6 +304,7 @@ test('awaits a scope update and sends it to the provider organization', async ()
     clientId: 'consumer-subsystem',
     serviceId: 'service-a',
     isApproved: false,
+    isActive: false,
     requesterDetails: {
       submissionId: 'submission-2',
       requester: { name: 'Jane Doe', email: 'jane@example.test' },
@@ -313,6 +319,48 @@ test('awaits a scope update and sends it to the provider organization', async ()
   });
   assert.deepEqual(response.results, {
     'service-a': 'updated scopes, submitted for re-approval',
+  });
+});
+
+test('reactivates an approved inactive connection on an exact resubmission', async () => {
+  const { service, writes } = createService({
+    catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    connections: [existingConnection({ isActive: false })],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+    ])
+  );
+
+  assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0].input, {
+    clientId: 'consumer-subsystem',
+    serviceId: 'service-a',
+    isApproved: true,
+    isActive: true,
+    requesterDetails: {
+      submissionId: 'submission-2',
+      requester: { name: 'Jane Doe', email: 'jane@example.test' },
+      scopes: ['read'],
+      client: {
+        integrationId: 'integration-a',
+        clientId: 'oauth-client-a',
+        privacyZone: 'citizen',
+      },
+      service: { clientId: 'provider-a', privacyZone: 'health' },
+    },
+  });
+  assert.deepEqual(response.results, {
+    'service-a': 'reactivated approved connection',
   });
 });
 
@@ -463,19 +511,86 @@ test('does not derive callback metadata from unrelated connections', async () =>
 
   await assert.rejects(
     service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /No approved connections found for integration integration-a in environment dev/
+    /No connections found for integration integration-a in environment dev/
   );
 });
 
-test('does not return an approved connection that is inactive', async () => {
+test('returns an empty callback when exact connections exist but none are active and approved', async () => {
   const { service } = createService({
     connections: [existingConnection({ isActive: false })],
   });
 
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-100-a',
+    resourceServers: [],
+  });
+});
+
+test('keeps apply strict but skips malformed legacy rows during revocation', async () => {
+  const warnings: unknown[][] = [];
+  const logger = {
+    debug: () => undefined,
+    warn: (...args: unknown[]) => warnings.push(args),
+  } as unknown as FastifyBaseLogger;
+  const { service } = createService({
+    logger,
+    connections: [
+      existingConnection({ id: 'valid', serviceId: 'service-a' }),
+      existingConnection({
+        id: 'malformed',
+        serviceId: 'service-b',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          submissionId: 'submission-200-b',
+          scopes: undefined as unknown as string[],
+        },
+      }),
+    ],
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-a'),
+      'service-b': catalogService('service-b', 'provider-a'),
+    },
+  });
+
   await assert.rejects(
     service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /No approved connections found for integration integration-a in environment dev/
+    /does not contain a valid scope list/
   );
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved',
+    { skipMalformedConnections: true }
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-200-b',
+    resourceServers: [
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+    ],
+  });
+  assert.equal(warnings.length, 1);
+  const warning = warnings[0][0] as {
+    connectionId: string;
+    serviceId: string;
+  };
+  assert.equal(warning.connectionId, 'malformed');
+  assert.equal(warning.serviceId, 'service-b');
 });
 
 test('fails closed when one integration resolves to multiple OAuth clients', async () => {
