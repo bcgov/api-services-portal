@@ -90,7 +90,7 @@ const links: NavLink[] = [
   {
     name: 'Consumers',
     url: '/manager/consumers',
-    access: ['api-owner'],
+    access: ['api-owner', 'sdx-viewer'],
     sites: ['manager'],
     BadgeElement: AccessRequestsBadge,
   },

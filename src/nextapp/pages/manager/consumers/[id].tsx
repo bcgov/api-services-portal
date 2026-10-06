@@ -43,6 +43,7 @@ import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
 import ActionsMenu from '@/components/actions-menu';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import { useAuth } from '@/shared/services/auth';
 import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -85,6 +86,9 @@ const ConsumerPage: React.FC<
   );
   const { isOpen, onClose, onToggle } = useDisclosure();
   const toast = useToast();
+  const { user } = useAuth();
+  // SDX consumers are managed by the provisioner, so SDX viewers can only look
+  const readOnly = user?.roles.includes('sdx-viewer');
   const consumer = data?.getNamespaceConsumerAccess;
   const application = data?.getNamespaceConsumerAccess?.application;
   const products = Object.keys(groupBy(consumer?.prodEnvAccess, 'productName'));
@@ -152,9 +156,11 @@ const ConsumerPage: React.FC<
       <Container maxW="6xl">
         <PageHeader
           actions={
-            <Button data-testid="consumer-grant-btn" onClick={onToggle}>
-              Grant Access
-            </Button>
+            !readOnly && (
+              <Button data-testid="consumer-grant-btn" onClick={onToggle}>
+                Grant Access
+              </Button>
+            )
           }
           breadcrumb={breadcrumbs}
           title={consumer.consumer?.username}
@@ -222,13 +228,15 @@ const ConsumerPage: React.FC<
                   </WrapItem>
                 ))}
 
-                <WrapItem>
-                  <ManageLabels
-                    data={consumer.labels}
-                    id={consumer.consumer?.id}
-                    queryKey={queryKey}
-                  />
-                </WrapItem>
+                {!readOnly && (
+                  <WrapItem>
+                    <ManageLabels
+                      data={consumer.labels}
+                      id={consumer.consumer?.id}
+                      queryKey={queryKey}
+                    />
+                  </WrapItem>
+                )}
               </Wrap>
             </Detail>
             <Detail>
@@ -284,23 +292,27 @@ const ConsumerPage: React.FC<
                           )}
                         </Td>
                         <Td textAlign="right">
-                          <ConsumerEditDialog
-                            queryKey={queryKey}
-                            consumerId={consumer?.consumer.id}
-                            prodEnvId={d.environment.id}
-                          />
-                          <ActionsMenu
-                            data-testid={`consumer-prod-${d.productName}-menu`}
-                          >
-                            <MenuItem
-                              onClick={handleRevoke(
-                                consumer?.consumer.id,
-                                d.environment.id
-                              )}
-                            >
-                              Revoke Access
-                            </MenuItem>
-                          </ActionsMenu>
+                          {!readOnly && (
+                            <>
+                              <ConsumerEditDialog
+                                queryKey={queryKey}
+                                consumerId={consumer?.consumer.id}
+                                prodEnvId={d.environment.id}
+                              />
+                              <ActionsMenu
+                                data-testid={`consumer-prod-${d.productName}-menu`}
+                              >
+                                <MenuItem
+                                  onClick={handleRevoke(
+                                    consumer?.consumer.id,
+                                    d.environment.id
+                                  )}
+                                >
+                                  Revoke Access
+                                </MenuItem>
+                              </ActionsMenu>
+                            </>
+                          )}
                         </Td>
                       </Tr>
                     ))}
