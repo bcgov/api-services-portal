@@ -16,10 +16,10 @@ const environment: EnvironmentConfig = {
   kong_admin_url: 'http://kong-admin',
   sdx_token_exchange_client_id: 'sdx-edge-exchange',
   sdx_token_exchange_token_url:
-    'https://issuer.example/realms/standard/protocol/openid-connect/token',
+    'https://ISSUER.EXAMPLE:443/realms/standard/protocol/openid-connect/token/',
   sdx_trusted_issuers: [
-    'https://issuer.example/realms/standard',
-    'https://issuer.example/realms/standard',
+    'https://issuer.example/realms/standard/',
+    'https://ISSUER.EXAMPLE:443/realms/standard',
   ],
 };
 
@@ -93,7 +93,23 @@ test('builds canonical R1 security settings from trusted sources', () => {
   );
 });
 
-test('R1 preflight requires the explicit client and trusted issuers', () => {
+test('uses the exchange client as the required incoming subject-token audience', () => {
+  const result = buildR1SecurityConfig({
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+  });
+
+  assert.equal(result.consumer.token.allowedAud, 'sdx-edge-exchange');
+  assert.notEqual(
+    result.consumer.token.allowedAud,
+    requesterDetails.client?.clientId
+  );
+  assert.notEqual(result.consumer.token.allowedAud, service.subsystem?.clientId);
+});
+
+test('R1 preflight requires the explicit client, endpoint, and trusted issuers', () => {
   assert.throws(
     () =>
       new PolicyService().preflightConnectionRequest('SDX.R1.00', {
@@ -109,6 +125,7 @@ test('R1 preflight requires the explicit client and trusted issuers', () => {
       assert.match(error.message, /SDX\.R1\.00 security configuration/);
       assert.deepEqual(error.details?.missing, [
         'sdx_token_exchange_client_id',
+        'sdx_token_exchange_token_url',
         'sdx_trusted_issuers',
       ]);
       return true;
@@ -116,38 +133,38 @@ test('R1 preflight requires the explicit client and trusted issuers', () => {
   );
 });
 
-test('requires an explicit exchange endpoint when control-plane OAuth uses another issuer', () => {
+test('requires an explicit exchange endpoint even when control-plane OAuth uses a trusted issuer', () => {
   assert.throws(
     () =>
       buildR1SecurityConfig({
         environment: 'dev',
         environmentConfig: {
           ...environment,
+          oauth_token_url:
+            'https://issuer.example/realms/standard/protocol/openid-connect/token',
           sdx_token_exchange_token_url: undefined,
         },
         service,
         requesterDetails,
       }),
-    /token endpoint is outside sdx_trusted_issuers/
+    /missing: sdx_token_exchange_token_url/
   );
 });
 
-test('can reuse oauth_token_url when it belongs to a trusted issuer', () => {
-  const issuer = 'https://issuer.example/realms/standard';
+test('canonicalizes issuer and endpoint host case, default ports, and trailing slashes', () => {
   const result = buildR1SecurityConfig({
     environment: 'dev',
-    environmentConfig: {
-      ...environment,
-      oauth_token_url: issuer + '/protocol/openid-connect/token',
-      sdx_token_exchange_token_url: undefined,
-    },
+    environmentConfig: environment,
     service,
     requesterDetails,
   });
 
+  assert.deepEqual(result.consumer.token.allowedIss, [
+    'https://issuer.example/realms/standard',
+  ]);
   assert.equal(
     result.consumer.tokenExchange.tokenEndpoint,
-    issuer + '/protocol/openid-connect/token'
+    'https://issuer.example/realms/standard/protocol/openid-connect/token'
   );
 });
 

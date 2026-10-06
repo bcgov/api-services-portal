@@ -1,5 +1,8 @@
 import type { ServiceCatalogEntry } from '../../../clients/sdx-member/index.js';
-import type { EnvironmentConfig } from '../../../config/environments.js';
+import type {
+  EnvironmentConfig,
+  R1EnvironmentConfig,
+} from '../../../config/environments.js';
 import {
   BadRequestError,
   InternalError,
@@ -63,6 +66,9 @@ export function buildR1SecurityConfig({
   const exchangeClientId = nonBlank(
     environmentConfig.sdx_token_exchange_client_id
   );
+  const tokenEndpointValue = nonBlank(
+    environmentConfig.sdx_token_exchange_token_url
+  );
   const configuredIssuers = environmentConfig.sdx_trusted_issuers;
   if (
     Array.isArray(configuredIssuers) &&
@@ -75,30 +81,34 @@ export function buildR1SecurityConfig({
       { environment: environmentName, field: 'sdx_trusted_issuers' }
     );
   }
-  const trustedIssuers = uniqueNonBlank(configuredIssuers);
-  if (!exchangeClientId || trustedIssuers.length === 0) {
-    const missing: string[] = [];
-    if (!exchangeClientId) missing.push('sdx_token_exchange_client_id');
-    if (trustedIssuers.length === 0) missing.push('sdx_trusted_issuers');
+
+  const missing: string[] = [];
+  if (!exchangeClientId) missing.push('sdx_token_exchange_client_id');
+  if (!tokenEndpointValue) missing.push('sdx_token_exchange_token_url');
+  if (!Array.isArray(configuredIssuers) || configuredIssuers.length === 0) {
+    missing.push('sdx_trusted_issuers');
+  }
+  if (missing.length > 0) {
     throw configurationError(environmentName, missing);
   }
 
-  validateUrls(environmentName, 'sdx_trusted_issuers', trustedIssuers);
-
-  const explicitTokenEndpoint = nonBlank(
-    environmentConfig.sdx_token_exchange_token_url
+  const r1Environment = environmentConfig as R1EnvironmentConfig;
+  const normalizedExchangeClientId = exchangeClientId as string;
+  const trustedIssuerUrls = uniqueCanonicalUrls(
+    environmentName,
+    'sdx_trusted_issuers',
+    r1Environment.sdx_trusted_issuers
   );
-  const tokenEndpoint =
-    explicitTokenEndpoint || nonBlank(environmentConfig.oauth_token_url);
-  if (!tokenEndpoint) {
-    throw configurationError(environmentName, ['sdx_token_exchange_token_url']);
-  }
-  validateUrls(environmentName, 'sdx_token_exchange_token_url', [
-    tokenEndpoint,
-  ]);
+  const tokenEndpointUrl = parseHttpUrl(
+    environmentName,
+    'sdx_token_exchange_token_url',
+    r1Environment.sdx_token_exchange_token_url
+  );
 
   if (
-    !trustedIssuers.some((issuer) => isEndpointForIssuer(tokenEndpoint, issuer))
+    !trustedIssuerUrls.some((issuer) =>
+      isEndpointForIssuer(tokenEndpointUrl, issuer)
+    )
   ) {
     throw withDetails(
       new InternalError(
@@ -106,12 +116,13 @@ export function buildR1SecurityConfig({
       ),
       {
         environment: environmentName,
-        field: explicitTokenEndpoint
-          ? 'sdx_token_exchange_token_url'
-          : 'oauth_token_url',
+        field: 'sdx_token_exchange_token_url',
       }
     );
   }
+
+  const trustedIssuers = trustedIssuerUrls.map(canonicalUrl);
+  const tokenEndpoint = canonicalUrl(tokenEndpointUrl);
 
   if (service.environment !== environmentName) {
     throw requestError(
@@ -150,7 +161,7 @@ export function buildR1SecurityConfig({
   return {
     consumer: {
       token: {
-        allowedAud: exchangeClientId,
+        allowedAud: normalizedExchangeClientId,
         allowedIss: trustedIssuers,
         consumerMatch: true,
         consumerMatchClaim: 'azp',
@@ -159,7 +170,7 @@ export function buildR1SecurityConfig({
       },
       acl: {},
       tokenExchange: {
-        clientId: exchangeClientId,
+        clientId: normalizedExchangeClientId,
         tokenEndpoint,
         scopes: [],
         audience: providerAudience,
@@ -204,38 +215,50 @@ function nonBlank(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function uniqueNonBlank(values: unknown): string[] {
-  if (!Array.isArray(values)) return [];
-  return Array.from(
-    new Set(values.map(nonBlank).filter((value): value is string => !!value))
-  );
-}
-
-function validateUrls(
+function uniqueCanonicalUrls(
   environment: string,
   field: string,
   values: string[]
-): void {
-  for (const value of values) {
-    try {
-      const url = new URL(value);
-      if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-        throw new Error();
-      }
-    } catch {
-      throw withDetails(
-        new InternalError(
-          `SDX.R1.00 security configuration for environment '${environment}' has an invalid URL in ${field}`
-        ),
-        { environment, field }
-      );
+): URL[] {
+  const urls = values.map((value) => parseHttpUrl(environment, field, value));
+  return Array.from(
+    new Map(urls.map((url) => [canonicalUrl(url), url])).values()
+  );
+}
+
+function parseHttpUrl(
+  environment: string,
+  field: string,
+  value: string
+): URL {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      throw new Error();
     }
+    return url;
+  } catch {
+    throw withDetails(
+      new InternalError(
+        `SDX.R1.00 security configuration for environment '${environment}' has an invalid URL in ${field}`
+      ),
+      { environment, field }
+    );
   }
 }
 
-function isEndpointForIssuer(endpoint: string, issuer: string): boolean {
-  const normalizedIssuer = issuer.replace(/\/+$/, '');
+function canonicalUrl(url: URL): string {
+  const pathname = url.pathname.replace(/\/+$/, '');
+  return `${url.origin}${pathname}${url.search}${url.hash}`;
+}
+
+function isEndpointForIssuer(endpoint: URL, issuer: URL): boolean {
+  if (endpoint.origin !== issuer.origin) return false;
+
+  const endpointPath = endpoint.pathname.replace(/\/+$/, '');
+  const issuerPath = issuer.pathname.replace(/\/+$/, '');
   return (
-    endpoint === normalizedIssuer || endpoint.startsWith(normalizedIssuer + '/')
+    endpointPath === issuerPath ||
+    endpointPath.startsWith(`${issuerPath}/`)
   );
 }

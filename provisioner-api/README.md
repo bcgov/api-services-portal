@@ -120,7 +120,7 @@ npm run lint:spec   # regenerates openapi.yaml and runs Spectral (fails on warn)
 
 ## SDX R1 security configuration
 
-Each entry in the environments configuration may include these R1 fields:
+An environment used for R1 must include all three of these fields:
 
 - `sdx_token_exchange_client_id` identifies the OAuth client used by the
   consumer edge for RFC 8693 exchange. It must not reuse `client_id` merely
@@ -128,16 +128,19 @@ Each entry in the environments configuration may include these R1 fields:
   control-plane authentication.
 - `sdx_trusted_issuers` lists the token issuers accepted at the consumer and
   provider edges.
-- `sdx_token_exchange_token_url` identifies the exchange endpoint. It may be
-  omitted only when `oauth_token_url` is an endpoint below one of the trusted
-  issuer URLs.
+- `sdx_token_exchange_token_url` identifies the exchange endpoint. It is
+  required and never falls back to the control-plane `oauth_token_url`.
 
 The available R1 preflight API validates these values and reports missing
 environment fields, invalid URLs, environment conflicts, and a requester
 provider identity that differs from the service catalog. The provider audience
 always comes from the catalog service subsystem's `clientId`. Managed R1 route
 configuration leaves the static exchange-scope fallback empty because the
-verified original token is the sole source of requested scopes.
+verified original token is the sole source of requested scopes. The consumer
+token's incoming audience is deliberately the exchange-client ID: APS-4979
+removes that audience during exchange and adds the authoritative provider
+audience. R1 activation remains blocked until APSTST confirms that CSS can
+issue the exchange-client audience.
 
 These settings are non-secret deployment configuration. APS platform
 operations may populate them only with an existing Common SSO realm and
