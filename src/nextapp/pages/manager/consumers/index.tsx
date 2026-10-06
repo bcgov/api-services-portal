@@ -36,6 +36,7 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
 import AccessRequestsList from '@/components/access-request/access-requests-list';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import { useAuth } from '@/shared/services/auth';
 
 const sortDate = new Intl.DateTimeFormat('en-ca', { dateStyle: 'short' });
 
@@ -76,8 +77,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
-
   const toast = useToast();
+  const { user } = useAuth();
+  // SDX consumers are managed by the provisioner, so SDX viewers can only look
+  const readOnly = user?.roles.includes('sdx-viewer');
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Consumers' }]);
   const client = useQueryClient();
   const [search, setSearch] = React.useState('');
@@ -195,9 +198,9 @@ const ConsumersPage: React.FC<
         <PageHeader
           title="Consumers"
           breadcrumb={breadcrumbs}
-          actions={<LinkConsumer queryKey={queryKey} />}
+          actions={!readOnly && <LinkConsumer queryKey={queryKey} />}
         />
-        {isSuccess && (
+        {isSuccess && !readOnly && (
           <AccessRequestsList
             labels={data?.allConsumerGroupLabels}
             queryKey={queryKey}
@@ -284,32 +287,34 @@ const ConsumersPage: React.FC<
                 <Td width="25%">
                   <Flex align="center" justify="space-between">
                     {formatDistanceToNow(new Date(d.lastUpdated))} ago
-                    <ActionsMenu
-                      data-testid={`consumer-${d.id}-menu`}
-                      placement="left-start"
-                    >
-                      <MenuItem
-                        color="bc-link"
-                        onClick={handleGrant(d)}
-                        data-testid="consumer-grant-menuitem"
-                      >
-                        Grant Access
-                      </MenuItem>
-                      <ConfirmationDialog
-                        destructive
-                        body="This action cannot be undone"
-                        confirmButtonText="Yes, Delete"
-                        title={`Delete ${d.username} Consumer?`}
-                        onConfirm={(() => handleDelete(d.id))()}
+                    {!readOnly && (
+                      <ActionsMenu
+                        data-testid={`consumer-${d.id}-menu`}
+                        placement="left-start"
                       >
                         <MenuItem
-                          color="red"
-                          data-testid="consumer-delete-menuitem"
+                          color="bc-link"
+                          onClick={handleGrant(d)}
+                          data-testid="consumer-grant-menuitem"
                         >
-                          Delete Consumer...
+                          Grant Access
                         </MenuItem>
-                      </ConfirmationDialog>
-                    </ActionsMenu>
+                        <ConfirmationDialog
+                          destructive
+                          body="This action cannot be undone"
+                          confirmButtonText="Yes, Delete"
+                          title={`Delete ${d.username} Consumer?`}
+                          onConfirm={(() => handleDelete(d.id))()}
+                        >
+                          <MenuItem
+                            color="red"
+                            data-testid="consumer-delete-menuitem"
+                          >
+                            Delete Consumer...
+                          </MenuItem>
+                        </ConfirmationDialog>
+                      </ActionsMenu>
+                    )}
                   </Flex>
                 </Td>
               </Tr>

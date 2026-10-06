@@ -79,6 +79,13 @@ ACCESS MANAGER,,,User,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Label,,"read,create,update,delete",,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
+SDX VIEWER,,getFilteredNamespaceConsumers,,,,,,,sdx-viewer,,,allow,filterByUserNS
+SDX VIEWER,,getNamespaceConsumerAccess,,,,,,,sdx-viewer,,,allow,
+SDX VIEWER,,allConsumerGroupLabels,,,,,,,sdx-viewer,,,allow,
+SDX VIEWER,,allConsumerScopesAndRoles,,,,,,,sdx-viewer,,,allow,
+SDX VIEWER,,BusinessProfile,,,,,,,sdx-viewer,,,allow,
+SDX VIEWER,,,Label,read,,,,,sdx-viewer,,,allow,
+SDX VIEWER,,,GatewayConsumer,read,,,,,sdx-viewer,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNSorSharedTrue
