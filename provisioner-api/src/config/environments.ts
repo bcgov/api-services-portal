@@ -51,12 +51,20 @@ export type EnvironmentConfig = {
    */
   sdx_token_exchange_client_id?: string;
   /**
-   * Token endpoint used by the SDX edge. May be omitted only when the existing
-   * `oauth_token_url` belongs to one of `sdx_trusted_issuers`.
+   * Token endpoint used by the SDX edge. Required by the R1 preflight and
+   * deliberately independent of the control-plane `oauth_token_url`.
+   * Optional here only because non-R1 environments share this file format.
    */
   sdx_token_exchange_token_url?: string;
   /** Issuers accepted for original and exchanged SDX access tokens. */
   sdx_trusted_issuers?: string[];
+};
+
+/** Environment fields that must be present before an R1 connection is built. */
+export type R1EnvironmentConfig = EnvironmentConfig & {
+  sdx_token_exchange_client_id: string;
+  sdx_token_exchange_token_url: string;
+  sdx_trusted_issuers: string[];
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
