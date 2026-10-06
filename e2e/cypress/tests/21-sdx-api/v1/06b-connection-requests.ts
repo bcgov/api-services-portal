@@ -117,6 +117,27 @@ describe('SDX Connection Requests (Sad Paths)', () => {
       })
     })
 
+    it('PUT /organizations/{org}/connections/approval - does not create a missing connection', () => {
+      const { org } = workingData
+
+      ;[true, false].forEach((isApproved) => {
+        cy.setRequestBody({
+          clientId: `MIN.ABCD.MY-SYSTEM`,
+          serviceId: `LAB.MIN.ABCD.SERVICE.v1`,
+          isApproved,
+        })
+        cy.callAPI(
+          `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+          'PUT'
+        ).then(({ apiRes: { status, body } }: any) => {
+          expect(status).to.be.equal(422)
+          expect(body.fields.clientId.message).to.be.equal(
+            'Connection request not found'
+          )
+        })
+      })
+    })
+
     it('PUT /organizations/{org}/connections - Invalid clientId format', () => {
       const { org } = workingData
 

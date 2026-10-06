@@ -25,7 +25,7 @@ import {
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
 import { Logger } from '../../../logger';
-import { assertEqual } from '../../ioc/assert';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import {
   getGwaProductEnvironment,
   getPermittedNamespaceNames,
@@ -103,19 +103,19 @@ export class OrgConnectionController extends Controller {
     const ctx = this.keystone.createContext(request, true);
     const connectionService = new ConnectionService();
 
-    if (input.isApproved === false) {
-      const existing = await connectionService.findConnection(
-        ctx,
-        input.clientId,
-        input.serviceId
-      );
-      assertEqual(
-        Boolean(existing) && !existing.isApproved,
-        false,
-        'isApproved',
-        'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
-      );
-    }
+    // Approval only applies to an existing request; the upsert must not create one
+    const existing = await connectionService.findConnection(
+      ctx,
+      input.clientId,
+      input.serviceId
+    );
+    assertIsDefined(existing, 'clientId', 'Connection request not found');
+    assertEqual(
+      input.isApproved === false && !existing.isApproved,
+      false,
+      'isApproved',
+      'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+    );
 
     const data: ConnectionRequestInput = {
       clientId: input.clientId,
