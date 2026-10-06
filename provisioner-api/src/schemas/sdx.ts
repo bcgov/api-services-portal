@@ -106,10 +106,15 @@ const ResourceServerServiceAccess = Type.Object(
   {
     scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
     name: Type.String({ examples: ['claims-svc'] }),
+    version: Type.Optional(
+      Type.String({ minLength: 1, examples: ['1.0.0'] })
+    ),
   },
   {
     additionalProperties: false,
-    examples: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+    examples: [
+      { scopes: ['Claims.Read'], name: 'claims-svc', version: '1.0.0' },
+    ],
   }
 );
 
@@ -117,10 +122,13 @@ const AllowedResourceServerServiceAccess = Type.Object(
   {
     scopes: Type.Array(Type.String(), { examples: [['Claims.Read']] }),
     name: Type.String({ examples: ['claims-svc'] }),
+    version: Type.String({ examples: ['1.0.0'] }),
   },
   {
     additionalProperties: false,
-    examples: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+    examples: [
+      { scopes: ['Claims.Read'], name: 'claims-svc', version: '1.0.0' },
+    ],
   }
 );
 
@@ -141,6 +149,7 @@ export const ResourceServerAccess = Type.Object(
           {
             scopes: ['Claims.Read'],
             name: 'MIN.CITZ.MY-API.v1',
+            version: '1.0.0',
           },
         ],
       },
@@ -169,7 +178,13 @@ export const IntegrationAccessRequest = Type.Object(
           {
             environment: 'dev',
             id: '1234',
-            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+            services: [
+              {
+                scopes: ['Claims.Read'],
+                name: 'claims-svc',
+                version: '1.0.0',
+              },
+            ],
           },
         ],
       },
@@ -210,7 +225,13 @@ const NewIntegrationAccessResourceServer = Type.Object(
       {
         id: 'MIN.CITZ.MY-SVC',
         environment: 'dev',
-        services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+        services: [
+          {
+            scopes: ['Claims.Read'],
+            name: 'claims-svc',
+            version: '1.0.0',
+          },
+        ],
       },
     ],
   }
@@ -249,7 +270,13 @@ export const NewIntegrationAccessRequest = Type.Object(
         privacyZone: 'public',
         resourceServers: [
           {
-            services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+            services: [
+              {
+                scopes: ['Claims.Read'],
+                name: 'claims-svc',
+                version: '1.0.0',
+              },
+            ],
             environment: 'dev',
             id: 'MIN.CITZ.MY-SVC',
           },
