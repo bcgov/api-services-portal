@@ -66,11 +66,17 @@ jobs:
               echo "Cypress tests completed."
 
               # Record why a container might have gone away during the run. Only
-              # state and resource numbers are printed, never container logs.
+              # state and resource numbers are printed, plus the sdx-ui log tail
+              # when it is not running, since it can exit during startup.
               echo "::group::Container state"
               docker ps -aq | xargs docker inspect --format \
                 '{{.Name}} status={{.State.Status}} exit={{.State.ExitCode}} oomkilled={{.State.OOMKilled}} restarts={{.RestartCount}} finished={{.State.FinishedAt}}'
               echo "::endgroup::"
+              if [ "$(docker inspect --format '{{.State.Status}}' sdx-ui 2>/dev/null)" != "running" ]; then
+                echo "::group::sdx-ui logs"
+                docker logs --tail 200 sdx-ui 2>&1 || true
+                echo "::endgroup::"
+              fi
               echo "::group::Resource usage"
               free -m
               docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}'
