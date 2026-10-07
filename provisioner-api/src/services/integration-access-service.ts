@@ -269,9 +269,7 @@ export class IntegrationAccessService {
         c.clientId === subsystem.clientId &&
         c.environment === environment &&
         c.requesterDetails.client?.integrationId === integrationId &&
-        c.isApproved === (status === 'approved') &&
-        // a deactivated connection keeps isApproved, but no longer grants access
-        c.isActive !== false
+        c.isApproved === (status === 'approved')
     );
 
     this.logger?.debug('connections allowed %j', allowedConnections);
