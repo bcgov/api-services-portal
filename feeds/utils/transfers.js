@@ -26,15 +26,16 @@ function transfers(workingPath, baseUrl, exceptions) {
         .then((data) => data.json())
         .then((json) => {
           fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
+          // return the next page so callers wait for every page
           if (json.next != null) {
-            this.copy(json.next, filename, index + 1);
+            return this.copy(json.next, filename, index + 1);
           } else if ('result' in json && json['result'].length > 0) {
             const u = url.parse(baseUrl + _url, true);
             if ('limit' in u.query) {
               const newUrl = `${u.pathname}?limit=${u.query.limit}&offset=${
                 Number(u.query.offset) + Number(u.query.limit)
               }`;
-              this.copy(newUrl, filename, index + 1);
+              return this.copy(newUrl, filename, index + 1);
             }
           }
         })

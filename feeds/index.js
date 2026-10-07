@@ -86,15 +86,8 @@ app.put('/forceSync/:source/:scope/:scopeKey', async (req, res) => {
   const scope = req.params.scope;
   const scopeKey = req.params.scopeKey;
   assert.strictEqual(source in sources, true, 'Invalid source ' + source);
-  if (config[source].url?.split(',').length > 1) {
-    const syncMultipleSources = config[source].url?.split(',');
-    for (const url of syncMultipleSources) {
-      const configCopy = { ...config[source], url };
-      await sources[source].scopedSync(configCopy, scope, scopeKey);
-    }
-  } else {
-    await sources[source].scopedSync(config[source], scope, scopeKey);
-  }
+  // a comma-separated KONG_ADMIN_URL is handled by the kong source itself
+  await sources[source].scopedSync(config[source], scope, scopeKey);
   res.send({ state: 'synced' });
 });
 
