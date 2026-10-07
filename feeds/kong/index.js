@@ -7,13 +7,29 @@ const { Logger } = require('../logger');
 
 const log = Logger('kong');
 
+/**
+ * KONG_ADMIN_URL may hold a comma-separated list of Kong admin URLs (e.g. the
+ * APS Kong and the SDX Kong); every Kong in the list is synced into the Portal.
+ */
+function kongUrls(url) {
+  return (url ?? '')
+    .split(',')
+    .map((u) => u.trim())
+    .filter((u) => u.length > 0);
+}
+
 async function scopedSync(
   { url, workingPath, destinationUrl },
   scope,
   scopeKey
 ) {
   if (scope == 'consumer') {
-    await scopedSyncByConsumer({ url, workingPath, destinationUrl }, scopeKey);
+    for (const kongUrl of kongUrls(url)) {
+      await scopedSyncByConsumer(
+        { url: kongUrl, workingPath, destinationUrl },
+        scopeKey
+      );
+    }
   } else if (scope == 'namespace') {
     await scopedSyncByNamespace({ url, workingPath, destinationUrl }, scopeKey);
   } else {
@@ -25,68 +41,92 @@ async function scopedSyncByNamespace(
   { url, workingPath, destinationUrl },
   namespace
 ) {
-  const exceptions = [];
+  // ids of the services and routes found across all Kongs, for the cleanup
+  const kongIds = { 'gw-services': new Set(), 'gw-routes': new Set() };
+  const urls = kongUrls(url);
+  let allFetched = urls.length > 0;
 
-  const scopedDir = `${workingPath}/${uuidv4()}`;
-  const xfer = transfers(scopedDir, url, exceptions);
-  await xfer.copy(`/services?tags=ns.${namespace}`, 'gw-services');
-  await xfer.copy(`/routes?tags=ns.${namespace}`, 'gw-routes');
-  await xfer.copy(`/consumers?tags=ns.${namespace}`, 'gw-consumers');
-  await xfer.copy(`/plugins?tags=ns.${namespace}`, 'gw-plugins');
-  await xfer.copy(`/acls?tags=ns.${namespace}`, 'gw-acls');
+  for (const kongUrl of urls) {
+    const exceptions = [];
 
-  // Now, send to portal
-  await xfer.concurrentWork(
-    loadProducer(
-      xfer,
-      destinationUrl,
-      'gw-services',
-      'name',
-      'service',
-      '/feed/GatewayService'
-    )
-  );
-  await xfer.concurrentWork(
-    loadProducer(
-      xfer,
-      destinationUrl,
-      'gw-routes',
-      'name',
-      'route',
-      '/feed/GatewayRoute'
-    )
-  );
-  await xfer.concurrentWork(
-    loadProducer(
-      xfer,
-      destinationUrl,
-      'gw-consumers',
-      'username',
-      'consumer',
-      '/feed/GatewayConsumer'
-    )
-  );
-  await xfer.concurrentWork(
-    loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
-  );
+    const scopedDir = `${workingPath}/${uuidv4()}`;
+    const xfer = transfers(scopedDir, kongUrl, exceptions);
+    await xfer.copy(`/services?tags=ns.${namespace}`, 'gw-services');
+    await xfer.copy(`/routes?tags=ns.${namespace}`, 'gw-routes');
+    await xfer.copy(`/consumers?tags=ns.${namespace}`, 'gw-consumers');
+    await xfer.copy(`/plugins?tags=ns.${namespace}`, 'gw-plugins');
+    await xfer.copy(`/acls?tags=ns.${namespace}`, 'gw-acls');
 
-  xfer.resultCollector().output();
+    // Now, send to portal
+    await xfer.concurrentWork(
+      loadProducer(
+        xfer,
+        destinationUrl,
+        'gw-services',
+        'name',
+        'service',
+        '/feed/GatewayService'
+      )
+    );
+    await xfer.concurrentWork(
+      loadProducer(
+        xfer,
+        destinationUrl,
+        'gw-routes',
+        'name',
+        'route',
+        '/feed/GatewayRoute'
+      )
+    );
+    await xfer.concurrentWork(
+      loadProducer(
+        xfer,
+        destinationUrl,
+        'gw-consumers',
+        'username',
+        'consumer',
+        '/feed/GatewayConsumer'
+      )
+    );
+    await xfer.concurrentWork(
+      loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
+    );
 
-  // remove any GatewayService or GatewayRoutes that no longer exist in Kong
+    xfer.resultCollector().output();
+
+    if (exceptions.length > 0) {
+      allFetched = false;
+    }
+    for (const file of Object.keys(kongIds)) {
+      xfer
+        .get_json_content(file)
+        ['data'].forEach((target) => kongIds[file].add(target['id']));
+    }
+
+    fs.rmSync(scopedDir, { recursive: true });
+  }
+
+  // a failed fetch reads as zero records, which would delete everything
+  if (!allFetched) {
+    log.error(
+      `[${namespace}] Skipping cleanup - not all Kong data could be fetched`
+    );
+    return;
+  }
+
+  // remove any GatewayService or GatewayRoutes that no longer exist in any Kong
   const destination = portal(destinationUrl);
 
   const cleanupEntities = [
     { entity: 'GatewayService', file: 'gw-services' },
     { entity: 'GatewayRoute', file: 'gw-routes' },
   ];
-  for (item of cleanupEntities) {
+  for (const item of cleanupEntities) {
     const current = await destination.get(
       '/feed/' + item.entity + '/namespace/' + namespace
     );
-    const items = xfer.get_json_content(item.file)['data'];
-    for (cur of current.filter(
-      (cur) =>
-        items.filter((target) => target['id'] === cur.extForeignKey).length == 0
+    for (const cur of current.filter(
+      (cur) => !kongIds[item.file].has(cur.extForeignKey)
     )) {
       const nm = item.entity + ':' + cur.extForeignKey;
       await destination
@@ -95,8 +135,6 @@ async function scopedSyncByNamespace(
         .catch((err) => log.error(`[${nm}] DELETION ERR ${err}`));
     }
   }
-
-  fs.rmSync(scopedDir, { recursive: true });
 }
 
 async function scopedSyncByConsumer(
@@ -130,6 +168,18 @@ async function scopedSyncByConsumer(
 }
 
 async function sync({ url, workingPath, destinationUrl }) {
+  for (const kongUrl of kongUrls(url)) {
+    // a fresh folder per Kong, so one Kong never reads another's pages
+    const syncDir = `${workingPath}/${uuidv4()}`;
+    try {
+      await syncKong({ url: kongUrl, workingPath: syncDir, destinationUrl });
+    } finally {
+      fs.rmSync(syncDir, { recursive: true, force: true });
+    }
+  }
+}
+
+async function syncKong({ url, workingPath, destinationUrl }) {
   const exceptions = [];
   const xfer = transfers(workingPath, url, exceptions);
 
