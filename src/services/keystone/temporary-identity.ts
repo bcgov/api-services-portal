@@ -72,15 +72,11 @@ export async function assignNamespace(
   const scopes = umaAuthDetails['scopes'];
   const _roles = scopesToRoles(identityProvider, scopes);
 
+  const roles = JSON.stringify(_roles);
+
   const noauthContext = context.createContext({
     skipAccessControl: true,
   });
-
-  if (await isSdxViewer(noauthContext, namespace, scopes)) {
-    _roles.push('sdx-viewer');
-  }
-
-  const roles = JSON.stringify(_roles);
 
   const ident = await getIdentityByJti(noauthContext, jti);
   let tempId = ident.id;
@@ -103,35 +99,6 @@ export async function assignNamespace(
     logger.error('assign_namespace - NO! Something went wrong %j', errors);
   }
   return Boolean(errors) == false;
-}
-
-/**
- * Subsystem roles on an SDX subsystem gateway only grant Namespace.View, which
- * does not include the Consumers page. Viewers of an SDX subsystem gateway who
- * can't already manage its consumers get read-only access to them.
- */
-export async function isSdxViewer(
-  context: any,
-  namespace: string,
-  scopes: string[]
-): Promise<boolean> {
-  if (
-    !namespace ||
-    !scopes.includes('Namespace.View') ||
-    scopes.includes('Namespace.Manage') ||
-    scopes.includes('Access.Manage')
-  ) {
-    return false;
-  }
-  const result = await context.executeGraphQL({
-    query: `query GetSubsystemsForNamespace($namespace: String!) {
-                  allSubsystems(where: { namespace: $namespace }, first: 1) {
-                      id
-                  }
-              }`,
-    variables: { namespace },
-  });
-  return result.data?.allSubsystems?.length > 0;
 }
 
 export async function updateUserProfileDetails(
