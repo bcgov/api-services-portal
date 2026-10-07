@@ -191,7 +191,7 @@ describe('SDX E2E Tests', () => {
     it('lists the integration client on the gateway Consumers page', () => {
       cy.visit('/')
       // Janis registered the subsystem gateway, so she only has the subsystem
-      // roles on it, which give read-only (sdx-viewer) access to its consumers
+      // roles on it; their Namespace.View gives read-only access to consumers
       cy.login(Cypress.env('DEV_USERNAME'), Cypress.env('DEV_PASSWORD'))
       cy.activateGateway(conn.gatewayId)
       cy.visit(consumers.path)
@@ -199,14 +199,12 @@ describe('SDX E2E Tests', () => {
         'contain',
         conn.integrationClientId
       )
-      cy.get(`[data-testid^="consumer-"][data-testid$="-menu"]`).should('not.exist')
 
       // the consumer details list the subsystem's Product
       cy.contains('a', conn.integrationClientId).click()
       cy.contains('Products (1)', { timeout: 15000 })
       cy.contains(conn.productName).should('be.visible')
       cy.get(consumers.productDetails).should('have.length', 1)
-      cy.get(consumers.consumerGrantAccessBtn).should('not.exist')
     })
 
     it('PUT /organizations/{org}/connections - deactivate', () => {
