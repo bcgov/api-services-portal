@@ -221,26 +221,21 @@ export class StructuredActivityService {
     success: boolean,
     dataInput: ActivityDataInput
   ) {
-    const applicationName = dataInput.application?.name;
-    const message = applicationName
-      ? '{actor} {action} {entity} for {application} ({consumer}) ({product} {environment})'
-      : '{actor} {action} {entity} for {consumer} ({product} {environment})';
+    const message = dataInput.application?.name
+      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
+      : '{actor} {action} {entity} for {consumer} to access {product} {environment}';
     const params = {
       actor: credentialActorLabel(this.actor, this.context?.req?.user),
       action: 'regenerated',
       entity: 'credential',
     };
-    const mappedInput: ActivityDataInput = { ...dataInput };
-    if (!applicationName) {
-      delete mappedInput.application;
-    }
-    this.mapDataInputToParams(mappedInput, params);
+    this.mapDataInputToParams(dataInput, params);
 
     return this.recordActivity(
       success,
       message,
       params,
-      this.mapDataInputToIDs(['consumer'], mappedInput)
+      this.mapDataInputToIDs(['consumer'], dataInput)
     );
   }
 

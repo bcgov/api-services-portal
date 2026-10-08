@@ -14,9 +14,9 @@ const recordActivityMock = activityModule.recordActivity;
 const ISSUE_TEMPLATE =
   '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}';
 const REGENERATE_WITH_APPLICATION =
-  '{actor} {action} {entity} for {application} ({consumer}) ({product} {environment})';
+  '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}';
 const REGENERATE_WITHOUT_APPLICATION =
-  '{actor} {action} {entity} for {consumer} ({product} {environment})';
+  '{actor} {action} {entity} for {consumer} to access {product} {environment}';
 
 function activityCall(callIndex = 0) {
   const [

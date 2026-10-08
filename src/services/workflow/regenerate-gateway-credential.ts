@@ -80,11 +80,12 @@ export async function regenerateGatewayCredential(
       gatewayId
     );
 
-    await recordRegeneratedCredential(
+    await recordRegeneratedCredentialActivity(
       context,
       gatewayId,
       clientId,
-      serviceAccess
+      serviceAccess,
+      'regenerateGatewayCredential'
     );
 
     return {
@@ -155,11 +156,12 @@ export async function regenerateGatewayCredential(
       gatewayId
     );
 
-    await recordRegeneratedCredential(
+    await recordRegeneratedCredentialActivity(
       context,
       gatewayId,
       clientId,
-      serviceAccess
+      serviceAccess,
+      'regenerateGatewayCredential'
     );
 
     return newCredential;
@@ -168,7 +170,7 @@ export async function regenerateGatewayCredential(
   throw new Error(`Invalid Service Access Action for flow '${flow}'`);
 }
 
-async function recordRegeneratedCredential(
+export async function recordRegeneratedCredentialActivity(
   context: any,
   gatewayId: string,
   clientId: string,
@@ -178,7 +180,8 @@ async function recordRegeneratedCredential(
       name?: string | null;
       product?: { name?: string | null } | null;
     } | null;
-  }
+  },
+  logLabel: string
 ) {
   try {
     await new StructuredActivityService(
@@ -195,7 +198,8 @@ async function recordRegeneratedCredential(
     );
   } catch (error) {
     logger.error(
-      '[regenerateGatewayCredential] Failed to record activity for %s: %s',
+      '[%s] Failed to record activity for %s: %s',
+      logLabel,
       clientId,
       error
     );

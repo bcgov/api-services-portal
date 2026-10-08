@@ -31,7 +31,7 @@ describe('24 Self-issuing credentials — activity', () => {
   const issueTemplate =
     '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
   const regenerateTemplate =
-    '{actor} {action} {entity} for {application} ({consumer}) ({product} {environment})'
+    '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
 
   before(() => {
     loadSuiteState().then((s) => {
