@@ -44,6 +44,27 @@ export type EnvironmentConfig = {
    * verifying the signature, not just from the internal SDX network.
    */
   public_url?: string;
+  /**
+   * OAuth client used by the SDX consumer edge to authenticate an RFC 8693
+   * token-exchange request. This is deliberately separate from `client_id`,
+   * which identifies the provisioner's control-plane client.
+   */
+  sdx_token_exchange_client_id?: string;
+  /**
+   * Token endpoint used by the SDX edge. Required by the R1 preflight and
+   * deliberately independent of the control-plane `oauth_token_url`.
+   * Optional here only because non-R1 environments share this file format.
+   */
+  sdx_token_exchange_token_url?: string;
+  /** Issuers accepted for original and exchanged SDX access tokens. */
+  sdx_trusted_issuers?: string[];
+};
+
+/** Environment fields that must be present before an R1 connection is built. */
+export type R1EnvironmentConfig = EnvironmentConfig & {
+  sdx_token_exchange_client_id: string;
+  sdx_token_exchange_token_url: string;
+  sdx_trusted_issuers: string[];
 };
 
 /** Map of environment name (`dev`, `test`, `prod`, `sbx`, …) to its config. */
@@ -81,7 +102,9 @@ export function loadEnvironments(): EnvironmentsConfig {
     raw = readFileSync(path, 'utf8');
   } catch (err) {
     throw new Error(
-      `Failed to read ENVIRONMENTS_CONFIG_FILE (${path}): ${(err as Error).message}`
+      `Failed to read ENVIRONMENTS_CONFIG_FILE (${path}): ${
+        (err as Error).message
+      }`
     );
   }
 
@@ -90,7 +113,9 @@ export function loadEnvironments(): EnvironmentsConfig {
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `Failed to parse ENVIRONMENTS_CONFIG_FILE (${path}) as JSON: ${(err as Error).message}`
+      `Failed to parse ENVIRONMENTS_CONFIG_FILE (${path}) as JSON: ${
+        (err as Error).message
+      }`
     );
   }
 
@@ -152,6 +177,9 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'operator_edge_url', name, path);
     optionalString(entry, 'ca_token_url', name, path);
     optionalString(entry, 'public_url', name, path);
+    optionalString(entry, 'sdx_token_exchange_client_id', name, path);
+    optionalString(entry, 'sdx_token_exchange_token_url', name, path);
+    optionalStringArray(entry, 'sdx_trusted_issuers', name, path);
     result[name] = {
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
@@ -160,6 +188,13 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
       operator_edge_url: entry.operator_edge_url as string | undefined,
       ca_token_url: entry.ca_token_url as string | undefined,
       public_url: entry.public_url as string | undefined,
+      sdx_token_exchange_client_id: entry.sdx_token_exchange_client_id as
+        | string
+        | undefined,
+      sdx_token_exchange_token_url: entry.sdx_token_exchange_token_url as
+        | string
+        | undefined,
+      sdx_trusted_issuers: entry.sdx_trusted_issuers as string[] | undefined,
     };
   }
   return result;
@@ -187,6 +222,23 @@ function optionalString(
   if (entry[field] !== undefined && typeof entry[field] !== 'string') {
     throw new Error(
       `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' field '${field}' must be a string`
+    );
+  }
+}
+
+function optionalStringArray(
+  entry: Record<string, unknown>,
+  field: string,
+  name: string,
+  path: string
+): void {
+  const value = entry[field];
+  if (
+    value !== undefined &&
+    (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))
+  ) {
+    throw new Error(
+      `ENVIRONMENTS_CONFIG_FILE (${path}): environment '${name}' field '${field}' must be an array of strings`
     );
   }
 }
