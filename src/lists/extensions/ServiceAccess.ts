@@ -17,6 +17,7 @@ import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
 import { strict as assert } from 'assert';
 import { UpdateCredentials } from '../../services/workflow';
+import { recordRegeneratedCredentialActivity } from '../../services/workflow/regenerate-gateway-credential';
 
 const typeCredentialReferenceUpdateInput = `
 input CredentialReferenceUpdateInput {
@@ -92,6 +93,12 @@ module.exports = {
                   apiKey: newApiKey.apiKey.apiKey,
                 } as NewCredential;
 
+                await recordPortalRegeneratedCredential(
+                  context,
+                  serviceAccess,
+                  clientId
+                );
+
                 return {
                   credential: JSON.stringify(newCredential),
                 };
@@ -154,6 +161,17 @@ module.exports = {
                   newCredential['clientPublicKey'] = publicKey;
                 }
 
+                if (
+                  clientAuthenticator === 'client-secret' ||
+                  clientAuthenticator === 'client-jwt'
+                ) {
+                  await recordPortalRegeneratedCredential(
+                    context,
+                    serviceAccess,
+                    serviceAccess.consumer.customId
+                  );
+                }
+
                 return {
                   credential: JSON.stringify(newCredential),
                 };
@@ -168,3 +186,22 @@ module.exports = {
     },
   ],
 };
+
+async function recordPortalRegeneratedCredential(
+  context: any,
+  serviceAccess: any,
+  clientId: string
+) {
+  // Developers can regenerate their own credential, and Activity create is
+  // limited to gateway managers. sudo() keeps authedItem, so the actor stays
+  // the portal user while the write is allowed.
+  const writeContext =
+    typeof context.sudo === 'function' ? context.sudo() : context;
+  await recordRegeneratedCredentialActivity(
+    writeContext,
+    serviceAccess.productEnvironment?.product?.namespace,
+    clientId,
+    serviceAccess,
+    'regenerateCredentials'
+  );
+}

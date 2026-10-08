@@ -15,6 +15,10 @@ import {
 } from './types';
 import { getEnvironmentContext } from './get-namespaces';
 import { replaceApiKey } from './kong-api-key-replace';
+import {
+  credentialActivityData,
+  StructuredActivityService,
+} from './namespace-activity';
 
 const logger = Logger('wf.RegenGatewayCred');
 
@@ -74,6 +78,14 @@ export async function regenerateGatewayCredential(
       '[regenerateGatewayCredential] Rotated API key for %s in %s',
       clientId,
       gatewayId
+    );
+
+    await recordRegeneratedCredentialActivity(
+      context,
+      gatewayId,
+      clientId,
+      serviceAccess,
+      'regenerateGatewayCredential'
     );
 
     return {
@@ -144,8 +156,52 @@ export async function regenerateGatewayCredential(
       gatewayId
     );
 
+    await recordRegeneratedCredentialActivity(
+      context,
+      gatewayId,
+      clientId,
+      serviceAccess,
+      'regenerateGatewayCredential'
+    );
+
     return newCredential;
   }
 
   throw new Error(`Invalid Service Access Action for flow '${flow}'`);
+}
+
+export async function recordRegeneratedCredentialActivity(
+  context: any,
+  gatewayId: string,
+  clientId: string,
+  serviceAccess: {
+    application?: { name?: string | null } | null;
+    productEnvironment?: {
+      name?: string | null;
+      product?: { name?: string | null } | null;
+    } | null;
+  },
+  logLabel: string
+) {
+  try {
+    await new StructuredActivityService(
+      context,
+      gatewayId
+    ).logRegenerateCredential(
+      true,
+      credentialActivityData({
+        clientId,
+        application: serviceAccess.application,
+        product: serviceAccess.productEnvironment?.product,
+        environment: serviceAccess.productEnvironment,
+      })
+    );
+  } catch (error) {
+    logger.error(
+      '[%s] Failed to record activity for %s: %s',
+      logLabel,
+      clientId,
+      error
+    );
+  }
 }

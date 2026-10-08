@@ -40,6 +40,10 @@ import { isBlank } from './common';
 import { setupAuthorizationAndEnable } from './apply';
 import { saveConsumerLabels } from './consumer-management';
 import { parsePluginConfig } from '../keystone/gateway-service';
+import {
+  credentialActivityData,
+  StructuredActivityService,
+} from './namespace-activity';
 
 const logger = Logger('wf.IssueGatewayCred');
 
@@ -122,6 +126,7 @@ export async function issueGatewayCredential(
   let application: Application | undefined;
   let createdNewApplication = false;
   let serviceAccessId: string | undefined;
+  let issuedCredential: NewCredential | undefined;
 
   try {
     application = await resolveApplication(
@@ -190,7 +195,7 @@ export async function issueGatewayCredential(
       gatewayId
     );
 
-    return created.newCredential;
+    issuedCredential = created.newCredential;
   } catch (error) {
     await rollbackIssuance(noauthContext, {
       serviceAccessId,
@@ -198,6 +203,42 @@ export async function issueGatewayCredential(
       application,
     });
     throw error;
+  }
+
+  // After the rollback try/catch: a feed failure must not delete the credential.
+  await recordIssuedCredential(
+    context,
+    gatewayId,
+    issuedCredential.clientId,
+    application,
+    productEnvironment
+  );
+  return issuedCredential;
+}
+
+async function recordIssuedCredential(
+  context: any,
+  gatewayId: string,
+  clientId: string,
+  application: Application | undefined,
+  productEnvironment: Environment
+) {
+  try {
+    await new StructuredActivityService(context, gatewayId).logIssueCredential(
+      true,
+      credentialActivityData({
+        clientId,
+        application,
+        product: productEnvironment.product,
+        environment: productEnvironment,
+      })
+    );
+  } catch (error) {
+    logger.error(
+      '[issueGatewayCredential] Failed to record activity for %s: %s',
+      clientId,
+      error
+    );
   }
 }
 

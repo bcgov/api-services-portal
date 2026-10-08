@@ -26,6 +26,58 @@ import {
 import { parseBlobString } from '../../batch/feed-worker';
 
 const logger = Logger('wf.Activity');
+
+// Portal users set name. v3 service accounts use username, then the token client id.
+function credentialActorLabel(
+  actor: {
+    name?: string | null;
+    username?: string | null;
+  },
+  requestUser?: {
+    preferred_username?: string | null;
+    clientId?: string | null;
+    azp?: string | null;
+  } | null
+): string {
+  if (actor?.name) {
+    return actor.name;
+  }
+  if (actor?.username) {
+    return actor.username;
+  }
+  if (requestUser?.preferred_username) {
+    return requestUser.preferred_username;
+  }
+  if (requestUser?.clientId) {
+    return requestUser.clientId;
+  }
+  if (requestUser?.azp) {
+    return requestUser.azp;
+  }
+  return '';
+}
+
+export function credentialActivityData(input: {
+  clientId: string;
+  application?: { name?: string | null } | null;
+  product?: { name?: string | null } | null;
+  environment?: { name?: string | null } | null;
+}): ActivityDataInput {
+  const data: ActivityDataInput = {
+    consumerUsername: input.clientId,
+  };
+  if (input.application?.name) {
+    data.application = { name: input.application.name } as Application;
+  }
+  if (input.product?.name) {
+    data.product = { name: input.product.name } as Product;
+  }
+  if (input.environment?.name) {
+    data.environment = { name: input.environment.name } as Environment;
+  }
+  return data;
+}
+
 export interface ActivityDataInput {
   accessRequest?: AccessRequest;
   application?: Application;
@@ -141,6 +193,49 @@ export class StructuredActivityService {
         ['accessRequest', 'consumer', 'environment'],
         dataInput
       )
+    );
+  }
+
+  public async logIssueCredential(
+    success: boolean,
+    dataInput: ActivityDataInput
+  ) {
+    const message =
+      '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}';
+    const params = {
+      actor: credentialActorLabel(this.actor, this.context?.req?.user),
+      action: 'issued',
+      entity: 'credential',
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    return this.recordActivity(
+      success,
+      message,
+      params,
+      this.mapDataInputToIDs(['consumer'], dataInput)
+    );
+  }
+
+  public async logRegenerateCredential(
+    success: boolean,
+    dataInput: ActivityDataInput
+  ) {
+    const message = dataInput.application?.name
+      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
+      : '{actor} {action} {entity} for {consumer} to access {product} {environment}';
+    const params = {
+      actor: credentialActorLabel(this.actor, this.context?.req?.user),
+      action: 'regenerated',
+      entity: 'credential',
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    return this.recordActivity(
+      success,
+      message,
+      params,
+      this.mapDataInputToIDs(['consumer'], dataInput)
     );
   }
 
