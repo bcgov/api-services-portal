@@ -443,6 +443,8 @@ jobs:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             OAS_VALIDATION_API_URL:
               value: 'https://oas-validation-api-gov-bc-ca.dev.api.gov.bc.ca'
+            SDX_UI_URL:
+              value: 'https://sdx-api-gov-bc-ca.dev.api.gov.bc.ca'
             OAS_VALIDATION_API_TIMEOUT_MS:
               value: '30000'
             GWA_PROD_ENV_SLUG:

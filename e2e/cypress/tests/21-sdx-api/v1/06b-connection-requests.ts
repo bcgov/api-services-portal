@@ -82,6 +82,64 @@ describe('SDX Connection Requests (Sad Paths)', () => {
   })
 
   describe('Connection Requests Sad Paths', () => {
+    it('PUT /organizations/{org}/connections/approval - reject a pending request', () => {
+      const { org, datasetId } = workingData
+
+      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
+        const payload = {
+          clientId: service.subsystem.clientId,
+          serviceId: service.name,
+          policyVersion: 'SDX.R0.00',
+          environment: 'dev',
+        }
+        cy.setRequestBody(payload)
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+          ({ apiRes: { status } }: any) => {
+            expect(status).to.be.equal(200)
+
+            // Pending requests are rejected by deleting them, not with isApproved: false
+            cy.setRequestBody({
+              clientId: payload.clientId,
+              serviceId: payload.serviceId,
+              isApproved: false,
+            })
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+              'PUT'
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.fields.isApproved.message).to.be.equal(
+                'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+              )
+            })
+          }
+        )
+      })
+    })
+
+    it('PUT /organizations/{org}/connections/approval - does not create a missing connection', () => {
+      const { org, datasetId } = workingData
+
+      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
+        ;[true, false].forEach((isApproved) => {
+          cy.setRequestBody({
+            clientId: service.subsystem.clientId,
+            serviceId: service.name,
+            isApproved,
+          })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+            'PUT'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(422)
+            expect(body.fields.clientId.message).to.be.equal(
+              'Connection request not found'
+            )
+          })
+        })
+      })
+    })
+
     it('PUT /organizations/{org}/connections - Invalid clientId format', () => {
       const { org } = workingData
 
