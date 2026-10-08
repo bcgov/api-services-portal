@@ -494,3 +494,75 @@ export function applyServicePattern(
     'PUT'
   )
 }
+
+// Creates the subsystem's APS Application and Product, which a connection's
+// ServiceAccess needs; nothing applies sdx-subsystem.r1 automatically yet
+export function applySubsystemPattern(
+  orgName: string,
+  clientId: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      clientId,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-subsystem.r1`,
+    'PUT'
+  )
+}
+
+// Grants the DEV user a scope (e.g. Namespace.Manage) on a gateway directly
+// through Keycloak's UMA protection API, acting as the gateway resource
+// server, for gateways where no user holds Namespace.Manage to grant it
+export function grantGatewayScopeToDevUser(gatewayId: string, scopeName: string) {
+  const issuer = Cypress.env('OIDC_ISSUER')
+  return cy.loginByAuthAPI('', '').then(({ token }: any) => {
+    const requester = JSON.parse(
+      Cypress.Buffer.from(token.split('.')[1], 'base64').toString()
+    ).sub
+    return cy
+      .request({
+        method: 'POST',
+        url: Cypress.env('TOKEN_URL'),
+        form: true,
+        body: {
+          grant_type: 'client_credentials',
+          client_id: Cypress.env('GWA_RES_SVR_CLIENT_ID'),
+          client_secret: Cypress.env('GWA_RES_SVR_CLIENT_SECRET'),
+        },
+      })
+      .then(({ body: { access_token } }: any) => {
+        const headers = { Authorization: `Bearer ${access_token}` }
+        return cy
+          .request({
+            url: `${issuer}/authz/protection/resource_set`,
+            qs: { name: gatewayId, exactName: true },
+            headers,
+          })
+          .then(({ body: resourceIds }: any) => {
+            expect(resourceIds, `gateway ${gatewayId}`).to.have.length(1)
+            return cy.request({
+              method: 'POST',
+              url: `${issuer}/authz/protection/permission/ticket`,
+              headers,
+              failOnStatusCode: false,
+              body: {
+                resource: resourceIds[0],
+                requester,
+                granted: true,
+                scopeName,
+              },
+            })
+          })
+      })
+      .then(({ status, body }: any) => {
+        // a Cypress retry finds the permission from the first attempt
+        if (body?.error_description !== 'Permission already exists') {
+          expect(status, JSON.stringify(body)).to.equal(200)
+        }
+      })
+  })
+}

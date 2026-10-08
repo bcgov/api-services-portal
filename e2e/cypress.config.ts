@@ -69,6 +69,9 @@ export default defineConfig({
       ASTRA_SCAN_ENABLED: true,
       CLIENT_ID: 'aps-portal',
       CLIENT_SECRET: '8e1a17ed-cb93-4806-ac32-e303d1c86018',
+      // local Keycloak resource server for gateway (namespace) permissions
+      GWA_RES_SVR_CLIENT_ID: 'gwa-api',
+      GWA_RES_SVR_CLIENT_SECRET: '18900468-3db1-43f7-a8af-e75f079eb742',
       OIDC_ISSUER: 'http://keycloak.localtest.me:9081/auth/realms/master',
       TOKEN_URL:
         'http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token',

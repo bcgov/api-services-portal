@@ -5,6 +5,7 @@ import type {
   Application,
   ConnectionProvisionerStatusUpdate,
   ConnectionRequest,
+  ServiceAccess,
 } from './types.js';
 import { BatchResult } from '../sdx-member/index.js';
 
@@ -35,6 +36,25 @@ export class FeedApiClient {
     connection: ConnectionProvisionerStatusUpdate
   ): Promise<BatchResult> {
     return await this.putEntity('ConnectionRequest', connection);
+  }
+
+  async putServiceAccess(serviceAccess: ServiceAccess): Promise<BatchResult> {
+    return await this.putEntity('ServiceAccess', serviceAccess);
+  }
+
+  async deleteServiceAccess(name: string): Promise<BatchResult> {
+    return await this.deleteEntity('ServiceAccess', name);
+  }
+
+  /**
+   * GET /feed/GatewayConsumer/username/{username} — whether the Portal has
+   * synced the Kong consumer yet (the feeder copies it from Kong).
+   */
+  async hasGatewayConsumer(username: string): Promise<boolean> {
+    const records = await this.getEntities(
+      `GatewayConsumer/username/${encodeURIComponent(username)}`
+    );
+    return Array.isArray(records) && records.length > 0;
   }
 
   async listConnectionRequests(): Promise<ConnectionRequest[]> {
@@ -74,6 +94,44 @@ export class FeedApiClient {
     } else {
       return await res.json();
     }
+  }
+
+  /**
+   * DELETE /feed/{kind}/{refKey} — remove an entity by its refKey. A 404 means
+   * it is already gone, so it is returned rather than thrown.
+   */
+  async deleteEntity(kind: string, refKey: string): Promise<any> {
+    if (!this.baseUrl) {
+      throw withDetails(new BadGatewayError('Feed API is not configured'), {
+        missing: 'FEED_URL',
+      });
+    }
+
+    const url = `${this.baseUrl.replace(/\/+$/, '')}/${kind}/${encodeURIComponent(refKey)}`;
+    const res = await fetch(url, { method: 'DELETE' }).catch((err) => {
+      this.logger?.error({ err, url }, 'Feed API request failed');
+      throw withDetails(new BadGatewayError('Feed API request failed'), {
+        url,
+      });
+    });
+
+    if (res.status === 404) {
+      return { status: 404, result: 'not-found' };
+    }
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      this.logger?.error(
+        { url, status: res.status, detail },
+        'Feed API returned an error'
+      );
+      throw withDetails(
+        new BadGatewayError(`Feed API responded ${res.status}`),
+        { url, status: res.status }
+      );
+    }
+
+    return await res.json();
   }
 
   private async getEntities(kind: string): Promise<any> {

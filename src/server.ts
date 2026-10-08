@@ -348,7 +348,11 @@ const configureExpress = (app: any) => {
     );
   });
   app.delete('/feed/:entity/:id', (req: any, res: any) => {
-    const context = keystone.createContext({ skipAccessControl: true });
+    // delete hooks log activity as the authenticated actor (e.g. AfterDeleteAccess)
+    const context = keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: { name: 'Feeder Bot' } },
+    });
     deleteFeedWorker(context, req, res);
   });
 

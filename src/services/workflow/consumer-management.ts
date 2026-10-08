@@ -63,7 +63,7 @@ import {
   lookupCredentialReferenceByServiceAccess,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
-import { KongConsumerService } from '../kong';
+import { KongConsumerService, kongUrlForConsumer } from '../kong';
 import {
   ConsumerAccess,
   ConsumerLabel,
@@ -276,7 +276,7 @@ async function getConsumerProdEnvAccessList(
   // - get the ACLs for the Consumer and derive the ProdEnvAccess records
   const consumer = await lookupConsumerPlugins(context, consumerId);
 
-  const kongApi = new KongConsumerService(process.env.KONG_URL);
+  const kongApi = new KongConsumerService(kongUrlForConsumer(consumer));
   const aclGroups = (
     await kongApi.getConsumerACLByNamespace(consumer.extForeignKey, ns)
   ).map((acl: any) => acl.group);
