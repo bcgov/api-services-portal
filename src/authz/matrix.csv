@@ -79,6 +79,14 @@ ACCESS MANAGER,,,User,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Label,,"read,create,update,delete",,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
+NS VIEWER,,getFilteredNamespaceConsumers,,,,,,,provider-user,,,allow,filterByUserNS
+NS VIEWER,,allAccessRequestsByNamespace,,,,,,,provider-user,,,allow,filterByEnvironmentPackageNS
+NS VIEWER,,getNamespaceConsumerAccess,,,,,,,provider-user,,,allow,
+NS VIEWER,,allConsumerGroupLabels,,,,,,,provider-user,,,allow,
+NS VIEWER,,allConsumerScopesAndRoles,,,,,,,provider-user,,,allow,
+NS VIEWER,,BusinessProfile,,,,,,,provider-user,,,allow,
+NS VIEWER,,,Label,read,,,,,provider-user,,,allow,
+NS VIEWER,,,GatewayConsumer,read,,,,,provider-user,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNSorSharedTrue

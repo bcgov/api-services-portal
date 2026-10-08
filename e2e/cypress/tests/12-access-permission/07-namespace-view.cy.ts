@@ -133,8 +133,16 @@ describe('Verify that Mark is unable to create service account', () => {
     cy.visit(consumers.path)
   })
 
-  it('Verify that the option to approve request is not displayed', () => {
-    consumers.isApproveAccessEnabled(false)
+  // Namespace.View can see pending requests, but only an access manager can
+  // approve them, so the approval is rejected
+  it('Verify that the option to approve request is displayed', () => {
+    consumers.isApproveAccessEnabled(true)
+  })
+
+  it('Verify that approving the request fails', () => {
+    cy.get(consumers.reviewBtn).first().click({ force: true })
+    cy.get(consumers.approveBtn).click({ force: true })
+    cy.verifyToastMessage('Access approval failed')
   })
 
   it('Navigate to Consumer Page to see the Approve Request option', () => {

@@ -10,7 +10,6 @@ import {
   createRuntimeGroup,
   createSubsystemAndOASService,
   createSubsystemGateway,
-  grantGatewayScopeToDevUser,
   uniqueSubsystemName,
   updateRuntimeGroupAddHostedOrg,
   updateSubsystemIntegrationClients,
@@ -191,11 +190,9 @@ describe('SDX E2E Tests', () => {
 
     it('lists the integration client on the gateway Consumers page', () => {
       cy.visit('/')
+      // Janis registered the subsystem gateway, so she only has the subsystem
+      // roles on it; their Namespace.View gives read-only access to consumers
       cy.login(Cypress.env('DEV_USERNAME'), Cypress.env('DEV_PASSWORD'))
-
-      // SDX subsystem roles don't include the Consumers page yet, so grant
-      // Namespace.Manage directly to check what the page lists
-      grantGatewayScopeToDevUser(conn.gatewayId, 'Namespace.Manage')
       cy.activateGateway(conn.gatewayId)
       cy.visit(consumers.path)
       cy.get(consumers.allConsumerTable, { timeout: 15000 }).should(
