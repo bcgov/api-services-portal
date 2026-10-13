@@ -14,21 +14,32 @@ const NS = 'gw-1234';
 /**
  * A fake Kong admin API. `entities` maps a collection (services, routes, ...)
  * to its records; collections may be split into pages to exercise `next`.
+ * `failWith` fails every request, or only paths ending in one of `failPaths`.
+ * `malformed` answers 200 with a body that has no `data`.
  */
 function fakeKong({
   entities = {},
   pageSize = 100,
   pageDelayMs = 0,
   failWith = null,
+  failPaths = null,
+  malformed = false,
 } = {}) {
   const requests = [];
   const server = http.createServer(async (req, res) => {
     requests.push(req.url);
-    if (failWith) {
+    const u = new URL(req.url, 'http://kong');
+    if (
+      failWith &&
+      (!failPaths || failPaths.some((f) => u.pathname.endsWith(f)))
+    ) {
       res.writeHead(failWith);
       return res.end();
     }
-    const u = new URL(req.url, 'http://kong');
+    if (malformed) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end('{}');
+    }
     const parts = u.pathname.split('/').filter(Boolean);
 
     if (parts[0] === 'consumers' && parts.length >= 2) {
@@ -187,6 +198,39 @@ test('namespace sync skips cleanup when a Kong cannot be read', async (t) => {
   assert.deepEqual(portal.state.deletes, []);
 });
 
+test('namespace sync sends nothing from a Kong whose plugins cannot be read', async (t) => {
+  t.after(stopAll);
+  // an unread plugin list would otherwise be sent as "no plugins" and clear them
+  const aps = fakeKong({
+    entities: { services: [svc('svc-aps')], routes: [route('rt-aps')] },
+    failWith: 500,
+    failPaths: ['/plugins'],
+  });
+  const sdx = fakeKong({ entities: { services: [svc('svc-sdx')] } });
+  const portal = fakePortal();
+  portal.state.current = {
+    GatewayService: [
+      { extForeignKey: 'svc-aps' },
+      { extForeignKey: 'svc-sdx' },
+      { extForeignKey: 'svc-gone' },
+    ],
+  };
+  const [apsUrl, sdxUrl, portalUrl] = await start(aps, sdx, portal);
+
+  await kong.scopedSync(
+    { url: `${apsUrl},${sdxUrl}`, workingPath, destinationUrl: portalUrl },
+    'namespace',
+    NS
+  );
+
+  assert.deepEqual(
+    portal.state.puts.map((p) => `${p.entity}:${p.item.id}`),
+    ['GatewayService:svc-sdx']
+  );
+  assert.deepEqual(portal.state.deletes, []);
+  assert.deepEqual(fs.readdirSync(workingPath), []);
+});
+
 test('namespace sync with a single Kong still removes deleted services', async (t) => {
   t.after(stopAll);
   const aps = fakeKong({ entities: { services: [svc('svc-aps')] } });
@@ -261,6 +305,28 @@ test('consumer sync finds the consumer on whichever Kong has it', async (t) => {
   );
 });
 
+test('consumer sync sends nothing when the consumer ACLs cannot be read', async (t) => {
+  t.after(stopAll);
+  const sdx = fakeKong({
+    entities: {
+      consumers: [{ id: 'c-1', username: 'client-1', tags: ['sdx'] }],
+    },
+    failWith: 500,
+    failPaths: ['/acls'],
+  });
+  const portal = fakePortal();
+  const [sdxUrl, portalUrl] = await start(sdx, portal);
+
+  await kong.scopedSync(
+    { url: sdxUrl, workingPath, destinationUrl: portalUrl },
+    'consumer',
+    'c-1'
+  );
+
+  assert.deepEqual(portal.state.puts, []);
+  assert.deepEqual(fs.readdirSync(workingPath), []);
+});
+
 test('full sync reads from every Kong in the list', async (t) => {
   t.after(stopAll);
   const aps = fakeKong({ entities: { services: [svc('svc-aps')] } });
@@ -282,6 +348,50 @@ test('full sync reads from every Kong in the list', async (t) => {
       .map((p) => p.item.id)
       .sort(),
     ['svc-aps', 'svc-sdx']
+  );
+  assert.deepEqual(fs.readdirSync(workingPath), []);
+});
+
+test('full sync sends nothing from a Kong whose plugins cannot be read', async (t) => {
+  t.after(stopAll);
+  const aps = fakeKong({
+    entities: { services: [svc('svc-aps')] },
+    failWith: 500,
+    failPaths: ['/plugins'],
+  });
+  const sdx = fakeKong({ entities: { services: [svc('svc-sdx')] } });
+  const portal = fakePortal();
+  const [apsUrl, sdxUrl, portalUrl] = await start(aps, sdx, portal);
+
+  await kong.sync({
+    url: `${apsUrl},${sdxUrl}`,
+    workingPath,
+    destinationUrl: portalUrl,
+  });
+
+  assert.deepEqual(
+    portal.state.puts.map((p) => `${p.entity}:${p.item.id}`),
+    ['GatewayService:svc-sdx']
+  );
+  assert.deepEqual(fs.readdirSync(workingPath), []);
+});
+
+test('full sync carries on to the next Kong when one throws', async (t) => {
+  t.after(stopAll);
+  const aps = fakeKong({ malformed: true });
+  const sdx = fakeKong({ entities: { services: [svc('svc-sdx')] } });
+  const portal = fakePortal();
+  const [apsUrl, sdxUrl, portalUrl] = await start(aps, sdx, portal);
+
+  await kong.sync({
+    url: `${apsUrl},${sdxUrl}`,
+    workingPath,
+    destinationUrl: portalUrl,
+  });
+
+  assert.deepEqual(
+    portal.state.puts.map((p) => `${p.entity}:${p.item.id}`),
+    ['GatewayService:svc-sdx']
   );
   assert.deepEqual(fs.readdirSync(workingPath), []);
 });

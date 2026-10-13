@@ -50,63 +50,70 @@ async function scopedSyncByNamespace(
     const exceptions = [];
 
     const scopedDir = `${workingPath}/${uuidv4()}`;
-    const xfer = transfers(scopedDir, kongUrl, exceptions);
-    await xfer.copy(`/services?tags=ns.${namespace}`, 'gw-services');
-    await xfer.copy(`/routes?tags=ns.${namespace}`, 'gw-routes');
-    await xfer.copy(`/consumers?tags=ns.${namespace}`, 'gw-consumers');
-    await xfer.copy(`/plugins?tags=ns.${namespace}`, 'gw-plugins');
-    await xfer.copy(`/acls?tags=ns.${namespace}`, 'gw-acls');
+    try {
+      const xfer = transfers(scopedDir, kongUrl, exceptions);
+      await xfer.copy(`/services?tags=ns.${namespace}`, 'gw-services');
+      await xfer.copy(`/routes?tags=ns.${namespace}`, 'gw-routes');
+      await xfer.copy(`/consumers?tags=ns.${namespace}`, 'gw-consumers');
+      await xfer.copy(`/plugins?tags=ns.${namespace}`, 'gw-plugins');
+      await xfer.copy(`/acls?tags=ns.${namespace}`, 'gw-acls');
 
-    // Now, send to portal
-    await xfer.concurrentWork(
-      loadProducer(
-        xfer,
-        destinationUrl,
-        'gw-services',
-        'name',
-        'service',
-        '/feed/GatewayService'
-      )
-    );
-    await xfer.concurrentWork(
-      loadProducer(
-        xfer,
-        destinationUrl,
-        'gw-routes',
-        'name',
-        'route',
-        '/feed/GatewayRoute'
-      )
-    );
-    await xfer.concurrentWork(
-      loadProducer(
-        xfer,
-        destinationUrl,
-        'gw-consumers',
-        'username',
-        'consumer',
-        '/feed/GatewayConsumer'
-      )
-    );
-    await xfer.concurrentWork(
-      loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
-    );
+      if (exceptions.length > 0) {
+        log.error(
+          `[${namespace}] Skipping ${kongUrl} - not all Kong data could be fetched`
+        );
+        allFetched = false;
+        continue;
+      }
 
-    xfer.resultCollector().output();
+      // Now, send to portal
+      await xfer.concurrentWork(
+        loadProducer(
+          xfer,
+          destinationUrl,
+          'gw-services',
+          'name',
+          'service',
+          '/feed/GatewayService'
+        )
+      );
+      await xfer.concurrentWork(
+        loadProducer(
+          xfer,
+          destinationUrl,
+          'gw-routes',
+          'name',
+          'route',
+          '/feed/GatewayRoute'
+        )
+      );
+      await xfer.concurrentWork(
+        loadProducer(
+          xfer,
+          destinationUrl,
+          'gw-consumers',
+          'username',
+          'consumer',
+          '/feed/GatewayConsumer'
+        )
+      );
+      await xfer.concurrentWork(
+        loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
+      );
 
-    if (exceptions.length > 0) {
-      allFetched = false;
+      xfer.resultCollector().output();
+
+      for (const file of Object.keys(kongIds)) {
+        xfer
+          .get_json_content(file)
+          ['data'].forEach((target) => kongIds[file].add(target['id']));
+      }
+    } finally {
+      fs.rmSync(scopedDir, { recursive: true, force: true });
     }
-    for (const file of Object.keys(kongIds)) {
-      xfer
-        .get_json_content(file)
-        ['data'].forEach((target) => kongIds[file].add(target['id']));
-    }
-
-    fs.rmSync(scopedDir, { recursive: true });
   }
 
-  // a failed fetch reads as zero records, which would delete everything
+  // the ids are incomplete, so the cleanup would delete records that still exist
   if (!allFetched) {
     log.error(
       `[${namespace}] Skipping cleanup - not all Kong data could be fetched`
@@ -143,28 +150,39 @@ async function scopedSyncByConsumer(
 ) {
   const exceptions = [];
   const scopedDir = `${workingPath}/${uuidv4()}`;
-  const xfer = transfers(scopedDir, url, exceptions);
+  try {
+    const xfer = transfers(scopedDir, url, exceptions);
 
-  // limit by a tag
-  await xfer.copyOne(`/consumers/${scopeKey}`, `gw-consumers`);
-  await xfer.copy(`/consumers/${scopeKey}/plugins`, 'gw-plugins');
-  await xfer.copy(`/consumers/${scopeKey}/acls`, 'gw-acls');
+    // limit by a tag
+    await xfer.copyOne(`/consumers/${scopeKey}`, `gw-consumers`);
+    await xfer.copy(`/consumers/${scopeKey}/plugins`, 'gw-plugins');
+    await xfer.copy(`/consumers/${scopeKey}/acls`, 'gw-acls');
 
-  // Consumer + aclGroups + plugins
-  await xfer.concurrentWork(
-    loadProducer(
-      xfer,
-      destinationUrl,
-      'gw-consumers',
-      'username',
-      'consumer',
-      '/feed/GatewayConsumer'
-    )
-  );
+    // Nothing to send from this Kong: either the consumer lives on another Kong
+    // (404), or its plugins or ACLs failed to load and would be sent as empty
+    if (exceptions.length > 0) {
+      log.info(
+        `[${scopeKey}] Skipping ${url} - consumer could not be fully fetched`
+      );
+      return;
+    }
 
-  xfer.resultCollector().output();
+    // Consumer + aclGroups + plugins
+    await xfer.concurrentWork(
+      loadProducer(
+        xfer,
+        destinationUrl,
+        'gw-consumers',
+        'username',
+        'consumer',
+        '/feed/GatewayConsumer'
+      )
+    );
 
-  fs.rmSync(scopedDir, { recursive: true });
+    xfer.resultCollector().output();
+  } finally {
+    fs.rmSync(scopedDir, { recursive: true, force: true });
+  }
 }
 
 async function sync({ url, workingPath, destinationUrl }) {
@@ -173,6 +191,9 @@ async function sync({ url, workingPath, destinationUrl }) {
     const syncDir = `${workingPath}/${uuidv4()}`;
     try {
       await syncKong({ url: kongUrl, workingPath: syncDir, destinationUrl });
+    } catch (err) {
+      // keep going, so one Kong failing does not stop the others being synced
+      log.error(`[sync] ${kongUrl} failed - ${err}`);
     } finally {
       fs.rmSync(syncDir, { recursive: true, force: true });
     }
@@ -188,6 +209,11 @@ async function syncKong({ url, workingPath, destinationUrl }) {
   await xfer.copy(`/consumers`, 'gw-consumers');
   await xfer.copy(`/plugins`, 'gw-plugins');
   await xfer.copy(`/acls`, 'gw-acls');
+
+  if (exceptions.length > 0) {
+    log.error(`[sync] Skipping ${url} - not all Kong data could be fetched`);
+    return;
+  }
 
   // Now, send to portal
   await xfer.concurrentWork(
