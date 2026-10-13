@@ -44,7 +44,6 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
         run: |
-          # Retry: a single API server timeout would otherwise fail the whole build
           for attempt in 1 2 3; do
             oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
             if [ "$attempt" = 3 ]; then exit 1; fi
@@ -526,7 +525,6 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
         run: |
-          # Retry: a single API server timeout would otherwise fail the whole build
           for attempt in 1 2 3; do
             oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
             if [ "$attempt" = 3 ]; then exit 1; fi
