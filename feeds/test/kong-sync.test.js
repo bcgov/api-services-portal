@@ -395,3 +395,164 @@ test('full sync carries on to the next Kong when one throws', async (t) => {
   );
   assert.deepEqual(fs.readdirSync(workingPath), []);
 });
+
+// One Portal can front several SDX Kongs as well as the APS Kong, e.g. the
+// prod Portal with an SDX Kong for each of dev, test and prod.
+const KONGS = ['aps', 'sdx-dev', 'sdx-test', 'sdx-prod'];
+
+function fourKongs(overrides = {}) {
+  return KONGS.map((k) =>
+    fakeKong({
+      entities: { services: [svc(`svc-${k}`)], routes: [route(`rt-${k}`)] },
+      ...(overrides[k] ?? {}),
+    })
+  );
+}
+
+const upserted = (portal, entity) =>
+  portal.state.puts
+    .filter((p) => p.entity === entity)
+    .map((p) => p.item.id)
+    .sort();
+
+test('namespace sync keeps services from all four Kongs', async (t) => {
+  t.after(stopAll);
+  const kongs = fourKongs();
+  const portal = fakePortal();
+  portal.state.current = {
+    GatewayService: [
+      ...KONGS.map((k) => ({ extForeignKey: `svc-${k}` })),
+      { extForeignKey: 'svc-gone' },
+    ],
+    GatewayRoute: [
+      ...KONGS.map((k) => ({ extForeignKey: `rt-${k}` })),
+      { extForeignKey: 'rt-gone' },
+    ],
+  };
+  const urls = await start(...kongs, portal);
+  const portalUrl = urls.pop();
+
+  await kong.scopedSync(
+    { url: urls.join(','), workingPath, destinationUrl: portalUrl },
+    'namespace',
+    NS
+  );
+
+  assert.deepEqual(
+    upserted(portal, 'GatewayService'),
+    KONGS.map((k) => `svc-${k}`).sort()
+  );
+  assert.deepEqual(
+    upserted(portal, 'GatewayRoute'),
+    KONGS.map((k) => `rt-${k}`).sort()
+  );
+  assert.deepEqual(portal.state.deletes.sort(), [
+    'GatewayRoute:rt-gone',
+    'GatewayService:svc-gone',
+  ]);
+});
+
+test('namespace sync across four Kongs skips cleanup when one cannot be read', async (t) => {
+  t.after(stopAll);
+  const kongs = fourKongs({ 'sdx-test': { failWith: 500 } });
+  const portal = fakePortal();
+  portal.state.current = {
+    GatewayService: [
+      ...KONGS.map((k) => ({ extForeignKey: `svc-${k}` })),
+      { extForeignKey: 'svc-gone' },
+    ],
+  };
+  const urls = await start(...kongs, portal);
+  const portalUrl = urls.pop();
+
+  await kong.scopedSync(
+    { url: urls.join(','), workingPath, destinationUrl: portalUrl },
+    'namespace',
+    NS
+  );
+
+  // the Kongs after the unreadable one are still synced
+  assert.deepEqual(upserted(portal, 'GatewayService'), [
+    'svc-aps',
+    'svc-sdx-dev',
+    'svc-sdx-prod',
+  ]);
+  assert.deepEqual(portal.state.deletes, []);
+});
+
+test('full sync reads from all four Kongs', async (t) => {
+  t.after(stopAll);
+  const kongs = fourKongs();
+  const portal = fakePortal();
+  const urls = await start(...kongs, portal);
+  const portalUrl = urls.pop();
+
+  await kong.sync({
+    url: urls.join(','),
+    workingPath,
+    destinationUrl: portalUrl,
+  });
+
+  assert.deepEqual(
+    upserted(portal, 'GatewayService'),
+    KONGS.map((k) => `svc-${k}`).sort()
+  );
+  assert.deepEqual(fs.readdirSync(workingPath), []);
+});
+
+test('consumer sync asks all four Kongs for the consumer', async (t) => {
+  t.after(stopAll);
+  // on the last Kong, so a loop that stops early would miss it
+  const kongs = fourKongs({
+    'sdx-prod': {
+      entities: {
+        consumers: [{ id: 'c-1', username: 'client-1', tags: ['sdx'] }],
+      },
+    },
+  });
+  const portal = fakePortal();
+  const urls = await start(...kongs, portal);
+  const portalUrl = urls.pop();
+
+  await kong.scopedSync(
+    { url: urls.join(','), workingPath, destinationUrl: portalUrl },
+    'consumer',
+    'c-1'
+  );
+
+  for (const k of kongs) {
+    assert.ok(k.requests.includes('/consumers/c-1'));
+  }
+  assert.deepEqual(
+    portal.state.puts.map((p) => `${p.entity}:${p.item.username}`),
+    ['GatewayConsumer:client-1']
+  );
+});
+
+test('consumer sync sends a username from every Kong that has it', async (t) => {
+  t.after(stopAll);
+  // The same client can be on several SDX Kongs under one username but with a
+  // different Kong id on each. The feeder sends each one; how the Portal keeps
+  // them apart is not settled (its GatewayConsumer username is unique).
+  const consumer = (id) => ({
+    entities: { consumers: [{ id, username: 'client-1', tags: ['sdx'] }] },
+  });
+  const kongs = fourKongs({
+    'sdx-dev': consumer('c-dev'),
+    'sdx-test': consumer('c-test'),
+  });
+  const portal = fakePortal();
+  const urls = await start(...kongs, portal);
+  const portalUrl = urls.pop();
+
+  await kong.scopedSync(
+    { url: urls.join(','), workingPath, destinationUrl: portalUrl },
+    'consumer',
+    'client-1'
+  );
+
+  assert.deepEqual(
+    portal.state.puts.map((p) => `${p.item.username}:${p.item.id}`),
+    ['client-1:c-dev', 'client-1:c-test']
+  );
+});
