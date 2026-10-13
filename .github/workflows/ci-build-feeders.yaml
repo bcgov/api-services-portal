@@ -44,7 +44,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi
@@ -152,7 +156,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi
