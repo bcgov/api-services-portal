@@ -8,9 +8,11 @@ const { ApiOpenapiApp } = require('../api-openapi');
 
 describe('ApiOpenapiApp', () => {
   const originalValidationApiUrl = process.env.OAS_VALIDATION_API_URL;
+  const originalSdxUiUrl = process.env.SDX_UI_URL;
 
   afterEach(() => {
     process.env.OAS_VALIDATION_API_URL = originalValidationApiUrl;
+    process.env.SDX_UI_URL = originalSdxUiUrl;
   });
 
   it('does not require OAS_VALIDATION_API_URL during construction', () => {
@@ -39,5 +41,21 @@ describe('ApiOpenapiApp', () => {
     process.env.OAS_VALIDATION_API_URL = 'https://validation.local';
 
     expect(() => new ApiOpenapiApp()).not.toThrow();
+  });
+
+  it('requires SDX_UI_URL when preparing middleware', () => {
+    delete process.env.SDX_UI_URL;
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      'SDX_UI_URL is required'
+    );
+  });
+
+  it('requires SDX_UI_URL to be an absolute http(s) URL', () => {
+    process.env.SDX_UI_URL = 'sdx.local';
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      'SDX_UI_URL must be an absolute http(s) URL'
+    );
   });
 });
