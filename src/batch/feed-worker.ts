@@ -243,6 +243,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
       ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
+    .concat(md.read || [])
     .filter((s: string) => !relationshipFields.includes(s))
     .slice();
   response.push(md.refKey);

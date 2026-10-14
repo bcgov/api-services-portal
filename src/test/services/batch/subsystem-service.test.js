@@ -1,6 +1,7 @@
 const {
   deleteRecordByInternalId,
   getRecords,
+  syncRecordsThrowErrors,
 } = require('../../../batch/feed-worker');
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
@@ -277,6 +278,53 @@ describe('SubsystemService', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('one-to-one subsystem integrations', () => {
+    it('rejects a subsystem payload containing multiple integrations', async () => {
+      const service = new SubsystemService();
+
+      await expect(
+        service.upsertSubsystem(
+          {},
+          {
+            name: 'MY-SUBSYSTEM',
+            integrations: [
+              { integrationClientId: 'CLIENT-A' },
+              { integrationClientId: 'CLIENT-B' },
+            ],
+          }
+        )
+      ).rejects.toThrow('can be associated with only one CSS integration');
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('uses deterministic ID order for duplicate untimestamped integration records', async () => {
+      const service = new SubsystemService();
+      getRecords.mockResolvedValueOnce([
+        { id: 'association-a', integrationClientId: 'CLIENT-A' },
+        { id: 'association-z', integrationClientId: 'CLIENT-A' },
+      ]);
+
+      const result = await service.lookupSubsystemIntegration({}, 'CLIENT-A');
+
+      expect(result.id).toEqual('association-z');
+    });
+
+    it('returns one deterministic subsystem when corrupted data has multiple owners', async () => {
+      const service = new SubsystemService();
+      getRecords.mockResolvedValueOnce([
+        { id: 'subsystem-a', name: 'A' },
+        { id: 'subsystem-z', name: 'Z' },
+      ]);
+
+      const result = await service.listSubsystemsByIntegration(
+        {},
+        'association-a'
+      );
+
+      expect(result).toEqual([{ id: 'subsystem-z', name: 'Z' }]);
     });
   });
 });

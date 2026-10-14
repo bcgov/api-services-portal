@@ -376,7 +376,7 @@ test('reactivates an approved inactive connection on an exact resubmission', asy
   });
 });
 
-test('fails closed rather than overwriting a shared connection owned by another client grant', async () => {
+test('fails closed rather than replacing the one-to-one client mapping', async () => {
   const { service, writes } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [
@@ -405,7 +405,7 @@ test('fails closed rather than overwriting a shared connection owned by another 
         },
       ])
     ),
-    /client grants are required before this connection can be shared/
+    /already associated with integration 'integration-b' and OAuth client 'oauth-client-b'/
   );
   assert.deepEqual(writes, []);
 });
@@ -602,9 +602,7 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
       {
         id: 'provider-a',
         environment: 'dev',
-        services: [
-          { name: 'service-a', scopes: ['read'], version: '1.0.0' },
-        ],
+        services: [{ name: 'service-a', scopes: ['read'], version: '1.0.0' }],
       },
     ],
   });
@@ -617,13 +615,72 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
   assert.equal(warning.serviceId, 'service-b');
 });
 
-test('fails closed when one integration resolves to multiple OAuth clients', async () => {
+test('warns and uses the latest timestamped OAuth client when stored data conflicts', async () => {
+  const warnings: unknown[][] = [];
+  const logger = {
+    debug: () => undefined,
+    warn: (...args: unknown[]) => warnings.push(args),
+  } as unknown as FastifyBaseLogger;
   const { service } = createService({
+    logger,
     connections: [
-      existingConnection({ serviceId: 'service-a' }),
+      existingConnection({
+        id: 'connection-1',
+        serviceId: 'service-a',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      }),
       existingConnection({
         id: 'connection-2',
         serviceId: 'service-b',
+        updatedAt: '2026-02-01T00:00:00.000Z',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          submissionId: 'submission-200-b',
+          client: {
+            integrationId: 'integration-a',
+            clientId: 'oauth-client-b',
+          },
+        },
+      }),
+    ],
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-a'),
+      'service-b': catalogService('service-b', 'provider-a'),
+    },
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
+  );
+
+  assert.equal(response.clientId, 'oauth-client-b');
+  assert.equal(response.submissionId, 'submission-200-b');
+  assert.deepEqual(response.resourceServers, [
+    {
+      id: 'provider-a',
+      environment: 'dev',
+      services: [{ name: 'service-b', scopes: ['read'], version: '1.0.0' }],
+    },
+  ]);
+  assert.equal(warnings.length, 1);
+  assert.deepEqual(warnings[0][0], {
+    subsystemId: 'consumer-subsystem',
+    environment: 'dev',
+    requestedIntegrationId: 'integration-a',
+    selectedRecordId: 'connection-2',
+    ignoredRecordIds: ['connection-1'],
+    selection: 'updatedAt-createdAt-id',
+  });
+});
+
+test('rejects a second OAuth client for another service in the same subsystem environment', async () => {
+  const { service, writes } = createService({
+    catalog: { 'service-b': catalogService('service-b', 'provider-a') },
+    connections: [
+      existingConnection({
+        serviceId: 'service-a',
         requesterDetails: {
           ...existingConnection().requesterDetails,
           client: {
@@ -636,7 +693,19 @@ test('fails closed when one integration resolves to multiple OAuth clients', asy
   });
 
   await assert.rejects(
-    service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /connections for more than one OAuth client/
+    service.submitIntegrationAccessRequest(
+      'submission-2',
+      consumerSubsystem,
+      'integration-a',
+      accessRequest([
+        {
+          id: 'provider-a',
+          environment: 'dev',
+          services: [{ name: 'service-b', scopes: ['read'] }],
+        },
+      ])
+    ),
+    /already associated with integration 'integration-a' and OAuth client 'oauth-client-b'/
   );
+  assert.deepEqual(writes, []);
 });

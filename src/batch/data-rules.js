@@ -613,7 +613,10 @@ const metadata = {
       isApproved: { type: 'boolean' },
       isActive: { type: 'boolean' },
       provisionerStatus: { type: 'entity', entity: 'ProvisionerStatus' },
+      updatedAt: { type: 'DateTime' },
+      createdAt: { type: 'DateTime' },
     },
+    read: ['updatedAt', 'createdAt'],
   },
   ProvisionerStatus: {
     transient: true,
