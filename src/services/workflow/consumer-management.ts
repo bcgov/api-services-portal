@@ -63,7 +63,7 @@ import {
   lookupCredentialReferenceByServiceAccess,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
-import { KongConsumerService, kongUrlForConsumer } from '../kong';
+import { KongConsumerService } from '../kong';
 import {
   ConsumerAccess,
   ConsumerLabel,
@@ -97,6 +97,7 @@ import { getActivityByRefId } from '../keystone/activity';
 import { syncPlugins, trimPlugin } from './consumer-plugins';
 import { KeycloakClientRolesService } from '../keycloak/client-roles';
 import { genClientId } from './client-shared-idp';
+import { assertNotSdxConsumer, isSdxConsumer } from './sdx-managed';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -276,10 +277,14 @@ async function getConsumerProdEnvAccessList(
   // - get the ACLs for the Consumer and derive the ProdEnvAccess records
   const consumer = await lookupConsumerPlugins(context, consumerId);
 
-  const kongApi = new KongConsumerService(kongUrlForConsumer(consumer));
-  const aclGroups = (
-    await kongApi.getConsumerACLByNamespace(consumer.extForeignKey, ns)
-  ).map((acl: any) => acl.group);
+  // SDX consumers are not on the APS Kong; their access is their ServiceAccess
+  const aclGroups = isSdxConsumer(consumer)
+    ? []
+    : (
+        await new KongConsumerService(
+          process.env.KONG_URL
+        ).getConsumerACLByNamespace(consumer.extForeignKey, ns)
+      ).map((acl: any) => acl.group);
 
   // find the ProductEnvironments that the ACL 'group' corresponds to
   const envs = await lookupEnvironmentsByNS(context, ns);
@@ -471,6 +476,8 @@ export async function grantAccessToConsumer(
     consumerId
   );
 
+  assertNotSdxConsumer(consumer);
+
   logger.debug('[grantAccessToConsumer] Consumer %j', consumer);
 
   const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
@@ -520,6 +527,8 @@ export async function revokeAccessFromConsumer(
     ns,
     consumerId
   );
+
+  assertNotSdxConsumer(consumer);
 
   const prodEnvAccessFiltered = prodEnvAccess.filter(
     (p) => p.environment.id === prodEnvId
@@ -591,6 +600,8 @@ export async function updateConsumerAccess(
     ns,
     consumerId
   );
+
+  assertNotSdxConsumer(consumer);
 
   const prodEnvAccessFilter = prodEnvAccess.filter(
     (p) => p.environment.id === prodEnvId
@@ -756,6 +767,8 @@ export async function revokeAllConsumerAccess(
     ns,
     consumerId
   );
+
+  assertNotSdxConsumer(consumer);
 
   logger.warn(
     '[revokeAllConsumerAccess] %s',
