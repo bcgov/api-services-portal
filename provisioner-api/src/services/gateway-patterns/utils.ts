@@ -101,6 +101,7 @@ export function edgeTokenExchangePluginConfig(opts: {
   tokenEndpoint?: string;
   scopes?: string[];
   audience?: string;
+  targetPrivacyZoneScope?: string;
 }): Record<string, unknown> {
   return {
     client_id: opts.clientId,
@@ -108,6 +109,7 @@ export function edgeTokenExchangePluginConfig(opts: {
     scopes: opts.scopes,
     scope_source: 'verified_subject_token',
     audience: opts.audience,
+    target_privacy_zone_scope: opts.targetPrivacyZoneScope,
     keyset_name: edgeKeySetName(opts.runtimeGroupName, opts.environment),
     private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
     algorithm: 'ES256',

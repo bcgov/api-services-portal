@@ -71,6 +71,7 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
       tokenEndpoint: 'https://issuer.example/token',
       scopes: ['configured.scope'],
       audience: 'TEST.PROVIDER',
+      targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
     },
   });
 
@@ -85,5 +86,9 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
   assert.equal(
     tokenExchangePlugin.config.scope_source,
     'verified_subject_token'
+  );
+  assert.equal(
+    tokenExchangePlugin.config.target_privacy_zone_scope,
+    'urn:ca:bc:gov:provider'
   );
 });
