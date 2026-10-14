@@ -1,7 +1,6 @@
 import { strict as assert } from 'assert';
 
 import {
-  countOtherServiceAccessesByConsumer,
   deleteRecord,
   deleteRecords,
   lookupCredentialReferenceByServiceAccess,
@@ -18,6 +17,7 @@ import { KongConsumerService } from '../kong';
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
 import { Logger } from '../../logger';
 import { UMAPolicyService } from '../uma2';
+import { isSdxConsumer } from './sdx-managed';
 import { StructuredActivityService } from './namespace-activity';
 import {
   Environment,
@@ -133,23 +133,14 @@ export const DeleteAccess = async (context: any, keys: any) => {
       ['id']
     );
 
-    // A consumer shared with other ServiceAccess records (e.g. an SDX
-    // integration client used by several connections) keeps its
-    // GatewayConsumer, Kong consumer and IdP client for that other access
-    if (svc.consumer != null && svc.consumerType == 'client') {
-      const otherAccess = await countOtherServiceAccessesByConsumer(
-        context,
-        svc.consumer.id,
-        serviceAccessId
+    // SDX consumers are managed by the SDX provisioner, so the Portal leaves
+    // the consumer on Kong and the IdP alone
+    if (svc.consumer != null && isSdxConsumer(svc.consumer)) {
+      logger.info(
+        '[DeleteAccess] Keeping SDX consumer %s',
+        svc.consumer.username
       );
-      if (otherAccess > 0) {
-        logger.info(
-          '[DeleteAccess] Keeping consumer %s, used by %d other service accesses',
-          svc.consumer.username,
-          otherAccess
-        );
-        return;
-      }
+      return;
     }
 
     svc.consumer != null &&

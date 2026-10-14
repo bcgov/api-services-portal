@@ -1,10 +1,10 @@
 import { DeleteAccess } from '../../../services/workflow/delete-access';
 import * as keystone from '../../../services/keystone';
+import { KongConsumerService } from '../../../services/kong';
 
 const mockDeleteConsumer = jest.fn();
 
 jest.mock('../../../services/keystone', () => ({
-  countOtherServiceAccessesByConsumer: jest.fn(),
   deleteRecord: jest.fn(),
   deleteRecords: jest.fn(),
   lookupCredentialReferenceByServiceAccess: jest.fn(),
@@ -22,8 +22,6 @@ jest.mock('../../../services/keycloak', () => ({}));
 jest.mock('../../../services/uma2', () => ({}));
 jest.mock('../../../services/workflow/namespace-activity', () => ({}));
 
-const countOtherServiceAccessesByConsumer =
-  keystone.countOtherServiceAccessesByConsumer;
 const deleteRecord = keystone.deleteRecord;
 const lookupCredentialReferenceByServiceAccess =
   keystone.lookupCredentialReferenceByServiceAccess;
@@ -42,35 +40,26 @@ const serviceAccess = {
   productEnvironment: { name: 'test', flow: 'protected-externally' },
 };
 
+const sdxServiceAccess = {
+  ...serviceAccess,
+  consumer: { ...serviceAccess.consumer, tags: JSON.stringify(['sdx']) },
+};
+
+const env = { ...process.env };
+
+afterAll(() => {
+  process.env = env;
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
-  lookupCredentialReferenceByServiceAccess.mockResolvedValue(serviceAccess);
+  process.env.KONG_URL = 'http://kong:8001';
   deleteRecord.mockResolvedValue(undefined);
   mockDeleteConsumer.mockResolvedValue(undefined);
 });
 
-it('keeps a consumer that is shared with other service accesses', async function () {
-  countOtherServiceAccessesByConsumer.mockResolvedValue(2);
-
-  await DeleteAccess(context, { serviceAccess: 'sa-1' });
-
-  expect(countOtherServiceAccessesByConsumer).toHaveBeenCalledWith(
-    context,
-    'consumer-1',
-    'sa-1'
-  );
-  expect(deleteRecord).toHaveBeenCalledTimes(1);
-  expect(deleteRecord).toHaveBeenCalledWith(
-    context,
-    'AccessRequest',
-    { serviceAccess: { id: 'sa-1' } },
-    ['id']
-  );
-  expect(mockDeleteConsumer).not.toHaveBeenCalled();
-});
-
-it('removes a consumer that has no other service access', async function () {
-  countOtherServiceAccessesByConsumer.mockResolvedValue(0);
+it('removes the consumer from the Portal and Kong', async function () {
+  lookupCredentialReferenceByServiceAccess.mockResolvedValue(serviceAccess);
 
   await DeleteAccess(context, { serviceAccess: 'sa-1' });
 
@@ -86,5 +75,17 @@ it('removes a consumer that has no other service access', async function () {
     { id: 'consumer-1' },
     ['id', 'extForeignKey', 'customId']
   );
+  expect(KongConsumerService).toHaveBeenCalledWith('http://kong:8001');
   expect(mockDeleteConsumer).toHaveBeenCalledWith('kong-1');
+});
+
+it('only removes the access request for an SDX consumer', async function () {
+  lookupCredentialReferenceByServiceAccess.mockResolvedValue(sdxServiceAccess);
+
+  await DeleteAccess(context, { serviceAccess: 'sa-1' });
+
+  expect(deleteRecord.mock.calls).toEqual([
+    [context, 'AccessRequest', { serviceAccess: { id: 'sa-1' } }, ['id']],
+  ]);
+  expect(mockDeleteConsumer).not.toHaveBeenCalled();
 });
