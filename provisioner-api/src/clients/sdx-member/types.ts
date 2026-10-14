@@ -88,6 +88,8 @@ export interface ConnectionRequestInput {
 
 export interface ConnectionRequest {
   id?: string;
+  updatedAt?: string;
+  createdAt?: string;
   clientId?: string;
   serviceId?: string;
   isApproved?: boolean;

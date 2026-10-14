@@ -44,6 +44,13 @@ class SubsystemService {
     context: Keystone,
     body: Subsystem
   ): Promise<BatchResult> => {
+    if ((body.integrations || []).length > 1) {
+      throw new Error(
+        `Subsystem '${
+          body.name || 'unknown'
+        }' can be associated with only one CSS integration`
+      );
+    }
     const result = await syncRecordsThrowErrors(
       context,
       'Subsystem',
@@ -99,7 +106,10 @@ class SubsystemService {
       }
     );
 
-    return records.pop();
+    return this.selectLatestRecord(
+      records,
+      `integrationClientId=${integrationClientId}`
+    );
   };
 
   listSubsystemsByIntegration = async (
@@ -117,7 +127,36 @@ class SubsystemService {
         variables: { subsystemIntegrationId },
       }
     );
-    return records;
+    const selected = this.selectLatestRecord(
+      records,
+      `subsystemIntegrationId=${subsystemIntegrationId}`
+    );
+    return selected ? [selected] : [];
+  };
+
+  private selectLatestRecord = <T extends { id?: string }>(
+    records: T[],
+    lookup: string
+  ): T | undefined => {
+    if (records.length === 0) {
+      return undefined;
+    }
+
+    const sorted = records
+      .slice()
+      .sort((left, right) =>
+        `${left.id || ''}`.localeCompare(`${right.id || ''}`)
+      );
+    const selected = sorted[sorted.length - 1];
+    if (sorted.length > 1) {
+      logger.warn(
+        'Multiple untimestamped subsystem association records found for %s; selected id=%s using deterministic ID order and ignored ids=%j',
+        lookup,
+        selected.id,
+        sorted.slice(0, -1).map((record) => record.id)
+      );
+    }
+    return selected;
   };
 
   listActiveConnectionsByClientId = async (

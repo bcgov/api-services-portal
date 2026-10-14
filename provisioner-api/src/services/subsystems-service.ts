@@ -42,7 +42,12 @@ export class SdxMemberService {
       );
     }
 
-    const subsystem = subsystems[0];
+    const subsystem = this.selectSubsystem(subsystems, integrationClientId);
+    if (!subsystem) {
+      throw new NotFoundError(
+        `Subsystem with clientId ${integrationClientId} not found`
+      );
+    }
 
     if (subsystem.organization === undefined) {
       throw new NotFoundError(
@@ -70,7 +75,10 @@ export class SdxMemberService {
       return { status: 'unregistered' };
     }
 
-    const subsystem = subsystems[0];
+    const subsystem = this.selectSubsystem(subsystems, integrationClientId);
+    if (!subsystem) {
+      return { status: 'unregistered' };
+    }
 
     return {
       status: 'registered',
@@ -79,6 +87,33 @@ export class SdxMemberService {
       organization: subsystem.organization?.name || 'unknown',
       description: subsystem.description || '',
     };
+  }
+
+  private selectSubsystem(
+    subsystems: SubsystemEntry[],
+    integrationClientId: string
+  ): SubsystemEntry | undefined {
+    const candidates = subsystems
+      .filter((subsystem) =>
+        subsystem.integrationClientIds.includes(integrationClientId)
+      )
+      .slice()
+      .sort((left, right) => left.clientId.localeCompare(right.clientId));
+    const selected = candidates.at(-1);
+    if (candidates.length > 1) {
+      this.logger?.warn(
+        {
+          integrationClientId,
+          selectedSubsystemId: selected?.clientId,
+          ignoredSubsystemIds: candidates
+            .slice(0, -1)
+            .map((subsystem) => subsystem.clientId),
+          selection: 'deterministic-subsystem-id',
+        },
+        'Multiple untimestamped subsystem mappings found for integration; continuing with deterministic selection'
+      );
+    }
+    return selected;
   }
 
   /**
