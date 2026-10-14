@@ -100,6 +100,27 @@ export interface ConnectionRequest {
   provisionerStatus?: ProvisionerStatus;
 }
 
+export type ConnectionClientGrantStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ConnectionClientGrant {
+  id: string;
+  connection?: string | { id: string };
+  integrationId: string;
+  oauthClientId: string;
+  submissionId?: string;
+  requesterDetails?: any;
+  scopes: string[];
+  status: ConnectionClientGrantStatus;
+}
+
+export interface ConnectionClientGrantInput {
+  integrationId: string;
+  oauthClientId: string;
+  submissionId?: string;
+  requesterDetails?: any;
+  scopes: string[];
+}
+
 export interface ProvisionerStatus {
   status: 'pending' | 'provisioned' | 'failed';
   message?: string;

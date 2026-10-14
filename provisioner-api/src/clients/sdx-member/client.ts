@@ -3,6 +3,8 @@ import type { OAuthClient } from '../oauth.js';
 import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 import type {
   BatchResult,
+  ConnectionClientGrant,
+  ConnectionClientGrantInput,
   ConnectionRequest,
   ConnectionRequestInput,
   CreateNewKeyInput,
@@ -86,6 +88,30 @@ export class SdxMemberApiClient {
   /** `listConnections` — GET /organizations/{org}/connections */
   listConnections(org: string): Promise<ConnectionRequest[]> {
     return this.request('GET', `organizations/${enc(org)}/connections`);
+  }
+
+  /** List the client grants associated with one shared connection. */
+  listConnectionClientGrants(
+    org: string,
+    connectionId: string
+  ): Promise<ConnectionClientGrant[]> {
+    return this.request(
+      'GET',
+      `organizations/${enc(org)}/connections/${enc(connectionId)}/grants`
+    );
+  }
+
+  /** Create or update the exact integration/OAuth-client grant. */
+  upsertConnectionClientGrant(
+    org: string,
+    connectionId: string,
+    body: ConnectionClientGrantInput
+  ): Promise<BatchResult> {
+    return this.request(
+      'PUT',
+      `organizations/${enc(org)}/connections/${enc(connectionId)}/grants`,
+      { body }
+    );
   }
 
   /** `deleteConnection` — DELETE /organizations/{org}/connections/{id} */

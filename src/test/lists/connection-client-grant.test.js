@@ -43,6 +43,62 @@ describe('ConnectionClientGrant list', () => {
     expect(resolved).toEqual({ scopes: '["read","write"]' });
   });
 
+  it('returns an approved grant to pending when the reviewed version changes', () => {
+    const resolved = resolveInput({
+      operation: 'update',
+      existingItem: {
+        requesterDetails: '{"service":{"version":"1.0.0"}}',
+        status: 'approved',
+      },
+      resolvedData: {
+        requesterDetails: { service: { version: '2.0.0' } },
+      },
+    });
+
+    expect(resolved).toEqual({
+      requesterDetails: '{"service":{"version":"2.0.0"}}',
+      status: 'pending',
+    });
+  });
+
+  it('preserves approval when only requester contact details change', () => {
+    const resolved = resolveInput({
+      operation: 'update',
+      existingItem: {
+        requesterDetails:
+          '{"requester":{"name":"Before"},"service":{"version":"1.0.0"}}',
+        status: 'approved',
+      },
+      resolvedData: {
+        requesterDetails: {
+          requester: { name: 'After' },
+          service: { version: '1.0.0' },
+        },
+      },
+    });
+
+    expect(resolved).toEqual({
+      requesterDetails:
+        '{"requester":{"name":"After"},"service":{"version":"1.0.0"}}',
+    });
+  });
+
+  it('returns a rejected grant to pending for a new submission', () => {
+    const resolved = resolveInput({
+      operation: 'update',
+      existingItem: {
+        submissionId: 'submission-1',
+        status: 'rejected',
+      },
+      resolvedData: { submissionId: ' submission-2 ' },
+    });
+
+    expect(resolved).toEqual({
+      submissionId: 'submission-2',
+      status: 'pending',
+    });
+  });
+
   it('accepts the existing parent connection and removes the redundant write', () => {
     const resolved = resolveInput({
       operation: 'update',

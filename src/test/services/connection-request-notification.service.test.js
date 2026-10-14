@@ -21,6 +21,7 @@ const {
 const {
   ConnectionRequestNotificationService,
   getConnectionNotificationEvent,
+  getConnectionGrantNotificationEvent,
   listSubsystemAccessManagers,
 } = require('../../services/notification/connection-request-notification.service');
 const {
@@ -108,6 +109,83 @@ describe('ConnectionRequestNotificationService', () => {
       ).toBe(expected);
     }
   );
+
+  it.each([
+    ['created', 'create', undefined, 'pending'],
+    ['reapproval', 'update', 'approved', 'pending'],
+    ['reapproval', 'update', 'rejected', 'pending'],
+    ['approved', 'update', 'pending', 'approved'],
+    ['rejected', 'update', 'pending', 'rejected'],
+    [undefined, 'update', 'pending', 'pending'],
+    [undefined, 'unknown', 'pending', 'approved'],
+  ])(
+    'identifies the %s grant lifecycle event',
+    (expected, operation, existingStatus, updatedStatus) => {
+      const grant = {
+        integrationId: 'css-integration',
+        oauthClientId: 'css-client',
+      };
+      const existingItem = existingStatus
+        ? { ...grant, status: existingStatus }
+        : undefined;
+      const updatedItem = updatedStatus
+        ? { ...grant, status: updatedStatus }
+        : undefined;
+
+      expect(
+        getConnectionGrantNotificationEvent(
+          operation,
+          existingItem,
+          updatedItem
+        )
+      ).toBe(expected);
+    }
+  );
+
+  it('routes a new grant notification with the exact client context', async () => {
+    const service = new ConnectionRequestNotificationService({
+      notify: jest.fn(),
+    });
+    const notifyChange = jest
+      .spyOn(service, 'notifyChange')
+      .mockResolvedValue(undefined);
+
+    await service.notifyGrantChange({
+      context: {},
+      operation: 'create',
+      connection,
+      updatedItem: {
+        integrationId: 'integration-2',
+        oauthClientId: 'oauth-client-2',
+        status: 'pending',
+        requesterDetails: {
+          requester: {
+            name: 'Another Requester',
+            email: 'another@example.com',
+          },
+          client: { privacyZone: 'business' },
+        },
+      },
+    });
+
+    const notification = notifyChange.mock.calls[0][0];
+    expect(notification.operation).toBe('create');
+    expect(notification.updatedItem).toMatchObject({
+      clientId: connection.clientId,
+      serviceId: connection.serviceId,
+      requesterDetails: {
+        requester: {
+          name: 'Another Requester',
+          email: 'another@example.com',
+        },
+        client: {
+          integrationId: 'integration-2',
+          clientId: 'oauth-client-2',
+          privacyZone: 'business',
+        },
+      },
+    });
+  });
 
   it('renders escaped connection context in notification templates', () => {
     const service = new NotificationService({

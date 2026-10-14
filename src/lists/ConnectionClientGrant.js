@@ -4,6 +4,12 @@ const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
+const { getRecordById } = require('../batch/feed-worker');
+const { logger } = require('../logger');
+const {
+  ConnectionRequestNotificationService,
+  getConnectionGrantNotificationEvent,
+} = require('../services/notification/connection-request-notification.service');
 
 const parseScopes = (value) => {
   const scopes = typeof value === 'string' ? JSON.parse(value) : value;
@@ -19,6 +25,48 @@ const parseScopes = (value) => {
   });
 
   return JSON.stringify(Array.from(new Set(normalized)).sort());
+};
+
+const notifyGrantChange = ({
+  context,
+  operation,
+  existingItem,
+  updatedItem,
+}) => {
+  if (
+    !getConnectionGrantNotificationEvent(operation, existingItem, updatedItem)
+  ) {
+    return;
+  }
+
+  const item = updatedItem || existingItem;
+  const connectionId = relationshipId(item?.connection);
+  if (!connectionId) {
+    logger.warn('Unable to notify grant change: parent connection not found');
+    return;
+  }
+
+  const noauthContext = context.createContext({ skipAccessControl: true });
+  getRecordById(noauthContext, 'ConnectionRequest', String(connectionId))
+    .then((connection) => {
+      if (!connection) {
+        logger.warn(
+          'Unable to notify grant change: connection %s not found',
+          connectionId
+        );
+        return;
+      }
+      return new ConnectionRequestNotificationService().notifyGrantChange({
+        context: noauthContext,
+        operation,
+        connection,
+        existingItem,
+        updatedItem,
+      });
+    })
+    .catch((err) => {
+      logger.error('Connection client grant notification failed: %s', err);
+    });
 };
 
 const relationshipId = (value) => {
@@ -134,6 +182,23 @@ module.exports = {
         }
       }
 
+      if ('submissionId' in resolvedData && resolvedData.submissionId != null) {
+        if (
+          typeof resolvedData.submissionId !== 'string' ||
+          resolvedData.submissionId.trim().length === 0
+        ) {
+          throw new Error('submissionId must not be blank');
+        }
+        resolvedData.submissionId = resolvedData.submissionId.trim();
+        if (
+          operation === 'update' &&
+          existingItem.status === 'rejected' &&
+          resolvedData.submissionId !== existingItem.submissionId
+        ) {
+          resolvedData.status = 'pending';
+        }
+      }
+
       if ('scopes' in resolvedData) {
         const normalizedScopes = parseScopes(resolvedData.scopes);
         if (
@@ -152,10 +217,31 @@ module.exports = {
           typeof resolvedData.requesterDetails === 'string'
             ? JSON.parse(resolvedData.requesterDetails)
             : resolvedData.requesterDetails;
-        resolvedData.requesterDetails = JSON.stringify(details || {});
+        const normalizedDetails = details || {};
+        if (operation === 'update') {
+          const existingDetails =
+            typeof existingItem.requesterDetails === 'string'
+              ? JSON.parse(existingItem.requesterDetails || '{}')
+              : existingItem.requesterDetails || {};
+          if (
+            normalizedDetails?.service?.version !==
+            existingDetails?.service?.version
+          ) {
+            resolvedData.status = 'pending';
+          }
+        }
+        resolvedData.requesterDetails = JSON.stringify(normalizedDetails);
       }
 
       return resolvedData;
+    },
+    afterChange: ({ context, operation, existingItem, updatedItem }) => {
+      notifyGrantChange({
+        context,
+        operation,
+        existingItem,
+        updatedItem,
+      });
     },
   },
 };

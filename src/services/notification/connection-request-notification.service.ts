@@ -24,11 +24,7 @@ type ConnectionRequest = {
 };
 
 export type ConnectionNotificationEvent =
-  | 'created'
-  | 'reapproval'
-  | 'approved'
-  | 'rejected'
-  | 'revoked';
+  'created' | 'reapproval' | 'approved' | 'rejected' | 'revoked';
 
 export const getConnectionNotificationEvent = (
   operation: string,
@@ -75,6 +71,39 @@ export const getConnectionNotificationEvent = (
   return undefined;
 };
 
+type ConnectionClientGrant = {
+  integrationId: string;
+  oauthClientId: string;
+  requesterDetails?: string | Record<string, any>;
+  status: 'pending' | 'approved' | 'rejected';
+};
+
+export const getConnectionGrantNotificationEvent = (
+  operation: string,
+  existingItem: ConnectionClientGrant | undefined,
+  updatedItem: ConnectionClientGrant | undefined
+): ConnectionNotificationEvent | undefined => {
+  if (operation === 'create') {
+    return 'created';
+  }
+  if (operation !== 'update' || !existingItem || !updatedItem) {
+    return undefined;
+  }
+  if (existingItem.status === 'approved' && updatedItem.status === 'pending') {
+    return 'reapproval';
+  }
+  if (existingItem.status === 'rejected' && updatedItem.status === 'pending') {
+    return 'reapproval';
+  }
+  if (existingItem.status !== 'approved' && updatedItem.status === 'approved') {
+    return 'approved';
+  }
+  if (existingItem.status !== 'rejected' && updatedItem.status === 'rejected') {
+    return 'rejected';
+  }
+  return undefined;
+};
+
 const parseRequesterDetails = (
   requesterDetails: ConnectionRequest['requesterDetails']
 ) => {
@@ -87,6 +116,18 @@ const parseRequesterDetails = (
   } catch {
     return undefined;
   }
+};
+
+const grantRequesterDetails = (grant: ConnectionClientGrant) => {
+  const details = parseRequesterDetails(grant.requesterDetails) || {};
+  return {
+    ...details,
+    client: {
+      ...(details.client || {}),
+      integrationId: grant.integrationId,
+      clientId: grant.oauthClientId,
+    },
+  };
 };
 
 type Requester = { name?: string; email?: string; username?: string };
@@ -246,8 +287,68 @@ export class ConnectionRequestNotificationService {
     private readonly findAccessManagers = lookupUsersByNamespace,
     private readonly findRoleAccessManagers = listSubsystemAccessManagers,
     private readonly findClient = (context: any, clientId: string) =>
-      new SubsystemService().findSubsystemByClientId(context, clientId),
+      new SubsystemService().findSubsystemByClientId(context, clientId)
   ) {}
+
+  public async notifyGrantChange({
+    context,
+    operation,
+    connection,
+    existingItem,
+    updatedItem,
+  }: {
+    context: any;
+    operation: string;
+    connection: ConnectionRequest;
+    existingItem?: ConnectionClientGrant;
+    updatedItem?: ConnectionClientGrant;
+  }) {
+    const event = getConnectionGrantNotificationEvent(
+      operation,
+      existingItem,
+      updatedItem
+    );
+    const grant = updatedItem ?? existingItem;
+    if (!event || !grant) {
+      return;
+    }
+
+    const item: ConnectionRequest = {
+      ...connection,
+      requesterDetails: grantRequesterDetails(grant),
+    };
+
+    if (event === 'created') {
+      return this.notifyChange({
+        context,
+        operation: 'create',
+        updatedItem: item,
+      });
+    }
+    if (event === 'reapproval') {
+      return this.notifyChange({
+        context,
+        operation: 'update',
+        existingItem: { ...item, isApproved: true },
+        updatedItem: { ...item, isApproved: false },
+        originalInput: { isApproved: false },
+      });
+    }
+    if (event === 'approved') {
+      return this.notifyChange({
+        context,
+        operation: 'update',
+        existingItem: { ...item, isApproved: false },
+        updatedItem: { ...item, isApproved: true },
+        originalInput: { isApproved: true },
+      });
+    }
+    return this.notifyChange({
+      context,
+      operation: 'delete',
+      existingItem: { ...item, isApproved: false, isActive: false },
+    });
+  }
 
   public async notifyChange({
     context,
@@ -275,9 +376,7 @@ export class ConnectionRequestNotificationService {
     // A deleted connection only has its state from before the delete
     const item = updatedItem ?? existingItem;
     const template = 'connection-rqst';
-    const requesterDetails = parseRequesterDetails(
-      item.requesterDetails
-    );
+    const requesterDetails = parseRequesterDetails(item.requesterDetails);
     const requester = resolveRequester(requesterDetails);
 
     try {
@@ -306,8 +405,8 @@ export class ConnectionRequestNotificationService {
         // The CSS table is only shown when the request carries CSS client details
         hasCssDetails: Boolean(
           cssClient?.clientId ||
-            cssClient?.integrationId ||
-            cssClient?.privacyZone
+          cssClient?.integrationId ||
+          cssClient?.privacyZone
         ),
         cssClientId: cssClient?.clientId || 'Not specified',
         cssIntegrationId: cssClient?.integrationId || 'Not specified',

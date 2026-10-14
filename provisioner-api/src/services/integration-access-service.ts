@@ -2,6 +2,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import {
   SdxMemberApiClient,
+  type ConnectionClientGrant,
   type ConnectionRequest,
   type ServiceCatalogEntry,
   type SubsystemEntry,
@@ -41,36 +42,17 @@ type PlannedConnectionChange =
   | {
       kind: 'create';
       request: PreparedServiceRequest;
-      result: 'submitted approval request';
-    }
-  | {
-      kind: 'update';
-      connection: ConnectionRequest;
-      request: PreparedServiceRequest;
-      serviceOrgName: string;
-      result:
-        | 'updated scopes, submitted for re-approval'
-        | 'updated version, submitted for re-approval'
-        | 'updated scopes and version, submitted for re-approval';
     }
   | {
       kind: 'reactivate';
       connection: ConnectionRequest;
       request: PreparedServiceRequest;
       serviceOrgName: string;
-      result: 'reactivated approved connection';
-    }
-  | {
-      kind: 'pin-version';
-      connection: ConnectionRequest;
-      request: PreparedServiceRequest;
-      serviceOrgName: string;
-      result: 'already approved' | 'pending approval';
     }
   | {
       kind: 'unchanged';
+      connection: ConnectionRequest;
       request: PreparedServiceRequest;
-      result: 'already approved' | 'pending approval';
     };
 
 /**
@@ -182,12 +164,30 @@ export class IntegrationAccessService {
       planConnectionChange(
         existingConnections,
         subsystem,
-        normalizedIntegrationId,
-        oauthClientId,
         policyVersion,
         request
       )
     );
+
+    // Complete all reads before the first write so an unavailable or malformed
+    // grant cannot leave an earlier service partially submitted.
+    const grantsByConnection = new Map<string, ConnectionClientGrant[]>();
+    for (const change of changes) {
+      if (change.kind === 'create') continue;
+      const connectionId = requireNonBlank(
+        change.connection.id,
+        `Connection ID for service '${change.request.name}'`
+      );
+      if (!grantsByConnection.has(connectionId)) {
+        grantsByConnection.set(
+          connectionId,
+          await this.api.listConnectionClientGrants(
+            subsystemOrgName,
+            connectionId
+          )
+        );
+      }
+    }
 
     const submission: TNewIntegrationAccessRequestResponse = {
       submissionId: normalizedSubmissionId,
@@ -199,6 +199,9 @@ export class IntegrationAccessService {
     // property order are deterministic.
     for (const change of changes) {
       const { request } = change;
+      let connectionId: string;
+      let existingGrant: ConnectionClientGrant | undefined;
+
       if (change.kind === 'create') {
         const outcome = await this.api.upsertConnection(subsystemOrgName, {
           clientId: subsystem.clientId,
@@ -210,26 +213,86 @@ export class IntegrationAccessService {
           serviceResources: request.defaults.serviceResources,
         });
         outcomes.push(outcome);
-      } else if (
-        change.kind === 'update' ||
-        change.kind === 'reactivate' ||
-        change.kind === 'pin-version'
-      ) {
-        const reactivating = change.kind === 'reactivate';
-        const pinningVersion = change.kind === 'pin-version';
-        const outcome = await this.api.upsertConnection(change.serviceOrgName, {
-          clientId: change.connection.clientId!,
-          serviceId: change.connection.serviceId!,
-          isApproved: pinningVersion
-            ? change.connection.isApproved
-            : reactivating,
-          isActive: pinningVersion ? change.connection.isActive : reactivating,
-          requesterDetails: request.requesterDetails,
-        });
-        outcomes.push(outcome);
+        connectionId = requireNonBlank(
+          outcome.id,
+          `Created connection ID for service '${request.name}'`
+        );
+      } else {
+        connectionId = requireNonBlank(
+          change.connection.id,
+          `Connection ID for service '${request.name}'`
+        );
+        const matchingGrants = (
+          grantsByConnection.get(connectionId) || []
+        ).filter(
+          (grant) =>
+            grant.integrationId === normalizedIntegrationId &&
+            grant.oauthClientId === oauthClientId
+        );
+        if (matchingGrants.length > 1) {
+          throw new ConflictError(
+            `More than one grant exists for integration '${normalizedIntegrationId}' and OAuth client '${oauthClientId}' on connection '${connectionId}'`
+          );
+        }
+        existingGrant = matchingGrants[0];
+
+        if (change.kind === 'reactivate') {
+          const outcome = await this.api.upsertConnection(
+            change.serviceOrgName,
+            {
+              clientId: change.connection.clientId!,
+              serviceId: change.connection.serviceId!,
+              isApproved: true,
+              isActive: true,
+            }
+          );
+          outcomes.push(outcome);
+        }
       }
 
-      submission.results[request.name] = change.result;
+      const scopesChanged =
+        existingGrant !== undefined &&
+        !sameStrings(
+          normalizeGrantScopes(existingGrant, request.name),
+          request.scopes
+        );
+      const versionChanged =
+        existingGrant !== undefined &&
+        grantServiceVersion(existingGrant) !== request.service.version;
+      const grantOutcome = await this.api.upsertConnectionClientGrant(
+        subsystemOrgName,
+        connectionId,
+        {
+          integrationId: normalizedIntegrationId,
+          oauthClientId,
+          submissionId: normalizedSubmissionId,
+          requesterDetails: request.requesterDetails,
+          scopes: request.scopes,
+        }
+      );
+      outcomes.push(grantOutcome);
+
+      if (change.kind === 'create') {
+        submission.results[request.name] =
+          'submitted connection and grant approval request';
+      } else if (!existingGrant) {
+        submission.results[request.name] = 'submitted grant approval request';
+      } else if (
+        scopesChanged ||
+        versionChanged ||
+        existingGrant.status === 'rejected'
+      ) {
+        submission.results[request.name] =
+          'updated grant, submitted for re-approval';
+      } else if (change.kind === 'reactivate') {
+        submission.results[request.name] = 'reactivated approved connection';
+      } else {
+        submission.results[request.name] =
+          existingGrant.status === 'approved' &&
+          change.connection.isApproved === true
+            ? 'already approved'
+            : 'pending approval';
+      }
     }
 
     this.logger?.debug(
@@ -287,52 +350,63 @@ export class IntegrationAccessService {
     const connections = await this.api.listConnections(subsystemOrgName);
     this.logger?.debug('Connections = %j', connections);
 
-    // Filter to the exact integration and environment before deriving any
-    // client or submission metadata. The member API does not guarantee order.
-    const integrationConnections = connections
+    const candidateConnections = connections
       .filter(
         (connection) =>
           connection.clientId === subsystem.clientId &&
-          connection.environment === normalizedEnvironment &&
-          connection.requesterDetails?.client?.integrationId ===
-            normalizedIntegrationId
+          connection.environment === normalizedEnvironment
       )
       .sort(compareConnections);
 
-    if (integrationConnections.length === 0) {
+    const grantContexts: ConnectionGrantContext[] = [];
+    for (const connection of candidateConnections) {
+      const connectionId = requireNonBlank(
+        connection.id,
+        `Connection ID for service '${connection.serviceId}'`
+      );
+      const grants = await this.api.listConnectionClientGrants(
+        subsystemOrgName,
+        connectionId
+      );
+      if (grants.length === 0) {
+        const legacyGrant = grantFromLegacyConnection(connection);
+        if (legacyGrant) {
+          grantContexts.push({ connection, grant: legacyGrant });
+        }
+      } else {
+        grantContexts.push(...grants.map((grant) => ({ connection, grant })));
+      }
+    }
+
+    const integrationGrants = grantContexts.filter(
+      ({ grant }) => grant.integrationId === normalizedIntegrationId
+    );
+    if (integrationGrants.length === 0) {
       throw new NotFoundError(
         `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
       );
     }
 
-    const metadataConnections = integrationConnections.filter((connection) => {
-      try {
-        const clientId = connection.requesterDetails?.client?.clientId;
-        if (typeof clientId !== 'string' || clientId.trim().length === 0) {
-          throw new ConflictError(
-            `Connection '${connection.serviceId}' does not identify an OAuth client`
-          );
-        }
+    const metadataGrants = integrationGrants.filter(({ connection, grant }) => {
+      const clientId = grant.oauthClientId;
+      if (typeof clientId === 'string' && clientId.trim().length > 0) {
         return true;
-      } catch (err) {
-        if (
-          !options.skipMalformedConnections ||
-          !isMalformedConnectionError(err)
-        ) {
-          throw err;
-        }
-        this.logger?.warn(
-          { err, connectionId: connection.id, serviceId: connection.serviceId },
-          'Skipping malformed integration connection during revocation'
-        );
-        return false;
       }
+      const err = new ConflictError(
+        `Grant '${grant.id}' for connection '${connection.serviceId}' does not identify an OAuth client`
+      );
+      if (!options.skipMalformedConnections) {
+        throw err;
+      }
+      this.logger?.warn(
+        { err, connectionId: connection.id, grantId: grant.id },
+        'Skipping malformed integration grant during revocation'
+      );
+      return false;
     });
 
     const clientIds = uniqueSorted(
-      metadataConnections.map((connection) =>
-        connection.requesterDetails!.client!.clientId!.trim()
-      )
+      metadataGrants.map(({ grant }) => grant.oauthClientId.trim())
     );
     if (clientIds.length === 0) {
       throw new ConflictError(
@@ -341,13 +415,13 @@ export class IntegrationAccessService {
     }
     if (clientIds.length !== 1) {
       throw new ConflictError(
-        `Integration ${normalizedIntegrationId} has connections for more than one OAuth client in environment ${normalizedEnvironment}`
+        `Integration ${normalizedIntegrationId} has grants for more than one OAuth client in environment ${normalizedEnvironment}`
       );
     }
 
     const submissionIds = uniqueSorted(
-      metadataConnections
-        .map((connection) => connection.requesterDetails?.submissionId)
+      metadataGrants
+        .map(({ grant }) => grant.submissionId)
         .filter(
           (submissionId): submissionId is string =>
             typeof submissionId === 'string' && submissionId.trim().length > 0
@@ -359,20 +433,23 @@ export class IntegrationAccessService {
     // legacy fallback for records created before submission IDs were stored.
     const submissionId = submissionIds.at(-1) || 'unknown';
 
-    const allowedConnections = metadataConnections.filter(
-      (connection) =>
-        connection.isApproved === (status === 'approved') &&
-        (status === 'pending' || connection.isActive === true)
+    const allowedGrants = metadataGrants.filter(({ connection, grant }) =>
+      status === 'approved'
+        ? connection.isApproved === true &&
+          connection.isActive === true &&
+          grant.status === 'approved'
+        : grant.status === 'pending' ||
+          (connection.isApproved !== true && grant.status === 'approved')
     );
 
-    this.logger?.debug('Connections allowed %j', allowedConnections);
+    this.logger?.debug('Grants allowed %j', allowedGrants);
 
     const servicesBySubsystem = new Map<
       string,
       Map<string, { name: string; scopes: string[]; version: string }>
     >();
 
-    for (const connection of allowedConnections) {
+    for (const { connection, grant } of allowedGrants) {
       try {
         const serviceId = requireNonBlank(
           connection.serviceId,
@@ -400,9 +477,11 @@ export class IntegrationAccessService {
           servicesBySubsystem.set(subsystemId, subsystemServices);
         }
 
-        const scopes = normalizeStoredScopes(connection, serviceId);
+        const scopes = normalizeGrantScopes(grant, serviceId);
         const version =
-          connection.requesterDetails?.service?.version || service.version;
+          grantServiceVersion(grant) ||
+          connection.requesterDetails?.service?.version ||
+          service.version;
         const existingService = subsystemServices.get(serviceId);
         subsystemServices.set(serviceId, {
           name: serviceId,
@@ -417,8 +496,13 @@ export class IntegrationAccessService {
           throw err;
         }
         this.logger?.warn(
-          { err, connectionId: connection.id, serviceId: connection.serviceId },
-          'Skipping malformed integration connection during revocation'
+          {
+            err,
+            connectionId: connection.id,
+            grantId: grant.id,
+            serviceId: connection.serviceId,
+          },
+          'Skipping malformed integration grant during revocation'
         );
       }
     }
@@ -517,7 +601,10 @@ function validateRequestedService(
       `Requested service '${requested.name}' belongs to subsystem '${service.subsystem.clientId}' which does not match requested resource server id '${requested.providerId}'`
     );
   }
-  if (requested.version !== undefined && requested.version !== service.version) {
+  if (
+    requested.version !== undefined &&
+    requested.version !== service.version
+  ) {
     throw new BadRequestError(
       `Requested service '${requested.name}' version '${requested.version}' does not match catalog version '${service.version}'`
     );
@@ -540,8 +627,6 @@ function validateRequestedService(
 function planConnectionChange(
   existingConnections: ConnectionRequest[],
   subsystem: SubsystemEntry,
-  integrationId: string,
-  oauthClientId: string,
   policyVersion: string,
   request: PreparedServiceRequest
 ): PlannedConnectionChange {
@@ -563,7 +648,6 @@ function planConnectionChange(
     return {
       kind: 'create',
       request,
-      result: 'submitted approval request',
     };
   }
 
@@ -573,73 +657,28 @@ function planConnectionChange(
     );
   }
 
-  const existingClient = existing.requesterDetails?.client;
-  if (
-    existingClient?.integrationId !== integrationId ||
-    existingClient?.clientId !== oauthClientId
-  ) {
-    throw new ConflictError(
-      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' is associated with a different integration or OAuth client; client grants are required before this connection can be shared`
-    );
-  }
-
   if (existing.policyVersion !== policyVersion) {
     throw new ConflictError(
       `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' uses policy '${existing.policyVersion}', not '${policyVersion}'`
     );
   }
 
-  const serviceOrgName = requireNonBlank(
-    request.service.subsystem.organization?.name,
-    `Organization for service '${request.name}'`
-  );
-
-  const existingScopes = normalizeStoredScopes(existing, request.name);
-  const scopesHaveChanged = !sameStrings(existingScopes, request.scopes);
-  const existingVersion = existing.requesterDetails?.service?.version;
-  const versionHasChanged =
-    existingVersion !== undefined && existingVersion !== request.service.version;
-  const legacyVersionNeedsPinning = existingVersion === undefined;
-
-  if (!scopesHaveChanged && !versionHasChanged) {
-    if (existing.isApproved && existing.isActive === false) {
-      return {
-        kind: 'reactivate',
-        connection: existing,
-        request,
-        serviceOrgName,
-        result: 'reactivated approved connection',
-      };
-    }
-    if (legacyVersionNeedsPinning) {
-      return {
-        kind: 'pin-version',
-        connection: existing,
-        request,
-        serviceOrgName,
-        result: existing.isApproved ? 'already approved' : 'pending approval',
-      };
-    }
+  if (existing.isApproved && existing.isActive === false) {
     return {
-      kind: 'unchanged',
+      kind: 'reactivate',
+      connection: existing,
       request,
-      result: existing.isApproved ? 'already approved' : 'pending approval',
+      serviceOrgName: requireNonBlank(
+        request.service.subsystem.organization?.name,
+        `Organization for service '${request.name}'`
+      ),
     };
   }
 
-  const changed = [
-    scopesHaveChanged ? 'scopes' : undefined,
-    versionHasChanged ? 'version' : undefined,
-  ].filter(Boolean);
   return {
-    kind: 'update',
+    kind: 'unchanged',
     connection: existing,
     request,
-    serviceOrgName,
-    result: `updated ${changed.join(' and ')}, submitted for re-approval` as
-      | 'updated scopes, submitted for re-approval'
-      | 'updated version, submitted for re-approval'
-      | 'updated scopes and version, submitted for re-approval',
   };
 }
 
@@ -654,28 +693,61 @@ function normalizeRequestedScopes(scopes: string[], serviceName: string) {
   );
 }
 
-function normalizeStoredScopes(
-  connection: ConnectionRequest,
+function normalizeGrantScopes(
+  grant: ConnectionClientGrant,
   serviceName: string
 ): string[] {
-  const scopes = connection.requesterDetails?.scopes;
+  const scopes = grant.scopes;
   if (!Array.isArray(scopes)) {
     throw new ConflictError(
-      `Connection for service '${serviceName}' does not contain a valid scope list`
+      `Grant for service '${serviceName}' does not contain a valid scope list`
     );
   }
   if (scopes.some((scope) => typeof scope !== 'string')) {
     throw new ConflictError(
-      `Connection for service '${serviceName}' contains an invalid scope`
+      `Grant for service '${serviceName}' contains an invalid scope`
     );
   }
   const normalized = scopes.map((scope) => scope.trim());
   if (normalized.some((scope) => scope.length === 0)) {
     throw new ConflictError(
-      `Connection for service '${serviceName}' contains a blank scope`
+      `Grant for service '${serviceName}' contains a blank scope`
     );
   }
   return uniqueSorted(normalized);
+}
+
+function grantServiceVersion(grant: ConnectionClientGrant): string | undefined {
+  const version = grant.requesterDetails?.service?.version;
+  return typeof version === 'string' && version.trim().length > 0
+    ? version.trim()
+    : undefined;
+}
+
+function grantFromLegacyConnection(
+  connection: ConnectionRequest
+): ConnectionClientGrant | undefined {
+  const details = connection.requesterDetails;
+  const integrationId = details?.client?.integrationId;
+  if (typeof integrationId !== 'string' || integrationId.trim().length === 0) {
+    return undefined;
+  }
+
+  const oauthClientId = details?.client?.clientId;
+  return {
+    id: `legacy-${connection.id || connection.serviceId || 'connection'}`,
+    connection: connection.id,
+    integrationId: integrationId.trim(),
+    oauthClientId:
+      typeof oauthClientId === 'string' ? oauthClientId.trim() : '',
+    submissionId:
+      typeof details?.submissionId === 'string'
+        ? details.submissionId
+        : undefined,
+    requesterDetails: details,
+    scopes: details?.scopes,
+    status: connection.isApproved ? 'approved' : 'pending',
+  };
 }
 
 function isMalformedConnectionError(error: unknown): boolean {
@@ -712,4 +784,8 @@ function compareConnections(
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+interface ConnectionGrantContext {
+  connection: ConnectionRequest;
+  grant: ConnectionClientGrant;
 }

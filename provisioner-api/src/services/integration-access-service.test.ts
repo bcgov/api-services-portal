@@ -4,6 +4,8 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
   BatchResult,
+  ConnectionClientGrant,
+  ConnectionClientGrantInput,
   ConnectionRequest,
   ConnectionRequestInput,
   SdxMemberApiClient,
@@ -69,13 +71,24 @@ function accessRequest(
 interface FakeApiOptions {
   catalog?: Record<string, ServiceCatalogEntry>;
   connections?: ConnectionRequest[];
+  grants?: Record<string, ConnectionClientGrant[]>;
   subsystems?: SubsystemEntry[];
   upsert?: (org: string, input: ConnectionRequestInput) => Promise<BatchResult>;
+  upsertGrant?: (
+    org: string,
+    connectionId: string,
+    input: ConnectionClientGrantInput
+  ) => Promise<BatchResult>;
   logger?: FastifyBaseLogger;
 }
 
 function createService(options: FakeApiOptions = {}) {
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
+  const grantWrites: Array<{
+    org: string;
+    connectionId: string;
+    input: ConnectionClientGrantInput;
+  }> = [];
   const catalog = options.catalog || {};
   const api = {
     getOASService: async (name: string) => {
@@ -84,13 +97,53 @@ function createService(options: FakeApiOptions = {}) {
       return service;
     },
     listConnections: async () => options.connections || [],
+    listConnectionClientGrants: async (_org: string, connectionId: string) => {
+      if (options.grants) return options.grants[connectionId] || [];
+      const connection = (options.connections || []).find(
+        (item) => item.id === connectionId
+      );
+      const details = connection?.requesterDetails;
+      return details?.client?.integrationId && details?.client?.clientId
+        ? [
+            {
+              id: `grant-${connectionId}`,
+              connection: connectionId,
+              integrationId: details.client.integrationId,
+              oauthClientId: details.client.clientId,
+              submissionId: details.submissionId,
+              requesterDetails: details,
+              scopes: details.scopes,
+              status: connection?.isApproved ? 'approved' : 'pending',
+            },
+          ]
+        : [];
+    },
     listCatalogSubsystems: async () =>
       options.subsystems || [consumerSubsystem],
     upsertConnection: async (org: string, input: ConnectionRequestInput) => {
       writes.push({ org, input });
       return options.upsert
         ? options.upsert(org, input)
-        : { status: 200, result: 'updated' };
+        : {
+            status: 200,
+            result: 'updated',
+            id:
+              (options.connections || []).find(
+                (item) =>
+                  item.clientId === input.clientId &&
+                  item.serviceId === input.serviceId
+              )?.id || `connection-${input.serviceId}`,
+          };
+    },
+    upsertConnectionClientGrant: async (
+      org: string,
+      connectionId: string,
+      input: ConnectionClientGrantInput
+    ) => {
+      grantWrites.push({ org, connectionId, input });
+      return options.upsertGrant
+        ? options.upsertGrant(org, connectionId, input)
+        : { status: 200, result: 'updated', id: `grant-${connectionId}` };
     },
   } as unknown as SdxMemberApiClient;
 
@@ -99,7 +152,7 @@ function createService(options: FakeApiOptions = {}) {
     options.logger
   );
   Object.assign(service, { api });
-  return { service, writes };
+  return { service, writes, grantWrites };
 }
 
 function existingConnection(
@@ -203,7 +256,7 @@ test('rejects blank OAuth client IDs and unsupported policies before catalog acc
 });
 
 test('merges duplicate services and scopes while allowing an empty scope set', async () => {
-  const { service, writes } = createService({
+  const { service, writes, grantWrites } = createService({
     catalog: {
       'empty-service': catalogService('empty-service', 'provider-a', 'dev', []),
       'scoped-service': catalogService('scoped-service', 'provider-a'),
@@ -233,6 +286,28 @@ test('merges duplicate services and scopes while allowing an empty scope set', a
 
   assert.equal(writes.length, 2);
   assert.deepEqual(
+    grantWrites.map(({ connectionId, input }) => ({
+      connectionId,
+      integrationId: input.integrationId,
+      oauthClientId: input.oauthClientId,
+      scopes: input.scopes,
+    })),
+    [
+      {
+        connectionId: 'connection-empty-service',
+        integrationId: 'integration-a',
+        oauthClientId: 'oauth-client-a',
+        scopes: [],
+      },
+      {
+        connectionId: 'connection-scoped-service',
+        integrationId: 'integration-a',
+        oauthClientId: 'oauth-client-a',
+        scopes: ['read', 'write'],
+      },
+    ]
+  );
+  assert.deepEqual(
     writes.map(({ input }) => ({
       serviceId: input.serviceId,
       scopes: input.requesterDetails.scopes,
@@ -254,13 +329,13 @@ test('merges duplicate services and scopes while allowing an empty scope set', a
   assert.deepEqual(response, {
     submissionId: 'submission-1',
     results: {
-      'empty-service': 'submitted approval request',
-      'scoped-service': 'submitted approval request',
+      'empty-service': 'submitted connection and grant approval request',
+      'scoped-service': 'submitted connection and grant approval request',
     },
   });
 });
 
-test('awaits a scope update and sends it to the provider organization', async () => {
+test('awaits a scope update and writes only the exact grant', async () => {
   let releaseWrite!: () => void;
   let signalWriteStarted!: () => void;
   const writeStarted = new Promise<void>((resolve) => {
@@ -269,10 +344,10 @@ test('awaits a scope update and sends it to the provider organization', async ()
   const writeGate = new Promise<BatchResult>((resolve) => {
     releaseWrite = () => resolve({ status: 200, result: 'updated' });
   });
-  const { service, writes } = createService({
+  const { service, writes, grantWrites } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [existingConnection()],
-    upsert: async () => {
+    upsertGrant: async () => {
       signalWriteStarted();
       return writeGate;
     },
@@ -302,13 +377,14 @@ test('awaits a scope update and sends it to the provider organization', async ()
   releaseWrite();
   const response = await pending;
 
-  assert.equal(writes.length, 1);
-  assert.equal(writes[0].org, 'provider-a-org');
-  assert.deepEqual(writes[0].input, {
-    clientId: 'consumer-subsystem',
-    serviceId: 'service-a',
-    isApproved: false,
-    isActive: false,
+  assert.deepEqual(writes, []);
+  assert.equal(grantWrites.length, 1);
+  assert.equal(grantWrites[0].org, 'consumer-org');
+  assert.equal(grantWrites[0].connectionId, 'connection-1');
+  assert.deepEqual(grantWrites[0].input, {
+    integrationId: 'integration-a',
+    oauthClientId: 'oauth-client-a',
+    submissionId: 'submission-2',
     requesterDetails: {
       submissionId: 'submission-2',
       requester: { name: 'Jane Doe', email: 'jane@example.test' },
@@ -324,14 +400,15 @@ test('awaits a scope update and sends it to the provider organization', async ()
         version: '1.0.0',
       },
     },
+    scopes: ['read', 'write'],
   });
   assert.deepEqual(response.results, {
-    'service-a': 'updated scopes, submitted for re-approval',
+    'service-a': 'updated grant, submitted for re-approval',
   });
 });
 
-test('reactivates an approved inactive connection on an exact resubmission', async () => {
-  const { service, writes } = createService({
+test('reactivates an approved inactive connection without replacing its metadata', async () => {
+  const { service, writes, grantWrites } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [existingConnection({ isActive: false })],
   });
@@ -355,29 +432,15 @@ test('reactivates an approved inactive connection on an exact resubmission', asy
     serviceId: 'service-a',
     isApproved: true,
     isActive: true,
-    requesterDetails: {
-      submissionId: 'submission-2',
-      requester: { name: 'Jane Doe', email: 'jane@example.test' },
-      scopes: ['read'],
-      client: {
-        integrationId: 'integration-a',
-        clientId: 'oauth-client-a',
-        privacyZone: 'citizen',
-      },
-      service: {
-        clientId: 'provider-a',
-        privacyZone: 'health',
-        version: '1.0.0',
-      },
-    },
   });
+  assert.equal(grantWrites.length, 1);
   assert.deepEqual(response.results, {
     'service-a': 'reactivated approved connection',
   });
 });
 
-test('fails closed rather than overwriting a shared connection owned by another client grant', async () => {
-  const { service, writes } = createService({
+test('adds a later client grant without overwriting the approved shared connection', async () => {
+  const { service, writes, grantWrites } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [
       existingConnection({
@@ -392,22 +455,27 @@ test('fails closed rather than overwriting a shared connection owned by another 
     ],
   });
 
-  await assert.rejects(
-    service.submitIntegrationAccessRequest(
-      'submission-2',
-      consumerSubsystem,
-      'integration-a',
-      accessRequest([
-        {
-          id: 'provider-a',
-          environment: 'dev',
-          services: [{ name: 'service-a', scopes: ['read'] }],
-        },
-      ])
-    ),
-    /client grants are required before this connection can be shared/
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+    ])
   );
+
   assert.deepEqual(writes, []);
+  assert.equal(grantWrites.length, 1);
+  assert.equal(grantWrites[0].connectionId, 'connection-1');
+  assert.equal(grantWrites[0].input.integrationId, 'integration-a');
+  assert.equal(grantWrites[0].input.oauthClientId, 'oauth-client-a');
+  assert.deepEqual(response.results, {
+    'service-a': 'submitted grant approval request',
+  });
 });
 
 test('does not confuse another consuming subsystem connection with shared connection identity', async () => {
@@ -602,9 +670,7 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
       {
         id: 'provider-a',
         environment: 'dev',
-        services: [
-          { name: 'service-a', scopes: ['read'], version: '1.0.0' },
-        ],
+        services: [{ name: 'service-a', scopes: ['read'], version: '1.0.0' }],
       },
     ],
   });
@@ -637,6 +703,6 @@ test('fails closed when one integration resolves to multiple OAuth clients', asy
 
   await assert.rejects(
     service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /connections for more than one OAuth client/
+    /grants for more than one OAuth client/
   );
 });
