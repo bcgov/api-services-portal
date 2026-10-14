@@ -372,10 +372,18 @@ const metadata = {
     refKey: 'name',
     sync: ['active', 'aclEnabled', 'consumerType'],
     transformations: {
+      // application: { name, namespace } - Application names are only unique within a namespace
       application: {
         name: 'connectOne',
         list: 'allApplications',
-        refKey: 'appId',
+        refKey: 'name',
+        compositeRefKey: [
+          { key: 'application.name', whereClause: 'name: $application_name' },
+          {
+            key: 'application.namespace',
+            whereClause: 'namespace: $application_namespace',
+          },
+        ],
       },
       consumer: {
         name: 'connectOne',

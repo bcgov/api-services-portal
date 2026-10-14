@@ -48,6 +48,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                             username
                             customId
                             extForeignKey
+                            tags
                         }
                         credentialReference
                     }

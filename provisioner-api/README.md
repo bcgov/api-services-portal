@@ -11,6 +11,7 @@ Resources supported:
 - APS
   - Product
   - Application
+  - ServiceAccess
   - ConsumerLabels
   - Activity
 
