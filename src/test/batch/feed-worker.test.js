@@ -1,4 +1,4 @@
-const { listFeedWorker } = require('../../batch/feed-worker');
+const { listFeedWorker, syncRecords } = require('../../batch/feed-worker');
 
 describe('listFeedWorker', () => {
   it('lists the requested entity using its data-rule fields and transformations', async () => {
@@ -97,5 +97,46 @@ describe('listFeedWorker', () => {
     expect(json).toHaveBeenCalledWith([
       expect.objectContaining({ tags: ['tag-one'] }),
     ]);
+  });
+});
+
+describe('syncRecords', () => {
+  it('attaches a new child to its existing parent before validation', async () => {
+    const context = {
+      executeGraphQL: jest
+        .fn()
+        .mockImplementation(async ({ query, variables }) => {
+          if (query.includes('allSubsystemIntegrations')) {
+            return { data: { allSubsystemIntegrations: [] } };
+          }
+          if (query.includes('createSubsystemIntegration')) {
+            expect(variables.data).toEqual({
+              integrationClientId: 'CLIENT-A',
+              subsystem: { connect: { id: 'subsystem-a' } },
+            });
+            return {
+              data: {
+                createSubsystemIntegration: { id: 'association-a' },
+              },
+            };
+          }
+          throw new Error(`Unexpected GraphQL operation: ${query}`);
+        }),
+    };
+
+    await expect(
+      syncRecords(
+        context,
+        'SubsystemIntegration',
+        'CLIENT-A',
+        { integrationClientId: 'CLIENT-A' },
+        true,
+        { id: 'subsystem-a' }
+      )
+    ).resolves.toMatchObject({
+      status: 200,
+      result: 'created',
+      id: 'association-a',
+    });
   });
 });
