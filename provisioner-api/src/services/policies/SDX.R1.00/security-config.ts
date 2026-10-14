@@ -27,6 +27,7 @@ export interface R1SecurityConfig {
       tokenEndpoint: string;
       scopes: string[];
       audience: string;
+      targetPrivacyZoneScope: string;
     };
   };
   provider: {
@@ -143,6 +144,34 @@ export function buildR1SecurityConfig({
     );
   }
 
+  const providerPrivacyZoneScope = nonBlank(service.subsystem?.privacyZone);
+  if (!providerPrivacyZoneScope || /\s/.test(providerPrivacyZoneScope)) {
+    throw withDetails(
+      new InternalError(
+        `SDX.R1.00 service '${service.name}' has no valid provider subsystem privacy-zone scope`
+      ),
+      { environment: environmentName, field: 'service.subsystem.privacyZone' }
+    );
+  }
+
+  const requestedPrivacyZoneScope = nonBlank(
+    requesterDetails?.service?.privacyZone
+  );
+  if (!requestedPrivacyZoneScope || /\s/.test(requestedPrivacyZoneScope)) {
+    throw requestError(
+      'requesterDetails.service.privacyZone is required and must contain exactly one OAuth scope for SDX.R1.00',
+      environmentName,
+      'requesterDetails.service.privacyZone'
+    );
+  }
+  if (requestedPrivacyZoneScope !== providerPrivacyZoneScope) {
+    throw requestError(
+      `requesterDetails.service.privacyZone '${requestedPrivacyZoneScope}' does not match authoritative provider '${providerPrivacyZoneScope}'`,
+      environmentName,
+      'requesterDetails.service.privacyZone'
+    );
+  }
+
   const requestedAudience = nonBlank(requesterDetails?.service?.clientId);
   if (!requestedAudience) {
     throw requestError(
@@ -175,6 +204,7 @@ export function buildR1SecurityConfig({
         tokenEndpoint,
         scopes: [],
         audience: providerAudience,
+        targetPrivacyZoneScope: providerPrivacyZoneScope,
       },
     },
     provider: {

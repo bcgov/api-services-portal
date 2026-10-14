@@ -12,7 +12,9 @@ const connections: ConnectionRequest[] = [
     policyVersion: 'SDX.R1.00',
     isApproved: true,
     isActive: true,
-    requesterDetails: '{}',
+    requesterDetails: JSON.stringify({
+      service: { privacyZone: 'urn:ca:bc:gov:provider' },
+    }),
     clientResources: '{}',
     serviceResources: '{}',
   },
@@ -30,7 +32,9 @@ const connections: ConnectionRequest[] = [
   },
 ];
 
-function preview(options: { providerExchange?: boolean } = {}) {
+function preview(
+  options: { providerExchange?: boolean; targetScope?: string } = {}
+) {
   return {
     applied: 0,
     failed: 0,
@@ -57,6 +61,8 @@ function preview(options: { providerExchange?: boolean } = {}) {
               scopes: [],
               scope_source: 'verified_subject_token',
               audience: 'provider-client',
+              target_privacy_zone_scope:
+                options.targetScope || 'urn:ca:bc:gov:provider',
             },
           },
         ],
@@ -129,6 +135,25 @@ test('reprovisions a validated connection in apply mode', async () => {
   assert.deepEqual(applied, ['connection-1']);
   assert.equal(summary.applied, 1);
   assert.equal(summary.failed, 0);
+});
+
+test('fails closed when the provisioned target privacy-zone scope is not authoritative', async () => {
+  let applyCalled = false;
+  const summary = await runAps4995Datafix({
+    listConnections: async () => connections,
+    previewConnection: async () =>
+      preview({ targetScope: 'urn:ca:bc:gov:caller-override' }),
+    applyConnection: async () => {
+      applyCalled = true;
+      return { applied: 1, failed: 0, skipped: 0, results: [] };
+    },
+    apply: true,
+  });
+
+  assert.equal(applyCalled, false);
+  assert.equal(summary.planned, 0);
+  assert.equal(summary.failed, 1);
+  assert.match(summary.issues[0].reason, /token exchange is not canonical/);
 });
 
 test('fails closed when a provider-edge token exchange is generated', async () => {
