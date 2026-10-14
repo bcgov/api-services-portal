@@ -180,9 +180,29 @@ describe('getOrgActivity', function () {
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
       AND: [
         { filterKey1: 'org:ministry-of-health' },
-        { OR: [...PUBLIC_ORG_ACTIVITY] },
+        {
+          OR: PUBLIC_ORG_ACTIVITY.map(({ action, type }) => ({
+            AND: [{ action }, { type }],
+          })),
+        },
         { result_not: 'failed' },
       ],
+    });
+  });
+
+  it('pairs action and type with AND so non-allowlisted types do not leak', async function () {
+    const ctx = mockOrgActivityContext();
+    await getOrgActivity(ctx, undefined, 20, 0, true);
+
+    const where = ctx.executeGraphQL.mock.calls[0][0].variables.where;
+    const orClause = where.AND.find((c: any) => c.OR).OR;
+    expect(orClause).toHaveLength(PUBLIC_ORG_ACTIVITY.length);
+    orClause.forEach((clause: any) => {
+      // No multi-key objects directly under OR (Knex ORs each key separately).
+      expect(Object.keys(clause)).toEqual(['AND']);
+    });
+    expect(orClause).not.toContainEqual({
+      AND: [{ action: 'published' }, { type: 'GatewayPatternPublish' }],
     });
   });
 
