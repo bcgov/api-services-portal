@@ -185,10 +185,7 @@ export function planLegacyGrant(
     integrationId,
     oauthClientId,
     ...(submissionId ? { submissionId } : {}),
-    requesterDetails:
-      details.requester && typeof details.requester === 'object'
-        ? (details.requester as Record<string, unknown>)
-        : {},
+    requesterDetails: details as Record<string, unknown>,
     scopes: Array.from(new Set(scopes)).sort(),
     status: connection.isApproved ? 'approved' : 'pending',
   };

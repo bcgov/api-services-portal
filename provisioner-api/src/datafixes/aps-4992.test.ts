@@ -32,8 +32,16 @@ test('plans one approved grant from a legacy approved R1 connection', () => {
     oauthClientId: 'oauth-client-1',
     submissionId: 'submission-1',
     requesterDetails: {
-      name: 'Requester',
-      email: 'requester@example.com',
+      submissionId: 'submission-1',
+      requester: {
+        name: 'Requester',
+        email: 'requester@example.com',
+      },
+      scopes: ['write', 'read', 'write'],
+      client: {
+        integrationId: 'integration-1',
+        clientId: 'oauth-client-1',
+      },
     },
     scopes: ['read', 'write'],
     status: 'approved',
@@ -58,7 +66,13 @@ test('preserves an empty scope list and pending connection state', () => {
     connection: 'connection-1',
     integrationId: 'integration-1',
     oauthClientId: 'oauth-client-1',
-    requesterDetails: {},
+    requesterDetails: {
+      scopes: [],
+      client: {
+        integrationId: 'integration-1',
+        clientId: 'oauth-client-1',
+      },
+    },
     scopes: [],
     status: 'pending',
   });
