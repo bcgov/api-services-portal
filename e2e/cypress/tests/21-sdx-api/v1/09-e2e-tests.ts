@@ -189,7 +189,9 @@ describe('SDX E2E Tests', () => {
 
     it('lists the integration client on the gateway Consumers page', () => {
       cy.visit('/')
-      cy.login(Cypress.env('DEV_USERNAME'), Cypress.env('DEV_PASSWORD'))
+      cy.fixture('apiowner').then(({ user }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+      })
 
       // SDX subsystem roles don't include the Consumers page yet, so grant
       // Namespace.Manage directly to check what the page lists
@@ -238,6 +240,12 @@ describe('SDX E2E Tests', () => {
     })
 
     it('removes the integration client from the gateway Consumers page', () => {
+      cy.visit('/')
+      cy.fixture('apiowner').then(({ user }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
+      })
+      cy.activateGateway(conn.gatewayId)
+
       // the page shows "0 Consumers" while it loads, so check the list it fetches
       cy.intercept('POST', '**/gql/api', (req) => {
         if (req.body?.query?.includes('getFilteredNamespaceConsumers')) {
@@ -245,11 +253,15 @@ describe('SDX E2E Tests', () => {
         }
       })
       cy.visit(consumers.path)
-      cy.wait('@getConsumers')
-        .its('response.body.data.getFilteredNamespaceConsumers')
-        .then((list: any[]) => {
-          expect(list.map((c) => c.username)).not.to.include(conn.integrationClientId)
-        })
+      cy.wait('@getConsumers').then(({ response }: any) => {
+        expect(response.statusCode).to.equal(200)
+        expect(response.body.errors).to.be.undefined
+        const list = response.body.data.getFilteredNamespaceConsumers
+        expect(list).to.be.an('array')
+        expect(list.map((c: any) => c.username)).not.to.include(
+          conn.integrationClientId
+        )
+      })
     })
   })
 
