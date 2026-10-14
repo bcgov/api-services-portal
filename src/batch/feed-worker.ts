@@ -526,6 +526,9 @@ export const syncRecords = async function (
       if (eid) {
         data[md.refKey] = eid;
       }
+      if (md.ownedBy && parentRecord?.id) {
+        data[md.ownedBy] = { connect: { id: parentRecord.id } };
+      }
       const nr = await batchService.create(entity, data);
       if (!nr.id) {
         logger.error('CREATE FAILED (%s) %j', nr, data);
