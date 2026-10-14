@@ -89,6 +89,7 @@ test('builds canonical R1 security settings from trusted sources', () => {
             'https://issuer.example/realms/standard/protocol/openid-connect/token',
           scopes: [],
           audience: 'MIN.PROVIDER.API',
+          targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
         },
       },
       provider: {
@@ -248,6 +249,55 @@ test('rejects requester service identity that contradicts the catalog', () => {
   );
 });
 
+test('rejects a provider privacy zone missing from the authoritative catalog', () => {
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: environment,
+        service: {
+          ...service,
+          subsystem: { ...providerSubsystem, privacyZone: undefined },
+        },
+        requesterDetails,
+      }),
+    /provider subsystem privacy-zone scope/
+  );
+});
+
+test('rejects a missing or contradictory requester service privacy zone', () => {
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: environment,
+        service,
+        requesterDetails: {
+          ...requesterDetails,
+          service: { ...requesterDetails.service, privacyZone: undefined },
+        },
+      }),
+    /requesterDetails.service.privacyZone is required/
+  );
+
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: environment,
+        service,
+        requesterDetails: {
+          ...requesterDetails,
+          service: {
+            ...requesterDetails.service,
+            privacyZone: 'urn:ca:bc:gov:caller-override',
+          },
+        },
+      }),
+    /privacyZone.*does not match authoritative provider/
+  );
+});
+
 test('R1 defaults include the canonical managed security settings', () => {
   const directory = mkdtempSync(join(tmpdir(), 'aps-4995-'));
   const configPath = join(directory, 'environments.json');
@@ -291,6 +341,7 @@ test('R1 defaults include the canonical managed security settings', () => {
         'https://issuer.example/realms/standard/protocol/openid-connect/token',
       scopes: [],
       audience: 'MIN.PROVIDER.API',
+      targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
     });
     assert.deepEqual(provider.upgrades?.token, {
       allowedAud: 'MIN.PROVIDER.API',
@@ -353,6 +404,14 @@ test('expands legacy R1 resource snapshots with managed settings', () => {
     consumerMatchIgnoreNotFound: false,
   });
   assert.deepEqual(consumer.upgrades.acl, {});
+  assert.deepEqual(consumer.upgrades.tokenExchange, {
+    clientId: 'sdx-edge-exchange',
+    tokenEndpoint:
+      'https://issuer.example/realms/standard/protocol/openid-connect/token',
+    scopes: [],
+    audience: 'MIN.PROVIDER.API',
+    targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
+  });
   assert.deepEqual(provider.upgrades.token, {
     allowedAud: 'MIN.PROVIDER.API',
     allowedIss: ['https://issuer.example/realms/standard'],
@@ -383,6 +442,40 @@ test('rejects caller-controlled R1 managed security settings', () => {
         },
       }),
     /conflicts with the authoritative R1 security configuration/
+  );
+
+  assert.throws(
+    () =>
+      enforceR1SecurityConfig({
+        environment: 'dev',
+        environmentConfig: environment,
+        service,
+        requesterDetails,
+        clientResources: {
+          gatewayPatterns: {
+            'sdx-p2p-consumer.r1': {
+              upgrades: {
+                tokenExchange: {
+                  clientId: 'sdx-edge-exchange',
+                  tokenEndpoint:
+                    'https://issuer.example/realms/standard/protocol/openid-connect/token',
+                  scopes: [],
+                  audience: 'MIN.PROVIDER.API',
+                  targetPrivacyZoneScope:
+                    'urn:ca:bc:gov:caller-override',
+                },
+              },
+            },
+            'sdx-p2p-consumer-access.r1': {},
+          },
+        },
+        serviceResources: {
+          gatewayPatterns: {
+            'sdx-p2p-provider.r1': { upgrades: {} },
+          },
+        },
+      }),
+    /tokenExchange.*conflicts with the authoritative/
   );
 
   assert.throws(
@@ -465,6 +558,17 @@ test('Cedar requires the canonical managed R1 security shape', () => {
   ).consumerMatch = false;
   assert.equal(
     policy.validateConnectionRequest('SDX.R1.00', invalid).allowed,
+    false
+  );
+
+  const invalidTargetScope = structuredClone(context);
+  (
+    invalidTargetScope.clientResources.gatewayPatterns[
+      'sdx-p2p-consumer.r1'
+    ].upgrades.tokenExchange as { targetPrivacyZoneScope: string }
+  ).targetPrivacyZoneScope = 'urn:ca:bc:gov:caller-override';
+  assert.equal(
+    policy.validateConnectionRequest('SDX.R1.00', invalidTargetScope).allowed,
     false
   );
 });

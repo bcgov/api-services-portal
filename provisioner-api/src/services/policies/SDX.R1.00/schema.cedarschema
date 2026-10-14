@@ -29,7 +29,7 @@ namespace SDX {
                     service: {
                         integrationId?: String,
                         clientId: String,
-                        privacyZone?: String
+                        privacyZone: String
                     },
                     submissionId: String
                 },
@@ -65,7 +65,8 @@ namespace SDX {
                                     clientId: String,
                                     tokenEndpoint: String,
                                     audience?: String,
-                                    scopes: Set<String>
+                                    scopes: Set<String>,
+                                    targetPrivacyZoneScope: String
                                 }
                             }
                         }
