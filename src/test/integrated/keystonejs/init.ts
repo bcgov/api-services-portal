@@ -58,6 +58,7 @@ export default async function InitKeystone(
     'Application',
     'Blob',
     'Content',
+    'ConnectionClientGrant',
     'ConnectionRequest',
     'CredentialIssuer',
     'Dataset',
