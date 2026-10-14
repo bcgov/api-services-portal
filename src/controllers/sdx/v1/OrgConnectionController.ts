@@ -14,7 +14,14 @@ import {
 } from 'tsoa';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
-import { ConnectionRequest } from '../../../services/batch/types';
+import {
+  ConnectionClientGrant,
+  ConnectionRequest,
+} from '../../../services/batch/types';
+import {
+  ConnectionClientGrantApprovalInput,
+  ConnectionClientGrantInput,
+} from '../../../services/batch/connection-client-grant-types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { ConnectionRequestInput } from './types';
 import {
@@ -31,6 +38,7 @@ import {
   getPermittedNamespaceNames,
   injectResSvrAccessTokenToContext,
 } from '../../../services/workflow';
+import { ConnectionClientGrantService } from '../../../services/batch/connection-client-grant-service';
 
 const logger = Logger('controller.org-connection');
 
@@ -196,6 +204,100 @@ export class OrgConnectionController extends Controller {
       .map((o) =>
         transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
       );
+  }
+
+  /**
+   * List the OAuth-client scope grants associated with a shared connection.
+   *
+   * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
+   */
+  @Get('/{connectionId}/grants')
+  @OperationId('listConnectionClientGrants')
+  @Security('jwt', ['System.Manage', 'Connection.Manage', 'Subsystem.Manage'])
+  public async listConnectionClientGrants(
+    @Path() org: string,
+    @Path() connectionId: string,
+    @Request() request: any
+  ): Promise<ConnectionClientGrant[]> {
+    const ctx = this.keystone.createContext(request, true);
+    return await new ConnectionClientGrantService().listGrants(
+      ctx,
+      org,
+      connectionId
+    );
+  }
+
+  /**
+   * Retrieve one OAuth-client scope grant from a shared connection.
+   *
+   * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
+   */
+  @Get('/{connectionId}/grants/{grantId}')
+  @OperationId('getConnectionClientGrant')
+  @Security('jwt', ['System.Manage', 'Connection.Manage', 'Subsystem.Manage'])
+  public async getConnectionClientGrant(
+    @Path() org: string,
+    @Path() connectionId: string,
+    @Path() grantId: string,
+    @Request() request: any
+  ): Promise<ConnectionClientGrant> {
+    const ctx = this.keystone.createContext(request, true);
+    return await new ConnectionClientGrantService().getGrant(
+      ctx,
+      org,
+      connectionId,
+      grantId
+    );
+  }
+
+  /**
+   * Create or update the requested scopes for one CSS integration and OAuth
+   * client. Changing the scope set always returns the grant to pending.
+   *
+   * > `Required Scope:` System.Manage or Subsystem.Manage
+   */
+  @Put('/{connectionId}/grants')
+  @OperationId('upsertConnectionClientGrant')
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage'])
+  public async upsertConnectionClientGrant(
+    @Path() org: string,
+    @Path() connectionId: string,
+    @Body() input: ConnectionClientGrantInput,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+    return await new ConnectionClientGrantService().upsertGrant(
+      ctx,
+      org,
+      connectionId,
+      input
+    );
+  }
+
+  /**
+   * Approve or reject one OAuth-client scope grant without changing the
+   * shared subsystem-to-service connection approval.
+   *
+   * > `Required Scope:` Connection.Manage
+   */
+  @Put('/{connectionId}/grants/{grantId}/approval')
+  @OperationId('updateConnectionClientGrantApproval')
+  @Security('jwt', ['Connection.Manage'])
+  public async updateConnectionClientGrantApproval(
+    @Path() org: string,
+    @Path() connectionId: string,
+    @Path() grantId: string,
+    @Body() input: ConnectionClientGrantApprovalInput,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+    return await new ConnectionClientGrantService().updateGrantApproval(
+      ctx,
+      org,
+      connectionId,
+      grantId,
+      input.status
+    );
   }
 
   /**

@@ -607,6 +607,42 @@ const metadata = {
       provisionerStatus: { type: 'entity', entity: 'ProvisionerStatus' },
     },
   },
+  ConnectionClientGrant: {
+    query: 'allConnectionClientGrants',
+    refKey: 'id',
+    compositeRefKey: [
+      {
+        key: 'connection',
+        whereClause: 'connection: { id: $connection }',
+      },
+      'integrationId',
+      'oauthClientId',
+    ],
+    sync: [
+      'connection',
+      'integrationId',
+      'oauthClientId',
+      'submissionId',
+      'requesterDetails',
+      'scopes',
+      'status',
+    ],
+    transformations: {
+      connection: {
+        name: 'connectOne',
+        list: 'allConnectionRequests',
+        refKey: 'id',
+      },
+      requesterDetails: { name: 'toString' },
+      scopes: { name: 'toString' },
+    },
+    validations: {
+      status: {
+        type: 'enum',
+        values: ['pending', 'approved', 'rejected'],
+      },
+    },
+  },
   ProvisionerStatus: {
     transient: true,
     refKey: 'name',

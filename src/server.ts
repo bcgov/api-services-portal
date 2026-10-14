@@ -135,6 +135,7 @@ for (const _list of [
   'Application',
   'Blob',
   'Content',
+  'ConnectionClientGrant',
   'ConnectionRequest',
   'CredentialIssuer',
   'Dataset',

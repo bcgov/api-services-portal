@@ -395,10 +395,28 @@ export interface ConnectionRequest {
  * @tsoaModel
  *
  */  
+export interface ConnectionClientGrant {
+  id?: string; // Primary Key
+  integrationId?: string;
+  oauthClientId?: string;
+  submissionId?: string;
+  status?: "pending" | "approved" | "rejected";
+  requesterDetails?: any; // toString
+  scopes?: any; // toString
+  connection?: ConnectionRequestRefID;
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */
 export interface ProvisionerStatus {
   name?: string; // Primary Key
   message?: string;
   status?: "pending" | "provisioned" | "failed";
+  endpoint?: string;
+  spec?: string;
 }
 
 
@@ -678,6 +696,11 @@ export type ApplicationRefID = string
 /**
  * @tsoaModel
  */  
+export type ConnectionRequestRefID = string
+
+/**
+ * @tsoaModel
+ */
 export type CredentialIssuerRefID = string
 
 /**

@@ -48,6 +48,27 @@ export interface ConnectionRequest {
   provisionerStatus?: ProvisionerStatus | string;
 }
 
+export interface ConnectionClientGrant {
+  id?: string;
+  connection?: { id?: string } | string;
+  integrationId: string;
+  oauthClientId: string;
+  submissionId?: string;
+  requesterDetails?: Record<string, unknown> | string;
+  scopes: string[] | string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface ConnectionClientGrantInput {
+  connection: string;
+  integrationId: string;
+  oauthClientId: string;
+  submissionId?: string;
+  requesterDetails: Record<string, unknown>;
+  scopes: string[];
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 export interface ConnectionProvisionerStatusUpdate {
   clientId: string;
   serviceId: string;

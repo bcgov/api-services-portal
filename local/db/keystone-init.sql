@@ -2860,6 +2860,64 @@ ALTER TABLE ONLY public."SubsystemIntegration"
 
 
 --
+-- Name: ConnectionClientGrant; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."ConnectionClientGrant_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE public."ConnectionClientGrant_id_seq" OWNER TO keystonejsuser;
+
+CREATE TABLE public."ConnectionClientGrant" (
+    id integer DEFAULT nextval('public."ConnectionClientGrant_id_seq"'::regclass) NOT NULL,
+    connection integer NOT NULL,
+    "integrationId" text NOT NULL,
+    "oauthClientId" text NOT NULL,
+    "submissionId" text,
+    "requesterDetails" text DEFAULT '{}'::text NOT NULL,
+    scopes text DEFAULT '[]'::text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    slug text,
+    "updatedAt_utc" timestamp without time zone,
+    "updatedAt_offset" text,
+    "createdAt_utc" timestamp without time zone,
+    "createdAt_offset" text
+);
+
+ALTER TABLE public."ConnectionClientGrant" OWNER TO keystonejsuser;
+
+ALTER SEQUENCE public."ConnectionClientGrant_id_seq"
+    OWNED BY public."ConnectionClientGrant".id;
+
+ALTER TABLE ONLY public."ConnectionClientGrant"
+    ADD CONSTRAINT "ConnectionClientGrant_pkey" PRIMARY KEY (id);
+
+ALTER TABLE ONLY public."ConnectionClientGrant"
+    ADD CONSTRAINT connectionclientgrant_connection_client_unique
+    UNIQUE (connection, "integrationId", "oauthClientId");
+
+ALTER TABLE ONLY public."ConnectionClientGrant"
+    ADD CONSTRAINT connectionclientgrant_slug_unique UNIQUE (slug);
+
+ALTER TABLE ONLY public."ConnectionClientGrant"
+    ADD CONSTRAINT connectionclientgrant_status_check
+    CHECK (status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text]));
+
+ALTER TABLE ONLY public."ConnectionClientGrant"
+    ADD CONSTRAINT connectionclientgrant_connection_foreign
+    FOREIGN KEY (connection) REFERENCES public."ConnectionRequest"(id)
+    ON DELETE CASCADE;
+
+CREATE INDEX connectionclientgrant_connection_index
+    ON public."ConnectionClientGrant" USING btree (connection);
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: keystonejsuser
 --
 

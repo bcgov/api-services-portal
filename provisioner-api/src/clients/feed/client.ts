@@ -3,6 +3,8 @@ import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 import type {
   Activity,
   Application,
+  ConnectionClientGrant,
+  ConnectionClientGrantInput,
   ConnectionProvisionerStatusUpdate,
   ConnectionRequest,
 } from './types.js';
@@ -39,6 +41,16 @@ export class FeedApiClient {
 
   async listConnectionRequests(): Promise<ConnectionRequest[]> {
     return await this.getEntities('ConnectionRequest');
+  }
+
+  async listConnectionClientGrants(): Promise<ConnectionClientGrant[]> {
+    return await this.getEntities('ConnectionClientGrant');
+  }
+
+  async putConnectionClientGrant(
+    grant: ConnectionClientGrantInput
+  ): Promise<BatchResult> {
+    return await this.putEntity('ConnectionClientGrant', grant);
   }
 
   /** PUT/feed/Activity — record a feed activity event. No authorization. */

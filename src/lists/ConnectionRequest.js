@@ -81,6 +81,11 @@ module.exports = {
       defaultValue: '{}',
       access: FieldEnforcementPoint,
     },
+    grants: {
+      type: Relationship,
+      ref: 'ConnectionClientGrant.connection',
+      many: true,
+    },
     clientResources: {
       type: Text,
       isRequired: true,

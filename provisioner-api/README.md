@@ -80,6 +80,20 @@ Routes are served under the OpenAPI server prefix `/ds/api/sdxpro/v1`:
 
 Before enabling the R1 integration-access callback, complete the APS-4992 audit and migration of legacy connection records so every `requesterDetails` object has an explicit `scopes` array. Submission and normal apply paths intentionally fail closed when scope data is missing or malformed. Delete/revocation remains available and skips malformed legacy rows with a structured warning so stale access can still be removed.
 
+APS-4992 then separates that legacy requester data into client grants. Deploy it
+as an expansion migration:
+
+1. Apply `docs/postgres/APS-4992-connection-client-grants.sql`.
+2. Deploy the portal and provisioner code while readers still support legacy
+   `requesterDetails`.
+3. Run `npm run datafix:aps-4992` without arguments and review every reported
+   malformed or duplicate record. This is a dry run and does not write data.
+4. Resolve all audit failures, then run
+   `npm run datafix:aps-4992 -- --apply` to backfill one grant per legacy R1
+   requester.
+5. Re-run the dry run and verify `failed` is zero before enabling grant-only
+   readers in later APS-4924 changes.
+
 Docs and spec:
 
 - `http://localhost:3000/docs` — Scalar API Reference
