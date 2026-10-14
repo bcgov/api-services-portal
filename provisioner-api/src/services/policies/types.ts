@@ -37,3 +37,13 @@ export interface PolicyPreflightContext {
 
 /** Validate policy-specific inputs before any gateway resource is built. */
 export type PolicyPreflightFn = (context: PolicyPreflightContext) => void;
+
+export interface PolicyEnforceResourcesInput extends PolicyPreflightContext {
+  clientResources: unknown;
+  serviceResources: unknown;
+}
+
+/** Return the effective resources after applying policy-managed settings. */
+export type PolicyEnforceResourcesFn = (
+  input: PolicyEnforceResourcesInput
+) => PolicyDefaultResources;
