@@ -5,7 +5,6 @@ import {
   type ServiceAccessResource,
 } from './directory-service.js';
 import { ResourceDispatcher } from './resource-dispatcher.js';
-import { UnprocessableEntityError } from '../errors/api-errors.js';
 
 const serviceAccess: ServiceAccessResource = {
   kind: 'ServiceAccess',
@@ -212,15 +211,18 @@ test('apply waits for the consumer to reach the Portal', async () => {
   assert.equal(calls.putServiceAccess.length, 1);
 });
 
-test('apply fails when the consumer never reaches the Portal', async () => {
+test('apply skips the ServiceAccess when the consumer never reaches the Portal', async () => {
   const { service, calls } = build({ consumerSynced: [false] });
 
-  await assert.rejects(
-    service.applyResources('gw-client', [serviceAccess as never], 'apply'),
-    (err: unknown) =>
-      err instanceof UnprocessableEntityError &&
-      /integration-client-1/.test(err.message)
+  const results = await service.applyResources(
+    'gw-client',
+    [serviceAccess as never],
+    'apply'
   );
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].result, 'skipped');
+  assert.match(results[0].reason!, /Consumer 'integration-client-1'/);
   // a first check, one per wait, and a last one
   assert.equal(calls.hasGatewayConsumer.length, 5);
   assert.deepEqual(calls.putServiceAccess, []);
