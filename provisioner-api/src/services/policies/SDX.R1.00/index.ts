@@ -3,8 +3,16 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import type { ClientResources, ServiceResources } from './types.js';
-import type { PolicyDefaultsFn, PolicyPreflightFn } from '../types.js';
-import { buildR1SecurityConfig } from './security-config.js';
+import type {
+  PolicyDefaultsFn,
+  PolicyEnforceResourcesFn,
+  PolicyPreflightFn,
+} from '../types.js';
+import { loadEnvironments } from '../../../config/environments.js';
+import {
+  buildR1SecurityConfig,
+  enforceR1SecurityConfig,
+} from './security-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -75,14 +83,29 @@ const defaults: PolicyDefaultsFn = (
   },
 });
 
+const managedDefaults: PolicyDefaultsFn = (subsystem, service, requester) => {
+  const base = defaults(subsystem, service, requester);
+  return enforceR1SecurityConfig({
+    environment: service.environment,
+    environmentConfig: loadEnvironments()[service.environment],
+    service,
+    requesterDetails: requester,
+    ...base,
+  });
+};
+
 const preflight: PolicyPreflightFn = (context) => {
   buildR1SecurityConfig(context);
 };
+
+const enforceResources: PolicyEnforceResourcesFn = (input) =>
+  enforceR1SecurityConfig(input);
 
 export const SDXPolicy = {
   id: 'SDX.R1.00',
   schema,
   policies,
-  defaults,
+  defaults: managedDefaults,
   preflight,
+  enforceResources,
 };
