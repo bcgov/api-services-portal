@@ -7,7 +7,6 @@ import {
   type Product,
 } from '../clients/directory/index.js';
 import { Action } from './resource-dispatcher.js';
-import { UnprocessableEntityError } from '../errors/api-errors.js';
 import { FeedApiClient } from '../clients/feed/index.js';
 
 /** Waits between checks for a newly created consumer, about 7.5s in total. */
@@ -145,7 +144,11 @@ export class DirectoryService {
       return skipped(reason);
     }
 
-    await this.ensureGatewayConsumer(r.consumer);
+    if (!(await this.waitForGatewayConsumer(r.consumer))) {
+      const reason = `Consumer '${r.consumer}' has not been synced from Kong into the Portal yet`;
+      this.logger?.warn({ name: r.name }, `Skipping service access: ${reason}`);
+      return skipped(reason);
+    }
 
     this.logger?.debug(
       { name: r.name, consumer: r.consumer },
@@ -168,38 +171,17 @@ export class DirectoryService {
    * asks to sync the gateway once the gwa publish completes. Wait a bounded
    * time for the consumer to arrive.
    */
-  private async ensureGatewayConsumer(username: string): Promise<void> {
+  private async waitForGatewayConsumer(username: string): Promise<boolean> {
     if (await this.feedClient.hasGatewayConsumer(username)) {
-      return;
+      return true;
     }
 
     for (const ms of this.consumerWaitMs) {
       if (await this.feedClient.hasGatewayConsumer(username)) {
-        return;
+        return true;
       }
       await sleep(ms);
     }
-    if (await this.feedClient.hasGatewayConsumer(username)) {
-      return;
-    }
-
-    throw new UnprocessableEntityError(
-      `Consumer '${username}' has not been synced from Kong into the Portal yet`
-    );
+    return await this.feedClient.hasGatewayConsumer(username);
   }
-
-  // async getHello(): Promise<string> {
-  //   const result = await this.client
-  //     .fetch('/gateways')
-  //     .then((res) => res.json())
-  //     .catch((err) => {
-  //       this.logger?.error({ err }, 'aps /gateways call failed');
-  //       throw withDetails(new NotFoundError('subsystem not found'), {
-  //         subsystem: 'abc',
-  //       });
-  //     });
-
-  //   this.logger?.debug({ result }, 'DirectoryService.getHello result');
-  //   return JSON.stringify(result);
-  // }
 }
