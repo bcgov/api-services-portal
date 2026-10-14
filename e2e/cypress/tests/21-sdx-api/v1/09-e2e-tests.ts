@@ -10,6 +10,7 @@ import {
   uniqueSubsystemName,
   updateRuntimeGroupAddHostedOrg,
   updateSubsystemIntegrationClients,
+  waitForSDXCall,
 } from '../../../support/sdx-commands'
 
 describe('SDX E2E Tests', () => {
@@ -145,21 +146,17 @@ describe('SDX E2E Tests', () => {
                     expect(body.result).to.be.equal('updated')
                     expect(typeof body.id).to.be.equal('string')
 
-                    cy.wait(10000)
-
                     // connection is approved; the provisioner runs asynchronously
                     // and kong control plane also pushes out changes to the data planes
-                    // async, so do some retries until we get a good response
-                    cy.setHeader('X-Client-Id', clientId)
-                    cy.makeSDXCall({
-                      method: 'GET',
-                      path: `/sdx/0/${serviceId}/ping`,
-                    }).then(({ status, body }) => {
-                      expect(status).to.be.equal(200)
-                      expect(body).has.property('currentTime')
-                      expect(body).has.property('headers')
-                      expect(body.headers).has.property('x-edge-token')
-                    })
+                    // async, so retry until we get a good response
+                    waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [200]).then(
+                      ({ status, body }: any) => {
+                        expect(status).to.be.equal(200)
+                        expect(body).has.property('currentTime')
+                        expect(body).has.property('headers')
+                        expect(body.headers).has.property('x-edge-token')
+                      }
+                    )
                     // disable access
                     cy.setRequestBody({
                       clientId: `${clientId}`,
@@ -174,19 +171,15 @@ describe('SDX E2E Tests', () => {
                       expect(body.result).to.be.equal('updated')
                       expect(typeof body.id).to.be.equal('string')
 
-                      cy.wait(10000)
-
                       // connection is de-activated; the provisioner runs asynchronously
                       // and kong control plane also pushes out changes to the data planes
-                      // async, so do some retries until we get a good response
-                      cy.setHeader('X-Client-Id', clientId)
-                      cy.makeSDXCall({
-                        method: 'GET',
-                        path: `/sdx/0/${serviceId}/ping`,
-                      }).then(({ status, body }) => {
-                        // expect 401 or 404, depending on runtime group default routes
-                        expect([401, 404]).to.include(status)
-                      })
+                      // async, so retry until access is gone. Expect 401 or 404,
+                      // depending on runtime group default routes
+                      waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [401, 404]).then(
+                        ({ status }: any) => {
+                          expect([401, 404]).to.include(status)
+                        }
+                      )
                     })
                   })
                 })

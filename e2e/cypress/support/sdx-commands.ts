@@ -251,6 +251,29 @@ export function deleteConnection(
   })
 }
 
+/**
+ * Calls the SDX data plane until the response status is one of expectedStatuses,
+ * and returns that response. The provisioner runs asynchronously and the Kong
+ * control plane pushes changes to the data planes asynchronously, so a fixed
+ * sleep either wastes time or flakes; poll instead.
+ */
+export function waitForSDXCall(
+  clientId: string,
+  path: string,
+  expectedStatuses: number[],
+  timeoutMs = 60000,
+  startedAt = Date.now()
+): Cypress.Chainable<any> {
+  cy.setHeader('X-Client-Id', clientId)
+  return cy.makeSDXCall({ method: 'GET', path }).then((res: any) => {
+    if (expectedStatuses.includes(res.status) || Date.now() - startedAt > timeoutMs) {
+      return cy.wrap(res)
+    }
+    cy.wait(1000)
+    return waitForSDXCall(clientId, path, expectedStatuses, timeoutMs, startedAt)
+  })
+}
+
 export function createRuntimeGroup(
   org: any,
   runtimeGroupName: string,
@@ -290,8 +313,8 @@ export function createRuntimeGroup(
             expect(status).to.be.equal(200)
             // expect(JSON.stringify(body)).to.be.equal('applied')
 
-            // just have to wait because it takes a bit of time to propogate the changes
-            cy.wait(10000)
+            // Default routes take a moment to reach the data planes. Nothing here
+            // depends on that; specs that call the data plane use waitForSDXCall.
           })
         })
     })
