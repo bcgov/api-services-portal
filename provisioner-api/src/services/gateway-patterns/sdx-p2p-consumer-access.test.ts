@@ -181,7 +181,7 @@ test('sets custom_id to the OAuth client ID for managed R1 consumers', () => {
   );
 });
 
-test('does not assign custom_id to explicit non-managed client overrides', () => {
+test('sets custom_id to the explicit non-managed client override', () => {
   const documents = pattern.eval(
     {
       connId: 'connection-a',
@@ -189,10 +189,17 @@ test('does not assign custom_id to explicit non-managed client overrides', () =>
       serviceId: 'service-a',
       integrationClientId: 'override-client',
     },
-    data
+    {
+      ...data,
+      allowedAccess: {
+        ...data.allowedAccess,
+        clientId: 'override-client',
+        resourceServers: [],
+      },
+    }
   );
 
-  assert.equal(documents.length, 1);
-  assert.equal(documents[0].username, 'oauth-client-a');
-  assert.equal(documents[0].custom_id, undefined);
+  assert.equal(documents.length, 2);
+  assert.equal(documents[0].username, 'override-client');
+  assert.equal(documents[0].custom_id, 'override-client');
 });
