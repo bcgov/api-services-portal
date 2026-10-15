@@ -5,12 +5,13 @@ import {
   createRuntimeGroup,
 } from '../../../support/sdx-commands'
 
-// Retries while the runtime group's gateway is still coming up (HTTP 500).
+// Retries while the runtime group's gateway is still coming up (CI saw 500, a
+// cold local stack saw 422).
 function requestCsr(orgName: string, startedAt = Date.now()): Cypress.Chainable<any> {
   return cy
     .callAPI(`ds/api/sdx/v1/organizations/${orgName}/keys`, 'POST')
     .then((res: any) => {
-      if (res.apiRes.status !== 500 || Date.now() - startedAt > 30000) {
+      if (res.apiRes.status === 200 || Date.now() - startedAt > 30000) {
         return cy.wrap(res)
       }
       cy.wait(1000)
