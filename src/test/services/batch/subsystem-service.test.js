@@ -265,7 +265,10 @@ describe('SubsystemService', () => {
 
     it('returns the matching integration record when one exists', async () => {
       const service = new SubsystemService();
-      const integration = { id: 'integration-123', integrationClientId: 'CLIENT-A' };
+      const integration = {
+        id: 'integration-123',
+        integrationClientId: 'CLIENT-A',
+      };
 
       getRecords.mockResolvedValueOnce([integration]);
 
@@ -356,9 +359,7 @@ describe('SubsystemService', () => {
         status: 200,
         result: 'created',
         id: 'subsystem-a',
-        childResults: [
-          { status: 200, result: 'created', id: 'association-a' },
-        ],
+        childResults: [{ status: 200, result: 'created', id: 'association-a' }],
       });
     });
 
@@ -397,33 +398,6 @@ describe('SubsystemService', () => {
         undefined,
         body
       );
-    });
-
-    it('uses deterministic ID order for duplicate untimestamped integration records', async () => {
-      const service = new SubsystemService();
-      getRecords.mockResolvedValueOnce([
-        { id: 'association-a', integrationClientId: 'CLIENT-A' },
-        { id: 'association-z', integrationClientId: 'CLIENT-A' },
-      ]);
-
-      const result = await service.lookupSubsystemIntegration({}, 'CLIENT-A');
-
-      expect(result.id).toEqual('association-z');
-    });
-
-    it('returns one deterministic subsystem when corrupted data has multiple owners', async () => {
-      const service = new SubsystemService();
-      getRecords.mockResolvedValueOnce([
-        { id: 'subsystem-a', name: 'A' },
-        { id: 'subsystem-z', name: 'Z' },
-      ]);
-
-      const result = await service.listSubsystemsByIntegration(
-        {},
-        'association-a'
-      );
-
-      expect(result).toEqual([{ id: 'subsystem-z', name: 'Z' }]);
     });
   });
 });

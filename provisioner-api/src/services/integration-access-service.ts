@@ -177,8 +177,9 @@ export class IntegrationAccessService {
       });
     }
 
-    const existingConnections =
-      await this.api.listConnections(subsystemOrgName);
+    const existingConnections = await this.api.listConnections(
+      subsystemOrgName
+    );
     for (const environment of uniqueSorted(
       preparedRequests.map((request) => request.environment)
     )) {
@@ -281,8 +282,7 @@ export class IntegrationAccessService {
     }
     const subsystem = selectSubsystemForIntegration(
       subsystems,
-      normalizedIntegrationId,
-      this.logger
+      normalizedIntegrationId
     );
     if (!subsystem) {
       throw new BadRequestError(

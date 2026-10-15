@@ -1226,7 +1226,7 @@ ALTER TABLE public."Subsystem" OWNER TO keystonejsuser;
 CREATE TABLE public."SubsystemIntegration" (
     id integer NOT NULL,
     "integrationClientId" text NOT NULL,
-    subsystem integer
+    subsystem integer NOT NULL
 );
 
 
@@ -2056,6 +2056,14 @@ ALTER TABLE ONLY public."SubsystemIntegration"
 
 
 --
+-- Name: SubsystemIntegration subsystemintegration_subsystem_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."SubsystemIntegration"
+    ADD CONSTRAINT subsystemintegration_subsystem_unique UNIQUE (subsystem);
+
+
+--
 -- Name: Task task_ref_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
 --
 
@@ -2435,12 +2443,6 @@ CREATE INDEX serviceaccess_productenvironment_index ON public."ServiceAccess" US
 
 CREATE INDEX subsystem_organization_index ON public."Subsystem" USING btree (organization);
 
-
---
--- Name: subsystemintegration_subsystem_index; Type: INDEX; Schema: public; Owner: keystonejsuser
---
-
-CREATE INDEX subsystemintegration_subsystem_index ON public."SubsystemIntegration" USING btree (subsystem);
 
 
 --

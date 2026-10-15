@@ -74,10 +74,7 @@ class SubsystemService {
         return { ...linked, result: created.result, id: created.id };
       }
 
-      const currentIntegration = this.selectLatestRecord(
-        existing.integrations || [],
-        `subsystemId=${existing.id}`
-      );
+      const currentIntegration = existing.integrations?.[0];
       if (
         currentIntegration &&
         currentIntegration.integrationClientId !==
@@ -123,10 +120,7 @@ class SubsystemService {
         },
       }
     );
-    return this.selectLatestRecord(
-      records,
-      `name=${body.name},organization=${body.organization}`
-    );
+    return records.pop();
   };
 
   listSubsystemsByOrganization = async (
@@ -175,10 +169,7 @@ class SubsystemService {
       }
     );
 
-    return this.selectLatestRecord(
-      records,
-      `integrationClientId=${integrationClientId}`
-    );
+    return records[0];
   };
 
   listSubsystemsByIntegration = async (
@@ -196,36 +187,7 @@ class SubsystemService {
         variables: { subsystemIntegrationId },
       }
     );
-    const selected = this.selectLatestRecord(
-      records,
-      `subsystemIntegrationId=${subsystemIntegrationId}`
-    );
-    return selected ? [selected] : [];
-  };
-
-  private selectLatestRecord = <T extends { id?: string }>(
-    records: T[],
-    lookup: string
-  ): T | undefined => {
-    if (records.length === 0) {
-      return undefined;
-    }
-
-    const sorted = records
-      .slice()
-      .sort((left, right) =>
-        `${left.id || ''}`.localeCompare(`${right.id || ''}`)
-      );
-    const selected = sorted[sorted.length - 1];
-    if (sorted.length > 1) {
-      logger.warn(
-        'Multiple untimestamped subsystem association records found for %s; selected id=%s using deterministic ID order and ignored ids=%j',
-        lookup,
-        selected.id,
-        sorted.slice(0, -1).map((record) => record.id)
-      );
-    }
-    return selected;
+    return records;
   };
 
   listActiveConnectionsByClientId = async (
