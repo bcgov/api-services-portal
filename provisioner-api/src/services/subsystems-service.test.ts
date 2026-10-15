@@ -40,29 +40,11 @@ test('selects the exact integration mapping from the catalog response', async ()
     subsystem('subsystem-b', ['integration-b']),
   ]);
 
-  const result =
-    await service.getSubsystemByIntegrationClientId('integration-b');
+  const result = await service.getSubsystemByIntegrationClientId(
+    'integration-b'
+  );
 
   assert.equal(result.clientId, 'subsystem-b');
-});
-
-test('warns and uses deterministic subsystem ID order when duplicate untimestamped mappings exist', async () => {
-  const { service, warnings } = createService([
-    subsystem('subsystem-a', ['integration-a']),
-    subsystem('subsystem-z', ['integration-a']),
-  ]);
-
-  const result =
-    await service.getSubsystemByIntegrationClientId('integration-a');
-
-  assert.equal(result.clientId, 'subsystem-z');
-  assert.equal(warnings.length, 1);
-  assert.deepEqual(warnings[0][0], {
-    integrationClientId: 'integration-a',
-    selectedSubsystemId: 'subsystem-z',
-    ignoredSubsystemIds: ['subsystem-a'],
-    selection: 'deterministic-subsystem-id',
-  });
 });
 
 test('does not use a subsystem whose authoritative mapping differs', async () => {

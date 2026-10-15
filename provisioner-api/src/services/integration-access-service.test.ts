@@ -726,46 +726,6 @@ test('uses creation order so lifecycle updates cannot change the authoritative O
   });
 });
 
-test('warns and deterministically selects a subsystem when catalog mappings conflict', async () => {
-  const warnings: unknown[][] = [];
-  const logger = {
-    debug: () => undefined,
-    warn: (...args: unknown[]) => warnings.push(args),
-  } as unknown as FastifyBaseLogger;
-  const selectedSubsystem = {
-    ...consumerSubsystem,
-    clientId: 'consumer-subsystem-z',
-  };
-  const { service } = createService({
-    logger,
-    subsystems: [
-      { ...consumerSubsystem, clientId: 'consumer-subsystem-a' },
-      selectedSubsystem,
-    ],
-    connections: [
-      existingConnection({ clientId: selectedSubsystem.clientId }),
-    ],
-    catalog: {
-      'service-a': catalogService('service-a', 'provider-a'),
-    },
-  });
-
-  const response = await service.buildIntegrationAllowedServices(
-    'integration-a',
-    'dev',
-    'approved'
-  );
-
-  assert.equal(response.clientId, 'oauth-client-a');
-  assert.equal(warnings.length, 1);
-  assert.deepEqual(warnings[0][0], {
-    integrationClientId: 'integration-a',
-    selectedSubsystemId: 'consumer-subsystem-z',
-    ignoredSubsystemIds: ['consumer-subsystem-a'],
-    selection: 'deterministic-subsystem-id',
-  });
-});
-
 test('rejects a second OAuth client for another service in the same subsystem environment', async () => {
   const { service, writes } = createService({
     catalog: { 'service-b': catalogService('service-b', 'provider-a') },

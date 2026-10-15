@@ -18,43 +18,6 @@ import { getSubsystemRoles } from '../workflow/get-subsystem-roles';
 
 const logger = Logger('gateway-patterns.catalog');
 
-type IntegrationRecord = {
-  id?: string;
-  integrationClientId?: string;
-};
-
-function authoritativeIntegrationIds(subsystem: {
-  id?: string;
-  name?: string;
-  integrations?: IntegrationRecord[];
-}): string[] {
-  const integrations = (subsystem.integrations || [])
-    .filter(
-      (integration) =>
-        typeof integration.integrationClientId === 'string' &&
-        integration.integrationClientId.length > 0
-    )
-    .slice()
-    .sort((left, right) =>
-      `${left.id || left.integrationClientId}`.localeCompare(
-        `${right.id || right.integrationClientId}`
-      )
-    );
-  if (integrations.length === 0) return [];
-
-  const selected = integrations[integrations.length - 1];
-  if (integrations.length > 1) {
-    logger.warn(
-      'Subsystem %s has multiple untimestamped CSS integration records; selected id=%s integrationClientId=%s using deterministic ID order and ignored ids=%j',
-      subsystem.id || subsystem.name || 'unknown',
-      selected.id,
-      selected.integrationClientId,
-      integrations.slice(0, -1).map((integration) => integration.id)
-    );
-  }
-  return [selected.integrationClientId!];
-}
-
 /**
  * @tsoaModel
  *
@@ -206,7 +169,9 @@ export async function GetCatalog(
         gateway: {
           id: c.namespace,
         },
-        integrationClientIds: authoritativeIntegrationIds(c.subsystem),
+        integrationClientIds: c.subsystem.integrations.map(
+          (i) => i.integrationClientId
+        ),
       },
       operations: JSON.parse(c.operations || '[]'),
     } as ServiceCatalogEntry;
@@ -406,7 +371,7 @@ export function GetSubsystemEntryForSubsystem(c: Subsystem): SubsystemEntry {
     gateway: {
       id: c.namespace,
     },
-    integrationClientIds: authoritativeIntegrationIds(c),
+    integrationClientIds: c.integrations.map((i) => i.integrationClientId),
   };
 }
 
