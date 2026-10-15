@@ -5,6 +5,19 @@ import {
   createRuntimeGroup,
 } from '../../../support/sdx-commands'
 
+// Retries while the runtime group's gateway is still coming up (HTTP 500).
+function requestCsr(orgName: string, startedAt = Date.now()): Cypress.Chainable<any> {
+  return cy
+    .callAPI(`ds/api/sdx/v1/organizations/${orgName}/keys`, 'POST')
+    .then((res: any) => {
+      if (res.apiRes.status !== 500 || Date.now() - startedAt > 30000) {
+        return cy.wrap(res)
+      }
+      cy.wait(1000)
+      return requestCsr(orgName, startedAt)
+    })
+}
+
 describe('SDX Organization Signing', () => {
   let workingData: any
 
@@ -43,7 +56,8 @@ describe('SDX Organization Signing', () => {
           runtimeGroupName: runtimeGroupName,
           environment: 'dev',
         })
-        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/keys`, 'POST').then(
+        // rg0 was only just created, so its gateway may not be ready to sign yet
+        requestCsr(org.name).then(
           ({ apiRes: { status, body, headers } }: any) => {
             expect(status).to.be.equal(200)
             expect(headers['content-type']).to.be.equal('text/plain; charset=utf-8')
