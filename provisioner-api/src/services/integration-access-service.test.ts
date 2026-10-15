@@ -410,6 +410,53 @@ test('fails closed rather than replacing the one-to-one client mapping', async (
   assert.deepEqual(writes, []);
 });
 
+test('moves a stale service connection onto the authoritative client identity', async () => {
+  const { service, writes } = createService({
+    catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    connections: [
+      existingConnection({
+        id: 'connection-a',
+        serviceId: 'service-a',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      }),
+      existingConnection({
+        id: 'connection-b',
+        serviceId: 'service-b',
+        createdAt: '2026-02-01T00:00:00.000Z',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          client: {
+            integrationId: 'integration-a',
+            clientId: 'oauth-client-b',
+          },
+        },
+      }),
+    ],
+  });
+
+  await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest(
+      [
+        {
+          id: 'provider-a',
+          environment: 'dev',
+          services: [{ name: 'service-a', scopes: ['read'] }],
+        },
+      ],
+      { clientId: 'oauth-client-b' }
+    )
+  );
+
+  assert.equal(writes.length, 1);
+  assert.equal(
+    writes[0].input.requesterDetails?.client?.clientId,
+    'oauth-client-b'
+  );
+});
+
 test('does not confuse another consuming subsystem connection with shared connection identity', async () => {
   const { service, writes } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
@@ -615,7 +662,7 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
   assert.equal(warning.serviceId, 'service-b');
 });
 
-test('warns and uses the latest timestamped OAuth client when stored data conflicts', async () => {
+test('uses creation order so lifecycle updates cannot change the authoritative OAuth client', async () => {
   const warnings: unknown[][] = [];
   const logger = {
     debug: () => undefined,
@@ -627,11 +674,15 @@ test('warns and uses the latest timestamped OAuth client when stored data confli
       existingConnection({
         id: 'connection-1',
         serviceId: 'service-a',
-        updatedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+        isApproved: false,
+        isActive: false,
       }),
       existingConnection({
         id: 'connection-2',
         serviceId: 'service-b',
+        createdAt: '2026-02-01T00:00:00.000Z',
         updatedAt: '2026-02-01T00:00:00.000Z',
         requesterDetails: {
           ...existingConnection().requesterDetails,
@@ -671,7 +722,47 @@ test('warns and uses the latest timestamped OAuth client when stored data confli
     requestedIntegrationId: 'integration-a',
     selectedRecordId: 'connection-2',
     ignoredRecordIds: ['connection-1'],
-    selection: 'updatedAt-createdAt-id',
+    selection: 'createdAt-id',
+  });
+});
+
+test('warns and deterministically selects a subsystem when catalog mappings conflict', async () => {
+  const warnings: unknown[][] = [];
+  const logger = {
+    debug: () => undefined,
+    warn: (...args: unknown[]) => warnings.push(args),
+  } as unknown as FastifyBaseLogger;
+  const selectedSubsystem = {
+    ...consumerSubsystem,
+    clientId: 'consumer-subsystem-z',
+  };
+  const { service } = createService({
+    logger,
+    subsystems: [
+      { ...consumerSubsystem, clientId: 'consumer-subsystem-a' },
+      selectedSubsystem,
+    ],
+    connections: [
+      existingConnection({ clientId: selectedSubsystem.clientId }),
+    ],
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-a'),
+    },
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
+  );
+
+  assert.equal(response.clientId, 'oauth-client-a');
+  assert.equal(warnings.length, 1);
+  assert.deepEqual(warnings[0][0], {
+    integrationClientId: 'integration-a',
+    selectedSubsystemId: 'consumer-subsystem-z',
+    ignoredSubsystemIds: ['consumer-subsystem-a'],
+    selection: 'deterministic-subsystem-id',
   });
 });
 

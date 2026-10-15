@@ -8,6 +8,15 @@ const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
   getNamespaceDetails,
 } = require('../../../services/workflow/get-namespaces');
+const { BatchService } = require('../../../services/keystone/batch-service');
+
+const mockUpdate = jest.fn();
+
+jest.mock('../../../services/keystone/batch-service', () => ({
+  BatchService: jest.fn().mockImplementation(() => ({
+    update: mockUpdate,
+  })),
+}));
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -58,6 +67,7 @@ describe('SubsystemService', () => {
     jest.clearAllMocks();
     getNamespaceDetails.mockResolvedValue(null);
     mockGetGatewayResources.mockResolvedValue([]);
+    mockUpdate.mockResolvedValue({ id: 'association-a' });
   });
 
   describe('deleteSubsystem', () => {
@@ -298,6 +308,95 @@ describe('SubsystemService', () => {
         )
       ).rejects.toThrow('can be associated with only one CSS integration');
       expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('creates the subsystem before linking its first integration', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+        integrations: [{ integrationClientId: 'CLIENT-A' }],
+      };
+      getRecords.mockResolvedValueOnce([]);
+      syncRecordsThrowErrors
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'created',
+          id: 'subsystem-a',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'updated-child',
+          id: 'subsystem-a',
+          childResults: [
+            { status: 200, result: 'created', id: 'association-a' },
+          ],
+        });
+
+      const result = await service.upsertSubsystem({}, body);
+
+      expect(syncRecordsThrowErrors).toHaveBeenNthCalledWith(
+        1,
+        {},
+        'Subsystem',
+        undefined,
+        {
+          name: 'MY-SUBSYSTEM',
+          organization: 'ministry-of-citz',
+        }
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenNthCalledWith(
+        2,
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
+      expect(result).toEqual({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+        childResults: [
+          { status: 200, result: 'created', id: 'association-a' },
+        ],
+      });
+    });
+
+    it('replaces an existing integration in place', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+        integrations: [{ integrationClientId: 'CLIENT-B' }],
+      };
+      getRecords.mockResolvedValueOnce([
+        {
+          id: 'subsystem-a',
+          integrations: [
+            { id: 'association-a', integrationClientId: 'CLIENT-A' },
+          ],
+        },
+      ]);
+      syncRecordsThrowErrors.mockResolvedValueOnce({
+        status: 200,
+        result: 'no-change',
+        id: 'subsystem-a',
+      });
+
+      await service.upsertSubsystem({}, body);
+
+      expect(BatchService).toHaveBeenCalledWith({});
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'SubsystemIntegration',
+        'association-a',
+        { integrationClientId: 'CLIENT-B' }
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
     });
 
     it('uses deterministic ID order for duplicate untimestamped integration records', async () => {
