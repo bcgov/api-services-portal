@@ -76,9 +76,6 @@ describe('SDX Connection Requests (Sad Deletions)', () => {
 
     cy.buildOrgGatewayDatasetAndProduct().then((data) => {
       workingData = data
-      cy.buildOrgGatewayDatasetAndProduct().then((data) => {
-        diffOrg = data
-      })
     })
   })
 
@@ -155,6 +152,11 @@ describe('SDX Connection Requests (Sad Deletions)', () => {
 
   it('DELETE /organizations/{org}/connections/{id} - org mismatch', () => {
     const { org, datasetId } = workingData
+
+    // the second organization is only needed here; diffOrg is read in later callbacks
+    cy.buildOrgGatewayDatasetAndProduct().then((data) => {
+      diffOrg = data
+    })
 
     new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
       createConnection(org, service, true, (connectionId: string) => {
