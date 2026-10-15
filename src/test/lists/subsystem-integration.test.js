@@ -2,10 +2,6 @@ jest.mock('../../authz/enforcement', () => ({
   EnforcementPoint: {},
 }));
 
-jest.mock('../../logger', () => ({
-  Logger: jest.fn(() => ({ warn: jest.fn() })),
-}));
-
 const config = require('../../lists/SubsystemIntegration');
 
 describe('SubsystemIntegration one-to-one validation', () => {
@@ -45,7 +41,7 @@ describe('SubsystemIntegration one-to-one validation', () => {
     ).rejects.toThrow('already has a CSS integration');
   });
 
-  it('allows an update to the existing association', async () => {
+  it('allows the existing association to change its integration client', async () => {
     const executeGraphQL = jest.fn().mockResolvedValue({
       data: {
         allSubsystemIntegrations: [
@@ -58,7 +54,7 @@ describe('SubsystemIntegration one-to-one validation', () => {
       config.hooks.validateInput({
         context: { executeGraphQL },
         operation: 'update',
-        resolvedData: {},
+        resolvedData: { integrationClientId: 'CLIENT-B' },
         existingItem: {
           id: 'association-a',
           subsystem: 'subsystem-a',

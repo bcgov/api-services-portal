@@ -28,6 +28,7 @@ import { OpenAPISpecService } from './oas-service';
 import { getNamespaceDetails } from '../workflow/get-namespaces';
 import { context } from 'msw';
 import { ProvisionerService } from '../provisioner';
+import { BatchService } from '../keystone/batch-service';
 
 const logger = Logger('batch.subsystem');
 
@@ -51,6 +52,50 @@ class SubsystemService {
         }' can be associated with only one CSS integration`
       );
     }
+
+    const requestedIntegration = body.integrations?.[0];
+    if (requestedIntegration?.integrationClientId) {
+      const existing = await this.lookupSubsystemForUpsert(context, body);
+      if (!existing) {
+        const parent = { ...body };
+        delete parent.integrations;
+        const created = await syncRecordsThrowErrors(
+          context,
+          'Subsystem',
+          undefined,
+          parent
+        );
+        const linked = await syncRecordsThrowErrors(
+          context,
+          'Subsystem',
+          undefined,
+          body
+        );
+        return { ...linked, result: created.result, id: created.id };
+      }
+
+      const currentIntegration = this.selectLatestRecord(
+        existing.integrations || [],
+        `subsystemId=${existing.id}`
+      );
+      if (
+        currentIntegration &&
+        currentIntegration.integrationClientId !==
+          requestedIntegration.integrationClientId
+      ) {
+        const updated = await new BatchService(context).update(
+          'SubsystemIntegration',
+          currentIntegration.id,
+          { integrationClientId: requestedIntegration.integrationClientId }
+        );
+        if (!updated.id) {
+          throw new Error(
+            updated.error || 'Failed replacing subsystem CSS integration'
+          );
+        }
+      }
+    }
+
     const result = await syncRecordsThrowErrors(
       context,
       'Subsystem',
@@ -58,6 +103,30 @@ class SubsystemService {
       body
     );
     return result;
+  };
+
+  private lookupSubsystemForUpsert = async (
+    context: Keystone,
+    body: Subsystem
+  ): Promise<KeystoneSubsystem | undefined> => {
+    const records: KeystoneSubsystem[] = await getRecords(
+      context,
+      'Subsystem',
+      'allSubsystems',
+      ['integrations'],
+      {
+        query: '$name: String!, $organization: String!',
+        clause: '{ name: $name, organization: { name: $organization } }',
+        variables: {
+          name: body.name,
+          organization: body.organization,
+        },
+      }
+    );
+    return this.selectLatestRecord(
+      records,
+      `name=${body.name},organization=${body.organization}`
+    );
   };
 
   listSubsystemsByOrganization = async (

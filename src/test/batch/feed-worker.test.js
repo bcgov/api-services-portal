@@ -139,4 +139,45 @@ describe('syncRecords', () => {
       id: 'association-a',
     });
   });
+
+  it('attaches a new environment to its existing product before validation', async () => {
+    const context = {
+      executeGraphQL: jest
+        .fn()
+        .mockImplementation(async ({ query, variables }) => {
+          if (query.includes('allEnvironments')) {
+            return { data: { allEnvironments: [] } };
+          }
+          if (query.includes('createEnvironment')) {
+            expect(variables.data).toEqual({
+              name: 'dev',
+              appId: 'APP-A',
+              services: { disconnectAll: true },
+              product: { connect: { id: 'product-a' } },
+            });
+            return {
+              data: {
+                createEnvironment: { id: 'environment-a' },
+              },
+            };
+          }
+          throw new Error(`Unexpected GraphQL operation: ${query}`);
+        }),
+    };
+
+    await expect(
+      syncRecords(
+        context,
+        'Environment',
+        'APP-A',
+        { name: 'dev', appId: 'APP-A' },
+        true,
+        { id: 'product-a' }
+      )
+    ).resolves.toMatchObject({
+      status: 200,
+      result: 'created',
+      id: 'environment-a',
+    });
+  });
 });

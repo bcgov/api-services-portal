@@ -1,8 +1,5 @@
 const { Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { Logger } = require('../logger');
-
-const logger = Logger('lists.subsystem-integration');
 
 function relationshipId(value) {
   if (typeof value === 'string') return value;
