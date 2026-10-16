@@ -1,3 +1,4 @@
+import type { JWTVerifyGetKey } from 'jose';
 import Fastify, { type FastifyInstance } from 'fastify';
 import swagger from '@fastify/swagger';
 import scalarReference from '@scalar/fastify-api-reference';
@@ -26,9 +27,18 @@ import { registerIntegrationAccessRoutes } from './routes/integrationAccess.js';
 import { registerGatewaysRoutes } from './routes/gateways.js';
 import { registerRuntimeGroupsRoutes } from './routes/runtime-groups.js';
 
+import {
+  registerPartnerAuth,
+  partnerAuthConfig,
+  type PartnerAuthConfig,
+} from './plugins/partner-auth.js';
+
 const API_PREFIX = '/v1';
 
-export async function buildApp(): Promise<FastifyInstance> {
+export async function buildApp(
+  options: { listener?: 'internal' | 'partner'; auth?: PartnerAuthConfig; authKey?: JWTVerifyGetKey } = {}
+): Promise<FastifyInstance> {
+  const partner = options.listener === 'partner';
   const app = Fastify({
     logger: { level: process.env.LOG_LEVEL ?? 'info' },
   }).withTypeProvider<TypeBoxTypeProvider>();
@@ -127,12 +137,16 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(clientsPlugin);
   await app.register(servicesPlugin);
   await app.register(controllersPlugin);
-  await app.register(registerResourceServersRoutes, { prefix: API_PREFIX });
-  await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
-  await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
-  await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
-  await app.register(registerGatewaysRoutes, { prefix: API_PREFIX });
-  await app.register(registerRuntimeGroupsRoutes, { prefix: API_PREFIX });
+  if (partner) {
+    registerPartnerAuth(app, options.auth ?? partnerAuthConfig(), options.authKey);
+    await app.register(registerResourceServersRoutes, { prefix: API_PREFIX });
+    await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
+  } else {
+    await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
+    await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
+    await app.register(registerGatewaysRoutes, { prefix: API_PREFIX });
+    await app.register(registerRuntimeGroupsRoutes, { prefix: API_PREFIX });
+  }
 
   return app;
 }

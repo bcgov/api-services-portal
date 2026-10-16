@@ -68,7 +68,7 @@ const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
   ],
 });
 
-const security = [] as any[];
+const security = [{ jwt: [] }];
 
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {

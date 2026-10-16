@@ -160,3 +160,64 @@ R0 behavior is unchanged. This task leaves the preflight out of the active
 request evaluator and does not add the R1 token, ACL, or exchange upgrades to
 route defaults. The policy-enforcement change will invoke the preflight before
 generating gateway resources.
+
+## Partner listener (APS-4927)
+
+Startup now creates two independent Fastify applications. `PORT` (default 3000)
+serves Portal resource/connection, pattern, gateway and runtime-group operations.
+`PARTNER_PORT` (default 3001) serves only `/v1/integrations/*` and
+`/v1/resource-servers`. Both use `HOST` (default `0.0.0.0`). Do not route the
+public hostname to `PORT`. Compose exposes the partner listener on loopback port
+3031 and leaves the existing Portal port mapping intact.
+
+Set these values through the established environment/secret mechanism before
+starting either listener (Compose uses `local/provisioner/.env.local`):
+
+| Variable | Required value |
+| --- | --- |
+| `PARTNER_JWT_ISSUER` | Exact trusted issuer claim |
+| `PARTNER_JWT_AUDIENCE` | Intended SDX partner API audience |
+| `PARTNER_JWT_JWKS_URL` | Trusted HTTPS JWKS endpoint |
+| `PARTNER_JWT_REQUIRED_SCOPE` | Required space-delimited OAuth scope entry |
+
+The partner listener validates RS256 signatures, issuer, audience, expiry and
+required `exp`, `iat`, `sub` claims using `jose` remote JWKS retrieval/cache.
+Missing/invalid tokens return 401 with a Bearer challenge; missing permission
+returns 403. Missing settings or a non-HTTPS JWKS URL prevent startup. No
+production issuer/scope or role mapping has been assumed: CSS must confirm these
+settings and the RS256 contract. The scope grants access across integrations;
+per-integration caller restrictions require an agreed claim mapping.
+
+The partner OpenAPI document is produced by `npm run spec`; use
+`npm run spec -- --internal` for the Portal contract. Offline spec generation
+uses example authentication configuration and never starts a listener.
+
+CSS receives `PUT /requests/{integrationId}/sdx-allowed-access` with the approved
+grant payload. Non-2xx and transport failures map to 502; this change adds no
+callback retries. Confirm replacement/idempotency and retry semantics with CSS.
+
+Validation:
+
+```sh
+# In provisioner-api, using Node 22+ and installed dependencies:
+npm run typecheck
+node --import tsx --test $(rg --files src -g '*.test.ts')
+# In e2e, with both packages' dependencies and Cypress installed:
+npx cypress run --config-file cypress.css.config.ts --browser electron --headless
+```
+
+The standalone Cypress suite uses real routes, controllers, grant filtering and
+callback dispatch with deterministic SDX fixtures and a loopback mock CSS server.
+It covers dev/test isolation, identity, callback shape, 400/401/403/404 and CSS
+non-2xx failures. It does not exercise approval orchestration, discovery, new
+requests, upstream OAuth or a deployed environment. Unit tests additionally cover
+invalid signatures, disjoint listener routes and transport failures.
+
+Before APSTST deployment, obtain ADR-017 and agree issuer/audience/scope, hostname,
+ports and callback contract. Update the deployment's container ports, Service
+ports and public Route target together; preserve Portal targeting of the internal
+port. No deployment manifests for these resources are present in this repository.
+Verify public operations reject missing/wrong/expired tokens, internal operations
+are unreachable publicly, both environments remain isolated and an approved
+request reaches CSS. Startup failure closes both listeners; existing readiness
+probes must be checked against the selected listener during deployment review.

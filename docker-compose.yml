@@ -125,12 +125,14 @@ services:
       - ./local/provisioner/.env.local
     environment:
       NODE_ENV: test # Needed for allowing non-secure connection to Keycloak
+      PARTNER_PORT: 3031
     restart: on-failure
     volumes:
       - ./local/provisioner/key.json:/secrets/key.json
       - ./local/provisioner/environments.json:/etc/environments.json
     ports:
       - 3030:3030
+      - 127.0.0.1:3031:3031
     networks:
       aps-net:
         aliases:
