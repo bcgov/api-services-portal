@@ -36,7 +36,11 @@ import {
 const API_PREFIX = '/v1';
 
 export async function buildApp(
-  options: { listener?: 'internal' | 'partner'; auth?: PartnerAuthConfig; authKey?: JWTVerifyGetKey } = {}
+  options: {
+    listener?: 'internal' | 'partner';
+    auth?: PartnerAuthConfig;
+    authKey?: JWTVerifyGetKey;
+  } = {}
 ): Promise<FastifyInstance> {
   const partner = options.listener === 'partner';
   const title = partner
@@ -47,8 +51,10 @@ export async function buildApp(
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   for (const schema of sdxSchemas) app.addSchema(schema);
-  for (const schema of resourceSchemas) app.addSchema(schema);
-  for (const schema of runtimeGroupSchemas) app.addSchema(schema);
+  if (!partner) {
+    for (const schema of resourceSchemas) app.addSchema(schema);
+    for (const schema of runtimeGroupSchemas) app.addSchema(schema);
+  }
   app.addSchema(ProblemSchema);
 
   await app.register(swagger, {
@@ -76,33 +82,33 @@ export async function buildApp(
           description: `${title} base path.`,
         },
       ],
-      tags: [
-        {
-          name: 'Integration Requests',
-          description:
-            'Submitting and retrieving status of integration access requests for SDX subsystem environments.',
-        },
-        {
-          name: 'Subsystems',
-          description:
-            'Operations for partner services to query SDX for subsystem and access details and to submit new access requests.',
-        },
-        {
-          name: 'Resource Provisioning',
-          description:
-            'Evaluate SDX patterns into resources and dispatch them to their applicable providers.',
-        },
-        {
-          name: 'Gateways',
-          description:
-            'Query gateway (namespace) configuration and the tagged entities it owns.',
-        },
-        {
-          name: 'Runtime Groups',
-          description:
-            'Operations against runtime group edge servers, such as CSR generation.',
-        },
-      ],
+      tags: partner
+        ? [
+            {
+              name: 'Integration Requests',
+              description:
+                'Integration discovery, access requests and allowed grants.',
+            },
+            {
+              name: 'Resource Servers',
+              description: 'Environment-filtered resource server discovery.',
+            },
+          ]
+        : [
+            {
+              name: 'Resource Provisioning',
+              description:
+                'Evaluate SDX patterns and dispatch resources to providers.',
+            },
+            {
+              name: 'Gateways',
+              description: 'Gateway configuration and owned resources.',
+            },
+            {
+              name: 'Runtime Groups',
+              description: 'Runtime group certificate operations.',
+            },
+          ],
       components: {
         securitySchemes: {
           jwt: {
@@ -112,7 +118,7 @@ export async function buildApp(
               'Bearer token issued by the SDX OAuth service client credentials flow',
           },
         },
-        responses: problemResponses,
+        responses: partner ? {} : problemResponses,
       },
     },
     transformObject: (doc) =>
@@ -121,7 +127,7 @@ export async function buildApp(
             pathSummaries,
             callbackSummaries,
             componentSchemaDescriptions,
-            errorResponseRefs: ERROR_RESPONSE_REFS,
+            errorResponseRefs: partner ? {} : ERROR_RESPONSE_REFS,
           })
         : doc.swaggerObject,
   });
@@ -143,7 +149,11 @@ export async function buildApp(
   await app.register(servicesPlugin);
   await app.register(controllersPlugin);
   if (partner) {
-    registerPartnerAuth(app, options.auth ?? partnerAuthConfig(), options.authKey);
+    registerPartnerAuth(
+      app,
+      options.auth ?? partnerAuthConfig(),
+      options.authKey
+    );
     await app.register(registerResourceServersRoutes, { prefix: API_PREFIX });
     await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
   } else {

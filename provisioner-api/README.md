@@ -206,12 +206,36 @@ node --import tsx --test $(rg --files src -g '*.test.ts')
 npx cypress run --config-file cypress.css.config.ts --browser electron --headless
 ```
 
-The standalone Cypress suite uses real routes, controllers, grant filtering and
-callback dispatch with deterministic SDX fixtures and a loopback mock CSS server.
-It covers dev/test isolation, identity, callback shape, 400/401/403/404 and CSS
-non-2xx failures. It does not exercise approval orchestration, discovery, new
-requests, upstream OAuth or a deployed environment. Unit tests additionally cover
-invalid signatures, disjoint listener routes and transport failures.
+The standalone Cypress suite starts the real partner HTTP app against a stateful
+mock SDX catalog/connection store, Feed endpoint and CSS callback receiver. It
+covers all four APIs, dev/test isolation, submission validation before writes,
+repeated submissions, simulated approval/rejection, and callback delivery through
+the real consumer-access pattern and CSS dispatcher. The mock changes stored
+approval state to simulate SDX approval; it does not execute the Portal approval
+UI, upstream OAuth, Cedar approval policy or GWA provisioning.
+
+Cases include missing/invalid/expired tokens, wrong issuer/audience/scope on each
+API; missing services, stale request versions and invalid scopes; services,
+providers, environments and scope definitions changed after submission; removed
+catalog versions; resubmission requiring reapproval; rejected/inactive grants;
+CSS 200/202/204 acknowledgements, non-2xx replies and transport failure. Dispatcher
+failures are asserted as failed CSS provider results, rather than fabricated HTTP
+responses from the asynchronous callback.
+
+Partner OpenAPI errors are operation-specific and use
+`application/problem+json`. Discovery/resource-server APIs advertise
+400/401/403/500/502; allowed-services and submission additionally advertise
+404/409. Blanket 422/503 declarations were removed from the partner spec. An
+unknown integration is 200/unregistered for discovery, 400 for allowed-services
+(existing behavior), and 404 for submission. Removed catalog services remain
+502 under the existing SDX client error mapping. CSS callbacks accept any 2xx.
+
+Approved versions stay pinned to the reviewed version; a newer catalog version
+is never silently substituted. Resubmitting an old version fails validation;
+requesting the current version triggers reapproval. Grants whose approved scopes
+are no longer declared, whose provider has changed, or whose catalog has no
+usable version return 409 and cannot be dispatched to CSS. These checks also run
+when callbacks are built after approval.
 
 Before APSTST deployment, obtain ADR-017 and agree issuer/audience/scope, hostname,
 ports and callback contract. Update the deployment's container ports, Service

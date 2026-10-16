@@ -394,13 +394,34 @@ export class IntegrationAccessService {
           service.subsystem.clientId,
           `Provider subsystem for service '${serviceId}'`
         );
+        const approvedProviderId = connection.requesterDetails?.service?.clientId;
+        if (approvedProviderId && approvedProviderId !== subsystemId) {
+          throw new ConflictError(
+            `Provider for service '${serviceId}' changed after submission; submit updated access for re-approval`
+          );
+        }
         let subsystemServices = servicesBySubsystem.get(subsystemId);
         if (!subsystemServices) {
           subsystemServices = new Map();
           servicesBySubsystem.set(subsystemId, subsystemServices);
         }
 
+        if (typeof service.version !== 'string' || !service.version.trim()) {
+          throw new ConflictError(
+            `Catalog version for service '${serviceId}' is missing; submit updated access once the catalog is valid`
+          );
+        }
         const scopes = normalizeStoredScopes(connection, serviceId);
+        const declaredScopes = new Set(
+          (service.operations || []).flatMap(operation =>
+            (operation.scopes || []).map(scope => scope.name)
+          )
+        );
+        if (scopes.some(scope => !declaredScopes.has(scope))) {
+          throw new ConflictError(
+            `Approved scopes for service '${serviceId}' are no longer declared in the catalog; submit updated access for re-approval`
+          );
+        }
         const version =
           connection.requesterDetails?.service?.version || service.version;
         const existingService = subsystemServices.get(serviceId);
