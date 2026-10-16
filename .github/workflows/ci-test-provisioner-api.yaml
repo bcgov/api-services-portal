@@ -1,0 +1,32 @@
+name: Test Provisioner API
+
+on:
+  pull_request:
+    paths:
+      - 'provisioner-api/**'
+      - '.github/workflows/ci-test-provisioner-api.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: provisioner-api
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: provisioner-api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
