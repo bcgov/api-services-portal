@@ -4,7 +4,7 @@ jest.mock('../../authz/enforcement', () => ({
 
 const config = require('../../lists/SubsystemIntegration');
 
-describe('SubsystemIntegration one-to-one schema', () => {
+describe('SubsystemIntegration zero-or-one mapping schema', () => {
   it('normalizes numeric integration IDs', async () => {
     const resolved = await config.hooks.resolveInput({
       resolvedData: { integrationClientId: 12345 },
@@ -13,7 +13,7 @@ describe('SubsystemIntegration one-to-one schema', () => {
     expect(resolved.integrationClientId).toBe('12345');
   });
 
-  it('requires one unique subsystem at the database layer', () => {
+  it('requires every mapping to reference a subsystem and limits each subsystem to one mapping', () => {
     expect(config.fields.subsystem).toEqual(
       expect.objectContaining({
         isRequired: true,
