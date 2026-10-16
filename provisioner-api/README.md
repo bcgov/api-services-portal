@@ -87,6 +87,21 @@ After APS-4992 is deployed, backfill the Kong consumer identity before enabling 
 3. Run `npm run datafix:aps-4994 -- --apply` to re-provision one representative active connection per subsystem/environment.
 4. Re-run the dry run and require `failed: 0` before APS-4995 enables strict `azp`-to-`custom_id` matching.
 
+Deploy APS-4995 only after APS-4992, APS-4994, and the required Kong plugin
+changes are live. Then use the enforcement migration as the release gate:
+
+1. Run `npm run datafix:aps-4995` without arguments. It previews every active,
+   approved R1 connection and verifies strict consumer `azp`/`custom_id`
+   matching, subsystem ACL enforcement, consumer-edge token exchange with
+   verified-subject scope transfer, provider JWT verification, and the absence
+   of provider-edge token exchange.
+2. Resolve every reported configuration or preview failure. The command does
+   not publish gateway changes without `--apply`.
+3. During the controlled cutover, run
+   `npm run datafix:aps-4995 -- --apply` to reprovision each validated active
+   R1 connection with the canonical policy-managed settings.
+4. Re-run the dry run and require `failed: 0` before enabling the release.
+
 Docs and spec:
 
 - `http://localhost:3000/docs` — Scalar API Reference

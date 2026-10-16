@@ -95,23 +95,49 @@ export class PatternsEvaluatorService {
       );
     }
 
-    // only do the policy check for preview, apply and diff actions, not for delete
+    let effectiveConnection = connection;
+
+    // only do the policy check and enforcement for preview, apply and diff
+    // actions, not for delete
     if (action !== 'delete') {
-      const combinedScopes = [...(connection.requesterDetails?.scopes || [])];
-      if (connection.requesterDetails?.service?.privacyZone) {
-        combinedScopes.push(connection.requesterDetails.service.privacyZone);
+      const environmentConfig = loadEnvironments()[connection.environment];
+      const preflightContext = {
+        environment: connection.environment,
+        environmentConfig,
+        service,
+        requesterDetails: connection.requesterDetails,
+      };
+      this.policyService.preflightConnectionRequest(
+        connection.policyVersion || '',
+        preflightContext
+      );
+      const enforcedResources = this.policyService.enforceConnectionResources(
+        connection.policyVersion || '',
+        preflightContext,
+        {
+          clientResources: connection.clientResources,
+          serviceResources: connection.serviceResources,
+        }
+      );
+      effectiveConnection = { ...connection, ...enforcedResources };
+
+      const combinedScopes = [
+        ...(effectiveConnection.requesterDetails?.scopes || []),
+      ];
+      if (effectiveConnection.requesterDetails?.service?.privacyZone) {
+        combinedScopes.push(
+          effectiveConnection.requesterDetails.service.privacyZone
+        );
       }
 
-      const {
-        provisionerStatus: _provisionerStatus,
-        ...policyConnection
-      } = connection;
+      const { provisionerStatus: _provisionerStatus, ...policyConnection } =
+        effectiveConnection;
       const policyContext = {
         ...policyConnection,
         combinedScopes,
         action,
         globals: {
-          environment: loadEnvironments()[connection.environment],
+          environment: environmentConfig,
         },
       };
 
@@ -119,7 +145,7 @@ export class PatternsEvaluatorService {
 
       // run the policy check
       const policyResult = this.policyService.validateConnectionRequest(
-        connection.policyVersion || '',
+        effectiveConnection.policyVersion || '',
         policyContext
       );
 
@@ -127,7 +153,7 @@ export class PatternsEvaluatorService {
         this.logger?.error('Policy check failed: %j', policyResult);
         throw withDetails(
           new BadRequestError(
-            `Connection request change not allowed by '${connection.policyVersion}' policy`
+            `Connection request change not allowed by '${effectiveConnection.policyVersion}' policy`
           ),
           {
             reason: policyResult,
@@ -140,8 +166,8 @@ export class PatternsEvaluatorService {
 
     // use the gateway patterns to create the resources
     const gatewayPatterns = {
-      ...(connection.clientResources?.gatewayPatterns as any),
-      ...(connection.serviceResources?.gatewayPatterns as any),
+      ...(effectiveConnection.clientResources?.gatewayPatterns as any),
+      ...(effectiveConnection.serviceResources?.gatewayPatterns as any),
     };
 
     this.logger?.debug(

@@ -13,6 +13,7 @@ import type {
 import type {
   PolicyDefaultResources,
   PolicyDefaultsFn,
+  PolicyEnforceResourcesFn,
   PolicyPreflightContext,
   PolicyPreflightFn,
   PolicyRequesterDetails,
@@ -43,7 +44,7 @@ export class PolicyService {
         type: 'SDX::ConnectionRequest',
         id: `${ctx.clientId}:${ctx.serviceId}`,
       },
-      (ctx as unknown) as Record<string, CedarValueJson>
+      ctx as unknown as Record<string, CedarValueJson>
     );
   }
 
@@ -81,6 +82,26 @@ export class PolicyService {
     }
     policy.preflight?.(context);
   }
+
+  /** Apply policy-managed settings before validation and resource generation. */
+  enforceConnectionResources(
+    policyVersion: string,
+    context: PolicyPreflightContext,
+    resources: PolicyDefaultResources
+  ): PolicyDefaultResources {
+    const policy = POLICY_REGISTRY[policyVersion];
+    if (!policy) {
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
+    }
+    return (
+      policy.enforceResources?.({
+        ...context,
+        ...resources,
+      }) ?? resources
+    );
+  }
 }
 
 const POLICY_REGISTRY: Record<
@@ -90,6 +111,7 @@ const POLICY_REGISTRY: Record<
     policies: Record<string, string>;
     defaults: PolicyDefaultsFn;
     preflight?: PolicyPreflightFn;
+    enforceResources?: PolicyEnforceResourcesFn;
   }
 > = {
   'SDX.R0.00': SDX_R0_00_Policy,
