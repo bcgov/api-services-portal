@@ -318,7 +318,7 @@ select 'drop table "' || tablename || '" cascade;' from pg_tables where schemana
 
 In the mean time, it is possible to drop the tables and re-run the `init-aps-portal-keystonejs-batch-job`.
 
-#### APS-4992 one-to-one subsystem integration migration
+#### APS-4992 zero-or-one subsystem integration migration
 
 Before deploying the APS-4992 application changes to a persistent PostgreSQL environment:
 
@@ -326,4 +326,8 @@ Before deploying the APS-4992 application changes to a persistent PostgreSQL env
 2. Run `local/db/aps-4992-subsystem-integration-one-to-one.sql`.
 3. If the script reports orphaned or duplicate `SubsystemIntegration` rows, review and clean them up, then run it again. The script does not delete data automatically.
 
-The migration fails closed until the data satisfies the one-to-one model, then replaces the existing non-unique subsystem index with a required unique relationship. New databases receive the same constraints from `local/db/keystone-init.sql`.
+The migration fails closed until every `SubsystemIntegration` references a
+subsystem and no subsystem has more than one mapping. It then replaces the
+existing non-unique subsystem index with a required parent reference and a
+unique constraint. A subsystem may still have no integration mapping. New
+databases receive the same constraints from `local/db/keystone-init.sql`.

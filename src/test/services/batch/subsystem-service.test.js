@@ -294,7 +294,34 @@ describe('SubsystemService', () => {
     });
   });
 
-  describe('one-to-one subsystem integrations', () => {
+  describe('zero-or-one subsystem integrations', () => {
+    it('creates a subsystem without an integration mapping', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+      };
+      syncRecordsThrowErrors.mockResolvedValueOnce({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+      });
+
+      await expect(service.upsertSubsystem({}, body)).resolves.toEqual({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+      });
+      expect(getRecords).not.toHaveBeenCalled();
+      expect(syncRecordsThrowErrors).toHaveBeenCalledTimes(1);
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
+    });
+
     it('rejects a subsystem payload containing multiple integrations', async () => {
       const service = new SubsystemService();
 
