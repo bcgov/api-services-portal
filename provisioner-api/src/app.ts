@@ -39,6 +39,9 @@ export async function buildApp(
   options: { listener?: 'internal' | 'partner'; auth?: PartnerAuthConfig; authKey?: JWTVerifyGetKey } = {}
 ): Promise<FastifyInstance> {
   const partner = options.listener === 'partner';
+  const title = partner
+    ? 'SDX Partner Authorization Services API'
+    : 'SDX Provisioner API';
   const app = Fastify({
     logger: { level: process.env.LOG_LEVEL ?? 'info' },
   }).withTypeProvider<TypeBoxTypeProvider>();
@@ -56,19 +59,21 @@ export async function buildApp(
     openapi: {
       openapi: '3.1.0',
       info: {
-        title: 'SDX Partner Authorization Services API',
+        title,
         version: '1.0.0',
-        summary:
-          'SDX partner authorization services API for subsystem access requests and provisioning callbacks.',
-        description:
-          'The Secure Data Exchange (SDX), operated by the Government of the Province of British Columbia, exposes this API to partner services so that they can discover subsystem environments, submit integration access requests, and receive allowed-service provisioning callbacks.',
+        summary: partner
+          ? 'SDX partner authorization services API for subsystem access requests and provisioning callbacks.'
+          : 'Internal Portal API for resource provisioning and gateway operations.',
+        description: partner
+          ? 'The Secure Data Exchange (SDX), operated by the Government of the Province of British Columbia, exposes this API to partner services so that they can discover subsystem environments, submit integration access requests, and receive allowed-service provisioning callbacks.'
+          : 'Internal provisioner operations used by the Portal to manage resources, patterns, gateways and runtime groups.',
         license: { name: 'MIT' },
         contact: { name: 'BC Gov APS' },
       },
       servers: [
         {
           url: API_PREFIX,
-          description: 'SDX Partner Authorization Services API base path.',
+          description: `${title} base path.`,
         },
       ],
       tags: [
@@ -124,7 +129,7 @@ export async function buildApp(
   await app.register(scalarReference, {
     routePrefix: '/docs',
     configuration: {
-      pageTitle: 'SDX Partner Authorization Services API',
+      pageTitle: title,
       showDeveloperTools: 'never',
       showSidebar: true,
       hideClientButton: true,
