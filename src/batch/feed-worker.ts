@@ -243,6 +243,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
       ].includes(md.transformations[tranField].name)
   );
   const response = md.sync
+    .concat(md.read || [])
     .filter((s: string) => !relationshipFields.includes(s))
     .slice();
   response.push(md.refKey);
@@ -524,6 +525,9 @@ export const syncRecords = async function (
       }
       if (eid) {
         data[md.refKey] = eid;
+      }
+      if (md.ownedBy && parentRecord?.id) {
+        data[md.ownedBy] = { connect: { id: parentRecord.id } };
       }
       const nr = await batchService.create(entity, data);
       if (!nr.id) {

@@ -22,6 +22,7 @@ import {
   type PolicyDefaultResources,
   type PolicyRequesterDetails,
 } from './policy-service.js';
+import { selectSubsystemForIntegration } from './subsystems-service.js';
 
 interface NormalizedServiceRequest {
   environment: string;
@@ -178,6 +179,18 @@ export class IntegrationAccessService {
 
     const existingConnections =
       await this.api.listConnections(subsystemOrgName);
+    for (const environment of uniqueSorted(
+      preparedRequests.map((request) => request.environment)
+    )) {
+      enforceRequestClientIdentity(
+        existingConnections,
+        subsystem,
+        normalizedIntegrationId,
+        oauthClientId,
+        environment,
+        this.logger
+      );
+    }
     const changes = preparedRequests.map((request) =>
       planConnectionChange(
         existingConnections,
@@ -265,13 +278,15 @@ export class IntegrationAccessService {
         `Subsystem with integration ${normalizedIntegrationId} not found`
       );
     }
-    if (subsystems.length > 1) {
-      throw new ConflictError(
-        `Integration ${normalizedIntegrationId} resolves to more than one subsystem`
+    const subsystem = selectSubsystemForIntegration(
+      subsystems,
+      normalizedIntegrationId
+    );
+    if (!subsystem) {
+      throw new BadRequestError(
+        `Subsystem with integration ${normalizedIntegrationId} not found`
       );
     }
-
-    const subsystem = subsystems[0];
     const subsystemOrgName = requireNonBlank(
       subsystem.organization?.name,
       `Organization for subsystem '${subsystem.clientId}'`
@@ -329,24 +344,31 @@ export class IntegrationAccessService {
       }
     });
 
-    const clientIds = uniqueSorted(
-      metadataConnections.map((connection) =>
-        connection.requesterDetails!.client!.clientId!.trim()
-      )
+    const authoritative = selectAuthoritativeClientConnections(
+      metadataConnections,
+      {
+        subsystemId: subsystem.clientId,
+        integrationId: normalizedIntegrationId,
+        environment: normalizedEnvironment,
+      },
+      this.logger
     );
-    if (clientIds.length === 0) {
+    if (!authoritative) {
       throw new ConflictError(
         `Integration ${normalizedIntegrationId} has no usable OAuth client in environment ${normalizedEnvironment}`
       );
     }
-    if (clientIds.length !== 1) {
-      throw new ConflictError(
-        `Integration ${normalizedIntegrationId} has connections for more than one OAuth client in environment ${normalizedEnvironment}`
-      );
-    }
+    const selectedConnections = requireUniqueServiceConnections(
+      authoritative.connections,
+      {
+        subsystemId: subsystem.clientId,
+        integrationId: normalizedIntegrationId,
+        environment: normalizedEnvironment,
+      }
+    );
 
     const submissionIds = uniqueSorted(
-      metadataConnections
+      selectedConnections
         .map((connection) => connection.requesterDetails?.submissionId)
         .filter(
           (submissionId): submissionId is string =>
@@ -359,7 +381,7 @@ export class IntegrationAccessService {
     // legacy fallback for records created before submission IDs were stored.
     const submissionId = submissionIds.at(-1) || 'unknown';
 
-    const allowedConnections = metadataConnections.filter(
+    const allowedConnections = selectedConnections.filter(
       (connection) =>
         connection.isApproved === (status === 'approved') &&
         (status === 'pending' || connection.isActive === true)
@@ -443,7 +465,7 @@ export class IntegrationAccessService {
 
     return {
       integrationId: normalizedIntegrationId,
-      clientId: clientIds[0],
+      clientId: authoritative.clientId,
       submissionId,
       resourceServers,
     };
@@ -517,7 +539,10 @@ function validateRequestedService(
       `Requested service '${requested.name}' belongs to subsystem '${service.subsystem.clientId}' which does not match requested resource server id '${requested.providerId}'`
     );
   }
-  if (requested.version !== undefined && requested.version !== service.version) {
+  if (
+    requested.version !== undefined &&
+    requested.version !== service.version
+  ) {
     throw new BadRequestError(
       `Requested service '${requested.name}' version '${requested.version}' does not match catalog version '${service.version}'`
     );
@@ -537,6 +562,111 @@ function validateRequestedService(
   }
 }
 
+interface ConnectionSelectionContext {
+  subsystemId: string;
+  integrationId: string;
+  environment: string;
+}
+
+interface AuthoritativeClientConnections {
+  integrationId: string;
+  clientId: string;
+  connections: ConnectionRequest[];
+}
+
+function enforceRequestClientIdentity(
+  existingConnections: ConnectionRequest[],
+  subsystem: SubsystemEntry,
+  integrationId: string,
+  clientId: string,
+  environment: string,
+  logger?: FastifyBaseLogger
+): void {
+  const candidates = existingConnections.filter(
+    (connection) =>
+      connection.clientId === subsystem.clientId &&
+      connection.environment === environment
+  );
+  const authoritative = selectAuthoritativeClientConnections(
+    candidates,
+    { subsystemId: subsystem.clientId, integrationId, environment },
+    logger
+  );
+  if (
+    authoritative &&
+    (authoritative.integrationId !== integrationId ||
+      authoritative.clientId !== clientId)
+  ) {
+    throw new ConflictError(
+      `Subsystem '${subsystem.clientId}' is already associated with integration '${authoritative.integrationId}' and OAuth client '${authoritative.clientId}' in environment '${environment}'`
+    );
+  }
+}
+
+function selectAuthoritativeClientConnections(
+  connections: ConnectionRequest[],
+  context: ConnectionSelectionContext,
+  logger?: FastifyBaseLogger
+): AuthoritativeClientConnections | undefined {
+  const groups = new Map<string, AuthoritativeClientConnections>();
+  for (const connection of connections) {
+    const integrationId =
+      connection.requesterDetails?.client?.integrationId?.trim();
+    const clientId = connection.requesterDetails?.client?.clientId?.trim();
+    if (!integrationId || !clientId) {
+      logger?.warn(
+        {
+          subsystemId: context.subsystemId,
+          environment: context.environment,
+          connectionId: connection.id,
+          serviceId: connection.serviceId,
+        },
+        'Ignoring connection with incomplete client identity while resolving one-to-one mapping'
+      );
+      continue;
+    }
+    const key = `${integrationId}\u0000${clientId}`;
+    const group: AuthoritativeClientConnections = groups.get(key) || {
+      integrationId,
+      clientId,
+      connections: [],
+    };
+    group.connections.push(connection);
+    groups.set(key, group);
+  }
+
+  if (groups.size === 0) return undefined;
+
+  if (groups.size > 1) {
+    throw new ConflictError(
+      `Subsystem '${context.subsystemId}' has connections for more than one integration or OAuth client in environment '${context.environment}'`
+    );
+  }
+  return groups.values().next().value;
+}
+
+function requireUniqueServiceConnections(
+  connections: ConnectionRequest[],
+  context: ConnectionSelectionContext
+): ConnectionRequest[] {
+  const byService = new Map<string, ConnectionRequest[]>();
+  for (const connection of connections) {
+    const key = connection.serviceId || '';
+    byService.set(key, [...(byService.get(key) || []), connection]);
+  }
+
+  return Array.from(byService.entries())
+    .map(([serviceId, candidates]) => {
+      if (candidates.length > 1) {
+        throw new ConflictError(
+          `More than one connection exists for subsystem '${context.subsystemId}', integration '${context.integrationId}', service '${serviceId}', and environment '${context.environment}'`
+        );
+      }
+      return candidates[0];
+    })
+    .sort(compareConnections);
+}
+
 function planConnectionChange(
   existingConnections: ConnectionRequest[],
   subsystem: SubsystemEntry,
@@ -547,18 +677,22 @@ function planConnectionChange(
 ): PlannedConnectionChange {
   // OAuth clients do not form connection identity. There is one shared
   // connection per consuming subsystem, service, and service environment.
-  const identityMatches = existingConnections.filter(
+  const serviceMatches = existingConnections.filter(
     (connection) =>
       connection.clientId === subsystem.clientId &&
       connection.serviceId === request.name
   );
-  if (identityMatches.length > 1) {
+  if (serviceMatches.length > 1) {
     throw new ConflictError(
       `More than one connection exists for subsystem '${subsystem.clientId}' and service '${request.name}'`
     );
   }
-
-  const existing = identityMatches[0];
+  const existing = serviceMatches[0];
+  if (existing && existing.environment !== request.environment) {
+    throw new ConflictError(
+      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' has environment '${existing.environment}', not '${request.environment}'`
+    );
+  }
   if (!existing) {
     return {
       kind: 'create',
@@ -567,19 +701,13 @@ function planConnectionChange(
     };
   }
 
-  if (existing.environment !== request.environment) {
-    throw new ConflictError(
-      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' has environment '${existing.environment}', not '${request.environment}'`
-    );
-  }
-
   const existingClient = existing.requesterDetails?.client;
   if (
     existingClient?.integrationId !== integrationId ||
     existingClient?.clientId !== oauthClientId
   ) {
     throw new ConflictError(
-      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' is associated with a different integration or OAuth client; client grants are required before this connection can be shared`
+      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' is associated with a different integration or OAuth client`
     );
   }
 
@@ -598,7 +726,8 @@ function planConnectionChange(
   const scopesHaveChanged = !sameStrings(existingScopes, request.scopes);
   const existingVersion = existing.requesterDetails?.service?.version;
   const versionHasChanged =
-    existingVersion !== undefined && existingVersion !== request.service.version;
+    existingVersion !== undefined &&
+    existingVersion !== request.service.version;
   const legacyVersionNeedsPinning = existingVersion === undefined;
 
   if (!scopesHaveChanged && !versionHasChanged) {
