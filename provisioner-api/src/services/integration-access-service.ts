@@ -177,9 +177,8 @@ export class IntegrationAccessService {
       });
     }
 
-    const existingConnections = await this.api.listConnections(
-      subsystemOrgName
-    );
+    const existingConnections =
+      await this.api.listConnections(subsystemOrgName);
     for (const environment of uniqueSorted(
       preparedRequests.map((request) => request.environment)
     )) {
@@ -199,8 +198,7 @@ export class IntegrationAccessService {
         normalizedIntegrationId,
         oauthClientId,
         policyVersion,
-        request,
-        this.logger
+        request
       )
     );
 
@@ -360,14 +358,13 @@ export class IntegrationAccessService {
         `Integration ${normalizedIntegrationId} has no usable OAuth client in environment ${normalizedEnvironment}`
       );
     }
-    const selectedConnections = selectLatestServiceConnections(
+    const selectedConnections = requireUniqueServiceConnections(
       authoritative.connections,
       {
         subsystemId: subsystem.clientId,
         integrationId: normalizedIntegrationId,
         environment: normalizedEnvironment,
-      },
-      this.logger
+      }
     );
 
     const submissionIds = uniqueSorted(
@@ -640,37 +637,17 @@ function selectAuthoritativeClientConnections(
 
   if (groups.size === 0) return undefined;
 
-  const candidates = Array.from(groups.values()).sort((left, right) =>
-    compareIdentityRecency(
-      selectLatestIdentityConnection(left.connections)!,
-      selectLatestIdentityConnection(right.connections)!
-    )
-  );
-  const selected = candidates[candidates.length - 1];
-  if (candidates.length > 1) {
-    const ignoredConnections = candidates
-      .slice(0, -1)
-      .flatMap((candidate) => candidate.connections);
-    logger?.warn(
-      {
-        subsystemId: context.subsystemId,
-        environment: context.environment,
-        requestedIntegrationId: context.integrationId,
-        selectedRecordId: selectLatestIdentityConnection(selected.connections)
-          ?.id,
-        ignoredRecordIds: ignoredConnections.map((connection) => connection.id),
-        selection: identitySelectionMethod(connections),
-      },
-      'Multiple client identities found for one subsystem and environment; continuing with latest record'
+  if (groups.size > 1) {
+    throw new ConflictError(
+      `Subsystem '${context.subsystemId}' has connections for more than one integration or OAuth client in environment '${context.environment}'`
     );
   }
-  return selected;
+  return groups.values().next().value;
 }
 
-function selectLatestServiceConnections(
+function requireUniqueServiceConnections(
   connections: ConnectionRequest[],
-  context: ConnectionSelectionContext,
-  logger?: FastifyBaseLogger
+  context: ConnectionSelectionContext
 ): ConnectionRequest[] {
   const byService = new Map<string, ConnectionRequest[]>();
   for (const connection of connections) {
@@ -680,95 +657,14 @@ function selectLatestServiceConnections(
 
   return Array.from(byService.entries())
     .map(([serviceId, candidates]) => {
-      const selected = selectLatestConnection(candidates)!;
       if (candidates.length > 1) {
-        logger?.warn(
-          {
-            subsystemId: context.subsystemId,
-            environment: context.environment,
-            serviceId,
-            selectedRecordId: selected.id,
-            ignoredRecordIds: candidates
-              .filter((connection) => connection !== selected)
-              .map((connection) => connection.id),
-            selection: selectionMethod(candidates),
-          },
-          'Multiple connection records found for one service; continuing with latest record'
+        throw new ConflictError(
+          `More than one connection exists for subsystem '${context.subsystemId}', integration '${context.integrationId}', service '${serviceId}', and environment '${context.environment}'`
         );
       }
-      return selected;
+      return candidates[0];
     })
     .sort(compareConnections);
-}
-
-function selectLatestConnection(
-  connections: ConnectionRequest[]
-): ConnectionRequest | undefined {
-  return connections.slice().sort(compareConnectionRecency).at(-1);
-}
-
-function selectLatestIdentityConnection(
-  connections: ConnectionRequest[]
-): ConnectionRequest | undefined {
-  return connections.slice().sort(compareIdentityRecency).at(-1);
-}
-
-function compareIdentityRecency(
-  left: ConnectionRequest,
-  right: ConnectionRequest
-): number {
-  const leftTimestamp = createdTimestamp(left);
-  const rightTimestamp = createdTimestamp(right);
-  if (leftTimestamp !== rightTimestamp) {
-    return leftTimestamp - rightTimestamp;
-  }
-  return compareStrings(left.id || '', right.id || '');
-}
-
-function compareConnectionRecency(
-  left: ConnectionRequest,
-  right: ConnectionRequest
-): number {
-  const leftTimestamp = connectionTimestamp(left);
-  const rightTimestamp = connectionTimestamp(right);
-  if (leftTimestamp !== rightTimestamp) {
-    return leftTimestamp - rightTimestamp;
-  }
-  return compareStrings(left.id || '', right.id || '');
-}
-
-function connectionTimestamp(connection: ConnectionRequest): number {
-  for (const value of [connection.updatedAt, connection.createdAt]) {
-    if (value) {
-      const parsed = Date.parse(value);
-      if (!Number.isNaN(parsed)) return parsed;
-    }
-  }
-  return Number.NEGATIVE_INFINITY;
-}
-
-function createdTimestamp(connection: ConnectionRequest): number {
-  if (connection.createdAt) {
-    const parsed = Date.parse(connection.createdAt);
-    if (!Number.isNaN(parsed)) return parsed;
-  }
-  return Number.NEGATIVE_INFINITY;
-}
-
-function identitySelectionMethod(connections: ConnectionRequest[]): string {
-  return connections.some(
-    (connection) => createdTimestamp(connection) !== Number.NEGATIVE_INFINITY
-  )
-    ? 'createdAt-id'
-    : 'deterministic-id-no-createdAt';
-}
-
-function selectionMethod(connections: ConnectionRequest[]): string {
-  return connections.some(
-    (connection) => connectionTimestamp(connection) !== Number.NEGATIVE_INFINITY
-  )
-    ? 'updatedAt-createdAt-id'
-    : 'deterministic-id-no-timestamp';
 }
 
 function planConnectionChange(
@@ -777,8 +673,7 @@ function planConnectionChange(
   integrationId: string,
   oauthClientId: string,
   policyVersion: string,
-  request: PreparedServiceRequest,
-  logger?: FastifyBaseLogger
+  request: PreparedServiceRequest
 ): PlannedConnectionChange {
   // OAuth clients do not form connection identity. There is one shared
   // connection per consuming subsystem, service, and service environment.
@@ -787,35 +682,15 @@ function planConnectionChange(
       connection.clientId === subsystem.clientId &&
       connection.serviceId === request.name
   );
-  const latestServiceMatch = selectLatestConnection(serviceMatches);
-  if (
-    latestServiceMatch &&
-    latestServiceMatch.environment !== request.environment
-  ) {
+  if (serviceMatches.length > 1) {
     throw new ConflictError(
-      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' has environment '${latestServiceMatch.environment}', not '${request.environment}'`
+      `More than one connection exists for subsystem '${subsystem.clientId}' and service '${request.name}'`
     );
   }
-  const identityMatches = serviceMatches.filter(
-    (connection) =>
-      connection.environment === request.environment &&
-      connection.requesterDetails?.client?.integrationId === integrationId &&
-      connection.requesterDetails?.client?.clientId === oauthClientId
-  );
-  const existing = selectLatestConnection(identityMatches);
-  if (identityMatches.length > 1) {
-    logger?.warn(
-      {
-        subsystemId: subsystem.clientId,
-        environment: request.environment,
-        serviceId: request.name,
-        selectedRecordId: existing?.id,
-        ignoredRecordIds: identityMatches
-          .filter((connection) => connection !== existing)
-          .map((connection) => connection.id),
-        selection: selectionMethod(identityMatches),
-      },
-      'Multiple connection records found for one subsystem and service; continuing with latest record'
+  const existing = serviceMatches[0];
+  if (existing && existing.environment !== request.environment) {
+    throw new ConflictError(
+      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' has environment '${existing.environment}', not '${request.environment}'`
     );
   }
   if (!existing) {
@@ -824,6 +699,16 @@ function planConnectionChange(
       request,
       result: 'submitted approval request',
     };
+  }
+
+  const existingClient = existing.requesterDetails?.client;
+  if (
+    existingClient?.integrationId !== integrationId ||
+    existingClient?.clientId !== oauthClientId
+  ) {
+    throw new ConflictError(
+      `Connection for subsystem '${subsystem.clientId}' and service '${request.name}' is associated with a different integration or OAuth client`
+    );
   }
 
   if (existing.policyVersion !== policyVersion) {

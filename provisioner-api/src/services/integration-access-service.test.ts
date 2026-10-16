@@ -410,19 +410,17 @@ test('fails closed rather than replacing the one-to-one client mapping', async (
   assert.deepEqual(writes, []);
 });
 
-test('moves a stale service connection onto the authoritative client identity', async () => {
+test('fails closed when existing connections contain conflicting client identities', async () => {
   const { service, writes } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [
       existingConnection({
         id: 'connection-a',
         serviceId: 'service-a',
-        createdAt: '2026-01-01T00:00:00.000Z',
       }),
       existingConnection({
         id: 'connection-b',
         serviceId: 'service-b',
-        createdAt: '2026-02-01T00:00:00.000Z',
         requesterDetails: {
           ...existingConnection().requesterDetails,
           client: {
@@ -434,27 +432,23 @@ test('moves a stale service connection onto the authoritative client identity', 
     ],
   });
 
-  await service.submitIntegrationAccessRequest(
-    'submission-2',
-    consumerSubsystem,
-    'integration-a',
-    accessRequest(
-      [
+  await assert.rejects(
+    service.submitIntegrationAccessRequest(
+      'submission-2',
+      consumerSubsystem,
+      'integration-a',
+      accessRequest([
         {
           id: 'provider-a',
           environment: 'dev',
           services: [{ name: 'service-a', scopes: ['read'] }],
         },
-      ],
-      { clientId: 'oauth-client-b' }
-    )
+      ])
+    ),
+    /connections for more than one integration or OAuth client/
   );
 
-  assert.equal(writes.length, 1);
-  assert.equal(
-    writes[0].input.requesterDetails?.client?.clientId,
-    'oauth-client-b'
-  );
+  assert.deepEqual(writes, []);
 });
 
 test('does not confuse another consuming subsystem connection with shared connection identity', async () => {
@@ -662,31 +656,18 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
   assert.equal(warning.serviceId, 'service-b');
 });
 
-test('uses creation order so lifecycle updates cannot change the authoritative OAuth client', async () => {
-  const warnings: unknown[][] = [];
-  const logger = {
-    debug: () => undefined,
-    warn: (...args: unknown[]) => warnings.push(args),
-  } as unknown as FastifyBaseLogger;
+test('fails closed when one integration resolves to multiple OAuth clients', async () => {
   const { service } = createService({
-    logger,
     connections: [
       existingConnection({
         id: 'connection-1',
         serviceId: 'service-a',
-        createdAt: '2026-01-01T00:00:00.000Z',
-        updatedAt: '2026-03-01T00:00:00.000Z',
-        isApproved: false,
-        isActive: false,
       }),
       existingConnection({
         id: 'connection-2',
         serviceId: 'service-b',
-        createdAt: '2026-02-01T00:00:00.000Z',
-        updatedAt: '2026-02-01T00:00:00.000Z',
         requesterDetails: {
           ...existingConnection().requesterDetails,
-          submissionId: 'submission-200-b',
           client: {
             integrationId: 'integration-a',
             clientId: 'oauth-client-b',
@@ -694,36 +675,12 @@ test('uses creation order so lifecycle updates cannot change the authoritative O
         },
       }),
     ],
-    catalog: {
-      'service-a': catalogService('service-a', 'provider-a'),
-      'service-b': catalogService('service-b', 'provider-a'),
-    },
   });
 
-  const response = await service.buildIntegrationAllowedServices(
-    'integration-a',
-    'dev',
-    'approved'
+  await assert.rejects(
+    service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
+    /connections for more than one integration or OAuth client/
   );
-
-  assert.equal(response.clientId, 'oauth-client-b');
-  assert.equal(response.submissionId, 'submission-200-b');
-  assert.deepEqual(response.resourceServers, [
-    {
-      id: 'provider-a',
-      environment: 'dev',
-      services: [{ name: 'service-b', scopes: ['read'], version: '1.0.0' }],
-    },
-  ]);
-  assert.equal(warnings.length, 1);
-  assert.deepEqual(warnings[0][0], {
-    subsystemId: 'consumer-subsystem',
-    environment: 'dev',
-    requestedIntegrationId: 'integration-a',
-    selectedRecordId: 'connection-2',
-    ignoredRecordIds: ['connection-1'],
-    selection: 'createdAt-id',
-  });
 });
 
 test('rejects a second OAuth client for another service in the same subsystem environment', async () => {
