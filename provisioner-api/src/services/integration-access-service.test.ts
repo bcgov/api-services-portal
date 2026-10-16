@@ -450,6 +450,7 @@ test('builds deterministic allowed services after filtering the exact integratio
       requesterDetails: {
         ...existingConnection().requesterDetails,
         submissionId: 'submission-100-a',
+        service: { ...existingConnection().requesterDetails.service, clientId: 'provider-z' },
         scopes: ['write', 'read', 'read'],
       },
     }),

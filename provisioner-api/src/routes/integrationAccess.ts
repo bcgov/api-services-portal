@@ -1,4 +1,5 @@
 import { Type } from '@sinclair/typebox';
+import { partnerErrors } from '../openapi/partner-errors.js';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 import {
@@ -6,49 +7,16 @@ import {
   IntegrationStatus,
   NewIntegrationAccessRequest,
   NewIntegrationAccessRequestResponse,
-  SubsystemEnvironment,
 } from '../schemas/sdx.js';
 
-const SUBJECT_TOKEN_DESC =
-  'Bearer JWT identifying the subject the partner is acting on behalf of.';
-const RESOURCE_SERVERS_ONLY_DESC =
-  'When true, restricts the result to subsystems exposing resource server services only.';
 const ENVIRONMENT_DESC =
   'Target environment (for example `dev`, `test`, or `prod`) the subsystems are scoped to.';
 const CLIENT_ID_DESC = 'Identifier of the OAuth Integration Client ID';
 const STATUS_DESC =
   'Filters the returned services to those with the given access status.';
 
-const SUBSYSTEM_ID_DESC =
-  'Identifier of the subsystem the request is scoped to.';
 const INTEGRATION_ID_DESC =
   'Identifier of the integration that allowed-services should be filtered or provisioned for.';
-
-const SubsystemsListResponse = Type.Array(Type.Ref(SubsystemEnvironment), {
-  description:
-    'Collection of subsystem environments visible to the calling partner service.',
-  examples: [
-    [
-      {
-        id: 'claims',
-        name: 'Claims',
-        organization: 'ministry-of-health',
-        environment: 'dev',
-        description: 'Authoritative source for benefit claim records.',
-        services: [
-          {
-            description: 'Read-only access to claim data.',
-            scopes: [
-              { label: 'Claims.Read', description: 'Read claim records' },
-            ],
-            title: 'Claims Service',
-            name: 'claims-svc',
-          },
-        ],
-      },
-    ],
-  ],
-});
 
 const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
   description:
@@ -56,19 +24,22 @@ const AllowedServicesResponse = Type.Ref(IntegrationAccessRequest, {
   examples: [
     {
       submissionId: '9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a',
+      integrationId: 'integration-42',
       clientId: 'integration-42',
       resourceServers: [
         {
           id: 'claims',
           environment: 'dev',
-          services: [{ scopes: ['Claims.Read'], name: 'claims-svc' }],
+          services: [
+            { scopes: ['Claims.Read'], name: 'claims-svc', version: '1.0.0' },
+          ],
         },
       ],
     },
   ],
 });
 
-const security = [] as any[];
+const security = [{ jwt: [] }];
 
 export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
   async (app) => {
@@ -80,7 +51,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'Get integration status',
           operationId: 'getIntegrationStatus',
           description:
-            'Returns whether an integration is registered as an SDX subsystem, and its subsystem attributes if so.',
+            'Returns whether an integration is registered as an SDX subsystem, and its subsystem attributes if so. Unknown integrations return 200 with status unregistered.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -88,7 +59,10 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
               examples: ['claims'],
             }),
           }),
-          response: { 200: Type.Ref(IntegrationStatus) },
+          response: {
+            200: Type.Ref(IntegrationStatus),
+            ...partnerErrors(400, 401, 403, 500, 502),
+          },
         },
       },
       async (req) =>
@@ -105,7 +79,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'List allowed access',
           operationId: 'getSubsystemAllowedServices',
           description:
-            'Returns the details of an integration access request with approved access to SDX services.',
+            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; no matching connections return 404; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Approved versions remain pinned to the reviewed version.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -127,7 +101,10 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
             ),
           }),
 
-          response: { 200: AllowedServicesResponse },
+          response: {
+            200: AllowedServicesResponse,
+            ...partnerErrors(400, 401, 403, 404, 409, 500, 502),
+          },
         },
       },
       async (req) =>
@@ -146,7 +123,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'New access request',
           operationId: 'createIntegrationAccessRequest',
           description:
-            'Submits a new integration access request for a partner authorization integration. Approval triggers the `provisionAllowedServices` callback to the partner.',
+            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. Invalid or stale request values return 400; missing integration/organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Version or scope changes require re-approval. Approval triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -155,30 +132,32 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
             }),
           }),
           body: Type.Ref(NewIntegrationAccessRequest),
-          response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
+          response: {
+            200: Type.Ref(NewIntegrationAccessRequestResponse),
+            ...partnerErrors(400, 401, 403, 404, 409, 500, 502),
+          },
           callbacks: {
             provisionAllowedServices: {
-              '/requests/{$request.params#/integrationId}/sdx-allowed-access':
-                {
-                  put: {
-                    requestBody: {
-                      required: true,
-                      content: {
-                        'application/json': {
-                          schema: {
-                            $ref: '#/components/schemas/IntegrationAccessRequest',
-                          },
+              '/requests/{$request.params#/integrationId}/sdx-allowed-access': {
+                put: {
+                  requestBody: {
+                    required: true,
+                    content: {
+                      'application/json': {
+                        schema: {
+                          $ref: '#/components/schemas/IntegrationAccessRequest',
                         },
                       },
                     },
-                    responses: {
-                      '200': {
-                        description:
-                          'Partner acknowledged receipt of the provisioning instruction.',
-                      },
+                  },
+                  responses: {
+                    '2XX': {
+                      description:
+                        'Partner acknowledged receipt of the provisioning instruction.',
                     },
                   },
                 },
+              },
             },
           },
         },

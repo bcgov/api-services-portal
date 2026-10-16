@@ -8,7 +8,12 @@ const format = argv.includes('--yaml') ? 'yaml' : 'json';
 const outIdx = argv.indexOf('--out');
 const out = outIdx >= 0 ? argv[outIdx + 1] : undefined;
 
-const app = await buildApp();
+const app = await buildApp(argv.includes('--internal') ? {} : {
+  listener: 'partner',
+  // Offline documentation only: no listener is started or key fetched.
+  auth: { issuer: 'https://issuer.example', audience: 'sdx-partner',
+    jwksUrl: 'https://issuer.example/keys', requiredScope: 'sdx:partner' },
+});
 await app.ready();
 const doc = app.swagger();
 const text =
