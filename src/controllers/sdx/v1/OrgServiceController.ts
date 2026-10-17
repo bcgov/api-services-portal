@@ -66,6 +66,7 @@ export class GatewayServiceController extends Controller {
    *
    * @param org - Organization identifier
    * @param subsystem - Subsystem name under which the service will be categorized
+   * @param environment - SDX environment label the service is published to (for example `stg`, `bct`, `bc`)
    * @param upstreamUrl - Upstream URL the gateway should route requests to for this service
    * @param request - HTTP request object for context creation
    */
