@@ -6,6 +6,7 @@ import {
   lookupCredentialReferenceByServiceAccess,
   lookupCredentialIssuerById,
   lookupEnvironmentAndIssuerById,
+  lookupConsumerUsername,
 } from '../keystone';
 import {
   KeycloakClientRegistrationService,
@@ -17,6 +18,7 @@ import { KongConsumerService } from '../kong';
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
 import { Logger } from '../../logger';
 import { UMAPolicyService } from '../uma2';
+import { isSdxConsumer } from './sdx-managed';
 import { StructuredActivityService } from './namespace-activity';
 import {
   Environment,
@@ -48,16 +50,25 @@ export const AfterDeleteAccess = async (context: any, existingItem: any) => {
     `${existingItem.productEnvironment}`
   );
 
-  // If existingItem.namespace is set and the product namespace does not match (or matches the slug)
-  // then assume it is a Namespace Service Account
-  // otherwise assume it is Consumer Access
-  const namespace: string = undefined;
+  // A Namespace Service Account has its own namespace; Consumer Access is
+  // recorded against the provider's namespace, as a feed delete has no
+  // namespace of its own
+  const namespace: string = existingItem.namespace || env.product?.namespace;
+
+  // Most ServiceAccess records are named after the consumer's client id, but
+  // an SDX one is named '<connection>:<service>'. Its consumer is kept on
+  // delete, so take the name from there when it still exists.
+  const consumerUsername =
+    (existingItem.consumer &&
+      (await lookupConsumerUsername(context, `${existingItem.consumer}`))) ||
+    existingItem.name;
+
   await new StructuredActivityService(context, namespace).logDeleteAccess(
     true,
     {
       product: env.product,
       environment: env,
-      consumerUsername: existingItem.name,
+      consumerUsername,
     }
   );
 };
@@ -131,6 +142,17 @@ export const DeleteAccess = async (context: any, keys: any) => {
       { serviceAccess: { id: serviceAccessId } },
       ['id']
     );
+
+    // SDX consumers are managed by the SDX provisioner, so the Portal leaves
+    // the consumer on Kong and the IdP alone
+    if (svc.consumer != null && isSdxConsumer(svc.consumer)) {
+      logger.info(
+        '[DeleteAccess] Keeping SDX consumer %s',
+        svc.consumer.username
+      );
+      return;
+    }
+
     svc.consumer != null &&
       svc.consumerType == 'client' &&
       svc.consumer.username != 'anonymous' &&
