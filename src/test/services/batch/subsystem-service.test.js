@@ -190,6 +190,55 @@ describe('SubsystemService', () => {
       );
     });
 
+    it('deletes the integration mapping before deleting the subsystem', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          integrations: [{ id: 'integration-123' }],
+        },
+      });
+
+      deleteRecordByInternalId
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'deleted',
+          id: 'integration-123',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'deleted',
+          id: 'subsystem-123',
+        });
+
+      const result = await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(deleteRecordByInternalId).toHaveBeenNthCalledWith(
+        1,
+        context,
+        'SubsystemIntegration',
+        'integration-123'
+      );
+      expect(deleteRecordByInternalId).toHaveBeenNthCalledWith(
+        2,
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
+      expect(result.childResults).toEqual([
+        {
+          status: 200,
+          result: 'deleted',
+          id: 'integration-123',
+        },
+      ]);
+    });
+
     it('rejects delete when active client connection requests exist', async () => {
       const service = new SubsystemService();
 

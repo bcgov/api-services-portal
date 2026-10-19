@@ -318,6 +318,15 @@ class SubsystemService {
     }
 
     const childResults: BatchResult[] = [];
+    for (const integration of subsystem.integrations || []) {
+      const integrationDeleteResult = await deleteRecordByInternalId(
+        context,
+        'SubsystemIntegration',
+        integration.id
+      );
+      childResults.push(integrationDeleteResult);
+    }
+
     for (const serviceSpec of serviceSpecs) {
       const serviceDeleteResult = await deleteRecordByInternalId(
         context,
@@ -347,7 +356,7 @@ class SubsystemService {
       context,
       'Subsystem',
       undefined,
-      ['organization'],
+      ['organization', 'integrations'],
       {
         query: '$org: String!, $name: String!',
         clause: '{ organization: { name: $org }, name: $name }',
