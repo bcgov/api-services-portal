@@ -23,6 +23,9 @@ const {
   httpStatusForIssuerMisconfig,
   clientMessageForIssuerMisconfig,
 } = require('./services/issuerMisconfigError');
+const {
+  validateSdxEnvironmentsConfig,
+} = require('./services/workflow/sdx-environments');
 
 const logger = Logger('dsapi');
 
@@ -52,6 +55,9 @@ class ApiOpenapiApp {
       throw new Error('SDX_UI_URL is required');
     }
     assertHttpUrl('SDX_UI_URL', sdxUiUrl);
+
+    // SDX_ENVIRONMENTS limits the environments an OAS service can be uploaded to
+    validateSdxEnvironmentsConfig();
   }
 
   prepareV2(app) {
