@@ -140,9 +140,13 @@ describe('Verify that Mark is unable to create service account', () => {
   })
 
   it('Verify that approving the request fails', () => {
-    cy.get(consumers.reviewBtn).first().click({ force: true })
-    cy.get(consumers.approveBtn).click({ force: true })
-    cy.verifyToastMessage('Access approval failed')
+    cy.get(consumers.reviewBtn).first().click()
+    cy.get(consumers.approveBtn).should('be.visible').click()
+    // wait for the error toast; verifyToastMessage would match the
+    // pending-request banner and not wait for the response
+    cy.contains('Access approval failed').should('be.visible')
+    // the request is still pending
+    cy.get(consumers.reviewBtn).should('be.visible')
   })
 
   it('Navigate to Consumer Page to see the Approve Request option', () => {
