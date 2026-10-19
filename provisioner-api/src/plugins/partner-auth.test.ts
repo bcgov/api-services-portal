@@ -44,3 +44,18 @@ test('partner configuration fails closed', () => {
   assert.throws(() => registerPartnerAuth(Fastify(), { ...config, audience: '' }));
   assert.throws(() => registerPartnerAuth(Fastify(), { ...config, jwksUrl: 'http://issuer.example/keys' }));
 });
+
+test('empty required scope accepts a valid scopeless token but still rejects wrong audience', async (t) => {
+  const { publicKey, privateKey } = await generateKeyPair('RS256');
+  const app = Fastify();
+  await app.register(errorHandler);
+  registerPartnerAuth(app, { ...config, requiredScope: '' }, createLocalJWKSet({ keys: [{ ...await exportJWK(publicKey), kid: 'test' }] }));
+  app.get('/partner', async () => ({ ok: true }));
+  t.after(() => app.close());
+  for (const [audience, status] of [[config.audience, 200], ['wrong', 401]] as const) {
+    const token = await new SignJWT({}).setProtectedHeader({ alg: 'RS256', kid: 'test' })
+      .setIssuer(config.issuer).setAudience(audience).setSubject('css-partner').setIssuedAt().setExpirationTime('5m').sign(privateKey);
+    assert.equal((await app.inject({ url: '/partner', headers: { authorization: `Bearer ${token}` } })).statusCode, status);
+  }
+  assert.equal((await app.inject('/partner')).statusCode, 401);
+});

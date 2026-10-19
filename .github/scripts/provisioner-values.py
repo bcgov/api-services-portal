@@ -14,15 +14,15 @@ PARTNER_SETTINGS = (
 
 
 def render(settings):
-    missing = [name for name in PARTNER_SETTINGS if not settings.get(name, '').strip()]
+    missing = [name for name in PARTNER_SETTINGS if name != 'PARTNER_JWT_REQUIRED_SCOPE' and not settings.get(name, '').strip()]
     if missing:
-        raise ValueError('Missing GitHub Actions repository variables: ' + ', '.join(missing))
-    partner = {name: settings[name].strip() for name in PARTNER_SETTINGS}
+        raise ValueError('Missing deployment environment settings: ' + ', '.join(missing))
+    partner = {name: settings.get(name, '').strip() for name in PARTNER_SETTINGS}
     jwks = urlparse(partner['PARTNER_JWT_JWKS_URL'])
     if jwks.scheme != 'https' or not jwks.hostname or jwks.username or jwks.password:
         raise ValueError('PARTNER_JWT_JWKS_URL must be an HTTPS URL without credentials')
-    if len(partner['PARTNER_JWT_REQUIRED_SCOPE'].split()) != 1:
-        raise ValueError('PARTNER_JWT_REQUIRED_SCOPE must identify one OAuth scope')
+    if len(partner['PARTNER_JWT_REQUIRED_SCOPE'].split()) > 1:
+        raise ValueError('PARTNER_JWT_REQUIRED_SCOPE must be empty or identify one OAuth scope')
     uid = int(settings['RUNNING_UID_GID'])
     if uid <= 0:
         raise ValueError('RUNNING_UID_GID must be positive')

@@ -19,7 +19,7 @@ export function partnerAuthConfig(): PartnerAuthConfig {
     issuer: required('PARTNER_JWT_ISSUER'),
     audience: required('PARTNER_JWT_AUDIENCE'),
     jwksUrl: required('PARTNER_JWT_JWKS_URL'),
-    requiredScope: required('PARTNER_JWT_REQUIRED_SCOPE'),
+    requiredScope: process.env.PARTNER_JWT_REQUIRED_SCOPE?.trim() ?? '',
   };
 }
 
@@ -28,8 +28,8 @@ export function registerPartnerAuth(
   config: PartnerAuthConfig,
   key?: JWTVerifyGetKey
 ): void {
-  if (!config.issuer || !config.audience || !config.requiredScope) {
-    throw new Error('Partner issuer, audience and scope must be configured');
+  if (!config.issuer || !config.audience) {
+    throw new Error('Partner issuer and audience must be configured');
   }
   const url = new URL(config.jwksUrl);
   if (url.protocol !== 'https:') throw new Error('Partner JWKS URL must use HTTPS');
@@ -53,7 +53,7 @@ export function registerPartnerAuth(
       throw new UnauthorizedError('Invalid bearer token');
     }
     const scopes = typeof payload.scope === 'string' ? payload.scope.split(' ') : [];
-    if (!scopes.includes(config.requiredScope)) {
+    if (config.requiredScope && !scopes.includes(config.requiredScope)) {
       throw new ForbiddenError('Required partner scope is missing');
     }
   });

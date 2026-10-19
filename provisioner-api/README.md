@@ -178,12 +178,13 @@ starting either listener (Compose uses `local/provisioner/.env.local`):
 | `PARTNER_JWT_ISSUER` | Exact trusted issuer claim |
 | `PARTNER_JWT_AUDIENCE` | Intended SDX partner API audience |
 | `PARTNER_JWT_JWKS_URL` | Trusted HTTPS JWKS endpoint |
-| `PARTNER_JWT_REQUIRED_SCOPE` | Required space-delimited OAuth scope entry |
+| `PARTNER_JWT_REQUIRED_SCOPE` | Optional required OAuth scope; empty for the CSS partner integration |
 
 The partner listener validates RS256 signatures, issuer, audience, expiry and
 required `exp`, `iat`, `sub` claims using `jose` remote JWKS retrieval/cache.
-Missing/invalid tokens return 401 with a Bearer challenge; missing permission
-returns 403. Missing settings or a non-HTTPS JWKS URL prevent startup. No
+Scope validation applies only when `PARTNER_JWT_REQUIRED_SCOPE` is nonempty.
+Missing/invalid tokens return 401 with a Bearer challenge; missing a configured
+scope returns 403. Missing issuer/audience/JWKS settings or a non-HTTPS JWKS URL prevent startup. No
 production issuer/scope or role mapping has been assumed: CSS must confirm these
 settings and the RS256 contract. The scope grants access across integrations;
 per-integration caller restrictions require an agreed claim mapping.
@@ -248,20 +249,21 @@ probes must be checked against the selected listener during deployment review.
 
 ### Silver feature deployment configuration
 
-`.github/workflows/ci-build-provisioner-api.yaml` must pass the four
-`PARTNER_JWT_*` settings above from GitHub Actions repository variables into the
-Silver provisioner Helm values. These are trust configuration, not private keys;
-use the CSS-approved values, not the Portal's OIDC client configuration.
+`.github/workflows/ci-build-provisioner-api.yaml` defines dev APS Authz settings
+directly in its environment block: issuer
+`https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps`, audience
+`sdx-partner-api`, the issuer's `/protocol/openid-connect/certs` JWKS URL, and
+`PARTNER_JWT_REQUIRED_SCOPE: ""`. The CSS partner integration requires no scope;
+JWT signature, issuer, audience and expiry validation still apply.
 `.github/scripts/provisioner-values.py` rejects missing/invalid settings before
 Helm can replace a release. The chart exposes internal port 3000 and the named
 `partner` Service/container port 3001. Startup/readiness check the partner
 listener, which starts after the internal listener. Helm waits up to five minutes
 for readiness instead of reporting an unhealthy release as successfully deployed.
 
-The repository variables must be configured by an authorized operator before the
-feature deployment can succeed; no issuer, audience or scope is assumed. This
-workflow applies the settings to Silver releases only. Gold's Terraform-managed
-provisioner configuration is separate and must be updated before promotion.
+This workflow applies dev trust settings to Silver releases only. Gold's
+Terraform-managed provisioner configuration is separate and must be updated
+before promotion.
 
 Partner authentication alone does not configure upstream SDX/APS/CSS clients,
 private signing keys, Feed, or environment-specific operator/GWA settings. The

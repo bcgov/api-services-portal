@@ -20,11 +20,18 @@ class DeploymentValuesTests(unittest.TestCase):
 
     def test_each_missing_setting_prevents_deployment(self):
         for name in module.PARTNER_SETTINGS:
+            if name == 'PARTNER_JWT_REQUIRED_SCOPE':
+                continue
             with self.subTest(name=name):
                 settings = self.settings()
                 settings[name] = ' '
                 with self.assertRaisesRegex(ValueError, name):
                     module.render(settings)
+
+    def test_empty_scope_is_passed_to_the_container(self):
+        settings = self.settings()
+        settings['PARTNER_JWT_REQUIRED_SCOPE'] = ''
+        self.assertEqual(module.render(settings)['env']['PARTNER_JWT_REQUIRED_SCOPE']['value'], '')
 
     def test_untrusted_key_transport_or_combined_scope_is_rejected(self):
         for name, value in [('PARTNER_JWT_JWKS_URL', 'http://issuer.example/certs'),

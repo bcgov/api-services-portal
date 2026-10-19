@@ -65,11 +65,11 @@ jobs:
       - name: Validate and render provisioner configuration
         if: github.ref != 'refs/heads/dev'
         env:
-          # Non-secret trust configuration. Do not reuse the Portal OIDC client.
-          PARTNER_JWT_ISSUER: ${{ vars.PARTNER_JWT_ISSUER }}
-          PARTNER_JWT_AUDIENCE: ${{ vars.PARTNER_JWT_AUDIENCE }}
-          PARTNER_JWT_JWKS_URL: ${{ vars.PARTNER_JWT_JWKS_URL }}
-          PARTNER_JWT_REQUIRED_SCOPE: ${{ vars.PARTNER_JWT_REQUIRED_SCOPE }}
+          # Dev APS Authz trust settings; partner access does not require a scope.
+          PARTNER_JWT_ISSUER: "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps"
+          PARTNER_JWT_AUDIENCE: "sdx-partner-api"
+          PARTNER_JWT_JWKS_URL: "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps/protocol/openid-connect/certs"
+          PARTNER_JWT_REQUIRED_SCOPE: ""
           RUNNING_UID_GID: ${{ secrets.RUNNING_UID_GID }}
           DEPLOY_ID: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
         run: python3 .github/scripts/provisioner-values.py > values.json
