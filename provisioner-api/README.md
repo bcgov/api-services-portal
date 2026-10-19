@@ -245,3 +245,34 @@ Verify public operations reject missing/wrong/expired tokens, internal operation
 are unreachable publicly, both environments remain isolated and an approved
 request reaches CSS. Startup failure closes both listeners; existing readiness
 probes must be checked against the selected listener during deployment review.
+
+### Silver feature deployment configuration
+
+`.github/workflows/ci-build-provisioner-api.yaml` must pass the four
+`PARTNER_JWT_*` settings above from GitHub Actions repository variables into the
+Silver provisioner Helm values. These are trust configuration, not private keys;
+use the CSS-approved values, not the Portal's OIDC client configuration.
+`.github/scripts/provisioner-values.py` rejects missing/invalid settings before
+Helm can replace a release. The chart exposes internal port 3000 and the named
+`partner` Service/container port 3001. Startup/readiness check the partner
+listener, which starts after the internal listener. Helm waits up to five minutes
+for readiness instead of reporting an unhealthy release as successfully deployed.
+
+The repository variables must be configured by an authorized operator before the
+feature deployment can succeed; no issuer, audience or scope is assumed. This
+workflow applies the settings to Silver releases only. Gold's Terraform-managed
+provisioner configuration is separate and must be updated before promotion.
+
+Partner authentication alone does not configure upstream SDX/APS/CSS clients,
+private signing keys, Feed, or environment-specific operator/GWA settings. The
+existing feature workflow has no bindings for those dependencies; their approved
+ConfigMap/Secret/Vault source still needs to be supplied for full integration
+verification. A public partner Route must target the named `partner` Service
+port; this workflow does not create a public hostname or route the internal
+listener publicly.
+
+Check the values renderer locally without cluster credentials:
+
+```sh
+python3 -m unittest discover -s .github/scripts -p 'test_provisioner_values.py'
+```
