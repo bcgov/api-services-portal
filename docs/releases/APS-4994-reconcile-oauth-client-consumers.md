@@ -12,8 +12,10 @@ strict token matching:
 
 1. Run `npm run datafix:aps-4994` from `provisioner-api` and review the dry-run
    output. Each active R1 subsystem/environment must produce exactly one
-   consumer whose `username` and `custom_id` match the OAuth client ID selected
-   from the latest connection record.
+   consumer whose `username` and `custom_id` match the single OAuth client ID
+   shared by all of its active, approved connection records. Missing or
+   conflicting OAuth client IDs fail the audit and must be corrected before
+   applying the datafix.
 2. Resolve every reported mismatch. The command does not publish gateway
    changes without `--apply`.
 3. Run `npm run datafix:aps-4994 -- --apply` to re-provision one representative

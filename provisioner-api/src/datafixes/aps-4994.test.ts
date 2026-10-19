@@ -4,25 +4,14 @@ import type { ConnectionRequest } from '../clients/feed/types.js';
 import { runAps4994Datafix } from './aps-4994.js';
 
 const connections: ConnectionRequest[] = [
-  connection(
-    'connection-1',
-    'service-a',
-    'oauth-old',
-    '2026-01-01T00:00:00.000Z'
-  ),
-  connection(
-    'connection-2',
-    'service-b',
-    'oauth-current',
-    '2026-02-01T00:00:00.000Z'
-  ),
+  connection('connection-1', 'service-a', 'oauth-current'),
+  connection('connection-2', 'service-b', 'oauth-current'),
 ];
 
 function connection(
   id: string,
   serviceId: string,
-  oauthClientId: string,
-  updatedAt: string
+  oauthClientId?: string
 ): ConnectionRequest {
   return {
     id,
@@ -32,10 +21,11 @@ function connection(
     policyVersion: 'SDX.R1.00',
     isApproved: true,
     isActive: true,
-    updatedAt,
     requesterDetails: JSON.stringify({
       client: {
-        integrationId: `integration-${oauthClientId}`,
+        integrationId: oauthClientId
+          ? `integration-${oauthClientId}`
+          : 'integration-without-client-id',
         clientId: oauthClientId,
       },
       scopes: [],
@@ -62,7 +52,7 @@ function preview(clientId = 'oauth-current') {
   };
 }
 
-test('audits the latest connection once and does not write in dry run', async () => {
+test('audits one representative connection and does not write in dry run', async () => {
   const previewed: string[] = [];
   const applied: string[] = [];
   const warnings: unknown[] = [];
@@ -89,9 +79,9 @@ test('audits the latest connection once and does not write in dry run', async ()
     } as never,
   });
 
-  assert.deepEqual(previewed, ['connection-2']);
+  assert.deepEqual(previewed, ['connection-1']);
   assert.deepEqual(applied, []);
-  assert.equal(warnings.length, 1);
+  assert.equal(warnings.length, 0);
   assert.deepEqual(
     {
       candidates: summary.candidates,
@@ -129,17 +119,17 @@ test('reprovisions one representative connection per group in apply mode', async
     apply: true,
   });
 
-  assert.deepEqual(applied, ['connection-2']);
+  assert.deepEqual(applied, ['connection-1']);
   assert.equal(summary.applied, 1);
   assert.equal(summary.failed, 0);
   assert.equal(summary.dryRun, false);
 });
 
-test('fails closed when the preview does not match the latest client', async () => {
+test('fails closed when the preview does not match the OAuth client', async () => {
   let applyCalled = false;
   const summary = await runAps4994Datafix({
     listConnections: async () => connections,
-    previewConnection: async () => preview('oauth-old'),
+    previewConnection: async () => preview('oauth-other'),
     applyConnection: async () => {
       applyCalled = true;
       return {
@@ -155,5 +145,67 @@ test('fails closed when the preview does not match the latest client', async () 
   assert.equal(applyCalled, false);
   assert.equal(summary.planned, 0);
   assert.equal(summary.failed, 1);
-  assert.match(summary.issues[0].reason, /latest OAuth client/);
+  assert.match(summary.issues[0].reason, /does not match OAuth client/);
+});
+
+test('fails closed when connections identify multiple OAuth clients', async () => {
+  let previewCalled = false;
+  let applyCalled = false;
+  const summary = await runAps4994Datafix({
+    listConnections: async () => [
+      connection('connection-1', 'service-a', 'oauth-one'),
+      connection('connection-2', 'service-b', 'oauth-two'),
+    ],
+    previewConnection: async () => {
+      previewCalled = true;
+      return preview();
+    },
+    applyConnection: async () => {
+      applyCalled = true;
+      return {
+        applied: 1,
+        failed: 0,
+        skipped: 0,
+        results: [],
+      };
+    },
+    apply: true,
+  });
+
+  assert.equal(previewCalled, false);
+  assert.equal(applyCalled, false);
+  assert.equal(summary.planned, 0);
+  assert.equal(summary.failed, 1);
+  assert.match(summary.issues[0].reason, /multiple OAuth clients/);
+});
+
+test('fails closed when a connection does not identify an OAuth client', async () => {
+  let previewCalled = false;
+  let applyCalled = false;
+  const summary = await runAps4994Datafix({
+    listConnections: async () => [
+      connection('connection-1', 'service-a', 'oauth-current'),
+      connection('connection-2', 'service-b'),
+    ],
+    previewConnection: async () => {
+      previewCalled = true;
+      return preview();
+    },
+    applyConnection: async () => {
+      applyCalled = true;
+      return {
+        applied: 1,
+        failed: 0,
+        skipped: 0,
+        results: [],
+      };
+    },
+    apply: true,
+  });
+
+  assert.equal(previewCalled, false);
+  assert.equal(applyCalled, false);
+  assert.equal(summary.planned, 0);
+  assert.equal(summary.failed, 1);
+  assert.match(summary.issues[0].reason, /do not identify an OAuth client/);
 });

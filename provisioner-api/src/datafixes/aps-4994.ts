@@ -57,7 +57,12 @@ export async function runAps4994Datafix(
   }
 
   const candidates = [...groups.values()]
-    .map((group) => group.slice().sort(compareConnectionRecency).at(-1)!)
+    .map((group) =>
+      group
+        .slice()
+        .sort((left, right) => left.id!.localeCompare(right.id!))
+        .at(0)!
+    )
     .sort((left, right) =>
       groupKey(left.clientId!, left.environment!).localeCompare(
         groupKey(right.clientId!, right.environment!)
@@ -79,36 +84,38 @@ export async function runAps4994Datafix(
       clientId: representative.clientId!,
       environment: representative.environment!,
     };
-    const expectedClientId = connectionOAuthClientId(representative);
-    if (!expectedClientId) {
+    const group =
+      groups.get(groupKey(candidate.clientId, candidate.environment)) || [];
+    const missingClientIds = group.filter(
+      (connection) => !connectionOAuthClientId(connection)
+    );
+    if (missingClientIds.length > 0) {
       recordIssue(
         summary,
         dependencies.logger,
         candidate,
-        `latest connection '${representative.id}' does not identify an OAuth client`
+        `connections do not identify an OAuth client: ${missingClientIds
+          .map((connection) => `'${connection.id}'`)
+          .join(', ')}`
       );
       continue;
     }
 
-    const group =
-      groups.get(groupKey(candidate.clientId, candidate.environment)) || [];
-    const ignoredRecords = group.filter(
-      (connection) =>
-        connection.id !== representative.id &&
-        connectionOAuthClientId(connection) !== expectedClientId
-    );
-    if (ignoredRecords.length > 0) {
-      dependencies.logger?.warn(
-        {
-          subsystemId: candidate.clientId,
-          environment: candidate.environment,
-          selectedRecordId: representative.id,
-          ignoredRecordIds: ignoredRecords.map((connection) => connection.id),
-          selection: selectionMethod(group),
-        },
-        'Multiple OAuth clients found for one subsystem and environment; reprovisioning the latest record'
+    const oauthClientIds = [
+      ...new Set(group.map((connection) => connectionOAuthClientId(connection)!)),
+    ].sort();
+    if (oauthClientIds.length !== 1) {
+      recordIssue(
+        summary,
+        dependencies.logger,
+        candidate,
+        `connections identify multiple OAuth clients: ${oauthClientIds
+          .map((clientId) => `'${clientId}'`)
+          .join(', ')}`
       );
+      continue;
     }
+    const expectedClientId = oauthClientIds[0];
 
     const input = connectionInput(representative);
     try {
@@ -134,7 +141,7 @@ export async function runAps4994Datafix(
           summary,
           dependencies.logger,
           candidate,
-          `generated consumer does not match latest OAuth client '${expectedClientId}'`
+          `generated consumer does not match OAuth client '${expectedClientId}'`
         );
         continue;
       }
@@ -209,40 +216,6 @@ function parseObject(value: unknown): Record<string, any> {
   return value && typeof value === 'object'
     ? (value as Record<string, any>)
     : {};
-}
-
-function compareConnectionRecency(
-  left: ConnectionRequest,
-  right: ConnectionRequest
-): number {
-  const leftTimestamp = connectionTimestamp(left);
-  const rightTimestamp = connectionTimestamp(right);
-  if (leftTimestamp !== rightTimestamp) {
-    return leftTimestamp - rightTimestamp;
-  }
-  return (left.id || '').localeCompare(right.id || '');
-}
-
-function connectionTimestamp(connection: ConnectionRequest): number {
-  const tracked = connection as ConnectionRequest & {
-    updatedAt?: unknown;
-    createdAt?: unknown;
-  };
-  for (const value of [tracked.updatedAt, tracked.createdAt]) {
-    if (typeof value === 'string' && value.length > 0) {
-      const parsed = Date.parse(value);
-      if (!Number.isNaN(parsed)) return parsed;
-    }
-  }
-  return Number.NEGATIVE_INFINITY;
-}
-
-function selectionMethod(connections: ConnectionRequest[]): string {
-  return connections.some(
-    (connection) => connectionTimestamp(connection) !== Number.NEGATIVE_INFINITY
-  )
-    ? 'updatedAt-createdAt-id'
-    : 'deterministic-id-no-timestamp';
 }
 
 function groupKey(clientId: string, environment: string): string {
