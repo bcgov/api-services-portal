@@ -385,8 +385,6 @@ export interface ConnectionRequest {
   policyVersion?: string;
   environment?: string;
   provisionerStatus?: ProvisionerStatus;
-  updatedAt?: DateTime;
-  createdAt?: DateTime;
   requesterDetails?: any; // toString
   clientResources?: any; // toString
   serviceResources?: any; // toString
