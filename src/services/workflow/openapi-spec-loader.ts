@@ -6,6 +6,7 @@ import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
 import { BuildServiceName } from '../gateway-patterns/catalog';
 import { OpenAPISpecValidationService } from './openapi-spec-validation-service';
+import { assertSdxEnvironment } from './sdx-environments';
 
 const logger = Logger('wf.OASLoader');
 
@@ -37,6 +38,9 @@ export const LoadOpenAPISpec = async (
 ): Promise<OpenAPISpec> => {
   // KeystoneJS entity
   const outSpec: OpenAPISpec = {};
+
+  // Reject unknown environments
+  assertSdxEnvironment(spec.environment);
 
   const subsystemRecord: Subsystem =
     await new SubsystemService().findSubsystemByName(

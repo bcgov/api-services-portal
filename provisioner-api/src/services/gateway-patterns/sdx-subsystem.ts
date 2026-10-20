@@ -1,6 +1,5 @@
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
-  RuntimeGroup,
   SdxMemberApiClient,
   SubsystemEntry,
 } from '../../clients/sdx-member/index.js';
@@ -51,17 +50,12 @@ export class SDXSubsystemPattern implements PatternProcessor {
   eval(_inputs: SDXSubsystemConfig, data: SDXSubsystemPatternData) {
     const subsystem = data.subsystem;
 
-    let tags = [
-      `ns.${data.gatewayId}.sys-${subsystem.name}`,
-      `subsystem:${subsystem.clientId}`,
-      'sdx',
-    ];
-
     const apsResources = [
       {
         kind: 'Application',
         name: subsystem.name,
         namespace: subsystem.gateway?.id,
+        organization: subsystem.organization?.name,
         description: subsystem.description || `${subsystem.clientId} subsystem`,
       },
       {

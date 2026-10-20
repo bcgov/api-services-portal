@@ -42,7 +42,15 @@ export class SdxMemberService {
       );
     }
 
-    const subsystem = subsystems[0];
+    const subsystem = selectSubsystemForIntegration(
+      subsystems,
+      integrationClientId
+    );
+    if (!subsystem) {
+      throw new NotFoundError(
+        `Subsystem with clientId ${integrationClientId} not found`
+      );
+    }
 
     if (subsystem.organization === undefined) {
       throw new NotFoundError(
@@ -70,7 +78,13 @@ export class SdxMemberService {
       return { status: 'unregistered' };
     }
 
-    const subsystem = subsystems[0];
+    const subsystem = selectSubsystemForIntegration(
+      subsystems,
+      integrationClientId
+    );
+    if (!subsystem) {
+      return { status: 'unregistered' };
+    }
 
     return {
       status: 'registered',
@@ -148,4 +162,13 @@ export class SdxMemberService {
     }
     return service;
   }
+}
+
+export function selectSubsystemForIntegration(
+  subsystems: SubsystemEntry[],
+  integrationClientId: string
+): SubsystemEntry | undefined {
+  return subsystems.find((subsystem) =>
+    subsystem.integrationClientIds.includes(integrationClientId)
+  );
 }

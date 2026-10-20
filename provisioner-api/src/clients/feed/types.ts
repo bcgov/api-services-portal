@@ -24,6 +24,22 @@ export interface Application {
   name: string;
   description?: string;
   namespace: string;
+  organization?: string;
+}
+
+/**
+ * Feed payload for a Portal ServiceAccess. `name` is the refKey; `consumer`
+ * is a GatewayConsumer username, `application` is looked up by name and
+ * namespace, and `productEnvironment` is an Environment appId.
+ */
+export interface ServiceAccess {
+  name: string;
+  active: boolean;
+  aclEnabled: boolean;
+  consumerType: 'client' | 'user';
+  consumer: string;
+  application: { name: string; namespace: string };
+  productEnvironment: string;
 }
 
 export interface ProvisionerStatus {

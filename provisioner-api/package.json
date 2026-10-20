@@ -10,12 +10,14 @@
     "build": "tsc -p tsconfig.json && copyfiles -u 1 \"src/**/*.{cedar,cedarschema}\" dist",
     "start": "node dist/server.js",
     "datafix:aps-4790": "node dist/datafix-aps-4790.js",
+    "datafix:aps-4994": "node dist/datafix-aps-4994.js",
     "spec": "tsx src/print-spec.ts",
     "spec:yaml": "tsx src/print-spec.ts --yaml --out openapi.yaml",
     "spec:json": "tsx src/print-spec.ts --out openapi.json",
     "lint:spec": "npm run --silent spec:yaml && spectral lint --ruleset ../.spectral.yaml --fail-severity=warn openapi.yaml",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\""
+    "datafix:aps-4995": "node dist/datafix-aps-4995.js"
   },
   "dependencies": {
     "@cedar-policy/cedar-wasm": "^4.11.0",

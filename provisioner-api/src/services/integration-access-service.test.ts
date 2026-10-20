@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, before, test } from 'node:test';
 import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
@@ -12,6 +15,40 @@ import type {
 } from '../clients/sdx-member/index.js';
 import type { TNewIntegrationAccessRequest } from '../schemas/sdx.js';
 import { IntegrationAccessService } from './integration-access-service.js';
+import { resetEnvironmentsCache } from '../config/environments.js';
+
+let environmentDirectory: string;
+let previousEnvironmentPath: string | undefined;
+
+before(() => {
+  environmentDirectory = mkdtempSync(join(tmpdir(), 'aps-4995-access-'));
+  const configPath = join(environmentDirectory, 'environments.json');
+  writeFileSync(
+    configPath,
+    JSON.stringify({
+      dev: {
+        oauth_token_url: 'https://issuer.example/token',
+        kong_admin_url: 'http://kong-admin',
+        sdx_token_exchange_client_id: 'sdx-edge-exchange',
+        sdx_token_exchange_token_url: 'https://issuer.example/token',
+        sdx_trusted_issuers: ['https://issuer.example'],
+      },
+    })
+  );
+  previousEnvironmentPath = process.env.ENVIRONMENTS_CONFIG_FILE;
+  process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
+  resetEnvironmentsCache();
+});
+
+after(() => {
+  if (previousEnvironmentPath === undefined) {
+    delete process.env.ENVIRONMENTS_CONFIG_FILE;
+  } else {
+    process.env.ENVIRONMENTS_CONFIG_FILE = previousEnvironmentPath;
+  }
+  resetEnvironmentsCache();
+  rmSync(environmentDirectory, { recursive: true, force: true });
+});
 
 const consumerSubsystem: SubsystemEntry = {
   name: 'Consumer',
@@ -376,7 +413,7 @@ test('reactivates an approved inactive connection on an exact resubmission', asy
   });
 });
 
-test('fails closed rather than overwriting a shared connection owned by another client grant', async () => {
+test('fails closed rather than replacing the one-to-one client mapping', async () => {
   const { service, writes } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [
@@ -405,8 +442,49 @@ test('fails closed rather than overwriting a shared connection owned by another 
         },
       ])
     ),
-    /client grants are required before this connection can be shared/
+    /already associated with integration 'integration-b' and OAuth client 'oauth-client-b'/
   );
+  assert.deepEqual(writes, []);
+});
+
+test('fails closed when existing connections contain conflicting client identities', async () => {
+  const { service, writes } = createService({
+    catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    connections: [
+      existingConnection({
+        id: 'connection-a',
+        serviceId: 'service-a',
+      }),
+      existingConnection({
+        id: 'connection-b',
+        serviceId: 'service-b',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          client: {
+            integrationId: 'integration-a',
+            clientId: 'oauth-client-b',
+          },
+        },
+      }),
+    ],
+  });
+
+  await assert.rejects(
+    service.submitIntegrationAccessRequest(
+      'submission-2',
+      consumerSubsystem,
+      'integration-a',
+      accessRequest([
+        {
+          id: 'provider-a',
+          environment: 'dev',
+          services: [{ name: 'service-a', scopes: ['read'] }],
+        },
+      ])
+    ),
+    /connections for more than one integration or OAuth client/
+  );
+
   assert.deepEqual(writes, []);
 });
 
@@ -602,9 +680,7 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
       {
         id: 'provider-a',
         environment: 'dev',
-        services: [
-          { name: 'service-a', scopes: ['read'], version: '1.0.0' },
-        ],
+        services: [{ name: 'service-a', scopes: ['read'], version: '1.0.0' }],
       },
     ],
   });
@@ -620,7 +696,10 @@ test('keeps apply strict but skips malformed legacy rows during revocation', asy
 test('fails closed when one integration resolves to multiple OAuth clients', async () => {
   const { service } = createService({
     connections: [
-      existingConnection({ serviceId: 'service-a' }),
+      existingConnection({
+        id: 'connection-1',
+        serviceId: 'service-a',
+      }),
       existingConnection({
         id: 'connection-2',
         serviceId: 'service-b',
@@ -637,6 +716,41 @@ test('fails closed when one integration resolves to multiple OAuth clients', asy
 
   await assert.rejects(
     service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /connections for more than one OAuth client/
+    /connections for more than one integration or OAuth client/
   );
+});
+
+test('rejects a second OAuth client for another service in the same subsystem environment', async () => {
+  const { service, writes } = createService({
+    catalog: { 'service-b': catalogService('service-b', 'provider-a') },
+    connections: [
+      existingConnection({
+        serviceId: 'service-a',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          client: {
+            integrationId: 'integration-a',
+            clientId: 'oauth-client-b',
+          },
+        },
+      }),
+    ],
+  });
+
+  await assert.rejects(
+    service.submitIntegrationAccessRequest(
+      'submission-2',
+      consumerSubsystem,
+      'integration-a',
+      accessRequest([
+        {
+          id: 'provider-a',
+          environment: 'dev',
+          services: [{ name: 'service-b', scopes: ['read'] }],
+        },
+      ])
+    ),
+    /already associated with integration 'integration-a' and OAuth client 'oauth-client-b'/
+  );
+  assert.deepEqual(writes, []);
 });
