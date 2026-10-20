@@ -207,6 +207,12 @@ node --import tsx --test $(rg --files src -g '*.test.ts')
 npx cypress run --config-file cypress.css.config.ts --browser electron --headless
 ```
 
+The specs under `e2e/cypress/tests/25-common-sso` are grouped into five files:
+`discovery-and-access.cy.ts`, `authentication-and-contract.cy.ts`,
+`access-requests.cy.ts`, `stale-grants.cy.ts`, and `callbacks.cy.ts`.
+Shared fixtures, URLs and assertions are in `helpers.ts`; the existing CSS
+Cypress configuration discovers all five specs.
+
 The standalone Cypress suite starts the real partner HTTP app against a stateful
 mock SDX catalog/connection store, Feed endpoint and CSS callback receiver. It
 covers all four APIs, dev/test isolation, submission validation before writes,
