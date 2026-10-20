@@ -131,6 +131,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
       {
         kind: 'GatewayConsumer',
         username: access.clientId,
+        custom_id: access.clientId,
         tags: [
           `ns.${consumerGateway}.consumer-${access.clientId}`,
           `client:${data.client.clientId}`,
