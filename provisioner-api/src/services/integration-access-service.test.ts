@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, before, test } from 'node:test';
 import type { FastifyBaseLogger } from 'fastify';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
@@ -12,6 +15,40 @@ import type {
 } from '../clients/sdx-member/index.js';
 import type { TNewIntegrationAccessRequest } from '../schemas/sdx.js';
 import { IntegrationAccessService } from './integration-access-service.js';
+import { resetEnvironmentsCache } from '../config/environments.js';
+
+let environmentDirectory: string;
+let previousEnvironmentPath: string | undefined;
+
+before(() => {
+  environmentDirectory = mkdtempSync(join(tmpdir(), 'aps-4995-access-'));
+  const configPath = join(environmentDirectory, 'environments.json');
+  writeFileSync(
+    configPath,
+    JSON.stringify({
+      dev: {
+        oauth_token_url: 'https://issuer.example/token',
+        kong_admin_url: 'http://kong-admin',
+        sdx_token_exchange_client_id: 'sdx-edge-exchange',
+        sdx_token_exchange_token_url: 'https://issuer.example/token',
+        sdx_trusted_issuers: ['https://issuer.example'],
+      },
+    })
+  );
+  previousEnvironmentPath = process.env.ENVIRONMENTS_CONFIG_FILE;
+  process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
+  resetEnvironmentsCache();
+});
+
+after(() => {
+  if (previousEnvironmentPath === undefined) {
+    delete process.env.ENVIRONMENTS_CONFIG_FILE;
+  } else {
+    process.env.ENVIRONMENTS_CONFIG_FILE = previousEnvironmentPath;
+  }
+  resetEnvironmentsCache();
+  rmSync(environmentDirectory, { recursive: true, force: true });
+});
 
 const consumerSubsystem: SubsystemEntry = {
   name: 'Consumer',
