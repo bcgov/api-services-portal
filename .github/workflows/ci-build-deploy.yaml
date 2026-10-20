@@ -201,6 +201,10 @@ jobs:
           oc rollout status deployment/${DB_NAME} --timeout=300s
 
           # Run Keystone schema (Job)
+          # Failed Jobs are not removed by ttlSecondsAfterFinished. Recreate the
+          # branch-scoped Job so retries run the current schema instead of
+          # waiting on an immutable failed Job.
+          oc delete job "${DB_NAME}-keystone-init" --ignore-not-found=true --wait=true
           cat <<EOF | oc apply -f -
           apiVersion: batch/v1
           kind: Job
@@ -233,7 +237,12 @@ jobs:
                       name: ${DB_NAME}-keystone-schema
           EOF
 
-          oc wait --for=condition=complete job/${DB_NAME}-keystone-init --timeout=300s
+          if ! oc wait --for=condition=complete job/${DB_NAME}-keystone-init --timeout=300s; then
+            oc describe job/${DB_NAME}-keystone-init || true
+            oc get pods -l job-name=${DB_NAME}-keystone-init -o wide || true
+            oc logs job/${DB_NAME}-keystone-init --all-containers=true || true
+            exit 1
+          fi
 
       - name: 'Deploy Backend'
         if: github.ref != 'refs/heads/dev'
@@ -449,6 +458,8 @@ jobs:
               value: 'https://oas-validation-api-gov-bc-ca.dev.api.gov.bc.ca'
             SDX_UI_URL:
               value: 'https://sdx-api-gov-bc-ca.dev.api.gov.bc.ca'
+            SDX_ENVIRONMENTS:
+              value: 'apsdev'
             OAS_VALIDATION_API_TIMEOUT_MS:
               value: '30000'
             GWA_PROD_ENV_SLUG:

@@ -11,6 +11,7 @@ Resources supported:
 - APS
   - Product
   - Application
+  - ServiceAccess
   - ConsumerLabels
   - Activity
 
@@ -75,10 +76,6 @@ Routes are served under the OpenAPI server prefix `/ds/api/sdxpro/v1`:
 - `GET  /ds/api/sdxpro/v1/subsystems/{id}/allowed-services`
 - `POST /ds/api/sdxpro/v1/subsystems/{id}/access-requests`
   - declares the `provisionAllowedServices` callback (`PUT` to the partner)
-
-### R1 access migration prerequisite
-
-Before enabling the R1 integration-access callback, complete the APS-4992 audit and migration of legacy connection records so every `requesterDetails` object has an explicit `scopes` array. Submission and normal apply paths intentionally fail closed when scope data is missing or malformed. Delete/revocation remains available and skips malformed legacy rows with a structured warning so stale access can still be removed.
 
 Docs and spec:
 

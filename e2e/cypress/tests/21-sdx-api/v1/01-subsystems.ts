@@ -7,6 +7,7 @@ import {
   createSubsystem,
   createSubsystemAndOASService,
   createSubsystemGateway,
+  updateSubsystemIntegrationClients,
   uniqueSubsystemName,
 } from '../../../support/sdx-commands'
 
@@ -48,6 +49,29 @@ describe('SDX Subsystem', () => {
         ).then(({ apiRes: { status, body } }: any) => {
           expect(status).to.be.equal(200)
           expect(body.result).to.be.equal('deleted')
+        })
+      })
+    })
+
+    it('DELETE /organizations/{org}/subsystems/{name} - deletes its integration mapping first', () => {
+      const { org } = workingData
+      const subsystemName = uniqueSubsystemName()
+      const integrationId = uuidv4().replace(/-/g, '').substring(0, 8)
+
+      createSubsystem(org, subsystemName, ({ result }: any) => {
+        expect(result).to.be.equal('created')
+
+        updateSubsystemIntegrationClients(org, subsystemName, [integrationId], () => {
+          cy.setQueryString({ force: false })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
+            'DELETE'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.result).to.be.equal('deleted')
+            expect(body.childResults).to.have.length(1)
+            expect(body.childResults[0].result).to.be.equal('deleted')
+          })
         })
       })
     })

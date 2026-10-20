@@ -634,3 +634,22 @@ export function applyServicePattern(
     'PUT'
   )
 }
+
+// Creates the subsystem's APS Application and Product, which a connection's
+// ServiceAccess needs; nothing applies sdx-subsystem.r1 automatically yet
+export function applySubsystemPattern(
+  orgName: string,
+  clientId: string,
+  action: 'apply' | 'delete' = 'apply'
+) {
+  cy.setRequestBody({
+    parameters: {
+      clientId,
+    },
+  })
+  cy.setQueryString({ action })
+  return cy.callAPI(
+    `ds/api/sdx/v1/organizations/${orgName}/patterns/sdx-subsystem.r1`,
+    'PUT'
+  )
+}
