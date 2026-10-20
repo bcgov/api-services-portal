@@ -26,6 +26,7 @@ const provider: SubsystemEntry = {
   organization: { name: 'provider' },
   integrationClientIds: [],
   privacyZone: 'urn:claims',
+  gateway: { id: 'provider-gateway' },
 };
 const catalog: ServiceCatalogEntry[] = ['dev', 'test'].map((environment) => ({
   name: `claims-${environment}`,
