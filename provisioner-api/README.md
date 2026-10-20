@@ -255,21 +255,16 @@ probes must be checked against the selected listener during deployment review.
 
 ### Silver feature deployment configuration
 
-`.github/workflows/ci-build-provisioner-api.yaml` defines dev APS Authz settings
-directly in its environment block: issuer
-`https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps`, audience
-`sdx-partner-api`, the issuer's `/protocol/openid-connect/certs` JWKS URL, and
-`PARTNER_JWT_REQUIRED_SCOPE: ""`. The CSS partner integration requires no scope;
+`.github/workflows/ci-build-provisioner-api.yaml` deploys the checked-in
+`.github/helm/provisioner-feature.values.yaml`. This preset contains dev APS
+Authz issuer/JWKS settings, audience `sdx-partner-api`, an empty required scope,
+internal port 3000, partner port 3001, and startup/readiness/liveness probes.
 JWT signature, issuer, audience and expiry validation still apply.
-`.github/scripts/provisioner-values.py` rejects missing/invalid settings before
-Helm can replace a release. The chart exposes internal port 3000 and the named
-`partner` Service/container port 3001. Startup/readiness check the partner
-listener, which starts after the internal listener. Helm waits up to five minutes
-for readiness instead of reporting an unhealthy release as successfully deployed.
 
-This workflow applies dev trust settings to Silver releases only. Gold's
-Terraform-managed provisioner configuration is separate and must be updated
-before promotion.
+Only the image tag, revision annotation and runtime UID/GID are supplied as Helm
+command-line overrides. No configuration renderer or generated values file is
+needed. Helm waits up to five minutes for readiness. These values apply to Silver
+releases only; Gold's Terraform configuration is separate.
 
 Partner authentication alone does not configure upstream SDX/APS/CSS clients,
 private signing keys, Feed, or environment-specific operator/GWA settings. The
@@ -279,8 +274,14 @@ verification. A public partner Route must target the named `partner` Service
 port; this workflow does not create a public hostname or route the internal
 listener publicly.
 
-Check the values renderer locally without cluster credentials:
+Render the preset locally from the repository root with a downloaded generic-api
+chart and example build overrides:
 
 ```sh
-python3 -m unittest discover -s .github/scripts -p 'test_provisioner_values.py'
+helm template provisioner-check /path/to/generic-api.tgz \
+  -f .github/helm/provisioner-feature.values.yaml \
+  --set-string image.tag=feature-example \
+  --set-string podAnnotations.sha=example-revision \
+  --set podSecurityContext.fsGroup=10001 \
+  --set securityContext.runAsUser=10001
 ```
