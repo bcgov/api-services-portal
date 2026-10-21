@@ -65,7 +65,10 @@ export async function runAps4995Datafix(
     const input = connectionInput(connection);
     try {
       const preview = await dependencies.previewConnection(id, input);
-      const problem = validatePreview(preview);
+      const problem = validatePreview(
+        preview,
+        requesterServicePrivacyZone(input.requesterDetails)
+      );
       if (problem) {
         recordIssue(summary, dependencies.logger, id, problem);
         continue;
@@ -103,7 +106,8 @@ export async function runAps4995Datafix(
 }
 
 function validatePreview(
-  result: TConnectionChangeResponse
+  result: TConnectionChangeResponse,
+  expectedTargetPrivacyZoneScope: string | undefined
 ): string | undefined {
   const services = (result.preview || []).filter(
     (resource: any) =>
@@ -139,7 +143,9 @@ function validatePreview(
     exchange.scopes.length !== 0 ||
     exchange.scope_source !== 'verified_subject_token' ||
     typeof exchange.audience !== 'string' ||
-    exchange.audience.length === 0
+    exchange.audience.length === 0 ||
+    !expectedTargetPrivacyZoneScope ||
+    exchange.target_privacy_zone_scope !== expectedTargetPrivacyZoneScope
   ) {
     return 'consumer-edge token exchange is not canonical';
   }
@@ -177,6 +183,20 @@ function connectionInput(
     clientResources: parseObject(connection.clientResources),
     serviceResources: parseObject(connection.serviceResources),
   };
+}
+
+function requesterServicePrivacyZone(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+  const service = (value as Record<string, unknown>).service;
+  if (!service || typeof service !== 'object' || Array.isArray(service)) {
+    return undefined;
+  }
+  const privacyZone = (service as Record<string, unknown>).privacyZone;
+  if (typeof privacyZone !== 'string') return undefined;
+  const normalized = privacyZone.trim();
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 function parseObject(value: unknown): Record<string, unknown> {
