@@ -142,6 +142,18 @@ const products = await res.json();
 
 If env vars are missing for a given client, the app still starts; calls to that client throw a clear `not configured: missing X, Y` error.
 
+## Run the unit tests
+
+```bash
+npm test                                  # discovers every src/**/*.test.ts
+npx tsx --test src/path/to/file.test.ts   # single file
+```
+
+Tests are co-located with the code they cover as `*.test.ts` and use the built-in
+`node:test` runner with `node:assert/strict`. No registration is needed: new test
+files are picked up automatically. CI runs the suite on pull requests that touch
+`provisioner-api/` and before every provisioner image build.
+
 ## Generate and lint the spec
 
 ```bash
