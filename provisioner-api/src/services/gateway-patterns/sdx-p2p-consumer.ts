@@ -3,6 +3,7 @@ import type {
   RuntimeGroup,
   SdxMemberApiClient,
 } from '../../clients/sdx-member/index.js';
+import { getRequiredEnvUrl } from '../../config/environments.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
@@ -373,6 +374,13 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
     config: {
       direction: 'response',
       signature_header_key: 'X-Edge-Token',
+      allowed_jwks_uri_prefix: [
+        `${getRequiredEnvUrl(
+          data.clientRuntimeGroup.environment,
+          'public_url',
+          'SDX public URL'
+        ).replace(/\/$/, '')}/keysets/`,
+      ],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },
