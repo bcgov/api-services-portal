@@ -6,7 +6,13 @@ import type {
 } from '../../clients/sdx-member/index.js';
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
-import { assert, edgeTrustSignPluginConfig, type EnrichedServiceCatalogEntry } from './utils.js';
+import {
+  assert,
+  edgeTrustSignPluginConfig,
+  mtlsAclPluginConfig,
+  type EnrichedServiceCatalogEntry,
+  type MtlsCertificateAttribute,
+} from './utils.js';
 
 export interface SDXServiceOpsConfig {
   serviceId: string;
@@ -20,6 +26,7 @@ interface ServiceOpsUpgrades {
   mtlsAuth: {};
   mtlsAcl: {
     allow: string[];
+    certificateAttribute?: MtlsCertificateAttribute;
     certificateHeaderName?: string;
   };
   acl: {};
@@ -259,15 +266,14 @@ function upgradeToMTLSACL(
   inputs: SDXServiceOpsConfig
 ) {
   const allow = inputs.upgrades.mtlsAcl.allow || [];
-  const headerName =
-    inputs.upgrades.mtlsAcl.certificateHeaderName || 'X-Client-Cert-I-Dn';
   return {
     name: 'mtls-acl',
     tags: tags,
-    config: {
+    config: mtlsAclPluginConfig({
       allow,
-      certificate_header_name: headerName,
-    },
+      certificateAttribute: inputs.upgrades.mtlsAcl.certificateAttribute,
+      certificateHeaderName: inputs.upgrades.mtlsAcl.certificateHeaderName,
+    }),
   };
 }
 

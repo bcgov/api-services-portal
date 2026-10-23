@@ -6,9 +6,11 @@ import type {
 import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
+  edgeJwksUriPrefix,
   edgeTokenExchangePluginConfig,
   edgeTrustSignPluginConfig,
   getRoutePathPrefix,
+  mtlsAclPluginConfig,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
@@ -347,10 +349,10 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
   return {
     name: 'mtls-acl',
     tags: tags,
-    config: {
+    config: mtlsAclPluginConfig({
       allow: [`${data.clientRG.host}`],
-      certificate_header_name: 'X-Client-Cert-CN',
-    },
+      certificateAttribute: 'common_name',
+    }),
   };
 }
 
@@ -388,6 +390,9 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       direction: 'request',
       signature_header_key: 'X-Edge-Token',
+      allowed_jwks_uri_prefix: [
+        edgeJwksUriPrefix(data.serviceRG.environment!),
+      ],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },
