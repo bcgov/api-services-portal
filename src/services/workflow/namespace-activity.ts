@@ -495,7 +495,7 @@ function getFilterKeyWhere(match: string): ActivityWhereInput {
 }
 
 function toISOString(pstDate: string, _timeZone: string) {
-  const timeZone = _timeZone ? _timeZone : 'America/Los_Angeles';
+  const timeZone = _timeZone ? _timeZone : 'America/Vancouver';
   const dt = new Date(pstDate);
   const pstTS = new Date(
     dt.toLocaleString('en-us', {
