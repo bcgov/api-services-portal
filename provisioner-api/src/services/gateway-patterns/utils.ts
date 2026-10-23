@@ -71,6 +71,15 @@ export function edgeKeySetName(
   return `sdx.edge.${runtimeGroupName}.${environment}`;
 }
 
+export function edgeJwksUriPrefix(environment: string): string {
+  const publicUrl = getRequiredEnvUrl(
+    environment,
+    'public_url',
+    'SDX public URL'
+  );
+  return `${publicUrl.replace(/\/+$/, '')}/keysets/`;
+}
+
 export function edgeTrustSignPluginConfig(opts: {
   direction: 'request' | 'response';
   runtimeGroupName: string;
@@ -78,19 +87,74 @@ export function edgeTrustSignPluginConfig(opts: {
   alg?: string;
 }): Record<string, unknown> {
   const keySetName = edgeKeySetName(opts.runtimeGroupName, opts.environment);
-  const publicUrl = getRequiredEnvUrl(
-    opts.environment,
-    'public_url',
-    'SDX public URL'
-  );
   return {
     direction: opts.direction,
     signature_header_key: 'X-Edge-Token',
     keyset_name: keySetName,
     private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
     alg: opts.alg || 'ES256',
-    jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
+    jwks_uri: `${edgeJwksUriPrefix(
+      opts.environment
+    )}${keySetName}/.well-known/jwks.json`,
     hash_alg: 'sha256',
+  };
+}
+
+const mtlsCertificateAttributes = [
+  'cert',
+  'fingerprint',
+  'serial',
+  'issuer_dn',
+  'subject_dn',
+  'common_name',
+  'organization',
+] as const;
+
+export type MtlsCertificateAttribute =
+  (typeof mtlsCertificateAttributes)[number];
+
+const legacyCertificateHeaderAttributes: Record<
+  string,
+  MtlsCertificateAttribute
+> = {
+  'x-client-cert': 'cert',
+  'x-client-cert-fingerprint': 'fingerprint',
+  'x-client-cert-serial': 'serial',
+  'x-client-cert-i-dn': 'issuer_dn',
+  'x-client-cert-s-dn': 'subject_dn',
+  'x-client-cert-cn': 'common_name',
+  'x-client-cert-org': 'organization',
+};
+
+export function mtlsAclPluginConfig(opts: {
+  allow: string[];
+  certificateAttribute?: MtlsCertificateAttribute;
+  certificateHeaderName?: string;
+}): Record<string, unknown> {
+  if (
+    opts.certificateAttribute &&
+    !mtlsCertificateAttributes.includes(opts.certificateAttribute)
+  ) {
+    throw new UnprocessableEntityError(
+      `Unsupported mtlsAcl certificateAttribute '${opts.certificateAttribute}'`
+    );
+  }
+
+  const certificateAttribute = opts.certificateAttribute
+    ? opts.certificateAttribute
+    : legacyCertificateHeaderAttributes[
+        (opts.certificateHeaderName || 'X-Client-Cert-I-DN').toLowerCase()
+      ];
+
+  if (!certificateAttribute) {
+    throw new UnprocessableEntityError(
+      `Unsupported mtlsAcl certificateHeaderName '${opts.certificateHeaderName}'`
+    );
+  }
+
+  return {
+    allow: opts.allow,
+    certificate_attribute: certificateAttribute,
   };
 }
 
