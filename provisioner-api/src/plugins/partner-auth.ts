@@ -32,14 +32,9 @@ export function registerPartnerAuth(
     throw new Error('Partner issuer and audience must be configured');
   }
   const url = new URL(config.jwksUrl);
-  const localIssuer = 'http://keycloak.localtest.me:9081/auth/realms/master';
-  const allowLocalHttp =
-    process.env.NODE_ENV === 'test' &&
-    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP === 'true' &&
-    config.issuer === localIssuer &&
-    url.href === `${localIssuer}/protocol/openid-connect/certs`;
-  if (url.protocol !== 'https:' && !allowLocalHttp) {
-    throw new Error('Partner JWKS URL must use HTTPS');
+  const localMode = ['development', 'test'].includes(process.env.NODE_ENV ?? '');
+  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && localMode)) {
+    throw new Error('Partner JWKS URL must use HTTPS (HTTP is allowed only in development/test)');
   }
   const getKey = key ?? createRemoteJWKSet(url);
   app.addHook('onRequest', async (request, reply) => {

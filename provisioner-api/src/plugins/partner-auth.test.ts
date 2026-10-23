@@ -42,7 +42,7 @@ test('partner authentication validates signature, claims and scope before handle
 
 test('partner configuration fails closed', () => {
   assert.throws(() => registerPartnerAuth(Fastify(), { ...config, audience: '' }));
-  assert.throws(() => registerPartnerAuth(Fastify(), { ...config, jwksUrl: 'http://issuer.example/keys' }));
+  assert.throws(() => registerPartnerAuth(Fastify(), { ...config, jwksUrl: 'ftp://issuer.example/keys' }));
 });
 
 test('empty required scope accepts a valid scopeless token but still rejects wrong audience', async (t) => {
@@ -61,26 +61,31 @@ test('empty required scope accepts a valid scopeless token but still rejects wro
 });
 
 
-test('local HTTP JWKS requires test mode, explicit opt-in and exact local realm', () => {
+test('HTTP JWKS is allowed only in explicit development or test mode', () => {
   const previousMode = process.env.NODE_ENV;
-  const previousFlag = process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP;
-  const issuer = 'http://keycloak.localtest.me:9081/auth/realms/master';
-  const local = { ...config, issuer, jwksUrl: `${issuer}/protocol/openid-connect/certs` };
+  const local = {
+    ...config,
+    issuer: 'http://localhost:8080/realms/demo',
+    jwksUrl: 'http://localhost:8080/realms/demo/protocol/openid-connect/certs',
+  };
   try {
-    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'true';
-    process.env.NODE_ENV = 'production';
+    for (const mode of ['development', 'test']) {
+      process.env.NODE_ENV = mode;
+      assert.doesNotThrow(() => registerPartnerAuth(Fastify(), local));
+      assert.doesNotThrow(() => registerPartnerAuth(Fastify(), {
+        ...local, jwksUrl: 'http://keycloak:9081/custom-realm/keys',
+      }));
+      assert.throws(() => registerPartnerAuth(Fastify(), { ...local, jwksUrl: 'ftp://localhost/keys' }));
+    }
+    for (const mode of ['production', 'staging', '']) {
+      process.env.NODE_ENV = mode;
+      assert.throws(() => registerPartnerAuth(Fastify(), local));
+      assert.doesNotThrow(() => registerPartnerAuth(Fastify(), config));
+    }
+    delete process.env.NODE_ENV;
     assert.throws(() => registerPartnerAuth(Fastify(), local));
-    process.env.NODE_ENV = 'test';
-    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'false';
-    assert.throws(() => registerPartnerAuth(Fastify(), local));
-    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'true';
-    assert.doesNotThrow(() => registerPartnerAuth(Fastify(), local));
-    assert.throws(() => registerPartnerAuth(Fastify(), { ...local, issuer: 'http://other.example' }));
-    assert.throws(() => registerPartnerAuth(Fastify(), { ...local, jwksUrl: 'http://other.example/keys' }));
   } finally {
     if (previousMode === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousMode;
-    if (previousFlag === undefined) delete process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP;
-    else process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = previousFlag;
   }
 });

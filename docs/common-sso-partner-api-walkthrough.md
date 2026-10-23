@@ -159,15 +159,15 @@ PARTNER_JWT_ISSUER=http://keycloak.localtest.me:9081/auth/realms/master
 PARTNER_JWT_AUDIENCE=sdx-partner-api
 PARTNER_JWT_JWKS_URL=http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/certs
 PARTNER_JWT_REQUIRED_SCOPE=
-PARTNER_JWT_ALLOW_LOCAL_HTTP=true
 ```
 
-The local HTTP option requires the accompanying implementation in
-[`partner-auth.ts`](../provisioner-api/src/plugins/partner-auth.ts): it accepts only
-this exact issuer/certificates URL when **both** `NODE_ENV=test` and the explicit
-opt-in are set. Compose sets `NODE_ENV=test`. HTTPS remains mandatory for other
-JWKS endpoints and production mode. Setting the flag against older code that
-always requires HTTPS will not work; rebuild from this checkout.
+The Partner API listener itself supports local HTTP. Its JWKS URL may also use
+HTTP when `NODE_ENV` is explicitly **`development`** or **`test`**; Compose sets
+`NODE_ENV=test`. There is no hard-coded Keycloak hostname, port or realm and no
+extra opt-in flag. Keep the issuer/JWKS URL aligned with the local realm actually
+used to issue the token. Production, unset and other modes require HTTPS JWKS.
+JWT signature, issuer, audience, expiry and required-claim checks still apply.
+Rebuild from this checkout if the running image still enforces the older rule.
 
 ```bash
 docker compose build provisioner
