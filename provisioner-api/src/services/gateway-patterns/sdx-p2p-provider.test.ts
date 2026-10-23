@@ -99,7 +99,7 @@ test('emits current trust verification and mTLS ACL plugin fields', () => {
       clientId: 'TEST.CLIENT',
       serviceId: 'TEST.SERVICE.v1',
       useSni: 'true',
-      upgrades: { verify: {}, mtlsAcl: {} },
+      upgrades: { verify: {}, mtlsAcl: {}, sign: {} },
     } as never,
     {
       upstreamUrl: 'https://upstream.example',
@@ -123,6 +123,14 @@ test('emits current trust verification and mTLS ACL plugin fields', () => {
   assert.deepEqual(verifyPlugin.config.allowed_jwks_uri_prefix, [
     'https://sdx.example/keysets/',
   ]);
+
+  const signPlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'trust-sign'
+  );
+  assert.equal(
+    signPlugin.config.jwks_uri,
+    'https://sdx.example/keysets/sdx.edge.provider-runtime.dev/.well-known/jwks.json'
+  );
 
   const mtlsAclPlugin = resources[0].plugins.find(
     (plugin: { name: string }) => plugin.name === 'mtls-acl'
