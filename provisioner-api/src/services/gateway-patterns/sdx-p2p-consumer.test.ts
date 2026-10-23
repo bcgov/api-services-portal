@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SDXP2PConsumerPattern } from './sdx-p2p-consumer.js';
 
-function evaluateConsumerPattern(upgrades: Record<string, unknown> = {}) {
+function evaluateConsumerPattern(upgrades: Record<string, unknown> = {}, stripPath?: boolean) {
   const pattern = new SDXP2PConsumerPattern({} as never);
   return pattern.eval(
     {
       connId: '11',
       clientId: 'TEST.CLIENT',
       serviceId: 'TEST.SERVICE.v1',
-      stripPath: false,
+      stripPath,
       upgrades,
     } as never,
     {
@@ -91,4 +91,15 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
     tokenExchangePlugin.config.target_privacy_zone_scope,
     'urn:ca:bc:gov:provider'
   );
+});
+
+
+test('preserves the SDX provider route prefix when stripPath is omitted', () => {
+  const resources = evaluateConsumerPattern();
+  assert.equal(resources[0].routes[0].strip_path, false);
+});
+
+test('honors an explicit stripPath override', () => {
+  const resources = evaluateConsumerPattern({}, true);
+  assert.equal(resources[0].routes[0].strip_path, true);
 });

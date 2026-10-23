@@ -1,3 +1,4 @@
+import { getRequiredEnvUrl } from '../../config/environments.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
   RuntimeGroup,
@@ -349,7 +350,7 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
     tags: tags,
     config: {
       allow: [`${data.clientRG.host}`],
-      certificate_header_name: 'X-Client-Cert-CN',
+      certificate_attribute: 'common_name',
     },
   };
 }
@@ -388,6 +389,7 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       direction: 'request',
       signature_header_key: 'X-Edge-Token',
+      allowed_jwks_uri_prefix: [getRequiredEnvUrl(data.serviceRG.environment, 'public_url', 'SDX public URL').replace(/\/$/, '') + '/keysets/'],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },

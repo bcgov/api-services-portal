@@ -1,0 +1,51 @@
+# Silver feature deployments use dev APS Authz. Build-specific overrides are
+# supplied by ci-build-provisioner-api.yaml; Gold uses its Terraform values.
+replicaCount: 1
+rollingUpdate:
+  maxUnavailable: 50%
+  maxSurge: 50%
+image:
+  repository: ghcr.io/bcgov/api-services-portal/provisioner-svc
+  pullPolicy: Always
+imagePullSecrets:
+  - name: dev-github-read-packages-creds
+containerPort: 3000
+extraPorts:
+  - name: partner
+    port: 3001
+ingress:
+  enabled: false
+serviceAccount:
+  create: false
+  name: asp-service-account
+env:
+  TZ:
+    value: America/Los_Angeles
+  PORT:
+    value: "3000"
+  PARTNER_PORT:
+    value: "3001"
+  PARTNER_JWT_ISSUER:
+    value: https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps
+  PARTNER_JWT_AUDIENCE:
+    value: sdx-partner-api
+  PARTNER_JWT_JWKS_URL:
+    value: https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps/protocol/openid-connect/certs
+  PARTNER_JWT_REQUIRED_SCOPE:
+    value: ""
+# The partner listener starts after the internal listener.
+startupProbe:
+  tcpSocket:
+    port: partner
+  periodSeconds: 5
+  failureThreshold: 30
+readinessProbe:
+  tcpSocket:
+    port: partner
+  periodSeconds: 5
+  timeoutSeconds: 2
+livenessProbe:
+  tcpSocket:
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 2
