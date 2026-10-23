@@ -77,6 +77,37 @@ Routes are served under the OpenAPI server prefix `/ds/api/sdxpro/v1`:
 - `POST /ds/api/sdxpro/v1/subsystems/{id}/access-requests`
   - declares the `provisionAllowedServices` callback (`PUT` to the partner)
 
+### R1 access migration prerequisite
+
+Before enabling the R1 integration-access callback, complete the APS-4992 audit and migration of legacy connection records so every `requesterDetails` object has an explicit `scopes` array. Submission and normal apply paths intentionally fail closed when scope data is missing or malformed. Delete/revocation remains available and skips malformed legacy rows with a structured warning so stale access can still be removed.
+
+After APS-4992 is deployed, backfill the Kong consumer identity before enabling strict token matching:
+
+1. Run `npm run datafix:aps-4994` and review the dry-run output. Each active R1 subsystem/environment must produce exactly one consumer whose `username` and `custom_id` match the OAuth client ID selected from the latest connection record.
+2. Resolve every reported mismatch. The command does not publish gateway changes without `--apply`.
+3. Run `npm run datafix:aps-4994 -- --apply` to re-provision one representative active connection per subsystem/environment.
+4. Re-run the dry run and require `failed: 0` before APS-4995 enables strict `azp`-to-`custom_id` matching.
+
+Deploy APS-4995 and APS-5006 only after APS-4992, APS-4994, and the
+required Kong plugin changes are live. The APS-5006 plugin schema must be
+available before the provisioner emits `target_privacy_zone_scope`. In each
+target Keycloak realm, permit the SDX token-exchange client to request every
+provider privacy-zone client scope used by that realm. Then use the enforcement
+migration as the release gate:
+
+1. Run `npm run datafix:aps-4995` without arguments. It previews every active,
+   approved R1 connection and verifies strict consumer `azp`/`custom_id`
+   matching, subsystem ACL enforcement, consumer-edge token exchange with
+   verified-subject scope transfer and the authoritative target provider
+   privacy-zone scope, provider JWT verification, and the absence of
+   provider-edge token exchange.
+2. Resolve every reported configuration or preview failure. The command does
+   not publish gateway changes without `--apply`.
+3. During the controlled cutover, run
+   `npm run datafix:aps-4995 -- --apply` to reprovision each validated active
+   R1 connection with the canonical policy-managed settings.
+4. Re-run the dry run and require `failed: 0` before enabling the release.
+
 Docs and spec:
 
 - `http://localhost:3000/docs` — Scalar API Reference
@@ -110,6 +141,18 @@ const products = await res.json();
 ```
 
 If env vars are missing for a given client, the app still starts; calls to that client throw a clear `not configured: missing X, Y` error.
+
+## Run the unit tests
+
+```bash
+npm test                                  # discovers every src/**/*.test.ts
+npx tsx --test src/path/to/file.test.ts   # single file
+```
+
+Tests are co-located with the code they cover as `*.test.ts` and use the built-in
+`node:test` runner with `node:assert/strict`. No registration is needed: new test
+files are picked up automatically. CI runs the suite on pull requests that touch
+`provisioner-api/` and before every provisioner image build.
 
 ## Generate and lint the spec
 

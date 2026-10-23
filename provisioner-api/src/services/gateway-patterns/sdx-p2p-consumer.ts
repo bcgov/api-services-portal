@@ -47,6 +47,7 @@ export interface ConsumerUpgrades {
     clientId: string;
     scopes: string[];
     audience: string;
+    targetPrivacyZoneScope: string;
   };
 }
 
@@ -397,6 +398,7 @@ function upgradeToTokenExchange(
       tokenEndpoint: tokenExchangeConfig?.tokenEndpoint,
       scopes: tokenExchangeConfig?.scopes,
       audience: tokenExchangeConfig?.audience,
+      targetPrivacyZoneScope: tokenExchangeConfig?.targetPrivacyZoneScope,
     }),
   };
 }

@@ -410,7 +410,7 @@ services:
     restart: on-failure:5
 
   sdx-ui:
-    image: ghcr.io/bcgov/aps-devops/sdx-ui:${SDX_UI_TAG:-v1.0.1}
+    image: ghcr.io/bcgov/aps-devops/sdx-ui:${SDX_UI_TAG:-dev}
     container_name: sdx-ui
     depends_on:
       - apsportal

@@ -16,7 +16,8 @@
     "spec:json": "tsx src/print-spec.ts --out openapi.json",
     "lint:spec": "npm run --silent spec:yaml && spectral lint --ruleset ../.spectral.yaml --fail-severity=warn openapi.yaml",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/services/integration-access-service.test.ts src/services/integration-access-contract.test.ts src/services/subsystems-service.test.ts && tsx --test src/services/gateway-patterns/sdx-keys.test.ts src/services/gateway-patterns/sdx-p2p-consumer.test.ts src/services/gateway-patterns/sdx-p2p-provider.test.ts src/services/gateway-patterns/sdx-subsystem.test.ts src/services/gateway-patterns/sdx-p2p-consumer-access.test.ts src/services/directory-service.test.ts && tsx src/config/environments.test.ts && tsx --test src/services/policies/SDX.R0.00/connection.test.ts && tsx --test src/services/policies/SDX.R1.00/security-config.test.ts src/services/policies/SDX.R1.00/connection.test.ts && tsx --test src/datafixes/aps-4790.test.ts src/datafixes/aps-4994.test.ts"
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "datafix:aps-4995": "node dist/datafix-aps-4995.js"
   },
   "dependencies": {
     "@cedar-policy/cedar-wasm": "^4.11.0",

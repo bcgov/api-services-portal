@@ -51,3 +51,31 @@ forbid ( // Deny if connection request is not approved
 unless {
     context.isApproved == true
 };
+
+forbid ( // Deny unless the managed R1 security settings are canonical
+    principal,
+    action == SDX::Action::"SubmitConnectionRequest",
+    resource is SDX::ConnectionRequest
+)
+unless {
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades has token &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.token.consumerMatch == true &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.token.consumerMatchClaim == "azp" &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.token.consumerMatchClaimCustomId == true &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.token.consumerMatchIgnoreNotFound == false &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.token.allowedAud == context.globals.environment.sdx_token_exchange_client_id &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades has acl &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades has tokenExchange &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.clientId == context.globals.environment.sdx_token_exchange_client_id &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.audience == context.requesterDetails.service.clientId &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.targetPrivacyZoneScope == context.requesterDetails.service.privacyZone &&
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes == [] &&
+    !(context.clientResources.gatewayPatterns["sdx-p2p-consumer-access.r1"] has integrationClientId) &&
+    context has serviceResources &&
+    context.serviceResources has gatewayPatterns &&
+    context.serviceResources.gatewayPatterns has "sdx-p2p-provider.r1" &&
+    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades has token &&
+    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades.token.consumerMatch == false &&
+    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades.token.allowedAud == context.requesterDetails.service.clientId &&
+    !(context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades has tokenExchange)
+};
