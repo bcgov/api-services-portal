@@ -382,9 +382,8 @@ export class IntegrationAccessService {
     const submissionId = submissionIds.at(-1) || 'unknown';
 
     const allowedConnections = selectedConnections.filter(
-      (connection) =>
-        connection.isApproved === (status === 'approved') &&
-        (status === 'pending' || connection.isActive === true)
+      // Approval determines the partner grant; activation controls routing.
+      (connection) => connection.isApproved === (status === 'approved')
     );
 
     this.logger?.debug('Connections allowed %j', allowedConnections);

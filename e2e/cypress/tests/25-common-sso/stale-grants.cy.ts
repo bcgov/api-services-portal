@@ -69,17 +69,17 @@ describe('Post-submission changes and grant reapproval', () => {
     })
   })
 
-  it('does not grant a rejected or inactive connection', () => {
-    run({
-      steps: [
-        { mutate: { approved: false, active: false }, url: grantsUrl(), callback: true },
-        { mutate: { approved: true }, url: grantsUrl(), callback: true },
-      ],
-    }).then((result) => {
-      expect(result.callbacks).have.length(2)
-      result.callbacks.forEach((callback: any) =>
-        expect(callback.body.resourceServers).deep.eq([])
-      )
+  for (const approved of [false, true]) {
+    it(`${approved ? 'returns the approved grant' : 'does not grant unapproved access'} while inactive through API and callback`, () => {
+      run({
+        steps: [{ mutate: { approved, active: false }, url: grantsUrl(), callback: true }],
+      }).then((result) => {
+        const expected = approved ? grant('dev') : []
+        expect(result.results[0].status).eq(200)
+        expect(result.results[0].body.resourceServers).deep.eq(expected)
+        expect(result.callbacks).have.length(1)
+        expect(result.callbacks[0].body.resourceServers).deep.eq(expected)
+      })
     })
-  })
+  }
 })

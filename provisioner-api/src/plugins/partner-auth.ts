@@ -32,7 +32,10 @@ export function registerPartnerAuth(
     throw new Error('Partner issuer and audience must be configured');
   }
   const url = new URL(config.jwksUrl);
-  if (url.protocol !== 'https:') throw new Error('Partner JWKS URL must use HTTPS');
+  const localMode = ['development', 'test'].includes(process.env.NODE_ENV ?? '');
+  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && localMode)) {
+    throw new Error('Partner JWKS URL must use HTTPS (HTTP is allowed only in development/test)');
+  }
   const getKey = key ?? createRemoteJWKSet(url);
   app.addHook('onRequest', async (request, reply) => {
     const match = /^Bearer ([^\s]+)$/i.exec(request.headers.authorization ?? '');

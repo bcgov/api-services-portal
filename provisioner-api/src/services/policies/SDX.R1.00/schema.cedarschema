@@ -29,7 +29,8 @@ namespace SDX {
                     service: {
                         integrationId?: String,
                         clientId: String,
-                        privacyZone?: String
+                        privacyZone?: String,
+                        version?: String
                     },
                     submissionId: String
                 },
