@@ -182,6 +182,17 @@ const ActivityPage: React.FC = () => {
               </Flex>
             </Center>
           )}
+          {isSuccess && Object.keys(feed).length > 0 && (
+            <Text
+              fontSize="sm"
+              color="bc-component"
+              textAlign="right"
+              mb={2}
+              data-testid="activity-feed-timezone-note"
+            >
+              Times shown in BC time (Pacific Time)
+            </Text>
+          )}
           {Object.keys(feed).map((date) => {
             return (
               <Box key={uid(date)}>
