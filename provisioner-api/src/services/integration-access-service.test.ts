@@ -579,24 +579,34 @@ test('does not derive callback metadata from unrelated connections', async () =>
   );
 });
 
-test('returns an empty callback when exact connections exist but none are active and approved', async () => {
-  const { service } = createService({
-    connections: [existingConnection({ isActive: false })],
+for (const isActive of [false, true]) {
+  test(`approved access includes the reviewed provider grant when isActive=${isActive}`, async () => {
+    const { service } = createService({
+      connections: [existingConnection({ isActive })],
+      catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    });
+    const response = await service.buildIntegrationAllowedServices(
+      'integration-a', 'dev', 'approved'
+    );
+    assert.deepEqual(response, {
+      integrationId: 'integration-a', clientId: 'oauth-client-a',
+      submissionId: 'submission-100-a',
+      resourceServers: [{
+        id: 'provider-a', environment: 'dev',
+        services: [{ name: 'service-a', version: '1.0.0', scopes: ['read'] }],
+      }],
+    });
   });
-
-  const response = await service.buildIntegrationAllowedServices(
-    'integration-a',
-    'dev',
-    'approved'
-  );
-
-  assert.deepEqual(response, {
-    integrationId: 'integration-a',
-    clientId: 'oauth-client-a',
-    submissionId: 'submission-100-a',
-    resourceServers: [],
+  test(`unapproved access has no approved grant when isActive=${isActive}`, async () => {
+    const { service } = createService({
+      connections: [existingConnection({ isApproved: false, isActive })],
+    });
+    const response = await service.buildIntegrationAllowedServices(
+      'integration-a', 'dev', 'approved'
+    );
+    assert.deepEqual(response.resourceServers, []);
   });
-});
+}
 
 test('keeps apply strict but skips malformed legacy rows during revocation', async () => {
   const warnings: unknown[][] = [];

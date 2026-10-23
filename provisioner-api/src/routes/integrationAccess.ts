@@ -79,7 +79,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'List allowed access',
           operationId: 'getSubsystemAllowedServices',
           description:
-            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; no matching connections return 404; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Approved versions remain pinned to the reviewed version.',
+            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; no matching connections return 404; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Provider approval is sufficient for an approved grant regardless of activation; activation controls runtime routing. Approved versions remain pinned to the reviewed version.',
           security,
           params: Type.Object({
             integrationId: Type.String({

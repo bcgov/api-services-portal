@@ -59,3 +59,28 @@ test('empty required scope accepts a valid scopeless token but still rejects wro
   }
   assert.equal((await app.inject('/partner')).statusCode, 401);
 });
+
+
+test('local HTTP JWKS requires test mode, explicit opt-in and exact local realm', () => {
+  const previousMode = process.env.NODE_ENV;
+  const previousFlag = process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP;
+  const issuer = 'http://keycloak.localtest.me:9081/auth/realms/master';
+  const local = { ...config, issuer, jwksUrl: `${issuer}/protocol/openid-connect/certs` };
+  try {
+    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'true';
+    process.env.NODE_ENV = 'production';
+    assert.throws(() => registerPartnerAuth(Fastify(), local));
+    process.env.NODE_ENV = 'test';
+    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'false';
+    assert.throws(() => registerPartnerAuth(Fastify(), local));
+    process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = 'true';
+    assert.doesNotThrow(() => registerPartnerAuth(Fastify(), local));
+    assert.throws(() => registerPartnerAuth(Fastify(), { ...local, issuer: 'http://other.example' }));
+    assert.throws(() => registerPartnerAuth(Fastify(), { ...local, jwksUrl: 'http://other.example/keys' }));
+  } finally {
+    if (previousMode === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousMode;
+    if (previousFlag === undefined) delete process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP;
+    else process.env.PARTNER_JWT_ALLOW_LOCAL_HTTP = previousFlag;
+  }
+});

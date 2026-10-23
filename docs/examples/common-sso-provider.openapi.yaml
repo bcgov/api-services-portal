@@ -1,0 +1,66 @@
+openapi: 3.1.1
+info:
+  title: Demo Ping
+  version: 1.0.0
+  summary: Read-only upstream for the local Common SSO partner walkthrough.
+  description: Returns the local mock timestamp and received request headers.
+  contact:
+    name: API Programme Services Team
+    url: https://developer.gov.bc.ca
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: /
+    description: Local SDX runtime
+tags:
+  - name: Demo
+    description: Read-only walkthrough operations.
+paths:
+  /ping:
+    get:
+      tags:
+        - Demo
+      operationId: demo_ping
+      summary: Check the walkthrough upstream
+      description: Read-only operation served by the Compose upstream mock.
+      security:
+        - common_sso:
+            - demo.read
+      responses:
+        '200':
+          description: The upstream received the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - currentTime
+                  - headers
+                properties:
+                  currentTime:
+                    type: string
+                    format: date-time
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '401':
+          description: Missing or invalid credentials.
+        '403':
+          description: The caller is not authorized for this operation.
+        '500':
+          description: An unexpected upstream failure occurred.
+        default:
+          description: An unexpected gateway or upstream response.
+components:
+  securitySchemes:
+    common_sso:
+      type: oauth2
+      description: Local test resource-token issuer; runtime enforcement is configured separately.
+      flows:
+        authorizationCode:
+          authorizationUrl: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/auth
+          tokenUrl: http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token
+          scopes:
+            demo.read: Read the walkthrough ping response.
