@@ -615,6 +615,33 @@ test('does not derive callback metadata from unrelated connections', async () =>
   );
 });
 
+test('returns an empty callback when the integration has connections only in another environment', async () => {
+  const { service } = createService({
+    connections: [
+      existingConnection({
+        environment: 'apsdev',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          submissionId: 'submission-apsdev',
+        },
+      }),
+    ],
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'apstst',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-apsdev',
+    resourceServers: [],
+  });
+});
+
 test('returns an empty callback when exact connections exist but none are active and approved', async () => {
   const { service } = createService({
     connections: [existingConnection({ isActive: false })],
