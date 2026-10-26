@@ -149,13 +149,17 @@ export async function buildApp(
   await app.register(servicesPlugin);
   await app.register(controllersPlugin);
   if (partner) {
-    registerPartnerAuth(
-      app,
-      options.auth ?? partnerAuthConfig(),
-      options.authKey
-    );
-    await app.register(registerResourceServersRoutes, { prefix: API_PREFIX });
-    await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
+    // Keep authentication encapsulated with the API routes so Scalar's public
+    // reference, assets and OpenAPI documents remain accessible without a token.
+    await app.register(async (partnerApi) => {
+      registerPartnerAuth(
+        partnerApi,
+        options.auth ?? partnerAuthConfig(),
+        options.authKey
+      );
+      await partnerApi.register(registerResourceServersRoutes, { prefix: API_PREFIX });
+      await partnerApi.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
+    });
   } else {
     await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
     await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
