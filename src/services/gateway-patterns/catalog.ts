@@ -159,6 +159,7 @@ export async function GetCatalog(
         name: c.subsystem.name,
         description: c.subsystem.description,
         clientId: `${member.memberClass}.${member.memberId}.${c.subsystem.name}`,
+        privacyZone: c.subsystem.privacyZone,
         organization: {
           name: c.organization.name,
         },
