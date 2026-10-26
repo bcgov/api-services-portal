@@ -244,7 +244,7 @@ Validation:
 npm run typecheck
 node --import tsx --test $(rg --files src -g '*.test.ts')
 # In e2e, with both packages' dependencies and Cypress installed:
-npx cypress run --config-file cypress.css.config.ts --browser electron --headless
+npx cypress run --config-file cypress.config.ts --spec "cypress/tests/25-common-sso/*.cy.ts" --browser electron --headless
 ```
 
 The specs under `e2e/cypress/tests/25-common-sso` are grouped into five files:

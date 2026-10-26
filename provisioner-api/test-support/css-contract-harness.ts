@@ -2,6 +2,9 @@
 // Only the external SDX catalog/connection store, Feed and CSS are HTTP fixtures.
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { buildApp } from '../src/app.js';
 import type {
@@ -12,6 +15,20 @@ import type {
 
 const input = JSON.parse(process.argv[2]);
 process.env.LOG_LEVEL = 'silent';
+// R1 defaults read deployment configuration. Keep contract runs independent of
+// the developer's environment and supply both fixture environments explicitly.
+const configDirectory = mkdtempSync(join(tmpdir(), 'css-contract-'));
+const configPath = join(configDirectory, 'environments.json');
+const environmentConfig = {
+  client_id: 'fixture-provisioner',
+  oauth_token_url: 'https://control.example/token',
+  kong_admin_url: 'http://fixture-kong',
+  sdx_token_exchange_client_id: 'fixture-exchange',
+  sdx_token_exchange_token_url: 'https://css.example/protocol/openid-connect/token',
+  sdx_trusted_issuers: ['https://css.example'],
+};
+writeFileSync(configPath, JSON.stringify({ dev: environmentConfig, test: environmentConfig }));
+process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
 const consumer: SubsystemEntry = {
   name: 'Consumer',
   clientId: 'consumer',
@@ -326,6 +343,7 @@ try {
     })
   );
 } finally {
+  rmSync(configDirectory, { recursive: true, force: true });
   await app.close();
   await new Promise<void>((resolve, reject) =>
     mock.close((error) => (error ? reject(error) : resolve()))
