@@ -315,9 +315,40 @@ export class IntegrationAccessService {
       .sort(compareConnections);
 
     if (integrationConnections.length === 0) {
-      throw new NotFoundError(
-        `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
+      // Partner clients query each configured environment in turn. Once the
+      // integration is known to SDX, an environment with no connections is an
+      // empty collection rather than a missing resource. Use the integration's
+      // identity from another environment, but continue to reject unknown or
+      // ambiguous integration identities.
+      const integrationIdentity = selectAuthoritativeClientConnections(
+        connections.filter(
+          (connection) =>
+            connection.clientId === subsystem.clientId &&
+            connection.requesterDetails?.client?.integrationId ===
+              normalizedIntegrationId
+        ),
+        {
+          subsystemId: subsystem.clientId,
+          integrationId: normalizedIntegrationId,
+          environment: normalizedEnvironment,
+        },
+        this.logger
       );
+      if (!integrationIdentity) {
+        throw new NotFoundError(
+          `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
+        );
+      }
+
+      const submissionId = latestSubmissionId(
+        integrationIdentity.connections
+      );
+      return {
+        integrationId: normalizedIntegrationId,
+        clientId: integrationIdentity.clientId,
+        submissionId,
+        resourceServers: [],
+      };
     }
 
     const metadataConnections = integrationConnections.filter((connection) => {
@@ -367,19 +398,7 @@ export class IntegrationAccessService {
       }
     );
 
-    const submissionIds = uniqueSorted(
-      selectedConnections
-        .map((connection) => connection.requesterDetails?.submissionId)
-        .filter(
-          (submissionId): submissionId is string =>
-            typeof submissionId === 'string' && submissionId.trim().length > 0
-        )
-        .map((submissionId) => submissionId.trim())
-    );
-    // Generated submission IDs contain their creation timestamp, so the
-    // lexicographically greatest matching ID is the most recent. Keep the
-    // legacy fallback for records created before submission IDs were stored.
-    const submissionId = submissionIds.at(-1) || 'unknown';
+    const submissionId = latestSubmissionId(selectedConnections);
 
     const allowedConnections = selectedConnections.filter(
       (connection) =>
@@ -470,6 +489,22 @@ export class IntegrationAccessService {
       resourceServers,
     };
   }
+}
+
+function latestSubmissionId(connections: ConnectionRequest[]): string {
+  const submissionIds = uniqueSorted(
+    connections
+      .map((connection) => connection.requesterDetails?.submissionId)
+      .filter(
+        (submissionId): submissionId is string =>
+          typeof submissionId === 'string' && submissionId.trim().length > 0
+      )
+      .map((submissionId) => submissionId.trim())
+  );
+  // Generated submission IDs contain their creation timestamp, so the
+  // lexicographically greatest matching ID is the most recent. Keep the
+  // legacy fallback for records created before submission IDs were stored.
+  return submissionIds.at(-1) || 'unknown';
 }
 
 function normalizeRequestedServices(
