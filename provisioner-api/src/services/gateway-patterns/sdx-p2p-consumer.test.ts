@@ -127,6 +127,27 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
     tokenExchangePlugin.config.target_privacy_zone_scope,
     'urn:ca:bc:gov:provider'
   );
+  assert.equal(tokenExchangePlugin.config.audience, 'TEST.PROVIDER');
+});
+
+test('omits the deprecated audience from new token-exchange configurations', () => {
+  const resources = evaluateConsumerPattern({
+    token: {
+      allowedAud: 'sdx-client',
+      allowedIss: ['https://issuer.example'],
+    },
+    tokenExchange: {
+      clientId: 'sdx-client',
+      tokenEndpoint: 'https://issuer.example/token',
+      scopes: [],
+      targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
+    },
+  });
+
+  const tokenExchangePlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'token-exchange'
+  );
+  assert.equal('audience' in tokenExchangePlugin.config, false);
 });
 
 test('emits the trusted JWKS prefix required by the current plugin', () => {

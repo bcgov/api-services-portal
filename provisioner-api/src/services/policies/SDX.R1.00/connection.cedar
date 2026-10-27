@@ -67,7 +67,6 @@ unless {
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades has acl &&
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades has tokenExchange &&
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.clientId == context.globals.environment.sdx_token_exchange_client_id &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.audience == context.requesterDetails.service.clientId &&
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.targetPrivacyZoneScope == context.requesterDetails.service.privacyZone &&
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].upgrades.tokenExchange.scopes == [] &&
     !(context.clientResources.gatewayPatterns["sdx-p2p-consumer-access.r1"] has integrationClientId) &&
@@ -76,6 +75,6 @@ unless {
     context.serviceResources.gatewayPatterns has "sdx-p2p-provider.r1" &&
     context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades has token &&
     context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades.token.consumerMatch == false &&
-    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades.token.allowedAud == context.requesterDetails.service.clientId &&
+    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades.token.allowedAud == context.globals.environment.sdx_token_exchange_client_id &&
     !(context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].upgrades has tokenExchange)
 };

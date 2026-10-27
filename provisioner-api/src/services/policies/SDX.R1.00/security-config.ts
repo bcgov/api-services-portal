@@ -26,7 +26,6 @@ export interface R1SecurityConfig {
       clientId: string;
       tokenEndpoint: string;
       scopes: string[];
-      audience: string;
       targetPrivacyZoneScope: string;
     };
   };
@@ -203,13 +202,12 @@ export function buildR1SecurityConfig({
         clientId: normalizedExchangeClientId,
         tokenEndpoint,
         scopes: [],
-        audience: providerAudience,
         targetPrivacyZoneScope: providerPrivacyZoneScope,
       },
     },
     provider: {
       token: {
-        allowedAud: providerAudience,
+        allowedAud: normalizedExchangeClientId,
         allowedIss: trustedIssuers,
         consumerMatch: false,
       },
@@ -285,7 +283,7 @@ export function enforceR1SecurityConfig(
     input.environment,
     'clientResources.gatewayPatterns.sdx-p2p-consumer.r1.upgrades.acl'
   );
-  setManagedSetting(
+  setManagedTokenExchange(
     consumerUpgrades,
     'tokenExchange',
     security.consumer.tokenExchange,
@@ -311,16 +309,87 @@ export function enforceR1SecurityConfig(
       'provider-edge token exchange is not allowed for managed SDX.R1.00 connections'
     );
   }
-  setManagedSetting(
+  setManagedProviderToken(
     providerUpgrades,
     'token',
     security.provider.token,
+    providerAudience(input.service),
     input.environment,
     'serviceResources.gatewayPatterns.sdx-p2p-provider.r1.upgrades.token'
   );
   providerPattern.upgrades = providerUpgrades;
 
   return { clientResources, serviceResources };
+}
+
+/**
+ * R1 no longer generates a provider audience. Preserve a non-empty audience
+ * already stored on a connection so older consumer configurations continue to
+ * work, while keeping every active token-exchange setting authoritative.
+ */
+function setManagedTokenExchange(
+  target: Record<string, unknown>,
+  key: string,
+  canonical: Record<string, unknown>,
+  environment: string | undefined,
+  path: string
+): void {
+  if (!(key in target)) {
+    target[key] = canonical;
+    return;
+  }
+
+  const existing = recordOrEmpty(target[key], environment, path);
+  const { audience, ...managed } = existing;
+  if (!isDeepStrictEqual(managed, canonical)) {
+    throw managedSettingError(
+      environment,
+      path,
+      'conflicts with the authoritative R1 security configuration'
+    );
+  }
+  if (audience !== undefined && !nonBlank(audience)) {
+    throw managedSettingError(
+      environment,
+      `${path}.audience`,
+      'must be a non-empty string when retained for backward compatibility'
+    );
+  }
+
+  target[key] =
+    audience === undefined ? canonical : { ...canonical, audience };
+}
+
+/** Upgrade the former provider-client audience to the SDX exchange client. */
+function setManagedProviderToken(
+  target: Record<string, unknown>,
+  key: string,
+  canonical: Record<string, unknown>,
+  formerProviderAudience: string | undefined,
+  environment: string | undefined,
+  path: string
+): void {
+  if (key in target && !isDeepStrictEqual(target[key], canonical)) {
+    const formerCanonical = {
+      ...canonical,
+      allowedAud: formerProviderAudience,
+    };
+    if (
+      !formerProviderAudience ||
+      !isDeepStrictEqual(target[key], formerCanonical)
+    ) {
+      throw managedSettingError(
+        environment,
+        path,
+        'conflicts with the authoritative R1 security configuration'
+      );
+    }
+  }
+  target[key] = canonical;
+}
+
+function providerAudience(service: ServiceCatalogEntry): string | undefined {
+  return nonBlank(service.subsystem?.clientId);
 }
 
 function setManagedSetting(
