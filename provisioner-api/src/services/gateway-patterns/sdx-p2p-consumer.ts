@@ -46,7 +46,7 @@ export interface ConsumerUpgrades {
     tokenEndpoint: string;
     clientId: string;
     scopes: string[];
-    audience: string;
+    audience?: string;
     targetPrivacyZoneScope: string;
   };
 }
