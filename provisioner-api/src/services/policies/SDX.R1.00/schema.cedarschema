@@ -113,6 +113,7 @@ namespace SDX {
                 combinedScopes: Set<String>,
                 action: String,
                 globals: {
+                    managedApplicationScopes: Set<String>,
                     environment: {
                         client_id: String,
                         oauth_token_url: String,
