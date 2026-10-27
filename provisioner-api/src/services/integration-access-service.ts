@@ -23,6 +23,7 @@ import {
   type PolicyRequesterDetails,
 } from './policy-service.js';
 import { selectSubsystemForIntegration } from './subsystems-service.js';
+import { managedApplicationScopesForEnvironment } from './policies/SDX.R1.00/security-config.js';
 
 interface NormalizedServiceRequest {
   environment: string;
@@ -133,6 +134,10 @@ export class IntegrationAccessService {
     // prevents a bad service later in the request from leaving earlier services
     // partially submitted.
     const normalizedRequests = normalizeRequestedServices(input);
+    const scopeCatalog =
+      policyVersion === 'SDX.R1.00'
+        ? await this.api.listCatalogScopes()
+        : undefined;
     const preparedRequests: PreparedServiceRequest[] = [];
     const services = new Map<string, ServiceCatalogEntry>();
 
@@ -172,7 +177,13 @@ export class IntegrationAccessService {
           policyVersion,
           subsystem,
           service,
-          requesterDetails
+          requesterDetails,
+          scopeCatalog
+            ? managedApplicationScopesForEnvironment(
+                scopeCatalog,
+                service.environment
+              )
+            : undefined
         ),
       });
     }
