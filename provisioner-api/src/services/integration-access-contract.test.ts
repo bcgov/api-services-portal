@@ -1,3 +1,4 @@
+import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { Value } from '@sinclair/typebox/value';
@@ -92,8 +93,19 @@ function serviceWithApi(api: Record<string, unknown>) {
   return service;
 }
 
+async function partnerApp() {
+  const { publicKey, privateKey } = await generateKeyPair('RS256');
+  const auth = { issuer: 'https://issuer.example', audience: 'sdx', jwksUrl: 'https://issuer.example/keys', requiredScope: 'sdx:partner' };
+  const app = await buildApp({ listener: 'partner', auth,
+    authKey: createLocalJWKSet({ keys: [{ ...await exportJWK(publicKey), kid: 'test' }] }),
+  });
+  const token = await new SignJWT({ scope: auth.requiredScope }).setProtectedHeader({ alg: 'RS256', kid: 'test' })
+    .setIssuer(auth.issuer).setAudience(auth.audience).setSubject('css').setIssuedAt().setExpirationTime('5m').sign(privateKey);
+  return { app, headers: { authorization: `Bearer ${token}` } };
+}
+
 test('partner API documents the callback path implemented by CSS', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   try {
     await app.ready();
     const spec = app.swagger() as any;
@@ -164,7 +176,7 @@ test('access requests reject a supplied version that differs from the catalog', 
 });
 
 test('route accepts a matching version and persists the reviewed version', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   const upserts: any[] = [];
 
   try {
@@ -190,6 +202,7 @@ test('route accepts a matching version and persists the reviewed version', async
     services.activity.publishActivity = async () => undefined;
 
     const response = await app.inject({
+      headers,
       method: 'POST',
       url: '/v1/integrations/css-integration/access-requests',
       payload: requestWithVersion('2.4.0'),
@@ -207,7 +220,7 @@ test('route accepts a matching version and persists the reviewed version', async
 });
 
 test('route schema rejects a supplied blank version before the handler', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   let called = false;
 
   try {
@@ -222,6 +235,7 @@ test('route schema rejects a supplied blank version before the handler', async (
     assert.equal(Value.Check(NewIntegrationAccessRequest, blankRequest), false);
 
     const response = await app.inject({
+      headers,
       method: 'POST',
       url: '/v1/integrations/css-integration/access-requests',
       payload: blankRequest,

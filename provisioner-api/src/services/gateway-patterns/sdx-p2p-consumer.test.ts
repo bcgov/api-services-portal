@@ -18,7 +18,7 @@ before(() => {
       dev: {
         oauth_token_url: 'https://issuer.example/token',
         kong_admin_url: 'http://kong-admin',
-        public_url: 'https://sdx.example/',
+        public_url: 'https://sdx.example//',
       },
     })
   );
@@ -37,14 +37,14 @@ after(() => {
   rmSync(environmentDirectory, { recursive: true, force: true });
 });
 
-function evaluateConsumerPattern(upgrades: Record<string, unknown> = {}) {
+function evaluateConsumerPattern(upgrades: Record<string, unknown> = {}, stripPath?: boolean) {
   const pattern = new SDXP2PConsumerPattern({} as never);
   return pattern.eval(
     {
       connId: '11',
       clientId: 'TEST.CLIENT',
       serviceId: 'TEST.SERVICE.v1',
-      stripPath: false,
+      stripPath,
       upgrades,
     } as never,
     {
@@ -138,4 +138,15 @@ test('emits the trusted JWKS prefix required by the current plugin', () => {
   assert.deepEqual(verifyPlugin.config.allowed_jwks_uri_prefix, [
     'https://sdx.example/keysets/',
   ]);
+});
+
+
+test('preserves the SDX provider route prefix when stripPath is omitted', () => {
+  const resources = evaluateConsumerPattern();
+  assert.equal(resources[0].routes[0].strip_path, false);
+});
+
+test('honors an explicit stripPath override', () => {
+  const resources = evaluateConsumerPattern({}, true);
+  assert.equal(resources[0].routes[0].strip_path, true);
 });

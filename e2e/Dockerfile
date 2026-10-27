@@ -10,6 +10,16 @@ RUN --mount=type=secret,id=npm_token \
 
 RUN npx nyc instrument --compact=false . --in-place
 
+# Common SSO task runs the provisioner against isolated HTTP fixtures.
+WORKDIR /provisioner-api
+COPY provisioner-api/package.json provisioner-api/package-lock.json ./
+RUN --mount=type=secret,id=npm_token \
+  ( [ ! -s /run/secrets/npm_token ] || npm config set //registry.npmjs.org/:_authToken="$(cat /run/secrets/npm_token)" ) && \
+  npm ci
+COPY provisioner-api/tsconfig.json ./
+COPY provisioner-api/src ./src
+COPY provisioner-api/test-support ./test-support
+
 # Cypress E2E
 WORKDIR /e2e
 
