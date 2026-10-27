@@ -1,0 +1,196 @@
+const { test, beforeEach, afterEach } = require('node:test');
+const assert = require('node:assert/strict');
+const http = require('node:http');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+
+process.env.LOG_LEVEL = 'error';
+
+const { transfers } = require('../utils/transfers');
+
+/**
+ * A fake paged API. Kong style (default) answers `{ data, next }`; CKAN style
+ * answers `{ result }` and pages with `limit`/`offset` until a page is empty.
+ * Every page after the first waits `pageDelayMs`, and `failOffset` fails the
+ * page starting at that offset.
+ */
+function fakeApi({
+  records = [],
+  pageSize = 2,
+  style = 'kong',
+  pageDelayMs = 0,
+  failOffset = null,
+} = {}) {
+  const requests = [];
+  const server = http.createServer(async (req, res) => {
+    requests.push(req.url);
+    const u = new URL(req.url, 'http://api');
+    const offset = Number(u.searchParams.get('offset') ?? 0);
+    const limit = Number(u.searchParams.get('limit') ?? pageSize);
+    if (offset > 0 && pageDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, pageDelayMs));
+    }
+    if (offset === failOffset) {
+      res.writeHead(500);
+      return res.end();
+    }
+    const page = records.slice(offset, offset + limit);
+    let body;
+    if (style === 'ckan') {
+      body = { result: page };
+    } else {
+      let next = null;
+      if (offset + limit < records.length) {
+        u.searchParams.set('offset', String(offset + limit));
+        next = `${u.pathname}?${u.searchParams.toString()}`;
+      }
+      body = { data: page, next };
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(body));
+  });
+  return { server, requests };
+}
+
+function listen(server) {
+  return new Promise((resolve) =>
+    server.listen(0, '127.0.0.1', () =>
+      resolve(`http://127.0.0.1:${server.address().port}`)
+    )
+  );
+}
+
+const ids = (n, prefix = 'rec') =>
+  Array.from({ length: n }, (_, i) => ({ id: `${prefix}-${i}` }));
+
+const pageFiles = (dir, filename) =>
+  fs
+    .readdirSync(dir)
+    .filter((f) => new RegExp(`^${filename}-\\d+\\.json$`).test(f))
+    .sort();
+
+let server;
+let workingPath;
+
+beforeEach(() => {
+  server = null;
+  workingPath = fs.mkdtempSync(path.join(os.tmpdir(), 'feeder-xfer-test-'));
+});
+
+afterEach(async () => {
+  if (server) {
+    await new Promise((resolve) => server.close(resolve));
+  }
+  fs.rmSync(workingPath, { recursive: true, force: true });
+});
+
+test('copy resolves only after every Kong page is written', async () => {
+  const api = fakeApi({ records: ids(7), pageSize: 2, pageDelayMs: 50 });
+  server = api.server;
+  const baseUrl = await listen(server);
+  const exceptions = [];
+  const xfer = transfers(workingPath, baseUrl, exceptions);
+
+  await xfer.copy('/services', 'gw-services');
+
+  assert.deepEqual(exceptions, []);
+  assert.deepEqual(pageFiles(workingPath, 'gw-services'), [
+    'gw-services-0.json',
+    'gw-services-1.json',
+    'gw-services-2.json',
+    'gw-services-3.json',
+  ]);
+  assert.deepEqual(
+    xfer.get_json_content('gw-services').data.map((r) => r.id),
+    ids(7).map((r) => r.id)
+  );
+});
+
+test('copy resolves only after every CKAN offset page is written', async () => {
+  const api = fakeApi({
+    records: ids(5),
+    style: 'ckan',
+    pageDelayMs: 50,
+  });
+  server = api.server;
+  const baseUrl = await listen(server);
+  const exceptions = [];
+  const xfer = transfers(workingPath, baseUrl, exceptions);
+
+  await xfer.copy('/api/action/group_list?limit=2&offset=0', 'group-keys');
+
+  assert.deepEqual(exceptions, []);
+  // 3 pages of records, then the empty page that ends the chain
+  assert.equal(api.requests.length, 4);
+  assert.deepEqual(
+    xfer.get_list_ids('group-keys').data.map((r) => r.id),
+    ids(5).map((r) => r.id)
+  );
+});
+
+test('copy records a failed later page before it resolves', async () => {
+  const api = fakeApi({
+    records: ids(6),
+    pageSize: 2,
+    pageDelayMs: 50,
+    failOffset: 4,
+  });
+  server = api.server;
+  const baseUrl = await listen(server);
+  const exceptions = [];
+  const xfer = transfers(workingPath, baseUrl, exceptions);
+
+  await xfer.copy('/plugins', 'gw-plugins');
+
+  assert.equal(exceptions.length, 1);
+  assert.equal(exceptions[0].filename, 'gw-plugins');
+});
+
+test('copy removes pages left over from an earlier run', async () => {
+  // an earlier run wrote 5 pages of records that have since been deleted
+  for (let i = 0; i < 5; i++) {
+    fs.writeFileSync(
+      `${workingPath}/gw-services-${i}.json`,
+      JSON.stringify({ data: [{ id: `stale-${i}` }], next: null })
+    );
+  }
+  fs.writeFileSync(
+    `${workingPath}/gw-routes-0.json`,
+    JSON.stringify({ data: [{ id: 'route-0' }], next: null })
+  );
+  const api = fakeApi({ records: ids(3), pageSize: 2 });
+  server = api.server;
+  const baseUrl = await listen(server);
+  const xfer = transfers(workingPath, baseUrl, []);
+
+  await xfer.copy('/services', 'gw-services');
+
+  assert.deepEqual(pageFiles(workingPath, 'gw-services'), [
+    'gw-services-0.json',
+    'gw-services-1.json',
+  ]);
+  assert.deepEqual(
+    xfer.get_json_content('gw-services').data.map((r) => r.id),
+    ['rec-0', 'rec-1', 'rec-2']
+  );
+  // other entities' pages are left alone
+  assert.deepEqual(pageFiles(workingPath, 'gw-routes'), ['gw-routes-0.json']);
+});
+
+test('copy leaves no stale pages when the first page fails', async () => {
+  fs.writeFileSync(
+    `${workingPath}/gw-services-0.json`,
+    JSON.stringify({ data: [{ id: 'stale-0' }], next: null })
+  );
+  const api = fakeApi({ records: ids(3), failOffset: 0 });
+  server = api.server;
+  const baseUrl = await listen(server);
+  const exceptions = [];
+  const xfer = transfers(workingPath, baseUrl, exceptions);
+
+  await xfer.copy('/services', 'gw-services');
+
+  assert.equal(exceptions.length, 1);
+  assert.deepEqual(xfer.get_json_content('gw-services').data, []);
+});
