@@ -20,6 +20,10 @@ function transfers(workingPath, baseUrl, exceptions) {
 
     copy: async function (_url, filename, index = 0) {
       log.debug('[copy] %s%s', baseUrl, _url);
+      if (index == 0) {
+        // a new copy starts at page 0, so drop any pages from an earlier run
+        this.clear_pages(filename);
+      }
       const out = workingPath + '/' + filename + '-' + index + '.json';
       return fetch(baseUrl + _url)
         .then(checkStatus)
@@ -96,6 +100,23 @@ function transfers(workingPath, baseUrl, exceptions) {
             error: '' + err,
           });
         });
+    },
+
+    // remove <filename>-0.json, -1.json, ... up to the first missing page,
+    // which is every page get_json_content() and get_list_ids() would read
+    clear_pages: function (filename) {
+      let index = 0;
+      while (true) {
+        const page = workingPath + '/' + filename + '-' + index + '.json';
+        if (!fs.existsSync(page)) {
+          if (index > 0) {
+            log.debug('[clear_pages] %s removed %d pages', filename, index);
+          }
+          return;
+        }
+        fs.unlinkSync(page);
+        index++;
+      }
     },
 
     read: function (filename) {
