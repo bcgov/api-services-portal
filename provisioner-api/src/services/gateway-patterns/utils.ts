@@ -172,7 +172,9 @@ export function edgeTokenExchangePluginConfig(opts: {
     token_endpoint: opts.tokenEndpoint,
     scopes: opts.scopes,
     scope_source: 'verified_subject_token',
-    audience: opts.audience,
+    ...(opts.audience
+      ? { audience: opts.audience }
+      : {}),
     target_privacy_zone_scope: opts.targetPrivacyZoneScope,
     keyset_name: edgeKeySetName(opts.runtimeGroupName, opts.environment),
     private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',

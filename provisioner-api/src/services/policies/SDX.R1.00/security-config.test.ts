@@ -88,13 +88,12 @@ test('builds canonical R1 security settings from trusted sources', () => {
           tokenEndpoint:
             'https://issuer.example/realms/standard/protocol/openid-connect/token',
           scopes: [],
-          audience: 'MIN.PROVIDER.API',
           targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
         },
       },
       provider: {
         token: {
-          allowedAud: 'MIN.PROVIDER.API',
+          allowedAud: 'sdx-edge-exchange',
           allowedIss: ['https://issuer.example/realms/standard'],
           consumerMatch: false,
         },
@@ -340,11 +339,10 @@ test('R1 defaults include the canonical managed security settings', () => {
       tokenEndpoint:
         'https://issuer.example/realms/standard/protocol/openid-connect/token',
       scopes: [],
-      audience: 'MIN.PROVIDER.API',
       targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
     });
     assert.deepEqual(provider.upgrades?.token, {
-      allowedAud: 'MIN.PROVIDER.API',
+      allowedAud: 'sdx-edge-exchange',
       allowedIss: ['https://issuer.example/realms/standard'],
       consumerMatch: false,
     });
@@ -409,11 +407,85 @@ test('expands legacy R1 resource snapshots with managed settings', () => {
     tokenEndpoint:
       'https://issuer.example/realms/standard/protocol/openid-connect/token',
     scopes: [],
-    audience: 'MIN.PROVIDER.API',
     targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
   });
   assert.deepEqual(provider.upgrades.token, {
-    allowedAud: 'MIN.PROVIDER.API',
+    allowedAud: 'sdx-edge-exchange',
+    allowedIss: ['https://issuer.example/realms/standard'],
+    consumerMatch: false,
+  });
+});
+
+test('preserves a legacy configured audience while upgrading provider validation', () => {
+  const result = enforceR1SecurityConfig({
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    clientResources: {
+      gatewayPatterns: {
+        'sdx-p2p-consumer.r1': {
+          upgrades: {
+            token: {
+              allowedAud: 'sdx-edge-exchange',
+              allowedIss: ['https://issuer.example/realms/standard'],
+              consumerMatch: true,
+              consumerMatchClaim: 'azp',
+              consumerMatchClaimCustomId: true,
+              consumerMatchIgnoreNotFound: false,
+            },
+            acl: {},
+            tokenExchange: {
+              clientId: 'sdx-edge-exchange',
+              tokenEndpoint:
+                'https://issuer.example/realms/standard/protocol/openid-connect/token',
+              scopes: [],
+              audience: 'legacy-provider-audience',
+              targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
+            },
+          },
+        },
+        'sdx-p2p-consumer-access.r1': {},
+      },
+    },
+    serviceResources: {
+      gatewayPatterns: {
+        'sdx-p2p-provider.r1': {
+          upgrades: {
+            token: {
+              allowedAud: 'MIN.PROVIDER.API',
+              allowedIss: ['https://issuer.example/realms/standard'],
+              consumerMatch: false,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const consumer = (
+    result.clientResources.gatewayPatterns as Record<
+      string,
+      { upgrades: Record<string, unknown> }
+    >
+  )['sdx-p2p-consumer.r1'];
+  const provider = (
+    result.serviceResources.gatewayPatterns as Record<
+      string,
+      { upgrades: Record<string, unknown> }
+    >
+  )['sdx-p2p-provider.r1'];
+
+  assert.deepEqual(consumer.upgrades.tokenExchange, {
+    clientId: 'sdx-edge-exchange',
+    tokenEndpoint:
+      'https://issuer.example/realms/standard/protocol/openid-connect/token',
+    scopes: [],
+    targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
+    audience: 'legacy-provider-audience',
+  });
+  assert.deepEqual(provider.upgrades.token, {
+    allowedAud: 'sdx-edge-exchange',
     allowedIss: ['https://issuer.example/realms/standard'],
     consumerMatch: false,
   });
@@ -550,6 +622,18 @@ test('Cedar requires the canonical managed R1 security shape', () => {
 
   const allowed = policy.validateConnectionRequest('SDX.R1.00', context);
   assert.equal(allowed.allowed, true, JSON.stringify(allowed));
+
+  const legacyAudience = structuredClone(context);
+  (
+    legacyAudience.clientResources.gatewayPatterns[
+      'sdx-p2p-consumer.r1'
+    ].upgrades.tokenExchange as { audience?: string }
+  ).audience = 'legacy-provider-audience';
+  const legacyAllowed = policy.validateConnectionRequest(
+    'SDX.R1.00',
+    legacyAudience
+  );
+  assert.equal(legacyAllowed.allowed, true, JSON.stringify(legacyAllowed));
 
   const invalid = structuredClone(context);
   (
