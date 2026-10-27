@@ -20,8 +20,42 @@ import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
+import { cloneDeep, get, has, set, unset } from 'lodash';
 
 const logger = Logger('batch.connection');
+
+const R1_MANAGED_CLIENT_RESOURCE_PATHS = [
+  ['gatewayPatterns', 'sdx-p2p-consumer-access.r1', 'integrationClientId'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'token'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'acl'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'tokenExchange'],
+];
+const R1_MANAGED_SERVICE_RESOURCE_PATHS = [
+  ['gatewayPatterns', 'sdx-p2p-provider.r1', 'upgrades', 'token'],
+  ['gatewayPatterns', 'sdx-p2p-provider.r1', 'upgrades', 'tokenExchange'],
+];
+
+const resourceObject = (value: any): any =>
+  typeof value === 'string' ? JSON.parse(value) : value || {};
+
+const preserveManagedR1Settings = (
+  submitted: any,
+  stored: any,
+  managedPaths: string[][]
+): any => {
+  const result = cloneDeep(resourceObject(submitted));
+  const current = resourceObject(stored);
+
+  managedPaths.forEach((path) => {
+    if (has(current, path)) {
+      set(result, path, cloneDeep(get(current, path)));
+    } else {
+      unset(result, path);
+    }
+  });
+
+  return result;
+};
 
 export interface ConnectionRequestUpdateParams {
   client: KeystoneSubsystem;
@@ -72,17 +106,37 @@ class ConnectionService {
       body.environment = serviceSpec.environment as any;
     }
 
+    const existing = await this.findConnection(
+      (context as any).createContext({ skipAccessControl: true }),
+      body.clientId,
+      body.serviceId
+    );
+
+    // Preserve each R1 setting managed by the authoritative policy while
+    // retaining submitted changes to resource settings callers may customize.
+    if (existing?.policyVersion === 'SDX.R1.00') {
+      if (body.clientResources !== undefined) {
+        body.clientResources = preserveManagedR1Settings(
+          body.clientResources,
+          existing.clientResources,
+          R1_MANAGED_CLIENT_RESOURCE_PATHS
+        );
+      }
+      if (body.serviceResources !== undefined) {
+        body.serviceResources = preserveManagedR1Settings(
+          body.serviceResources,
+          existing.serviceResources,
+          R1_MANAGED_SERVICE_RESOURCE_PATHS
+        );
+      }
+    }
+
     // `isApproved` is only an approval decision when it changes the stored value.
     // Callers such as the SDX UI Customize save resend the current value along
     // with other changes, so an unchanged value is dropped rather than treated
     // as approving or un-approving.
     let isResentApproval = false;
     if (typeof body.isApproved === 'boolean') {
-      const existing = await this.findConnection(
-        (context as any).createContext({ skipAccessControl: true }),
-        body.clientId,
-        body.serviceId
-      );
       if (existing && Boolean(existing.isApproved) === body.isApproved) {
         delete body.isApproved;
         isResentApproval = true;
