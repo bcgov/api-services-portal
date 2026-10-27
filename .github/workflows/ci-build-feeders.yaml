@@ -151,7 +151,7 @@ jobs:
 
           env:
             TZ:
-              value: 'America/Los_Angeles'
+              value: 'America/Vancouver'
             LOG_FEEDS:
               value: 'false'
             WORKING_PATH:

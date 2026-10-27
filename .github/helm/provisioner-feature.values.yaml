@@ -20,7 +20,7 @@ serviceAccount:
   name: asp-service-account
 env:
   TZ:
-    value: America/Los_Angeles
+    value: America/Vancouver
   PORT:
     value: "3000"
   PARTNER_PORT:

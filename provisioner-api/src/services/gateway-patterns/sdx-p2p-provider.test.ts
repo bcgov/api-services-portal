@@ -1,6 +1,41 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, before, test } from 'node:test';
+import { resetEnvironmentsCache } from '../../config/environments.js';
 import { SDXP2PProviderPattern } from './sdx-p2p-provider.js';
+
+let environmentDirectory: string;
+let previousEnvironmentPath: string | undefined;
+
+before(() => {
+  environmentDirectory = mkdtempSync(join(tmpdir(), 'sdx-provider-pattern-'));
+  const configPath = join(environmentDirectory, 'environments.json');
+  writeFileSync(
+    configPath,
+    JSON.stringify({
+      dev: {
+        oauth_token_url: 'https://issuer.example/token',
+        kong_admin_url: 'http://kong-admin',
+        public_url: 'https://sdx.example//',
+      },
+    })
+  );
+  previousEnvironmentPath = process.env.ENVIRONMENTS_CONFIG_FILE;
+  process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
+  resetEnvironmentsCache();
+});
+
+after(() => {
+  if (previousEnvironmentPath === undefined) {
+    delete process.env.ENVIRONMENTS_CONFIG_FILE;
+  } else {
+    process.env.ENVIRONMENTS_CONFIG_FILE = previousEnvironmentPath;
+  }
+  resetEnvironmentsCache();
+  rmSync(environmentDirectory, { recursive: true, force: true });
+});
 
 test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
   const pattern = new SDXP2PProviderPattern({} as never);
@@ -56,42 +91,51 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
   );
 });
 
-
-test('uses trusted JWKS prefixes and native certificate attributes with current Kong plugins', async (t) => {
-  const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
-  const { tmpdir } = await import('node:os');
-  const { join } = await import('node:path');
-  const { resetEnvironmentsCache } = await import('../../config/environments.js');
-  const directory = mkdtempSync(join(tmpdir(), 'sdx-jwks-'));
-  const previous = process.env.ENVIRONMENTS_CONFIG_FILE;
-  const configPath = join(directory, 'environments.json');
-  writeFileSync(configPath, JSON.stringify({ dev: {
-    oauth_token_url: 'https://issuer.example/token', kong_admin_url: 'http://kong-admin',
-    public_url: 'https://sdx.example/',
-  } }));
-  process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
-  resetEnvironmentsCache();
-  t.after(() => {
-    if (previous === undefined) delete process.env.ENVIRONMENTS_CONFIG_FILE;
-    else process.env.ENVIRONMENTS_CONFIG_FILE = previous;
-    resetEnvironmentsCache();
-    rmSync(directory, { recursive: true });
-  });
+test('emits current trust verification and mTLS ACL plugin fields', () => {
   const pattern = new SDXP2PProviderPattern({} as never);
-  const resources = pattern.eval({
-    connId: '11', clientId: 'TEST.CLIENT', serviceId: 'TEST.SERVICE.v1',
-    useSni: 'true', upgrades: { verify: {}, mtlsAcl: {} },
-  } as never, {
-    upstreamUrl: 'https://upstream.example', client: { clientId: 'TEST.CLIENT' },
-    service: { name: 'TEST.SERVICE.v1', subsystem: { gateway: { id: 'gateway' } } },
-    clientRG: { host: 'rg0.dev.servers.sdx' },
-    serviceRG: { name: 'rg0', environment: 'dev', host: 'rg0.dev.servers.sdx' },
-  } as never);
-  const plugins = resources[0].plugins;
-  assert.deepEqual(plugins.find((p: any) => p.name === 'trust-verify-signature').config.allowed_jwks_uri_prefix,
-    ['https://sdx.example/keysets/']);
-  const acl = plugins.find((p: any) => p.name === 'mtls-acl').config;
-  assert.equal(acl.certificate_attribute, 'common_name');
-  assert.deepEqual(acl.allow, ['rg0.dev.servers.sdx']);
-  assert.equal(acl.certificate_header_name, undefined);
+  const resources = pattern.eval(
+    {
+      connId: '11',
+      clientId: 'TEST.CLIENT',
+      serviceId: 'TEST.SERVICE.v1',
+      useSni: 'true',
+      upgrades: { verify: {}, mtlsAcl: {}, sign: {} },
+    } as never,
+    {
+      upstreamUrl: 'https://upstream.example',
+      client: { clientId: 'TEST.CLIENT' },
+      service: {
+        name: 'TEST.SERVICE.v1',
+        subsystem: { gateway: { id: 'test-gateway' } },
+      },
+      clientRG: { host: 'rg0.dev.servers.sdx' },
+      serviceRG: {
+        name: 'provider-runtime',
+        environment: 'dev',
+        host: 'share0.dev.servers.sdx',
+      },
+    } as never
+  );
+
+  const verifyPlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'trust-verify-signature'
+  );
+  assert.deepEqual(verifyPlugin.config.allowed_jwks_uri_prefix, [
+    'https://sdx.example/keysets/',
+  ]);
+
+  const signPlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'trust-sign'
+  );
+  assert.equal(
+    signPlugin.config.jwks_uri,
+    'https://sdx.example/keysets/sdx.edge.provider-runtime.dev/.well-known/jwks.json'
+  );
+
+  const mtlsAclPlugin = resources[0].plugins.find(
+    (plugin: { name: string }) => plugin.name === 'mtls-acl'
+  );
+  assert.equal(mtlsAclPlugin.config.certificate_attribute, 'common_name');
+  assert.deepEqual(mtlsAclPlugin.config.allow, ['rg0.dev.servers.sdx']);
+  assert.equal(mtlsAclPlugin.config.certificate_header_name, undefined);
 });
