@@ -20,6 +20,7 @@ import { loadEnvironments } from '../config/environments.js';
 import { SDXSubsystemPattern } from './gateway-patterns/sdx-subsystem.js';
 import { IntegrationAccessService } from './integration-access-service.js';
 import type { GatewayAdminService } from './gateway-admin-service.js';
+import { managedApplicationScopesForEnvironment } from './policies/SDX.R1.00/security-config.js';
 
 export interface PatternOutput {
   documents: any[];
@@ -57,7 +58,7 @@ export class PatternsEvaluatorService {
 
   constructor(
     private readonly policyService: PolicyService,
-    sdx: SdxMemberApiClient,
+    private readonly sdx: SdxMemberApiClient,
     integrationAccessService: IntegrationAccessService,
     gatewayAdmin?: GatewayAdminService,
     private readonly logger?: FastifyBaseLogger
@@ -101,11 +102,19 @@ export class PatternsEvaluatorService {
     // actions, not for delete
     if (action !== 'delete') {
       const environmentConfig = loadEnvironments()[connection.environment];
+      const managedApplicationScopes =
+        connection.policyVersion === 'SDX.R1.00'
+          ? managedApplicationScopesForEnvironment(
+              await this.sdx.listCatalogScopes(),
+              connection.environment
+            )
+          : undefined;
       const preflightContext = {
         environment: connection.environment,
         environmentConfig,
         service,
         requesterDetails: connection.requesterDetails,
+        managedApplicationScopes,
       };
       this.policyService.preflightConnectionRequest(
         connection.policyVersion || '',
@@ -138,6 +147,7 @@ export class PatternsEvaluatorService {
         action,
         globals: {
           environment: environmentConfig,
+          managedApplicationScopes: managedApplicationScopes || [],
         },
       };
 

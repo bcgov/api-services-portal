@@ -77,7 +77,20 @@ function requestWithVersion(version: string): any {
 
 function serviceWithApi(api: Record<string, unknown>) {
   const service = new IntegrationAccessService(client);
-  (service as unknown as { api: Record<string, unknown> }).api = api;
+  (service as unknown as { api: Record<string, unknown> }).api = {
+    listCatalogScopes: async () => [
+      {
+        name: 'Claims.Read',
+        services: [
+          {
+            name: catalogService.name,
+            environment: catalogService.environment,
+          },
+        ],
+      },
+    ],
+    ...api,
+  };
   (
     service as unknown as {
       policyService: {
@@ -98,13 +111,11 @@ test('partner API documents the callback path implemented by CSS', async () => {
     await app.ready();
     const spec = app.swagger() as any;
     const callbacks =
-      spec.paths['/integrations/{integrationId}/access-requests'].post
-        .callbacks.provisionAllowedServices;
+      spec.paths['/integrations/{integrationId}/access-requests'].post.callbacks
+        .provisionAllowedServices;
 
     assert.ok(
-      callbacks[
-        '/requests/{$request.params#/integrationId}/sdx-allowed-access'
-      ]
+      callbacks['/requests/{$request.params#/integrationId}/sdx-allowed-access']
     );
     assert.equal(
       callbacks[
@@ -173,6 +184,17 @@ test('route accepts a matching version and persists the reviewed version', async
     services.sdxMember.getSubsystemByIntegrationClientId = async () =>
       consumerSubsystem;
     services.integrationAccess.api = {
+      listCatalogScopes: async () => [
+        {
+          name: 'Claims.Read',
+          services: [
+            {
+              name: catalogService.name,
+              environment: catalogService.environment,
+            },
+          ],
+        },
+      ],
       listConnections: async () => [],
       getOASService: async () => catalogService,
       upsertConnection: async (_organization: string, body: unknown) => {

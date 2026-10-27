@@ -1,5 +1,8 @@
 import { isDeepStrictEqual } from 'node:util';
-import type { ServiceCatalogEntry } from '../../../clients/sdx-member/index.js';
+import type {
+  ResourceScopeEntry,
+  ServiceCatalogEntry,
+} from '../../../clients/sdx-member/index.js';
 import type {
   EnvironmentConfig,
   R1EnvironmentConfig,
@@ -43,6 +46,7 @@ export interface R1SecurityConfigInput {
   environmentConfig: EnvironmentConfig | undefined;
   service: ServiceCatalogEntry;
   requesterDetails: PolicyRequesterDetails | undefined;
+  managedApplicationScopes?: string[];
 }
 
 /**
@@ -55,6 +59,7 @@ export function buildR1SecurityConfig({
   environmentConfig,
   service,
   requesterDetails,
+  managedApplicationScopes,
 }: R1SecurityConfigInput): R1SecurityConfig {
   const environmentName = nonBlank(environment);
   if (!environmentName) {
@@ -99,6 +104,10 @@ export function buildR1SecurityConfig({
     environmentName,
     'sdx_trusted_issuers',
     r1Environment.sdx_trusted_issuers
+  );
+  const normalizedManagedApplicationScopes = normalizeManagedApplicationScopes(
+    environmentName,
+    managedApplicationScopes
   );
   const tokenEndpointUrl = parseHttpUrl(
     environmentName,
@@ -201,7 +210,7 @@ export function buildR1SecurityConfig({
       tokenExchange: {
         clientId: normalizedExchangeClientId,
         tokenEndpoint,
-        scopes: [],
+        scopes: normalizedManagedApplicationScopes,
         targetPrivacyZoneScope: providerPrivacyZoneScope,
       },
     },
@@ -340,8 +349,13 @@ function setManagedTokenExchange(
   }
 
   const existing = recordOrEmpty(target[key], environment, path);
-  const { audience, ...managed } = existing;
-  if (!isDeepStrictEqual(managed, canonical)) {
+  const { audience, scopes, ...managed } = existing;
+  const { scopes: canonicalScopes, ...canonicalManaged } = canonical;
+  const isLegacyEmptyAllowlist = Array.isArray(scopes) && scopes.length === 0;
+  if (
+    !isDeepStrictEqual(managed, canonicalManaged) ||
+    (!isLegacyEmptyAllowlist && !isDeepStrictEqual(scopes, canonicalScopes))
+  ) {
     throw managedSettingError(
       environment,
       path,
@@ -356,8 +370,7 @@ function setManagedTokenExchange(
     );
   }
 
-  target[key] =
-    audience === undefined ? canonical : { ...canonical, audience };
+  target[key] = audience === undefined ? canonical : { ...canonical, audience };
 }
 
 /** Upgrade the former provider-client audience to the SDX exchange client. */
@@ -386,6 +399,38 @@ function setManagedProviderToken(
     }
   }
   target[key] = canonical;
+}
+
+export function managedApplicationScopesForEnvironment(
+  catalog: ResourceScopeEntry[],
+  environment: string
+): string[] {
+  return catalog
+    .filter((entry) =>
+      entry.services?.some((service) => service.environment === environment)
+    )
+    .map((entry) => entry.name);
+}
+
+function normalizeManagedApplicationScopes(
+  environment: string,
+  scopes: string[] | undefined
+): string[] {
+  if (!Array.isArray(scopes) || scopes.length === 0) {
+    throw configurationError(environment, ['catalog.scopes']);
+  }
+
+  const normalized = scopes.map((scope) => nonBlank(scope));
+  if (normalized.some((scope) => !scope || /\s/.test(scope))) {
+    throw withDetails(
+      new InternalError(
+        `SDX.R1.00 scope catalog contains an invalid OAuth scope for the configured environment`
+      ),
+      { environment, field: 'catalog.scopes' }
+    );
+  }
+
+  return Array.from(new Set(normalized as string[])).sort();
 }
 
 function providerAudience(service: ServiceCatalogEntry): string | undefined {

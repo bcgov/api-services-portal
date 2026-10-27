@@ -25,7 +25,8 @@ export type PolicyDefaultResources = {
 export type PolicyDefaultsFn = (
   subsystem: SubsystemEntry,
   service: ServiceCatalogEntry,
-  requesterDetails: PolicyRequesterDetails
+  requesterDetails: PolicyRequesterDetails,
+  managedApplicationScopes?: string[]
 ) => PolicyDefaultResources;
 
 export interface PolicyPreflightContext {
@@ -33,6 +34,7 @@ export interface PolicyPreflightContext {
   environmentConfig: EnvironmentConfig | undefined;
   service: ServiceCatalogEntry;
   requesterDetails: PolicyRequesterDetails | undefined;
+  managedApplicationScopes?: string[];
 }
 
 /** Validate policy-specific inputs before any gateway resource is built. */
