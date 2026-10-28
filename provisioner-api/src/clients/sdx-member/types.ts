@@ -61,6 +61,21 @@ export interface ServiceCatalogEntry {
   subsystem: SubsystemEntry;
 }
 
+export interface ResourceScopeEntry {
+  name: string;
+  description?: string;
+  namespace?: string;
+  resourceType?: string;
+  subResourceTypes?: string[];
+  action?: string;
+  services: Array<{
+    name: string;
+    environment: string;
+    specVersion?: string;
+    version?: string;
+  }>;
+}
+
 /** Result of a batched provisioning operation, possibly nested. */
 export interface BatchResult {
   status: number;

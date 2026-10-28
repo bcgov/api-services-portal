@@ -13,6 +13,7 @@ import type {
   RuntimeGroup,
   RuntimeGroupFilter,
   RuntimeGroupInput,
+  ResourceScopeEntry,
   ServiceCatalogEntry,
   Subsystem,
   SubsystemEntry,
@@ -59,6 +60,11 @@ export class SdxMemberApiClient {
   /** `listServiceCatalog` — GET /catalog/services */
   listServiceCatalog(): Promise<ServiceCatalogEntry[]> {
     return this.request('GET', 'catalog/services');
+  }
+
+  /** listScopeCatalog — GET /catalog/scopes */
+  listCatalogScopes(): Promise<ResourceScopeEntry[]> {
+    return this.request('GET', 'catalog/scopes');
   }
 
   /** `getOASService` — GET /catalog/services/{name} */

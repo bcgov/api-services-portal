@@ -58,7 +58,8 @@ export class PolicyService {
     policyVersion: string,
     subsystem: SubsystemEntry,
     service: ServiceCatalogEntry,
-    requesterDetails: PolicyRequesterDetails
+    requesterDetails: PolicyRequesterDetails,
+    managedApplicationScopes?: string[]
   ): PolicyDefaultResources {
     const policy = POLICY_REGISTRY[policyVersion];
     if (!policy) {
@@ -66,7 +67,12 @@ export class PolicyService {
         `Policy ${policyVersion} not found in registry`
       );
     }
-    return policy.defaults(subsystem, service, requesterDetails);
+    return policy.defaults(
+      subsystem,
+      service,
+      requesterDetails,
+      managedApplicationScopes
+    );
   }
 
   /** Validate policy-specific inputs for callers before they generate resources. */

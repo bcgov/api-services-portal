@@ -9,6 +9,7 @@ import type {
   BatchResult,
   ConnectionRequest,
   ConnectionRequestInput,
+  ResourceScopeEntry,
   SdxMemberApiClient,
   ServiceCatalogEntry,
   SubsystemEntry,
@@ -109,12 +110,42 @@ interface FakeApiOptions {
   subsystems?: SubsystemEntry[];
   upsert?: (org: string, input: ConnectionRequestInput) => Promise<BatchResult>;
   logger?: FastifyBaseLogger;
+  scopeCatalog?: ResourceScopeEntry[];
+}
+
+function scopeCatalogForServices(
+  services: ServiceCatalogEntry[]
+): ResourceScopeEntry[] {
+  const entries = new Map<string, ResourceScopeEntry>();
+  for (const service of services) {
+    for (const operation of service.operations) {
+      for (const scope of operation.scopes || []) {
+        if (typeof scope === 'string') continue;
+        const existing = entries.get(scope.name) || {
+          name: scope.name,
+          description: scope.description,
+          services: [],
+        };
+        if (!existing.services.some((entry) => entry.name === service.name)) {
+          existing.services.push({
+            name: service.name,
+            environment: service.environment,
+            version: service.version,
+          });
+        }
+        entries.set(scope.name, existing);
+      }
+    }
+  }
+  return Array.from(entries.values());
 }
 
 function createService(options: FakeApiOptions = {}) {
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
   const catalog = options.catalog || {};
   const api = {
+    listCatalogScopes: async () =>
+      options.scopeCatalog || scopeCatalogForServices(Object.values(catalog)),
     getOASService: async (name: string) => {
       const service = catalog[name];
       if (!service) throw new Error(`Unexpected catalog lookup: ${name}`);
@@ -286,6 +317,17 @@ test('merges duplicate services and scopes while allowing an empty scope set', a
         scopes: ['read', 'write'],
         integrationId: 'integration-a',
       },
+    ]
+  );
+  assert.deepEqual(
+    writes.map(
+      ({ input }) =>
+        (input.clientResources as any).gatewayPatterns['sdx-p2p-consumer.r1']
+          .upgrades.tokenExchange.scopes
+    ),
+    [
+      ['read', 'write'],
+      ['read', 'write'],
     ]
   );
   assert.deepEqual(response, {

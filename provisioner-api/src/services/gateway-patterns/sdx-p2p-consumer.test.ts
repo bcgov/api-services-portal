@@ -123,6 +123,7 @@ test('emits bearer-only JWT and verified-token scope-transfer settings', () => {
     tokenExchangePlugin.config.scope_source,
     'verified_subject_token'
   );
+  assert.deepEqual(tokenExchangePlugin.config.scopes, ['configured.scope']);
   assert.equal(
     tokenExchangePlugin.config.target_privacy_zone_scope,
     'urn:ca:bc:gov:provider'
