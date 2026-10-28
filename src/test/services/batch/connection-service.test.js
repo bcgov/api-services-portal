@@ -6,10 +6,8 @@ const {
 const {
   ConnectionService,
 } = require('../../../services/batch/connection-service');
-const {
-  SubsystemService,
-} = require('../../../services/batch/subsystem');
-const {
+const { SubsystemService } = require('../../../services/batch/subsystem');
+const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -373,6 +371,46 @@ describe('ConnectionService', () => {
       expect(
         saved.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'].upgrades
       ).not.toHaveProperty('tokenExchange');
+    });
+
+    it('keeps null resources unchanged on an existing R1 connection', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          clientResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-consumer.r1': {
+                upgrades: { sign: { value: 'stored' } },
+              },
+            },
+          }),
+          serviceResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-provider.r1': {
+                upgrades: { sign: { value: 'stored' } },
+              },
+            },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          isActive: false,
+          clientResources: null,
+          serviceResources: null,
+        })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isActive: false,
+        clientResources: null,
+        serviceResources: null,
+      });
     });
 
     it('keeps generated resources when creating an R1 connection', async () => {

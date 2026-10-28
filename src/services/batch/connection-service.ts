@@ -115,14 +115,14 @@ class ConnectionService {
     // Preserve each R1 setting managed by the authoritative policy while
     // retaining submitted changes to resource settings callers may customize.
     if (existing?.policyVersion === 'SDX.R1.00') {
-      if (body.clientResources !== undefined) {
+      if (body.clientResources != null) {
         body.clientResources = preserveManagedR1Settings(
           body.clientResources,
           existing.clientResources,
           R1_MANAGED_CLIENT_RESOURCE_PATHS
         );
       }
-      if (body.serviceResources !== undefined) {
+      if (body.serviceResources != null) {
         body.serviceResources = preserveManagedR1Settings(
           body.serviceResources,
           existing.serviceResources,
