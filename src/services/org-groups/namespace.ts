@@ -191,6 +191,13 @@ export class NamespaceService {
     return matches;
   }
 
+  async getNamespaceAttributes(
+    ns: string
+  ): Promise<{ [key: string]: string[] } | undefined> {
+    const nsGroup = await this.groupService.findByName('ns', ns, false);
+    return nsGroup ? nsGroup.attributes ?? {} : undefined;
+  }
+
   async getNamespaceOrganizationDetails(ns: string): Promise<OrgNamespace> {
     const nsGroup = await this.groupService.findByName('ns', ns, false);
 

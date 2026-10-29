@@ -280,6 +280,25 @@ export async function getNamespaceDetails(
   return await nsService.getNamespaceOrganizationDetails(ns);
 }
 
+export async function getNamespaceAttributes(
+  context: any,
+  ns: string
+): Promise<{ [key: string]: string[] } | undefined> {
+  const prodEnv = await lookupProductEnvironmentServicesBySlug(
+    context,
+    process.env.GWA_PROD_ENV_SLUG
+  );
+  const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, false);
+
+  const nsService = new NamespaceService(envCtx.issuerEnvConfig.issuerUrl);
+  await nsService.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+
+  return await nsService.getNamespaceAttributes(ns);
+}
+
 async function getProductEnvironmentIdBySlug(context: any, slug: string) {
   const noauthContext = context.createContext({
     skipAccessControl: true,

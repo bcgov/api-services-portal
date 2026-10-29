@@ -3,6 +3,8 @@ export interface IssuerMisconfigDetail {
   description: string;
   status: string;
   statusCode: number;
+  /** Upstream correlation id (the provisioner's RFC 7807 `requestId`). */
+  requestId?: string;
 }
 
 /** Pass 4xx from the upstream through; anything else stays a 500. */
@@ -56,6 +58,9 @@ export function issuerMisconfigFromHttpError(
         typeof payload.details === 'string'
           ? payload.details
           : JSON.stringify(payload.details);
+    }
+    if (payload.requestId) {
+      error.requestId = payload.requestId;
     }
   } catch {
     if (body) {

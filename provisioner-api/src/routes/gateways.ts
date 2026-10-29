@@ -1,7 +1,11 @@
 import { Type } from '@sinclair/typebox';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
-import { GatewayResourcesResponse, GatewayKeysResponse } from '../schemas/resources.js';
+import {
+  GatewayResourcesResponse,
+  GatewayKeysResponse,
+  DeleteGatewayResponse,
+} from '../schemas/resources.js';
 
 const GATEWAY_ID_DESC =
   'Identifier of the gateway (namespace) the request is scoped to.';
@@ -52,6 +56,32 @@ export const registerGatewaysRoutes: FastifyPluginAsyncTypebox = async (
         gatewayId: req.params.gateway,
         environment: req.query.environment,
         tag: req.query.tag,
+      })
+  );
+
+  app.delete(
+    '/gateways/:gateway',
+    {
+      schema: {
+        tags: ['Gateways'],
+        summary: 'Delete gateway',
+        operationId: 'deleteGateway',
+        description:
+          'Tears down an SDX gateway: removes its Portal record, UMA resource and namespace group. ' +
+          'Refused with 409 while the gateway still has configuration in any environment.',
+        security,
+        params: Type.Object({
+          gateway: Type.String({
+            description: GATEWAY_ID_DESC,
+            examples: ['sdx-gw-abc12'],
+          }),
+        }),
+        response: { 200: Type.Ref(DeleteGatewayResponse) },
+      },
+    },
+    async (req) =>
+      app.controllers.gateway.deleteGateway({
+        gatewayId: req.params.gateway,
       })
   );
 

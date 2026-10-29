@@ -23,6 +23,9 @@ export async function checkStatus(res: any) {
       const errors = JSON.parse(body);
       error.reason = errors?.error ?? '';
       error.description = (errors?.error_description || errors?.results) ?? '';
+      if (errors?.error_id) {
+        error.requestId = errors.error_id;
+      }
       logger.error('Added reason to error: %j', error);
     } catch (e) {
       logger.error('Not able to parse error response (%s)', e);
