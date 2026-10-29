@@ -165,6 +165,39 @@ describe('SDX Subsystem', () => {
       })
     })
 
+    it('DELETE /organizations/{org}/subsystems/{name} - tears down its unprovisioned gateway', () => {
+      const { org, runtimeGroupId, env } = workingData
+      const subsystemName = uniqueSubsystemName()
+      const runtimeGroupName = `${runtimeGroupId}d`
+
+      createSubsystem(org, subsystemName, () => {
+        createRuntimeGroup(org, runtimeGroupName, env)
+
+        createSubsystemGateway(org, runtimeGroupName, subsystemName, ({ gatewayId }: any) => {
+          cy.setQueryString({ force: false })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}`,
+            'DELETE',
+            false
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status, JSON.stringify(body)).to.be.equal(200)
+            expect(body.result).to.be.equal('deleted')
+            expect(body.childResults).to.deep.include({
+              status: 200,
+              result: 'deleted',
+              id: gatewayId,
+            })
+
+            cy.callAPI(`ds/api/v3/gateways/${gatewayId}`, 'GET', false).then(
+              ({ apiRes: { status } }: any) => {
+                expect(status).to.not.be.equal(200)
+              }
+            )
+          })
+        })
+      })
+    })
+
     it('GET /organizations/{org}/clients', () => {
       const { org } = workingData
 

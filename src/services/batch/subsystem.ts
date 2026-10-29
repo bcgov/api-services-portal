@@ -25,7 +25,7 @@ import {
 } from '../gateway-patterns/catalog';
 import { Logger } from '../../logger';
 import { OpenAPISpecService } from './oas-service';
-import { getNamespaceDetails } from '../workflow/get-namespaces';
+import { getNamespaceAttributes } from '../workflow/get-namespaces';
 import { context } from 'msw';
 import { ProvisionerService } from '../provisioner';
 import { BatchService } from '../keystone/batch-service';
@@ -253,12 +253,13 @@ class SubsystemService {
       return false;
     }
 
-    const gatewayDetails = await getNamespaceDetails(
+    const attributes = await getNamespaceAttributes(
       context,
       subsystem.namespace
     );
 
-    return gatewayDetails != null;
+    // A torn-down gateway keeps its group, marked decommissioned
+    return attributes != null && attributes['decommissioned']?.[0] !== 'true';
   };
 
   deleteSubsystem = async (
@@ -304,6 +305,7 @@ class SubsystemService {
 
     const gatewayExists = await this.subsystemGatewayExists(context, subsystem);
 
+    const childResults: BatchResult[] = [];
     if (gatewayExists) {
       const provisioner = new ProvisionerService(process.env.PROVISIONER_URL!);
       const resources = await provisioner.getGatewayResources(
@@ -315,9 +317,17 @@ class SubsystemService {
         true,
         'Subsystem cannot be deleted because gateway configuration exists'
       );
+
+      // The provisioner owns SDX gateways; tear the gateway down before the
+      // subsystem records so a failure leaves the subsystem in place to retry
+      await provisioner.deleteGateway(subsystem.namespace!);
+      childResults.push({
+        status: 200,
+        result: 'deleted',
+        id: subsystem.namespace,
+      });
     }
 
-    const childResults: BatchResult[] = [];
     for (const integration of subsystem.integrations || []) {
       const integrationDeleteResult = await deleteRecordByInternalId(
         context,

@@ -4,12 +4,16 @@ import type {
   GatewayResource,
 } from '../clients/gateway-admin/index.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import { BadRequestError } from '../errors/api-errors.js';
+import { BadRequestError, ConflictError } from '../errors/api-errors.js';
 
 export interface GetGatewayResourcesInput {
   gatewayId: string;
   environment?: string;
   tag?: string;
+}
+
+export interface DeleteGatewayInput {
+  gatewayId: string;
 }
 
 export interface GetGatewayKeysInput {
@@ -40,6 +44,31 @@ export class GatewayController {
         input.tag
       );
     }
+  }
+
+  /**
+   * Tears down an SDX gateway whose configuration is already empty in every
+   * environment. The Portal record, UMA resource and namespace group are
+   * removed through the Portal's gateway delete, which only the provisioner's
+   * client is entitled to call for SDX gateways.
+   */
+  async deleteGateway(
+    input: DeleteGatewayInput
+  ): Promise<{ gatewayId: string; result: 'deleted' }> {
+    const resources =
+      await this.services.gatewayAdmin.getResourcesFromAllEnvironments(
+        input.gatewayId
+      );
+    if (resources.length > 0) {
+      throw new ConflictError(
+        `Gateway ${input.gatewayId} still has ${resources.length} configured resources; remove them before deleting the gateway`
+      );
+    }
+
+    await this.services.directory.api.deleteGateway(input.gatewayId);
+    this.logger?.info({ gatewayId: input.gatewayId }, 'Gateway deleted');
+
+    return { gatewayId: input.gatewayId, result: 'deleted' };
   }
 
   async getKeys(input: GetGatewayKeysInput): Promise<GatewayKeysResponse> {

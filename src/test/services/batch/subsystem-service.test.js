@@ -6,7 +6,7 @@ const {
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
-  getNamespaceDetails,
+  getNamespaceAttributes,
 } = require('../../../services/workflow/get-namespaces');
 const { BatchService } = require('../../../services/keystone/batch-service');
 
@@ -51,22 +51,28 @@ jest.mock('../../../services/batch/oas-service', () => ({
 }));
 
 jest.mock('../../../services/workflow/get-namespaces', () => ({
-  getNamespaceDetails: jest.fn(),
+  getNamespaceAttributes: jest.fn(),
 }));
 
 const mockGetGatewayResources = jest.fn();
+const mockDeleteGateway = jest.fn();
 
 jest.mock('../../../services/provisioner', () => ({
   ProvisionerService: jest.fn().mockImplementation(() => ({
     getGatewayResources: mockGetGatewayResources,
+    deleteGateway: mockDeleteGateway,
   })),
 }));
 
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getNamespaceDetails.mockResolvedValue(null);
+    getNamespaceAttributes.mockResolvedValue(undefined);
     mockGetGatewayResources.mockResolvedValue([]);
+    mockDeleteGateway.mockResolvedValue({
+      gatewayId: 'sdx-subsystem-gateway',
+      result: 'deleted',
+    });
     mockUpdate.mockResolvedValue({ id: 'association-a' });
   });
 
@@ -270,8 +276,8 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceDetails.mockResolvedValue({
-        name: 'sdx-subsystem-gateway',
+      getNamespaceAttributes.mockResolvedValue({
+        'perm-data-plane': ['sdx-edge'],
       });
       mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
@@ -283,7 +289,98 @@ describe('SubsystemService', () => {
       expect(mockGetGatewayResources).toHaveBeenCalledWith(
         'sdx-subsystem-gateway'
       );
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('tears down an empty subsystem gateway through the provisioner before deleting the subsystem', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      getNamespaceAttributes.mockResolvedValue({
+        'perm-data-plane': ['sdx-edge'],
+      });
+      deleteRecordByInternalId.mockResolvedValueOnce({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      const result = await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(mockDeleteGateway.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteRecordByInternalId.mock.invocationCallOrder[0]
+      );
+      expect(result.childResults).toEqual([
+        { status: 200, result: 'deleted', id: 'sdx-subsystem-gateway' },
+      ]);
+    });
+
+    it('keeps the subsystem when the gateway teardown fails', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      getNamespaceAttributes.mockResolvedValue({
+        'perm-data-plane': ['sdx-edge'],
+      });
+      mockDeleteGateway.mockRejectedValue(new Error('provisioner down'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('provisioner down');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('skips a gateway that was already torn down', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      getNamespaceAttributes.mockResolvedValue({
+        'perm-data-plane': ['sdx-edge'],
+        decommissioned: ['true'],
+      });
+      deleteRecordByInternalId.mockResolvedValue({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockGetGatewayResources).not.toHaveBeenCalled();
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
     });
 
     it('rejects delete when active provider connection requests exist', async () => {
