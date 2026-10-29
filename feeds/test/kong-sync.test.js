@@ -352,6 +352,39 @@ test('full sync reads from every Kong in the list', async (t) => {
   assert.deepEqual(fs.readdirSync(workingPath), []);
 });
 
+test('full sync reads every page of services and plugins before sending', async (t) => {
+  t.after(stopAll);
+  const services = [1, 2, 3, 4, 5].map((i) => svc(`svc-${i}`));
+  const plugins = services.map((s) => ({
+    id: `plugin-${s.id}`,
+    name: 'key-auth',
+    service: { id: s.id },
+    tags: [`ns.${NS}`],
+  }));
+  const aps = fakeKong({
+    entities: { services, plugins },
+    pageSize: 2,
+    pageDelayMs: 100,
+  });
+  const portal = fakePortal();
+  const [apsUrl, portalUrl] = await start(aps, portal);
+
+  await kong.sync({ url: apsUrl, workingPath, destinationUrl: portalUrl });
+
+  const sent = portal.state.puts.filter((p) => p.entity === 'GatewayService');
+  assert.deepEqual(
+    sent.map((p) => p.item.id).sort(),
+    services.map((s) => s.id)
+  );
+  for (const { item } of sent) {
+    assert.deepEqual(
+      item.plugins.map((p) => p.id),
+      [`plugin-${item.id}`],
+      `${item.id} is sent with its plugin`
+    );
+  }
+});
+
 test('full sync sends nothing from a Kong whose plugins cannot be read', async (t) => {
   t.after(stopAll);
   const aps = fakeKong({
