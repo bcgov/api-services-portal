@@ -70,6 +70,19 @@ const pageFiles = (dir, filename) =>
     .filter((f) => new RegExp(`^${filename}-\\d+\\.json$`).test(f))
     .sort();
 
+/** Write `count` one-record pages of `filename`, as an earlier run would. */
+const writePages = (filename, count, prefix) => {
+  for (let i = 0; i < count; i++) {
+    fs.writeFileSync(
+      `${workingPath}/${filename}-${i}.json`,
+      JSON.stringify({ data: [{ id: `${prefix}-${i}` }], next: null })
+    );
+  }
+};
+
+const stagingDirs = () =>
+  fs.readdirSync(workingPath).filter((f) => f.startsWith('.staging-'));
+
 let server;
 let workingPath;
 
@@ -129,7 +142,8 @@ test('copy resolves only after every CKAN offset page is written', async () => {
   );
 });
 
-test('copy records a failed later page before it resolves', async () => {
+test('a failed later page keeps the previous pages', async () => {
+  writePages('gw-plugins', 3, 'old');
   const api = fakeApi({
     records: ids(6),
     pageSize: 2,
@@ -143,8 +157,15 @@ test('copy records a failed later page before it resolves', async () => {
 
   await xfer.copy('/plugins', 'gw-plugins');
 
+  // the error is recorded before copy resolves
   assert.equal(exceptions.length, 1);
   assert.equal(exceptions[0].filename, 'gw-plugins');
+  // pages 0 and 1 were fetched, but none replace the previous run's pages
+  assert.deepEqual(
+    xfer.get_json_content('gw-plugins').data.map((r) => r.id),
+    ['old-0', 'old-1', 'old-2']
+  );
+  assert.deepEqual(stagingDirs(), []);
 });
 
 test('copy removes pages left over from an earlier run', async () => {
@@ -176,21 +197,26 @@ test('copy removes pages left over from an earlier run', async () => {
   );
   // other entities' pages are left alone
   assert.deepEqual(pageFiles(workingPath, 'gw-routes'), ['gw-routes-0.json']);
+  assert.deepEqual(stagingDirs(), []);
 });
 
-test('copy leaves no stale pages when the first page fails', async () => {
-  fs.writeFileSync(
-    `${workingPath}/gw-services-0.json`,
-    JSON.stringify({ data: [{ id: 'stale-0' }], next: null })
-  );
+test('a failed first page keeps the previous page', async () => {
+  // e.g. a failed CKAN organization_show keeps that org's file from last run
+  fs.mkdirSync(`${workingPath}/orgs`);
+  writePages('orgs/org-1', 1, 'old');
   const api = fakeApi({ records: ids(3), failOffset: 0 });
   server = api.server;
   const baseUrl = await listen(server);
   const exceptions = [];
   const xfer = transfers(workingPath, baseUrl, exceptions);
 
-  await xfer.copy('/services', 'gw-services');
+  await xfer.copy('/api/3/action/organization_show?id=org-1', 'orgs/org-1');
 
   assert.equal(exceptions.length, 1);
-  assert.deepEqual(xfer.get_json_content('gw-services').data, []);
+  assert.deepEqual(xfer.get_file_list('orgs'), ['org-1-0.json']);
+  assert.deepEqual(
+    xfer.get_json_content('orgs/org-1').data.map((r) => r.id),
+    ['old-0']
+  );
+  assert.deepEqual(stagingDirs(), []);
 });

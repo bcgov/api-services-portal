@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const fetch = require('node-fetch');
 const url = require('url');
 const PromisePool = require('es6-promise-pool');
@@ -15,42 +16,64 @@ function transfers(workingPath, baseUrl, exceptions) {
   const resultCollector = new ResultsService();
   resultCollector.init();
 
+  // write each page to <stagingDir>/<index>.json, following Kong's `next` link
+  // or the CKAN `offset`, and resolve with the number of pages written
+  function copyPages(_url, stagingDir, index) {
+    log.debug('[copy] %s%s', baseUrl, _url);
+    return fetch(baseUrl + _url)
+      .then(checkStatus)
+      .then((data) => data.json())
+      .then((json) => {
+        fs.writeFileSync(
+          stagingDir + '/' + index + '.json',
+          JSON.stringify(json, null, 4),
+          null
+        );
+        if (json.next != null) {
+          return copyPages(json.next, stagingDir, index + 1);
+        } else if ('result' in json && json['result'].length > 0) {
+          const u = url.parse(baseUrl + _url, true);
+          if ('limit' in u.query) {
+            const newUrl = `${u.pathname}?limit=${u.query.limit}&offset=${
+              Number(u.query.offset) + Number(u.query.limit)
+            }`;
+            return copyPages(newUrl, stagingDir, index + 1);
+          }
+        }
+        return index + 1;
+      });
+  }
+
   return {
     resultCollector: () => resultCollector,
 
-    copy: async function (_url, filename, index = 0) {
-      log.debug('[copy] %s%s', baseUrl, _url);
-      if (index == 0) {
-        // a new copy starts at page 0, so drop any pages from an earlier run
-        this.clear_pages(filename);
-      }
-      const out = workingPath + '/' + filename + '-' + index + '.json';
-      return fetch(baseUrl + _url)
-        .then(checkStatus)
-        .then((data) => data.json())
-        .then((json) => {
-          fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
-          // return the next page so callers wait for every page
-          if (json.next != null) {
-            return this.copy(json.next, filename, index + 1);
-          } else if ('result' in json && json['result'].length > 0) {
-            const u = url.parse(baseUrl + _url, true);
-            if ('limit' in u.query) {
-              const newUrl = `${u.pathname}?limit=${u.query.limit}&offset=${
-                Number(u.query.offset) + Number(u.query.limit)
-              }`;
-              return this.copy(newUrl, filename, index + 1);
-            }
-          }
-        })
-        .catch((err) => {
-          log.error('[copy] %s, %s', filename, err);
-          exceptions.push({
-            relativeUrl: url,
-            filename: filename,
-            error: '' + err,
-          });
+    // Fetch every page into a staging folder, and only replace the
+    // <filename>-N.json pages once the whole chain has been fetched, so a
+    // failed copy leaves the previous pages in place.
+    copy: async function (_url, filename) {
+      let stagingDir = null;
+      try {
+        stagingDir = fs.mkdtempSync(workingPath + '/.staging-');
+        const pageCount = await copyPages(_url, stagingDir, 0);
+        for (let index = 0; index < pageCount; index++) {
+          const out = workingPath + '/' + filename + '-' + index + '.json';
+          fs.mkdirSync(path.dirname(out), { recursive: true });
+          fs.renameSync(stagingDir + '/' + index + '.json', out);
+        }
+        // drop higher-numbered pages left over from a longer earlier run
+        this.clear_pages(filename, pageCount);
+      } catch (err) {
+        log.error('[copy] %s, %s', filename, err);
+        exceptions.push({
+          relativeUrl: url,
+          filename: filename,
+          error: '' + err,
         });
+      } finally {
+        if (stagingDir != null) {
+          fs.rmSync(stagingDir, { recursive: true, force: true });
+        }
+      }
     },
 
     copyOne: async function (_url, filename, index = 0) {
@@ -102,15 +125,19 @@ function transfers(workingPath, baseUrl, exceptions) {
         });
     },
 
-    // remove <filename>-0.json, -1.json, ... up to the first missing page,
-    // which is every page get_json_content() and get_list_ids() would read
-    clear_pages: function (filename) {
-      let index = 0;
+    // remove <filename>-<fromIndex>.json and later pages, up to the first
+    // missing page, the same pages get_json_content() and get_list_ids() read
+    clear_pages: function (filename, fromIndex = 0) {
+      let index = fromIndex;
       while (true) {
         const page = workingPath + '/' + filename + '-' + index + '.json';
         if (!fs.existsSync(page)) {
-          if (index > 0) {
-            log.debug('[clear_pages] %s removed %d pages', filename, index);
+          if (index > fromIndex) {
+            log.debug(
+              '[clear_pages] %s removed %d pages',
+              filename,
+              index - fromIndex
+            );
           }
           return;
         }
