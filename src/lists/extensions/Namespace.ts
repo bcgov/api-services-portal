@@ -518,9 +518,7 @@ module.exports = {
                 getSubjectToken(context.req),
                 args.namespace
               );
-              await resourcesApi.deleteResourceSet(nsResource[0].id);
 
-              // Last thing to do is mark the Namespace group 'decommissioned'
               const nsService = new NamespaceService(
                 envCtx.issuerEnvConfig.issuerUrl
               );
@@ -529,6 +527,11 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientSecret
               );
               await nsService.markNamespaceAsDecommissioned(args.namespace);
+
+              // Delete the UMA resource last: requests for this namespace are
+              // authorized against it, so while it exists a failed delete can
+              // be retried (the steps above are safe to repeat)
+              await resourcesApi.deleteResourceSet(nsResource[0].id);
 
               return true;
             },

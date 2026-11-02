@@ -25,7 +25,7 @@ import {
 } from '../gateway-patterns/catalog';
 import { Logger } from '../../logger';
 import { OpenAPISpecService } from './oas-service';
-import { getNamespaceAttributes } from '../workflow/get-namespaces';
+import { namespaceResourceExists } from '../workflow/get-namespaces';
 import { context } from 'msw';
 import { ProvisionerService } from '../provisioner';
 import { BatchService } from '../keystone/batch-service';
@@ -253,13 +253,10 @@ class SubsystemService {
       return false;
     }
 
-    const attributes = await getNamespaceAttributes(
-      context,
-      subsystem.namespace
-    );
-
-    // A torn-down gateway keeps its group, marked decommissioned
-    return attributes != null && attributes['decommissioned']?.[0] !== 'true';
+    // The gateway's UMA resource is deleted as the last teardown step, so a
+    // gateway whose group is already decommissioned but still has its resource
+    // was only partly torn down and is torn down again
+    return await namespaceResourceExists(context, subsystem.namespace);
   };
 
   deleteSubsystem = async (
@@ -319,7 +316,8 @@ class SubsystemService {
       );
 
       // The provisioner owns SDX gateways; tear the gateway down before the
-      // subsystem records so a failure leaves the subsystem in place to retry
+      // subsystem records so a failure leaves the subsystem in place, and the
+      // gateway's UMA resource in place to authorize the retry
       await provisioner.deleteGateway(subsystem.namespace!);
       childResults.push({
         status: 200,

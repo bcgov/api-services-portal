@@ -134,11 +134,12 @@ export class NamespaceService {
 
     assert.strictEqual(group === null, false, 'Namespace not found');
 
-    assert.strictEqual(
-      'decommissioned' in group.attributes,
-      false,
-      `[${ns}] Namespace already decommissioned`
-    );
+    // A retried namespace delete can reach here after an earlier attempt
+    // already marked the group
+    if (group.attributes['decommissioned']?.[0] === 'true') {
+      logger.debug('[markNamespaceAsDecommissioned] %s - Already marked', ns);
+      return true;
+    }
 
     group.attributes['decommissioned'] = ['true'];
     await this.groupService.updateGroup(group);

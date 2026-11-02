@@ -299,6 +299,34 @@ export async function getNamespaceAttributes(
   return await nsService.getNamespaceAttributes(ns);
 }
 
+/**
+ * Whether the namespace's UMA resource is still registered. Looked up as the
+ * resource server, so the answer does not depend on the caller's permissions.
+ */
+export async function namespaceResourceExists(
+  context: any,
+  ns: string
+): Promise<boolean> {
+  const prodEnv = await lookupProductEnvironmentServicesBySlug(
+    context,
+    process.env.GWA_PROD_ENV_SLUG
+  );
+  const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, false);
+
+  const accessToken = await new KeycloakTokenService(
+    envCtx.openid.token_endpoint
+  ).getKeycloakSession(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const resourcesApi = new UMAResourceRegistrationService(
+    envCtx.uma2.resource_registration_endpoint,
+    accessToken
+  );
+
+  return Boolean(await resourcesApi.findResourceByName(ns));
+}
+
 async function getProductEnvironmentIdBySlug(context: any, slug: string) {
   const noauthContext = context.createContext({
     skipAccessControl: true,

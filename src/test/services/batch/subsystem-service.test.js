@@ -6,7 +6,7 @@ const {
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
-  getNamespaceAttributes,
+  namespaceResourceExists,
 } = require('../../../services/workflow/get-namespaces');
 const { BatchService } = require('../../../services/keystone/batch-service');
 
@@ -51,7 +51,7 @@ jest.mock('../../../services/batch/oas-service', () => ({
 }));
 
 jest.mock('../../../services/workflow/get-namespaces', () => ({
-  getNamespaceAttributes: jest.fn(),
+  namespaceResourceExists: jest.fn(),
 }));
 
 const mockGetGatewayResources = jest.fn();
@@ -67,7 +67,7 @@ jest.mock('../../../services/provisioner', () => ({
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getNamespaceAttributes.mockResolvedValue(undefined);
+    namespaceResourceExists.mockResolvedValue(false);
     mockGetGatewayResources.mockResolvedValue([]);
     mockDeleteGateway.mockResolvedValue({
       gatewayId: 'sdx-subsystem-gateway',
@@ -276,9 +276,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceAttributes.mockResolvedValue({
-        'perm-data-plane': ['sdx-edge'],
-      });
+      namespaceResourceExists.mockResolvedValue(true);
       mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
       await expect(
@@ -303,9 +301,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceAttributes.mockResolvedValue({
-        'perm-data-plane': ['sdx-edge'],
-      });
+      namespaceResourceExists.mockResolvedValue(true);
       deleteRecordByInternalId.mockResolvedValueOnce({
         status: 200,
         result: 'deleted',
@@ -337,9 +333,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceAttributes.mockResolvedValue({
-        'perm-data-plane': ['sdx-edge'],
-      });
+      namespaceResourceExists.mockResolvedValue(true);
       mockDeleteGateway.mockRejectedValue(new Error('provisioner down'));
 
       await expect(
@@ -348,7 +342,7 @@ describe('SubsystemService', () => {
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });
 
-    it('skips a gateway that was already torn down', async () => {
+    it('skips a gateway whose UMA resource is already deleted', async () => {
       const service = new SubsystemService();
 
       setupDeleteSubsystem({
@@ -358,10 +352,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceAttributes.mockResolvedValue({
-        'perm-data-plane': ['sdx-edge'],
-        decommissioned: ['true'],
-      });
+      namespaceResourceExists.mockResolvedValue(false);
       deleteRecordByInternalId.mockResolvedValue({
         status: 200,
         result: 'deleted',
@@ -403,6 +394,38 @@ describe('SubsystemService', () => {
         'Subsystem cannot be deleted because it has active connection requests as a service provider'
       );
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('subsystemGatewayExists', () => {
+    const context = {};
+
+    it('is false without a registered gateway, without a lookup', async () => {
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM' }
+      );
+
+      expect(exists).toBe(false);
+      expect(namespaceResourceExists).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['present, so the gateway still needs a teardown', true],
+      ['deleted, so the gateway was torn down', false],
+    ])('follows the UMA resource when it is %s', async (_state, present) => {
+      namespaceResourceExists.mockResolvedValue(present);
+
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM', namespace: 'sdx-subsystem-gateway' }
+      );
+
+      expect(exists).toBe(present);
+      expect(namespaceResourceExists).toHaveBeenCalledWith(
+        context,
+        'sdx-subsystem-gateway'
+      );
     });
   });
 
