@@ -3,10 +3,11 @@ import { test } from 'node:test';
 import type { Services } from '../services/index.js';
 import { GatewayController } from './gateway-controller.js';
 
-function setup(resources: unknown[] = []) {
+function setup(resources: unknown[] = [], environments = ['dev', 'test']) {
   const calls = { getResources: [] as string[], deleteGateway: [] as string[] };
   const services = {
     gatewayAdmin: {
+      environments,
       getResourcesFromAllEnvironments: async (gatewayId: string) => {
         calls.getResources.push(gatewayId);
         return resources;
@@ -47,5 +48,23 @@ test('deleteGateway refuses while configuration remains', async () => {
       return true;
     }
   );
+  assert.deepEqual(calls.deleteGateway, []);
+});
+
+test('deleteGateway refuses when no environments are configured', async () => {
+  const { controller, calls } = setup([], []);
+
+  await assert.rejects(
+    controller.deleteGateway({ gatewayId: 'sdx-gw-abc12' }),
+    (err: any) => {
+      assert.equal(err.statusCode, 500);
+      assert.match(
+        err.message,
+        /No environments configured; refusing to delete gateway sdx-gw-abc12/
+      );
+      return true;
+    }
+  );
+  assert.deepEqual(calls.getResources, []);
   assert.deepEqual(calls.deleteGateway, []);
 });

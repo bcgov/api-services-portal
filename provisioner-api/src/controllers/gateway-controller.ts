@@ -4,7 +4,12 @@ import type {
   GatewayResource,
 } from '../clients/gateway-admin/index.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import { BadRequestError, ConflictError } from '../errors/api-errors.js';
+import {
+  BadRequestError,
+  ConflictError,
+  InternalError,
+  withDetails,
+} from '../errors/api-errors.js';
 
 export interface GetGatewayResourcesInput {
   gatewayId: string;
@@ -55,6 +60,17 @@ export class GatewayController {
   async deleteGateway(
     input: DeleteGatewayInput
   ): Promise<{ gatewayId: string; result: 'deleted' }> {
+    // With no environments there is nothing to check, so an empty result
+    // would not mean the gateway is empty
+    if (this.services.gatewayAdmin.environments.length === 0) {
+      throw withDetails(
+        new InternalError(
+          `No environments configured; refusing to delete gateway ${input.gatewayId}`
+        ),
+        { gatewayId: input.gatewayId, missing: 'environments' }
+      );
+    }
+
     const resources =
       await this.services.gatewayAdmin.getResourcesFromAllEnvironments(
         input.gatewayId
