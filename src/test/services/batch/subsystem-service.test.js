@@ -342,6 +342,28 @@ describe('SubsystemService', () => {
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
     });
 
+    it('keeps the subsystem when its gateway has a UMA resource but no group', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      // The group is not consulted: the UMA resource alone means a teardown
+      // is still needed, and the Portal's decommission fails without a group
+      namespaceResourceExists.mockResolvedValue(true);
+      mockDeleteGateway.mockRejectedValue(new Error('Namespace not found'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('Namespace not found');
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
     it('skips a gateway whose UMA resource is already deleted', async () => {
       const service = new SubsystemService();
 

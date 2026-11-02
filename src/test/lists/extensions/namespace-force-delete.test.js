@@ -135,6 +135,19 @@ describe('forceDeleteNamespace', () => {
     expect(updateGroup).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the UMA resource when the decommission fails, so a retry can finish', async () => {
+    updateGroup.mockRejectedValueOnce(new Error('keycloak unavailable'));
+
+    await expect(forceDelete()).rejects.toThrow('keycloak unavailable');
+    expect(groups[ns].attributes.decommissioned).toBeUndefined();
+    expect(deleteResourceSet).not.toHaveBeenCalled();
+    expect(resources).toHaveProperty('res-1');
+
+    await expect(forceDelete()).resolves.toBe(true);
+    expect(groups[ns].attributes.decommissioned).toEqual(['true']);
+    expect(resources).toEqual({});
+  });
+
   it('keeps the UMA resource when the namespace group is missing', async () => {
     delete groups[ns];
 
