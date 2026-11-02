@@ -67,7 +67,7 @@ export const registerGatewaysRoutes: FastifyPluginAsyncTypebox = async (
         summary: 'Delete gateway',
         operationId: 'deleteGateway',
         description:
-          'Tears down an SDX gateway: removes its Portal record, UMA resource and namespace group. ' +
+          'Tears down an SDX gateway: removes its Portal record and UMA resource and marks its namespace group decommissioned. ' +
           'Refused with 409 while the gateway still has configuration in any environment.',
         security,
         params: Type.Object({

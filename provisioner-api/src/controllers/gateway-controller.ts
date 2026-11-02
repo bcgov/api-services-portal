@@ -53,9 +53,9 @@ export class GatewayController {
 
   /**
    * Tears down an SDX gateway whose configuration is already empty in every
-   * environment. The Portal record, UMA resource and namespace group are
-   * removed through the Portal's gateway delete, which only the provisioner's
-   * client is entitled to call for SDX gateways.
+   * environment. The Portal's gateway delete removes the Portal record and UMA
+   * resource and marks the namespace group decommissioned; only the
+   * provisioner's client is entitled to call it for SDX gateways.
    */
   async deleteGateway(
     input: DeleteGatewayInput
