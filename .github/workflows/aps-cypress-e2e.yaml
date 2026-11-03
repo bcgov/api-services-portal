@@ -6,7 +6,7 @@ on:
     branches: ['test', 'cypress/*']
   pull_request:
     branches: ['dev']
-    types: [opened, reopened, synchronize, edited]
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -17,8 +17,7 @@ env:
   GIT_COMMIT_AUTHOR: ${{ github.actor }}
   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   GIT_REPO_URL: ${{ github.repository }}
-  # Change this expression if the accepted PR title convention changes.
-  PR_TITLE_REGEX: '^APS-[0-9]+:'
+  CYPRESS_SKIP_LABEL: 'skip-e2e'
   CYPRESS_COMMENT_MARKER: '<!-- cypress-e2e-results -->'
   CYPRESS_COMMENT_HEADING: '## Cypress E2E tests failed'
   # Optional: avoids npm 403 from registry when multiple images run npm install in parallel
@@ -35,19 +34,22 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           PR_ACTION: ${{ github.event.action }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PREVIOUS_PR_TITLE: ${{ github.event.changes.title.from }}
+          PR_IS_DRAFT: ${{ github.event.pull_request.draft }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          EVENT_LABEL: ${{ github.event.label.name }}
         run: |
           SHOULD_RUN=false
 
           if [[ "$EVENT_NAME" != "pull_request" ]]; then
             SHOULD_RUN=true
-          elif [[ "$PR_ACTION" == "edited" && -z "$PREVIOUS_PR_TITLE" ]]; then
-            echo "The PR title was not changed; skipping Cypress."
-          elif [[ "$PR_TITLE" =~ $PR_TITLE_REGEX ]]; then
-            SHOULD_RUN=true
+          elif [[ "$PR_ACTION" =~ ^(labeled|unlabeled)$ && "$EVENT_LABEL" != "$CYPRESS_SKIP_LABEL" ]]; then
+            echo "The changed label does not affect Cypress; skipping this event."
+          elif [[ "$PR_IS_DRAFT" == "true" ]]; then
+            echo "The pull request is a draft; skipping Cypress."
+          elif jq -e --arg label "$CYPRESS_SKIP_LABEL" 'index($label) != null' <<< "$PR_LABELS" > /dev/null; then
+            echo "The pull request has the $CYPRESS_SKIP_LABEL label; skipping Cypress."
           else
-            echo "PR title does not match $PR_TITLE_REGEX; skipping Cypress."
+            SHOULD_RUN=true
           fi
 
           echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
