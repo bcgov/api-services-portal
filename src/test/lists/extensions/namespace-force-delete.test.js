@@ -54,7 +54,7 @@ describe('forceDeleteNamespace', () => {
   const context = {
     createContext: () => ({ noauth: true }),
     sudo: () => ({ sudo: true }),
-    req: {},
+    req: { oauth_user: { azp: 'sdx-provisioner' } },
   };
   // Keycloak state the teardown changes: namespace groups and UMA resources
   let groups, resources, deleteResourceSet, updateGroup;
@@ -112,7 +112,8 @@ describe('forceDeleteNamespace', () => {
     expect(DeleteNamespace).toHaveBeenCalledWith(
       { sudo: true },
       'subject-token',
-      ns
+      ns,
+      'sdx-provisioner'
     );
     expect(groups[ns].attributes.decommissioned).toEqual(['true']);
     expect(resources).toEqual({});

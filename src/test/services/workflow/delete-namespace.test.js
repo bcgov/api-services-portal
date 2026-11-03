@@ -24,7 +24,10 @@ jest.mock('../../../services/gwaapi', () => ({
 
 import { DeleteNamespace } from '../../../services/workflow/delete-namespace';
 import { getNamespaceAttributes } from '../../../services/workflow/get-namespaces';
-import { deleteRecords } from '../../../services/keystone';
+import {
+  deleteRecords,
+  recordActivityWithBlob,
+} from '../../../services/keystone';
 import { updateActivity } from '../../../services/keystone/activity';
 
 describe('Delete Namespace gateway configuration', () => {
@@ -44,7 +47,12 @@ describe('Delete Namespace gateway configuration', () => {
       'perm-data-plane': ['sdx-edge'],
     });
 
-    await DeleteNamespace(context, 'subject-token', 'sdx-gw-abc12');
+    await DeleteNamespace(
+      context,
+      'subject-token',
+      'sdx-gw-abc12',
+      'sdx-provisioner'
+    );
 
     expect(mockDeleteAllGatewayConfiguration).not.toHaveBeenCalled();
     expect(deleteRecords).toHaveBeenCalledWith(
@@ -61,6 +69,31 @@ describe('Delete Namespace gateway configuration', () => {
       undefined
     );
   });
+
+  it.each([
+    ['another client', 'gwa-cli'],
+    ['an unknown caller', undefined],
+  ])(
+    'refuses an SDX gateway delete from %s before changing anything',
+    async (_label, callerClientId) => {
+      getNamespaceAttributes.mockResolvedValue({
+        'perm-data-plane': ['sdx-edge'],
+      });
+
+      await expect(
+        DeleteNamespace(
+          context,
+          'subject-token',
+          'sdx-o-gov-bc-ca',
+          callerClientId
+        )
+      ).rejects.toThrow('SDX gateways are deleted through the SDX Member API');
+
+      expect(recordActivityWithBlob).not.toHaveBeenCalled();
+      expect(mockDeleteAllGatewayConfiguration).not.toHaveBeenCalled();
+      expect(deleteRecords).not.toHaveBeenCalled();
+    }
+  );
 
   it('deletes other gateway configuration through the GWA API', async () => {
     getNamespaceAttributes.mockResolvedValue({

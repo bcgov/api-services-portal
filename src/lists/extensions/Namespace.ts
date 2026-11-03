@@ -516,7 +516,8 @@ module.exports = {
               await DeleteNamespace(
                 context.sudo(),
                 getSubjectToken(context.req),
-                args.namespace
+                args.namespace,
+                context.req?.oauth_user?.azp
               );
 
               const nsService = new NamespaceService(

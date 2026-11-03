@@ -13,7 +13,10 @@ import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { Environment } from '../keystone/types';
 //import { CascadeDeleteEnvironment } from './delete-environment';
 import { GWAService } from '../gwaapi';
-import { SDX_DATA_PLANE } from './create-namespace-sdx';
+import {
+  SDX_DATA_PLANE,
+  SDX_PROVISIONER_CLIENT_ID,
+} from './create-namespace-sdx';
 import { getNamespaceAttributes } from './get-namespaces';
 
 const logger = Logger('wf.DeleteNamespace');
@@ -98,7 +101,8 @@ export const DeleteNamespaceRecordActivity = async (
 export const DeleteNamespace = async (
   context: any,
   subjectToken: string,
-  ns: string
+  ns: string,
+  callerClientId?: string
 ) => {
   logger.debug('Deleting Namespace ns=%s', ns);
   assert.strictEqual(
@@ -107,12 +111,23 @@ export const DeleteNamespace = async (
     'Invalid namespace'
   );
 
+  // SDX gateway configuration is owned by the provisioner, which checks it is
+  // empty in every environment before tearing down the gateway; GWA_API_URL
+  // does not serve that data plane. Nothing here can check it, so only the
+  // provisioner may delete an SDX gateway.
+  const nsAttributes = await getNamespaceAttributes(context, ns);
+  const isSDX = nsAttributes?.['perm-data-plane']?.[0] === SDX_DATA_PLANE;
+  if (isSDX) {
+    assert.strictEqual(
+      callerClientId,
+      SDX_PROVISIONER_CLIENT_ID,
+      'SDX gateways are deleted through the SDX Member API'
+    );
+  }
+
   const activity = await DeleteNamespaceRecordActivity(context, ns);
 
-  // SDX gateway configuration is owned by the provisioner, which removes it
-  // before tearing down the gateway; GWA_API_URL does not serve that data plane.
-  const nsAttributes = await getNamespaceAttributes(context, ns);
-  if (nsAttributes?.['perm-data-plane']?.[0] === SDX_DATA_PLANE) {
+  if (isSDX) {
     logger.debug('Skipping gateway configuration delete for SDX ns=%s', ns);
   } else {
     const gwaService = new GWAService(process.env.GWA_API_URL);
