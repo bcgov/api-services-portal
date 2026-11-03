@@ -68,6 +68,11 @@ export async function buildApp(): Promise<FastifyInstance> {
             'Submitting and retrieving status of integration access requests for SDX subsystem environments.',
         },
         {
+          name: 'Onboarding',
+          description:
+            'Operator actions that finish a held Common SSO onboarding and submit the stored access request.',
+        },
+        {
           name: 'Subsystems',
           description:
             'Operations for partner services to query SDX for subsystem and access details and to submit new access requests.',

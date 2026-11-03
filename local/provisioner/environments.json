@@ -6,7 +6,12 @@
     "kong_admin_url": "http://kong-sdx-admin0.localtest.me:9081",
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
     "ca_token_url": "http://step-token-api.localtest.me:2020",
-    "public_url": "http://kong-sdx-edge0.localtest.me:9080"
+    "public_url": "http://kong-sdx-edge0.localtest.me:9080",
+    "sdx_token_exchange_client_id": "sdx-provisioner",
+    "sdx_token_exchange_token_url": "http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token",
+    "sdx_trusted_issuers": [
+      "http://keycloak.localtest.me:9081/auth/realms/master"
+    ]
   },
   "cyp": {
     "client_id": "sdx-provisioner",
@@ -15,6 +20,11 @@
     "kong_admin_url": "http://kong-sdx-admin0.localtest.me:9081",
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
     "ca_token_url": "http://step-token-api-2.localtest.me:2022",
-    "public_url": "http://kong-sdx-edge0.localtest.me:9080"
+    "public_url": "http://kong-sdx-edge0.localtest.me:9080",
+    "sdx_token_exchange_client_id": "sdx-provisioner",
+    "sdx_token_exchange_token_url": "http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token",
+    "sdx_trusted_issuers": [
+      "http://keycloak.localtest.me:9081/auth/realms/master"
+    ]
   }
 }

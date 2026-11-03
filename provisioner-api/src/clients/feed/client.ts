@@ -6,6 +6,7 @@ import type {
   ConnectionProvisionerStatusUpdate,
   ConnectionRequest,
   ServiceAccess,
+  TaskFeedRecord,
 } from './types.js';
 import { BatchResult } from '../sdx-member/index.js';
 
@@ -55,6 +56,30 @@ export class FeedApiClient {
       `GatewayConsumer/username/${encodeURIComponent(username)}`
     );
     return Array.isArray(records) && records.length > 0;
+  }
+
+  /**
+   * GET /feed/Task/ref/{ref} — the stored task, or undefined when the ref
+   * has no row. The portal returns the sync fields and parses `jsonBlob`.
+   */
+  async getTaskByRef(ref: string): Promise<TaskFeedRecord | undefined> {
+    const records = await this.getEntities(
+      `Task/ref/${encodeURIComponent(ref)}`
+    );
+    if (!Array.isArray(records) || records.length === 0) return undefined;
+    const record = records[0];
+    return {
+      ref: record.ref,
+      title: record.title,
+      type: record.type,
+      status: record.status,
+      jsonBlob: record.jsonBlob,
+    };
+  }
+
+  /** PUT /feed/Task — upsert a task by its `ref`. */
+  async putTask(task: TaskFeedRecord): Promise<BatchResult> {
+    return await this.putEntity('Task', task);
   }
 
   async listConnectionRequests(): Promise<ConnectionRequest[]> {

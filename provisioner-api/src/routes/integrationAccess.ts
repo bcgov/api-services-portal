@@ -146,7 +146,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'New access request',
           operationId: 'createIntegrationAccessRequest',
           description:
-            'Submits a new integration access request for a partner authorization integration. Approval triggers the `provisionAllowedServices` callback to the partner.',
+            'Submits a new integration access request for a partner authorization integration. When the integration is not registered in SDX, the request is held for onboarding and each service result is `held for onboarding`. Approval of a registered request triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -187,6 +187,31 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
         app.controllers.integration.createIntegrationAccessRequest({
           integrationId: req.params.integrationId,
           request: req.body,
+        })
+    );
+
+    app.post(
+      '/integrations/:integrationId/onboarding/complete',
+      {
+        schema: {
+          tags: ['Onboarding'],
+          summary: 'Complete held onboarding',
+          operationId: 'completeIntegrationOnboarding',
+          description:
+            'Operator call. Replays a held Common SSO access request after the integration is linked to a subsystem, then marks the onboarding task processed. Returns the stored submission when onboarding was already completed.',
+          security,
+          params: Type.Object({
+            integrationId: Type.String({
+              description: INTEGRATION_ID_DESC,
+              examples: ['claims'],
+            }),
+          }),
+          response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
+        },
+      },
+      async (req) =>
+        app.controllers.integration.completeIntegrationOnboarding({
+          integrationId: req.params.integrationId,
         })
     );
   };

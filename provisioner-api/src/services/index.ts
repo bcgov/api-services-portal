@@ -12,6 +12,7 @@ import { ActivityService } from './activity-service.js';
 import { ConnectionStatusService } from './connection-status-service.js';
 import { SdxOperatorService } from './sdx-operator-service.js';
 import { CaTokenService } from './ca-token-service.js';
+import { CssOnboardingService } from './css-onboarding-service.js';
 import { SdxMemberApiClient } from '../clients/sdx-member/index.js';
 import { loadEnvironments } from '../config/environments.js';
 
@@ -40,6 +41,7 @@ export interface Services {
   resourceDispatcher: ResourceDispatcher;
   sdxOperator: SdxOperatorService;
   caToken: CaTokenService;
+  cssOnboarding: CssOnboardingService;
 }
 
 function child(
@@ -59,6 +61,14 @@ export function buildServices(
     environments,
     child(logger, 'gatewayAdmin')
   );
+  const sdxMember = new SdxMemberService(
+    clients.sdx,
+    child(logger, 'sdxMember')
+  );
+  const integrationAccess = new IntegrationAccessService(
+    clients.sdx,
+    child(logger, 'integrationAccess')
+  );
   return {
     activity: new ActivityService(clients.feed, child(logger, 'activity')),
     connectionStatus: new ConnectionStatusService(
@@ -70,12 +80,15 @@ export function buildServices(
       clients.feed,
       child(logger, 'directory')
     ),
-    sdxMember: new SdxMemberService(clients.sdx, child(logger, 'sdxMember')),
+    sdxMember,
     gatewayAdmin,
     commonSso: new CommonSsoService(clients.css, child(logger, 'commonSso')),
-    integrationAccess: new IntegrationAccessService(
-      clients.sdx,
-      child(logger, 'integrationAccess')
+    integrationAccess,
+    cssOnboarding: new CssOnboardingService(
+      clients.feed,
+      integrationAccess,
+      sdxMember,
+      child(logger, 'cssOnboarding')
     ),
     policyEngine: new PolicyService(child(logger, 'policyEngine')),
     patternsEvaluator: new PatternsEvaluatorService(

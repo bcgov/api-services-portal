@@ -1,6 +1,10 @@
 const { Text, Select } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { logger } = require('../logger');
+const {
+  CssOnboardingNotificationService,
+} = require('../services/notification/css-onboarding-notification.service');
 
 /**
  * Task manages a general task for approval with the following requests:
@@ -56,4 +60,17 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [atTracking()],
+  hooks: {
+    afterChange: async function ({ operation, existingItem, updatedItem }) {
+      try {
+        await new CssOnboardingNotificationService().notifyChange({
+          operation,
+          existingItem,
+          updatedItem,
+        });
+      } catch (err) {
+        logger.error('CSS onboarding notification failed: %s', err);
+      }
+    },
+  },
 };

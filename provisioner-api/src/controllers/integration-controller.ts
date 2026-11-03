@@ -52,6 +52,24 @@ export class IntegrationController {
   ): Promise<TNewIntegrationAccessRequestResponse> {
     // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
     const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    const status = await this.services.sdxMember.getIntegrationStatus(
+      input.integrationId
+    );
+
+    if (status.status === 'unregistered') {
+      try {
+        const result = await this.services.cssOnboarding.hold(
+          input.integrationId,
+          submissionId,
+          input.request
+        );
+        await this.logHoldActivity(input, result);
+        return result;
+      } catch (err) {
+        await this.logHoldActivity(input, undefined, err);
+        throw err;
+      }
+    }
 
     const subsystem =
       await this.services.sdxMember.getSubsystemByIntegrationClientId(
@@ -72,6 +90,33 @@ export class IntegrationController {
       await this.logActivity(input, subsystem, undefined, err);
       throw err;
     }
+  }
+
+  async completeIntegrationOnboarding(input: {
+    integrationId: string;
+  }): Promise<TNewIntegrationAccessRequestResponse> {
+    const outcome = await this.services.cssOnboarding.complete(
+      input.integrationId
+    );
+    if (outcome.replayed) {
+      try {
+        const subsystem =
+          await this.services.sdxMember.getSubsystemByIntegrationClientId(
+            input.integrationId
+          );
+        await this.logActivity(
+          { integrationId: input.integrationId, request: outcome.request },
+          subsystem,
+          outcome.response
+        );
+      } catch (err) {
+        this.logger?.error(
+          { err, integrationId: input.integrationId },
+          'Failed to log replayed integration access request'
+        );
+      }
+    }
+    return outcome.response;
   }
 
   private async logActivity(
@@ -103,6 +148,39 @@ export class IntegrationController {
       ],
       filterKey1: `org:${clientSubsystem.organization?.name}`,
       filterKey2: `sdxClient:${clientSubsystem.clientId}`,
+    };
+
+    await this.services.activity.publishActivity(activity);
+  }
+
+  private async logHoldActivity(
+    request: CreateIntegrationAccessRequestInput,
+    result: TNewIntegrationAccessRequestResponse | undefined,
+    error?: unknown
+  ): Promise<void> {
+    const activity: Activity = {
+      id: uuidv4(),
+      type: 'IntegrationAccessRequest',
+      action: 'create',
+      result: error ? 'failed' : 'success',
+      name: 'N/A',
+      message: error
+        ? `Integration access request for ${request.integrationId} failed`
+        : `Integration access request for ${request.integrationId} held for onboarding`,
+      refId: '',
+      context: {
+        message: 'Integration access request for {client} {action}',
+        params: {
+          client: request.integrationId,
+          action: error ? 'failed' : 'held for onboarding',
+        },
+      },
+      blob: [
+        {
+          id: uuidv4(),
+          blob: JSON.stringify({ input: request, output: result || error }),
+        },
+      ],
     };
 
     await this.services.activity.publishActivity(activity);

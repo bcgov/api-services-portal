@@ -112,6 +112,14 @@ test('partner API documents the callback path implemented by CSS', async () => {
       ],
       undefined
     );
+    assert.deepEqual(
+      spec.paths['/integrations/{integrationId}/access-requests'].post.tags,
+      ['Integration Requests']
+    );
+    assert.deepEqual(
+      spec.paths['/integrations/{integrationId}/onboarding/complete'].post.tags,
+      ['Onboarding']
+    );
   } finally {
     await app.close();
   }
@@ -170,6 +178,13 @@ test('route accepts a matching version and persists the reviewed version', async
   try {
     await app.ready();
     const services = app.services as any;
+    services.sdxMember.getIntegrationStatus = async () => ({
+      status: 'registered',
+      id: consumerSubsystem.clientId,
+      name: consumerSubsystem.name,
+      organization: consumerSubsystem.organization?.name,
+      description: '',
+    });
     services.sdxMember.getSubsystemByIntegrationClientId = async () =>
       consumerSubsystem;
     services.integrationAccess.api = {
