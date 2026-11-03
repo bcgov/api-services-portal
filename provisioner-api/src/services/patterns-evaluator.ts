@@ -147,7 +147,11 @@ export class PatternsEvaluatorService {
         action,
         globals: {
           environment: environmentConfig,
-          managedApplicationScopes: managedApplicationScopes || [],
+          // R0's schema does not declare this field. Cedar rejects the whole
+          // request when it is present, so only R1 receives it.
+          ...(managedApplicationScopes
+            ? { managedApplicationScopes }
+            : {}),
         },
       };
 
