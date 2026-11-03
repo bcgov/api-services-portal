@@ -2,6 +2,7 @@ const {
   httpStatusForIssuerMisconfig,
   clientMessageForIssuerMisconfig,
   issuerMisconfigFromHttpError,
+  IssuerMisconfigError,
 } = require('../../services/issuerMisconfigError');
 
 describe('issuer misconfig error mapping', () => {
@@ -56,6 +57,30 @@ describe('issuer misconfig error mapping', () => {
     expect(detail.description).toMatch(/targeted deletion/);
     expect(clientMessageForIssuerMisconfig(detail)).toBe(
       '[400] Query action=delete removes the entire key qualifier. For targeted deletion, use action=apply with operation=delete.'
+    );
+  });
+
+  it('keeps the upstream gwa-api error and request id from a provisioner 502', () => {
+    const detail = issuerMisconfigFromHttpError(
+      502,
+      'Bad Gateway',
+      JSON.stringify({
+        title: 'Bad gateway',
+        status: 502,
+        code: 'BAD_GATEWAY',
+        requestId: 'req-42',
+        details: {
+          environment: 'test',
+          status: 400,
+          details: { error: 'Sync Failed.' },
+        },
+      })
+    );
+    expect(detail.statusCode).toBe(502);
+    expect(detail.requestId).toBe('req-42');
+    expect(detail.description).toMatch(/Sync Failed/);
+    expect(JSON.parse(new IssuerMisconfigError(detail).message).requestId).toBe(
+      'req-42'
     );
   });
 

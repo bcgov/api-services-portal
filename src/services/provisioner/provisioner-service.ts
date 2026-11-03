@@ -172,6 +172,20 @@ export class ProvisionerService {
       });
   }
 
+  public async deleteGateway(
+    gatewayId: string
+  ): Promise<{ gatewayId: string; result: string }> {
+    const url = `${this.provisionerUrl}/gateways/${encodeURIComponent(
+      gatewayId
+    )}`;
+    logger.debug('Calling DELETE %s', url);
+
+    // No Content-Type: the provisioner rejects a JSON content type without a body
+    return await fetch(url, { method: 'DELETE' })
+      .then(checkStatus)
+      .then((r) => r.json());
+  }
+
   public async getGatewayResources(
     gatewayId: string,
     environment?: string,
