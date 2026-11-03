@@ -13,6 +13,9 @@ jest.mock('../../../services/keycloak', () => ({
 jest.mock('../../../services/uma2', () => ({
   UMAResourceRegistrationService: jest.fn(),
 }));
+jest.mock('../../../services/org-groups', () => ({
+  NamespaceService: jest.fn(),
+}));
 
 const {
   lookupProductEnvironmentServicesBySlug,
@@ -27,32 +30,61 @@ const {
   getUma2FromIssuer,
 } = require('../../../services/keycloak');
 const { UMAResourceRegistrationService } = require('../../../services/uma2');
+const { NamespaceService } = require('../../../services/org-groups');
 const {
+  getNamespaceAttributes,
   namespaceResourceExists,
 } = require('../../../services/workflow/get-namespaces');
 
+const context = { createContext: () => ({ noauth: true }) };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  lookupProductEnvironmentServicesBySlug.mockResolvedValue({ id: 'env-1' });
+  lookupEnvironmentAndIssuerUsingWhereClause.mockResolvedValue({
+    name: 'prod',
+    credentialIssuer: { resourceType: 'namespace' },
+  });
+  checkIssuerEnvironmentConfig.mockReturnValue({
+    issuerUrl: 'http://keycloak/realms/master',
+    clientId: 'gwa-api',
+    clientSecret: 'client-secret',
+  });
+  getOpenidFromIssuer.mockResolvedValue({
+    token_endpoint: 'http://keycloak/token',
+  });
+  getUma2FromIssuer.mockResolvedValue({
+    resource_registration_endpoint: 'http://keycloak/resource_set',
+  });
+});
+
+describe('getNamespaceAttributes', () => {
+  it('reads the namespace group as the issuer client', async () => {
+    const login = jest.fn();
+    const getNamespaceAttributesForNs = jest
+      .fn()
+      .mockResolvedValue({ 'perm-data-plane': ['sdx-edge'] });
+    NamespaceService.mockImplementation(() => ({
+      login,
+      getNamespaceAttributes: getNamespaceAttributesForNs,
+    }));
+
+    await expect(
+      getNamespaceAttributes(context, 'sdx-gw-abc12')
+    ).resolves.toEqual({ 'perm-data-plane': ['sdx-edge'] });
+
+    expect(NamespaceService).toHaveBeenCalledWith(
+      'http://keycloak/realms/master'
+    );
+    expect(login).toHaveBeenCalledWith('gwa-api', 'client-secret');
+    expect(getNamespaceAttributesForNs).toHaveBeenCalledWith('sdx-gw-abc12');
+  });
+});
+
 describe('namespaceResourceExists', () => {
-  const context = { createContext: () => ({ noauth: true }) };
   let getKeycloakSession, findResourceByName;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    lookupProductEnvironmentServicesBySlug.mockResolvedValue({ id: 'env-1' });
-    lookupEnvironmentAndIssuerUsingWhereClause.mockResolvedValue({
-      name: 'prod',
-      credentialIssuer: { resourceType: 'namespace' },
-    });
-    checkIssuerEnvironmentConfig.mockReturnValue({
-      issuerUrl: 'http://keycloak/realms/master',
-      clientId: 'gwa-api',
-      clientSecret: 'client-secret',
-    });
-    getOpenidFromIssuer.mockResolvedValue({
-      token_endpoint: 'http://keycloak/token',
-    });
-    getUma2FromIssuer.mockResolvedValue({
-      resource_registration_endpoint: 'http://keycloak/resource_set',
-    });
     getKeycloakSession = jest.fn().mockResolvedValue('resource-server-token');
     KeycloakTokenService.mockImplementation(() => ({ getKeycloakSession }));
     findResourceByName = jest.fn();
@@ -67,9 +99,9 @@ describe('namespaceResourceExists', () => {
       name: 'sdx-gw-abc12',
     });
 
-    await expect(namespaceResourceExists(context, 'sdx-gw-abc12')).resolves.toBe(
-      true
-    );
+    await expect(
+      namespaceResourceExists(context, 'sdx-gw-abc12')
+    ).resolves.toBe(true);
 
     expect(getKeycloakSession).toHaveBeenCalledWith('gwa-api', 'client-secret');
     expect(UMAResourceRegistrationService).toHaveBeenCalledWith(
@@ -82,8 +114,8 @@ describe('namespaceResourceExists', () => {
   it('is false once the resource is deleted', async () => {
     findResourceByName.mockResolvedValue(undefined);
 
-    await expect(namespaceResourceExists(context, 'sdx-gw-abc12')).resolves.toBe(
-      false
-    );
+    await expect(
+      namespaceResourceExists(context, 'sdx-gw-abc12')
+    ).resolves.toBe(false);
   });
 });
