@@ -23,6 +23,7 @@ import { callbackSummaries } from './openapi/callback-summaries.js';
 import { componentSchemaDescriptions } from './openapi/component-descriptions.js';
 import { decorateOpenApi } from './openapi/decorate.js';
 import { registerIntegrationAccessRoutes } from './routes/integrationAccess.js';
+import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerGatewaysRoutes } from './routes/gateways.js';
 import { registerRuntimeGroupsRoutes } from './routes/runtime-groups.js';
 
@@ -138,6 +139,10 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
   await app.register(registerGatewaysRoutes, { prefix: API_PREFIX });
   await app.register(registerRuntimeGroupsRoutes, { prefix: API_PREFIX });
+  // Operator action. When partner and internal listeners are split, register
+  // this on the internal listener only. The partner listener accepts the
+  // Common SSO token with no required scope.
+  await app.register(registerOnboardingRoutes, { prefix: API_PREFIX });
 
   return app;
 }

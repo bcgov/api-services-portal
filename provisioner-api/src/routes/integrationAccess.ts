@@ -189,29 +189,4 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           request: req.body,
         })
     );
-
-    app.post(
-      '/integrations/:integrationId/onboarding/complete',
-      {
-        schema: {
-          tags: ['Onboarding'],
-          summary: 'Complete held onboarding',
-          operationId: 'completeIntegrationOnboarding',
-          description:
-            'Operator call. Replays a held Common SSO access request after the integration is linked to a subsystem, then marks the onboarding task processed. Returns the stored submission when onboarding was already completed.',
-          security,
-          params: Type.Object({
-            integrationId: Type.String({
-              description: INTEGRATION_ID_DESC,
-              examples: ['claims'],
-            }),
-          }),
-          response: { 200: Type.Ref(NewIntegrationAccessRequestResponse) },
-        },
-      },
-      async (req) =>
-        app.controllers.integration.completeIntegrationOnboarding({
-          integrationId: req.params.integrationId,
-        })
-    );
   };

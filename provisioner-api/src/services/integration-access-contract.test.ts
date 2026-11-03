@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import Fastify from 'fastify';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { Value } from '@sinclair/typebox/value';
 
 import { buildApp } from '../app.js';
+import { registerIntegrationAccessRoutes } from '../routes/integrationAccess.js';
+import { sdxSchemas } from '../schemas/sdx.js';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
   ConnectionRequest,
@@ -119,6 +123,39 @@ test('partner API documents the callback path implemented by CSS', async () => {
     assert.deepEqual(
       spec.paths['/integrations/{integrationId}/onboarding/complete'].post.tags,
       ['Onboarding']
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test('partner integration routes do not include onboarding complete', async () => {
+  const app = Fastify().withTypeProvider<TypeBoxTypeProvider>();
+  for (const schema of sdxSchemas) app.addSchema(schema);
+  app.decorate('controllers', {
+    integration: {
+      createIntegrationAccessRequest: async () => ({
+        submissionId: 'unused',
+        results: {},
+      }),
+    },
+  });
+  await app.register(registerIntegrationAccessRoutes, { prefix: '/v1' });
+  await app.ready();
+  try {
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      false
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/access-requests',
+      }),
+      true
     );
   } finally {
     await app.close();
