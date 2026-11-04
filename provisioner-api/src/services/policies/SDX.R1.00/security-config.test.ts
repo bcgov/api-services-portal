@@ -132,6 +132,10 @@ test('selects only scopes managed in the connection environment', () => {
     managedApplicationScopesForEnvironment(
       [
         {
+          name: ' service:read ',
+          services: [{ name: 'dev-service', environment: 'dev' }],
+        },
+        {
           name: 'service:read',
           services: [{ name: 'dev-service', environment: 'dev' }],
         },
@@ -547,6 +551,44 @@ test('preserves a legacy configured audience while upgrading provider validation
     allowedIss: ['https://issuer.example/realms/standard'],
     consumerMatch: false,
   });
+});
+
+test('refreshes a stored token-exchange allowlist when the scope catalog changes', () => {
+  const stored = enforceR1SecurityConfig({
+    managedApplicationScopes: ['service:read'],
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    clientResources: {
+      gatewayPatterns: {
+        'sdx-p2p-consumer.r1': { upgrades: {} },
+        'sdx-p2p-consumer-access.r1': {},
+      },
+    },
+    serviceResources: {
+      gatewayPatterns: { 'sdx-p2p-provider.r1': { upgrades: {} } },
+    },
+  });
+
+  const refreshed = enforceR1SecurityConfig({
+    managedApplicationScopes,
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    ...stored,
+  });
+
+  assert.deepEqual(
+    (
+      refreshed.clientResources.gatewayPatterns as Record<
+        string,
+        { upgrades: { tokenExchange: { scopes: string[] } } }
+      >
+    )['sdx-p2p-consumer.r1'].upgrades.tokenExchange.scopes,
+    normalizedManagedApplicationScopes
+  );
 });
 
 test('rejects caller-controlled R1 managed security settings', () => {
