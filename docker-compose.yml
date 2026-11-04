@@ -125,12 +125,25 @@ services:
       - ./local/provisioner/.env.local
     environment:
       NODE_ENV: test # Needed for allowing non-secure connection to Keycloak
+      PARTNER_PORT: 3031
     restart: on-failure
+    healthcheck:
+      # The partner listener starts last; readiness implies both ports bound.
+      test:
+        - CMD
+        - node
+        - -e
+        - 'const s=require("node:net").connect(Number(process.env.PARTNER_PORT||3001),"127.0.0.1");s.setTimeout(2000);s.on("connect",()=>s.end());s.on("error",()=>process.exit(1));s.on("timeout",()=>process.exit(1));'
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     volumes:
       - ./local/provisioner/key.json:/secrets/key.json
       - ./local/provisioner/environments.json:/etc/environments.json
     ports:
       - 3030:3030
+      - 127.0.0.1:3031:3031
     networks:
       aps-net:
         aliases:
@@ -463,7 +476,10 @@ services:
       - COMMIT_INFO_REMOTE=${CY_REPO_URL:-}
       - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL:-}
     depends_on:
-      - feeder-seeding
+      feeder-seeding:
+        condition: service_started
+      provisioner:
+        condition: service_healthy
     build:
       context: .
       dockerfile: e2e/Dockerfile

@@ -220,7 +220,7 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
             'X-Client-Id': [`${clientLocator}`],
           },
           name,
-          strip_path: inputs.stripPath,
+          strip_path: inputs.stripPath ?? false,
           protocols:
             routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
           tags,
