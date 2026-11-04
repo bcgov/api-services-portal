@@ -4,6 +4,7 @@ const { atTracking } = require('@keystonejs/list-plugins');
 const { logger } = require('../logger');
 const {
   CssOnboardingNotificationService,
+  cssOnboardingNotification,
 } = require('../services/notification/css-onboarding-notification.service');
 
 /**
@@ -61,16 +62,16 @@ module.exports = {
   access: EnforcementPoint,
   plugins: [atTracking()],
   hooks: {
-    afterChange: async function ({ operation, existingItem, updatedItem }) {
-      try {
-        await new CssOnboardingNotificationService().notifyChange({
-          operation,
-          existingItem,
-          updatedItem,
-        });
-      } catch (err) {
-        logger.error('CSS onboarding notification failed: %s', err);
+    afterChange: function ({ operation, existingItem, updatedItem }) {
+      if (!cssOnboardingNotification(operation, existingItem, updatedItem)) {
+        return;
       }
+      // Do not await SMTP. The feed write should return once the task is saved.
+      new CssOnboardingNotificationService()
+        .notifyChange({ operation, existingItem, updatedItem })
+        .catch((err) => {
+          logger.error('CSS onboarding notification failed: %s', err);
+        });
     },
   },
 };

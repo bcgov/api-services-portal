@@ -116,6 +116,7 @@ function setup() {
   const catalogReads: string[] = [];
   let connectionReads = 0;
   let subsystemLookups = 0;
+  let rejectProcessedWrites = false;
   let registration: 'registered' | 'unregistered' = 'unregistered';
 
   const catalog: Record<string, ServiceCatalogEntry> = {
@@ -148,28 +149,18 @@ function setup() {
   Object.assign(integrationAccess, { api });
 
   const sdxMember = {
-    getIntegrationStatus: async () =>
-      registration === 'registered'
-        ? {
-            status: 'registered' as const,
-            id: subsystem.clientId,
-            name: subsystem.name,
-            organization: 'consumer-org',
-            description: '',
-          }
-        : { status: 'unregistered' as const },
-    getSubsystemByIntegrationClientId: async () => {
+    findSubsystemByIntegrationClientId: async () => {
       subsystemLookups += 1;
-      if (registration !== 'registered') {
-        throw new Error('subsystem lookup is not allowed before registration');
-      }
-      return subsystem;
+      return registration === 'registered' ? subsystem : undefined;
     },
   };
 
   const feed = {
     getTaskByRef: async (ref: string) => tasks.get(ref),
     putTask: async (task: TaskFeedRecord) => {
+      if (rejectProcessedWrites && task.status === 'processed') {
+        throw new Error('feed unavailable');
+      }
       const stored = structuredClone(task);
       puts.push(stored);
       tasks.set(task.ref, stored);
@@ -209,6 +200,12 @@ function setup() {
     register() {
       registration = 'registered';
     },
+    rejectProcessedWrites() {
+      rejectProcessedWrites = true;
+    },
+    allowProcessedWrites() {
+      rejectProcessedWrites = false;
+    },
   };
 }
 
@@ -242,7 +239,7 @@ test('unregistered integration is held and does not upsert connections', async (
   assert.equal(ctx.puts.length, 1);
   assert.equal(ctx.writes.length, 0);
   assert.equal(ctx.connectionReads, 0);
-  assert.equal(ctx.subsystemLookups, 0);
+  assert.equal(ctx.subsystemLookups, 1);
   assert.deepEqual(ctx.catalogReads.sort(), ['service-a', 'service-b']);
 
   const task = ctx.tasks.get('css-onboarding:integration-a');
@@ -363,7 +360,7 @@ test('complete submits the stored request only after registration', async () => 
     /not registered/
   );
   assert.equal(ctx.writes.length, 0);
-  assert.equal(ctx.subsystemLookups, 0);
+  assert.equal(ctx.subsystemLookups, 2);
   assert.equal(ctx.tasks.get('css-onboarding:integration-a')?.status, 'pending');
 
   ctx.register();
@@ -414,6 +411,69 @@ test('complete submits the stored request only after registration', async () => 
     ctx.activities.filter((entry) => entry.filterKey1 === 'org:consumer-org')
       .length,
     1
+  );
+});
+
+test('overlapping completion submits the held request once', async () => {
+  const ctx = setup();
+  const held = await ctx.controller.createIntegrationAccessRequest({
+    integrationId: 'integration-a',
+    request: accessRequest(['service-a']),
+  });
+  ctx.register();
+
+  const [first, second] = await Promise.all([
+    ctx.controller.completeIntegrationOnboarding({
+      integrationId: 'integration-a',
+    }),
+    ctx.controller.completeIntegrationOnboarding({
+      integrationId: 'integration-a',
+    }),
+  ]);
+
+  assert.equal(first.submissionId, held.submissionId);
+  assert.deepEqual(second, first);
+  assert.equal(ctx.writes.length, 1);
+  assert.equal(
+    ctx.activities.filter((entry) => entry.filterKey1 === 'org:consumer-org')
+      .length,
+    1
+  );
+});
+
+test('a feed failure after submit keeps the result for a retry', async () => {
+  const ctx = setup();
+  const held = await ctx.controller.createIntegrationAccessRequest({
+    integrationId: 'integration-a',
+    request: accessRequest(['service-a']),
+  });
+  ctx.register();
+  ctx.rejectProcessedWrites();
+
+  await expectStatus(
+    ctx.controller.completeIntegrationOnboarding({
+      integrationId: 'integration-a',
+    }),
+    502,
+    /still pending/
+  );
+  assert.equal(ctx.writes.length, 1);
+  assert.equal(ctx.tasks.get('css-onboarding:integration-a')?.status, 'pending');
+  assert.equal(
+    (ctx.tasks.get('css-onboarding:integration-a')?.jsonBlob as { results?: { submissionId?: string } })
+      .results?.submissionId,
+    held.submissionId
+  );
+
+  ctx.allowProcessedWrites();
+  const completed = await ctx.controller.completeIntegrationOnboarding({
+    integrationId: 'integration-a',
+  });
+  assert.equal(completed.submissionId, held.submissionId);
+  assert.equal(ctx.writes.length, 1);
+  assert.equal(
+    ctx.tasks.get('css-onboarding:integration-a')?.status,
+    'processed'
   );
 });
 

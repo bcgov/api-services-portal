@@ -6,7 +6,7 @@ const {
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
-  getNamespaceDetails,
+  namespaceResourceExists,
 } = require('../../../services/workflow/get-namespaces');
 const { BatchService } = require('../../../services/keystone/batch-service');
 
@@ -51,22 +51,28 @@ jest.mock('../../../services/batch/oas-service', () => ({
 }));
 
 jest.mock('../../../services/workflow/get-namespaces', () => ({
-  getNamespaceDetails: jest.fn(),
+  namespaceResourceExists: jest.fn(),
 }));
 
 const mockGetGatewayResources = jest.fn();
+const mockDeleteGateway = jest.fn();
 
 jest.mock('../../../services/provisioner', () => ({
   ProvisionerService: jest.fn().mockImplementation(() => ({
     getGatewayResources: mockGetGatewayResources,
+    deleteGateway: mockDeleteGateway,
   })),
 }));
 
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getNamespaceDetails.mockResolvedValue(null);
+    namespaceResourceExists.mockResolvedValue(false);
     mockGetGatewayResources.mockResolvedValue([]);
+    mockDeleteGateway.mockResolvedValue({
+      gatewayId: 'sdx-subsystem-gateway',
+      result: 'deleted',
+    });
     mockUpdate.mockResolvedValue({ id: 'association-a' });
   });
 
@@ -270,9 +276,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceDetails.mockResolvedValue({
-        name: 'sdx-subsystem-gateway',
-      });
+      namespaceResourceExists.mockResolvedValue(true);
       mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
       await expect(
@@ -283,7 +287,113 @@ describe('SubsystemService', () => {
       expect(mockGetGatewayResources).toHaveBeenCalledWith(
         'sdx-subsystem-gateway'
       );
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('tears down an empty subsystem gateway through the provisioner before deleting the subsystem', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(true);
+      deleteRecordByInternalId.mockResolvedValueOnce({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      const result = await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(mockDeleteGateway.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteRecordByInternalId.mock.invocationCallOrder[0]
+      );
+      expect(result.childResults).toEqual([
+        { status: 200, result: 'deleted', id: 'sdx-subsystem-gateway' },
+      ]);
+    });
+
+    it('keeps the subsystem when the gateway teardown fails', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(true);
+      mockDeleteGateway.mockRejectedValue(new Error('provisioner down'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('provisioner down');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('keeps the subsystem when its gateway has a UMA resource but no group', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      // The group is not consulted: the UMA resource alone means a teardown
+      // is still needed, and the Portal's decommission fails without a group
+      namespaceResourceExists.mockResolvedValue(true);
+      mockDeleteGateway.mockRejectedValue(new Error('Namespace not found'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('Namespace not found');
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('skips a gateway whose UMA resource is already deleted', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(false);
+      deleteRecordByInternalId.mockResolvedValue({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockGetGatewayResources).not.toHaveBeenCalled();
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
     });
 
     it('rejects delete when active provider connection requests exist', async () => {
@@ -306,6 +416,38 @@ describe('SubsystemService', () => {
         'Subsystem cannot be deleted because it has active connection requests as a service provider'
       );
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('subsystemGatewayExists', () => {
+    const context = {};
+
+    it('is false without a registered gateway, without a lookup', async () => {
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM' }
+      );
+
+      expect(exists).toBe(false);
+      expect(namespaceResourceExists).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['present, so the gateway still needs a teardown', true],
+      ['deleted, so the gateway was torn down', false],
+    ])('follows the UMA resource when it is %s', async (_state, present) => {
+      namespaceResourceExists.mockResolvedValue(present);
+
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM', namespace: 'sdx-subsystem-gateway' }
+      );
+
+      expect(exists).toBe(present);
+      expect(namespaceResourceExists).toHaveBeenCalledWith(
+        context,
+        'sdx-subsystem-gateway'
+      );
     });
   });
 

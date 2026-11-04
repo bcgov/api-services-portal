@@ -9,6 +9,7 @@ import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import { Activity } from '../clients/feed/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { SubsystemEntry } from '../clients/sdx-member/index.js';
+import { subsystemWithOrganization } from '../services/subsystems-service.js';
 
 export interface CreateIntegrationAccessRequestInput {
   integrationId: string;
@@ -52,11 +53,12 @@ export class IntegrationController {
   ): Promise<TNewIntegrationAccessRequestResponse> {
     // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
     const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    const status = await this.services.sdxMember.getIntegrationStatus(
-      input.integrationId
-    );
+    const registered =
+      await this.services.sdxMember.findSubsystemByIntegrationClientId(
+        input.integrationId
+      );
 
-    if (status.status === 'unregistered') {
+    if (!registered) {
       try {
         const result = await this.services.cssOnboarding.hold(
           input.integrationId,
@@ -71,10 +73,10 @@ export class IntegrationController {
       }
     }
 
-    const subsystem =
-      await this.services.sdxMember.getSubsystemByIntegrationClientId(
-        input.integrationId
-      );
+    const subsystem = subsystemWithOrganization(
+      registered,
+      input.integrationId
+    );
 
     try {
       const result =
@@ -98,15 +100,11 @@ export class IntegrationController {
     const outcome = await this.services.cssOnboarding.complete(
       input.integrationId
     );
-    if (outcome.replayed) {
+    if (outcome.replayed && outcome.subsystem) {
       try {
-        const subsystem =
-          await this.services.sdxMember.getSubsystemByIntegrationClientId(
-            input.integrationId
-          );
         await this.logActivity(
           { integrationId: input.integrationId, request: outcome.request },
-          subsystem,
+          outcome.subsystem,
           outcome.response
         );
       } catch (err) {

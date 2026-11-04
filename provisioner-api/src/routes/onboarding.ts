@@ -6,11 +6,6 @@ import { NewIntegrationAccessRequestResponse } from '../schemas/sdx.js';
 const INTEGRATION_ID_DESC =
   'Identifier of the integration whose held access request should be submitted.';
 
-/**
- * Internal operator routes. Register these on the internal listener only.
- * The partner listener accepts the Common SSO token with no required scope,
- * so this route must not be part of the partner integration-access set.
- */
 export const registerOnboardingRoutes: FastifyPluginAsyncTypebox = async (
   app
 ) => {

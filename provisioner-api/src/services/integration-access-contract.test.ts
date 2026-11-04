@@ -1,3 +1,4 @@
+import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import Fastify from 'fastify';
@@ -5,6 +6,7 @@ import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { Value } from '@sinclair/typebox/value';
 
 import { buildApp } from '../app.js';
+import { ProblemSchema } from '../errors/problem.js';
 import { registerIntegrationAccessRoutes } from '../routes/integrationAccess.js';
 import { sdxSchemas } from '../schemas/sdx.js';
 import type { OAuthClient } from '../clients/oauth.js';
@@ -96,8 +98,19 @@ function serviceWithApi(api: Record<string, unknown>) {
   return service;
 }
 
+async function partnerApp() {
+  const { publicKey, privateKey } = await generateKeyPair('RS256');
+  const auth = { issuer: 'https://issuer.example', audience: 'sdx', jwksUrl: 'https://issuer.example/keys', requiredScope: 'sdx:partner' };
+  const app = await buildApp({ listener: 'partner', auth,
+    authKey: createLocalJWKSet({ keys: [{ ...await exportJWK(publicKey), kid: 'test' }] }),
+  });
+  const token = await new SignJWT({ scope: auth.requiredScope }).setProtectedHeader({ alg: 'RS256', kid: 'test' })
+    .setIssuer(auth.issuer).setAudience(auth.audience).setSubject('css').setIssuedAt().setExpirationTime('5m').sign(privateKey);
+  return { app, headers: { authorization: `Bearer ${token}` } };
+}
+
 test('partner API documents the callback path implemented by CSS', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   try {
     await app.ready();
     const spec = app.swagger() as any;
@@ -120,9 +133,41 @@ test('partner API documents the callback path implemented by CSS', async () => {
       spec.paths['/integrations/{integrationId}/access-requests'].post.tags,
       ['Integration Requests']
     );
+    assert.equal(
+      spec.paths['/integrations/{integrationId}/onboarding/complete'],
+      undefined
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      false
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test('internal listener documents onboarding complete', async () => {
+  const app = await buildApp();
+  try {
+    await app.ready();
+    const spec = app.swagger() as any;
     assert.deepEqual(
       spec.paths['/integrations/{integrationId}/onboarding/complete'].post.tags,
       ['Onboarding']
+    );
+    assert.equal(
+      spec.paths['/integrations/{integrationId}/access-requests'],
+      undefined
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      true
     );
   } finally {
     await app.close();
@@ -132,6 +177,7 @@ test('partner API documents the callback path implemented by CSS', async () => {
 test('partner integration routes do not include onboarding complete', async () => {
   const app = Fastify().withTypeProvider<TypeBoxTypeProvider>();
   for (const schema of sdxSchemas) app.addSchema(schema);
+  app.addSchema(ProblemSchema);
   app.decorate('controllers', {
     integration: {
       createIntegrationAccessRequest: async () => ({
@@ -209,20 +255,13 @@ test('access requests reject a supplied version that differs from the catalog', 
 });
 
 test('route accepts a matching version and persists the reviewed version', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   const upserts: any[] = [];
 
   try {
     await app.ready();
     const services = app.services as any;
-    services.sdxMember.getIntegrationStatus = async () => ({
-      status: 'registered',
-      id: consumerSubsystem.clientId,
-      name: consumerSubsystem.name,
-      organization: consumerSubsystem.organization?.name,
-      description: '',
-    });
-    services.sdxMember.getSubsystemByIntegrationClientId = async () =>
+    services.sdxMember.findSubsystemByIntegrationClientId = async () =>
       consumerSubsystem;
     services.integrationAccess.api = {
       listConnections: async () => [],
@@ -242,6 +281,7 @@ test('route accepts a matching version and persists the reviewed version', async
     services.activity.publishActivity = async () => undefined;
 
     const response = await app.inject({
+      headers,
       method: 'POST',
       url: '/v1/integrations/css-integration/access-requests',
       payload: requestWithVersion('2.4.0'),
@@ -259,7 +299,7 @@ test('route accepts a matching version and persists the reviewed version', async
 });
 
 test('route schema rejects a supplied blank version before the handler', async () => {
-  const app = await buildApp();
+  const { app, headers } = await partnerApp();
   let called = false;
 
   try {
@@ -274,6 +314,7 @@ test('route schema rejects a supplied blank version before the handler', async (
     assert.equal(Value.Check(NewIntegrationAccessRequest, blankRequest), false);
 
     const response = await app.inject({
+      headers,
       method: 'POST',
       url: '/v1/integrations/css-integration/access-requests',
       payload: blankRequest,

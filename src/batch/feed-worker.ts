@@ -167,6 +167,16 @@ export const deleteRecordByInternalId = async function (
   return { status: 200, result: 'deleted', id: result.id };
 };
 
+function jsonFieldsFor(md: {
+  transformations?: Record<string, { name?: string }>;
+}): string[] {
+  return Object.entries(md.transformations || {})
+    .filter(([, transformInfo]) =>
+      ['toString', 'toStringDefaultArray'].includes(transformInfo?.name ?? '')
+    )
+    .map(([field]) => field);
+}
+
 export const getFeedWorker = async (context: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const refKey = req.params['refKey'];
@@ -201,11 +211,7 @@ export const getFeedWorker = async (context: any, req: any, res: any) => {
     return;
   }
 
-  const jsonFields = Object.entries(md.transformations || {})
-    .filter(([, transformInfo]: [string, any]) =>
-      ['toString', 'toStringDefaultArray'].includes(transformInfo.name)
-    )
-    .map(([field]) => field);
+  const jsonFields = jsonFieldsFor(md);
   res.json(
     records.map((record: any) => parseJsonString({ ...record }, jsonFields))
   );
@@ -344,11 +350,7 @@ export const listFeedWorker = async (
   const fields = buildQueryResponse(md).filter(
     (field) => field !== 'id'
   );
-  const jsonFields = Object.entries(md.transformations)
-    .filter(([, transformInfo]: [string, any]) =>
-      ['toString', 'toStringDefaultArray'].includes(transformInfo.name)
-    )
-    .map(([field]) => field);
+  const jsonFields = jsonFieldsFor(md);
 
   const records = await new BatchService(context).listAllPages(
     md.query,

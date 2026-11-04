@@ -18,7 +18,7 @@ before(() => {
       dev: {
         oauth_token_url: 'https://issuer.example/token',
         kong_admin_url: 'http://kong-admin',
-        public_url: 'https://sdx.example/',
+        public_url: 'https://sdx.example//',
       },
     })
   );

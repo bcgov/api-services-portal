@@ -1,4 +1,6 @@
 import cypress, { defineConfig } from 'cypress'
+import { execFileSync } from 'node:child_process'
+import { resolve } from 'node:path'
 //import plugins from './cypress/plugins/index.js'
 
 const baseUrl = 'http://oauth2proxy.localtest.me:4180'
@@ -15,6 +17,17 @@ export default defineConfig({
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
       require('dotenv').config()
+      on('task', {
+        cssContract(input) {
+          const output = execFileSync(process.execPath, ['--import', 'tsx', 'test-support/css-contract-harness.ts', JSON.stringify(input)], {
+            cwd: resolve(__dirname, '../provisioner-api'),
+            encoding: 'utf8',
+            env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+            timeout: 15000,
+          })
+          return JSON.parse(output)
+        },
+      })
       // Only enable code coverage in CI or when explicitly enabled
       if (process.env.CI || process.env.ENABLE_COVERAGE === 'true') {
         require('@cypress/code-coverage/task')(on, config)
@@ -47,6 +60,7 @@ export default defineConfig({
         './cypress/tests/22-*/*.ts',
         './cypress/tests/23-*/*.ts',
         './cypress/tests/24-*/*.cy.ts',
+        './cypress/tests/25-common-sso/*.cy.ts',
       ]
       return config
     },

@@ -2,6 +2,7 @@ import { Logger } from '../../logger';
 import { ConfigService } from '../config.service';
 import { NotificationConfig, EmailNotification, User } from './config';
 import { NotificationService } from './notification.service';
+import { withoutTrailingSlash } from './urls';
 
 const logger = Logger('css-onboarding-notification.service');
 
@@ -74,7 +75,7 @@ export function cssOnboardingInviteUrl(
       .replace(/\{id\}/g, id)
       .replace(/\{integrationId\}/g, id);
   }
-  const base = (config.sdxUiUrl || '').replace(/\/+$/, '');
+  const base = withoutTrailingSlash(config.sdxUiUrl || '');
   return `${base}/onboarding/invite?integrationId=${id}`;
 }
 
@@ -266,7 +267,7 @@ function onboardingTemplateContext(
         .filter((environment): environment is string => Boolean(environment))
     )
   ).sort();
-  const brochureUrl = (config.sdxUiUrl || '').replace(/\/+$/, '');
+  const brochureUrl = withoutTrailingSlash(config.sdxUiUrl || '');
   return {
     hasCssDetails: true,
     cssClientId: request.clientId || 'Not specified',
