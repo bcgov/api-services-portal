@@ -64,6 +64,15 @@ export interface ConnectionRequest {
   provisionerStatus?: ProvisionerStatus | string;
 }
 
+/** Feed payload for a Portal Task. `ref` is the upsert key. `jsonBlob` is an object on write and parsed on read. */
+export interface TaskFeedRecord {
+  ref: string;
+  title: string;
+  type: string;
+  status: string;
+  jsonBlob: unknown;
+}
+
 export interface ConnectionProvisionerStatusUpdate {
   clientId: string;
   serviceId: string;

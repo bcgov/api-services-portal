@@ -1,9 +1,14 @@
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import Fastify from 'fastify';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { Value } from '@sinclair/typebox/value';
 
 import { buildApp } from '../app.js';
+import { ProblemSchema } from '../errors/problem.js';
+import { registerIntegrationAccessRoutes } from '../routes/integrationAccess.js';
+import { sdxSchemas } from '../schemas/sdx.js';
 import type { OAuthClient } from '../clients/oauth.js';
 import type {
   ConnectionRequest,
@@ -124,6 +129,80 @@ test('partner API documents the callback path implemented by CSS', async () => {
       ],
       undefined
     );
+    assert.deepEqual(
+      spec.paths['/integrations/{integrationId}/access-requests'].post.tags,
+      ['Integration Requests']
+    );
+    assert.equal(
+      spec.paths['/integrations/{integrationId}/onboarding/complete'],
+      undefined
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      false
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test('internal listener documents onboarding complete', async () => {
+  const app = await buildApp();
+  try {
+    await app.ready();
+    const spec = app.swagger() as any;
+    assert.deepEqual(
+      spec.paths['/integrations/{integrationId}/onboarding/complete'].post.tags,
+      ['Onboarding']
+    );
+    assert.equal(
+      spec.paths['/integrations/{integrationId}/access-requests'],
+      undefined
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      true
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test('partner integration routes do not include onboarding complete', async () => {
+  const app = Fastify().withTypeProvider<TypeBoxTypeProvider>();
+  for (const schema of sdxSchemas) app.addSchema(schema);
+  app.addSchema(ProblemSchema);
+  app.decorate('controllers', {
+    integration: {
+      createIntegrationAccessRequest: async () => ({
+        submissionId: 'unused',
+        results: {},
+      }),
+    },
+  });
+  await app.register(registerIntegrationAccessRoutes, { prefix: '/v1' });
+  await app.ready();
+  try {
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/onboarding/complete',
+      }),
+      false
+    );
+    assert.equal(
+      app.hasRoute({
+        method: 'POST',
+        url: '/v1/integrations/:integrationId/access-requests',
+      }),
+      true
+    );
   } finally {
     await app.close();
   }
@@ -182,7 +261,7 @@ test('route accepts a matching version and persists the reviewed version', async
   try {
     await app.ready();
     const services = app.services as any;
-    services.sdxMember.getSubsystemByIntegrationClientId = async () =>
+    services.sdxMember.findSubsystemByIntegrationClientId = async () =>
       consumerSubsystem;
     services.integrationAccess.api = {
       listConnections: async () => [],

@@ -111,40 +111,21 @@ export class IntegrationAccessService {
       'Integration ID'
     );
     const oauthClientId = requireNonBlank(input.clientId, 'OAuth client ID');
-    const policyVersion =
-      input.policyVersion === undefined
-        ? 'SDX.R1.00'
-        : requireNonBlank(input.policyVersion, 'Policy version');
     const subsystemOrgName = requireNonBlank(
       subsystem.organization?.name,
       `Organization for subsystem '${subsystem.clientId}'`
     );
-
-    if (!this.policyService.supportsPolicyVersion(policyVersion)) {
-      throw new BadRequestError(
-        `Policy ${policyVersion} not found in registry`
-      );
-    }
+    // Catalog and policy checks are shared with the onboarding hold so a
+    // request that cannot be replayed is rejected before any connection write.
+    const validated = await this.validateCatalogAndPolicy(input);
+    const policyVersion = validated.policyVersion;
 
     this.logger?.debug('Submission ID: %s', normalizedSubmissionId);
     this.logger?.debug('Full access request %j', input);
 
-    // All catalog and policy validation completes before the first write. This
-    // prevents a bad service later in the request from leaving earlier services
-    // partially submitted.
-    const normalizedRequests = normalizeRequestedServices(input);
     const preparedRequests: PreparedServiceRequest[] = [];
-    const services = new Map<string, ServiceCatalogEntry>();
 
-    for (const requested of normalizedRequests) {
-      let service = services.get(requested.name);
-      if (!service) {
-        service = await this.api.getOASService(requested.name);
-        services.set(requested.name, service);
-      }
-
-      validateRequestedService(requested, service);
-
+    for (const requested of validated.requests) {
       const requesterDetails: PolicyRequesterDetails = {
         submissionId: normalizedSubmissionId,
         requester: {
@@ -158,20 +139,19 @@ export class IntegrationAccessService {
           privacyZone: input.privacyZone,
         },
         service: {
-          clientId: service.subsystem.clientId,
-          privacyZone: service.subsystem.privacyZone,
-          version: service.version,
+          clientId: requested.service.subsystem.clientId,
+          privacyZone: requested.service.subsystem.privacyZone,
+          version: requested.service.version,
         },
       };
 
       preparedRequests.push({
         ...requested,
-        service,
         requesterDetails,
         defaults: this.policyService.getDefaultResources(
           policyVersion,
           subsystem,
-          service,
+          requested.service,
           requesterDetails
         ),
       });
@@ -251,6 +231,59 @@ export class IntegrationAccessService {
     );
 
     return submission;
+  }
+
+  /**
+   * Checks the policy and catalog fields that do not need the consuming
+   * subsystem. Submit and the onboarding hold both use this, so the two paths
+   * reject the same requests before anything is stored.
+   */
+  async validateCatalogAndPolicy(
+    input: TNewIntegrationAccessRequest
+  ): Promise<{
+    policyVersion: string;
+    clientId: string;
+    requests: Array<NormalizedServiceRequest & { service: ServiceCatalogEntry }>;
+  }> {
+    const clientId = requireNonBlank(input.clientId, 'OAuth client ID');
+    const policyVersion =
+      input.policyVersion === undefined
+        ? 'SDX.R1.00'
+        : requireNonBlank(input.policyVersion, 'Policy version');
+
+    if (!this.policyService.supportsPolicyVersion(policyVersion)) {
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
+    }
+
+    const normalizedRequests = normalizeRequestedServices(input);
+    const services = new Map<string, ServiceCatalogEntry>();
+    const requests: Array<
+      NormalizedServiceRequest & { service: ServiceCatalogEntry }
+    > = [];
+
+    for (const requested of normalizedRequests) {
+      let service = services.get(requested.name);
+      if (!service) {
+        try {
+          service = await this.api.getOASService(requested.name);
+        } catch (err) {
+          if (isMissingCatalogService(err)) {
+            throw new BadRequestError(
+              `Service '${requested.name}' was not found in the catalog`
+            );
+          }
+          throw err;
+        }
+        services.set(requested.name, service);
+      }
+
+      validateRequestedService(requested, service);
+      requests.push({ ...requested, service });
+    }
+
+    return { policyVersion, clientId, requests };
   }
 
   /**
@@ -571,6 +604,12 @@ function normalizeRequestedServices(
       `${right.environment}\u0000${right.providerId}\u0000${right.name}`
     )
   );
+}
+
+function isMissingCatalogService(error: unknown): boolean {
+  if (error instanceof NotFoundError) return true;
+  if (!error || typeof error !== 'object') return false;
+  return (error as { details?: { status?: number } }).details?.status === 404;
 }
 
 function validateRequestedService(

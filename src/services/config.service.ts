@@ -42,6 +42,9 @@ export class ConfigService {
         port: Number(process.env.EMAIL_PORT || 25),
         user: process.env.EMAIL_USER || '',
         pass: process.env.EMAIL_PASS || '',
+        apsOnboardingEmail: process.env.APS_ONBOARDING_EMAIL || '',
+        sdxOnboardingInviteUrl: process.env.SDX_ONBOARDING_INVITE_URL || '',
+        sdxUiUrl: process.env.SDX_UI_URL || '',
       },
     };
   }

@@ -123,7 +123,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'New access request',
           operationId: 'createIntegrationAccessRequest',
           description:
-            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. Invalid or stale request values return 400; missing integration/organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Version or scope changes require re-approval. Approval triggers the `provisionAllowedServices` callback to the partner.',
+            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. When the integration is not registered in SDX, the request is held for onboarding and each service result is `held for onboarding`. Invalid or stale request values return 400; a registered integration with no organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Version or scope changes require re-approval. Approval of a registered request triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
             integrationId: Type.String({
