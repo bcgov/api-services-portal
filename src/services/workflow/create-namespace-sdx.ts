@@ -28,6 +28,13 @@ const logger = Logger('wf.CreateNamespaceSDX');
 // CreateNamespaceForOrganization) keep them.
 const NAMESPACE_CREATOR_DIRECT_SCOPES = ['Namespace.Manage'];
 
+// Data plane assigned to every SDX gateway (namespace). Gateway configuration
+// on it is managed by the provisioner, not through GWA_API_URL.
+export const SDX_DATA_PLANE = 'sdx-edge';
+
+// Client the provisioner authenticates as; it manages every SDX gateway.
+export const SDX_PROVISIONER_CLIENT_ID = 'sdx-provisioner';
+
 /**
  * Arguments for creating a namespace for an organization.
  */
@@ -77,7 +84,7 @@ export async function CreateNamespaceForOrganization(
     orgUnit: undefined,
     orgEnabled: false,
     displayName: `SDX - ${member.memberClass}.${member.memberId}`,
-    dataPlane: `sdx-edge`,
+    dataPlane: SDX_DATA_PLANE,
     domains: [],
   });
 
@@ -134,7 +141,7 @@ export async function CreateNamespaceForRuntimeGroup(
     orgUnit: undefined,
     orgEnabled: false,
     displayName: `SDX - Edge ${args.runtimeGroupName}`,
-    dataPlane: 'sdx-edge',
+    dataPlane: SDX_DATA_PLANE,
     runtimeGroupName: args.runtimeGroupName,
     domains: [
       ...runtimeGroups.map((rg) => rg.host),
@@ -222,7 +229,7 @@ export async function CreateNamespaceForSubsystem(
     orgUnit: args.subsystem.organization?.orgUnit,
     orgEnabled: false,
     displayName: `SDX - ${args.subsystem.name}`,
-    dataPlane: 'sdx-edge',
+    dataPlane: SDX_DATA_PLANE,
     runtimeGroupName: args.runtimeGroupName,
     domains: [
       ...runtimeGroups.map((rg) => rg.host),
@@ -344,7 +351,7 @@ async function createSDXNamespace(
 
   const resourceSet = await CreateNamespace(context, args);
 
-  const name = 'sdx-provisioner';
+  const name = SDX_PROVISIONER_CLIENT_ID;
 
   const umaPolicy: Policy = {
     name: `${name} access to ${resourceSet.name}`,

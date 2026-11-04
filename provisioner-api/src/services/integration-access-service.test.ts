@@ -616,6 +616,33 @@ test('does not derive callback metadata from unrelated connections', async () =>
   );
 });
 
+test('returns an empty callback when the integration has connections only in another environment', async () => {
+  const { service } = createService({
+    connections: [
+      existingConnection({
+        environment: 'apsdev',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          submissionId: 'submission-apsdev',
+        },
+      }),
+    ],
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'apstst',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-apsdev',
+    resourceServers: [],
+  });
+});
+
 for (const isActive of [false, true]) {
   test(`approved access includes the reviewed provider grant when isActive=${isActive}`, async () => {
     const { service } = createService({
@@ -623,15 +650,21 @@ for (const isActive of [false, true]) {
       catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     });
     const response = await service.buildIntegrationAllowedServices(
-      'integration-a', 'dev', 'approved'
+      'integration-a',
+      'dev',
+      'approved'
     );
     assert.deepEqual(response, {
-      integrationId: 'integration-a', clientId: 'oauth-client-a',
+      integrationId: 'integration-a',
+      clientId: 'oauth-client-a',
       submissionId: 'submission-100-a',
-      resourceServers: [{
-        id: 'provider-a', environment: 'dev',
-        services: [{ name: 'service-a', version: '1.0.0', scopes: ['read'] }],
-      }],
+      resourceServers: [
+        {
+          id: 'provider-a',
+          environment: 'dev',
+          services: [{ name: 'service-a', version: '1.0.0', scopes: ['read'] }],
+        },
+      ],
     });
   });
   test(`unapproved access has no approved grant when isActive=${isActive}`, async () => {
@@ -639,7 +672,9 @@ for (const isActive of [false, true]) {
       connections: [existingConnection({ isApproved: false, isActive })],
     });
     const response = await service.buildIntegrationAllowedServices(
-      'integration-a', 'dev', 'approved'
+      'integration-a',
+      'dev',
+      'approved'
     );
     assert.deepEqual(response.resourceServers, []);
   });

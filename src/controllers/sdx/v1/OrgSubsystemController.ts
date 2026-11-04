@@ -122,7 +122,8 @@ export class OrgSubsystemController extends Controller {
   /**
    * Deletes a subsystem from the specified organization. The subsystem can only
    * be deleted when it has no active connection requests and no gateway
-   * configuration. Related OAS services are deleted with the subsystem.
+   * configuration. Related OAS services are deleted with the subsystem, and
+   * its gateway, if registered, is torn down by the provisioner.
    *
    * > `Required Scope:` System.Manage
    *

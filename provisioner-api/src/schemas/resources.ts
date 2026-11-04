@@ -383,6 +383,20 @@ export const GatewayKeysResponse = Type.Object(
   }
 );
 
+export const DeleteGatewayResponse = Type.Object(
+  {
+    gatewayId: Type.String({
+      description: 'Identifier of the deleted gateway.',
+    }),
+    result: Type.Literal('deleted'),
+  },
+  {
+    $id: 'DeleteGatewayResponse',
+    additionalProperties: false,
+    examples: [{ gatewayId: 'sdx-gw-abc12', result: 'deleted' }],
+  }
+);
+
 export type TResource = Static<typeof Resource>;
 export type TResourceResult = Static<typeof ResourceResult>;
 export type TApplyResourcesRequest = Static<typeof ApplyResourcesRequest>;
@@ -404,4 +418,5 @@ export const resourceSchemas = [
   ApplyPatternRequest,
   GatewayResource,
   GatewayKeysResponse,
+  DeleteGatewayResponse,
 ];

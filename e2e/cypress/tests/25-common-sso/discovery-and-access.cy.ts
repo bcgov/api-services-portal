@@ -101,11 +101,28 @@ describe('Partner discovery and environment access', () => {
     })
   })
 
+  it('returns an empty grant for a known integration in an unused environment', () => {
+    run({
+      initial: 'empty',
+      steps: [
+        { method: 'POST', url: submitUrl, body: submission() },
+        { url: grantsUrl('prod') },
+      ],
+    }).then((result) => {
+      expect(result.results[0].status).eq(200)
+      expect(result.results[1].status).eq(200)
+      expect(result.results[1].body).include({
+        integrationId: 'integration', clientId: 'client-dev',
+        submissionId: result.results[0].body.submissionId,
+      })
+      expect(result.results[1].body.resourceServers).deep.eq([])
+    })
+  })
+
   for (const [url, status] of [
     ['/v1/resource-servers', 400],
     [grantsUrl('dev', 'invalid'), 400],
     ['/v1/integrations/integration/allowed-services?environment=dev', 400],
-    [grantsUrl('prod'), 404],
     ['/v1/integrations/unknown/allowed-services?environment=dev&status=approved', 400],
   ] as const) {
     it(`returns ${status} for ${url}`, () =>
