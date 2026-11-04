@@ -166,7 +166,7 @@ export class CssOnboardingNotificationService {
           context: {
             ...details,
             headline: 'Common SSO asked SDX for API access',
-            message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.`,
+            message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration ${integrationId}, this access request will be submitted.`,
             connectionsUrl: details.inviteUrl,
           },
         }
@@ -195,7 +195,7 @@ export class CssOnboardingNotificationService {
         context: {
           ...details,
           headline: 'A new onboarding task is waiting',
-          message: `A new onboarding task is waiting for integration ${integrationId}. The onboarding blueprint applies: kickoff, then organization and subsystem.`,
+          message: `A new onboarding task is waiting for integration ${integrationId}. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.`,
           connectionsUrl: details.brochureUrl,
         },
       }

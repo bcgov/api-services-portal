@@ -70,7 +70,7 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
             expect(details.To.map((to) => to.Address)).to.include(requester.email)
             expect(details.HTML).to.include('Common SSO asked SDX for API access')
             expect(details.HTML).to.include('not onboarded yet')
-            expect(details.HTML).to.include('onboarding blueprint')
+            expect(details.HTML).to.include('will onboard this application')
             expect(details.HTML).to.include(`href="${inviteUrl}"`)
           })
         })
@@ -79,7 +79,7 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
             expect(details.HTML).to.include(requester.displayName)
             expect(details.HTML).to.include(requester.email)
             expect(details.HTML).to.include(service.name)
-            expect(details.HTML).to.include('kickoff, then organization and subsystem')
+            expect(details.HTML).to.include('Start with a kickoff, then create the SDX organization')
           })
         })
 

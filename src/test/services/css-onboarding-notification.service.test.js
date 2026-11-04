@@ -100,7 +100,7 @@ describe('CSS onboarding Task hook', () => {
         ...letterDetails,
         headline: 'Common SSO asked SDX for API access',
         message:
-          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.',
+          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
         connectionsUrl: inviteUrl,
       },
     });
@@ -116,7 +116,7 @@ describe('CSS onboarding Task hook', () => {
         ...letterDetails,
         headline: 'A new onboarding task is waiting',
         message:
-          'A new onboarding task is waiting for integration integration-a. The onboarding blueprint applies: kickoff, then organization and subsystem.',
+          'A new onboarding task is waiting for integration integration-a. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.',
         connectionsUrl: 'http://sdx-ui.example.com',
       },
     });
@@ -225,7 +225,7 @@ describe('CSS onboarding Task hook', () => {
         ...letterDetails,
         headline: 'Common SSO asked SDX for API access',
         message:
-          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.',
+          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
         connectionsUrl: inviteUrl,
       }
     );
@@ -236,7 +236,7 @@ describe('CSS onboarding Task hook', () => {
         ...letterDetails,
         headline: 'A new onboarding task is waiting',
         message:
-          'A new onboarding task is waiting for integration integration-a. The onboarding blueprint applies: kickoff, then organization and subsystem.',
+          'A new onboarding task is waiting for integration integration-a. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.',
         connectionsUrl: letterDetails.brochureUrl,
       }
     );
@@ -256,7 +256,7 @@ describe('CSS onboarding Task hook', () => {
     expect(invite).toContain('not onboarded yet');
     expect(invite).toContain('access request is held');
     expect(invite).toContain(
-      'APS Operations follows the onboarding blueprint: kickoff, organization'
+      'APS Operations will onboard this application with you: a kickoff'
     );
     expect(invite).toContain(
       'href="http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a"'
@@ -265,7 +265,7 @@ describe('CSS onboarding Task hook', () => {
     expect(aps).toContain('Jane Doe');
     expect(aps).toContain('jane@example.gov.bc.ca');
     expect(aps).toContain('claims-svc, notes-svc');
-    expect(aps).toContain('kickoff, then organization and subsystem');
+    expect(aps).toContain('Start with a kickoff, then create the SDX organization');
     expect(done).toContain('is done');
     expect(done).toContain('held request has');
     expect(done).toContain('submitted for approval');
