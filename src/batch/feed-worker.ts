@@ -182,17 +182,21 @@ export const getFeedWorker = async (context: any, req: any, res: any) => {
 
   assert.strictEqual(md['sync'].includes(refKey), true, 'Unexpected ref key');
 
-  // Kong sync looks records up by external id and only needs the reference
-  // columns. Task has no external id; onboarding reads the stored payload.
-  const fields =
-    feedEntity === 'Task' ? md.sync : ['extForeignKey', 'extRecordHash'];
+  // External sync only needs the reference columns. Entities that are not
+  // keyed by an external id return their sync fields, including JSON payloads.
+  const usesExternalId =
+    md.refKey === 'extForeignKey' ||
+    (Array.isArray(md.sync) && md.sync.includes('extForeignKey'));
+  const fields = usesExternalId
+    ? ['extForeignKey', 'extRecordHash']
+    : md.sync;
   const records = await batchService.list(
     md.query,
     refKey,
     refKeyValue,
     fields
   );
-  if (feedEntity !== 'Task') {
+  if (usesExternalId) {
     res.json(records);
     return;
   }

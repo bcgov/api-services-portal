@@ -41,6 +41,23 @@ const request = {
   ],
 };
 
+const inviteUrl =
+  'http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a';
+
+const letterDetails = {
+  hasCssDetails: true,
+  cssClientId: 'partner-app',
+  cssIntegrationId: 'integration-a',
+  cssPrivacyZone: 'public',
+  sdxClientId: 'partner-app',
+  requestedBy: 'Jane Doe (jane@example.gov.bc.ca)',
+  serviceId: 'claims-svc, notes-svc',
+  environment: 'dev',
+  policyVersion: 'SDX.R1.00',
+  brochureUrl: 'http://sdx-ui.example.com',
+  inviteUrl,
+};
+
 const pendingTask = {
   ref: 'css-onboarding:integration-a',
   type: 'integrationAccessRequest-subsystemLinking',
@@ -77,12 +94,14 @@ describe('CSS onboarding Task hook', () => {
       username: '',
     });
     expect(notify.mock.calls[0][1]).toEqual({
-      template: 'css-onboarding-invite',
+      template: 'connection-rqst',
       subject: 'SDX onboarding - integration-a',
       context: {
-        integrationId: 'integration-a',
-        inviteUrl:
-          'http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a',
+        ...letterDetails,
+        headline: 'Common SSO asked SDX for API access',
+        message:
+          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.',
+        connectionsUrl: inviteUrl,
       },
     });
     expect(notify.mock.calls[1][0]).toEqual({
@@ -91,13 +110,14 @@ describe('CSS onboarding Task hook', () => {
       username: '',
     });
     expect(notify.mock.calls[1][1]).toEqual({
-      template: 'css-onboarding-aps',
+      template: 'connection-rqst',
       subject: 'New onboarding task - integration-a',
       context: {
-        integrationId: 'integration-a',
-        requesterName: 'Jane Doe',
-        requesterEmail: 'jane@example.gov.bc.ca',
-        services: 'claims-svc, notes-svc',
+        ...letterDetails,
+        headline: 'A new onboarding task is waiting',
+        message:
+          'A new onboarding task is waiting for integration integration-a. The onboarding blueprint applies: kickoff, then organization and subsystem.',
+        connectionsUrl: 'http://sdx-ui.example.com',
       },
     });
   });
@@ -162,9 +182,15 @@ describe('CSS onboarding Task hook', () => {
     expect(notify).toHaveBeenCalledTimes(1);
     expect(notify.mock.calls[0][0].email).toBe('jane@example.gov.bc.ca');
     expect(notify.mock.calls[0][1]).toEqual({
-      template: 'css-onboarding-complete',
+      template: 'connection-rqst',
       subject: 'SDX onboarding complete - integration-a',
-      context: { integrationId: 'integration-a' },
+      context: {
+        ...letterDetails,
+        headline: 'Onboarding is done',
+        message:
+          'Onboarding for integration integration-a is done. The held request has been submitted for approval.',
+        connectionsUrl: 'http://sdx-ui.example.com',
+      },
     });
   });
 
@@ -188,33 +214,42 @@ describe('CSS onboarding Task hook', () => {
     expect(notify).not.toHaveBeenCalled();
   });
 
-  it('renders the onboarding letters', () => {
+  it('renders the onboarding letters with the connection template', () => {
     const renderer = new NotificationService({
       getConfig: () => ({ notification: { enabled: false } }),
     });
     const invite = renderer.templateToContent(
       { name: 'Jane Doe' },
-      'css-onboarding-invite',
+      'connection-rqst',
       {
-        integrationId: 'integration-a',
-        inviteUrl:
-          'http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a',
+        ...letterDetails,
+        headline: 'Common SSO asked SDX for API access',
+        message:
+          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.',
+        connectionsUrl: inviteUrl,
       }
     );
     const aps = renderer.templateToContent(
       { name: 'APS Operations' },
-      'css-onboarding-aps',
+      'connection-rqst',
       {
-        integrationId: 'integration-a',
-        requesterName: 'Jane Doe',
-        requesterEmail: 'jane@example.gov.bc.ca',
-        services: 'claims-svc, notes-svc',
+        ...letterDetails,
+        headline: 'A new onboarding task is waiting',
+        message:
+          'A new onboarding task is waiting for integration integration-a. The onboarding blueprint applies: kickoff, then organization and subsystem.',
+        connectionsUrl: letterDetails.brochureUrl,
       }
     );
     const done = renderer.templateToContent(
       { name: 'Jane Doe' },
-      'css-onboarding-complete',
-      { integrationId: 'integration-a' }
+      'connection-rqst',
+      {
+        ...letterDetails,
+        headline: 'Onboarding is done',
+        message:
+          'Onboarding for integration integration-a is done. The held request has been submitted for approval.',
+        connectionsUrl: letterDetails.brochureUrl,
+      }
     );
 
     expect(invite).toContain('Common SSO asked SDX for API access');

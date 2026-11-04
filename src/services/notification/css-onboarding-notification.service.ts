@@ -6,6 +6,9 @@ import { NotificationService } from './notification.service';
 const logger = Logger('css-onboarding-notification.service');
 
 const ONBOARDING_TASK_TYPE = 'integrationAccessRequest-subsystemLinking';
+// Same layout as connection requests. Wording is a placeholder until
+// Andi and Tanya revise the copy.
+const ONBOARDING_TEMPLATE = 'connection-rqst';
 
 type TaskItem = {
   ref?: string;
@@ -15,8 +18,14 @@ type TaskItem = {
 };
 
 type OnboardingRequest = {
+  clientId?: string;
+  privacyZone?: string;
+  policyVersion?: string;
   requester?: { displayName?: string; email?: string };
-  resourceServers?: Array<{ services?: Array<{ name?: string }> }>;
+  resourceServers?: Array<{
+    environment?: string;
+    services?: Array<{ name?: string }>;
+  }>;
 };
 
 type OnboardingBlob = {
@@ -120,7 +129,12 @@ export class CssOnboardingNotificationService {
         return;
       }
 
-      await this.notifyCompleted(integrationId, requester);
+      await this.notifyCompleted(
+        integrationId,
+        requester,
+        blob.request,
+        config
+      );
     } catch (err) {
       logger.error('Failed processing CSS onboarding notification - %s', err);
     }
@@ -132,6 +146,12 @@ export class CssOnboardingNotificationService {
     request: OnboardingRequest,
     config: OnboardingMailConfig
   ) {
+    const details = onboardingTemplateContext(
+      integrationId,
+      requester,
+      request,
+      config
+    );
     if (requester.email) {
       await this.notification.notify(
         {
@@ -140,11 +160,13 @@ export class CssOnboardingNotificationService {
           username: '',
         },
         {
-          template: 'css-onboarding-invite',
+          template: ONBOARDING_TEMPLATE,
           subject: `SDX onboarding - ${integrationId}`,
           context: {
-            integrationId,
-            inviteUrl: cssOnboardingInviteUrl(integrationId, config),
+            ...details,
+            headline: 'Common SSO asked SDX for API access',
+            message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet. The access request is held until onboarding is complete. APS Operations follows the onboarding blueprint: kickoff, organization, subsystem, link this integration id, then the held request is submitted.`,
+            connectionsUrl: details.inviteUrl,
           },
         }
       );
@@ -167,13 +189,13 @@ export class CssOnboardingNotificationService {
     await this.notification.notify(
       { email: apsEmail, name: 'APS Operations', username: '' },
       {
-        template: 'css-onboarding-aps',
+        template: ONBOARDING_TEMPLATE,
         subject: `New onboarding task - ${integrationId}`,
         context: {
-          integrationId,
-          requesterName: requester.displayName || 'Not specified',
-          requesterEmail: requester.email || 'Not specified',
-          services: requestedServiceNames(request),
+          ...details,
+          headline: 'A new onboarding task is waiting',
+          message: `A new onboarding task is waiting for integration ${integrationId}. The onboarding blueprint applies: kickoff, then organization and subsystem.`,
+          connectionsUrl: details.brochureUrl,
         },
       }
     );
@@ -181,7 +203,9 @@ export class CssOnboardingNotificationService {
 
   private async notifyCompleted(
     integrationId: string,
-    requester: { displayName?: string; email?: string }
+    requester: { displayName?: string; email?: string },
+    request: OnboardingRequest,
+    config: OnboardingMailConfig
   ) {
     if (!requester.email) {
       logger.warn(
@@ -191,6 +215,12 @@ export class CssOnboardingNotificationService {
       return;
     }
 
+    const details = onboardingTemplateContext(
+      integrationId,
+      requester,
+      request,
+      config
+    );
     await this.notification.notify(
       {
         email: requester.email,
@@ -198,9 +228,14 @@ export class CssOnboardingNotificationService {
         username: '',
       },
       {
-        template: 'css-onboarding-complete',
+        template: ONBOARDING_TEMPLATE,
         subject: `SDX onboarding complete - ${integrationId}`,
-        context: { integrationId },
+        context: {
+          ...details,
+          headline: 'Onboarding is done',
+          message: `Onboarding for integration ${integrationId} is done. The held request has been submitted for approval.`,
+          connectionsUrl: details.brochureUrl,
+        },
       }
     );
   }
@@ -216,6 +251,37 @@ function integrationIdFromRef(ref?: string): string {
   const prefix = 'css-onboarding:';
   if (ref?.startsWith(prefix)) return ref.slice(prefix.length);
   return '';
+}
+
+function onboardingTemplateContext(
+  integrationId: string,
+  requester: { displayName?: string; email?: string },
+  request: OnboardingRequest,
+  config: OnboardingMailConfig
+) {
+  const environments = Array.from(
+    new Set(
+      (request.resourceServers || [])
+        .map((server) => server.environment)
+        .filter((environment): environment is string => Boolean(environment))
+    )
+  ).sort();
+  const brochureUrl = (config.sdxUiUrl || '').replace(/\/+$/, '');
+  return {
+    hasCssDetails: true,
+    cssClientId: request.clientId || 'Not specified',
+    cssIntegrationId: integrationId || 'Not specified',
+    cssPrivacyZone: request.privacyZone || 'Not specified',
+    sdxClientId: request.clientId || 'Not specified',
+    requestedBy: requester.email
+      ? `${requester.displayName || 'Not specified'} (${requester.email})`
+      : requester.displayName || 'Not specified',
+    serviceId: requestedServiceNames(request),
+    environment: environments.join(', ') || 'Not specified',
+    policyVersion: request.policyVersion || 'Not specified',
+    brochureUrl,
+    inviteUrl: cssOnboardingInviteUrl(integrationId, config),
+  };
 }
 
 function requestedServiceNames(request: OnboardingRequest): string {
