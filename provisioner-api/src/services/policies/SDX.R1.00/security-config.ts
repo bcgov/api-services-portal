@@ -334,7 +334,9 @@ export function enforceR1SecurityConfig(
 /**
  * R1 no longer generates a provider audience. Preserve a non-empty audience
  * already stored on a connection so older consumer configurations continue to
- * work, while keeping every active token-exchange setting authoritative.
+ * work, while keeping every active token-exchange setting authoritative. The
+ * scope allowlist is regenerated from the current catalog instead of trusting
+ * the copy stored on the connection.
  */
 function setManagedTokenExchange(
   target: Record<string, unknown>,
@@ -349,13 +351,11 @@ function setManagedTokenExchange(
   }
 
   const existing = recordOrEmpty(target[key], environment, path);
-  const { audience, scopes, ...managed } = existing;
-  const { scopes: canonicalScopes, ...canonicalManaged } = canonical;
-  const isLegacyEmptyAllowlist = Array.isArray(scopes) && scopes.length === 0;
-  if (
-    !isDeepStrictEqual(managed, canonicalManaged) ||
-    (!isLegacyEmptyAllowlist && !isDeepStrictEqual(scopes, canonicalScopes))
-  ) {
+  const { audience, ...managed } = existing;
+  delete managed.scopes;
+  const canonicalManaged = { ...canonical };
+  delete canonicalManaged.scopes;
+  if (!isDeepStrictEqual(managed, canonicalManaged)) {
     throw managedSettingError(
       environment,
       path,
@@ -405,11 +405,14 @@ export function managedApplicationScopesForEnvironment(
   catalog: ResourceScopeEntry[],
   environment: string
 ): string[] {
-  return catalog
-    .filter((entry) =>
-      entry.services?.some((service) => service.environment === environment)
-    )
-    .map((entry) => entry.name);
+  return normalizeManagedApplicationScopes(
+    environment,
+    catalog
+      .filter((entry) =>
+        entry.services?.some((service) => service.environment === environment)
+      )
+      .map((entry) => entry.name)
+  );
 }
 
 function normalizeManagedApplicationScopes(
