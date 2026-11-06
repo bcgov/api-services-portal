@@ -30,7 +30,8 @@ before(() => {
       dev: {
         oauth_token_url: 'https://issuer.example/token',
         kong_admin_url: 'http://kong-admin',
-        sdx_token_exchange_client_id: 'sdx-edge-exchange',
+        client_runtime_override: 'MIN.CITZ.pzgw',
+    sdx_token_exchange_client_id: 'sdx-edge-exchange',
         sdx_token_exchange_token_url: 'https://issuer.example/token',
         sdx_trusted_issuers: ['https://issuer.example'],
       },

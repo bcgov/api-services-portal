@@ -49,6 +49,8 @@ export type EnvironmentConfig = {
    * token-exchange request. This is deliberately separate from `client_id`,
    * which identifies the provisioner's control-plane client.
    */
+  /** Shared consumer edge identity required by R1 on both connection sides. */
+  client_runtime_override?: string;
   sdx_token_exchange_client_id?: string;
   /**
    * Token endpoint used by the SDX edge. Required by the R1 preflight and
@@ -62,6 +64,7 @@ export type EnvironmentConfig = {
 
 /** Environment fields that must be present before an R1 connection is built. */
 export type R1EnvironmentConfig = EnvironmentConfig & {
+  client_runtime_override: string;
   sdx_token_exchange_client_id: string;
   sdx_token_exchange_token_url: string;
   sdx_trusted_issuers: string[];
@@ -177,6 +180,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'operator_edge_url', name, path);
     optionalString(entry, 'ca_token_url', name, path);
     optionalString(entry, 'public_url', name, path);
+    optionalString(entry, 'client_runtime_override', name, path);
     optionalString(entry, 'sdx_token_exchange_client_id', name, path);
     optionalString(entry, 'sdx_token_exchange_token_url', name, path);
     optionalStringArray(entry, 'sdx_trusted_issuers', name, path);
@@ -188,6 +192,7 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
       operator_edge_url: entry.operator_edge_url as string | undefined,
       ca_token_url: entry.ca_token_url as string | undefined,
       public_url: entry.public_url as string | undefined,
+      client_runtime_override: entry.client_runtime_override as string | undefined,
       sdx_token_exchange_client_id: entry.sdx_token_exchange_client_id as
         | string
         | undefined,

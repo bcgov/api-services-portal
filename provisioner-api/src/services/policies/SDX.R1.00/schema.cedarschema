@@ -122,6 +122,7 @@ namespace SDX {
                         operator_edge_url: String,
                         ca_token_url: String,
                         public_url: String,
+                        client_runtime_override?: String,
                         sdx_token_exchange_client_id?: String,
                         sdx_token_exchange_token_url?: String,
                         sdx_trusted_issuers?: Set<String>
