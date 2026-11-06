@@ -64,8 +64,175 @@ paths: {}
     expect(mockBuildServiceName).toHaveBeenCalled();
     expect(result.name).toBe('DEV.MIN.CITZ.TEST.v1');
     expect(result.spec).toContain('x-csbc-api-standard: v0.3.0-test');
-    expect(result.spec).toContain(
-      'x-csbc-api-standard-ruleset: basic-ruleset'
+    expect(result.spec).toContain('x-csbc-api-standard-ruleset: basic-ruleset');
+  });
+
+  it.each(['YAML', 'JSON'])(
+    'ignores path metadata and preserves real operations in %s',
+    async (format) => {
+      mockValidateRuleset.mockResolvedValue({
+        version: 'v0.3.0-test',
+        ruleset: 'basic-ruleset',
+      });
+      const pathItem = {
+        summary: 'Shared path summary',
+        description: 'Path description',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        servers: [{ url: 'https://api.example.test' }],
+        'x-routing': { value: true },
+        get: {
+          operationId: 'readItem',
+          summary: 'Read an item',
+          security: [{ oauth: ['items:read'] }],
+        },
+        post: { operationId: 'createItem', summary: 'Create an item' },
+      };
+      const spec = {
+        openapi: '3.1.0',
+        info: { title: 'Test API', version: '1.0.0' },
+        paths: {
+          '/items/{id}': pathItem,
+          '/metadata-only': { parameters: [] },
+        },
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                authorizationCode: {
+                  authorizationUrl: 'https://issuer.example/auth',
+                  tokenUrl: 'https://issuer.example/token',
+                  scopes: { 'items:read': 'Read items' },
+                },
+              },
+            },
+          },
+        },
+      };
+      const result = await LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'dev',
+          spec: format === 'JSON' ? JSON.stringify(spec) : YAML.stringify(spec),
+        }
+      );
+      expect(JSON.parse(result.operations)).toEqual([
+        {
+          operationId: 'readItem',
+          method: 'GET',
+          path: '/items/{id}',
+          summary: 'Read an item',
+          scopes: [{ name: 'items:read', description: 'Read items' }],
+        },
+        {
+          operationId: 'createItem',
+          method: 'POST',
+          path: '/items/{id}',
+          summary: 'Create an item',
+          scopes: [],
+        },
+      ]);
+      // The uploaded parameter definitions remain in the persisted spec.
+      expect(YAML.parse(result.spec).paths['/items/{id}'].parameters).toEqual(
+        pathItem.parameters
+      );
+    }
+  );
+
+  it('ignores callback Path Item parameters while retaining the callback operation', async () => {
+    mockValidateRuleset.mockResolvedValue({
+      version: 'v0.3.0-test',
+      ruleset: 'basic-ruleset',
+    });
+    const result = await LoadOpenAPISpec(
+      {},
+      {
+        organization: 'ministry-of-citz',
+        subsystem: 'MY-SVC',
+        environment: 'dev',
+        spec: YAML.stringify({
+          openapi: '3.1.0',
+          info: { title: 'Test API', version: '1.0.0' },
+          components: { securitySchemes: {} },
+          paths: {
+            '/items': {
+              get: { operationId: 'items' },
+              callback: {
+                notification: {
+                  '/notification': {
+                    parameters: [],
+                    summary: 'Callback',
+                    post: { summary: 'Notify' },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      }
+    );
+    expect(JSON.parse(result.operations)).toEqual([
+      {
+        operationId: 'items',
+        method: 'GET',
+        path: '/items',
+        summary: '',
+        scopes: [],
+      },
+      {
+        operationId: 'callback:notification',
+        method: 'post',
+        path: '/notification',
+        summary: 'Notify',
+        scopes: [],
+      },
+    ]);
+  });
+
+  it('keeps all eight OpenAPI 3.0/3.1 HTTP methods', async () => {
+    mockValidateRuleset.mockResolvedValue({
+      version: 'v0.3.0-test',
+      ruleset: 'basic-ruleset',
+    });
+    const methods = [
+      'get',
+      'put',
+      'post',
+      'delete',
+      'options',
+      'head',
+      'patch',
+      'trace',
+    ];
+    const result = await LoadOpenAPISpec(
+      {},
+      {
+        organization: 'ministry-of-citz',
+        subsystem: 'MY-SVC',
+        environment: 'dev',
+        spec: YAML.stringify({
+          openapi: '3.1.0',
+          info: { title: 'Test API', version: '1.0.0' },
+          components: { securitySchemes: {} },
+          paths: {
+            '/items': Object.fromEntries(
+              methods.map((method) => [method, { operationId: method }])
+            ),
+          },
+        }),
+      }
+    );
+    expect(JSON.parse(result.operations).map((op) => op.method)).toEqual(
+      methods.map((method) => method.toUpperCase())
     );
   });
 
