@@ -29,6 +29,18 @@ const notifyChange = (context, args) => {
     });
 };
 
+const parseProvisionerStatus = (value) => {
+  if (typeof value !== 'string') {
+    return value || {};
+  }
+
+  try {
+    return JSON.parse(value || '{}');
+  } catch {
+    return {};
+  }
+};
+
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
 between a consumer and provider.
@@ -195,8 +207,20 @@ module.exports = {
 
       if (existingItem.isActive) {
         throw new UserAssertionError(
-          'Cannot delete an active connection request. Please set isActive to false before deleting.'
+          'Cannot revoke an active connection. Deactivate it and wait for access configuration removal to finish.'
         );
+      }
+
+      if (existingItem.isApproved) {
+        const provisionerStatus = parseProvisionerStatus(
+          existingItem.provisionerStatus
+        );
+
+        if (provisionerStatus.status !== 'deprovisioned') {
+          throw new UserAssertionError(
+            'Cannot revoke this connection until its access configuration has been removed. Deactivate it and wait for access configuration removal to finish.'
+          );
+        }
       }
     },
 
