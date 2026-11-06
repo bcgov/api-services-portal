@@ -119,6 +119,7 @@ describe('ConnectionRequestNotificationService', () => {
       { name: 'Portal <User>' },
       'connection-rqst',
       {
+        linkLabel: 'View request',
         hasCssDetails: true,
         cssClientId: 'CLIENT<&>',
         cssIntegrationId: 'INTEGRATION',
@@ -417,9 +418,10 @@ describe('ConnectionRequestNotificationService', () => {
         subject: 'Connection Request Rejected - LAB.MIN.SERVICE.v1',
         context: expect.objectContaining({
           headline: 'Connection request rejected',
+          linkLabel: 'View activity',
           sdxClientId: 'LAB.MIN.CLIENT',
           connectionsUrl:
-            'http://sdx-ui.example.com/connections?org=ministry-of-client',
+            'http://sdx-ui.example.com/org-activity?org=ministry-of-client',
         }),
       })
     );
