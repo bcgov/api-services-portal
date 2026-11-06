@@ -114,3 +114,143 @@ test('R1 still denies an unapproved request with a pinned service version', () =
   });
   assert.equal(result.decision, 'deny', JSON.stringify(result));
 });
+
+// Exercise the provisioner entry point with real Cedar evaluation: submitted
+// customizations must not be repaired by resource enforcement before validation.
+test('connection changes evaluate submitted resources without reapplying defaults', async () => {
+  const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { resetEnvironmentsCache } = await import(
+    '../../../config/environments.js'
+  );
+  const { PatternsEvaluatorService } = await import(
+    '../../patterns-evaluator.js'
+  );
+  const context = connectionContext('SDX.R1.00', true);
+  const directory = mkdtempSync(join(tmpdir(), 'connection-policy-'));
+  const previousPath = process.env.ENVIRONMENTS_CONFIG_FILE;
+  process.env.ENVIRONMENTS_CONFIG_FILE = join(directory, 'environments.json');
+  writeFileSync(
+    process.env.ENVIRONMENTS_CONFIG_FILE,
+    JSON.stringify({ dev: context.globals.environment })
+  );
+  resetEnvironmentsCache();
+  try {
+    const policy = new PolicyService();
+    // Any attempt to regenerate defaults or enforce resources on updates fails.
+    policy.getDefaultResources = () => {
+      throw new Error('Unexpected defaults');
+    };
+    policy.enforceConnectionResources = () => {
+      throw new Error('Unexpected resource enforcement');
+    };
+    const evaluator = new PatternsEvaluatorService(
+      policy,
+      {
+        listCatalogScopes: async () => [
+          { name: 'demo.read', services: [{ environment: 'dev' }] },
+        ],
+      } as any,
+      {} as any
+    );
+    let generated = 0;
+    evaluator.buildResourcesUsingPattern = async () => {
+      generated++;
+      return { documents: [] };
+    };
+    const service = {
+      name: context.serviceId,
+      environment: 'dev',
+      subsystem: {
+        clientId: context.requesterDetails.service.clientId,
+        privacyZone: context.requesterDetails.service.privacyZone,
+      },
+    } as ServiceCatalogEntry;
+    const { globals, combinedScopes, action: _action, ...connection } = context;
+    for (const action of ['preview', 'apply', 'diff'] as const) {
+      await evaluator.buildResourcesUsingConnectionRequest(
+        'connection-1',
+        action,
+        service,
+        connection
+      );
+      const allowedCustomization = structuredClone(connection);
+      (
+        allowedCustomization.clientResources.gatewayPatterns[
+          'sdx-p2p-consumer.r1'
+        ] as any
+      ).upgrades.sign = {};
+      const submitted = structuredClone(allowedCustomization);
+      await evaluator.buildResourcesUsingConnectionRequest(
+        'connection-1',
+        action,
+        service,
+        allowedCustomization
+      );
+      assert.deepEqual(allowedCustomization, submitted);
+      for (const tokenExchange of [null, false, {}]) {
+        const customized = structuredClone(connection);
+        (
+          customized.clientResources.gatewayPatterns[
+            'sdx-p2p-consumer.r1'
+          ] as any
+        ).upgrades.tokenExchange = tokenExchange;
+        await assert.rejects(
+          evaluator.buildResourcesUsingConnectionRequest(
+            'connection-1',
+            action,
+            service,
+            customized
+          ),
+          /not allowed by 'SDX.R1.00' policy/
+        );
+      }
+      for (const upgrade of ['tokenExchange', 'token', 'acl']) {
+        const customized = structuredClone(connection);
+        delete (
+          customized.clientResources.gatewayPatterns[
+            'sdx-p2p-consumer.r1'
+          ] as any
+        ).upgrades[upgrade];
+        const before = structuredClone(customized);
+        generated = 0;
+        await assert.rejects(
+          evaluator.buildResourcesUsingConnectionRequest(
+            'connection-1',
+            action,
+            service,
+            customized
+          ),
+          /not allowed by 'SDX.R1.00' policy/
+        );
+        assert.equal(
+          generated,
+          0,
+          'Policy rejection must precede resource generation'
+        );
+        assert.deepEqual(
+          customized,
+          before,
+          'Submitted resources must remain unchanged'
+        );
+      }
+    }
+    // Deletion remains possible even if the stored connection no longer meets policy.
+    const removed = structuredClone(connection);
+    delete (
+      removed.clientResources.gatewayPatterns['sdx-p2p-consumer.r1'] as any
+    ).upgrades.tokenExchange;
+    await evaluator.buildResourcesUsingConnectionRequest(
+      'connection-1',
+      'delete',
+      service,
+      removed
+    );
+  } finally {
+    if (previousPath === undefined) delete process.env.ENVIRONMENTS_CONFIG_FILE;
+    else process.env.ENVIRONMENTS_CONFIG_FILE = previousPath;
+    resetEnvironmentsCache();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
