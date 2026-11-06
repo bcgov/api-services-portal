@@ -20,7 +20,7 @@ import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
-import { cloneDeep, get, has, set, unset } from 'lodash';
+import { cloneDeep, get, has, isEqual, set, unset } from 'lodash';
 
 const logger = Logger('batch.connection');
 
@@ -116,6 +116,15 @@ class ConnectionService {
     // retaining submitted changes to resource settings callers may customize.
     if (existing?.policyVersion === 'SDX.R1.00') {
       if (body.clientResources != null) {
+        const path = ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'tokenExchange'];
+        const stored = resourceObject(existing.clientResources);
+        const submitted = resourceObject(body.clientResources);
+        assertEqual(
+          !has(stored, path) || (has(submitted, path) && isEqual(get(stored, path), get(submitted, path))),
+          true,
+          'clientResources',
+          'SDX.R1.00 requires the policy-managed tokenExchange configuration; it cannot be disabled or changed'
+        );
         body.clientResources = preserveManagedR1Settings(
           body.clientResources,
           existing.clientResources,

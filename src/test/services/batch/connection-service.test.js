@@ -316,7 +316,7 @@ describe('ConnectionService', () => {
                 upgrades: {
                   token: { allowedAud: 'ignored-audience' },
                   acl: { allow: ['ignored-client'] },
-                  tokenExchange: {},
+                  tokenExchange: managedTokenExchange,
                   sign: { value: 'updated' },
                 },
               },
@@ -371,6 +371,20 @@ describe('ConnectionService', () => {
       expect(
         saved.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'].upgrades
       ).not.toHaveProperty('tokenExchange');
+    });
+
+    it.each([undefined, null, false, {}])('rejects removing or changing R1 token exchange (%p)', async (tokenExchange) => {
+      getRecords.mockResolvedValue([{ id: '1', policyVersion: 'SDX.R1.00', isApproved: true,
+        clientResources: JSON.stringify({ gatewayPatterns: { 'sdx-p2p-consumer.r1': {
+          upgrades: { tokenExchange: { clientId: 'managed-client' } },
+        } } }),
+      }]);
+      await expect(new ConnectionService().upsertConnection(context, 'ministry-of-client', input({
+        clientResources: { gatewayPatterns: { 'sdx-p2p-consumer.r1': {
+          upgrades: tokenExchange === undefined ? {} : { tokenExchange },
+        } } },
+      }))).rejects.toThrow('Validation Failed');
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
     });
 
     it('keeps null resources unchanged on an existing R1 connection', async () => {
