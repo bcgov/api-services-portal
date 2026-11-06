@@ -618,10 +618,20 @@ const metadata = {
   ProvisionerStatus: {
     transient: true,
     refKey: 'name',
-    sync: ['message', 'status', 'endpoint', 'spec'],
+    sync: ['message', 'status', 'operation', 'endpoint', 'spec'],
     transformations: {},
     validations: {
-      status: { type: 'enum', values: ['pending', 'provisioned', 'failed'] },
+      status: {
+        type: 'enum',
+        values: [
+          'pending',
+          'provisioned',
+          'deprovisioning',
+          'deprovisioned',
+          'failed',
+        ],
+      },
+      operation: { type: 'enum', values: ['provision', 'deprovision'] },
     },
   },
   Product: {
