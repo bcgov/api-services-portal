@@ -20,6 +20,7 @@ const validConfig = {
     oauth_token_url: 'https://oidc.example.gov.bc.ca/token',
     kong_admin_url: 'http://kong:8001',
     operator_edge_url: 'https://edge.dev.example.gov.bc.ca',
+    sdx_client_runtime_override: 'MIN.CITZ.pzgw',
     sdx_token_exchange_client_id: 'sdx-edge-exchange',
     sdx_token_exchange_token_url:
       'https://issuer.example.gov.bc.ca/realms/standard/protocol/openid-connect/token',

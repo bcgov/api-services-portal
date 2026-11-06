@@ -325,3 +325,8 @@ helm template provisioner-check /path/to/generic-api.tgz \
   --set podSecurityContext.fsGroup=10001 \
   --set securityContext.runAsUser=10001
 ```
+
+R1 environments require `sdx_client_runtime_override` (for example `MIN.CITZ.pzgw`).
+Both consumer and provider defaults use this identity, and R1 rejects mismatched
+values. Configure it in the deployed `ENVIRONMENTS_CONFIG_FILE` before upgrading;
+existing R1 connections with a different override must be reviewed and updated.
