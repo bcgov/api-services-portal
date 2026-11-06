@@ -1,3 +1,5 @@
+import type { GatewayAdminService } from '../gateway-admin-service.js';
+import { requireOrganizationSigning } from './org-signing.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
   RuntimeGroup,
@@ -72,7 +74,8 @@ export class SDXP2PProviderPattern implements PatternProcessor {
 
   constructor(
     private readonly api: SdxMemberApiClient,
-    private readonly logger?: FastifyBaseLogger
+    private readonly logger?: FastifyBaseLogger,
+    private readonly gatewayAdmin?: GatewayAdminService
   ) {}
 
   id = () => SDXP2PProviderPattern.ID;
@@ -80,7 +83,8 @@ export class SDXP2PProviderPattern implements PatternProcessor {
   deleteHandling = () => 'delete' as const;
 
   async inject(
-    inputs: SDXP2PProviderPatternConfig
+    inputs: SDXP2PProviderPatternConfig,
+    ctx?: { action?: string }
   ): Promise<SDXP2PProviderPatternData> {
     const { api } = this;
 
@@ -191,6 +195,10 @@ export class SDXP2PProviderPattern implements PatternProcessor {
       true,
       `Service '${inputs.serviceId}' does not have an upstreamUrl configured nor was it passed in as an input parameter.`
     );
+
+    if (ctx?.action !== 'delete' && Object.prototype.hasOwnProperty.call(inputs.upgrades || {}, 'counterSign')) {
+      await requireOrganizationSigning(this.gatewayAdmin, service.subsystem.member, serviceRG as RuntimeGroup);
+    }
 
     return {
       gatewayId: service.subsystem.gateway.id,
