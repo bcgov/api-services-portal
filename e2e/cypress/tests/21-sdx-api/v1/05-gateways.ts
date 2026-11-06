@@ -2,6 +2,24 @@ import { v4 as uuidv4 } from 'uuid'
 
 describe('SDX Gateways', () => {
   let workingData: any
+  const reservedDomains = String(
+    Cypress.env('SDX_RESERVED_DOMAINS') ?? 'kong-sdx-edge0.localtest.me'
+  ).split(',')
+
+  const expectGatewayDomains = (gatewayId: string, expectedDomains: string[]) => {
+    for (const endpoint of [
+      `ds/api/v2/namespaces/${gatewayId}`,
+      `ds/api/v3/gateways/${gatewayId}`,
+    ]) {
+      cy.callAPI(endpoint, 'GET').then(({ apiRes: { status, body } }: any) => {
+        expect(status, body.message).to.equal(200)
+        expect(
+          body.permDomains,
+          `${endpoint} persisted permitted domains`
+        ).to.have.members(expectedDomains)
+      })
+    }
+  }
 
   before(() => {
     cy.buildOrgGatewayDatasetAndProduct().then((data) => {
@@ -68,6 +86,11 @@ describe('SDX Gateways', () => {
                 expect(status).to.be.equal(200)
                 expect(body).to.have.property('gatewayId')
                 expect(body.gatewayId).to.be.equal(gatewayId)
+                expectGatewayDomains(gatewayId, [
+                  `${runtimeGroup.name}.cyp.servers.sdx`,
+                  `internal.${runtimeGroup.name}.cyp.servers.sdx`,
+                  ...reservedDomains,
+                ])
               })
             })
           }
@@ -99,55 +122,75 @@ describe('SDX Gateways', () => {
               consumerEndpoint: `http://internal.${runtimeGroupId}.servers.sdx`,
             }
             cy.setRequestBody(runtimeGroup)
-            cy.callAPI(
-              `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
-              'PUT'
-            ).then(({ apiRes: { status, body } }: any) => {
-              expect(status, body.message).to.be.equal(200)
-
-              cy.setRequestBody({
-                runtimeGroupName: runtimeGroup.name,
-              })
-              cy.callAPI(
-                `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/gateway`,
-                'PUT'
-              ).then(({ apiRes: { status, body } }: any) => {
+            cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/runtime-groups`, 'PUT')
+              .then(({ apiRes: { status, body } }: any) => {
                 expect(status, body.message).to.be.equal(200)
-                expect(body).to.have.property('gatewayId')
+                // The namespace serves every hosted environment of this runtime name.
+                // A distinct endpoint proves domains are collected, not just derived
+                // from the selected runtime name or copied from one environment.
+                cy.setRequestBody({
+                  ...runtimeGroup,
+                  environment: 'dev',
+                  consumerEndpoint: `https://consumer.${runtimeGroupId}.example.test`,
+                })
+                return cy.callAPI(
+                  `ds/api/sdx/v1/organizations/${org.name}/runtime-groups`,
+                  'PUT'
+                )
+              })
+              .then(({ apiRes: { status, body } }: any) => {
+                expect(status, body.message).to.be.equal(200)
 
-                const gatewayId = body.gatewayId
-
+                cy.setRequestBody({
+                  runtimeGroupName: runtimeGroup.name,
+                })
                 cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/clients/${subsystem.name}`,
-                  'GET'
+                  `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystem.name}/gateway`,
+                  'PUT'
                 ).then(({ apiRes: { status, body } }: any) => {
                   expect(status, body.message).to.be.equal(200)
-                  expect(body.runtimeGroups[0].name).to.be.equal(runtimeGroup.name)
+                  expect(body).to.have.property('gatewayId')
 
-                  expect(body.name).to.be.equal(subsystem.name)
-                  // expect(JSON.stringify(body)).to.be.equal('')
-                  expect(body).to.have.property('gateway')
-                  expect(body.gateway.id).to.be.equal(gatewayId)
-                  expect(body.organization.name).to.be.equal(org.name)
+                  const gatewayId = body.gatewayId
+                  expectGatewayDomains(gatewayId, [
+                    `${runtimeGroup.name}.cyp.servers.sdx`,
+                    `${runtimeGroup.name}.dev.servers.sdx`,
+                    `internal.${runtimeGroupId}.servers.sdx`,
+                    `consumer.${runtimeGroupId}.example.test`,
+                    ...reservedDomains,
+                  ])
 
-                  const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
+                  cy.callAPI(
+                    `ds/api/sdx/v1/organizations/${org.name}/clients/${subsystem.name}`,
+                    'GET'
+                  ).then(({ apiRes: { status, body } }: any) => {
+                    expect(status, body.message).to.be.equal(200)
+                    expect(body.runtimeGroups[0].name).to.be.equal(runtimeGroup.name)
 
-                  cy.callAPI(`ds/api/v2/namespaces/${gatewayId}`, 'GET').then(
-                    ({ apiRes: { status, body } }: any) => {
-                      expect(status, body.message).to.be.equal(200)
-                      expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
-                    }
-                  )
+                    expect(body.name).to.be.equal(subsystem.name)
+                    // expect(JSON.stringify(body)).to.be.equal('')
+                    expect(body).to.have.property('gateway')
+                    expect(body.gateway.id).to.be.equal(gatewayId)
+                    expect(body.organization.name).to.be.equal(org.name)
 
-                  cy.callAPI(`ds/api/v3/gateways/${gatewayId}`, 'GET').then(
-                    ({ apiRes: { status, body } }: any) => {
-                      expect(status, body.message).to.be.equal(200)
-                      expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
-                    }
-                  )
+                    const expectedRoutePathPrefix = `/sdx/0/${body.clientId}`
+
+                    cy.callAPI(`ds/api/v2/namespaces/${gatewayId}`, 'GET').then(
+                      ({ apiRes: { status, body } }: any) => {
+                        expect(status, body.message).to.be.equal(200)
+                        expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
+                      }
+                    )
+
+                    cy.callAPI(`ds/api/v3/gateways/${gatewayId}`, 'GET').then(
+                      ({ apiRes: { status, body } }: any) => {
+                        expect(status, body.message).to.be.equal(200)
+                        expect(body.permRoutePaths).to.include(expectedRoutePathPrefix)
+                      }
+                    )
+                  })
                 })
               })
-            })
           }
         )
       })
