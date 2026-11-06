@@ -7,7 +7,7 @@
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
     "ca_token_url": "http://step-token-api.localtest.me:2020",
     "public_url": "http://kong-sdx-edge0.localtest.me:9080",
-    "sdx_client_runtime_override": "MIN.CITZ.pzgw"
+    "client_runtime_override": "MIN.CITZ.pzgw"
   },
   "cyp": {
     "client_id": "sdx-provisioner",
@@ -17,6 +17,6 @@
     "operator_edge_url": "http://kong-sdx-edge0.localtest.me:9080",
     "ca_token_url": "http://step-token-api-2.localtest.me:2022",
     "public_url": "http://kong-sdx-edge0.localtest.me:9080",
-    "sdx_client_runtime_override": "MIN.CITZ.pzgw"
+    "client_runtime_override": "MIN.CITZ.pzgw"
   }
 }
