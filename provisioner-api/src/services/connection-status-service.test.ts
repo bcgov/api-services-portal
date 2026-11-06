@@ -30,6 +30,7 @@ test('updates only the connection provisioner status through the feed API', asyn
       clientId: 'client-1',
       serviceId: 'service-1',
       provisionerStatus: {
+        subsystemClientId: 'client-1',
         endpoint: 'https://consumer.example/sdx/0/client-1',
         spec: '/catalog/services/service-1/oas-spec',
         status: 'failed',

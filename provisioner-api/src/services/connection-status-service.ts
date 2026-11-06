@@ -29,7 +29,7 @@ export class ConnectionStatusService {
     const update: ConnectionProvisionerStatusUpdate = {
       clientId,
       serviceId,
-      provisionerStatus: { ...information, status, message },
+      provisionerStatus: { ...information, subsystemClientId: clientId, status, message },
     };
     this.logger?.debug({ update }, 'Updating connection provisioner status');
 
