@@ -398,7 +398,8 @@ export interface ConnectionRequest {
 export interface ProvisionerStatus {
   name?: string; // Primary Key
   message?: string;
-  status?: "pending" | "provisioned" | "failed";
+  status?: "pending" | "provisioned" | "deprovisioning" | "deprovisioned" | "failed";
+  operation?: "provision" | "deprovision";
   endpoint?: string;
   spec?: string;
 }
