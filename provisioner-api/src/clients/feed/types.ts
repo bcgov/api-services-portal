@@ -44,6 +44,7 @@ export interface ServiceAccess {
 
 export interface ProvisionerStatus {
   status: 'pending' | 'provisioned' | 'failed';
+  subsystemClientId?: string;
   message?: string;
   endpoint?: string;
   spec?: string;

@@ -396,6 +396,7 @@ export interface ConnectionRequest {
  *
  */  
 export interface ProvisionerStatus {
+  subsystemClientId?: string;
   name?: string; // Primary Key
   message?: string;
   status?: "pending" | "provisioned" | "failed";

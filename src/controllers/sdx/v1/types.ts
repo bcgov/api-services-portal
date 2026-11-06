@@ -65,6 +65,7 @@ export interface ConnectionRequestInput {
   /** Managed security settings are read-only on existing SDX.R1.00 connections. */
   serviceResources?: any;
   provisionerStatus?: {
+    subsystemClientId?: string;
     message: string;
     status: 'pending' | 'provisioned' | 'failed';
     endpoint?: string;
