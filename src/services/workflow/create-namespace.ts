@@ -156,6 +156,20 @@ export async function CreateNamespace(
       gwGroup.attributes['perm-route-paths'] = args.routePaths;
     }
     await kcGroupService.updateGroup(gwGroup);
+
+    // Fail at registration, rather than later as an opaque GWA "host invalid".
+    // Read back Keycloak state: an accepted update is not proof the domains
+    // were persisted by the configured server/client combination.
+    if (args.includeSDXScopes && args.domains?.length) {
+      const persisted = await kcGroupService.getGroupById(id);
+      const domains = persisted.attributes?.['perm-domains'] || [];
+      const missing = args.domains.filter((domain) => !domains.includes(domain));
+      if (missing.length) {
+        throw new Error(
+          `SDX gateway '${newNS}' is missing permitted domains in Keycloak: ${missing.join(', ')}`
+        );
+      }
+    }
   }
 
   await recordActivity(
