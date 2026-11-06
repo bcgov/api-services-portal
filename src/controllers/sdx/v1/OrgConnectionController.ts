@@ -82,7 +82,8 @@ export class OrgConnectionController extends Controller {
 
   /**
    * Approve a connection request (`isApproved: true`), or withdraw the approval of an
-   * approved connection (`isApproved: false`).
+   * approved connection (`isApproved: false`). Pass `isActive: true` to
+   * approve and activate the connection in the same update.
    *
    * To reject a pending request, delete it with
    * `DELETE /organizations/{org}/connections/{id}`.
@@ -124,7 +125,8 @@ export class OrgConnectionController extends Controller {
       serviceId: input.serviceId,
       isApproved: input.isApproved,
     };
-    if (input.isActive !== null) {
+    // Preserve explicit false and omit absent values when approving.
+    if (typeof input.isActive === 'boolean') {
       data['isActive'] = input.isActive;
     }
 
