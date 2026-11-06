@@ -34,6 +34,7 @@ describe('ConnectionRequestNotificationService', () => {
     environment: 'prod',
     policyVersion: 'SDX.R1.00',
     requesterDetails: JSON.stringify({
+      scopes: ['service:read', 'service:write'],
       requester: {
         name: 'Request User',
         email: 'requester@example.com',
@@ -258,7 +259,7 @@ describe('ConnectionRequestNotificationService', () => {
 
   it('notifies the requester when a request is approved', async () => {
     const notify = jest.fn().mockResolvedValue(undefined);
-    const findService = jest.fn();
+    const findService = jest.fn().mockResolvedValue({ organization: { name: 'provider-org' }, title: 'Provider API' });
     const service = new ConnectionRequestNotificationService(
       { notify },
       findService,
@@ -281,13 +282,17 @@ describe('ConnectionRequestNotificationService', () => {
         subject: 'Connection Request Approved - LAB.MIN.SERVICE.v1',
         context: expect.objectContaining({
           headline: 'Connection request approved',
+          message: 'Your connection request was approved.',
+          serviceOrganization: 'provider-org',
+          serviceName: 'Provider API',
+          scopes: 'service:read, service:write',
           connectionsUrl:
             'http://sdx-ui.example.com/connections?org=ministry-of-client',
         }),
       })
     );
     expect(findClient).toHaveBeenCalledWith({}, 'LAB.MIN.CLIENT');
-    expect(findService).not.toHaveBeenCalled();
+    expect(findService).toHaveBeenCalledWith({}, 'LAB.MIN.SERVICE.v1');
   });
 
   it('supports the R1 requester string shape', async () => {

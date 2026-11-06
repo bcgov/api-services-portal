@@ -213,7 +213,7 @@ const connectionEmailCopy: Record<
     subject: 'Connection Request Approved',
     headline: 'Connection request approved',
     message:
-      'Your connection request was approved. The client can use this service once the connection is active.',
+      'Your connection request was approved.',
   },
   rejected: {
     subject: 'Connection Request Rejected',
@@ -284,10 +284,16 @@ export class ConnectionRequestNotificationService {
       const isManagerEvent = event === 'created' || event === 'reapproval';
       // Access managers act on the request from the service organization;
       // the requester follows it from the client organization.
-      const service = isManagerEvent
-        ? await this.findService(context, item.serviceId)
-        : undefined;
-      let linkOrg = service?.organization?.name;
+      // Resolve display details for requester emails too. A removed service
+      // must not prevent a rejection/revocation notification being delivered.
+      let service;
+      try {
+        service = await this.findService(context, item.serviceId);
+      } catch (err) {
+        if (isManagerEvent) throw err;
+        logger.warn('Unable to resolve service details for %s: %s', item.serviceId, err);
+      }
+      let linkOrg = isManagerEvent ? service?.organization?.name : undefined;
       if (!isManagerEvent) {
         try {
           const client = await this.findClient(context, item.clientId);
@@ -315,6 +321,9 @@ export class ConnectionRequestNotificationService {
         sdxClientId: item.clientId,
         requestedBy: describeRequester(requester),
         serviceId: item.serviceId,
+        serviceOrganization: service?.organization?.title || service?.organization?.name || service?.subsystem?.organization?.name || 'Not available',
+        serviceName: service?.title || service?.name || item.serviceId,
+        scopes: (Array.isArray(requesterDetails?.scopes) ? requesterDetails.scopes : []).join(', ') || 'None',
         environment: item.environment,
         policyVersion: item.policyVersion,
         connectionsUrl: connectionsUrl(linkOrg),
