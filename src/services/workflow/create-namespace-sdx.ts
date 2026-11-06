@@ -217,6 +217,12 @@ export async function CreateNamespaceForSubsystem(
     args.runtimeGroupName
   );
 
+  assert.strictEqual(
+    runtimeGroups.length > 0,
+    true,
+    `Runtime group '${args.runtimeGroupName}' does not host organization '${args.subsystem.organization.name}' in any environment. Configure hostedOrganizations before registering the subsystem gateway.`
+  );
+
   const envCtx = await getEnvCtx(context);
 
   // Create the namespace using subsystem organization and gateway details
