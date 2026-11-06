@@ -141,9 +141,9 @@ export class OrgConnectionController extends Controller {
    * only connections for services belonging to the subsystem gateways they've been granted
    * either of those scopes on.
    *
-   * `provisionerStatus` describes the most recent provisioning attempt. Deactivating a
-   * connection does not overwrite that history; use `isActive` as the authoritative current
-   * lifecycle state.
+   * `provisionerStatus` describes the current provisioning or deprovisioning operation.
+   * Deactivate an active connection and wait for `deprovisioned` before deleting the
+   * connection record.
    *
    * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
    *

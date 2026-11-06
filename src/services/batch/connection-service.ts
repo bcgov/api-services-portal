@@ -352,6 +352,23 @@ class ConnectionService {
       `Organization not related to this connection request`
     );
 
+    assertEqual(
+      Boolean(connection.isActive),
+      false,
+      'isActive',
+      'Cannot revoke an active connection. Deactivate it and wait for access configuration removal to finish.'
+    );
+
+    if (connection.isApproved) {
+      const provisionerStatus = resourceObject(connection.provisionerStatus);
+      assertEqual(
+        provisionerStatus.status === 'deprovisioned',
+        true,
+        'provisionerStatus',
+        'Cannot revoke this connection until its access configuration has been removed. Deactivate it and wait for access configuration removal to finish.'
+      );
+    }
+
     const status = await this.getConnectionDeleteStatus(
       connection,
       clientSubsystem,
