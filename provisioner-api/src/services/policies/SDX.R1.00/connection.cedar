@@ -86,9 +86,9 @@ forbid ( // Deny unless both sides use the environment's shared client runtime
     resource is SDX::ConnectionRequest
 )
 unless {
-    context.globals.environment has sdx_client_runtime_override &&
+    context.globals.environment has client_runtime_override &&
     context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"] has clientRuntimeOverride &&
     context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"] has clientRuntimeOverride &&
-    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].clientRuntimeOverride == context.globals.environment.sdx_client_runtime_override &&
-    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].clientRuntimeOverride == context.globals.environment.sdx_client_runtime_override
+    context.clientResources.gatewayPatterns["sdx-p2p-consumer.r1"].clientRuntimeOverride == context.globals.environment.client_runtime_override &&
+    context.serviceResources.gatewayPatterns["sdx-p2p-provider.r1"].clientRuntimeOverride == context.globals.environment.client_runtime_override
 };

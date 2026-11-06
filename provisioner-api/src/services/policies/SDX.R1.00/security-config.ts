@@ -89,9 +89,9 @@ export function buildR1SecurityConfig({
     );
   }
 
-  const runtimeOverride = nonBlank(environmentConfig.sdx_client_runtime_override);
+  const runtimeOverride = nonBlank(environmentConfig.client_runtime_override);
   const missing: string[] = [];
-  if (!runtimeOverride) missing.push('sdx_client_runtime_override');
+  if (!runtimeOverride) missing.push('client_runtime_override');
   if (!exchangeClientId) missing.push('sdx_token_exchange_client_id');
   if (!tokenEndpointValue) missing.push('sdx_token_exchange_token_url');
   if (!Array.isArray(configuredIssuers) || configuredIssuers.length === 0) {
@@ -102,7 +102,7 @@ export function buildR1SecurityConfig({
   }
 
   if (!/^[A-Z0-9]+\.[A-Z0-9]+\.[a-z0-9]{3,8}$/.test(runtimeOverride!)) {
-    throw configurationError(environmentName, ['valid sdx_client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)']);
+    throw configurationError(environmentName, ['valid client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)']);
   }
 
   const r1Environment = environmentConfig as R1EnvironmentConfig;
