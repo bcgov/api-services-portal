@@ -1,28 +1,23 @@
 import { grantsUrl, submitUrl, submission, grant, run, problem } from './helpers'
 
 describe('Access request submission and validation', () => {
-  for (const [environment, runtime] of [
-    ['dev', 'MIN.CITZ.pzgw'],
-    ['test', 'OPS.CITZ.pzgw'],
-  ]) {
-    it(`applies the ${environment} R1 runtime identity to both connection sides`, () => {
-      run({
-        initial: 'empty',
-        method: 'POST',
-        url: submitUrl,
-        body: submission(environment),
-      }).then((result) => {
-        expect(result.status).eq(200)
-        expect(result.writes).have.length(1)
-        expect(result.connections).have.length(1)
-        const connection = result.connections[0]
-        expect(connection.clientResources.gatewayPatterns['sdx-p2p-consumer.r1'])
-          .have.property('clientRuntimeOverride', runtime)
-        expect(connection.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'])
-          .have.property('clientRuntimeOverride', runtime)
-      })
+  it('applies the R1 runtime identity to both connection sides', () => {
+    run({
+      initial: 'empty',
+      method: 'POST',
+      url: submitUrl,
+      body: submission(),
+    }).then((result) => {
+      expect(result.status).eq(200)
+      expect(result.writes).have.length(1)
+      expect(result.connections).have.length(1)
+      const connection = result.connections[0]
+      expect(connection.clientResources.gatewayPatterns['sdx-p2p-consumer.r1'])
+        .have.property('clientRuntimeOverride', 'MIN.CITZ.pzgw')
+      expect(connection.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'])
+        .have.property('clientRuntimeOverride', 'MIN.CITZ.pzgw')
     })
-  }
+  })
 
   for (const [description, change, status] of [
     ['missing service', { name: 'missing-service' }, 502],

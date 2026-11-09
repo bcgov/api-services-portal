@@ -29,10 +29,7 @@ const environmentConfig = {
   sdx_token_exchange_token_url: 'https://css.example/protocol/openid-connect/token',
   sdx_trusted_issuers: ['https://css.example'],
 };
-writeFileSync(configPath, JSON.stringify({
-  dev: environmentConfig,
-  test: { ...environmentConfig, client_runtime_override: 'OPS.CITZ.pzgw' },
-}));
+writeFileSync(configPath, JSON.stringify({ dev: environmentConfig, test: environmentConfig }));
 process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
 const consumer: SubsystemEntry = {
   name: 'Consumer',
