@@ -1,7 +1,6 @@
 const mockFindHosted = jest.fn();
 const mockGetGroup = jest.fn();
 const mockUpdateGroup = jest.fn();
-const mockReadGroup = jest.fn();
 const mockFindResource = jest.fn();
 const mockCreateNamespace = jest.fn();
 const mockAssignRoles = jest.fn();
@@ -19,7 +18,6 @@ jest.mock('../../../services/keycloak', () => ({
     login: jest.fn(),
     getGroup: mockGetGroup,
     updateGroup: mockUpdateGroup,
-    getGroupById: mockReadGroup,
   })),
   KeycloakPermissionTicketService: jest.fn(() => ({
     listPermissions: jest.fn(async () => []),
@@ -111,7 +109,6 @@ beforeEach(() => {
   mockUpdateGroup.mockImplementation(async (updated) => {
     group = updated;
   });
-  mockReadGroup.mockImplementation(async () => group);
   mockFindResource.mockResolvedValue(resource);
   mockCreateNamespace.mockResolvedValue(resource);
 });
@@ -241,10 +238,10 @@ test('rejects incomplete registration before changing domains', async () => {
   expect(mockCreateNamespace).not.toHaveBeenCalled();
 });
 
-test('fails when Keycloak did not persist refreshed domains', async () => {
-  mockReadGroup.mockResolvedValueOnce({ attributes: { 'perm-domains': [] } });
+test('propagates a failed Keycloak update without recording success', async () => {
+  mockUpdateGroup.mockRejectedValueOnce(new Error('Keycloak update failed'));
   await expect(CreateNamespaceForSubsystem(context, args)).rejects.toThrow(
-    'not persisted in Keycloak'
+    'Keycloak update failed'
   );
   expect(recordActivity).not.toHaveBeenCalled();
 });

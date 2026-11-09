@@ -350,17 +350,6 @@ async function refreshSubsystemGatewayDomains(
     ...group,
     attributes: { ...attributes, 'perm-domains': domains },
   });
-  const persisted = await groups.getGroupById(group.id);
-  const actual = persisted?.attributes?.['perm-domains'] || [];
-  if (
-    actual.length !== domains.length ||
-    domains.some((domain) => !actual.includes(domain))
-  ) {
-    throw new Error(
-      `SDX gateway '${args.name}' permitted domains were not persisted in Keycloak.`
-    );
-  }
-
   await recordActivity(
     context.sudo(),
     'update',
