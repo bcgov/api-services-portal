@@ -228,8 +228,8 @@ const connectionEmailCopy: Record<
   },
 };
 
-const connectionsUrl = (org?: string, activity = false) => {
-  const url = new URL(`${brochureUrl()}/${activity ? 'org-activity' : 'connections'}`);
+const connectionsUrl = (org?: string) => {
+  const url = new URL(`${brochureUrl()}/connections`);
   if (org) {
     url.searchParams.set('org', org);
   }
@@ -326,8 +326,8 @@ export class ConnectionRequestNotificationService {
         scopes: (Array.isArray(requesterDetails?.scopes) ? requesterDetails.scopes : []).join(', ') || 'None',
         environment: item.environment,
         policyVersion: item.policyVersion,
-        connectionsUrl: connectionsUrl(linkOrg, event === 'revoked' || event === 'rejected'),
-        linkLabel: event === 'revoked' || event === 'rejected' ? 'View activity' : 'View request',
+        connectionsUrl:
+          event === 'revoked' || event === 'rejected' ? '' : connectionsUrl(linkOrg),
         brochureUrl: brochureUrl(),
         ...copy,
       };
