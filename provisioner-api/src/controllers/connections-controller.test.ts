@@ -12,6 +12,7 @@ const connectionRequest = {
   requesterDetails: {},
   clientResources: {},
   serviceResources: {},
+  operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
 };
 
 const service = {
@@ -49,6 +50,7 @@ function setup(
         serviceId: string,
         status: string,
         operation: string,
+        operationId: string | undefined,
         message: string,
         information?: Record<string, unknown>
       ) =>
@@ -57,6 +59,7 @@ function setup(
           serviceId,
           status,
           operation,
+          operationId,
           message,
           ...(information ? { information } : {}),
         }),
@@ -183,6 +186,7 @@ test('apply writes failed after partial provider failure', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'provision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message: 'Provisioning failed for 1 provider batch: gwa.',
   });
 });
@@ -206,6 +210,7 @@ test('apply writes failed after a thrown provisioning exception', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'provision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message:
       'Provisioning failed unexpectedly. See provisioner logs for details.',
   });
@@ -301,6 +306,7 @@ test('delete writes failed after a partial provider failure', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'deprovision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message: 'Deprovisioning failed for 1 provider batch: gwa.',
   });
 });
@@ -323,6 +329,7 @@ test('delete writes failed after a thrown deprovisioning exception', async () =>
     serviceId: 'service-1',
     status: 'failed',
     operation: 'deprovision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message:
       'Deprovisioning failed unexpectedly. See provisioner logs for details.',
   });

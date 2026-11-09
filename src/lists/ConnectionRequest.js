@@ -1,5 +1,6 @@
 const { Checkbox, Slug, Text, Relationship } = require('@keystonejs/fields');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { v4: uuidv4 } = require('uuid');
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
@@ -40,6 +41,21 @@ const parseProvisionerStatus = (value) => {
     return {};
   }
 };
+
+const lifecycleStatus = (isActive) => {
+  const provisioning = Boolean(isActive);
+  return {
+    status: provisioning ? 'pending' : 'deprovisioning',
+    operation: provisioning ? 'provision' : 'deprovision',
+    operationId: uuidv4(),
+    message: provisioning
+      ? 'Provisioning started.'
+      : 'Deprovisioning started.',
+  };
+};
+
+const operationMatches = (current, incoming) =>
+  !current.operationId || current.operationId === incoming.operationId;
 
 /*
 Connection Request : For SDX this manages the lifecycle of a connection
@@ -138,6 +154,7 @@ module.exports = {
       operation,
       existingItem,
       originalInput,
+      existingItem,
       resolvedData,
     }) => {
       logger.debug('Resolving input for ConnectionRequest: %j', resolvedData);
@@ -151,6 +168,29 @@ module.exports = {
             'provisionerStatus must be updated on its own, without any other attributes'
           );
         }
+
+        const currentStatus = parseProvisionerStatus(
+          existingItem && existingItem.provisionerStatus
+        );
+        const incomingStatus = parseProvisionerStatus(
+          resolvedData.provisionerStatus
+        );
+        if (!operationMatches(currentStatus, incomingStatus)) {
+          logger.info(
+            'Ignoring stale provisioner status for operation %s; current operation is %s',
+            incomingStatus.operationId || 'legacy',
+            currentStatus.operationId
+          );
+          resolvedData.provisionerStatus = existingItem.provisionerStatus;
+        }
+      } else {
+        const isActive =
+          'isActive' in resolvedData
+            ? resolvedData.isActive
+            : Boolean(existingItem && existingItem.isActive);
+        resolvedData.provisionerStatus = JSON.stringify(
+          lifecycleStatus(isActive)
+        );
       }
 
       if (
