@@ -107,13 +107,13 @@ export class NamespaceController extends Controller {
   /**
    * Consumers with access to this gateway, including the application owner's
    * name and email so providers can contact them.
-   * > `Required Scope:` Access.Manage
+   * > `Required Scope:` Namespace.View or Access.Manage
    *
    * @summary Consumer report for a gateway
    */
   @Get('/{gatewayId}/report/consumers')
   @OperationId('gateway-report-consumers')
-  @Security('jwt', ['Access.Manage'])
+  @Security('jwt', ['Namespace.View', 'Access.Manage'])
   public async reportConsumers(
     @Path() gatewayId: string,
     @Request() request: any
@@ -126,13 +126,13 @@ export class NamespaceController extends Controller {
   /**
    * Access requests made against this gateway's products, including the
    * requestor's email.
-   * > `Required Scope:` Access.Manage
+   * > `Required Scope:` Namespace.View or Access.Manage
    *
    * @summary Consumer request report for a gateway
    */
   @Get('/{gatewayId}/report/consumers/requests')
   @OperationId('gateway-report-consumer-requests')
-  @Security('jwt', ['Access.Manage'])
+  @Security('jwt', ['Namespace.View', 'Access.Manage'])
   public async reportConsumerRequests(
     @Path() gatewayId: string,
     @Request() request: any
