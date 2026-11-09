@@ -8,13 +8,11 @@ import { Keystone } from '@keystonejs/keystone';
 import { ReportOfNamespaces } from './namespaces';
 import { lookupDetailedServiceAccessesByNS } from '../../keystone/service-access';
 import {
-  EnvironmentContext,
   getResourceServerContext,
   ResourceServerContext,
 } from '../../workflow/get-namespaces';
 import { KongConsumer } from '../../kong/consumer';
 import { KongACLService, KongACL, KongConsumers } from '../../kong';
-import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { lookupEnvironmentsByNS } from '../../keystone/product-environment';
 import { KeycloakClientService, KeycloakUserService } from '../../keycloak';
 import { Logger } from '../../../logger';
@@ -39,15 +37,15 @@ export interface ReportOfConsumerAccess {
   app_name?: string;
   app_id?: string;
   app_owner?: string;
+  app_owner_name?: string;
+  app_owner_email?: string;
 }
 
 /*
  */
 export async function getConsumerAccess(
-  envCtx: EnvironmentContext,
   ksCtx: Keystone,
-  namespaces: ReportOfNamespaces[],
-  serviceLookup: Map<string, ReportOfGatewayMetrics>
+  namespaces: Pick<ReportOfNamespaces, 'name' | 'displayName'>[]
 ): Promise<ReportOfConsumerAccess[]> {
   const kongConsumerSvc = new KongConsumers(process.env.KONG_URL);
   const allKongConsumers = await kongConsumerSvc.getAllConsumers();
@@ -161,6 +159,8 @@ export async function getConsumerAccess(
             app_name: access.application?.name,
             app_id: access.application?.appId,
             app_owner: access.application?.owner?.username,
+            app_owner_name: access.application?.owner?.name,
+            app_owner_email: access.application?.owner?.email,
             perm_acl: '',
             perm_scope: '',
             perm_role: '',
@@ -177,7 +177,7 @@ export async function getConsumerAccess(
 /*
  */
 async function fillClientScopeBasedAccess(
-  ns: ReportOfNamespaces,
+  ns: Pick<ReportOfNamespaces, 'name' | 'displayName'>,
   env: Environment,
   resSvcCtx: ResourceServerContext,
   consumerLookup: any,
@@ -237,6 +237,8 @@ async function fillClientScopeBasedAccess(
         app_name: access.application?.name,
         app_id: access.application?.appId,
         app_owner: access.application?.owner?.username,
+        app_owner_name: access.application?.owner?.name,
+        app_owner_email: access.application?.owner?.email,
         perm_acl: '',
         perm_scope: client.defaultClientScopes.join(' '),
         perm_role: '',
@@ -248,7 +250,7 @@ async function fillClientScopeBasedAccess(
 /*
  */
 async function fillClientRoleBasedAccess(
-  ns: ReportOfNamespaces,
+  ns: Pick<ReportOfNamespaces, 'name' | 'displayName'>,
   env: Environment,
   resSvcCtx: ResourceServerContext,
   consumerLookup: any,
@@ -309,6 +311,8 @@ async function fillClientRoleBasedAccess(
           app_name: access.application?.name,
           app_id: access.application?.appId,
           app_owner: access.application?.owner?.username,
+          app_owner_name: access.application?.owner?.name,
+          app_owner_email: access.application?.owner?.email,
           perm_acl: '',
           perm_scope: '',
           perm_role: role.name,
@@ -322,7 +326,7 @@ async function fillClientRoleBasedAccess(
 /*
  */
 async function fillConsumerKongACLBasedAccess(
-  ns: ReportOfNamespaces,
+  ns: Pick<ReportOfNamespaces, 'name' | 'displayName'>,
   env: Environment,
   kongAcls: KongACL[],
   consumerLookup: any,
@@ -372,6 +376,8 @@ async function fillConsumerKongACLBasedAccess(
           app_name: access.application?.name,
           app_id: access.application?.appId,
           app_owner: access.application?.owner?.username,
+          app_owner_name: access.application?.owner?.name,
+          app_owner_email: access.application?.owner?.email,
           perm_acl: 'allow',
           perm_scope: '',
           perm_role: '',

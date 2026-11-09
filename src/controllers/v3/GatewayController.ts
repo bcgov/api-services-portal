@@ -18,6 +18,12 @@ import { inject, injectable } from 'tsyringe';
 import { getRecords, replaceKey } from '../../batch/feed-worker';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
+import {
+  getConsumerAccess,
+  getConsumerRequests,
+  ReportOfConsumerAccess,
+  ReportOfConsumerRequest,
+} from '../../services/report/data';
 import { Namespace, NamespaceInput } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
@@ -96,6 +102,44 @@ export class NamespaceController extends Controller {
     });
 
     return null;
+  }
+
+  /**
+   * Consumers with access to this gateway, including the application owner's
+   * name and email so providers can contact them.
+   * > `Required Scope:` Access.Manage
+   *
+   * @summary Consumer report for a gateway
+   */
+  @Get('/{gatewayId}/report/consumers')
+  @OperationId('gateway-report-consumers')
+  @Security('jwt', ['Access.Manage'])
+  public async reportConsumers(
+    @Path() gatewayId: string,
+    @Request() request: any
+  ): Promise<ReportOfConsumerAccess[]> {
+    return getConsumerAccess(this.keystone.createContext(request, true), [
+      { name: gatewayId },
+    ]);
+  }
+
+  /**
+   * Access requests made against this gateway's products, including the
+   * requestor's email.
+   * > `Required Scope:` Access.Manage
+   *
+   * @summary Consumer request report for a gateway
+   */
+  @Get('/{gatewayId}/report/consumers/requests')
+  @OperationId('gateway-report-consumer-requests')
+  @Security('jwt', ['Access.Manage'])
+  public async reportConsumerRequests(
+    @Path() gatewayId: string,
+    @Request() request: any
+  ): Promise<ReportOfConsumerRequest[]> {
+    return getConsumerRequests(this.keystone.createContext(request, true), [
+      { name: gatewayId },
+    ]);
   }
 
   /**

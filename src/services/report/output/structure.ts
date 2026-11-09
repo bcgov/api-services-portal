@@ -158,6 +158,7 @@ export const reportStructure: any = {
         width: 26,
       },
       { header: 'Requestor', key: 'requestor', width: 25 },
+      { header: 'Requestor Email', key: 'requestor_email', width: 35 },
       { header: 'Application', key: 'app_name', width: 30 },
       { header: 'Application ID', key: 'app_id', width: 25 },
       { header: 'Product', key: 'prod_name', width: 32 },
@@ -231,6 +232,7 @@ export const reportStructure: any = {
       { header: 'Application', key: 'app_name', width: 30 },
       { header: 'Application ID', key: 'app_id', width: 25 },
       { header: 'Application Owner', key: 'app_owner', width: 25 },
+      { header: 'Application Owner Email', key: 'app_owner_email', width: 35 },
     ],
   },
   consumer_metrics: {

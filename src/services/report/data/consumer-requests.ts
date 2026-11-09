@@ -5,7 +5,7 @@ import { ReportOfNamespaces } from './namespaces';
 import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { getAccessRequestsByNamespace } from '../../keystone';
 
-interface ReportOfConsumerRequest {
+export interface ReportOfConsumerRequest {
   namespace: string;
   displayName?: string;
   prod_name: string;
@@ -15,6 +15,7 @@ interface ReportOfConsumerRequest {
   app_name: string;
   app_id: string;
   requestor: string;
+  requestor_email?: string;
   req_created: string;
   req_reviewer: string;
   req_result: string;
@@ -25,7 +26,7 @@ interface ReportOfConsumerRequest {
  */
 export async function getConsumerRequests(
   ksCtx: Keystone,
-  namespaces: ReportOfNamespaces[]
+  namespaces: Pick<ReportOfNamespaces, 'name' | 'displayName'>[]
 ): Promise<ReportOfConsumerRequest[]> {
   const dataPromises = namespaces.map(
     async (ns): Promise<ReportOfConsumerRequest[]> => {
@@ -44,7 +45,8 @@ export async function getConsumerRequests(
           prod_env_flow: req.productEnvironment?.flow,
           app_name: req.application.name,
           app_id: req.application.appId,
-          requestor: req.requestor.name,
+          requestor: req.requestor?.name,
+          requestor_email: req.requestor?.email,
           req_created: req.createdAt,
           req_reviewer: '',
           req_result: req.isComplete

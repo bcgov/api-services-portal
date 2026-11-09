@@ -158,6 +158,8 @@ export async function lookupDetailedServiceAccessesByNS(
                           appId
                           owner {
                             username
+                            name
+                            email
                           }
                         }
                         consumer {
