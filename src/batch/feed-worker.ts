@@ -21,6 +21,7 @@ import {
   CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
+import { updateConnectionProvisionerStatus } from '../services/batch/connection-status';
 
 const { metadata } = require('./data-rules');
 
@@ -641,6 +642,22 @@ export const syncRecords = async function (
           }
         }
       }
+      if (
+        entity === 'ConnectionRequest' &&
+        Object.keys(data).length === 1 &&
+        'provisionerStatus' in data
+      ) {
+        const statusResult = await updateConnectionProvisionerStatus(
+          context.keystoneAdapter,
+          localRecord.id,
+          localRecord.provisionerStatus,
+          data.provisionerStatus
+        );
+        if (statusResult) {
+          return { ...statusResult, childResults };
+        }
+      }
+
       if (Object.keys(data).length === 0) {
         logger.debug('[%s] [%s] no update', entity, localRecord.id);
         const firstChildResult = childResults

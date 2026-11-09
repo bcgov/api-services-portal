@@ -123,6 +123,7 @@ export interface ProvisionerStatus {
     | 'deprovisioned'
     | 'failed';
   operation?: 'provision' | 'deprovision';
+  operationId?: string;
   message?: string;
   endpoint?: string;
   spec?: string;
