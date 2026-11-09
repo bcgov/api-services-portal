@@ -284,13 +284,11 @@ export class ConnectionRequestNotificationService {
       const isManagerEvent = event === 'created' || event === 'reapproval';
       // Access managers act on the request from the service organization;
       // the requester follows it from the client organization.
-      // Resolve display details for requester emails too. A removed service
-      // must not prevent a rejection/revocation notification being delivered.
+      // Resolve display details for every event, even if the service was removed.
       let service;
       try {
         service = await this.findService(context, item.serviceId);
       } catch (err) {
-        if (isManagerEvent) throw err;
         logger.warn('Unable to resolve service details for %s: %s', item.serviceId, err);
       }
       let linkOrg = isManagerEvent ? service?.organization?.name : undefined;
