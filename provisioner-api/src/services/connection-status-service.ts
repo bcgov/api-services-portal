@@ -24,13 +24,27 @@ export class ConnectionStatusService {
     serviceId: string,
     status: ProvisionerStatus['status'],
     operation: NonNullable<ProvisionerStatus['operation']>,
+    operationId: string | undefined,
     message?: string,
     information: Record<string, unknown> = {}
   ): Promise<void> {
+    const {
+      status: _status,
+      operation: _operation,
+      operationId: _operationId,
+      message: _message,
+      ...details
+    } = information;
     const update: ConnectionProvisionerStatusUpdate = {
       clientId,
       serviceId,
-      provisionerStatus: { ...information, status, operation, message },
+      provisionerStatus: {
+        ...details,
+        status,
+        operation,
+        ...(operationId ? { operationId } : {}),
+        message,
+      },
     };
     this.logger?.debug({ update }, 'Updating connection provisioner status');
 

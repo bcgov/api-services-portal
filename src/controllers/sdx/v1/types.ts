@@ -73,6 +73,7 @@ export interface ConnectionRequestInput {
       | 'deprovisioned'
       | 'failed';
     operation?: 'provision' | 'deprovision';
+    operationId?: string;
     endpoint?: string;
     spec?: string;
   };

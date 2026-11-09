@@ -127,6 +127,10 @@ export class ProvisionerService {
   ): Promise<void> {
     // credentials will be using the gwa admin
 
+    const provisionerStatus =
+      typeof connection.provisionerStatus === 'string'
+        ? JSON.parse(connection.provisionerStatus || '{}')
+        : connection.provisionerStatus || {};
     const payload = {
       clientId: connection.clientId,
       serviceId: connection.serviceId,
@@ -136,6 +140,7 @@ export class ProvisionerService {
       requesterDetails: JSON.parse(connection.requesterDetails),
       clientResources: JSON.parse(connection.clientResources),
       serviceResources: JSON.parse(connection.serviceResources),
+      operationId: provisionerStatus.operationId,
     };
 
     logger.debug(

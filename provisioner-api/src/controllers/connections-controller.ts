@@ -190,6 +190,7 @@ export class ConnectionsController {
       connectionRequest.serviceId,
       status,
       operation,
+      connectionRequest.operationId,
       message,
       information
     );

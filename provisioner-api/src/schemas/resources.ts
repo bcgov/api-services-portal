@@ -116,6 +116,13 @@ export const ConnectionChangeRequest = Type.Object(
     requesterDetails: Type.Optional(Type.Any()),
     clientResources: Type.Optional(Type.Any()),
     serviceResources: Type.Optional(Type.Any()),
+    operationId: Type.Optional(
+      Type.String({
+        format: 'uuid',
+        description:
+          'Correlates every status callback with the lifecycle operation that started it.',
+      })
+    ),
   },
   {
     $id: 'ConnectionChangeRequest',
