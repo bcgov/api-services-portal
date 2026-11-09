@@ -21,6 +21,7 @@ process.env.LOG_LEVEL = 'silent';
 const configDirectory = mkdtempSync(join(tmpdir(), 'css-contract-'));
 const configPath = join(configDirectory, 'environments.json');
 const environmentConfig = {
+  client_runtime_override: 'MIN.CITZ.pzgw',
   client_id: 'fixture-provisioner',
   oauth_token_url: 'https://control.example/token',
   kong_admin_url: 'http://fixture-kong',
@@ -28,7 +29,10 @@ const environmentConfig = {
   sdx_token_exchange_token_url: 'https://css.example/protocol/openid-connect/token',
   sdx_trusted_issuers: ['https://css.example'],
 };
-writeFileSync(configPath, JSON.stringify({ dev: environmentConfig, test: environmentConfig }));
+writeFileSync(configPath, JSON.stringify({
+  dev: environmentConfig,
+  test: { ...environmentConfig, client_runtime_override: 'OPS.CITZ.pzgw' },
+}));
 process.env.ENVIRONMENTS_CONFIG_FILE = configPath;
 const consumer: SubsystemEntry = {
   name: 'Consumer',
