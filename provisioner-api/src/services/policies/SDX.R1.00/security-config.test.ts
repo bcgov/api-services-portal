@@ -25,7 +25,7 @@ const environment: EnvironmentConfig = {
   oauth_token_url: 'https://control.example/realms/aps/token',
   kong_admin_url: 'http://kong-admin',
   client_runtime_override: 'MIN.CITZ.pzgw',
-    sdx_token_exchange_client_id: 'sdx-edge-exchange',
+  sdx_token_exchange_client_id: 'sdx-edge-exchange',
   sdx_token_exchange_token_url:
     'https://ISSUER.EXAMPLE:443/realms/standard/protocol/openid-connect/token/',
   sdx_trusted_issuers: [
@@ -720,7 +720,7 @@ test('Cedar requires the canonical managed R1 security shape', () => {
         ca_token_url: 'https://ca.example',
         public_url: 'https://sdx.example',
         client_runtime_override: 'MIN.CITZ.pzgw',
-    sdx_token_exchange_client_id: environment.sdx_token_exchange_client_id,
+        sdx_token_exchange_client_id: environment.sdx_token_exchange_client_id,
         sdx_token_exchange_token_url: environment.sdx_token_exchange_token_url,
         sdx_trusted_issuers: environment.sdx_trusted_issuers,
       },
@@ -813,20 +813,47 @@ test('R0 preflight remains a no-op', () => {
   );
 });
 
-
 test('R1 defaults share the environment runtime and reject either side overriding it', () => {
-  const input = { environment: 'dev', environmentConfig: environment, service,
-    requesterDetails, managedApplicationScopes,
-    clientResources: { gatewayPatterns: { 'sdx-p2p-consumer.r1': { upgrades: {} }, 'sdx-p2p-consumer-access.r1': {} } },
-    serviceResources: { gatewayPatterns: { 'sdx-p2p-provider.r1': { upgrades: {} } } },
+  const input = {
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    managedApplicationScopes,
+    clientResources: {
+      gatewayPatterns: {
+        'sdx-p2p-consumer.r1': { upgrades: {} },
+        'sdx-p2p-consumer-access.r1': {},
+      },
+    },
+    serviceResources: {
+      gatewayPatterns: { 'sdx-p2p-provider.r1': { upgrades: {} } },
+    },
   };
   const resources = enforceR1SecurityConfig(input);
-  for (const [side, pattern] of [['clientResources', 'sdx-p2p-consumer.r1'], ['serviceResources', 'sdx-p2p-provider.r1']] as const) {
+  for (const [side, pattern] of [
+    ['clientResources', 'sdx-p2p-consumer.r1'],
+    ['serviceResources', 'sdx-p2p-provider.r1'],
+  ] as const) {
     const patterns = resources[side].gatewayPatterns as Record<string, any>;
     assert.equal(patterns[pattern].clientRuntimeOverride, 'MIN.CITZ.pzgw');
     const invalid = structuredClone(input) as any;
-    invalid[side].gatewayPatterns[pattern].clientRuntimeOverride = 'MIN.OTHER.rg0';
-    assert.throws(() => enforceR1SecurityConfig(invalid), /clientRuntimeOverride.*conflicts/);
+    invalid[side].gatewayPatterns[pattern].clientRuntimeOverride =
+      'MIN.OTHER.rg0';
+    assert.throws(
+      () => enforceR1SecurityConfig(invalid),
+      /clientRuntimeOverride.*conflicts/
+    );
   }
-  assert.throws(() => buildR1SecurityConfig({ ...input, environmentConfig: { ...environment, client_runtime_override: undefined } }), /client_runtime_override/);
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        ...input,
+        environmentConfig: {
+          ...environment,
+          client_runtime_override: undefined,
+        },
+      }),
+    /client_runtime_override/
+  );
 });

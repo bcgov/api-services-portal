@@ -102,7 +102,9 @@ export function buildR1SecurityConfig({
   }
 
   if (!/^[A-Z0-9]+\.[A-Z0-9]+\.[a-z0-9]{3,8}$/.test(runtimeOverride!)) {
-    throw configurationError(environmentName, ['valid client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)']);
+    throw configurationError(environmentName, [
+      'valid client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)',
+    ]);
   }
 
   const r1Environment = environmentConfig as R1EnvironmentConfig;
@@ -281,7 +283,13 @@ export function enforceR1SecurityConfig(
     'sdx-p2p-consumer.r1',
     input.environment
   );
-  setManagedSetting(consumerPattern, 'clientRuntimeOverride', security.clientRuntimeOverride, input.environment, 'clientResources.gatewayPatterns.sdx-p2p-consumer.r1.clientRuntimeOverride');
+  setManagedSetting(
+    consumerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'clientResources.gatewayPatterns.sdx-p2p-consumer.r1.clientRuntimeOverride'
+  );
   const consumerUpgrades = recordOrEmpty(
     consumerPattern.upgrades,
     input.environment,
@@ -315,7 +323,13 @@ export function enforceR1SecurityConfig(
     'sdx-p2p-provider.r1',
     input.environment
   );
-  setManagedSetting(providerPattern, 'clientRuntimeOverride', security.clientRuntimeOverride, input.environment, 'serviceResources.gatewayPatterns.sdx-p2p-provider.r1.clientRuntimeOverride');
+  setManagedSetting(
+    providerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'serviceResources.gatewayPatterns.sdx-p2p-provider.r1.clientRuntimeOverride'
+  );
   const providerUpgrades = recordOrEmpty(
     providerPattern.upgrades,
     input.environment,
