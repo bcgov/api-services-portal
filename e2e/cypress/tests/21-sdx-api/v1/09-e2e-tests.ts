@@ -58,7 +58,7 @@ describe('SDX E2E Tests', () => {
     const consumers = new ConsumersPage()
     let conn: any
 
-    it('PUT /organizations/{org}/connections/approval - approve and activate together provisions the connection', () => {
+    function provisionConnection(activateWithApproval: boolean) {
       const { org, datasetId, env } = workingData
       const subsystemName = uniqueSubsystemName()
       const integrationId = uuidv4().replace(/-/g, '').substring(0, 8)
@@ -107,7 +107,7 @@ describe('SDX E2E Tests', () => {
                   policyVersion: 'SDX.R0.00',
                   environment: env,
                   isApproved: false,
-                  isActive: false,
+                  isActive: !activateWithApproval,
                   requesterDetails: {
                     requester: {
                       name: 'Janis',
@@ -155,7 +155,7 @@ describe('SDX E2E Tests', () => {
 
                   const connectionId = body.id
 
-                  // Start inactive so provisioning requires both flags in one update.
+                  // The combined update must activate an initially inactive request.
                   cy.callAPI(
                     `ds/api/sdx/v1/organizations/${org.name}/connections`,
                     'GET'
@@ -163,7 +163,7 @@ describe('SDX E2E Tests', () => {
                     expect(status).to.be.equal(200)
                     expect(body.find((c: any) => c.id === connectionId)).to.include({
                       isApproved: false,
-                      isActive: false,
+                      isActive: !activateWithApproval,
                     })
                   })
 
@@ -171,7 +171,7 @@ describe('SDX E2E Tests', () => {
                     clientId: `${clientId}`,
                     serviceId: `${serviceId}`,
                     isApproved: true,
-                    isActive: true,
+                    ...(activateWithApproval ? { isActive: true } : {}),
                   })
 
                   cy.callAPI(
@@ -212,6 +212,10 @@ describe('SDX E2E Tests', () => {
           }
         )
       })
+    }
+
+    it('PUT /organizations/{org}/connections', () => {
+      provisionConnection(false)
     })
 
     it('lists the integration client on the gateway Consumers page', () => {
@@ -250,6 +254,18 @@ describe('SDX E2E Tests', () => {
           expect(status).to.be.equal(200)
           expect(body.result).to.be.equal('updated')
           expect(typeof body.id).to.be.equal('string')
+          const connectionId = body.id
+
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/connections`,
+            'GET'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(200)
+            expect(body.find((c: any) => c.id === connectionId)).to.include({
+              isActive: false,
+              isApproved: true,
+            })
+          })
 
           // connection is de-activated; the provisioner runs asynchronously
           // and kong control plane also pushes out changes to the data planes
@@ -287,6 +303,10 @@ describe('SDX E2E Tests', () => {
           conn.integrationClientId
         )
       })
+    })
+
+    it('PUT /organizations/{org}/connections/approval - approve and activate together provisions the connection', () => {
+      provisionConnection(true)
     })
   })
 
