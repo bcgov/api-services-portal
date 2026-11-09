@@ -618,7 +618,14 @@ const metadata = {
   ProvisionerStatus: {
     transient: true,
     refKey: 'name',
-    sync: ['message', 'status', 'operation', 'endpoint', 'spec'],
+    sync: [
+      'message',
+      'status',
+      'operation',
+      'operationId',
+      'endpoint',
+      'spec',
+    ],
     transformations: {},
     validations: {
       status: {

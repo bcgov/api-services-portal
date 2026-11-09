@@ -400,6 +400,7 @@ export interface ProvisionerStatus {
   message?: string;
   status?: "pending" | "provisioned" | "deprovisioning" | "deprovisioned" | "failed";
   operation?: "provision" | "deprovision";
+  operationId?: string;
   endpoint?: string;
   spec?: string;
 }

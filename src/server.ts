@@ -330,19 +330,25 @@ const configureExpress = (app: any) => {
     });
   });
   app.put('/feed/:entity', (req: any, res: any) => {
-    const context = keystone.createContext({
-      skipAccessControl: true,
-      authentication: {
-        item: { name: 'Feeder Bot', namespace: req.body?.namespace },
-      },
-    });
+    const context = Object.assign(
+      keystone.createContext({
+        skipAccessControl: true,
+        authentication: {
+          item: { name: 'Feeder Bot', namespace: req.body?.namespace },
+        },
+      }),
+      { keystoneAdapter: keystone.adapter }
+    );
     putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
     });
   });
   app.put('/feed/:entity/:id', (req: any, res: any) => {
-    const context = keystone.createContext({ skipAccessControl: true });
+    const context = Object.assign(
+      keystone.createContext({ skipAccessControl: true }),
+      { keystoneAdapter: keystone.adapter }
+    );
     putFeedWorker(context, req, res).catch((err: any) =>
       res.status(400).json({ result: 'error', error: '' + err })
     );

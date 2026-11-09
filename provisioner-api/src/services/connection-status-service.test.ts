@@ -17,12 +17,14 @@ test('updates only the connection provisioner status through the feed API', asyn
     'service-1',
     'failed',
     'provision',
+    'operation-1',
     'Provisioning failed.',
     {
       endpoint: 'https://consumer.example/sdx/0/client-1',
       spec: '/catalog/services/service-1/oas-spec',
       status: 'incorrect',
       operation: 'incorrect',
+      operationId: 'incorrect',
       message: 'Information must not replace the status message.',
     }
   );
@@ -36,6 +38,7 @@ test('updates only the connection provisioner status through the feed API', asyn
         spec: '/catalog/services/service-1/oas-spec',
         status: 'failed',
         operation: 'provision',
+        operationId: 'operation-1',
         message: 'Provisioning failed.',
       },
     },
@@ -62,7 +65,14 @@ test('retries transient status update failures with backoff', async () => {
     sleep: async (delayMs) => {
       delays.push(delayMs);
     },
-  }).update('client-1', 'service-1', 'provisioned', 'provision', 'Provisioned.');
+  }).update(
+    'client-1',
+    'service-1',
+    'provisioned',
+    'provision',
+    'operation-1',
+    'Provisioned.'
+  );
 
   assert.equal(attempts, 3);
   assert.deepEqual(delays, [10, 20]);
@@ -83,7 +93,14 @@ test('propagates a transient status update failure after retries are exhausted',
     new ConnectionStatusService(feedClient, undefined, {
       initialDelayMs: 0,
       sleep: async () => {},
-    }).update('client-1', 'service-1', 'provisioned', 'provision', 'Provisioned.'),
+    }).update(
+      'client-1',
+      'service-1',
+      'provisioned',
+      'provision',
+      'operation-1',
+      'Provisioned.'
+    ),
     /Feed unavailable/
   );
 
@@ -105,7 +122,14 @@ test('does not retry a non-transient status update failure', async () => {
     new ConnectionStatusService(feedClient, undefined, {
       initialDelayMs: 0,
       sleep: async () => {},
-    }).update('client-1', 'service-1', 'failed', 'provision', 'Provisioning failed.'),
+    }).update(
+      'client-1',
+      'service-1',
+      'failed',
+      'provision',
+      'operation-1',
+      'Provisioning failed.'
+    ),
     /Invalid status update/
   );
 
