@@ -29,7 +29,8 @@ namespace SDX {
                     service: {
                         integrationId?: String,
                         clientId: String,
-                        privacyZone?: String
+                        privacyZone: String,
+                        version?: String
                     },
                     submissionId: String
                 },
@@ -65,7 +66,8 @@ namespace SDX {
                                     clientId: String,
                                     tokenEndpoint: String,
                                     audience?: String,
-                                    scopes: Set<String>
+                                    scopes: Set<String>,
+                                    targetPrivacyZoneScope: String
                                 }
                             }
                         }
@@ -111,6 +113,7 @@ namespace SDX {
                 combinedScopes: Set<String>,
                 action: String,
                 globals: {
+                    managedApplicationScopes: Set<String>,
                     environment: {
                         client_id: String,
                         oauth_token_url: String,
@@ -118,7 +121,10 @@ namespace SDX {
                         gwa_api_url: String,
                         operator_edge_url: String,
                         ca_token_url: String,
-                        public_url: String
+                        public_url: String,
+                        sdx_token_exchange_client_id?: String,
+                        sdx_token_exchange_token_url?: String,
+                        sdx_trusted_issuers?: Set<String>
                     }
                 }
             }

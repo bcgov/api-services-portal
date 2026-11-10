@@ -36,6 +36,7 @@ export {
   lookupKongConsumerIdByName,
   lookupKongConsumerByCustomId,
   lookupKongConsumerByUsername,
+  lookupConsumerUsername,
 } from './gateway-consumer';
 
 export {

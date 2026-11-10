@@ -1,5 +1,6 @@
 import {
   createConnection,
+  createSubsystem,
   createSubsystemAndOASService,
   new_service,
 } from '../../../support/sdx-commands'
@@ -13,6 +14,22 @@ describe('SDX OpenAPI Services', () => {
       workingData = data
     })
   })
+
+  function putOASServiceWithEnvironment(
+    org: any,
+    subsystemName: string,
+    environment: string
+  ) {
+    return cy.get('@toys.v1').then((text: any) => {
+      cy.setRequestBodyRaw(text.toString())
+      cy.setHeader('Content-Type', 'application/octet-stream')
+      return cy.callAPI(
+        `ds/api/sdx/v1/organizations/${org.name}/oas-services?subsystem=${subsystemName}&environment=${environment}`,
+        'PUT',
+        false
+      )
+    })
+  }
 
   describe('OpenAPI Services Happy Paths', () => {
     it('GET /services', () => {
@@ -182,9 +199,52 @@ describe('SDX OpenAPI Services', () => {
         })
       })
     })
+
+    it('PUT /organizations/{org}/oas-services - a valid SDX environment is accepted', () => {
+      const { org, datasetId } = workingData
+      const subsystemName = `SUBSYS-${datasetId.toUpperCase()}`
+
+      createSubsystem(org, subsystemName, () => {
+        putOASServiceWithEnvironment(org, subsystemName, 'cyp').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status, body.message).to.be.equal(200)
+            expect(body.result).to.be.equal('created')
+            expect(body.refKey).to.match(/^CYP\./)
+          }
+        )
+      })
+    })
   })
 
   describe('OpenAPI Services Sad Paths', () => {
+    it('PUT /organizations/{org}/oas-services - environment not in SDX_ENVIRONMENTS is rejected', () => {
+      const { org, datasetId } = workingData
+      const subsystemName = `SUBSYS-${datasetId.toUpperCase()}`
+
+      createSubsystem(org, subsystemName, () => {
+        putOASServiceWithEnvironment(org, subsystemName, 'prod').then(
+          ({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(422)
+            expect(body.code).to.be.equal('validation_error')
+            expect(body.message).to.be.equal('Validation Failed')
+            expect(body.fields.environment.message).to.be.equal(
+              "Environment 'prod' is not a valid SDX environment. Valid environments: dev, cyp"
+            )
+
+            // nothing was persisted
+            cy.setRequestBody(undefined)
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
+              'GET'
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body.length).to.be.equal(0)
+            })
+          }
+        )
+      })
+    })
+
     it('DELETE /organizations/{org}/oas-services/{id} - active connection request exists', () => {
       const { org, datasetId } = workingData
 

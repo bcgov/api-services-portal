@@ -38,8 +38,19 @@ class NameSpacePage {
     }
 
     deleteNamespace(name: string) {
+        // the gateway is still listed until the delete finishes, so wait for it
+        cy.intercept('POST', '**/gql/api', (req) => {
+            if (req.body?.query?.includes('forceDeleteNamespace')) {
+                req.alias = 'deleteNamespace'
+            }
+        })
         cy.get(this.deleteNamespaceLink).click()
         cy.contains('button', 'Yes, Delete').click()
+        cy.wait('@deleteNamespace').then(({ response }: any) => {
+            expect(response.statusCode).to.equal(200)
+            expect(response.body.errors, JSON.stringify(response.body.errors)).to.be.undefined
+            expect(response.body.data.forceDeleteNamespace).to.equal(true)
+        })
       }
 }
 

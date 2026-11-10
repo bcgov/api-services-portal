@@ -89,10 +89,50 @@ test('allows a fully configured R0 privacy-zone token-exchange request', () => {
         operator_edge_url: 'https://operator.example',
         ca_token_url: 'https://ca.example/token',
         public_url: 'https://portal.example',
+        sdx_token_exchange_client_id: 'r1-edge-client-is-ignored-by-r0',
+        sdx_token_exchange_token_url:
+          'https://issuer.example/realms/standard/protocol/openid-connect/token',
+        sdx_trusted_issuers: ['https://issuer.example/realms/standard'],
       },
     },
   });
 
   assert.equal(result.allowed, true, result.errors.join('; '));
   assert.equal(result.decision, 'allow');
+
+  const withManagedScopes = new PolicyService().validateConnectionRequest(
+    'SDX.R0.00',
+    {
+      clientId: 'MIN.CITZ.EXAMPLE-UI',
+      serviceId: 'APSTST.MIN.EXAMPLE.SERVICE.v0',
+      environment: 'dev',
+      isApproved: true,
+      policyVersion: 'SDX.R0.00',
+      requesterDetails: {
+        submissionId: 'submission-1',
+        requester: { name: 'Janis' },
+        scopes: [],
+        client: { clientId: 'consumer-browser-client' },
+        service: { clientId: 'MIN.EXAMPLE.RESOURCE-SERVER' },
+      },
+      clientResources: {},
+      serviceResources: {},
+      combinedScopes: [],
+      action: 'apply',
+      globals: {
+        managedApplicationScopes: ['demo.read'],
+        environment: {
+          client_id: 'sdx-provisioner',
+          oauth_token_url: 'https://aps.example/oauth/token',
+          kong_admin_url: 'http://kong-admin.example',
+          gwa_api_url: 'https://gwa.example',
+          operator_edge_url: 'https://operator.example',
+          ca_token_url: 'https://ca.example/token',
+          public_url: 'https://portal.example',
+        },
+      },
+    }
+  );
+  assert.equal(withManagedScopes.allowed, false);
+  assert.equal(withManagedScopes.decision, 'error');
 });

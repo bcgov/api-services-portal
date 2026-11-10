@@ -6,8 +6,13 @@ import type {
 } from '../../clients/sdx-member/index.js';
 import { convertPath } from '../kong/openapi-to-kong/openapi-to-kong-paths.js';
 import { PatternProcessor } from '../patterns-evaluator.js';
-import { assert, type EnrichedServiceCatalogEntry } from './utils.js';
-import { getRequiredEnvUrl } from '../../config/environments.js';
+import {
+  assert,
+  edgeTrustSignPluginConfig,
+  mtlsAclPluginConfig,
+  type EnrichedServiceCatalogEntry,
+  type MtlsCertificateAttribute,
+} from './utils.js';
 
 export interface SDXServiceOpsConfig {
   serviceId: string;
@@ -21,6 +26,7 @@ interface ServiceOpsUpgrades {
   mtlsAuth: {};
   mtlsAcl: {
     allow: string[];
+    certificateAttribute?: MtlsCertificateAttribute;
     certificateHeaderName?: string;
   };
   acl: {};
@@ -260,15 +266,14 @@ function upgradeToMTLSACL(
   inputs: SDXServiceOpsConfig
 ) {
   const allow = inputs.upgrades.mtlsAcl.allow || [];
-  const headerName =
-    inputs.upgrades.mtlsAcl.certificateHeaderName || 'X-Client-Cert-I-Dn';
   return {
     name: 'mtls-acl',
     tags: tags,
-    config: {
+    config: mtlsAclPluginConfig({
       allow,
-      certificate_header_name: headerName,
-    },
+      certificateAttribute: inputs.upgrades.mtlsAcl.certificateAttribute,
+      certificateHeaderName: inputs.upgrades.mtlsAcl.certificateHeaderName,
+    }),
   };
 }
 
@@ -288,27 +293,15 @@ function upgradeToTrustSign(
   inputs: SDXServiceOpsConfig
 ) {
   const environment = data.subsystemRuntimeGroup.environment;
-  const kid = `urn:ca:bc:sdx:edge:${data.subsystemRuntimeGroup.name}:${environment}:0`;
-  const keySetName = `sdx.edge.${data.subsystemRuntimeGroup.name}.${environment}`;
-
-  const publicUrl = getRequiredEnvUrl(
-    environment,
-    'public_url',
-    'SDX public URL'
-  );
-
   return {
     name: 'trust-sign',
     tags: tags,
-    config: {
+    config: edgeTrustSignPluginConfig({
       direction: 'response',
-      signature_header_key: 'X-Edge-Token',
-      keyid: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      runtimeGroupName: data.subsystemRuntimeGroup.name!,
+      environment: environment!,
       alg: inputs.upgrades.sign?.alg || 'ES256',
-      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
-      hash_alg: 'sha256',
-    },
+    }),
   };
 }
 
@@ -331,6 +324,8 @@ function upgradeToTrustKMS(tags: string[], data: SDXServicePatternData) {
 
   const key_id = `urn:ca:bc:sdx:org:${memberText}`;
 
+  // Org KMS keys keep a fixed kid; random-kid rotation applies to edge
+  // signing keys (trust-sign / token-exchange), not trust-kms.
   return {
     name: 'trust-kms',
     tags: tags,

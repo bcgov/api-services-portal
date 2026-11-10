@@ -32,7 +32,7 @@ const YAML = require('yaml');
 describe('LoadOpenAPISpec', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBuildServiceName.mockReturnValue('LAB.MIN.CITZ.TEST.v1');
+    mockBuildServiceName.mockReturnValue('DEV.MIN.CITZ.TEST.v1');
   });
 
   it('validates the uploaded OpenAPI spec before building the Keystone record', async () => {
@@ -46,7 +46,7 @@ describe('LoadOpenAPISpec', () => {
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
-        environment: 'LAB',
+        environment: 'dev',
         spec: `
 openapi: 3.1.0
 info:
@@ -62,7 +62,7 @@ paths: {}
       undefined
     );
     expect(mockBuildServiceName).toHaveBeenCalled();
-    expect(result.name).toBe('LAB.MIN.CITZ.TEST.v1');
+    expect(result.name).toBe('DEV.MIN.CITZ.TEST.v1');
     expect(result.spec).toContain('x-csbc-api-standard: v0.3.0-test');
     expect(result.spec).toContain(
       'x-csbc-api-standard-ruleset: basic-ruleset'
@@ -80,7 +80,7 @@ paths: {}
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
-        environment: 'LAB',
+        environment: 'dev',
         spec: `
 openapi: 3.1.0
 info:
@@ -98,7 +98,7 @@ paths: {}
     );
     expect(mockBuildServiceName).toHaveBeenCalledWith(
       expect.any(Object),
-      'LAB',
+      'dev',
       expect.objectContaining({
         info: expect.objectContaining({
           'x-csbc-api-standard': 'v0.2.0-test',
@@ -119,7 +119,7 @@ paths: {}
       {
         organization: 'ministry-of-citz',
         subsystem: 'MY-SVC',
-        environment: 'LAB',
+        environment: 'dev',
         spec: JSON.stringify({
           openapi: '3.1.0',
           info: {
@@ -138,6 +138,37 @@ paths: {}
     expect(parsed.info['x-csbc-api-standard-ruleset']).toBe('strict-ruleset');
   });
 
+  it('rejects an environment that is not in SDX_ENVIRONMENTS before validating the spec', async () => {
+    await expect(
+      LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'prod',
+          spec: `
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+paths: {}
+`,
+        }
+      )
+    ).rejects.toMatchObject({
+      message: 'Validation Failed',
+      fields: {
+        environment: {
+          message:
+            "Environment 'prod' is not a valid SDX environment. Valid environments: dev, cyp",
+        },
+      },
+    });
+
+    expect(mockValidateRuleset).not.toHaveBeenCalled();
+    expect(mockBuildServiceName).not.toHaveBeenCalled();
+  });
+
   it('stops loading when info.x-csbc-api-standard is not a string', async () => {
     await expect(
       LoadOpenAPISpec(
@@ -145,7 +176,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
-          environment: 'LAB',
+          environment: 'dev',
           spec: `
 openapi: 3.1.0
 info:
@@ -176,7 +207,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
-          environment: 'LAB',
+          environment: 'dev',
           spec: 'openapi: "3.1.0"\ninfo:\n  title: [',
         }
       )
@@ -203,7 +234,7 @@ paths: {}
         {
           organization: 'ministry-of-citz',
           subsystem: 'MY-SVC',
-          environment: 'LAB',
+          environment: 'dev',
           spec: `
 openapi: 3.1.0
 info:

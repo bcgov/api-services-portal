@@ -18,7 +18,14 @@ const { ForbiddenError } = require('./auth/forbidden-error');
 const { AssertionError } = require('assert');
 const { BatchSyncException } = require('./batch/types');
 const { UserAssertionError } = require('./services/user-assert');
-const { IssuerMisconfigError } = require('./services/issuerMisconfigError');
+const {
+  IssuerMisconfigError,
+  httpStatusForIssuerMisconfig,
+  clientMessageForIssuerMisconfig,
+} = require('./services/issuerMisconfigError');
+const {
+  validateSdxEnvironmentsConfig,
+} = require('./services/workflow/sdx-environments');
 
 const logger = Logger('dsapi');
 
@@ -42,6 +49,15 @@ class ApiOpenapiApp {
       throw new Error('OAS_VALIDATION_API_URL is required');
     }
     assertHttpUrl('OAS_VALIDATION_API_URL', validationApiUrl);
+
+    const sdxUiUrl = process.env.SDX_UI_URL;
+    if (!sdxUiUrl) {
+      throw new Error('SDX_UI_URL is required');
+    }
+    assertHttpUrl('SDX_UI_URL', sdxUiUrl);
+
+    // SDX_ENVIRONMENTS limits the environments an OAS service can be uploaded to
+    validateSdxEnvironmentsConfig();
   }
 
   prepareV2(app) {
@@ -184,9 +200,9 @@ class ApiOpenapiApp {
       } else if (err instanceof IssuerMisconfigError) {
         const errmsg = JSON.parse(err.message);
         logger.warn(`Caught Misconfig Error for ${req.path}: %j`, errmsg);
-        return res.status(500).json({
+        return res.status(httpStatusForIssuerMisconfig(errmsg)).json({
           code: 'misconfig_error',
-          message: `[${errmsg?.statusCode}] ${errmsg?.reason} (${errmsg?.description})`,
+          message: clientMessageForIssuerMisconfig(errmsg),
         });
       } else if (err?.name === 'OpenAPISpecValidationError' && err?.result) {
         logger.warn(

@@ -8,6 +8,7 @@ const logger = Logger('uma2-resource');
 
 export interface ResourceSetQuery {
   name?: string;
+  exactName?: boolean;
   uri?: string;
   owner?: string;
   type?: string;

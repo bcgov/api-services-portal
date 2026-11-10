@@ -13,6 +13,7 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import { InternalError } from '../errors/api-errors.js';
 import type { PolicyRequesterDetails } from '../services/policy-service.js';
+import { managedApplicationScopesForEnvironment } from '../services/policies/SDX.R1.00/security-config.js';
 
 export class ConnectionsController {
   constructor(
@@ -212,11 +213,20 @@ export class ConnectionsController {
       },
     };
 
+    const managedApplicationScopes =
+      policyVersion === 'SDX.R1.00'
+        ? managedApplicationScopesForEnvironment(
+            await this.services.sdxMember.api.listCatalogScopes(),
+            service.environment
+          )
+        : undefined;
+
     return this.services.policyEngine.getDefaultResources(
       policyVersion,
       subsystem,
       service,
-      requesterDetails
+      requesterDetails,
+      managedApplicationScopes
     ) as TConnectionDefaultsResponse;
   }
 

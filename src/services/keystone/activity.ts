@@ -259,8 +259,13 @@ export async function getOrgActivity(
   ];
 
   if (publicOnly) {
+    // Each pair must be an explicit AND: the Knex adapter turns a multi-key
+    // object inside OR into `action = x OR type = y`, which leaks every row
+    // whose action (or type) appears anywhere in the allowlist.
     conditions.push({
-      OR: [...PUBLIC_ORG_ACTIVITY],
+      OR: PUBLIC_ORG_ACTIVITY.map(({ action, type }) => ({
+        AND: [{ action }, { type }],
+      })),
     });
     conditions.push({ result_not: 'failed' });
   }

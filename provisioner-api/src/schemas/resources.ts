@@ -10,6 +10,7 @@ export const RESOURCE_KINDS = [
   // APS (directory)
   'Product',
   'Application',
+  'ServiceAccess',
   // 'ConsumerLabels',
   // 'Activity',
   // SDX (sdxMember)
@@ -232,6 +233,36 @@ export const ApplyResourcesResponse = Type.Object(
     }),
     results: Type.Array(ResourceResult),
     preview: Type.Optional(Type.Array(Type.Unknown()), true),
+    changes: Type.Optional(
+      Type.Object(
+        {
+          operation: Type.String({
+            description:
+              'Pattern operation applied (add, rotate, replace, delete, or publish).',
+            examples: ['rotate'],
+          }),
+          added: Type.Array(
+            Type.Object({
+              kid: Type.String(),
+              name: Type.String(),
+            })
+          ),
+          removed: Type.Array(
+            Type.Object({
+              kid: Type.String(),
+              name: Type.String(),
+            })
+          ),
+          retained: Type.Array(
+            Type.Object({
+              kid: Type.String(),
+              name: Type.String(),
+            })
+          ),
+        },
+        { additionalProperties: false }
+      )
+    ),
   },
   {
     $id: 'ApplyResourcesResponse',
@@ -326,6 +357,46 @@ export const GatewayResourcesResponse = Type.Array(Type.Ref(GatewayResource), {
   ],
 });
 
+export const GatewayKeysResponse = Type.Object(
+  {
+    key_sets: Type.Array(Type.Unknown(), {
+      description: 'Kong key sets for the gateway (public fields only).',
+    }),
+    keys: Type.Array(Type.Unknown(), {
+      description: 'Kong keys for the gateway (public fields only).',
+    }),
+  },
+  {
+    $id: 'GatewayKeysResponse',
+    additionalProperties: false,
+    examples: [
+      {
+        key_sets: [{ name: 'sdx.edge.myrg.dev' }],
+        keys: [
+          {
+            name: 'sdx.keys.myrg.dev.edge:0',
+            kid: 'urn:ca:bc:sdx:edge:myrg:dev:0',
+          },
+        ],
+      },
+    ],
+  }
+);
+
+export const DeleteGatewayResponse = Type.Object(
+  {
+    gatewayId: Type.String({
+      description: 'Identifier of the deleted gateway.',
+    }),
+    result: Type.Literal('deleted'),
+  },
+  {
+    $id: 'DeleteGatewayResponse',
+    additionalProperties: false,
+    examples: [{ gatewayId: 'sdx-gw-abc12', result: 'deleted' }],
+  }
+);
+
 export type TResource = Static<typeof Resource>;
 export type TResourceResult = Static<typeof ResourceResult>;
 export type TApplyResourcesRequest = Static<typeof ApplyResourcesRequest>;
@@ -346,4 +417,6 @@ export const resourceSchemas = [
   ConnectionDefaultsResponse,
   ApplyPatternRequest,
   GatewayResource,
+  GatewayKeysResponse,
+  DeleteGatewayResponse,
 ];

@@ -1,4 +1,5 @@
 import { issueGatewayCredential } from '../../../services/workflow/issue-gateway-credential';
+import { StructuredActivityService } from '../../../services/workflow/namespace-activity';
 import * as keystone from '../../../services/keystone';
 import * as apply from '../../../services/workflow/apply';
 import * as consumerMgmt from '../../../services/workflow/consumer-management';
@@ -76,6 +77,19 @@ jest.mock('../../../services/keystone/gateway-service', () => ({
   parsePluginConfig: jest.fn(),
 }));
 
+const mockLogIssueCredential = jest.fn();
+jest.mock('../../../services/workflow/namespace-activity', () => {
+  const actual = jest.requireActual(
+    '../../../services/workflow/namespace-activity'
+  );
+  return {
+    ...actual,
+    StructuredActivityService: jest.fn().mockImplementation(() => ({
+      logIssueCredential: mockLogIssueCredential,
+    })),
+  };
+});
+
 jest.mock('../../../services/workflow/types', () => {
   const actual = jest.requireActual('../../../services/workflow/types');
   return {
@@ -150,6 +164,8 @@ function buildContext() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockLogIssueCredential.mockReset();
+  mockLogIssueCredential.mockResolvedValue(undefined);
   mockForceSync.mockResolvedValue(undefined);
   mockDeleteConsumer.mockResolvedValue(undefined);
   lookupEnvironmentByAppIdInNamespace.mockResolvedValue(apiKeyEnvironment());
@@ -204,11 +220,8 @@ describe('issueGatewayCredential', function () {
       controls: { aclGroups: ['notify-tenant-a'] },
     };
 
-    const result = await issueGatewayCredential(
-      buildContext(),
-      GATEWAY,
-      input
-    );
+    const context = buildContext();
+    const result = await issueGatewayCredential(context, GATEWAY, input);
 
     expect(addApplication).toHaveBeenCalledWith(
       expect.anything(),
@@ -248,6 +261,19 @@ describe('issueGatewayCredential', function () {
       clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
       apiKey: 'secret-api-key',
     });
+    expect(StructuredActivityService).toHaveBeenCalledTimes(1);
+    expect(StructuredActivityService).toHaveBeenCalledWith(context, GATEWAY);
+    expect(mockLogIssueCredential).toHaveBeenCalledTimes(1);
+    expect(mockLogIssueCredential).toHaveBeenCalledWith(true, {
+      consumerUsername: `${ENV_APP_ID}-${APP_APP_ID}`,
+      application: { name: 'notify-tenant-a' },
+      product: { name: 'Notify' },
+      environment: { name: 'dev' },
+    });
+    const payload = JSON.stringify(mockLogIssueCredential.mock.calls);
+    expect(payload).not.toContain('apiKey');
+    expect(payload).not.toContain('clientSecret');
+    expect(payload).not.toContain('secret-api-key');
   });
 
   it('reuses an existing application in the same gateway for another environment', async function () {
@@ -288,6 +314,7 @@ describe('issueGatewayCredential', function () {
     ).rejects.toThrow(/already has access/);
 
     expect(deleteApplication).toHaveBeenCalledWith(expect.anything(), 'app-1');
+    expect(mockLogIssueCredential).not.toHaveBeenCalled();
   });
 
   it('rejects unsupported flows', async function () {
@@ -303,6 +330,7 @@ describe('issueGatewayCredential', function () {
     ).rejects.toThrow(/does not support credential issuance/);
 
     expect(addApplication).not.toHaveBeenCalled();
+    expect(mockLogIssueCredential).not.toHaveBeenCalled();
   });
 
   it('requires application.name when creating', async function () {
@@ -406,6 +434,24 @@ describe('issueGatewayCredential', function () {
       expect.anything(),
       'sa-1'
     );
+    expect(deleteApplication).not.toHaveBeenCalled();
+  });
+
+  it('returns the credential when activity logging fails', async function () {
+    mockLogIssueCredential.mockRejectedValueOnce(new Error('activity down'));
+
+    const result = await issueGatewayCredential(buildContext(), GATEWAY, {
+      environmentAppId: ENV_APP_ID,
+      application: { name: 'notify-tenant-a' },
+    });
+
+    expect(mockLogIssueCredential).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      flow: 'kong-api-key-acl',
+      clientId: `${ENV_APP_ID}-${APP_APP_ID}`,
+      apiKey: 'secret-api-key',
+    });
+    expect(deleteServiceAccess).not.toHaveBeenCalled();
     expect(deleteApplication).not.toHaveBeenCalled();
   });
 

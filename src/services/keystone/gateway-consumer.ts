@@ -19,6 +19,7 @@ export async function lookupConsumerPlugins(
                         customId
                         extForeignKey
                         namespace
+                        tags
                         plugins {
                           id
                           name
@@ -59,6 +60,21 @@ export async function lookupConsumerPlugins(
   );
 
   return result.data.allGatewayConsumers[0];
+}
+
+export async function lookupConsumerUsername(
+  context: any,
+  id: string
+): Promise<string | undefined> {
+  const result = await context.executeGraphQL({
+    query: `query GetConsumerUsername($id: ID!) {
+                    allGatewayConsumers(where: {id: $id}) {
+                        username
+                    }
+                }`,
+    variables: { id },
+  });
+  return result.data?.allGatewayConsumers[0]?.username;
 }
 
 export async function lookupKongConsumerId(

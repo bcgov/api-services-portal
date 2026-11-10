@@ -8,9 +8,13 @@ const { ApiOpenapiApp } = require('../api-openapi');
 
 describe('ApiOpenapiApp', () => {
   const originalValidationApiUrl = process.env.OAS_VALIDATION_API_URL;
+  const originalSdxUiUrl = process.env.SDX_UI_URL;
+  const originalSdxEnvironments = process.env.SDX_ENVIRONMENTS;
 
   afterEach(() => {
     process.env.OAS_VALIDATION_API_URL = originalValidationApiUrl;
+    process.env.SDX_UI_URL = originalSdxUiUrl;
+    process.env.SDX_ENVIRONMENTS = originalSdxEnvironments;
   });
 
   it('does not require OAS_VALIDATION_API_URL during construction', () => {
@@ -39,5 +43,37 @@ describe('ApiOpenapiApp', () => {
     process.env.OAS_VALIDATION_API_URL = 'https://validation.local';
 
     expect(() => new ApiOpenapiApp()).not.toThrow();
+  });
+
+  it('requires SDX_UI_URL when preparing middleware', () => {
+    delete process.env.SDX_UI_URL;
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      'SDX_UI_URL is required'
+    );
+  });
+
+  it('requires SDX_UI_URL to be an absolute http(s) URL', () => {
+    process.env.SDX_UI_URL = 'sdx.local';
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      'SDX_UI_URL must be an absolute http(s) URL'
+    );
+  });
+
+  it('requires SDX_ENVIRONMENTS when preparing middleware', () => {
+    delete process.env.SDX_ENVIRONMENTS;
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      'SDX_ENVIRONMENTS is required'
+    );
+  });
+
+  it('requires SDX_ENVIRONMENTS labels to be lowercase alphanumeric', () => {
+    process.env.SDX_ENVIRONMENTS = 'apsdev,APS TEST';
+
+    expect(() => new ApiOpenapiApp().prepareMiddleware({})).toThrow(
+      "SDX_ENVIRONMENTS contains invalid environment label(s) 'APS TEST'"
+    );
   });
 });

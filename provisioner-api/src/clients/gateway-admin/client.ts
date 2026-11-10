@@ -3,7 +3,9 @@ import type { GatewayClientResolver } from '../index.js';
 import type { EnvironmentsConfig } from '../../config/environments.js';
 import { BadGatewayError, withDetails } from '../../errors/api-errors.js';
 import type {
+  GatewayKeysResponse,
   GatewayResource,
+  GetGatewayKeysInput,
   Profile,
   PublishGatewayConfigInput,
   Status,
@@ -59,6 +61,28 @@ export class GatewayAdminApiClient {
       environment,
       'GET',
       `namespaces/${enc(namespace)}/resources${tag ? `?tag=${enc(tag)}` : ''}`
+    );
+  }
+
+  /**
+   * `Keys` — GET /namespaces/{namespace}/keys
+   *
+   * Returns full Kong key and key-set objects for the namespace. Private
+   * key material is stripped by GWA.
+   */
+  getKeys(
+    environment: string,
+    namespace: string,
+    input: GetGatewayKeysInput = {}
+  ): Promise<GatewayKeysResponse> {
+    const params = new URLSearchParams();
+    if (input.tag) params.set('tag', input.tag);
+    if (input.keySet) params.set('key_set', input.keySet);
+    const query = params.toString();
+    return this.request(
+      environment,
+      'GET',
+      `namespaces/${enc(namespace)}/keys${query ? `?${query}` : ''}`
     );
   }
 

@@ -75,13 +75,68 @@ describe('SDX Connection Requests (Sad Paths)', () => {
 
     cy.buildOrgGatewayDatasetAndProduct().then((data) => {
       workingData = data
-      cy.buildOrgGatewayDatasetAndProduct().then((data) => {
-        diffOrg = data
-      })
     })
   })
 
   describe('Connection Requests Sad Paths', () => {
+    it('PUT /organizations/{org}/connections/approval - reject a pending request', () => {
+      const { org, datasetId } = workingData
+
+      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
+        const payload = {
+          clientId: service.subsystem.clientId,
+          serviceId: service.name,
+          policyVersion: 'SDX.R0.00',
+          environment: 'dev',
+        }
+        cy.setRequestBody(payload)
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+          ({ apiRes: { status } }: any) => {
+            expect(status).to.be.equal(200)
+
+            // Pending requests are rejected by deleting them, not with isApproved: false
+            cy.setRequestBody({
+              clientId: payload.clientId,
+              serviceId: payload.serviceId,
+              isApproved: false,
+            })
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+              'PUT'
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(422)
+              expect(body.fields.isApproved.message).to.be.equal(
+                'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+              )
+            })
+          }
+        )
+      })
+    })
+
+    it('PUT /organizations/{org}/connections/approval - does not create a missing connection', () => {
+      const { org, datasetId } = workingData
+
+      new_service(org, `SUBSYS-${datasetId.toUpperCase()}`, (service: any) => {
+        ;[true, false].forEach((isApproved) => {
+          cy.setRequestBody({
+            clientId: service.subsystem.clientId,
+            serviceId: service.name,
+            isApproved,
+          })
+          cy.callAPI(
+            `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+            'PUT'
+          ).then(({ apiRes: { status, body } }: any) => {
+            expect(status).to.be.equal(422)
+            expect(body.fields.clientId.message).to.be.equal(
+              'Connection request not found'
+            )
+          })
+        })
+      })
+    })
+
     it('PUT /organizations/{org}/connections - Invalid clientId format', () => {
       const { org } = workingData
 
@@ -119,91 +174,100 @@ describe('SDX Connection Requests (Sad Paths)', () => {
       )
     })
 
-    it('PUT /organizations/{org}/connections - org mismatch', () => {
-      const { org } = workingData
+    // Only these tests need a second organization
+    describe('Organization mismatch', () => {
+      beforeEach(() => {
+        cy.buildOrgGatewayDatasetAndProduct().then((data) => {
+          diffOrg = data
+        })
+      })
 
-      new_service(org, `SUBSYS`, (service: any) => {
-        new_service(diffOrg.org, `SUBSYS`, (service: any) => {
-          const diffClientId = service.subsystem.clientId
-          // const diffServiceId = service.name
+      it('PUT /organizations/{org}/connections - org mismatch', () => {
+        const { org } = workingData
 
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-            'GET',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            expect(body.length).to.be.equal(1)
-            const service = body[0]
-            // const clientId = service.subsystem.clientId
-            const serviceId = service.name
+        new_service(org, `SUBSYS`, (service: any) => {
+          new_service(diffOrg.org, `SUBSYS`, (service: any) => {
+            const diffClientId = service.subsystem.clientId
+            // const diffServiceId = service.name
 
-            const payload = {
-              clientId: `${diffClientId}`,
-              serviceId: `${serviceId}`,
-              policyVersion: 'SDX.R0.00',
-              environment: 'dev',
-            }
-            cy.setRequestBody(payload)
-            cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-              ({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(422)
-                expect(body.message).to.be.equal('Validation Failed')
-                expect(body.fields.clientId.message).to.be.equal(
-                  'Only client subsystems can create connection requests for their own organization'
-                )
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
+              'GET',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body.length).to.be.equal(1)
+              const service = body[0]
+              // const clientId = service.subsystem.clientId
+              const serviceId = service.name
+
+              const payload = {
+                clientId: `${diffClientId}`,
+                serviceId: `${serviceId}`,
+                policyVersion: 'SDX.R0.00',
+                environment: 'dev',
               }
-            )
+              cy.setRequestBody(payload)
+              cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+                ({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(422)
+                  expect(body.message).to.be.equal('Validation Failed')
+                  expect(body.fields.clientId.message).to.be.equal(
+                    'Only client subsystems can create connection requests for their own organization'
+                  )
+                }
+              )
+            })
           })
         })
       })
-    })
 
-    it('PUT /organizations/{org}/connections - approval org mismatch', () => {
-      const { org } = workingData
+      it('PUT /organizations/{org}/connections - approval org mismatch', () => {
+        const { org } = workingData
 
-      new_service(org, `SUBSYS`, (service: any) => {
-        new_service(diffOrg.org, `SUBSYS`, (service: any) => {
-          const diffClientId = service.subsystem.clientId
-          const diffServiceId = service.name
+        new_service(org, `SUBSYS`, (service: any) => {
+          new_service(diffOrg.org, `SUBSYS`, (service: any) => {
+            const diffClientId = service.subsystem.clientId
+            const diffServiceId = service.name
 
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
-            'GET',
-            false
-          ).then(({ apiRes: { status, body } }: any) => {
-            expect(status).to.be.equal(200)
-            expect(body.length).to.be.equal(1)
-            const service = body[0]
-            const clientId = service.subsystem.clientId
-            const serviceId = service.name
+            cy.callAPI(
+              `ds/api/sdx/v1/organizations/${org.name}/oas-services`,
+              'GET',
+              false
+            ).then(({ apiRes: { status, body } }: any) => {
+              expect(status).to.be.equal(200)
+              expect(body.length).to.be.equal(1)
+              const service = body[0]
+              const clientId = service.subsystem.clientId
+              const serviceId = service.name
 
-            const payload: any = {
-              clientId: `${clientId}`,
-              serviceId: `${diffServiceId}`,
-              policyVersion: 'SDX.R0.00',
-              environment: 'dev',
-            }
-            cy.setRequestBody(payload)
-            cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-              ({ apiRes: { status, body } }: any) => {
-                expect(status).to.be.equal(200)
-
-                payload.isApproved = true
-                cy.setRequestBody(payload)
-                cy.callAPI(
-                  `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
-                  'PUT'
-                ).then(({ apiRes: { status, body } }: any) => {
-                  expect(status).to.be.equal(403)
-
-                  // expect(body.message).to.be.equal('Validation Failed')
-                  // expect(body.fields.isApproved.message).to.be.equal(
-                  //   'Cannot approve/reject connection request when service organization does not match the specified organization'
-                  // )
-                })
+              const payload: any = {
+                clientId: `${clientId}`,
+                serviceId: `${diffServiceId}`,
+                policyVersion: 'SDX.R0.00',
+                environment: 'dev',
               }
-            )
+              cy.setRequestBody(payload)
+              cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
+                ({ apiRes: { status, body } }: any) => {
+                  expect(status).to.be.equal(200)
+
+                  payload.isApproved = true
+                  cy.setRequestBody(payload)
+                  cy.callAPI(
+                    `ds/api/sdx/v1/organizations/${org.name}/connections/approval`,
+                    'PUT'
+                  ).then(({ apiRes: { status, body } }: any) => {
+                    expect(status).to.be.equal(403)
+
+                    // expect(body.message).to.be.equal('Validation Failed')
+                    // expect(body.fields.isApproved.message).to.be.equal(
+                    //   'Cannot approve/reject connection request when service organization does not match the specified organization'
+                    // )
+                  })
+                }
+              )
+            })
           })
         })
       })

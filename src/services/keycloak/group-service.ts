@@ -272,6 +272,27 @@ export class KeycloakGroupService {
     return grp;
   }
 
+  /**
+   * Looks up a single group by its full path (for example
+   * `/access-manager/systems/<clientId>`) in one request, regardless of how many
+   * groups the realm has. Returns null when the group does not exist.
+   */
+  public async findGroupByPath(
+    path: string
+  ): Promise<GroupRepresentation | null> {
+    try {
+      return await this.kcAdminClient.realms.getGroupByPath({
+        realm: this.kcAdminClient.realmName,
+        path: path.replace(/^\//, ''),
+      });
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
   public async listMembers(id: string): Promise<UserRepresentation[]> {
     return this.kcAdminClient.groups.listMembers({ id });
   }

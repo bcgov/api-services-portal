@@ -6,6 +6,7 @@ on:
     branches: ['test', 'cypress/*']
   pull_request:
     branches: ['dev']
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -16,11 +17,49 @@ env:
   GIT_COMMIT_AUTHOR: ${{ github.actor }}
   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   GIT_REPO_URL: ${{ github.repository }}
+  CYPRESS_SKIP_LABEL: 'skip-e2e'
+  CYPRESS_COMMENT_MARKER: '<!-- cypress-e2e-results -->'
+  CYPRESS_COMMENT_HEADING: '## Cypress E2E tests failed'
   # Optional: avoids npm 403 from registry when multiple images run npm install in parallel
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
+  cypress_eligibility:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check whether Cypress should run
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_IS_DRAFT: ${{ github.event.pull_request.draft }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          EVENT_LABEL: ${{ github.event.label.name }}
+        run: |
+          SHOULD_RUN=false
+
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
+            SHOULD_RUN=true
+          elif [[ "$PR_ACTION" =~ ^(labeled|unlabeled)$ && "$EVENT_LABEL" != "$CYPRESS_SKIP_LABEL" ]]; then
+            echo "The changed label does not affect Cypress; skipping this event."
+          elif [[ "$PR_IS_DRAFT" == "true" ]]; then
+            echo "The pull request is a draft; skipping Cypress."
+          elif jq -e --arg label "$CYPRESS_SKIP_LABEL" 'index($label) != null' <<< "$PR_LABELS" > /dev/null; then
+            echo "The pull request has the $CYPRESS_SKIP_LABEL label; skipping Cypress."
+          else
+            SHOULD_RUN=true
+          fi
+
+          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+
   cypress-run:
+    needs: cypress_eligibility
+    if: needs.cypress_eligibility.outputs.should_run == 'true'
+    concurrency:
+      group: cypress-e2e-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -64,6 +103,24 @@ jobs:
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               echo "Cypress tests completed."
+
+              # Record why a container might have gone away during the run. Only
+              # state and resource numbers are printed, plus the sdx-ui log tail
+              # when it is not running, since it can exit during startup.
+              echo "::group::Container state"
+              docker ps -aq | xargs docker inspect --format \
+                '{{.Name}} status={{.State.Status}} exit={{.State.ExitCode}} oomkilled={{.State.OOMKilled}} restarts={{.RestartCount}} finished={{.State.FinishedAt}}'
+              echo "::endgroup::"
+              if [ "$(docker inspect --format '{{.State.Status}}' sdx-ui 2>/dev/null)" != "running" ]; then
+                echo "::group::sdx-ui logs"
+                docker logs --tail 200 sdx-ui 2>&1 || true
+                echo "::endgroup::"
+              fi
+              echo "::group::Resource usage"
+              free -m
+              docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}'
+              echo "::endgroup::"
+
               # cleanup
               docker compose down
               break
@@ -129,8 +186,35 @@ jobs:
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          RESULT_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
-          FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
+          RESULTS_FILE=$GITHUB_WORKSPACE/e2e/results/bcgov-aps-e2e-report.json
+          FAILURE_COUNT=$(jq '.stats.failures' "$RESULTS_FILE")
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            COMMENTS=$(gh api --paginate \
+              "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100")
+            mapfile -t COMMENT_IDS < <(
+              jq -r \
+                --arg marker "$CYPRESS_COMMENT_MARKER" \
+                --arg heading "$CYPRESS_COMMENT_HEADING" \
+                '.[] |
+                  select(.user.login == "github-actions[bot]") |
+                  (.body // "") as $body |
+                  select(($body | contains($marker)) or ($body | startswith($heading))) |
+                  .id' <<< "$COMMENTS"
+            )
+
+            for COMMENT_ID in "${COMMENT_IDS[@]}"; do
+              echo "Deleting previous Cypress results comment $COMMENT_ID."
+              gh api --method DELETE \
+                "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_ID"
+            done
+          fi
+
           if [[ "$FAILURE_COUNT" -gt 0 ]]; then
             FAILED_TESTS=$(jq -r '
               .results[] |
@@ -140,17 +224,20 @@ jobs:
               .[] | 
               select(.fail == true) | 
               "- " + $file + " - " + .title
-            ' ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json)
-            STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' | column -t)
-            RUN_LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            BRANCH="${{ github.head_ref || github.ref_name }}"
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+            ' "$RESULTS_FILE")
+            STATS=$(jq -r '.stats | to_entries | map("\(.key)\t\(.value)") | .[]' "$RESULTS_FILE" | column -t)
+            RUN_LINK="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            BRANCH="$RESULT_BRANCH"
+            if [[ "$EVENT_NAME" == "pull_request" ]]; then
+              COMMIT_SHA="$PR_COMMIT_SHA"
             else
-              COMMIT_SHA="${{ github.sha }}"
+              COMMIT_SHA="$GITHUB_SHA"
             fi
             SHORT_SHA="${COMMIT_SHA:0:7}"
             {
+              if [[ "$EVENT_NAME" == "pull_request" ]]; then
+                echo "$CYPRESS_COMMENT_MARKER"
+              fi
               echo "## Cypress E2E tests failed ($FAILURE_COUNT)"
               echo ""
               echo "**Branch:** \`$BRANCH\` | **Commit:** \`$SHORT_SHA\`"
@@ -179,11 +266,11 @@ jobs:
               echo ""
               echo "[View workflow run]($RUN_LINK)"
             } > msg
-            export MSG=$(cat msg)
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              gh pr comment ${{ github.event.pull_request.number }} --body "$MSG"
+            if [[ "$EVENT_NAME" == "pull_request" ]]; then
+              gh pr comment "$PR_NUMBER" --body-file msg
             else
-              gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+              MSG=$(cat msg)
+              gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "$GIT_COMMIT_AUTHOR"
             fi
             exit 1
           fi

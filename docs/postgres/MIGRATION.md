@@ -38,3 +38,16 @@ create index activity_filterkey3_createdat_index
 create index activity_filterkey4_createdat_index
   on public."Activity" ("filterKey4", "createdAt_utc" desc);
 ```
+
+## SubsystemIntegration zero-or-one relationship (APS-4992)
+
+New databases receive the required and unique subsystem relationship from
+`local/db/keystone-init.sql`. Persistent environments must apply
+`migrations/portal/postgres/migrations/mig-3.0.12-sdx-subsystem-integration.sql`
+from the `bcgov-c/api-serv-infra` repository before deploying the APS-4992
+application changes.
+
+The migration reports and rejects orphaned or duplicate
+`SubsystemIntegration` rows instead of modifying them automatically. Back up
+the database, resolve any reported invalid data, and rerun the migration before
+deploying the application.
