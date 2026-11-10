@@ -62,7 +62,6 @@ const defaults: PolicyDefaultsFn = (
         upgrades: {
           sign: {},
           verify: {},
-          counterSign: {},
         },
       },
       'sdx-p2p-consumer-access.r1': {},
@@ -76,7 +75,6 @@ const defaults: PolicyDefaultsFn = (
           mtlsAcl: {},
           sign: {},
           verify: {},
-          counterSign: {},
         },
       },
     },

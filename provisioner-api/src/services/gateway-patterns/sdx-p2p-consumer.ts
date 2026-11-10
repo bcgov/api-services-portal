@@ -1,3 +1,5 @@
+import type { GatewayAdminService } from '../gateway-admin-service.js';
+import { requireOrganizationSigning } from './org-signing.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
 import type {
   RuntimeGroup,
@@ -70,7 +72,8 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
 
   constructor(
     private readonly api: SdxMemberApiClient,
-    private readonly logger?: FastifyBaseLogger
+    private readonly logger?: FastifyBaseLogger,
+    private readonly gatewayAdmin?: GatewayAdminService
   ) {}
 
   id = () => SDXP2PConsumerPattern.ID;
@@ -78,7 +81,8 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
   deleteHandling = () => 'delete' as const;
 
   async inject(
-    inputs: SDXP2PConsumerPatternConfig
+    inputs: SDXP2PConsumerPatternConfig,
+    ctx?: { action?: string }
   ): Promise<SDXP2PConsumerPatternData> {
     const { api } = this;
 
@@ -181,6 +185,10 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
       true,
       `Service subsystem does not have a runtime group for environment '${environment}'`
     );
+
+    if (ctx?.action !== 'delete' && Object.prototype.hasOwnProperty.call(inputs.upgrades || {}, 'counterSign')) {
+      await requireOrganizationSigning(this.gatewayAdmin, orgClient.member, overrideRG || (clientRG as RuntimeGroup));
+    }
 
     return {
       gatewayId: orgClient.gateway.id,
