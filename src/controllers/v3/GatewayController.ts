@@ -229,7 +229,7 @@ export class NamespaceController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Gateway.View
+   * > `Required Scope:` Gateway.View or Gateway.Manage
    *
    * @summary Get administration activity for this Gateway
    * @param ns
@@ -239,8 +239,7 @@ export class NamespaceController extends Controller {
    */
   @Get('/{gatewayId}/activity')
   @OperationId('gateway-admin-activity')
-  @Security('jwt', ['Namespace.View'])
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.View', 'Namespace.Manage'])
   public async namespaceActivity(
     @Path() gatewayId: string,
     @Query() first: number = 20,

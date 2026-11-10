@@ -9,6 +9,7 @@ import { SDXP2PConsumerAccessPattern } from './gateway-patterns/sdx-p2p-consumer
 import { SDXP2PProviderPattern } from './gateway-patterns/sdx-p2p-provider.js';
 import { SDXRuntimeGroupPattern } from './gateway-patterns/sdx-runtime-group.js';
 import { SDXKeysPattern } from './gateway-patterns/sdx-keys.js';
+import type { KeySetChanges } from './gateway-patterns/sdx-keys.js';
 import { SDXServicePattern } from './gateway-patterns/sdx-service.js';
 import { SDXServiceOpsPattern } from './gateway-patterns/sdx-service-ops.js';
 import { raiseValidateError } from './gateway-patterns/utils.js';
@@ -18,11 +19,14 @@ import { PolicyService } from './policy-service.js';
 import { loadEnvironments } from '../config/environments.js';
 import { SDXSubsystemPattern } from './gateway-patterns/sdx-subsystem.js';
 import { IntegrationAccessService } from './integration-access-service.js';
+import type { GatewayAdminService } from './gateway-admin-service.js';
+import { managedApplicationScopesForEnvironment } from './policies/SDX.R1.00/security-config.js';
 
 export interface PatternOutput {
   documents: any[];
   _delete_handling?: 'delete' | 'apply';
   _gateway_id?: string;
+  _changes?: KeySetChanges;
 }
 
 /**
@@ -35,13 +39,14 @@ export interface PatternProcessor {
   id: () => string;
   requiredParams: () => string[];
   eval: (inputs: any, data?: any) => any[];
-  inject?: (inputs: any) => Promise<any>;
+  inject?: (inputs: any, ctx?: { action?: string }) => Promise<any>;
   deleteHandling: (data?: any) => 'delete' | 'apply';
 }
 
 export interface GatewayPatternConfig {
   patternName: string;
   parameters: Record<string, any>;
+  action?: 'preview' | 'apply' | 'diff' | 'delete';
 }
 
 /**
@@ -53,12 +58,13 @@ export class PatternsEvaluatorService {
 
   constructor(
     private readonly policyService: PolicyService,
-    sdx: SdxMemberApiClient,
+    private readonly sdx: SdxMemberApiClient,
     integrationAccessService: IntegrationAccessService,
+    gatewayAdmin?: GatewayAdminService,
     private readonly logger?: FastifyBaseLogger
   ) {
     this.patterns = {
-      [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, logger),
+      [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, gatewayAdmin, logger),
       [SDXP2PConsumerAccessPattern.ID]: new SDXP2PConsumerAccessPattern(
         sdx,
         integrationAccessService,
@@ -90,23 +96,62 @@ export class PatternsEvaluatorService {
       );
     }
 
-    // only do the policy check for preview, apply and diff actions, not for delete
+    let effectiveConnection = connection;
+
+    // only do the policy check and enforcement for preview, apply and diff
+    // actions, not for delete
     if (action !== 'delete') {
-      const combinedScopes = [...(connection.requesterDetails?.scopes || [])];
-      if (connection.requesterDetails?.service?.privacyZone) {
-        combinedScopes.push(connection.requesterDetails.service.privacyZone);
+      const environmentConfig = loadEnvironments()[connection.environment];
+      const managedApplicationScopes =
+        connection.policyVersion === 'SDX.R1.00'
+          ? managedApplicationScopesForEnvironment(
+              await this.sdx.listCatalogScopes(),
+              connection.environment
+            )
+          : undefined;
+      const preflightContext = {
+        environment: connection.environment,
+        environmentConfig,
+        service,
+        requesterDetails: connection.requesterDetails,
+        managedApplicationScopes,
+      };
+      this.policyService.preflightConnectionRequest(
+        connection.policyVersion || '',
+        preflightContext
+      );
+      const enforcedResources = this.policyService.enforceConnectionResources(
+        connection.policyVersion || '',
+        preflightContext,
+        {
+          clientResources: connection.clientResources,
+          serviceResources: connection.serviceResources,
+        }
+      );
+      effectiveConnection = { ...connection, ...enforcedResources };
+
+      const combinedScopes = [
+        ...(effectiveConnection.requesterDetails?.scopes || []),
+      ];
+      if (effectiveConnection.requesterDetails?.service?.privacyZone) {
+        combinedScopes.push(
+          effectiveConnection.requesterDetails.service.privacyZone
+        );
       }
 
-      const {
-        provisionerStatus: _provisionerStatus,
-        ...policyConnection
-      } = connection;
+      const { provisionerStatus: _provisionerStatus, ...policyConnection } =
+        effectiveConnection;
       const policyContext = {
         ...policyConnection,
         combinedScopes,
         action,
         globals: {
-          environment: loadEnvironments()[connection.environment],
+          environment: environmentConfig,
+          // R0's schema does not declare this field. Cedar rejects the whole
+          // request when it is present, so only R1 receives it.
+          ...(managedApplicationScopes
+            ? { managedApplicationScopes }
+            : {}),
         },
       };
 
@@ -114,7 +159,7 @@ export class PatternsEvaluatorService {
 
       // run the policy check
       const policyResult = this.policyService.validateConnectionRequest(
-        connection.policyVersion || '',
+        effectiveConnection.policyVersion || '',
         policyContext
       );
 
@@ -122,7 +167,7 @@ export class PatternsEvaluatorService {
         this.logger?.error('Policy check failed: %j', policyResult);
         throw withDetails(
           new BadRequestError(
-            `Connection request change not allowed by '${connection.policyVersion}' policy`
+            `Connection request change not allowed by '${effectiveConnection.policyVersion}' policy`
           ),
           {
             reason: policyResult,
@@ -135,8 +180,8 @@ export class PatternsEvaluatorService {
 
     // use the gateway patterns to create the resources
     const gatewayPatterns = {
-      ...(connection.clientResources?.gatewayPatterns as any),
-      ...(connection.serviceResources?.gatewayPatterns as any),
+      ...(effectiveConnection.clientResources?.gatewayPatterns as any),
+      ...(effectiveConnection.serviceResources?.gatewayPatterns as any),
     };
 
     this.logger?.debug(
@@ -161,6 +206,7 @@ export class PatternsEvaluatorService {
           },
           ...gatewayPatterns[patternName],
         },
+        action,
       });
       results.push(patternResult);
     }
@@ -176,6 +222,7 @@ export class PatternsEvaluatorService {
   async buildResourcesUsingPattern({
     patternName,
     parameters,
+    action,
   }: GatewayPatternConfig): Promise<PatternOutput> {
     const pattern = this.patterns[patternName];
     if (!pattern) {
@@ -185,12 +232,13 @@ export class PatternsEvaluatorService {
     this.expectRequiredParams(parameters, pattern.requiredParams());
 
     if (pattern.inject) {
-      const data = await pattern.inject(parameters);
+      const data = await pattern.inject(parameters, { action });
       this.logger?.info('Pattern inject data for %s: %j', patternName, data);
       return {
         _gateway_id: data.gatewayId,
         _delete_handling: pattern.deleteHandling(data),
         documents: pattern.eval(parameters, data),
+        _changes: data.changes,
       };
     }
 

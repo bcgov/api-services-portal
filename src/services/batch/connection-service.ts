@@ -20,8 +20,42 @@ import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
+import { cloneDeep, get, has, set, unset } from 'lodash';
 
 const logger = Logger('batch.connection');
+
+const R1_MANAGED_CLIENT_RESOURCE_PATHS = [
+  ['gatewayPatterns', 'sdx-p2p-consumer-access.r1', 'integrationClientId'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'token'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'acl'],
+  ['gatewayPatterns', 'sdx-p2p-consumer.r1', 'upgrades', 'tokenExchange'],
+];
+const R1_MANAGED_SERVICE_RESOURCE_PATHS = [
+  ['gatewayPatterns', 'sdx-p2p-provider.r1', 'upgrades', 'token'],
+  ['gatewayPatterns', 'sdx-p2p-provider.r1', 'upgrades', 'tokenExchange'],
+];
+
+const resourceObject = (value: any): any =>
+  typeof value === 'string' ? JSON.parse(value) : value || {};
+
+const preserveManagedR1Settings = (
+  submitted: any,
+  stored: any,
+  managedPaths: string[][]
+): any => {
+  const result = cloneDeep(resourceObject(submitted));
+  const current = resourceObject(stored);
+
+  managedPaths.forEach((path) => {
+    if (has(current, path)) {
+      set(result, path, cloneDeep(get(current, path)));
+    } else {
+      unset(result, path);
+    }
+  });
+
+  return result;
+};
 
 export interface ConnectionRequestUpdateParams {
   client: KeystoneSubsystem;
@@ -72,13 +106,58 @@ class ConnectionService {
       body.environment = serviceSpec.environment as any;
     }
 
-    // if approving or explicitely rejecting the connection, validate the client and service belong to the same organization
+    const existing = await this.findConnection(
+      (context as any).createContext({ skipAccessControl: true }),
+      body.clientId,
+      body.serviceId
+    );
+
+    // Preserve each R1 setting managed by the authoritative policy while
+    // retaining submitted changes to resource settings callers may customize.
+    if (existing?.policyVersion === 'SDX.R1.00') {
+      if (body.clientResources != null) {
+        body.clientResources = preserveManagedR1Settings(
+          body.clientResources,
+          existing.clientResources,
+          R1_MANAGED_CLIENT_RESOURCE_PATHS
+        );
+      }
+      if (body.serviceResources != null) {
+        body.serviceResources = preserveManagedR1Settings(
+          body.serviceResources,
+          existing.serviceResources,
+          R1_MANAGED_SERVICE_RESOURCE_PATHS
+        );
+      }
+    }
+
+    // `isApproved` is only an approval decision when it changes the stored value.
+    // Callers such as the SDX UI Customize save resend the current value along
+    // with other changes, so an unchanged value is dropped rather than treated
+    // as approving or un-approving.
+    let isResentApproval = false;
+    if (typeof body.isApproved === 'boolean') {
+      if (existing && Boolean(existing.isApproved) === body.isApproved) {
+        delete body.isApproved;
+        isResentApproval = true;
+      }
+    }
+
+    // if approving or un-approving the connection, validate the service belongs to the specified organization
     if (body.isApproved === true || body.isApproved === false) {
       assertEqual(
         serviceSpec.organization.name === org,
         true,
         'isApproved',
         'Cannot approve/reject connection request when service organization does not match the specified organization'
+      );
+    } else if (isResentApproval) {
+      assertEqual(
+        clientSubsystem.organization.name === org ||
+          serviceSpec.organization.name === org,
+        true,
+        'clientId',
+        'Only the client or service organization can update a connection request'
       );
     } else {
       assertEqual(
@@ -96,6 +175,64 @@ class ConnectionService {
       body
     );
     return result;
+  };
+
+  findConnection = async (
+    context: Keystone,
+    clientId: string,
+    serviceId: string
+  ): Promise<KeystoneConnectionRequest | undefined> => {
+    const records: KeystoneConnectionRequest[] = await getRecords(
+      context,
+      'ConnectionRequest',
+      'allConnectionRequests',
+      [],
+      {
+        query: '$clientId: String, $serviceId: String',
+        clause: '{ clientId: $clientId, serviceId: $serviceId }',
+        variables: { clientId, serviceId },
+      }
+    );
+    return records.pop();
+  };
+
+  // R0 records the user who created the request as the requester. Later
+  // updates keep that requester, so notifications reach the original
+  // requester rather than whoever last changed the connection.
+  applyR0Requester = (
+    input: ConnectionRequestInput,
+    existing: KeystoneConnectionRequest | undefined,
+    caller: { name?: string; email?: string }
+  ): ConnectionRequestInput => {
+    const policyVersion = input.policyVersion ?? existing?.policyVersion;
+    if (
+      policyVersion !== 'SDX.R0.00' ||
+      (existing && !input.requesterDetails)
+    ) {
+      return input;
+    }
+
+    let existingRequester;
+    try {
+      const details =
+        typeof existing?.requesterDetails === 'string'
+          ? JSON.parse(existing.requesterDetails)
+          : existing?.requesterDetails;
+      existingRequester = details?.requester;
+    } catch {
+      existingRequester = undefined;
+    }
+
+    return {
+      ...input,
+      requesterDetails: {
+        ...input.requesterDetails,
+        requester: existingRequester ?? {
+          name: caller.name,
+          email: caller.email,
+        },
+      },
+    };
   };
 
   getConnectionById = async (

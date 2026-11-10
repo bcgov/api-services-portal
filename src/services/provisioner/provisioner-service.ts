@@ -2,8 +2,8 @@ import fetch from 'node-fetch';
 import { ConnectionRequest } from '../keystone/types';
 import { Logger } from '../../logger';
 import {
-  IssuerMisconfigDetail,
   IssuerMisconfigError,
+  issuerMisconfigFromHttpError,
 } from '../issuerMisconfigError';
 
 const logger = Logger('services.provisioner');
@@ -29,6 +29,12 @@ export type PostPatternsResponse = {
   failed: number;
   results: any[];
   preview?: any[];
+  changes?: {
+    operation: string;
+    added: Array<{ kid: string; name: string }>;
+    removed: Array<{ kid: string; name: string }>;
+    retained: Array<{ kid: string; name: string }>;
+  };
 };
 
 export class ProvisionerService {
@@ -166,6 +172,20 @@ export class ProvisionerService {
       });
   }
 
+  public async deleteGateway(
+    gatewayId: string
+  ): Promise<{ gatewayId: string; result: string }> {
+    const url = `${this.provisionerUrl}/gateways/${encodeURIComponent(
+      gatewayId
+    )}`;
+    logger.debug('Calling DELETE %s', url);
+
+    // No Content-Type: the provisioner rejects a JSON content type without a body
+    return await fetch(url, { method: 'DELETE' })
+      .then(checkStatus)
+      .then((r) => r.json());
+  }
+
   public async getGatewayResources(
     gatewayId: string,
     environment?: string,
@@ -205,23 +225,11 @@ async function checkStatus(res: any) {
   if (res.ok) {
     return res;
   } else {
-    const error: IssuerMisconfigDetail = {
-      reason: 'provisioner_error',
-      description: '',
-      status: `${res.status} ${res.statusText}`,
-      statusCode: res.status,
-    };
     logger.error('Error - %d %s', res.status, res.statusText);
     const body = await res.text();
-
     logger.error('ERROR ' + body);
-    try {
-      const payload = JSON.parse(body);
-      error.reason = JSON.stringify(payload.details);
-      error.description = payload.title;
-    } catch (e) {
-      logger.error('Not able to parse error response (%s)', e);
-    }
-    throw new IssuerMisconfigError(error);
+    throw new IssuerMisconfigError(
+      issuerMisconfigFromHttpError(res.status, res.statusText, body)
+    );
   }
 }

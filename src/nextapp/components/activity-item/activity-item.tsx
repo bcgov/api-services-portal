@@ -131,6 +131,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data, onSelect }) => {
         >
           {new Date(data.activityAt).toLocaleTimeString('en-CA', {
             timeStyle: 'short',
+            timeZone: 'America/Vancouver',
           })}
         </Text>
       </Box>

@@ -6,11 +6,13 @@ import type {
 import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
+  edgeJwksUriPrefix,
+  edgeTokenExchangePluginConfig,
+  edgeTrustSignPluginConfig,
   getRoutePathPrefix,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PConsumerPatternConfig {
   connId: string;
@@ -44,7 +46,8 @@ export interface ConsumerUpgrades {
     tokenEndpoint: string;
     clientId: string;
     scopes: string[];
-    audience: string;
+    audience?: string;
+    targetPrivacyZoneScope: string;
   };
 }
 
@@ -217,7 +220,7 @@ export class SDXP2PConsumerPattern implements PatternProcessor {
             'X-Client-Id': [`${clientLocator}`],
           },
           name,
-          strip_path: inputs.stripPath,
+          strip_path: inputs.stripPath ?? false,
           protocols:
             routeHostUrl.protocol === 'https:' ? ['https', 'http'] : ['http'],
           tags,
@@ -282,9 +285,17 @@ function transformer(tags: string[], data: SDXP2PConsumerPatternData) {
     name: 'request-transformer',
     tags,
     config: {
+      remove: {
+        headers: [
+          'X-Client-Id',
+          'X-SDX-Client-Subsystem-Id',
+          'X-Service-Id',
+        ],
+      },
       add: {
         headers: [
           `X-Client-Id:${clientLocator}`,
+          `X-SDX-Client-Subsystem-Id:${clientLocator}`,
           `X-Service-Id:${serviceLocator}`,
         ],
       },
@@ -308,6 +319,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
+      uri_param_names: [],
       scope: jwtKeycloakConfig?.scope,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
@@ -343,27 +355,15 @@ function upgradeToTrustSign(
   inputs: SDXP2PConsumerPatternConfig
 ) {
   const environment = data.clientRuntimeGroup.environment;
-  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${environment}:0`;
-  const keySetName = `sdx.edge.${data.clientRuntimeGroup.name}.${environment}`;
-
-  const publicUrl = getRequiredEnvUrl(
-    environment,
-    'public_url',
-    'SDX public URL'
-  );
-
   return {
     name: 'trust-sign',
     tags: tags,
-    config: {
+    config: edgeTrustSignPluginConfig({
       direction: 'request',
-      signature_header_key: 'X-Edge-Token',
-      keyid: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      runtimeGroupName: data.clientRuntimeGroup.name!,
+      environment: environment!,
       alg: inputs.upgrades.sign?.alg || 'ES256',
-      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
-      hash_alg: 'sha256',
-    },
+    }),
   };
 }
 
@@ -374,6 +374,9 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PConsumerPatternData) {
     config: {
       direction: 'response',
       signature_header_key: 'X-Edge-Token',
+      allowed_jwks_uri_prefix: [
+        edgeJwksUriPrefix(data.clientRuntimeGroup.environment!),
+      ],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },
@@ -387,21 +390,18 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.clientRuntimeGroup.name}:${data.clientRuntimeGroup.environment}:0`;
-
   return {
     name: 'token-exchange',
     tags: tags,
-    config: {
-      client_id: tokenExchangeConfig?.clientId,
-      token_endpoint: tokenExchangeConfig?.tokenEndpoint,
+    config: edgeTokenExchangePluginConfig({
+      runtimeGroupName: data.clientRuntimeGroup.name!,
+      environment: data.clientRuntimeGroup.environment!,
+      clientId: tokenExchangeConfig?.clientId,
+      tokenEndpoint: tokenExchangeConfig?.tokenEndpoint,
       scopes: tokenExchangeConfig?.scopes,
       audience: tokenExchangeConfig?.audience,
-      key_id: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      algorithm: 'ES256',
-      expiration: 60,
-    },
+      targetPrivacyZoneScope: tokenExchangeConfig?.targetPrivacyZoneScope,
+    }),
   };
 }
 
@@ -415,6 +415,8 @@ function upgradeToTrustKMS(
 
   const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.clientRuntimeGroup.environment}:0`;
 
+  // Org KMS keys keep a fixed :0 kid; random-kid rotation applies to edge
+  // signing keys (trust-sign / token-exchange), not trust-kms.
   return {
     name: 'trust-kms',
     tags: tags,

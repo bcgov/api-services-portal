@@ -1,5 +1,5 @@
 #FROM node:lts-alpine3.17
-FROM node:22.12.0-alpine3.21
+FROM node:22.23.4-alpine3.23
 
 RUN apk add curl jq
 

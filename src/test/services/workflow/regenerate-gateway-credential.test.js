@@ -1,4 +1,5 @@
 import { regenerateGatewayCredential } from '../../../services/workflow/regenerate-gateway-credential';
+import { StructuredActivityService } from '../../../services/workflow/namespace-activity';
 import * as keystone from '../../../services/keystone';
 import * as kongReplace from '../../../services/workflow/kong-api-key-replace';
 import * as getNamespaces from '../../../services/workflow/get-namespaces';
@@ -21,6 +22,19 @@ jest.mock('../../../services/keycloak', () => ({
   KeycloakClientService: jest.fn(),
 }));
 
+const mockLogRegenerateCredential = jest.fn();
+jest.mock('../../../services/workflow/namespace-activity', () => {
+  const actual = jest.requireActual(
+    '../../../services/workflow/namespace-activity'
+  );
+  return {
+    ...actual,
+    StructuredActivityService: jest.fn().mockImplementation(() => ({
+      logRegenerateCredential: mockLogRegenerateCredential,
+    })),
+  };
+});
+
 const lookupServiceAccessByName = keystone.lookupServiceAccessByName;
 const linkCredRefsToServiceAccess = keystone.linkCredRefsToServiceAccess;
 const replaceApiKey = kongReplace.replaceApiKey;
@@ -38,6 +52,8 @@ function buildContext() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockLogRegenerateCredential.mockReset();
+  mockLogRegenerateCredential.mockResolvedValue(undefined);
 });
 
 describe('regenerateGatewayCredential', function () {
@@ -45,10 +61,12 @@ describe('regenerateGatewayCredential', function () {
     lookupServiceAccessByName.mockResolvedValue({
       id: 'sa-1',
       namespace: GATEWAY,
+      application: { name: 'notify-tenant-a' },
       productEnvironment: {
         id: 'env-1',
+        name: 'dev',
         flow: 'kong-api-key-acl',
-        product: { namespace: GATEWAY },
+        product: { namespace: GATEWAY, name: 'Notify' },
       },
       consumer: { customId: CLIENT_ID },
       credentialReference: { keyAuthPK: 'old-key', clientId: CLIENT_ID },
@@ -57,8 +75,9 @@ describe('regenerateGatewayCredential', function () {
       apiKey: { apiKey: 'new-api-key', keyAuthPK: 'new-key' },
     });
 
+    const context = buildContext();
     const result = await regenerateGatewayCredential(
-      buildContext(),
+      context,
       GATEWAY,
       CLIENT_ID
     );
@@ -74,15 +93,61 @@ describe('regenerateGatewayCredential', function () {
       clientId: CLIENT_ID,
       apiKey: 'new-api-key',
     });
+    expect(StructuredActivityService).toHaveBeenCalledWith(context, GATEWAY);
+    expect(mockLogRegenerateCredential).toHaveBeenCalledTimes(1);
+    expect(mockLogRegenerateCredential).toHaveBeenCalledWith(true, {
+      consumerUsername: CLIENT_ID,
+      application: { name: 'notify-tenant-a' },
+      product: { name: 'Notify' },
+      environment: { name: 'dev' },
+    });
+    const payload = JSON.stringify(mockLogRegenerateCredential.mock.calls);
+    expect(payload).not.toContain('apiKey');
+    expect(payload).not.toContain('clientSecret');
+    expect(payload).not.toContain('new-api-key');
+  });
+
+  it('returns the rotated API key when activity logging fails', async function () {
+    lookupServiceAccessByName.mockResolvedValue({
+      id: 'sa-1',
+      namespace: GATEWAY,
+      application: { name: 'notify-tenant-a' },
+      productEnvironment: {
+        id: 'env-1',
+        name: 'dev',
+        flow: 'kong-api-key-acl',
+        product: { namespace: GATEWAY, name: 'Notify' },
+      },
+      consumer: { customId: CLIENT_ID },
+      credentialReference: { keyAuthPK: 'old-key', clientId: CLIENT_ID },
+    });
+    replaceApiKey.mockResolvedValue({
+      apiKey: { apiKey: 'new-api-key', keyAuthPK: 'new-key' },
+    });
+    mockLogRegenerateCredential.mockRejectedValueOnce(
+      new Error('activity down')
+    );
+
+    const result = await regenerateGatewayCredential(
+      buildContext(),
+      GATEWAY,
+      CLIENT_ID
+    );
+
+    expect(linkCredRefsToServiceAccess).toHaveBeenCalled();
+    expect(result.apiKey).toBe('new-api-key');
+    expect(mockLogRegenerateCredential).toHaveBeenCalledTimes(1);
   });
 
   it('rotates client-secret credentials', async function () {
     lookupServiceAccessByName.mockResolvedValue({
       id: 'sa-1',
+      application: { name: 'notify-tenant-a' },
       productEnvironment: {
         id: 'env-1',
+        name: 'dev',
         flow: 'client-credentials',
-        product: { namespace: GATEWAY },
+        product: { namespace: GATEWAY, name: 'Notify' },
         credentialIssuer: { clientAuthenticator: 'client-secret' },
       },
       consumer: { customId: CLIENT_ID },
@@ -105,8 +170,9 @@ describe('regenerateGatewayCredential', function () {
       regenerateSecret: jest.fn().mockResolvedValue('new-secret'),
     }));
 
+    const context = buildContext();
     const result = await regenerateGatewayCredential(
-      buildContext(),
+      context,
       GATEWAY,
       CLIENT_ID
     );
@@ -118,6 +184,18 @@ describe('regenerateGatewayCredential', function () {
       tokenEndpoint: 'https://idp/token',
       clientSecret: 'new-secret',
     });
+    expect(StructuredActivityService).toHaveBeenCalledWith(context, GATEWAY);
+    expect(mockLogRegenerateCredential).toHaveBeenCalledTimes(1);
+    expect(mockLogRegenerateCredential).toHaveBeenCalledWith(true, {
+      consumerUsername: CLIENT_ID,
+      application: { name: 'notify-tenant-a' },
+      product: { name: 'Notify' },
+      environment: { name: 'dev' },
+    });
+    const payload = JSON.stringify(mockLogRegenerateCredential.mock.calls);
+    expect(payload).not.toContain('apiKey');
+    expect(payload).not.toContain('clientSecret');
+    expect(payload).not.toContain('new-secret');
   });
 
   it('rejects when consumer is not in the gateway', async function () {
@@ -136,5 +214,6 @@ describe('regenerateGatewayCredential', function () {
     await expect(
       regenerateGatewayCredential(buildContext(), GATEWAY, CLIENT_ID)
     ).rejects.toThrow(/does not belong to gateway/);
+    expect(mockLogRegenerateCredential).not.toHaveBeenCalled();
   });
 });

@@ -79,6 +79,7 @@ export class ResourceDispatcher {
       Information: 'info',
       Product: 'aps',
       Application: 'aps',
+      ServiceAccess: 'aps',
       // ConsumerLabels: 'aps',
       // Activity: 'aps',
       // Subsystem: 'sdx',

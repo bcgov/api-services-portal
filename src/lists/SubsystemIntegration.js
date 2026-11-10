@@ -1,6 +1,5 @@
 const { Text, Relationship } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
-const { atTracking } = require('@keystonejs/list-plugins');
 
 /**
  * SubsystemIntegration manages the linking of a subsystem to an integration OAuth client.
@@ -24,12 +23,15 @@ module.exports = {
       type: Relationship,
       ref: 'Subsystem.integrations',
       many: false,
+      isRequired: true,
+      isUnique: true,
+      knexOptions: { isNotNullable: true },
       access: { update: false },
     },
   },
   access: EnforcementPoint,
   hooks: {
-    resolveInput: async ({ context, operation, resolvedData }) => {
+    resolveInput: async ({ resolvedData }) => {
       // if integrationClientId is a number, convert to string
       if (typeof resolvedData.integrationClientId === 'number') {
         resolvedData.integrationClientId =

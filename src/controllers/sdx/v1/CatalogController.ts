@@ -187,6 +187,11 @@ export class CatalogController extends Controller {
       records.map(async (o) => GetSubsystemEntryForSubsystem(o))
     );
     return result
+      .filter(
+        (entry) =>
+          !integrationClientId ||
+          entry.integrationClientIds.includes(integrationClientId)
+      )
       .map((o) => removeEmpty(o))
       .map((o) => removeKeys(o, ['gateway']))
       .map((o) => o as SubsystemEntry);

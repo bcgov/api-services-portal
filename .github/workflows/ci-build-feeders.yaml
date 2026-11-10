@@ -10,7 +10,27 @@ env:
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: feeds
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -44,7 +64,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi
@@ -127,7 +151,7 @@ jobs:
 
           env:
             TZ:
-              value: 'America/Los_Angeles'
+              value: 'America/Vancouver'
             LOG_FEEDS:
               value: 'false'
             WORKING_PATH:
@@ -152,7 +176,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi

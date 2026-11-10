@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{headline}}</title>
+    <!-- Styles live in connection-rqst.css and are inlined when the email is sent -->
+  </head>
+  <body>
+    <table
+      class="wrapper"
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+    >
+      <tr>
+        <td class="wrapper-cell" align="center">
+          <table
+            class="container"
+            role="presentation"
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+          >
+            <tr>
+              <td class="header">
+                <p class="eyebrow">Secure Data Exchange</p>
+                <h1 class="headline">{{headline}}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td class="accent-bar">&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="content">
+                <p class="greeting">Hi {{name}},</p>
+                <p class="message">{{message}}</p>
+                <table
+                  class="button-table"
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td class="button-cell" bgcolor="#013366">
+                      <a class="button" href="{{connectionsUrl}}"
+                        >View request</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+
+                <p class="section-title">Secure Data Exchange</p>
+                <table
+                  class="details"
+                  role="presentation"
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td class="label">Client</td>
+                    <td class="value mono">{{sdxClientId}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Requested by</td>
+                    <td class="value">{{requestedBy}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Service</td>
+                    <td class="value mono">{{serviceId}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Environment</td>
+                    <td class="value">{{environment}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Policy</td>
+                    <td class="value mono">{{policyVersion}}</td>
+                  </tr>
+                </table>
+
+                {{#if hasCssDetails}}
+                <p class="section-title">Common Single Sign-on</p>
+                <table
+                  class="details"
+                  role="presentation"
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td class="label">Client</td>
+                    <td class="value mono">{{cssClientId}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Integration</td>
+                    <td class="value mono">{{cssIntegrationId}}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Privacy zone</td>
+                    <td class="value mono">{{cssPrivacyZone}}</td>
+                  </tr>
+                </table>
+                {{/if}}
+              </td>
+            </tr>
+            <tr>
+              <td class="footer">
+                <p class="footer-team">API Program Services Team</p>
+                <p class="footer-org">Province of British Columbia</p>
+                <p class="footer-links">
+                  <a href="{{brochureUrl}}">Open Secure Data Exchange</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

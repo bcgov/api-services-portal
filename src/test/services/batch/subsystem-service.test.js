@@ -1,12 +1,22 @@
 const {
   deleteRecordByInternalId,
   getRecords,
+  syncRecordsThrowErrors,
 } = require('../../../batch/feed-worker');
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 const {
-  getNamespaceDetails,
+  namespaceResourceExists,
 } = require('../../../services/workflow/get-namespaces');
+const { BatchService } = require('../../../services/keystone/batch-service');
+
+const mockUpdate = jest.fn();
+
+jest.mock('../../../services/keystone/batch-service', () => ({
+  BatchService: jest.fn().mockImplementation(() => ({
+    update: mockUpdate,
+  })),
+}));
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -41,22 +51,29 @@ jest.mock('../../../services/batch/oas-service', () => ({
 }));
 
 jest.mock('../../../services/workflow/get-namespaces', () => ({
-  getNamespaceDetails: jest.fn(),
+  namespaceResourceExists: jest.fn(),
 }));
 
 const mockGetGatewayResources = jest.fn();
+const mockDeleteGateway = jest.fn();
 
 jest.mock('../../../services/provisioner', () => ({
   ProvisionerService: jest.fn().mockImplementation(() => ({
     getGatewayResources: mockGetGatewayResources,
+    deleteGateway: mockDeleteGateway,
   })),
 }));
 
 describe('SubsystemService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getNamespaceDetails.mockResolvedValue(null);
+    namespaceResourceExists.mockResolvedValue(false);
     mockGetGatewayResources.mockResolvedValue([]);
+    mockDeleteGateway.mockResolvedValue({
+      gatewayId: 'sdx-subsystem-gateway',
+      result: 'deleted',
+    });
+    mockUpdate.mockResolvedValue({ id: 'association-a' });
   });
 
   describe('deleteSubsystem', () => {
@@ -179,6 +196,55 @@ describe('SubsystemService', () => {
       );
     });
 
+    it('deletes the integration mapping before deleting the subsystem', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          integrations: [{ id: 'integration-123' }],
+        },
+      });
+
+      deleteRecordByInternalId
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'deleted',
+          id: 'integration-123',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'deleted',
+          id: 'subsystem-123',
+        });
+
+      const result = await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(deleteRecordByInternalId).toHaveBeenNthCalledWith(
+        1,
+        context,
+        'SubsystemIntegration',
+        'integration-123'
+      );
+      expect(deleteRecordByInternalId).toHaveBeenNthCalledWith(
+        2,
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
+      expect(result.childResults).toEqual([
+        {
+          status: 200,
+          result: 'deleted',
+          id: 'integration-123',
+        },
+      ]);
+    });
+
     it('rejects delete when active client connection requests exist', async () => {
       const service = new SubsystemService();
 
@@ -210,9 +276,7 @@ describe('SubsystemService', () => {
         },
       });
 
-      getNamespaceDetails.mockResolvedValue({
-        name: 'sdx-subsystem-gateway',
-      });
+      namespaceResourceExists.mockResolvedValue(true);
       mockGetGatewayResources.mockResolvedValue([{ id: 'resource-1' }]);
 
       await expect(
@@ -223,7 +287,113 @@ describe('SubsystemService', () => {
       expect(mockGetGatewayResources).toHaveBeenCalledWith(
         'sdx-subsystem-gateway'
       );
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
       expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('tears down an empty subsystem gateway through the provisioner before deleting the subsystem', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(true);
+      deleteRecordByInternalId.mockResolvedValueOnce({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      const result = await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(mockDeleteGateway.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteRecordByInternalId.mock.invocationCallOrder[0]
+      );
+      expect(result.childResults).toEqual([
+        { status: 200, result: 'deleted', id: 'sdx-subsystem-gateway' },
+      ]);
+    });
+
+    it('keeps the subsystem when the gateway teardown fails', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(true);
+      mockDeleteGateway.mockRejectedValue(new Error('provisioner down'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('provisioner down');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('keeps the subsystem when its gateway has a UMA resource but no group', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      // The group is not consulted: the UMA resource alone means a teardown
+      // is still needed, and the Portal's decommission fails without a group
+      namespaceResourceExists.mockResolvedValue(true);
+      mockDeleteGateway.mockRejectedValue(new Error('Namespace not found'));
+
+      await expect(
+        service.deleteSubsystem(context, 'ministry-of-citz', 'MY-SUBSYSTEM')
+      ).rejects.toThrow('Namespace not found');
+      expect(mockDeleteGateway).toHaveBeenCalledWith('sdx-subsystem-gateway');
+      expect(deleteRecordByInternalId).not.toHaveBeenCalled();
+    });
+
+    it('skips a gateway whose UMA resource is already deleted', async () => {
+      const service = new SubsystemService();
+
+      setupDeleteSubsystem({
+        subsystemRecord: {
+          ...subsystem,
+          namespace: 'sdx-subsystem-gateway',
+        },
+      });
+
+      namespaceResourceExists.mockResolvedValue(false);
+      deleteRecordByInternalId.mockResolvedValue({
+        status: 200,
+        result: 'deleted',
+        id: 'subsystem-123',
+      });
+
+      await service.deleteSubsystem(
+        context,
+        'ministry-of-citz',
+        'MY-SUBSYSTEM'
+      );
+
+      expect(mockGetGatewayResources).not.toHaveBeenCalled();
+      expect(mockDeleteGateway).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalId).toHaveBeenCalledWith(
+        context,
+        'Subsystem',
+        'subsystem-123'
+      );
     });
 
     it('rejects delete when active provider connection requests exist', async () => {
@@ -249,12 +419,47 @@ describe('SubsystemService', () => {
     });
   });
 
+  describe('subsystemGatewayExists', () => {
+    const context = {};
+
+    it('is false without a registered gateway, without a lookup', async () => {
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM' }
+      );
+
+      expect(exists).toBe(false);
+      expect(namespaceResourceExists).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['present, so the gateway still needs a teardown', true],
+      ['deleted, so the gateway was torn down', false],
+    ])('follows the UMA resource when it is %s', async (_state, present) => {
+      namespaceResourceExists.mockResolvedValue(present);
+
+      const exists = await new SubsystemService().subsystemGatewayExists(
+        context,
+        { name: 'MY-SUBSYSTEM', namespace: 'sdx-subsystem-gateway' }
+      );
+
+      expect(exists).toBe(present);
+      expect(namespaceResourceExists).toHaveBeenCalledWith(
+        context,
+        'sdx-subsystem-gateway'
+      );
+    });
+  });
+
   describe('lookupSubsystemIntegration', () => {
     const context = {};
 
     it('returns the matching integration record when one exists', async () => {
       const service = new SubsystemService();
-      const integration = { id: 'integration-123', integrationClientId: 'CLIENT-A' };
+      const integration = {
+        id: 'integration-123',
+        integrationClientId: 'CLIENT-A',
+      };
 
       getRecords.mockResolvedValueOnce([integration]);
 
@@ -277,6 +482,140 @@ describe('SubsystemService', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('zero-or-one subsystem integrations', () => {
+    it('creates a subsystem without an integration mapping', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+      };
+      syncRecordsThrowErrors.mockResolvedValueOnce({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+      });
+
+      await expect(service.upsertSubsystem({}, body)).resolves.toEqual({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+      });
+      expect(getRecords).not.toHaveBeenCalled();
+      expect(syncRecordsThrowErrors).toHaveBeenCalledTimes(1);
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
+    });
+
+    it('rejects a subsystem payload containing multiple integrations', async () => {
+      const service = new SubsystemService();
+
+      await expect(
+        service.upsertSubsystem(
+          {},
+          {
+            name: 'MY-SUBSYSTEM',
+            integrations: [
+              { integrationClientId: 'CLIENT-A' },
+              { integrationClientId: 'CLIENT-B' },
+            ],
+          }
+        )
+      ).rejects.toThrow('can be associated with only one CSS integration');
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('creates the subsystem before linking its first integration', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+        integrations: [{ integrationClientId: 'CLIENT-A' }],
+      };
+      getRecords.mockResolvedValueOnce([]);
+      syncRecordsThrowErrors
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'created',
+          id: 'subsystem-a',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          result: 'updated-child',
+          id: 'subsystem-a',
+          childResults: [
+            { status: 200, result: 'created', id: 'association-a' },
+          ],
+        });
+
+      const result = await service.upsertSubsystem({}, body);
+
+      expect(syncRecordsThrowErrors).toHaveBeenNthCalledWith(
+        1,
+        {},
+        'Subsystem',
+        undefined,
+        {
+          name: 'MY-SUBSYSTEM',
+          organization: 'ministry-of-citz',
+        }
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenNthCalledWith(
+        2,
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
+      expect(result).toEqual({
+        status: 200,
+        result: 'created',
+        id: 'subsystem-a',
+        childResults: [{ status: 200, result: 'created', id: 'association-a' }],
+      });
+    });
+
+    it('replaces an existing integration in place', async () => {
+      const service = new SubsystemService();
+      const body = {
+        name: 'MY-SUBSYSTEM',
+        organization: 'ministry-of-citz',
+        integrations: [{ integrationClientId: 'CLIENT-B' }],
+      };
+      getRecords.mockResolvedValueOnce([
+        {
+          id: 'subsystem-a',
+          integrations: [
+            { id: 'association-a', integrationClientId: 'CLIENT-A' },
+          ],
+        },
+      ]);
+      syncRecordsThrowErrors.mockResolvedValueOnce({
+        status: 200,
+        result: 'no-change',
+        id: 'subsystem-a',
+      });
+
+      await service.upsertSubsystem({}, body);
+
+      expect(BatchService).toHaveBeenCalledWith({});
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'SubsystemIntegration',
+        'association-a',
+        { integrationClientId: 'CLIENT-B' }
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        {},
+        'Subsystem',
+        undefined,
+        body
+      );
     });
   });
 });

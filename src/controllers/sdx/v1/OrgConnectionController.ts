@@ -25,6 +25,7 @@ import {
 } from '../../../batch/feed-worker';
 import { ConnectionService } from '../../../services/batch/connection-service';
 import { Logger } from '../../../logger';
+import { assertEqual, assertIsDefined } from '../../ioc/assert';
 import {
   getGwaProductEnvironment,
   getPermittedNamespaceNames,
@@ -63,19 +64,29 @@ export class OrgConnectionController extends Controller {
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request);
 
-    // For R0 policy, force the requester details to be the user making this request
-    if (input.policyVersion === 'SDX.R0.00' && input.requesterDetails) {
-      input.requesterDetails.requester = {
-        name: request.user.name,
-        email: request.user.email,
-      };
-    }
+    const connectionService = new ConnectionService();
 
-    return new ConnectionService().upsertConnection(ctx, org, input);
+    // For R0 policy, the requester is the user who created the request
+    const existing = await connectionService.findConnection(
+      ctx.createContext({ skipAccessControl: true }),
+      input.clientId,
+      input.serviceId
+    );
+
+    return connectionService.upsertConnection(
+      ctx,
+      org,
+      connectionService.applyR0Requester(input, existing, request.user)
+    );
   }
 
   /**
-   * Update a connection request approval setting `isApproved`
+   * Approve a connection request (`isApproved: true`), or withdraw the approval of an
+   * approved connection (`isApproved: false`).
+   *
+   * To reject a pending request, delete it with
+   * `DELETE /organizations/{org}/connections/{id}`.
+   *
    * > `Required Scope:` Connection.Manage
    *
    * @param org
@@ -92,6 +103,21 @@ export class OrgConnectionController extends Controller {
     @Request() request: any
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
+    const connectionService = new ConnectionService();
+
+    // Approval only applies to an existing request; the upsert must not create one
+    const existing = await connectionService.findConnection(
+      ctx,
+      input.clientId,
+      input.serviceId
+    );
+    assertIsDefined(existing, 'clientId', 'Connection request not found');
+    assertEqual(
+      input.isApproved === false && !existing.isApproved,
+      false,
+      'isApproved',
+      'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+    );
 
     const data: ConnectionRequestInput = {
       clientId: input.clientId,
@@ -102,7 +128,7 @@ export class OrgConnectionController extends Controller {
       data['isActive'] = input.isActive;
     }
 
-    return new ConnectionService().upsertConnection(ctx, org, data);
+    return connectionService.upsertConnection(ctx, org, data);
   }
 
   /**

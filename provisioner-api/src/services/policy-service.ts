@@ -13,6 +13,9 @@ import type {
 import type {
   PolicyDefaultResources,
   PolicyDefaultsFn,
+  PolicyEnforceResourcesFn,
+  PolicyPreflightContext,
+  PolicyPreflightFn,
   PolicyRequesterDetails,
 } from './policies/types.js';
 
@@ -20,6 +23,11 @@ export type { PolicyDefaultResources, PolicyRequesterDetails };
 
 export class PolicyService {
   constructor(private readonly logger?: FastifyBaseLogger) {}
+
+  /** Returns whether the provisioner has an implementation for a policy. */
+  supportsPolicyVersion(policyVersion: string): boolean {
+    return Object.hasOwn(POLICY_REGISTRY, policyVersion);
+  }
 
   /**
    * Validate a Connection Request.
@@ -50,13 +58,55 @@ export class PolicyService {
     policyVersion: string,
     subsystem: SubsystemEntry,
     service: ServiceCatalogEntry,
-    requesterDetails: PolicyRequesterDetails
+    requesterDetails: PolicyRequesterDetails,
+    managedApplicationScopes?: string[]
   ): PolicyDefaultResources {
     const policy = POLICY_REGISTRY[policyVersion];
     if (!policy) {
-      throw new BadRequestError(`Policy ${policyVersion} not found in registry`);
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
     }
-    return policy.defaults(subsystem, service, requesterDetails);
+    return policy.defaults(
+      subsystem,
+      service,
+      requesterDetails,
+      managedApplicationScopes
+    );
+  }
+
+  /** Validate policy-specific inputs for callers before they generate resources. */
+  preflightConnectionRequest(
+    policyVersion: string,
+    context: PolicyPreflightContext
+  ): void {
+    const policy = POLICY_REGISTRY[policyVersion];
+    if (!policy) {
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
+    }
+    policy.preflight?.(context);
+  }
+
+  /** Apply policy-managed settings before validation and resource generation. */
+  enforceConnectionResources(
+    policyVersion: string,
+    context: PolicyPreflightContext,
+    resources: PolicyDefaultResources
+  ): PolicyDefaultResources {
+    const policy = POLICY_REGISTRY[policyVersion];
+    if (!policy) {
+      throw new BadRequestError(
+        `Policy ${policyVersion} not found in registry`
+      );
+    }
+    return (
+      policy.enforceResources?.({
+        ...context,
+        ...resources,
+      }) ?? resources
+    );
   }
 }
 
@@ -66,6 +116,8 @@ const POLICY_REGISTRY: Record<
     schema: string;
     policies: Record<string, string>;
     defaults: PolicyDefaultsFn;
+    preflight?: PolicyPreflightFn;
+    enforceResources?: PolicyEnforceResourcesFn;
   }
 > = {
   'SDX.R0.00': SDX_R0_00_Policy,

@@ -6,11 +6,14 @@ import type {
 import { PatternProcessor } from '../patterns-evaluator.js';
 import {
   assert,
+  edgeJwksUriPrefix,
+  edgeTokenExchangePluginConfig,
+  edgeTrustSignPluginConfig,
   getRoutePathPrefix,
+  mtlsAclPluginConfig,
   type EnrichedServiceCatalogEntry,
   type EnrichedSubsystemEntry,
 } from './utils.js';
-import { getRequiredEnvUrl } from '../../config/environments.js';
 
 export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   connId: string;
@@ -314,6 +317,7 @@ function upgradeToJWTKeycloak(
     config: {
       allowed_aud: jwtKeycloakConfig?.allowedAud,
       allowed_iss: jwtKeycloakConfig?.allowedIss,
+      uri_param_names: [],
       scope: jwtKeycloakConfig?.scope ? [jwtKeycloakConfig.scope] : undefined,
       consumer_match: jwtKeycloakConfig?.consumerMatch || false,
       consumer_match_claim: jwtKeycloakConfig?.consumerMatchClaim || 'azp',
@@ -345,10 +349,10 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
   return {
     name: 'mtls-acl',
     tags: tags,
-    config: {
+    config: mtlsAclPluginConfig({
       allow: [`${data.clientRG.host}`],
-      certificate_header_name: 'X-Client-Cert-CN',
-    },
+      certificateAttribute: 'common_name',
+    }),
   };
 }
 
@@ -367,28 +371,15 @@ function upgradeToTrustSign(
   data: SDXP2PProviderPatternData,
   inputs: SDXP2PProviderPatternConfig
 ) {
-  const environment = data.serviceRG.environment;
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${environment}:0`;
-  const keySetName = `sdx.edge.${data.serviceRG.name}.${environment}`;
-
-  const publicUrl = getRequiredEnvUrl(
-    environment,
-    'public_url',
-    'SDX public URL'
-  );
-
   return {
     name: 'trust-sign',
     tags: tags,
-    config: {
+    config: edgeTrustSignPluginConfig({
       direction: 'response',
-      signature_header_key: 'X-Edge-Token',
-      keyid: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
+      runtimeGroupName: data.serviceRG.name!,
+      environment: data.serviceRG.environment!,
       alg: inputs.upgrades.sign?.alg || 'ES256',
-      jwks_uri: `${publicUrl}/keysets/${keySetName}/.well-known/jwks.json`,
-      hash_alg: 'sha256',
-    },
+    }),
   };
 }
 
@@ -399,6 +390,9 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
     config: {
       direction: 'request',
       signature_header_key: 'X-Edge-Token',
+      allowed_jwks_uri_prefix: [
+        edgeJwksUriPrefix(data.serviceRG.environment!),
+      ],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },
@@ -412,21 +406,17 @@ function upgradeToTokenExchange(
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
-  const kid = `urn:ca:bc:sdx:edge:${data.serviceRG.name}:${data.serviceRG.environment}:0`;
-
   return {
     name: 'token-exchange',
     tags: tags,
-    config: {
-      client_id: tokenExchangeConfig?.clientId,
-      token_endpoint: tokenExchangeConfig?.tokenEndpoint,
+    config: edgeTokenExchangePluginConfig({
+      runtimeGroupName: data.serviceRG.name!,
+      environment: data.serviceRG.environment!,
+      clientId: tokenExchangeConfig?.clientId,
+      tokenEndpoint: tokenExchangeConfig?.tokenEndpoint,
       scopes: tokenExchangeConfig?.scopes,
       audience: tokenExchangeConfig?.audience,
-      key_id: kid,
-      private_key_location: '/etc/secrets/sdx-edge-signing-cert/tls.key',
-      algorithm: 'ES256',
-      expiration: 60,
-    },
+    }),
   };
 }
 
@@ -440,6 +430,8 @@ function upgradeToTrustKMS(
 
   const key_id = `urn:ca:bc:sdx:org:${memberText}:${data.serviceRG.environment}:0`;
 
+  // Org KMS keys keep a fixed :0 kid; random-kid rotation applies to edge
+  // signing keys (trust-sign / token-exchange), not trust-kms.
   return {
     name: 'trust-kms',
     tags: tags,

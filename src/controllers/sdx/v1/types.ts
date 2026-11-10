@@ -60,7 +60,9 @@ export interface ConnectionRequestInput {
   environment?: string;
   policyVersion?: string;
   requesterDetails?: any;
+  /** Managed security settings are read-only on existing SDX.R1.00 connections. */
   clientResources?: any;
+  /** Managed security settings are read-only on existing SDX.R1.00 connections. */
   serviceResources?: any;
   provisionerStatus?: {
     message: string;

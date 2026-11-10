@@ -1,15 +1,13 @@
 const {
   deleteRecordByInternalIdThrowErrors,
+  getRecords,
+  syncRecordsThrowErrors,
 } = require('../../../batch/feed-worker');
 const {
   ConnectionService,
 } = require('../../../services/batch/connection-service');
-const {
-  SubsystemService,
-} = require('../../../services/batch/subsystem');
-const {
-  OpenAPISpecService,
-} = require('../../../services/batch/oas-service');
+const { SubsystemService } = require('../../../services/batch/subsystem');
+const { OpenAPISpecService } = require('../../../services/batch/oas-service');
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -34,6 +32,423 @@ jest.mock('../../../services/batch/oas-service', () => ({
 describe('ConnectionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('findConnection', () => {
+    it('looks up the connection by client and service', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      const result = await new ConnectionService().findConnection(
+        {},
+        'LAB.MIN.CLIENT',
+        'LAB.MIN.SERVICE.v1'
+      );
+
+      expect(result).toEqual({ id: '1', isApproved: false });
+      expect(getRecords).toHaveBeenCalledWith(
+        {},
+        'ConnectionRequest',
+        'allConnectionRequests',
+        [],
+        expect.objectContaining({
+          variables: {
+            clientId: 'LAB.MIN.CLIENT',
+            serviceId: 'LAB.MIN.SERVICE.v1',
+          },
+        })
+      );
+    });
+
+    it('returns undefined when there is no connection', async () => {
+      getRecords.mockResolvedValue([]);
+
+      expect(
+        await new ConnectionService().findConnection({}, 'A', 'B')
+      ).toBeUndefined();
+    });
+  });
+
+  describe('applyR0Requester', () => {
+    const caller = { name: 'Updater', email: 'updater@example.com' };
+    const r0 = (overrides = {}) => ({
+      clientId: 'LAB.MIN.CLIENT',
+      serviceId: 'LAB.MIN.SERVICE.v1',
+      policyVersion: 'SDX.R0.00',
+      ...overrides,
+    });
+    const existing = {
+      id: '1',
+      policyVersion: 'SDX.R0.00',
+      requesterDetails: JSON.stringify({
+        requester: { name: 'Original', email: 'original@example.com' },
+      }),
+    };
+
+    it('records the caller as the requester when the request is created', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ requesterDetails: { client: { clientId: 'css' } } }),
+        undefined,
+        caller
+      );
+
+      expect(result.requesterDetails).toEqual({
+        client: { clientId: 'css' },
+        requester: { name: 'Updater', email: 'updater@example.com' },
+      });
+    });
+
+    it('keeps the original requester when a different user updates the request', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({
+          requesterDetails: {
+            requester: { name: 'Spoofed', email: 'spoofed@example.com' },
+          },
+        }),
+        existing,
+        caller
+      );
+
+      expect(result.requesterDetails.requester).toEqual({
+        name: 'Original',
+        email: 'original@example.com',
+      });
+    });
+
+    it('leaves requesterDetails out of an update that does not send them', () => {
+      const input = r0({ isActive: false });
+
+      const result = new ConnectionService().applyR0Requester(
+        input,
+        existing,
+        caller
+      );
+
+      expect(result).toBe(input);
+      expect(result.requesterDetails).toBeUndefined();
+    });
+
+    it('uses the stored policy version when the update omits it', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ policyVersion: undefined, requesterDetails: {} }),
+        existing,
+        caller
+      );
+
+      expect(result.requesterDetails.requester.email).toBe(
+        'original@example.com'
+      );
+    });
+
+    it('records the caller when the stored request has no requester', () => {
+      const result = new ConnectionService().applyR0Requester(
+        r0({ requesterDetails: {} }),
+        { ...existing, requesterDetails: 'not json' },
+        caller
+      );
+
+      expect(result.requesterDetails.requester.email).toBe(
+        'updater@example.com'
+      );
+    });
+
+    it('does not change requests for other policy versions', () => {
+      const input = r0({
+        policyVersion: 'SDX.R1.00',
+        requesterDetails: { requester: 'someone@example.com' },
+      });
+
+      expect(
+        new ConnectionService().applyR0Requester(input, undefined, caller)
+      ).toBe(input);
+    });
+  });
+
+  describe('upsertConnection', () => {
+    const context = { createContext: jest.fn(() => ({ noauth: true })) };
+    const clientSubsystem = { organization: { name: 'ministry-of-client' } };
+    const serviceSpec = {
+      environment: 'dev',
+      organization: { name: 'ministry-of-service' },
+    };
+    const input = (overrides = {}) => ({
+      clientId: 'LAB.MIN.CLIENT',
+      serviceId: 'LAB.MIN.SERVICE.v1',
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      SubsystemService.mockImplementation(() => ({
+        findSubsystemByClientId: jest.fn().mockResolvedValue(clientSubsystem),
+      }));
+      OpenAPISpecService.mockImplementation(() => ({
+        findOpenAPISpecByName: jest.fn().mockResolvedValue(serviceSpec),
+      }));
+      syncRecordsThrowErrors.mockResolvedValue({ status: 200 });
+      getRecords.mockResolvedValue([]);
+    });
+
+    it('lets the client organization resend the current approval with other changes', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: true }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({ isApproved: true, isActive: false })
+      );
+
+      expect(getRecords).toHaveBeenCalledWith(
+        { noauth: true },
+        'ConnectionRequest',
+        'allConnectionRequests',
+        [],
+        expect.anything()
+      );
+      expect(syncRecordsThrowErrors).toHaveBeenCalledWith(
+        context,
+        'ConnectionRequest',
+        undefined,
+        expect.not.objectContaining({ isApproved: expect.anything() })
+      );
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isActive: false,
+      });
+    });
+
+    it('lets the service organization resend the current approval', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: true }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: true, isActive: true })
+      );
+
+      expect(syncRecordsThrowErrors).toHaveBeenCalled();
+    });
+
+    it('rejects an approval change from the client organization', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-client',
+          input({ isApproved: true })
+        )
+      ).rejects.toThrow('Validation Failed');
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('treats isApproved on a new connection as an approval decision', async () => {
+      getRecords.mockResolvedValue([]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-client',
+          input({ isApproved: false })
+        )
+      ).rejects.toThrow('Validation Failed');
+    });
+
+    it('keeps an approval change from the service organization', async () => {
+      getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: true })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isApproved: true,
+      });
+    });
+
+    it('preserves managed settings and applies allowed R1 resource changes', async () => {
+      const managedConsumerToken = { allowedAud: 'stored-audience' };
+      const managedConsumerAcl = { allow: ['stored-client'] };
+      const managedTokenExchange = { targetPrivacyZoneScope: 'stored-scope' };
+      const managedProviderToken = { allowedAud: 'stored-provider' };
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          clientResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-consumer-access.r1': {},
+              'sdx-p2p-consumer.r1': {
+                upgrades: {
+                  token: managedConsumerToken,
+                  acl: managedConsumerAcl,
+                  tokenExchange: managedTokenExchange,
+                  sign: { value: 'stored' },
+                },
+              },
+            },
+          }),
+          serviceResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-provider.r1': {
+                upgrades: {
+                  token: managedProviderToken,
+                  sign: { value: 'stored' },
+                },
+              },
+            },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          isActive: false,
+          clientResources: {
+            comment: 'updated client setting',
+            gatewayPatterns: {
+              'sdx-p2p-consumer-access.r1': {
+                integrationClientId: 'ignored-client',
+              },
+              'sdx-p2p-consumer.r1': {
+                upgrades: {
+                  token: { allowedAud: 'ignored-audience' },
+                  acl: { allow: ['ignored-client'] },
+                  tokenExchange: {},
+                  sign: { value: 'updated' },
+                },
+              },
+            },
+          },
+          serviceResources: {
+            comment: 'updated service setting',
+            gatewayPatterns: {
+              'sdx-p2p-provider.r1': {
+                upgrades: {
+                  token: { allowedAud: 'ignored-provider' },
+                  tokenExchange: { clientId: 'ignored-client' },
+                  sign: { value: 'updated' },
+                },
+              },
+            },
+          },
+        })
+      );
+
+      const saved = syncRecordsThrowErrors.mock.calls[0][3];
+      expect(saved).toMatchObject({
+        isActive: false,
+        clientResources: {
+          comment: 'updated client setting',
+          gatewayPatterns: {
+            'sdx-p2p-consumer.r1': {
+              upgrades: {
+                token: managedConsumerToken,
+                acl: managedConsumerAcl,
+                tokenExchange: managedTokenExchange,
+                sign: { value: 'updated' },
+              },
+            },
+          },
+        },
+        serviceResources: {
+          comment: 'updated service setting',
+          gatewayPatterns: {
+            'sdx-p2p-provider.r1': {
+              upgrades: {
+                token: managedProviderToken,
+                sign: { value: 'updated' },
+              },
+            },
+          },
+        },
+      });
+      expect(
+        saved.clientResources.gatewayPatterns['sdx-p2p-consumer-access.r1']
+      ).not.toHaveProperty('integrationClientId');
+      expect(
+        saved.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'].upgrades
+      ).not.toHaveProperty('tokenExchange');
+    });
+
+    it('keeps null resources unchanged on an existing R1 connection', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          clientResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-consumer.r1': {
+                upgrades: { sign: { value: 'stored' } },
+              },
+            },
+          }),
+          serviceResources: JSON.stringify({
+            gatewayPatterns: {
+              'sdx-p2p-provider.r1': {
+                upgrades: { sign: { value: 'stored' } },
+              },
+            },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          isActive: false,
+          clientResources: null,
+          serviceResources: null,
+        })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isActive: false,
+        clientResources: null,
+        serviceResources: null,
+      });
+    });
+
+    it('keeps generated resources when creating an R1 connection', async () => {
+      const clientResources = { generated: 'client value' };
+      const serviceResources = { generated: 'service value' };
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          policyVersion: 'SDX.R1.00',
+          clientResources,
+          serviceResources,
+        })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual(
+        expect.objectContaining({ clientResources, serviceResources })
+      );
+    });
+
+    it('continues to update resources on an existing R0 connection', async () => {
+      getRecords.mockResolvedValue([
+        { id: '1', policyVersion: 'SDX.R0.00', isApproved: true },
+      ]);
+      const clientResources = { customized: 'client value' };
+      const serviceResources = { customized: 'service value' };
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({ clientResources, serviceResources })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual(
+        expect.objectContaining({ clientResources, serviceResources })
+      );
+    });
   });
 
   describe('buildConnectionConfigTags', () => {

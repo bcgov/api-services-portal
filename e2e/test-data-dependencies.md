@@ -121,3 +121,11 @@
 | │   -- ALL TESTS ARE INDEPENDENT --                         | NA                                                             |
 | 21-notifications                                            |                                                                |
 | |   01-namespace-assignment-notification.cy.ts              | NA                                                             |
+| 24-self-issuing-credentials                                 |                                                                |
+| │   00-setup.cy.ts                                          | NA                                                             |
+| │   01-api-key-flows.cy.ts                                  | 00-setup in folder 24                                          |
+| │   02-client-credential-flows.cy.ts                        | 00-setup in folder 24                                          |
+| │   03-authz-labels-revoke.cy.ts                            | 00-setup in folder 24                                          |
+| │   04-my-access-exclusion.cy.ts                            | 00-setup in folder 24                                          |
+| │   05-orphan-application-cleanup.cy.ts                     | 00-setup in folder 24                                          |
+| │   06-activity.cy.ts                                       | 00-setup in folder 24                                          |

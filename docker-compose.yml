@@ -125,12 +125,25 @@ services:
       - ./local/provisioner/.env.local
     environment:
       NODE_ENV: test # Needed for allowing non-secure connection to Keycloak
+      PARTNER_PORT: 3031
     restart: on-failure
+    healthcheck:
+      # The partner listener starts last; readiness implies both ports bound.
+      test:
+        - CMD
+        - node
+        - -e
+        - 'const s=require("node:net").connect(Number(process.env.PARTNER_PORT||3001),"127.0.0.1");s.setTimeout(2000);s.on("connect",()=>s.end());s.on("error",()=>process.exit(1));s.on("timeout",()=>process.exit(1));'
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     volumes:
       - ./local/provisioner/key.json:/secrets/key.json
       - ./local/provisioner/environments.json:/etc/environments.json
     ports:
       - 3030:3030
+      - 127.0.0.1:3031:3031
     networks:
       aps-net:
         aliases:
@@ -265,6 +278,7 @@ services:
     command: sh -c "apk add --no-cache openssl >/dev/null && sh /gen/gen-cluster-certs.sh"
     volumes:
       - ./local/kong/gen-cluster-certs.sh:/gen/gen-cluster-certs.sh:ro
+      - ./local/kong/sdx-edge-signing-cert:/gen/sdx-edge-signing-cert:ro
       - tls-certs:/certs
     networks:
       - aps-net
@@ -395,6 +409,32 @@ services:
       - tls-certs:/etc/secrets:ro
     restart: on-failure:5
 
+  sdx-ui:
+    image: ghcr.io/bcgov/aps-devops/sdx-ui:${SDX_UI_TAG:-dev}
+    container_name: sdx-ui
+    depends_on:
+      - apsportal
+      - keycloak
+      - oauth2-proxy
+    environment:
+      PORT: '5500'
+      SDX_API_BASE: http://oauth2proxy.localtest.me:4180/ds/api/sdx/v1/catalog
+      SDX_API_ROOT: http://oauth2proxy.localtest.me:4180/ds/api/sdx/v1
+      OIDC_ISSUER: http://keycloak.localtest.me:9081/auth/realms/master
+      OIDC_CLIENT_ID: aps-portal
+      OIDC_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+      OIDC_REDIRECT_URI: http://sdx-ui.localtest.me:5500/auth/callback
+      SESSION_SECRET: local-sdx-ui-session
+    volumes:
+      - ./local/sdx-ui/config.yaml:/app/config.yaml:ro
+    restart: on-failure:5
+    ports:
+      - '5500:5500'
+    networks:
+      aps-net:
+        aliases:
+          - sdx-ui.localtest.me
+
   oas-validation-api:
     image: ${OAS_VALIDATION_API_IMAGE:-ghcr.io/bcgov/gwa-api/gwa-csit-oas-validation-api:dev}
     container_name: oas-validation-api
@@ -436,7 +476,10 @@ services:
       - COMMIT_INFO_REMOTE=${CY_REPO_URL:-}
       - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL:-}
     depends_on:
-      - feeder-seeding
+      feeder-seeding:
+        condition: service_started
+      provisioner:
+        condition: service_healthy
     build:
       context: .
       dockerfile: e2e/Dockerfile

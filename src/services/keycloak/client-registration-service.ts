@@ -17,6 +17,20 @@ import { AudienceMapper } from './templates/protocol-mappers/audience';
 
 const logger = Logger('keycloak.ClientReg');
 
+const APIGW_REALM = 'apigw';
+// These realm scopes put client_id, clientHost, and clientAddress on a client-credentials token.
+const REQUIRED_APIGW_DEFAULT_SCOPES = ['service_account', 'basic'];
+const CLIENT_PAGE_SIZE = 100;
+
+export interface ApigwScopeBackfillUpdate {
+  clientId: string;
+  scopesAdded: string[];
+}
+
+export interface ApigwScopeBackfillSummary {
+  updated: ApigwScopeBackfillUpdate[];
+}
+
 export interface ClientRegResponse {
   id: string;
   clientId: string;
@@ -44,6 +58,7 @@ export class KeycloakClientRegistrationService {
   private registrationUrl: string;
   private accessToken: string;
   private kcAdminClient: any;
+  private realmName: string = '';
   private session: boolean = false;
 
   constructor(
@@ -60,8 +75,27 @@ export class KeycloakClientRegistrationService {
       // this will probably fail if the issuer is not Keycloak
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
+      this.realmName = realmName;
       this.kcAdminClient = new KeycloakAdminClient({ baseUrl, realmName });
     }
+  }
+
+  private isApigwRealm(): boolean {
+    return this.realmName === APIGW_REALM;
+  }
+
+  private unionRequiredApigwScopes(scopes: string[] | undefined): string[] {
+    const merged = Array.isArray(scopes) ? [...scopes] : [];
+    for (const name of REQUIRED_APIGW_DEFAULT_SCOPES) {
+      if (!merged.includes(name)) {
+        merged.push(name);
+      }
+    }
+    return merged;
+  }
+
+  private missingRequiredScopes(names: string[]): string[] {
+    return REQUIRED_APIGW_DEFAULT_SCOPES.filter((name) => !names.includes(name));
   }
 
   public async clientRegistration(
@@ -138,6 +172,12 @@ export class KeycloakClientRegistrationService {
         }
       });
 
+    if (this.isApigwRealm()) {
+      body.defaultClientScopes = this.unionRequiredApigwScopes(
+        body.defaultClientScopes
+      );
+    }
+
     logger.debug('[clientRegistration] CALLING %s', this.registrationUrl);
     logger.debug('[clientRegistration] BODY %j', body);
 
@@ -149,6 +189,9 @@ export class KeycloakClientRegistrationService {
       .then(checkStatus)
       .then((res) => res.json());
     logger.debug('[clientRegistration] RESULT %j', response);
+    if (this.isApigwRealm()) {
+      await this.assertCreatedDefaultScopes(response);
+    }
     return {
       id: response['id'],
       enabled: response['enabled'],
@@ -188,10 +231,13 @@ export class KeycloakClientRegistrationService {
     } as ClientRegResponse;
   }
 
-  public async deleteClientRegistration(clientId: string): Promise<void> {
+  public async deleteClientRegistration(
+    clientId: string,
+    accessToken: string = this.accessToken
+  ): Promise<void> {
     await fetch(`${this.registrationUrl}/${clientId}`, {
       method: 'delete',
-      headers: headers(this.accessToken) as any,
+      headers: headers(accessToken) as any,
     }).then(checkStatus);
   }
 
@@ -303,10 +349,13 @@ export class KeycloakClientRegistrationService {
     desiredSetOfDefaultScopes: string[],
     desiredSetOfOptionalScopes: string[]
   ): Promise<string[]> {
+    const defaultScopes = this.isApigwRealm()
+      ? this.unionRequiredApigwScopes(desiredSetOfDefaultScopes)
+      : desiredSetOfDefaultScopes;
     logger.info(
       '[syncAndApply] %s %j %j',
       clientId,
-      desiredSetOfDefaultScopes,
+      defaultScopes,
       desiredSetOfOptionalScopes
     );
     const changeList: string[] = [];
@@ -315,7 +364,7 @@ export class KeycloakClientRegistrationService {
     const clientPK = lkup[0].id;
     const changes: string[][] = await this.syncScopes(
       clientPK,
-      desiredSetOfDefaultScopes,
+      defaultScopes,
       false
     );
     changes[0].forEach((scope) => changeList.push(`DefaultScope Add ${scope}`));
@@ -324,6 +373,9 @@ export class KeycloakClientRegistrationService {
     );
 
     await this.applyChanges(clientPK, changes, false);
+    if (this.isApigwRealm()) {
+      await this.assertDefaultScopesAssigned(clientPK);
+    }
 
     const changesOptional: string[][] = await this.syncScopes(
       clientPK,
@@ -354,5 +406,121 @@ export class KeycloakClientRegistrationService {
         throw err;
       });
     this.session = true;
+  }
+
+  public async backfillRequiredDefaultScopes(): Promise<ApigwScopeBackfillSummary> {
+    if (!this.isApigwRealm()) {
+      logger.info(
+        '[backfillRequiredDefaultScopes] skipping realm %s',
+        this.realmName
+      );
+      return { updated: [] };
+    }
+    if (!this.session) {
+      throw Error('Keycloak admin session required');
+    }
+
+    const allScopes = await this.kcAdminClient.clientScopes.find();
+    const scopeToId = (allScopes || []).reduce(function (map: any, obj: any) {
+      map[obj.name] = obj.id;
+      return map;
+    }, {});
+    const missingFromRealm = REQUIRED_APIGW_DEFAULT_SCOPES.filter(
+      (name) => scopeToId[name] == null
+    );
+    if (missingFromRealm.length !== 0) {
+      throw Error(
+        'Required scopes missing from IdP - ' + missingFromRealm.join(', ')
+      );
+    }
+
+    const updated: ApigwScopeBackfillUpdate[] = [];
+    let first = 0;
+    for (;;) {
+      const page =
+        (await this.kcAdminClient.clients.find({
+          first,
+          max: CLIENT_PAGE_SIZE,
+        })) || [];
+      for (const client of page) {
+        const current =
+          (await this.kcAdminClient.clients.listDefaultClientScopes({
+            id: client.id,
+          })) || [];
+        const missing = this.missingRequiredScopes(
+          current.map((scope: any) => scope.name)
+        );
+        if (missing.length === 0) {
+          continue;
+        }
+        for (const name of missing) {
+          await this.kcAdminClient.clients.addDefaultClientScope({
+            id: client.id,
+            clientScopeId: scopeToId[name],
+          });
+        }
+        updated.push({
+          clientId: client.clientId,
+          scopesAdded: missing,
+        });
+      }
+      if (page.length < CLIENT_PAGE_SIZE) {
+        break;
+      }
+      first += page.length;
+    }
+
+    logger.info(
+      '[backfillRequiredDefaultScopes] updated %d clients',
+      updated.length
+    );
+    return { updated };
+  }
+
+  private async assertCreatedDefaultScopes(response: any): Promise<void> {
+    const assigned = Array.isArray(response?.defaultClientScopes)
+      ? response.defaultClientScopes
+      : [];
+    const missing = this.missingRequiredScopes(assigned);
+    if (missing.length === 0) {
+      return;
+    }
+
+    const clientId = response?.clientId;
+    logger.error(
+      '[clientRegistration] Missing required default scopes %s on %s',
+      missing.join(', '),
+      clientId
+    );
+    if (clientId) {
+      try {
+        await this.deleteClientRegistration(
+          clientId,
+          response.registrationAccessToken
+        );
+      } catch (err) {
+        logger.error(
+          '[clientRegistration] Failed to delete client %s after missing scopes %s',
+          clientId,
+          err
+        );
+      }
+    }
+    throw Error(
+      'Required default scopes missing from client - ' + missing.join(', ')
+    );
+  }
+
+  private async assertDefaultScopesAssigned(clientPK: string): Promise<void> {
+    const assigned = await this.kcAdminClient.clients.listDefaultClientScopes({
+      id: clientPK,
+    });
+    const names = (assigned || []).map((scope: any) => scope.name);
+    const missing = this.missingRequiredScopes(names);
+    if (missing.length !== 0) {
+      throw Error(
+        'Required default scopes missing from client - ' + missing.join(', ')
+      );
+    }
   }
 }

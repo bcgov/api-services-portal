@@ -23,6 +23,7 @@ export async function lookupProductEnvironmentServices(
                         flow
                         approval
                         product {
+                            name
                             namespace
                             dataset {
                               id

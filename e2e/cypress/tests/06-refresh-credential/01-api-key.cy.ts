@@ -1,5 +1,6 @@
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import ApplicationPage from '../../pageObjects/applications'
+import ActivityPage from '../../pageObjects/activity'
 import LoginPage from '../../pageObjects/login'
 import MyAccessPage from '../../pageObjects/myAccess'
 
@@ -8,6 +9,7 @@ describe('Regenerate Credential for API Key', () => {
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const myAccessPage = new MyAccessPage()
+  const activityPage = new ActivityPage()
   let consumerid: string
   let consumerNumber: string
   let existingAPIKey: string
@@ -73,6 +75,21 @@ describe('Regenerate Credential for API Key', () => {
         expect(response.status).to.be.oneOf([401, 500])
         // expect(response.body.message).to.be.equal("Invalid authentication credentials")
       })
+    })
+  })
+
+  it('shows the regenerated credential on the Activity page', () => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+    cy.visit(login.path)
+    cy.get('@apiowner').then(({ user, namespace }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.activateGateway(namespace)
+    })
+    cy.get('@store').then(({ clientid }: any) => {
+      cy.visit(activityPage.path)
+      cy.contains('p', 'regenerated credential').should('contain.text', clientid)
     })
   })
 

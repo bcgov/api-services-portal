@@ -208,7 +208,7 @@ export class NamespaceController extends Controller {
   }
 
   /**
-   * > `Required Scope:` Namespace.View
+   * > `Required Scope:` Namespace.View or Namespace.Manage
    *
    * @summary Get Namespace Activity for this namespace
    * @param ns
@@ -218,8 +218,7 @@ export class NamespaceController extends Controller {
    */
   @Get('/{ns}/activity')
   @OperationId('namespace-activity')
-  @Security('jwt', ['Namespace.View'])
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.View', 'Namespace.Manage'])
   public async namespaceActivity(
     @Path() ns: string,
     @Query() first: number = 20,

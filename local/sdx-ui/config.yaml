@@ -1,0 +1,12 @@
+site:
+  title: Secure Data Exchange
+  description: Local SDX brochure
+  subtitle: Local
+support_url: https://developer.gov.bc.ca/docs/default/component/aps-infra-platform-docs/concepts/secure-data-exchange/
+bannerTitle: SDX Local
+defaultEnvironment: dev
+environments:
+  - id: dev
+    label: Dev
+    jwks_urls:
+      - http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/certs

@@ -44,7 +44,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi
@@ -197,6 +201,10 @@ jobs:
           oc rollout status deployment/${DB_NAME} --timeout=300s
 
           # Run Keystone schema (Job)
+          # Failed Jobs are not removed by ttlSecondsAfterFinished. Recreate the
+          # branch-scoped Job so retries run the current schema instead of
+          # waiting on an immutable failed Job.
+          oc delete job "${DB_NAME}-keystone-init" --ignore-not-found=true --wait=true
           cat <<EOF | oc apply -f -
           apiVersion: batch/v1
           kind: Job
@@ -229,7 +237,12 @@ jobs:
                       name: ${DB_NAME}-keystone-schema
           EOF
 
-          oc wait --for=condition=complete job/${DB_NAME}-keystone-init --timeout=300s
+          if ! oc wait --for=condition=complete job/${DB_NAME}-keystone-init --timeout=300s; then
+            oc describe job/${DB_NAME}-keystone-init || true
+            oc get pods -l job-name=${DB_NAME}-keystone-init -o wide || true
+            oc logs job/${DB_NAME}-keystone-init --all-containers=true || true
+            exit 1
+          fi
 
       - name: 'Deploy Backend'
         if: github.ref != 'refs/heads/dev'
@@ -443,6 +456,10 @@ jobs:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             OAS_VALIDATION_API_URL:
               value: 'https://oas-validation-api-gov-bc-ca.dev.api.gov.bc.ca'
+            SDX_UI_URL:
+              value: 'https://sdx-api-gov-bc-ca.dev.api.gov.bc.ca'
+            SDX_ENVIRONMENTS:
+              value: 'apsdev'
             OAS_VALIDATION_API_TIMEOUT_MS:
               value: '30000'
             GWA_PROD_ENV_SLUG:
@@ -521,7 +538,11 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi

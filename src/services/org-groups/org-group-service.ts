@@ -21,6 +21,16 @@ import { Policy } from '../uma2';
 
 const logger = Logger('org-groups');
 
+const toUserReference = (
+  user: UserRepresentation
+): UserReference & { username?: string } => ({
+  id: user.id,
+  username: user.username,
+  email: user.email,
+  name:
+    user.attributes?.display_name?.[0] || user.firstName + ' ' + user.lastName,
+});
+
 enum RoleGroups {
   'organization-admin',
   'system-admin',
@@ -562,14 +572,22 @@ export class OrgGroupService {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     const group = groupIds[groupIds.length - 1];
     const groupMembers = await this.keycloakService.listMembers(group.id);
-    return groupMembers.map((user) => ({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      name:
-        user.attributes?.display_name?.[0] ||
-        user.firstName + ' ' + user.lastName,
-    }));
+    return groupMembers.map(toUserReference);
+  }
+
+  /**
+   * Lists the members of one group, found by its full path. Unlike
+   * listMembersForLeafOnly, this needs no backfillGroups() first, so its cost
+   * does not grow with the number of groups in the realm. Returns no members
+   * when the group does not exist.
+   */
+  public async listMembersForPath(path: string): Promise<UserReference[]> {
+    const group = await this.keycloakService.findGroupByPath(path);
+    if (!group) {
+      return [];
+    }
+    const groupMembers = await this.keycloakService.listMembers(group.id);
+    return groupMembers.map(toUserReference);
   }
 
   /**

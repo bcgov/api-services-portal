@@ -6,13 +6,15 @@ on:
 jobs:
   delete:
     name: Delete deployment
-    if: github.event.ref_type == 'branch' && (startsWith(github.event.ref, 'refs/heads/feature/') || startsWith(github.event.ref, 'feature/'))
+    # feature/* deploys the Portal stack and provisioner; tmp/* deploys only the provisioner
+    if: github.event.ref_type == 'branch' && (startsWith(github.event.ref, 'feature/') || startsWith(github.event.ref, 'tmp/'))
     runs-on: ubuntu-latest
     steps:
       - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
+        env:
+          BRANCH: ${{ github.event.ref }}
         run: |
-          echo "BRANCH = ${{ github.event.ref }}"
-          export BRANCH="${{ github.event.ref }}"
+          echo "BRANCH = ${BRANCH}"
           echo "DEPLOY_ID=${BRANCH//\//-}" >> "$GITHUB_OUTPUT"
         id: set-deploy-id
 
@@ -34,15 +36,21 @@ jobs:
           OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           OPENSHIFT_NAMESPACE: ${{ env.OPENSHIFT_NAMESPACE }}
         run: |
-          oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+          # Retry: a single API server timeout would otherwise leave the whole deployment behind
+          for attempt in 1 2 3; do
+            oc login "$OPENSHIFT_SERVER" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
           if [ -n "$OPENSHIFT_NAMESPACE" ]; then
             oc project "$OPENSHIFT_NAMESPACE"
           fi
 
       - name: 'Get Helm'
         run: |
-          curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
-          tar -xf helm-v3.4.2-linux-amd64.tar.gz
+          # Needs >= 3.13 for 'uninstall --ignore-not-found' (3.4.2 silently ignores unknown flags)
+          curl -L -O https://get.helm.sh/helm-v3.22.0-linux-amd64.tar.gz
+          tar -xf helm-v3.22.0-linux-amd64.tar.gz
 
       - name: 'Delete DB (Postgres k8s resources)'
         run: |
@@ -57,10 +65,12 @@ jobs:
       - name: 'Delete ALL (Helm releases)'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
+          PREFIX="proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
-          # for old MongoDB Helm releases
-          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --ignore-not-found
-
-          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
-          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder
+          # Each release is optional (tmp/* only has -proapi; -db is for old MongoDB Helm releases),
+          # so ignore missing ones and keep going rather than stopping at the first failure.
+          failed=0
+          for release in "$PREFIX" "$PREFIX-routes" "$PREFIX-feeder" "$PREFIX-proapi" "$PREFIX-db"; do
+            helm uninstall "$release" --ignore-not-found || failed=1
+          done
+          exit $failed
