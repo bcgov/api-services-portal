@@ -12,6 +12,7 @@ function connectionContext(policyVersion: string, includeVersion: boolean) {
     operator_edge_url: 'http://edge',
     ca_token_url: 'http://ca',
     public_url: 'http://edge',
+    client_runtime_override: 'MIN.CITZ.pzgw',
     sdx_token_exchange_client_id: 'sdx-edge-exchange',
     sdx_token_exchange_token_url: 'https://issuer.example/token',
     sdx_trusted_issuers: ['https://issuer.example'],

@@ -15,6 +15,7 @@ import {
 import type { PolicyRequesterDetails } from '../types.js';
 
 export interface R1SecurityConfig {
+  clientRuntimeOverride: string;
   consumer: {
     token: {
       allowedAud: string;
@@ -88,7 +89,9 @@ export function buildR1SecurityConfig({
     );
   }
 
+  const runtimeOverride = nonBlank(environmentConfig.client_runtime_override);
   const missing: string[] = [];
+  if (!runtimeOverride) missing.push('client_runtime_override');
   if (!exchangeClientId) missing.push('sdx_token_exchange_client_id');
   if (!tokenEndpointValue) missing.push('sdx_token_exchange_token_url');
   if (!Array.isArray(configuredIssuers) || configuredIssuers.length === 0) {
@@ -96,6 +99,12 @@ export function buildR1SecurityConfig({
   }
   if (missing.length > 0) {
     throw configurationError(environmentName, missing);
+  }
+
+  if (!/^[A-Z0-9]+\.[A-Z0-9]+\.[a-z0-9]{3,8}$/.test(runtimeOverride!)) {
+    throw configurationError(environmentName, [
+      'valid client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)',
+    ]);
   }
 
   const r1Environment = environmentConfig as R1EnvironmentConfig;
@@ -197,6 +206,7 @@ export function buildR1SecurityConfig({
   }
 
   return {
+    clientRuntimeOverride: runtimeOverride!,
     consumer: {
       token: {
         allowedAud: normalizedExchangeClientId,
@@ -273,6 +283,13 @@ export function enforceR1SecurityConfig(
     'sdx-p2p-consumer.r1',
     input.environment
   );
+  setManagedSetting(
+    consumerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'clientResources.gatewayPatterns.sdx-p2p-consumer.r1.clientRuntimeOverride'
+  );
   const consumerUpgrades = recordOrEmpty(
     consumerPattern.upgrades,
     input.environment,
@@ -305,6 +322,13 @@ export function enforceR1SecurityConfig(
     servicePatterns,
     'sdx-p2p-provider.r1',
     input.environment
+  );
+  setManagedSetting(
+    providerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'serviceResources.gatewayPatterns.sdx-p2p-provider.r1.clientRuntimeOverride'
   );
   const providerUpgrades = recordOrEmpty(
     providerPattern.upgrades,

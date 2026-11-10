@@ -21,6 +21,7 @@ process.env.LOG_LEVEL = 'silent';
 const configDirectory = mkdtempSync(join(tmpdir(), 'css-contract-'));
 const configPath = join(configDirectory, 'environments.json');
 const environmentConfig = {
+  client_runtime_override: 'MIN.CITZ.pzgw',
   client_id: 'fixture-provisioner',
   oauth_token_url: 'https://control.example/token',
   kong_admin_url: 'http://fixture-kong',
