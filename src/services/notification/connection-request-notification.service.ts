@@ -324,7 +324,8 @@ export class ConnectionRequestNotificationService {
         scopes: (Array.isArray(requesterDetails?.scopes) ? requesterDetails.scopes : []).join(', ') || 'None',
         environment: item.environment,
         policyVersion: item.policyVersion,
-        connectionsUrl: connectionsUrl(linkOrg),
+        connectionsUrl:
+          event === 'revoked' || event === 'rejected' ? '' : connectionsUrl(linkOrg),
         brochureUrl: brochureUrl(),
         ...copy,
       };

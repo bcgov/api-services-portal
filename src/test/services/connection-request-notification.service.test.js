@@ -418,11 +418,41 @@ describe('ConnectionRequestNotificationService', () => {
         context: expect.objectContaining({
           headline: 'Connection request rejected',
           sdxClientId: 'LAB.MIN.CLIENT',
-          connectionsUrl:
-            'http://sdx-ui.example.com/connections?org=ministry-of-client',
+          connectionsUrl: '',
         }),
       })
     );
+  });
+
+  it.each(['rejected', 'revoked'])('omits the button from %s emails', async (event) => {
+    const notify = jest.fn().mockResolvedValue(undefined);
+    const service = new ConnectionRequestNotificationService(
+      { notify }, undefined, undefined, undefined, findClient
+    );
+    await service.notifyChange({
+      context: {},
+      operation: event === 'rejected' ? 'delete' : 'update',
+      existingItem: { ...connection, isApproved: event === 'revoked' },
+      updatedItem: event === 'revoked'
+        ? { ...connection, isApproved: true, isActive: false }
+        : undefined,
+      originalInput: event === 'revoked' ? { isActive: false } : {},
+    });
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    const email = notify.mock.calls[0][1];
+    expect(email.context.connectionsUrl).toBe('');
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(
+      notify.mock.calls[0][0], email.template, email.context
+    );
+    expect(content).not.toContain('button-table');
+    expect(content).not.toContain('View activity');
+    expect(content).not.toContain('View request');
+    expect(content).toContain(email.context.headline);
+    expect(content).toContain('Open Secure Data Exchange');
   });
 
   describe('requester and link edge cases', () => {

@@ -36,6 +36,7 @@
               <td class="content">
                 <p class="greeting">Hi {{name}},</p>
                 <p class="message">{{message}}</p>
+                {{#if connectionsUrl}}
                 <table
                   class="button-table"
                   role="presentation"
@@ -50,6 +51,8 @@
                     </td>
                   </tr>
                 </table>
+
+                {{/if}}
 
                 <p class="section-title">Secure Data Exchange</p>
                 <table
