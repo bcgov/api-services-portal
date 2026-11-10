@@ -641,7 +641,7 @@ test('builds deterministic allowed services after filtering the exact integratio
   });
 });
 
-test('does not derive callback metadata from unrelated connections', async () => {
+test('returns an empty callback without deriving metadata from unrelated connections', async () => {
   const { service } = createService({
     connections: [
       existingConnection({
@@ -653,10 +653,58 @@ test('does not derive callback metadata from unrelated connections', async () =>
     ],
   });
 
-  await assert.rejects(
-    service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /No connections found for integration integration-a in environment dev/
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
   );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
+});
+
+test('returns an empty callback when a registered integration has no connections', async () => {
+  const { service } = createService();
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'pending'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
+});
+
+test('returns an empty callback when only an unidentifiable legacy connection remains', async () => {
+  const { service } = createService({
+    connections: [
+      existingConnection({
+        requesterDetails: {} as ConnectionRequest['requesterDetails'],
+      }),
+    ],
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
 });
 
 test('returns an empty callback when the integration has connections only in another environment', async () => {

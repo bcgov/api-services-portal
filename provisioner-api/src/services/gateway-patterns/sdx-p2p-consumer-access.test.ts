@@ -104,6 +104,20 @@ test('marks the ServiceAccess for removal on a full delete', async () => {
   assert.equal(serviceAccess._action, 'delete');
 });
 
+test('rejects an empty integration client ID from an empty access grant', async () => {
+  await assert.rejects(
+    run(
+      buildPattern({
+        clientId: '',
+        resourceServers: [],
+      }),
+      inputs,
+      'apply'
+    ),
+    /No client ID available for integration access for consumer TEST.CLIENT/
+  );
+});
+
 test('uses the integrationClientId override as the ServiceAccess consumer', async () => {
   const { documents } = await run(
     buildPattern(),
