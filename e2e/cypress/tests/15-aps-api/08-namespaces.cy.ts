@@ -245,8 +245,6 @@ describe('API Tests for invalid namespace name', () => {
         })
       })
     })
-  })
-})
 
 // describe('API Tests for Deleting Namespace', () => {
 
