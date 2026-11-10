@@ -111,8 +111,8 @@ export class NamespaceController extends Controller {
    *
    * @summary Consumer report for a gateway
    */
-  @Get('/{gatewayId}/report/consumers')
-  @OperationId('gateway-report-consumers')
+  @Get('/{gatewayId}/report/consumer-access')
+  @OperationId('gateway-report-consumer-access')
   @Security('jwt', ['Namespace.View', 'Access.Manage'])
   public async reportConsumers(
     @Path() gatewayId: string,
@@ -130,7 +130,7 @@ export class NamespaceController extends Controller {
    *
    * @summary Consumer request report for a gateway
    */
-  @Get('/{gatewayId}/report/consumers/requests')
+  @Get('/{gatewayId}/report/consumer-requests')
   @OperationId('gateway-report-consumer-requests')
   @Security('jwt', ['Namespace.View', 'Access.Manage'])
   public async reportConsumerRequests(
