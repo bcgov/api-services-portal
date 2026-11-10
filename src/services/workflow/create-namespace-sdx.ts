@@ -10,12 +10,23 @@ import { Subsystem, UmaPolicyInput } from '../keystone/types';
 import { Policy, ResourceSet } from '../uma2';
 import { CreateNamespace, CreateNamespaceArgs } from './create-namespace';
 import assert from '../user-assert';
-import { EnvironmentContext, getEnvironmentContext } from './get-namespaces';
-import { lookupProductEnvironmentServicesBySlug } from '../keystone';
+import {
+  EnvironmentContext,
+  getEnvironmentContext,
+  injectResSvrAccessTokenToContext,
+} from './get-namespaces';
+import {
+  lookupProductEnvironmentServicesBySlug,
+  recordActivity,
+} from '../keystone';
 import { createUmaPolicy, updateUmaPolicy } from './ns-uma-policy-access';
 import { SysGroupAccessService } from '../org-groups/sys-group-access';
 import { GroupAccessService } from '../org-groups';
-import { KeycloakPermissionTicketService } from '../keycloak';
+import {
+  KeycloakGroupService,
+  KeycloakPermissionTicketService,
+} from '../keycloak';
+import { UMAResourceRegistrationService } from '../uma2';
 
 const logger = Logger('wf.CreateNamespaceSDX');
 
@@ -229,7 +240,7 @@ export async function CreateNamespaceForSubsystem(
   // pzgw.api.gov.bc.ca : required for allowing API calls from PZGW to the subsystem in the SDX edge environment
   // In the p2p-consumer pattern, the consumer routes can be setup on the consumer's runtime group, or
   // due to the token exchange, a central gateway for handling consumer requests.
-  const resourceSet = await createSDXNamespace(context, envCtx, {
+  const namespaceArgs: CreateNamespaceArgs = {
     name: args.subsystem.gateway?.id,
     org: args.subsystem.organization?.name,
     orgUnit: args.subsystem.organization?.orgUnit,
@@ -245,7 +256,18 @@ export async function CreateNamespaceForSubsystem(
         : ['pzgw.api.gov.bc.ca']),
     ],
     routePaths: args.routePaths,
-  });
+  };
+
+  const existing = await refreshSubsystemGatewayDomains(
+    context,
+    envCtx,
+    namespaceArgs
+  );
+  if (existing) {
+    return existing;
+  }
+
+  const resourceSet = await createSDXNamespace(context, envCtx, namespaceArgs);
 
   logger.debug(
     '[CreateNamespaceForSubsystem] Created Namespace %s for Subsystem %s',
@@ -275,6 +297,74 @@ export async function CreateNamespaceForSubsystem(
   );
 
   return resourceSet;
+}
+
+/** Refresh only domain permissions on an already registered subsystem gateway. */
+async function refreshSubsystemGatewayDomains(
+  context: any,
+  envCtx: EnvironmentContext,
+  args: CreateNamespaceArgs
+): Promise<ResourceSet | undefined> {
+  const groups = new KeycloakGroupService(envCtx.issuerEnvConfig.issuerUrl);
+  await groups.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  const group = await groups.getGroup('ns', args.name);
+  if (!group) {
+    return undefined;
+  }
+
+  const attributes = group.attributes || {};
+  assert.strictEqual(
+    attributes['perm-runtime-group']?.length === 1 &&
+      attributes['perm-runtime-group'][0] === args.runtimeGroupName,
+    true,
+    `Gateway '${args.name}' runtime group cannot be changed to '${args.runtimeGroupName}'.`
+  );
+  assert.strictEqual(
+    attributes['org']?.[0] === args.org &&
+      (attributes['org-unit']?.[0] || '') === (args.orgUnit || '') &&
+      attributes['perm-data-plane']?.[0] === SDX_DATA_PLANE &&
+      attributes['decommissioned']?.[0] !== 'true',
+    true,
+    `Gateway '${args.name}' is not an active SDX gateway for this subsystem organization.`
+  );
+
+  await injectResSvrAccessTokenToContext(envCtx);
+  const resources = new UMAResourceRegistrationService(
+    envCtx.uma2.resource_registration_endpoint,
+    envCtx.accessToken
+  );
+  const resource = await resources.findResourceByName(args.name);
+  assert.strictEqual(
+    resource?.type === 'namespace',
+    true,
+    `Gateway '${args.name}' namespace resource is missing; repair registration before refreshing permissions.`
+  );
+
+  // Recompute from all currently hosted environments. Preserve every other
+  // attribute, UMA policy and role assignment on the existing gateway.
+  const domains = [...new Set(args.domains)];
+  await groups.updateGroup({
+    ...group,
+    attributes: { ...attributes, 'perm-domains': domains },
+  });
+  await recordActivity(
+    context.sudo(),
+    'update',
+    'Namespace',
+    args.name,
+    `Refreshed ${args.name} namespace domain permissions`,
+    'success',
+    JSON.stringify({
+      message: '{actor} refreshed {ns} namespace domain permissions',
+      params: { actor: context.authedItem.name, ns: args.name },
+    }),
+    args.name,
+    [`Namespace:${args.name}`, `actor:${context.authedItem.name}`]
+  );
+  return resource;
 }
 
 async function getEnvCtx(context: any): Promise<EnvironmentContext> {
