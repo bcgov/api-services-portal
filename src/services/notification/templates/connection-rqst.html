@@ -74,10 +74,12 @@
                     <td class="label">Service organization</td>
                     <td class="value">{{serviceOrganization}}</td>
                   </tr>
+                  {{#if serviceName}}
                   <tr>
                     <td class="label">Service name</td>
                     <td class="value">{{serviceName}}</td>
                   </tr>
+                  {{/if}}
                   <tr>
                     <td class="label">Scopes</td>
                     <td class="value mono">{{scopes}}</td>

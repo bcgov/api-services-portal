@@ -259,7 +259,11 @@ describe('ConnectionRequestNotificationService', () => {
 
   it('notifies the requester when a request is approved', async () => {
     const notify = jest.fn().mockResolvedValue(undefined);
-    const findService = jest.fn().mockResolvedValue({ organization: { name: 'provider-org' }, title: 'Provider API' });
+    const findService = jest.fn().mockResolvedValue({
+      organization: { id: 'provider-id', name: 'provider-org' },
+      subsystem: { organization: { name: 'provider-org', title: 'Provider Ministry' } },
+      title: 'Provider API',
+    });
     const service = new ConnectionRequestNotificationService(
       { notify },
       findService,
@@ -283,7 +287,7 @@ describe('ConnectionRequestNotificationService', () => {
         context: expect.objectContaining({
           headline: 'Connection request approved',
           message: 'Your connection request was approved.',
-          serviceOrganization: 'provider-org',
+          serviceOrganization: 'Provider Ministry',
           serviceName: 'Provider API',
           scopes: 'service:read, service:write',
           connectionsUrl:
@@ -293,6 +297,47 @@ describe('ConnectionRequestNotificationService', () => {
     );
     expect(findClient).toHaveBeenCalledWith({}, 'LAB.MIN.CLIENT');
     expect(findService).toHaveBeenCalledWith({}, 'LAB.MIN.SERVICE.v1');
+    const [recipient, email] = notify.mock.calls[0];
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(recipient, email.template, email.context);
+    expect(content).toContain('Service name');
+    expect(content).toContain('Provider API');
+    expect(content).toContain('Provider Ministry');
+  });
+
+  it.each([
+    ['untitled service', { name: 'LAB.MIN.SERVICE.v1', organization: { name: 'provider-org' } }, 'provider-org'],
+    ['nested organization slug', { subsystem: { organization: { name: 'nested-org' } } }, 'nested-org'],
+    ['removed service', undefined, 'Not available'],
+  ])('renders approval details safely for %s', async (_, result, organization) => {
+    const notify = jest.fn().mockResolvedValue(undefined);
+    const findService = result
+      ? jest.fn().mockResolvedValue(result)
+      : jest.fn().mockRejectedValue(new Error('OpenAPI Spec not found'));
+    const service = new ConnectionRequestNotificationService(
+      { notify }, findService, undefined, undefined, findClient
+    );
+
+    await service.notifyChange({
+      context: {},
+      operation: 'update',
+      existingItem: connection,
+      updatedItem: { ...connection, isApproved: true },
+    });
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    const [recipient, email] = notify.mock.calls[0];
+    expect(email.context.serviceOrganization).toBe(organization);
+    expect(email.context.serviceName).toBeUndefined();
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(recipient, email.template, email.context);
+    expect(content).not.toContain('Service name');
+    expect(content).toContain(organization);
+    expect(content).toContain('LAB.MIN.SERVICE.v1');
   });
 
   it('supports the R1 requester string shape', async () => {

@@ -319,8 +319,12 @@ export class ConnectionRequestNotificationService {
         sdxClientId: item.clientId,
         requestedBy: describeRequester(requester),
         serviceId: item.serviceId,
-        serviceOrganization: service?.organization?.title || service?.organization?.name || service?.subsystem?.organization?.name || 'Not available',
-        serviceName: service?.title || service?.name || item.serviceId,
+        serviceOrganization:
+          service?.subsystem?.organization?.title ||
+          service?.organization?.name ||
+          service?.subsystem?.organization?.name ||
+          'Not available',
+        serviceName: service?.title,
         scopes: (Array.isArray(requesterDetails?.scopes) ? requesterDetails.scopes : []).join(', ') || 'None',
         environment: item.environment,
         policyVersion: item.policyVersion,
