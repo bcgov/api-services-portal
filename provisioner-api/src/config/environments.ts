@@ -44,13 +44,13 @@ export type EnvironmentConfig = {
    * verifying the signature, not just from the internal SDX network.
    */
   public_url?: string;
+  /** Shared consumer edge identity required by R1 on both connection sides. */
+  client_runtime_override?: string;
   /**
    * OAuth client used by the SDX consumer edge to authenticate an RFC 8693
    * token-exchange request. This is deliberately separate from `client_id`,
    * which identifies the provisioner's control-plane client.
    */
-  /** Shared consumer edge identity required by R1 on both connection sides. */
-  client_runtime_override?: string;
   sdx_token_exchange_client_id?: string;
   /**
    * Token endpoint used by the SDX edge. Required by the R1 preflight and
@@ -192,7 +192,9 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
       operator_edge_url: entry.operator_edge_url as string | undefined,
       ca_token_url: entry.ca_token_url as string | undefined,
       public_url: entry.public_url as string | undefined,
-      client_runtime_override: entry.client_runtime_override as string | undefined,
+      client_runtime_override: entry.client_runtime_override as
+        | string
+        | undefined,
       sdx_token_exchange_client_id: entry.sdx_token_exchange_client_id as
         | string
         | undefined,

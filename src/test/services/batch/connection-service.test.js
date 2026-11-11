@@ -251,17 +251,18 @@ describe('ConnectionService', () => {
       ).rejects.toThrow('Validation Failed');
     });
 
-    it('keeps an approval change from the service organization', async () => {
+    it('approves and activates in the same service-owner update', async () => {
       getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
 
       await new ConnectionService().upsertConnection(
         context,
         'ministry-of-service',
-        input({ isApproved: true })
+        input({ isApproved: true, isActive: true })
       );
 
       expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
         isApproved: true,
+        isActive: true,
       });
     });
 
