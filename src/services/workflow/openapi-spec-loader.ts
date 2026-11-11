@@ -127,6 +127,19 @@ function getCSBCApiStandard(oas: any): string | undefined {
   return apiStandard;
 }
 
+// OpenAPI 3.0/3.1 Path Items also contain parameters, servers, $ref and
+// specification extensions. Only HTTP operation fields become catalog methods.
+const OPENAPI_HTTP_METHODS = new Set([
+  'get',
+  'put',
+  'post',
+  'delete',
+  'options',
+  'head',
+  'patch',
+  'trace',
+]);
+
 function parseSpecOperations(spec: any) {
   const operations =
     spec?.paths &&
@@ -135,7 +148,7 @@ function parseSpecOperations(spec: any) {
 
       // include all the standard operations
       const stdOperations = Object.keys(pathItem)
-        .filter((path) => !['summary', 'description'].includes(path))
+        .filter((method) => OPENAPI_HTTP_METHODS.has(method))
         .map((method) => {
           const op = pathItem[method];
           return {
@@ -147,28 +160,7 @@ function parseSpecOperations(spec: any) {
           };
         });
 
-      // if there is a "callback" then add that as an event
-      if (pathItem.callback) {
-        Object.keys(pathItem.callback).forEach((cbName) => {
-          Object.keys(pathItem.callback[cbName]).forEach((callbackPath) => {
-            Object.keys(pathItem.callback[cbName][callbackPath]).forEach(
-              (method) => {
-                const op = pathItem.callback[cbName][callbackPath][method];
-                stdOperations.push({
-                  operationId: `callback:${cbName}`,
-                  method,
-                  path: callbackPath,
-                  summary: op.summary,
-                  scopes: parseScopes(
-                    spec.components.securitySchemes,
-                    op.security
-                  ),
-                });
-              }
-            );
-          });
-        });
-      }
+      // Callback definitions remain in the stored spec; they are not catalog operations.
       return [...stdOperations];
     });
 
