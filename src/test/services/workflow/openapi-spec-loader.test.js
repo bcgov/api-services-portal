@@ -148,55 +148,57 @@ paths: {}
     }
   );
 
-  it('ignores callback Path Item parameters while retaining the callback operation', async () => {
-    mockValidateRuleset.mockResolvedValue({
-      version: 'v0.3.0-test',
-      ruleset: 'basic-ruleset',
-    });
-    const result = await LoadOpenAPISpec(
-      {},
-      {
-        organization: 'ministry-of-citz',
-        subsystem: 'MY-SVC',
-        environment: 'dev',
-        spec: YAML.stringify({
-          openapi: '3.1.0',
-          info: { title: 'Test API', version: '1.0.0' },
-          components: { securitySchemes: {} },
-          paths: {
-            '/items': {
-              get: { operationId: 'items' },
-              callback: {
-                notification: {
-                  '/notification': {
-                    parameters: [],
-                    summary: 'Callback',
-                    post: { summary: 'Notify' },
-                  },
-                },
-              },
-            },
+  it.each(['legacy', 'openapi'])(
+    'preserves %s callback definitions without creating catalog operations',
+    async (format) => {
+      mockValidateRuleset.mockResolvedValue({
+        version: 'v0.3.0-test',
+        ruleset: 'basic-ruleset',
+      });
+      const callbacks = {
+        notification: {
+          '{$request.query.callbackUrl}': {
+            parameters: [],
+            summary: 'Callback',
+            post: { operationId: 'notify', summary: 'Notify' },
           },
-        }),
+        },
+      };
+      const pathItem = {
+        get: { operationId: 'items' },
+      };
+      if (format === 'legacy') {
+        pathItem.callback = callbacks;
+      } else {
+        pathItem.get.callbacks = callbacks;
       }
-    );
-    expect(JSON.parse(result.operations)).toEqual([
-      {
-        operationId: 'items',
-        method: 'GET',
-        path: '/items',
-        summary: '',
-        scopes: [],
-      },
-      {
-        operationId: 'callback:notification',
-        method: 'post',
-        path: '/notification',
-        summary: 'Notify',
-        scopes: [],
-      },
-    ]);
-  });
+      const spec = {
+        openapi: '3.1.0',
+        info: { title: 'Test API', version: '1.0.0' },
+        components: { securitySchemes: {} },
+        paths: { '/items': pathItem },
+      };
+      const result = await LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'dev',
+          spec: YAML.stringify(spec),
+        }
+      );
+      expect(JSON.parse(result.operations)).toEqual([
+        {
+          operationId: 'items',
+          method: 'GET',
+          path: '/items',
+          summary: '',
+          scopes: [],
+        },
+      ]);
+      expect(YAML.parse(result.spec).paths).toEqual(spec.paths);
+    }
+  );
 
   it('keeps all eight OpenAPI 3.0/3.1 HTTP methods', async () => {
     mockValidateRuleset.mockResolvedValue({

@@ -160,28 +160,7 @@ function parseSpecOperations(spec: any) {
           };
         });
 
-      // if there is a "callback" then add that as an event
-      if (pathItem.callback) {
-        Object.keys(pathItem.callback).forEach((cbName) => {
-          Object.keys(pathItem.callback[cbName]).forEach((callbackPath) => {
-            Object.keys(pathItem.callback[cbName][callbackPath])
-              .filter((method) => OPENAPI_HTTP_METHODS.has(method))
-              .forEach((method) => {
-                const op = pathItem.callback[cbName][callbackPath][method];
-                stdOperations.push({
-                  operationId: `callback:${cbName}`,
-                  method,
-                  path: callbackPath,
-                  summary: op.summary,
-                  scopes: parseScopes(
-                    spec.components.securitySchemes,
-                    op.security
-                  ),
-                });
-              });
-          });
-        });
-      }
+      // Callback definitions remain in the stored spec; they are not catalog operations.
       return [...stdOperations];
     });
 
