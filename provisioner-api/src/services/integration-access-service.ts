@@ -6,11 +6,7 @@ import {
   type ServiceCatalogEntry,
   type SubsystemEntry,
 } from '../clients/sdx-member/index.js';
-import {
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-} from '../errors/api-errors.js';
+import { BadRequestError, ConflictError } from '../errors/api-errors.js';
 import {
   type TIntegrationAccessRequest,
   type TNewIntegrationAccessRequest,
@@ -327,10 +323,9 @@ export class IntegrationAccessService {
 
     if (integrationConnections.length === 0) {
       // Partner clients query each configured environment in turn. Once the
-      // integration is known to SDX, an environment with no connections is an
-      // empty collection rather than a missing resource. Use the integration's
-      // identity from another environment, but continue to reject unknown or
-      // ambiguous integration identities.
+      // integration is registered in the catalog, the absence of matching
+      // connections is an empty collection rather than a missing
+      // resource. Reuse an authoritative identity from another environment when one exists.
       const integrationIdentity = selectAuthoritativeClientConnections(
         connections.filter(
           (connection) =>
@@ -346,9 +341,12 @@ export class IntegrationAccessService {
         this.logger
       );
       if (!integrationIdentity) {
-        throw new NotFoundError(
-          `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
-        );
+        return {
+          integrationId: normalizedIntegrationId,
+          clientId: '',
+          submissionId: 'unknown',
+          resourceServers: [],
+        };
       }
 
       const submissionId = latestSubmissionId(integrationIdentity.connections);

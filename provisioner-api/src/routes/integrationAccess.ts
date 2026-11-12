@@ -79,7 +79,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'List allowed access',
           operationId: 'getSubsystemAllowedServices',
           description:
-            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; a known integration with connections only in another environment returns an empty grant; no connections for the integration return 404; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Provider approval is sufficient for an approved grant regardless of activation; activation controls runtime routing. Approved versions remain pinned to the reviewed version.',
+            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; a known integration without matching connections returns an empty grant; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Provider approval is sufficient for an approved grant regardless of activation; activation controls runtime routing. Approved versions remain pinned to the reviewed version.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -103,7 +103,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
 
           response: {
             200: AllowedServicesResponse,
-            ...partnerErrors(400, 401, 403, 404, 409, 500, 502),
+            ...partnerErrors(400, 401, 403, 409, 500, 502),
           },
         },
       },

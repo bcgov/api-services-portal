@@ -75,21 +75,12 @@ describe('Partner authentication, upstream errors and OpenAPI contract', () => {
         '500',
         '502',
       ])
-      for (const [path, method] of [
-        ['/integrations/{integrationId}/allowed-services', 'get'],
-        ['/integrations/{integrationId}/access-requests', 'post'],
-      ]) {
-        expect(Object.keys(paths[path][method].responses)).deep.eq([
-          '200',
-          '400',
-          '401',
-          '403',
-          '404',
-          '409',
-          '500',
-          '502',
-        ])
-      }
+      expect(
+        Object.keys(paths['/integrations/{integrationId}/allowed-services'].get.responses)
+      ).deep.eq(['200', '400', '401', '403', '409', '500', '502'])
+      expect(
+        Object.keys(paths['/integrations/{integrationId}/access-requests'].post.responses)
+      ).deep.eq(['200', '400', '401', '403', '404', '409', '500', '502'])
       const callback =
         paths['/integrations/{integrationId}/access-requests'].post.callbacks
           .provisionAllowedServices
