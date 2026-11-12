@@ -48,11 +48,13 @@ export class ConnectionsController {
 
     let response: TConnectionChangeResponse;
     try {
+      const { operationId: _operationId, ...policyConnectionRequest } =
+        connectionRequest;
       const resourceSets = await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
         id,
         action,
         service,
-        connectionRequest
+        policyConnectionRequest
       );
 
       const results: TResourceResult[] = [];

@@ -40,6 +40,7 @@ function setup(
   const statusUpdates: any[] = [];
   const activity: any[] = [];
   const dispatches: any[] = [];
+  const policyRequests: any[] = [];
   const services = ({
     sdxMember: {
       getSubsystemService: async () => service,
@@ -65,7 +66,13 @@ function setup(
         }),
     },
     patternsEvaluator: {
-      buildResourcesUsingConnectionRequest: async () => {
+      buildResourcesUsingConnectionRequest: async (
+        _id: string,
+        _action: string,
+        _service: unknown,
+        request: unknown
+      ) => {
+        policyRequests.push(request);
         if (options.provisioningError) throw options.provisioningError;
         return [
           {
@@ -95,11 +102,12 @@ function setup(
     statusUpdates,
     activity,
     dispatches,
+    policyRequests,
   };
 }
 
 test('apply writes pending and provisioned statuses', async () => {
-  const { controller, statusUpdates } = setup();
+  const { controller, statusUpdates, policyRequests } = setup();
 
   const response = await controller.onConnectionRequestChange(
     'connection-1',
@@ -130,6 +138,8 @@ test('apply writes pending and provisioned statuses', async () => {
       },
     ]
   );
+  assert.equal(policyRequests[0].operationId, undefined);
+  assert.equal(policyRequests[0].clientId, 'client-1');
 });
 
 test('apply copies produced Information data into provisioned status', async () => {
