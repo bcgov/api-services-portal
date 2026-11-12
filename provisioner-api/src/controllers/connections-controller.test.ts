@@ -12,6 +12,7 @@ const connectionRequest = {
   requesterDetails: {},
   clientResources: {},
   serviceResources: {},
+  operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
 };
 
 const service = {
@@ -39,6 +40,7 @@ function setup(
   const statusUpdates: any[] = [];
   const activity: any[] = [];
   const dispatches: any[] = [];
+  const policyRequests: any[] = [];
   const services = ({
     sdxMember: {
       getSubsystemService: async () => service,
@@ -49,6 +51,7 @@ function setup(
         serviceId: string,
         status: string,
         operation: string,
+        operationId: string | undefined,
         message: string,
         information?: Record<string, unknown>
       ) =>
@@ -57,12 +60,19 @@ function setup(
           serviceId,
           status,
           operation,
+          operationId,
           message,
           ...(information ? { information } : {}),
         }),
     },
     patternsEvaluator: {
-      buildResourcesUsingConnectionRequest: async () => {
+      buildResourcesUsingConnectionRequest: async (
+        _id: string,
+        _action: string,
+        _service: unknown,
+        request: unknown
+      ) => {
+        policyRequests.push(request);
         if (options.provisioningError) throw options.provisioningError;
         return [
           {
@@ -92,11 +102,12 @@ function setup(
     statusUpdates,
     activity,
     dispatches,
+    policyRequests,
   };
 }
 
 test('apply writes pending and provisioned statuses', async () => {
-  const { controller, statusUpdates } = setup();
+  const { controller, statusUpdates, policyRequests } = setup();
 
   const response = await controller.onConnectionRequestChange(
     'connection-1',
@@ -127,6 +138,8 @@ test('apply writes pending and provisioned statuses', async () => {
       },
     ]
   );
+  assert.equal(policyRequests[0].operationId, undefined);
+  assert.equal(policyRequests[0].clientId, 'client-1');
 });
 
 test('apply copies produced Information data into provisioned status', async () => {
@@ -183,6 +196,7 @@ test('apply writes failed after partial provider failure', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'provision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message: 'Provisioning failed for 1 provider batch: gwa.',
   });
 });
@@ -206,6 +220,7 @@ test('apply writes failed after a thrown provisioning exception', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'provision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message:
       'Provisioning failed unexpectedly. See provisioner logs for details.',
   });
@@ -301,6 +316,7 @@ test('delete writes failed after a partial provider failure', async () => {
     serviceId: 'service-1',
     status: 'failed',
     operation: 'deprovision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message: 'Deprovisioning failed for 1 provider batch: gwa.',
   });
 });
@@ -323,6 +339,7 @@ test('delete writes failed after a thrown deprovisioning exception', async () =>
     serviceId: 'service-1',
     status: 'failed',
     operation: 'deprovision',
+    operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message:
       'Deprovisioning failed unexpectedly. See provisioner logs for details.',
   });

@@ -181,3 +181,64 @@ describe('syncRecords', () => {
     });
   });
 });
+describe('ConnectionRequest status callbacks', () => {
+  it('uses compare-and-set instead of an unconditional GraphQL update', async () => {
+    const currentStatus = JSON.stringify({
+      status: 'pending',
+      operation: 'provision',
+      operationId: 'operation-1',
+    });
+    const findOneAndUpdate = jest.fn().mockResolvedValue({
+      id: 'connection-1',
+    });
+    const executeGraphQL = jest.fn().mockResolvedValue({
+      data: {
+        allConnectionRequests: [
+          {
+            id: 'connection-1',
+            clientId: 'client-1',
+            serviceId: 'service-1',
+            provisionerStatus: currentStatus,
+          },
+        ],
+      },
+    });
+    const context = {
+      executeGraphQL,
+      keystoneAdapter: {
+        name: 'mongoose',
+        getListAdapterByKey: jest.fn().mockReturnValue({
+          model: { findOneAndUpdate },
+        }),
+      },
+    };
+
+    await expect(
+      syncRecords(context, 'ConnectionRequest', undefined, {
+        clientId: 'client-1',
+        serviceId: 'service-1',
+        provisionerStatus: {
+          status: 'provisioned',
+          operation: 'provision',
+          operationId: 'operation-1',
+          endpoint: 'https://current.example',
+        },
+      })
+    ).resolves.toMatchObject({
+      status: 200,
+      result: 'updated',
+      id: 'connection-1',
+    });
+
+    expect(executeGraphQL).toHaveBeenCalledTimes(1);
+    expect(findOneAndUpdate).toHaveBeenCalledTimes(1);
+    const nextStatus =
+      findOneAndUpdate.mock.calls[0][1].$set.provisionerStatus;
+    expect(JSON.parse(nextStatus)).toEqual({
+      endpoint: 'https://current.example',
+      operation: 'provision',
+      operationId: 'operation-1',
+      status: 'provisioned',
+    });
+  });
+});

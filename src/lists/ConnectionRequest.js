@@ -1,5 +1,6 @@
 const { Checkbox, Slug, Text, Relationship } = require('@keystonejs/fields');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { v4: uuidv4 } = require('uuid');
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
@@ -39,6 +40,38 @@ const parseProvisionerStatus = (value) => {
   } catch {
     return {};
   }
+};
+
+const lifecycleStatus = (isActive) => {
+  const provisioning = Boolean(isActive);
+  return {
+    status: provisioning ? 'pending' : 'deprovisioning',
+    operation: provisioning ? 'provision' : 'deprovision',
+    operationId: uuidv4(),
+    message: provisioning ? 'Provisioning started.' : 'Deprovisioning started.',
+  };
+};
+
+const operationMatches = (current, incoming) =>
+  !current.operationId || current.operationId === incoming.operationId;
+
+const startsInactiveWithoutAccess = (operation, existingItem, resolvedData) => {
+  const isActive =
+    'isActive' in resolvedData
+      ? resolvedData.isActive
+      : Boolean(existingItem && existingItem.isActive);
+  if (isActive) {
+    return false;
+  }
+
+  if (operation === 'create') {
+    return true;
+  }
+
+  const currentStatus = parseProvisionerStatus(
+    existingItem && existingItem.provisionerStatus
+  );
+  return !existingItem.isActive && currentStatus.status === 'deprovisioned';
 };
 
 /*
@@ -137,6 +170,7 @@ module.exports = {
       context,
       operation,
       originalInput,
+      existingItem,
       resolvedData,
     }) => {
       logger.debug('Resolving input for ConnectionRequest: %j', resolvedData);
@@ -150,6 +184,35 @@ module.exports = {
             'provisionerStatus must be updated on its own, without any other attributes'
           );
         }
+
+        const currentStatus = parseProvisionerStatus(
+          existingItem && existingItem.provisionerStatus
+        );
+        const incomingStatus = parseProvisionerStatus(
+          resolvedData.provisionerStatus
+        );
+        if (!operationMatches(currentStatus, incomingStatus)) {
+          logger.info(
+            'Ignoring stale provisioner status for operation %s; current operation is %s',
+            incomingStatus.operationId || 'legacy',
+            currentStatus.operationId
+          );
+          resolvedData.provisionerStatus = existingItem.provisionerStatus;
+        }
+      } else if (
+        startsInactiveWithoutAccess(operation, existingItem, resolvedData)
+      ) {
+        // A new pending request, or new request metadata on a connection whose
+        // access was already removed, has nothing to deprovision.
+        resolvedData.provisionerStatus = '{}';
+      } else {
+        const isActive =
+          'isActive' in resolvedData
+            ? resolvedData.isActive
+            : Boolean(existingItem && existingItem.isActive);
+        resolvedData.provisionerStatus = JSON.stringify(
+          lifecycleStatus(isActive)
+        );
       }
 
       if (operation !== 'create') {
@@ -244,6 +307,18 @@ module.exports = {
         logger.debug(
           'Skipping provisioner callback because provisionerStatus was supplied directly'
         );
+        return;
+      }
+      if (startsInactiveWithoutAccess(operation, existingItem, updatedItem)) {
+        logger.debug(
+          'Skipping provisioner callback because the inactive connection has no access configuration'
+        );
+        notifyChange(context, {
+          operation,
+          existingItem,
+          originalInput,
+          updatedItem,
+        });
         return;
       }
       const provisionerService = new ProvisionerService(
