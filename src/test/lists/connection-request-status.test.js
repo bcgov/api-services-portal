@@ -19,9 +19,66 @@ jest.mock(
 );
 
 const config = require('../../lists/ConnectionRequest');
+const { SubsystemService } = require('../../services/batch/subsystem');
+const { OpenAPISpecService } = require('../../services/batch/oas-service');
+const {
+  ProvisionerService,
+} = require('../../services/provisioner/provisioner-service');
+const {
+  ConnectionRequestNotificationService,
+} = require('../../services/notification/connection-request-notification.service');
 
 describe('ConnectionRequest provisioner status ordering', () => {
   const resolveInput = config.hooks.resolveInput;
+
+  it('starts a new inactive request without a deprovisioning operation', async () => {
+    SubsystemService.mockImplementation(() => ({
+      findSubsystemByClientId: jest.fn().mockResolvedValue({
+        organization: { id: '1' },
+      }),
+    }));
+    OpenAPISpecService.mockImplementation(() => ({
+      findOpenAPISpecByName: jest.fn().mockResolvedValue({
+        organization: { id: '2' },
+      }),
+    }));
+
+    const resolved = await resolveInput({
+      operation: 'create',
+      originalInput: {
+        clientId: 'client-1',
+        serviceId: 'service-1',
+      },
+      existingItem: undefined,
+      resolvedData: {
+        clientId: 'client-1',
+        serviceId: 'service-1',
+        isActive: false,
+      },
+    });
+
+    expect(resolved.provisionerStatus).toBe('{}');
+  });
+
+  it('clears completed deprovisioning state when an inactive request is resubmitted', async () => {
+    const resolved = await resolveInput({
+      operation: 'update',
+      originalInput: { requesterDetails: '{"submissionId":"new"}' },
+      existingItem: {
+        isActive: false,
+        provisionerStatus: JSON.stringify({
+          status: 'deprovisioned',
+          operation: 'deprovision',
+          message: 'Deprovisioned 6 provider batches successfully.',
+        }),
+      },
+      resolvedData: {
+        requesterDetails: '{"submissionId":"new"}',
+      },
+    });
+
+    expect(resolved.provisionerStatus).toBe('{}');
+  });
 
   it.each([
     [
@@ -146,5 +203,76 @@ describe('ConnectionRequest provisioner status ordering', () => {
     });
 
     expect(resolved.provisionerStatus).toBe(current);
+  });
+});
+
+describe('ConnectionRequest provisioner callbacks', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it.each([
+    [
+      'a new inactive request',
+      {
+        operation: 'create',
+        existingItem: undefined,
+        originalInput: {
+          clientId: 'client-1',
+          serviceId: 'service-1',
+        },
+      },
+    ],
+    [
+      'an inactive resubmission after access removal',
+      {
+        operation: 'update',
+        existingItem: {
+          isActive: false,
+          provisionerStatus: JSON.stringify({
+            status: 'deprovisioned',
+            operation: 'deprovision',
+          }),
+        },
+        originalInput: {
+          requesterDetails: '{"submissionId":"new"}',
+        },
+      },
+    ],
+  ])('does not invoke the provisioner for %s', async (_label, input) => {
+    const postConnectionRequestChangeEvent = jest.fn();
+    const notify = jest.fn().mockResolvedValue(undefined);
+    ProvisionerService.mockImplementation(() => ({
+      postConnectionRequestChangeEvent,
+    }));
+    ConnectionRequestNotificationService.mockImplementation(() => ({
+      notifyChange: notify,
+    }));
+
+    const updatedItem = {
+      id: 'connection-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      isActive: false,
+      provisionerStatus: '{}',
+    };
+    const context = {
+      createContext: jest.fn(() => ({ skipAccessControl: true })),
+    };
+
+    await config.hooks.afterChange({
+      ...input,
+      updatedItem,
+      context,
+    });
+
+    expect(ProvisionerService).not.toHaveBeenCalled();
+    expect(postConnectionRequestChangeEvent).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: input.operation,
+        updatedItem,
+      })
+    );
   });
 });
