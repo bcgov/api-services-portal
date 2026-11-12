@@ -158,6 +158,8 @@ export async function lookupDetailedServiceAccessesByNS(
                           appId
                           owner {
                             username
+                            name
+                            email
                           }
                         }
                         consumer {
@@ -165,6 +167,7 @@ export async function lookupDetailedServiceAccessesByNS(
                           username
                           customId
                           extForeignKey
+                          aclGroups
                           updatedAt
 
                           plugins {

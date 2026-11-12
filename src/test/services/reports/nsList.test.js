@@ -158,5 +158,19 @@ describe('Generate Namespace Reports', function () {
       const workbook = generateExcelWorkbook(short);
       //await workbook.xlsx.writeFile('test2.xlsx');
     });
+    it('keeps the existing sheets and adds the product consumer access sheet', function () {
+      const workbook = generateExcelWorkbook(short);
+      expect(workbook.worksheets.map((ws) => ws.name)).toEqual([
+        'Gateways',
+        'Gateway Access',
+        'Gateway Metrics',
+        'Gateway Controls',
+        'Consumer Requests',
+        'Consumer Access',
+        'Consumer Access (Products)',
+        'Consumer Metrics',
+        'Consumer Controls',
+      ]);
+    });
   });
 });

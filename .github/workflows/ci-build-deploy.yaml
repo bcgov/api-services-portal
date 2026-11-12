@@ -516,7 +516,7 @@ jobs:
                 termination: edge
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml --history-max 3 bcgov/ocp-route
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml --history-max 3 bcgov/ocp-route --version 0.1.4
 
       - name: 'Seed Data'
         if: github.ref != 'refs/heads/dev'
