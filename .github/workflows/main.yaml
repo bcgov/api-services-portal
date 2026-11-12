@@ -66,7 +66,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
@@ -80,7 +79,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
@@ -94,6 +92,5 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-svc:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
