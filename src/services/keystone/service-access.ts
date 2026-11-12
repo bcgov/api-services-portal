@@ -167,6 +167,7 @@ export async function lookupDetailedServiceAccessesByNS(
                           username
                           customId
                           extForeignKey
+                          aclGroups
                           updatedAt
 
                           plugins {

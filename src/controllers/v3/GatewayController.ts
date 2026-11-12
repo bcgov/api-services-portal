@@ -106,7 +106,8 @@ export class NamespaceController extends Controller {
 
   /**
    * Consumers with access to this gateway, including the application owner's
-   * name and email so providers can contact them.
+   * name and email so providers can contact them. Same rows as the
+   * "Consumer Access (Products)" sheet in the gateway report.
    * > `Required Scope:` Namespace.View or Access.Manage
    *
    * @summary Consumer report for a gateway
@@ -125,7 +126,8 @@ export class NamespaceController extends Controller {
 
   /**
    * Access requests made against this gateway's products, including the
-   * requestor's email.
+   * requestor's email. Same rows as the "Consumer Requests" sheet in the
+   * gateway report.
    * > `Required Scope:` Namespace.View or Access.Manage
    *
    * @summary Consumer request report for a gateway

@@ -5,6 +5,7 @@ export const reportOrder = [
   'gateway_controls',
   'consumer_requests',
   'service_access',
+  'consumer_access',
   'consumer_metrics',
   'consumer_controls',
 ];
@@ -198,7 +199,7 @@ export const reportStructure: any = {
     ],
   },
   consumer_access: {
-    label: 'Consumer Access',
+    label: 'Consumer Access (Products)',
     fields: [
       {
         header: 'Gateway ID',
