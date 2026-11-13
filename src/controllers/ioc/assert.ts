@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { ValidateError, FieldErrors } from 'tsoa';
+import { ValidateError, FieldErrors } from '@tsoa/runtime';
 
 export function assertIsDefined<T>(
   value: T | undefined,

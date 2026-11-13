@@ -11,8 +11,8 @@ import {
   Query,
   Post,
   Body,
-} from 'tsoa';
-import { ValidateError, FieldErrors } from 'tsoa';
+} from '@tsoa/runtime';
+import { ValidateError, FieldErrors } from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { getRecords, replaceKey } from '../../batch/feed-worker';

@@ -1,4 +1,4 @@
-import { ValidateError } from 'tsoa';
+import { ValidateError } from '@tsoa/runtime';
 
 /**
  * Portal setting that lists the SDX environment labels an OAS service may be

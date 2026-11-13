@@ -13,7 +13,7 @@ import {
   Example,
   ValidateError,
   SuccessResponse,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { GetConfigUsingPattern } from '../../services/gateway-patterns/evaluator';

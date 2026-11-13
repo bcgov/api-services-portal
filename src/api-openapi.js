@@ -1,7 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 const YAML = require('js-yaml');
-const { ValidateError } = require('tsoa');
+const { ValidateError } = require('@tsoa/runtime');
 const swaggerUi = require('swagger-ui-express');
 const getRawBody = require('raw-body');
 const { Logger } = require('./logger');

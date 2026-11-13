@@ -10,7 +10,7 @@ import {
   Get,
   Tags,
   Delete,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { strict as assert } from 'assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
