@@ -10,25 +10,32 @@ secrets:
     environment: 'NPM_TOKEN'
 
 services:
-  keycloak:
+  # Two stateless Keycloak sites behind HAProxy. The service name, container name,
+  # host port, and keycloak.localtest.me alias stay on the proxy so existing clients
+  # keep using http://keycloak.localtest.me:9081/auth.
+  keycloak-site-a:
     image: keycloak-quarkus:e2e
-    container_name: keycloak
-    build:
+    container_name: keycloak-site-a
+    build: &keycloak-build
       context: local/keycloak
       dockerfile: Dockerfile
       args:
-        - KC_VERSION=${KC_VERSION:-26.5.3}
+        - KC_VERSION=${KC_VERSION:-26.8.2}
+    mem_limit: 768m
     depends_on:
       kong-db:
         condition: service_healthy
-    environment:
+    environment: &keycloak-env
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: local
-    # Keycloak 26 Hostname v2: --hostname accepts full URL (host + port + path).
+      JAVA_OPTS_APPEND: "-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=70.0"
+    entrypoint: ["bash", "/opt/keycloak/start-site-a.sh"]
     command:
       [
         'start',
         '--optimized',
+        '--features=stateless',
+        '--cache-embedded-cluster-name=site-a',
         '--hostname',
         'http://keycloak.localtest.me:9081/auth',
         '--db-url',
@@ -37,26 +44,97 @@ services:
         'keycloakuser',
         '--db-password',
         'keycloakuser',
-        '--http-enabled',
-        'true',
-        '--http-port',
-        '9081',
+        '--db-tls-mode=disabled',
+        '--http-enabled=true',
+        '--http-port=9081',
+        '--http-host=0.0.0.0',
+        '--http-management-port=9000',
+        '--http-management-host=0.0.0.0',
+        '--http-management-scheme=http',
         '--import-realm',
       ]
     volumes:
       - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
+      - ./local/keycloak/start-site-a.sh:/opt/keycloak/start-site-a.sh:ro
+      - ./local/keycloak/healthcheck.sh:/opt/keycloak/healthcheck.sh:ro
+    ports:
+      - 9001:9000
+    networks:
+      - aps-net
+    healthcheck:
+      test: ["CMD", "bash", "/opt/keycloak/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+  keycloak-site-b:
+    image: keycloak-quarkus:e2e
+    container_name: keycloak-site-b
+    build: *keycloak-build
+    mem_limit: 768m
+    depends_on:
+      keycloak-site-a:
+        condition: service_healthy
+    environment: *keycloak-env
+    command:
+      [
+        'start',
+        '--optimized',
+        '--features=stateless',
+        '--cache-embedded-cluster-name=site-b',
+        '--hostname',
+        'http://keycloak.localtest.me:9081/auth',
+        '--db-url',
+        'jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}',
+        '--db-username',
+        'keycloakuser',
+        '--db-password',
+        'keycloakuser',
+        '--db-tls-mode=disabled',
+        '--http-enabled=true',
+        '--http-port=9081',
+        '--http-host=0.0.0.0',
+        '--http-management-port=9000',
+        '--http-management-host=0.0.0.0',
+        '--http-management-scheme=http',
+      ]
+    volumes:
+      - ./local/keycloak/healthcheck.sh:/opt/keycloak/healthcheck.sh:ro
+    ports:
+      - 9002:9000
+    networks:
+      - aps-net
+    healthcheck:
+      test: ["CMD", "bash", "/opt/keycloak/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+      start_period: 30s
+  keycloak:
+    image: haproxy:2.8-alpine
+    container_name: keycloak
+    depends_on:
+      keycloak-site-a:
+        condition: service_healthy
+      keycloak-site-b:
+        condition: service_healthy
+    volumes:
+      - ./local/keycloak/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
       - 9081:9081
-      - 9000:9000
+      - 9999:9999
     networks:
       aps-net:
         aliases:
           - keycloak.localtest.me
+          - keycloak-site-a.localtest.me
+          - keycloak-site-b.localtest.me
     healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/localhost/9081'
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9081/auth/realms/master"]
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 5s
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.8.1
     container_name: oauth2-proxy

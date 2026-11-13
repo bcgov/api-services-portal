@@ -15,6 +15,18 @@ while true; do
         else
             npm run cy:run:html
         fi
+        portal_status=$?
+        echo "Running Keycloak HA specs"
+        export KEYCLOAK_SITE_A_HEALTH=http://keycloak-site-a:9000/health/ready
+        export KEYCLOAK_SITE_B_HEALTH=http://keycloak-site-b:9000/health/ready
+        export HAPROXY_SOCKET_HOST=keycloak
+        npm run cy:run:ha
+        ha_status=$?
+        npm run moch:json
+        npm run moch:html
+        if [[ "$portal_status" -ne 0 || "$ha_status" -ne 0 ]]; then
+            exit 1
+        fi
         break
     else
         echo  "Waiting for Keycloak....."
