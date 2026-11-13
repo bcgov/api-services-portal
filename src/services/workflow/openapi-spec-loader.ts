@@ -1,7 +1,7 @@
 import { OpenAPISpec } from '@/controllers/v3/types';
 import { Logger } from '../../logger';
 import YAML from 'yaml';
-import { ValidateError } from 'tsoa';
+import { ValidateError } from '@tsoa/runtime';
 import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
 import { BuildServiceName } from '../gateway-patterns/catalog';

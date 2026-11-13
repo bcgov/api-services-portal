@@ -1,4 +1,4 @@
-import { Controller, Get, Path, Route } from 'tsoa';
+import { Controller, Get, Path, Route } from '@tsoa/runtime';
 
 import {
   newProductID,

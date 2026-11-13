@@ -7,7 +7,7 @@ import {
   Route,
   Security,
   Tags,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import { SubsystemService } from '../../../services/batch/subsystem';
 import {

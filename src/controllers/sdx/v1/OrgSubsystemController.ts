@@ -11,7 +11,7 @@ import {
   Route,
   Security,
   Tags,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
 import { SubsystemService } from '../../../services/batch/subsystem';

@@ -1,4 +1,4 @@
-import { Controller, OperationId, Get, Path, Route } from 'tsoa';
+import { Controller, OperationId, Get, Path, Route } from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';

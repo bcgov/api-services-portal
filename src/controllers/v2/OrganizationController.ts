@@ -11,7 +11,7 @@ import {
   Body,
   Get,
   Tags,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { assertEqual } from '../ioc/assert';
 import { inject, injectable } from 'tsyringe';

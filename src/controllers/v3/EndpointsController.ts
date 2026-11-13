@@ -8,7 +8,7 @@ import {
   Request,
   Security,
   Path,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
