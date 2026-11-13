@@ -41,7 +41,7 @@ export default defineConfig({
       })
     },
     baseUrl: 'http://keycloak.localtest.me:9081',
-    specPattern: 'cypress/tests/keycloak-ha/*.cy.ts',
+    specPattern: 'cypress/tests/26-keycloak-ha/*.cy.ts',
     supportFile: false,
     screenshotOnRunFailure: true,
     screenshotsFolder: 'results/report/assets',
