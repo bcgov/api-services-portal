@@ -266,7 +266,7 @@ describe('ConnectionService', () => {
       });
     });
 
-    it('preserves managed settings and applies allowed R1 resource changes', async () => {
+    it('passes submitted R1 resources through for provisioner policy evaluation', async () => {
       const managedConsumerToken = { allowedAud: 'stored-audience' };
       const managedConsumerAcl = { allow: ['stored-client'] };
       const managedTokenExchange = { targetPrivacyZoneScope: 'stored-scope' };
@@ -311,13 +311,13 @@ describe('ConnectionService', () => {
             comment: 'updated client setting',
             gatewayPatterns: {
               'sdx-p2p-consumer-access.r1': {
-                integrationClientId: 'ignored-client',
+                integrationClientId: 'submitted-client',
               },
               'sdx-p2p-consumer.r1': {
                 upgrades: {
-                  token: { allowedAud: 'ignored-audience' },
-                  acl: { allow: ['ignored-client'] },
-                  tokenExchange: {},
+                  token: { allowedAud: 'submitted-audience' },
+                  acl: { allow: ['submitted-client'] },
+                  tokenExchange: managedTokenExchange,
                   sign: { value: 'updated' },
                 },
               },
@@ -328,8 +328,8 @@ describe('ConnectionService', () => {
             gatewayPatterns: {
               'sdx-p2p-provider.r1': {
                 upgrades: {
-                  token: { allowedAud: 'ignored-provider' },
-                  tokenExchange: { clientId: 'ignored-client' },
+                  token: { allowedAud: 'submitted-provider' },
+                  tokenExchange: { clientId: 'submitted-client' },
                   sign: { value: 'updated' },
                 },
               },
@@ -346,8 +346,8 @@ describe('ConnectionService', () => {
           gatewayPatterns: {
             'sdx-p2p-consumer.r1': {
               upgrades: {
-                token: managedConsumerToken,
-                acl: managedConsumerAcl,
+                token: { allowedAud: 'submitted-audience' },
+                acl: { allow: ['submitted-client'] },
                 tokenExchange: managedTokenExchange,
                 sign: { value: 'updated' },
               },
@@ -359,7 +359,8 @@ describe('ConnectionService', () => {
           gatewayPatterns: {
             'sdx-p2p-provider.r1': {
               upgrades: {
-                token: managedProviderToken,
+                token: { allowedAud: 'submitted-provider' },
+                tokenExchange: { clientId: 'submitted-client' },
                 sign: { value: 'updated' },
               },
             },
@@ -368,11 +369,46 @@ describe('ConnectionService', () => {
       });
       expect(
         saved.clientResources.gatewayPatterns['sdx-p2p-consumer-access.r1']
-      ).not.toHaveProperty('integrationClientId');
+      ).toHaveProperty('integrationClientId', 'submitted-client');
       expect(
         saved.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'].upgrades
-      ).not.toHaveProperty('tokenExchange');
+      ).toHaveProperty('tokenExchange', { clientId: 'submitted-client' });
     });
+
+    it.each([undefined, null, false, {}])(
+      'passes token exchange customization to policy evaluation (%p)',
+      async (tokenExchange) => {
+        getRecords.mockResolvedValue([
+          {
+            id: '1',
+            policyVersion: 'SDX.R1.00',
+            isApproved: true,
+            clientResources: JSON.stringify({
+              gatewayPatterns: {
+                'sdx-p2p-consumer.r1': {
+                  upgrades: { tokenExchange: { clientId: 'managed-client' } },
+                },
+              },
+            }),
+          },
+        ]);
+        const clientResources = {
+          gatewayPatterns: {
+            'sdx-p2p-consumer.r1': {
+              upgrades: tokenExchange === undefined ? {} : { tokenExchange },
+            },
+          },
+        };
+        await new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-client',
+          input({ clientResources })
+        );
+        expect(syncRecordsThrowErrors.mock.calls[0][3].clientResources).toEqual(
+          clientResources
+        );
+      }
+    );
 
     it('keeps null resources unchanged on an existing R1 connection', async () => {
       getRecords.mockResolvedValue([

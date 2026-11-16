@@ -96,9 +96,9 @@ export class PatternsEvaluatorService {
       );
     }
 
-    let effectiveConnection = connection;
+    const effectiveConnection = connection;
 
-    // only do the policy check and enforcement for preview, apply and diff
+    // Evaluate submitted resources for preview, apply and diff
     // actions, not for delete
     if (action !== 'delete') {
       const environmentConfig = loadEnvironments()[connection.environment];
@@ -120,15 +120,8 @@ export class PatternsEvaluatorService {
         connection.policyVersion || '',
         preflightContext
       );
-      const enforcedResources = this.policyService.enforceConnectionResources(
-        connection.policyVersion || '',
-        preflightContext,
-        {
-          clientResources: connection.clientResources,
-          serviceResources: connection.serviceResources,
-        }
-      );
-      effectiveConnection = { ...connection, ...enforcedResources };
+      // Defaults are generated for new requests. Updates must reach Cedar
+      // unchanged so missing required settings are rejected, not restored.
 
       const combinedScopes = [
         ...(effectiveConnection.requesterDetails?.scopes || []),

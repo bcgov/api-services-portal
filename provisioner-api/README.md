@@ -330,3 +330,10 @@ R1 environments require `client_runtime_override` (for example `MIN.CITZ.pzgw`).
 Both consumer and provider defaults use this identity, and R1 rejects mismatched
 values. Configure it in the deployed `ENVIRONMENTS_CONFIG_FILE` before upgrading;
 existing R1 connections with a different override must be reviewed and updated.
+
+Connection defaults initialize new requests. When a connection request changes,
+preview, diff, and apply evaluate the submitted resources with Cedar without
+reapplying defaults or restoring stored managed settings. For example, removing
+the required R1 token exchange upgrade produces a policy error before gateway
+resources are generated. Valid customizations remain unchanged. Deletion skips
+policy evaluation so an invalid connection can still be removed.
