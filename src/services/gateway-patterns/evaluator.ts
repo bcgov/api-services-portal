@@ -1,4 +1,4 @@
-import { FieldErrors, ValidateError } from 'tsoa';
+import { FieldErrors, ValidateError } from '@tsoa/runtime';
 import { SimpleServicePattern } from './patterns/simple-service';
 
 export interface PatternOutput {

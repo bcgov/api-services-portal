@@ -7,7 +7,7 @@ import {
   Security,
   Body,
   OperationId,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../../batch/feed-worker';
