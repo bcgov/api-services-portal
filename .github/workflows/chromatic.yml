@@ -6,6 +6,10 @@ on:
     branches:
       - dev
 
+permissions:
+  contents: read
+  pull-requests: read
+
 # what the action will do
 jobs:
   test:

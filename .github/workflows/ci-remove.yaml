@@ -3,6 +3,9 @@ name: Delete Deployment
 on:
   delete:
 
+permissions:
+  contents: read
+
 jobs:
   delete:
     name: Delete deployment

@@ -23,6 +23,9 @@ env:
   # Optional: avoids npm 403 from registry when multiple images run npm install in parallel
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+permissions:
+  contents: read
+
 jobs:
   cypress_eligibility:
     runs-on: ubuntu-latest
