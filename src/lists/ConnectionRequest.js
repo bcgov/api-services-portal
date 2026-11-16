@@ -136,6 +136,7 @@ module.exports = {
     resolveInput: async ({
       context,
       operation,
+      existingItem,
       originalInput,
       resolvedData,
     }) => {
@@ -150,6 +151,18 @@ module.exports = {
             'provisionerStatus must be updated on its own, without any other attributes'
           );
         }
+      }
+
+      if (
+        operation === 'update' &&
+        existingItem?.isApproved === true &&
+        originalInput?.isApproved === false &&
+        typeof originalInput?.isActive === 'boolean' &&
+        originalInput.isActive !== Boolean(existingItem.isActive)
+      ) {
+        throw new UserAssertionError(
+          'Cannot change connection activity while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.'
+        );
       }
 
       if (operation !== 'create') {
@@ -204,6 +217,12 @@ module.exports = {
         'Before delete hook for ConnectionRequest: existingItem=%j',
         existingItem
       );
+
+      if (!existingItem.isApproved && existingItem.isActive) {
+        throw new UserAssertionError(
+          'Cannot reject changes by deleting an active connection. Existing access must be preserved; revoke the connection separately.'
+        );
+      }
 
       if (existingItem.isActive) {
         throw new UserAssertionError(
