@@ -5,7 +5,7 @@ import { OrganizationGroup, OrgGroupService } from './org-group-service';
 import { GroupMembership, UserReference } from './types';
 import { buildGroupAccess, buildUserReference } from './org-role';
 import { strict as assert } from 'assert';
-import { ValidateError } from 'tsoa';
+import { ValidateError } from '@tsoa/runtime';
 
 export const SystemRoles = ['subsystem-owner', 'tech-lead', 'access-manager'];
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Path, Route, Tags } from 'tsoa';
+import { Controller, Get, Path, Route, Tags } from '@tsoa/runtime';
 
 import { PredefinedRolePermissions } from '../../services/org-groups';
 
