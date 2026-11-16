@@ -266,6 +266,47 @@ describe('ConnectionService', () => {
       });
     });
 
+    it('preserves activity when an approved connection is marked for re-approval', async () => {
+      getRecords.mockResolvedValue([
+        { id: '1', isApproved: true, isActive: true },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: false })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isApproved: false,
+      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isActive'
+      );
+    });
+
+    it('rejects deactivation while an approved connection is marked for re-approval', async () => {
+      getRecords.mockResolvedValue([
+        { id: '1', isApproved: true, isActive: true },
+      ]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-service',
+          input({ isApproved: false, isActive: false })
+        )
+      ).rejects.toMatchObject({
+        fields: {
+          isActive: {
+            message:
+              'Cannot change connection activity while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.',
+          },
+        },
+      });
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+    });
+
     it('preserves managed settings and applies allowed R1 resource changes', async () => {
       const managedConsumerToken = { allowedAud: 'stored-audience' };
       const managedConsumerAcl = { allow: ['stored-client'] };
@@ -571,6 +612,34 @@ describe('ConnectionService', () => {
           isActive: {
             message:
               'Cannot revoke an active connection. Deactivate it and wait for access configuration removal to finish.',
+          },
+        },
+      });
+      expect(service.getConnectionDeleteStatus).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('rejects deleting an active connection while changes await re-approval', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.getConnectionById.mockResolvedValue({
+        ...connection,
+        isApproved: false,
+        isActive: true,
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).rejects.toMatchObject({
+        fields: {
+          isActive: {
+            message:
+              'Cannot reject changes by deleting an active connection. Existing access must be preserved; revoke the connection separately.',
           },
         },
       });

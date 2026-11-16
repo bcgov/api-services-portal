@@ -112,6 +112,18 @@ class ConnectionService {
       body.serviceId
     );
 
+    assertEqual(
+      Boolean(
+        existing?.isApproved === true &&
+          body.isApproved === false &&
+          typeof body.isActive === 'boolean' &&
+          body.isActive !== Boolean(existing.isActive)
+      ),
+      false,
+      'isActive',
+      'Cannot change connection activity while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.'
+    );
+
     // Preserve each R1 setting managed by the authoritative policy while
     // retaining submitted changes to resource settings callers may customize.
     if (existing?.policyVersion === 'SDX.R1.00') {
@@ -350,6 +362,13 @@ class ConnectionService {
       true,
       'organization',
       `Organization not related to this connection request`
+    );
+
+    assertEqual(
+      Boolean(!connection.isApproved && connection.isActive),
+      false,
+      'isActive',
+      'Cannot reject changes by deleting an active connection. Existing access must be preserved; revoke the connection separately.'
     );
 
     assertEqual(
