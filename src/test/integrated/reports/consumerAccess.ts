@@ -55,17 +55,7 @@ const logger = Logger('test.reports');
 
   await injectResSvrAccessTokenToContext(envCtx);
 
-  const result = await getConsumerAccess(
-    envCtx,
-    ctx,
-    [
-      {
-        resource_id: '49f95b75-6aa5-4bc0-a0bf-6a8037ca083d',
-        name: 'refactortime',
-      },
-    ],
-    new Map()
-  );
+  const result = await getConsumerAccess(ctx, [{ name: 'refactortime' }]);
   o(result);
   await keystone.disconnect();
 })();
