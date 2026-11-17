@@ -171,7 +171,6 @@ module.exports = {
       operation,
       existingItem,
       originalInput,
-      existingItem,
       resolvedData,
     }) => {
       logger.debug('Resolving input for ConnectionRequest: %j', resolvedData);
