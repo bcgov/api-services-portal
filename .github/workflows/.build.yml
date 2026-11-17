@@ -9,6 +9,9 @@ on:
         type: string
         default: '.'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -34,6 +37,9 @@ jobs:
   build-image:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push the image to ghcr.io
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
