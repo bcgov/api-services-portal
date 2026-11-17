@@ -21,6 +21,10 @@ type ConnectionRequest = {
   requesterDetails?: string | Record<string, any>;
   isApproved?: boolean;
   isActive?: boolean;
+  proposedConfiguration?: string | Record<string, any>;
+  lifecycleIntent?: string | Record<string, any>;
+  clientResources?: string | Record<string, any>;
+  serviceResources?: string | Record<string, any>;
 };
 
 export type ConnectionNotificationEvent =
@@ -28,6 +32,7 @@ export type ConnectionNotificationEvent =
   | 'reapproval'
   | 'approved'
   | 'rejected'
+  | 'changesRejected'
   | 'revoked';
 
 export const getConnectionNotificationEvent = (
@@ -40,32 +45,32 @@ export const getConnectionNotificationEvent = (
     return 'created';
   }
 
-  // Each user action should send one email, but an active connection can only
-  // be removed by deactivating it and then deleting it. So an approved
-  // connection is announced as revoked when it is deactivated (access ends),
-  // and a pending request as rejected when it is deleted (the request is gone).
   if (operation === 'delete') {
-    return existingItem && !existingItem.isApproved ? 'rejected' : undefined;
+    return existingItem?.isApproved ? 'revoked' : 'rejected';
   }
 
   if (operation !== 'update' || !existingItem || !updatedItem) {
     return undefined;
   }
 
-  if (
-    existingItem.isActive &&
-    !updatedItem.isActive &&
-    existingItem.isApproved
-  ) {
-    return 'revoked';
+  const previousProposal = parseJsonObject(existingItem.proposedConfiguration);
+  const currentProposal = parseJsonObject(updatedItem.proposedConfiguration);
+  const hadProposal = Object.keys(previousProposal).length > 0;
+  const hasProposal = Object.keys(currentProposal).length > 0;
+
+  if (!hadProposal && hasProposal) {
+    return 'reapproval';
   }
 
-  if (
-    originalInput.isApproved === false &&
-    existingItem.isApproved &&
-    !updatedItem.isApproved
-  ) {
-    return 'reapproval';
+  if (hadProposal && !hasProposal) {
+    const promoted = [
+      'policyVersion',
+      'environment',
+      'requesterDetails',
+      'clientResources',
+      'serviceResources',
+    ].some((field) => Object.prototype.hasOwnProperty.call(originalInput, field));
+    return promoted ? 'approved' : 'changesRejected';
   }
 
   if (!existingItem.isApproved && updatedItem.isApproved) {
@@ -73,6 +78,17 @@ export const getConnectionNotificationEvent = (
   }
 
   return undefined;
+};
+
+const parseJsonObject = (value: unknown): Record<string, any> => {
+  if (value && typeof value === 'object') return value as Record<string, any>;
+  if (typeof value !== 'string' || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
 };
 
 const parseRequesterDetails = (
@@ -219,6 +235,12 @@ const connectionEmailCopy: Record<
     subject: 'Connection Request Rejected',
     headline: 'Connection request rejected',
     message: 'Your connection request was rejected.',
+  },
+  changesRejected: {
+    subject: 'Connection changes rejected',
+    headline: 'Proposed connection changes rejected',
+    message:
+      'Your proposed connection changes were rejected. The existing approved connection and access remain unchanged.',
   },
   revoked: {
     subject: 'Connection Revoked',

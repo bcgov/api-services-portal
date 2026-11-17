@@ -102,7 +102,14 @@ describe('ConnectionRequest provisioner status ordering', () => {
     async (isActive, expected) => {
       const resolved = await resolveInput({
         operation: 'update',
-        originalInput: { isActive },
+        originalInput: {
+          isActive,
+          lifecycleIntent: {
+            action: isActive ? 'activate' : 'deactivate',
+            operationId: 'operation-new',
+            phase: isActive ? 'provision' : 'deprovision',
+          },
+        },
         existingItem: {
           isActive: !isActive,
           provisionerStatus: JSON.stringify({
@@ -112,15 +119,20 @@ describe('ConnectionRequest provisioner status ordering', () => {
             endpoint: 'https://stale.example',
           }),
         },
-        resolvedData: { isActive },
+        resolvedData: {
+          isActive,
+          lifecycleIntent: {
+            action: isActive ? 'activate' : 'deactivate',
+            operationId: 'operation-new',
+            phase: isActive ? 'provision' : 'deprovision',
+          },
+        },
       });
 
       const status = JSON.parse(resolved.provisionerStatus);
       expect(status).toEqual({
         ...expected,
-        operationId: expect.stringMatching(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-        ),
+        operationId: 'operation-new',
       });
       expect(status).not.toHaveProperty('endpoint');
     }
@@ -209,6 +221,49 @@ describe('ConnectionRequest provisioner status ordering', () => {
 describe('ConnectionRequest provisioner callbacks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('waits for the provisioner during revoke orchestration', async () => {
+    const postConnectionRequestChangeEvent = jest.fn().mockResolvedValue(undefined);
+    ProvisionerService.mockImplementation(() => ({
+      postConnectionRequestChangeEvent,
+    }));
+    ConnectionRequestNotificationService.mockImplementation(() => ({
+      notifyChange: jest.fn().mockResolvedValue(undefined),
+    }));
+    const updatedItem = {
+      id: 'connection-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      isActive: false,
+      lifecycleIntent: JSON.stringify({
+        action: 'revoke',
+        operationId: 'operation-1',
+        phase: 'deprovision',
+      }),
+      provisionerStatus: JSON.stringify({
+        status: 'deprovisioning',
+        operation: 'deprovision',
+        operationId: 'operation-1',
+      }),
+    };
+
+    await config.hooks.afterChange({
+      operation: 'update',
+      existingItem: { ...updatedItem, isActive: true },
+      originalInput: {
+        isActive: false,
+        lifecycleIntent: updatedItem.lifecycleIntent,
+      },
+      updatedItem,
+      context: { createContext: jest.fn(() => ({ skipAccessControl: true })) },
+    });
+
+    expect(postConnectionRequestChangeEvent).toHaveBeenCalledWith(
+      updatedItem,
+      'delete',
+      true
+    );
   });
 
   it.each([

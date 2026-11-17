@@ -187,7 +187,7 @@ describe('ConnectionService', () => {
       getRecords.mockResolvedValue([]);
     });
 
-    it('lets the client organization resend the current approval with other changes', async () => {
+    it('ignores legacy activity while resending the current approval', async () => {
       getRecords.mockResolvedValue([{ id: '1', isApproved: true }]);
 
       await new ConnectionService().upsertConnection(
@@ -209,9 +209,9 @@ describe('ConnectionService', () => {
         undefined,
         expect.not.objectContaining({ isApproved: expect.anything() })
       );
-      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
-        isActive: false,
-      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isActive'
+      );
     });
 
     it('lets the service organization resend the current approval', async () => {
@@ -266,45 +266,64 @@ describe('ConnectionService', () => {
       });
     });
 
-    it('preserves activity when an approved connection is marked for re-approval', async () => {
+    it('stores proposed changes without changing approved or runtime state', async () => {
       getRecords.mockResolvedValue([
-        { id: '1', isApproved: true, isActive: true },
+        {
+          id: '1',
+          isApproved: true,
+          isActive: true,
+          environment: 'dev',
+          requesterDetails: JSON.stringify({ scopes: ['read'] }),
+        },
       ]);
 
       await new ConnectionService().upsertConnection(
         context,
         'ministry-of-service',
-        input({ isApproved: false })
+        input({
+          isApproved: false,
+          isActive: false,
+          requesterDetails: { scopes: ['read', 'write'] },
+        })
       );
 
-      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
-        isApproved: false,
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual({
+        clientId: 'LAB.MIN.CLIENT',
+        serviceId: 'LAB.MIN.SERVICE.v1',
+        proposedConfiguration: expect.objectContaining({
+          environment: 'dev',
+          requesterDetails: { scopes: ['read', 'write'] },
+        }),
       });
       expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
         'isActive'
       );
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isApproved'
+      );
     });
 
-    it('rejects deactivation while an approved connection is marked for re-approval', async () => {
+    it('ignores a legacy activity field while creating a proposal', async () => {
       getRecords.mockResolvedValue([
-        { id: '1', isApproved: true, isActive: true },
+        { id: '1', isApproved: true, isActive: true, environment: 'dev' },
       ]);
 
-      await expect(
-        new ConnectionService().upsertConnection(
-          context,
-          'ministry-of-service',
-          input({ isApproved: false, isActive: false })
-        )
-      ).rejects.toMatchObject({
-        fields: {
-          isActive: {
-            message:
-              'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.',
-          },
-        },
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({
+          isApproved: false,
+          isActive: false,
+          requesterDetails: { scopes: ['write'] },
+        })
+      );
+
+      const saved = syncRecordsThrowErrors.mock.calls[0][3];
+      expect(saved.proposedConfiguration.requesterDetails).toEqual({
+        scopes: ['write'],
       });
-      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
+      expect(saved).not.toHaveProperty('isActive');
+      expect(saved).not.toHaveProperty('isApproved');
     });
 
     it('preserves managed settings and applies allowed R1 resource changes', async () => {
@@ -316,6 +335,7 @@ describe('ConnectionService', () => {
         {
           id: '1',
           policyVersion: 'SDX.R1.00',
+          environment: 'dev',
           isApproved: true,
           clientResources: JSON.stringify({
             gatewayPatterns: {
@@ -380,8 +400,7 @@ describe('ConnectionService', () => {
       );
 
       const saved = syncRecordsThrowErrors.mock.calls[0][3];
-      expect(saved).toMatchObject({
-        isActive: false,
+      expect(saved.proposedConfiguration).toMatchObject({
         clientResources: {
           comment: 'updated client setting',
           gatewayPatterns: {
@@ -408,10 +427,14 @@ describe('ConnectionService', () => {
         },
       });
       expect(
-        saved.clientResources.gatewayPatterns['sdx-p2p-consumer-access.r1']
+        saved.proposedConfiguration.clientResources.gatewayPatterns[
+          'sdx-p2p-consumer-access.r1'
+        ]
       ).not.toHaveProperty('integrationClientId');
       expect(
-        saved.serviceResources.gatewayPatterns['sdx-p2p-provider.r1'].upgrades
+        saved.proposedConfiguration.serviceResources.gatewayPatterns[
+          'sdx-p2p-provider.r1'
+        ].upgrades
       ).not.toHaveProperty('tokenExchange');
     });
 
@@ -420,6 +443,7 @@ describe('ConnectionService', () => {
         {
           id: '1',
           policyVersion: 'SDX.R1.00',
+          environment: 'dev',
           isApproved: true,
           clientResources: JSON.stringify({
             gatewayPatterns: {
@@ -448,11 +472,12 @@ describe('ConnectionService', () => {
         })
       );
 
-      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
-        isActive: false,
-        clientResources: null,
-        serviceResources: null,
-      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'proposedConfiguration'
+      );
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isActive'
+      );
     });
 
     it('keeps generated resources when creating an R1 connection', async () => {
@@ -474,7 +499,7 @@ describe('ConnectionService', () => {
       );
     });
 
-    it('continues to update resources on an existing R0 connection', async () => {
+    it('stores R0 resource customization as a proposal', async () => {
       getRecords.mockResolvedValue([
         { id: '1', policyVersion: 'SDX.R0.00', isApproved: true },
       ]);
@@ -487,9 +512,259 @@ describe('ConnectionService', () => {
         input({ clientResources, serviceResources })
       );
 
-      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual(
-        expect.objectContaining({ clientResources, serviceResources })
+      expect(
+        syncRecordsThrowErrors.mock.calls[0][3].proposedConfiguration
+      ).toEqual(expect.objectContaining({ clientResources, serviceResources }));
+    });
+  });
+
+  describe('proposal decisions', () => {
+    const context = { createContext: jest.fn(() => ({ noauth: true })) };
+    const proposal = {
+      requesterDetails: { scopes: ['read', 'write'] },
+      environment: 'dev',
+    };
+
+    beforeEach(() => {
+      OpenAPISpecService.mockImplementation(() => ({
+        findOpenAPISpecByName: jest.fn().mockResolvedValue({
+          organization: { name: 'ministry-of-service' },
+        }),
+      }));
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          clientId: 'LAB.MIN.CLIENT',
+          serviceId: 'LAB.MIN.SERVICE.v1',
+          isApproved: true,
+          isActive: true,
+          proposedConfiguration: JSON.stringify(proposal),
+        },
+      ]);
+      syncRecordsThrowErrors.mockResolvedValue({ status: 200 });
+    });
+
+    it('promotes approved proposed configuration without changing activity', async () => {
+      await new ConnectionService().decideProposedConfiguration(
+        context,
+        'ministry-of-service',
+        'LAB.MIN.CLIENT',
+        'LAB.MIN.SERVICE.v1',
+        true
       );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual({
+        clientId: 'LAB.MIN.CLIENT',
+        serviceId: 'LAB.MIN.SERVICE.v1',
+        proposedConfiguration: {},
+        requesterDetails: { scopes: ['read', 'write'] },
+        environment: 'dev',
+        isApproved: true,
+      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isActive'
+      );
+    });
+
+    it('rejects only the proposal and preserves the approved connection', async () => {
+      await new ConnectionService().decideProposedConfiguration(
+        context,
+        'ministry-of-service',
+        'LAB.MIN.CLIENT',
+        'LAB.MIN.SERVICE.v1',
+        false
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual({
+        clientId: 'LAB.MIN.CLIENT',
+        serviceId: 'LAB.MIN.SERVICE.v1',
+        proposedConfiguration: {},
+      });
+    });
+  });
+
+  describe('lifecycleConnection', () => {
+    const context = { createContext: jest.fn(() => ({ noauth: true })) };
+    const active = {
+      id: '123',
+      clientId: 'LAB.MIN.CLIENT',
+      serviceId: 'LAB.MIN.SERVICE.v1',
+      environment: 'dev',
+      isApproved: true,
+      isActive: true,
+      provisionerStatus: JSON.stringify({
+        status: 'provisioned',
+        operation: 'provision',
+      }),
+      lifecycleIntent: '{}',
+    };
+    const clientSubsystem = {
+      namespace: 'client-gateway',
+      organization: { name: 'ministry-of-client' },
+    };
+    const serviceSpec = {
+      organization: { name: 'ministry-of-service' },
+      subsystem: {
+        namespace: 'service-gateway',
+        organization: { name: 'ministry-of-service' },
+      },
+    };
+
+    beforeEach(() => {
+      SubsystemService.mockImplementation(() => ({
+        findSubsystemByClientId: jest.fn().mockResolvedValue(clientSubsystem),
+      }));
+      OpenAPISpecService.mockImplementation(() => ({
+        findOpenAPISpecByName: jest.fn().mockResolvedValue(serviceSpec),
+      }));
+      syncRecordsThrowErrors.mockResolvedValue({ status: 200 });
+    });
+
+    it('orchestrates revoke through cleanup verification and record deletion', async () => {
+      const service = new ConnectionService();
+      const deprovisioned = {
+        ...active,
+        isActive: false,
+        provisionerStatus: JSON.stringify({
+          status: 'deprovisioned',
+          operation: 'deprovision',
+        }),
+      };
+      service.getConnectionById = jest
+        .fn()
+        .mockResolvedValueOnce(active)
+        .mockResolvedValueOnce(deprovisioned);
+      service.getConnectionDeleteStatus = jest.fn().mockResolvedValue({
+        clientTag: 'client-tag',
+        serviceTag: 'service-tag',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.deleteConnection = jest
+        .fn()
+        .mockResolvedValue({ status: 200, result: 'deleted', id: '123' });
+
+      await expect(
+        service.lifecycleConnection(context, 'ministry-of-client', '123', {
+          action: 'revoke',
+        })
+      ).resolves.toMatchObject({ result: 'deleted' });
+
+      const deprovision = syncRecordsThrowErrors.mock.calls[0][3];
+      const finish = syncRecordsThrowErrors.mock.calls[1][3];
+      expect(deprovision).toMatchObject({
+        isActive: false,
+        lifecycleIntent: {
+          action: 'revoke',
+          phase: 'deprovision',
+        },
+      });
+      expect(finish).toMatchObject({
+        lifecycleIntent: {
+          action: 'revoke',
+          operationId: deprovision.lifecycleIntent.operationId,
+          phase: 'delete',
+        },
+      });
+      expect(service.deleteConnection).toHaveBeenCalledWith(
+        context,
+        'ministry-of-client',
+        '123'
+      );
+    });
+
+    it('reports a retryable cleanup failure without deleting the record', async () => {
+      const service = new ConnectionService();
+      service.getConnectionById = jest
+        .fn()
+        .mockResolvedValueOnce(active)
+        .mockResolvedValueOnce({
+          ...active,
+          isActive: false,
+          provisionerStatus: JSON.stringify({
+            status: 'failed',
+            operation: 'deprovision',
+          }),
+        });
+      service.deleteConnection = jest.fn();
+
+      await expect(
+        service.lifecycleConnection(context, 'ministry-of-client', '123', {
+          action: 'revoke',
+        })
+      ).rejects.toMatchObject({
+        fields: {
+          action: {
+            message:
+              'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.',
+          },
+        },
+      });
+      expect(service.deleteConnection).not.toHaveBeenCalled();
+    });
+
+    it('reports final deletion failure and lets retry resume at delete', async () => {
+      const service = new ConnectionService();
+      const readyToDelete = {
+        ...active,
+        isActive: false,
+        provisionerStatus: JSON.stringify({
+          status: 'deprovisioned',
+          operation: 'deprovision',
+        }),
+        lifecycleIntent: JSON.stringify({
+          action: 'revoke',
+          operationId: 'operation-1',
+          phase: 'delete',
+        }),
+      };
+      service.getConnectionById = jest.fn().mockResolvedValue(readyToDelete);
+      service.getConnectionDeleteStatus = jest.fn().mockResolvedValue({
+        clientTag: 'client-tag',
+        serviceTag: 'service-tag',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.deleteConnection = jest
+        .fn()
+        .mockRejectedValue(new Error('database unavailable'));
+
+      await expect(
+        service.lifecycleConnection(context, 'ministry-of-client', '123', {
+          action: 'retry',
+        })
+      ).rejects.toMatchObject({
+        fields: {
+          action: {
+            message:
+              'Access has been removed, but the connection record could not be deleted. The client no longer has access. Retry revoke to finish.',
+          },
+        },
+      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        lifecycleIntent: {
+          action: 'revoke',
+          operationId: 'operation-1',
+          phase: 'delete',
+        },
+      });
+    });
+
+    it('treats retrying an already deleted revoke as successful', async () => {
+      const service = new ConnectionService();
+      service.getConnectionById = jest
+        .fn()
+        .mockRejectedValue(new Error('Connection request not found'));
+
+      await expect(
+        service.lifecycleConnection(context, 'ministry-of-client', '123', {
+          action: 'retry',
+        })
+      ).resolves.toEqual({
+        status: 200,
+        result: 'already-revoked',
+        id: '123',
+      });
     });
   });
 

@@ -85,4 +85,50 @@ describe('ProvisionerService connection lifecycle events', () => {
       'ca5019b2-b8d1-4362-846b-276b063f94c4'
     );
   });
+  it('waits for the provisioner response when revoke orchestration requires it', async () => {
+    let release;
+    fetch.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = () =>
+            resolve({
+              ok: true,
+              json: async () => ({ applied: 1, failed: 0, results: [] }),
+            });
+        })
+    );
+    const provisioner = new ProvisionerService('http://provisioner/v1');
+    let settled = false;
+    const request = provisioner
+      .postConnectionRequestChangeEvent(
+        {
+          id: 'connection-1',
+          clientId: 'client-1',
+          serviceId: 'service-1',
+          policyVersion: 'SDX.R1.00',
+          environment: 'dev',
+          isApproved: true,
+          requesterDetails: '{}',
+          clientResources: '{}',
+          serviceResources: '{}',
+          provisionerStatus: JSON.stringify({
+            status: 'deprovisioning',
+            operation: 'deprovision',
+            operationId: 'operation-1',
+          }),
+        },
+        'delete',
+        true
+      )
+      .then(() => {
+        settled = true;
+      });
+
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    release();
+    await request;
+    expect(settled).toBe(true);
+  });
+
 });

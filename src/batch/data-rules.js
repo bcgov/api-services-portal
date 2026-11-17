@@ -595,12 +595,16 @@ const metadata = {
       'requesterDetails',
       'clientResources',
       'serviceResources',
+      'proposedConfiguration',
+      'lifecycleIntent',
       'provisionerStatus',
     ],
     transformations: {
       requesterDetails: { name: 'toString' },
       clientResources: { name: 'toString' },
       serviceResources: { name: 'toString' },
+      proposedConfiguration: { name: 'toString' },
+      lifecycleIntent: { name: 'toString' },
       provisionerStatus: { name: 'toString' },
     },
     example: {

@@ -230,20 +230,26 @@ export class IntegrationAccessService {
           serviceResources: request.defaults.serviceResources,
         });
         outcomes.push(outcome);
-      } else if (
-        change.kind === 'update' ||
-        change.kind === 'reactivate' ||
-        change.kind === 'pin-version'
-      ) {
-        const reactivating = change.kind === 'reactivate';
-        const pinningVersion = change.kind === 'pin-version';
+      } else if (change.kind === 'update') {
         const outcome = await this.api.upsertConnection(change.serviceOrgName, {
           clientId: change.connection.clientId!,
           serviceId: change.connection.serviceId!,
-          isApproved: pinningVersion
-            ? change.connection.isApproved
-            : reactivating,
-          isActive: pinningVersion ? change.connection.isActive : reactivating,
+          isApproved: false,
+          requesterDetails: request.requesterDetails,
+        });
+        outcomes.push(outcome);
+      } else if (change.kind === 'reactivate') {
+        const outcome = await this.api.lifecycleConnection(
+          change.serviceOrgName,
+          change.connection.id!,
+          { action: 'activate' }
+        );
+        outcomes.push(outcome);
+      } else if (change.kind === 'pin-version') {
+        const outcome = await this.api.upsertConnection(change.serviceOrgName, {
+          clientId: change.connection.clientId!,
+          serviceId: change.connection.serviceId!,
+          isApproved: change.connection.isApproved,
           requesterDetails: request.requesterDetails,
         });
         outcomes.push(outcome);
@@ -405,12 +411,11 @@ export class IntegrationAccessService {
       }
     );
 
-    const submissionId = latestSubmissionId(selectedConnections);
-
-    const allowedConnections = selectedConnections.filter(
-      // Approval determines the partner grant; activation controls routing.
-      (connection) => connection.isApproved === (status === 'approved')
+    const allowedConnections = connectionsForStatus(
+      selectedConnections,
+      status
     );
+    const submissionId = latestSubmissionId(allowedConnections);
 
     this.logger?.debug('Connections allowed %j', allowedConnections);
 
@@ -515,6 +520,34 @@ export class IntegrationAccessService {
       submissionId,
       resourceServers,
     };
+  }
+}
+
+function connectionsForStatus(
+  connections: ConnectionRequest[],
+  status: 'approved' | 'pending'
+): ConnectionRequest[] {
+  if (status === 'approved') {
+    return connections.filter((connection) => connection.isApproved === true);
+  }
+
+  return connections.flatMap((connection) => {
+    const proposal = parseObject(connection.proposedConfiguration);
+    if (Object.keys(proposal).length > 0) {
+      return [{ ...connection, ...proposal, isApproved: false }];
+    }
+    return connection.isApproved ? [] : [connection];
+  });
+}
+
+function parseObject(value: unknown): Record<string, any> {
+  if (value && typeof value === 'object') return value as Record<string, any>;
+  if (typeof value !== 'string' || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
   }
 }
 

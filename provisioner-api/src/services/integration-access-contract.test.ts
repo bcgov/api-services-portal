@@ -355,7 +355,7 @@ test('legacy connections pin the reviewed version without changing approval stat
   assert.equal(result.results[catalogService.name], 'already approved');
   assert.equal(upserts.length, 1);
   assert.equal(upserts[0].isApproved, true);
-  assert.equal(upserts[0].isActive, true);
+  assert.equal(upserts[0].isActive, undefined);
   assert.equal(
     upserts[0].requesterDetails.service.version,
     catalogService.version
@@ -408,7 +408,7 @@ test('catalog version changes require reapproval for a pinned connection', async
     'updated version, submitted for re-approval'
   );
   assert.equal(upserts[0].isApproved, false);
-  assert.equal(upserts[0].isActive, false);
+  assert.equal(upserts[0].isActive, undefined);
   assert.equal(
     upserts[0].requesterDetails.service.version,
     catalogService.version

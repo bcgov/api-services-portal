@@ -123,7 +123,8 @@ export class ProvisionerService {
 
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
-    action: 'apply' | 'delete'
+    action: 'apply' | 'delete',
+    waitForCompletion = false
   ): Promise<void> {
     // credentials will be using the gwa admin
 
@@ -150,7 +151,7 @@ export class ProvisionerService {
 
     const body = JSON.stringify(payload);
 
-    fetch(
+    const request = fetch(
       `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
       {
         method: 'POST',
@@ -175,6 +176,14 @@ export class ProvisionerService {
         logger.error('Provisioner Sent: %s', body);
         logger.error('Provisioner Error: %s', err);
       });
+
+    // Revoke is one orchestrated action: wait until the provisioner has
+    // persisted its terminal callback before verifying cleanup and deleting
+    // the connection record. Other lifecycle events keep their established
+    // asynchronous response behavior.
+    if (waitForCompletion) {
+      await request;
+    }
   }
 
   public async deleteGateway(

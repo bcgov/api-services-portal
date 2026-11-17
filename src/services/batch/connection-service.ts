@@ -14,13 +14,21 @@ import {
   Subsystem as KeystoneSubsystem,
   OpenApiSpec as KeystoneOpenApiSpec,
 } from '../keystone/types';
-import { ConnectionRequestInput } from '../../controllers/sdx/v1/types';
+import {
+  ConnectionLifecycleActionInput,
+  ConnectionRequestInput,
+} from '../../controllers/sdx/v1/types';
 import { SubsystemService } from './subsystem';
 import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
-import { cloneDeep, get, has, set, unset } from 'lodash';
+import { cloneDeep, get, has, isEqual, set, unset } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+const {
+  lifecycleActionError,
+  parseJsonObject,
+} = require('./connection-lifecycle');
 
 const logger = Logger('batch.connection');
 
@@ -37,6 +45,51 @@ const R1_MANAGED_SERVICE_RESOURCE_PATHS = [
 
 const resourceObject = (value: any): any =>
   typeof value === 'string' ? JSON.parse(value) : value || {};
+
+const PROPOSAL_FIELDS = [
+  'policyVersion',
+  'environment',
+  'requesterDetails',
+  'clientResources',
+  'serviceResources',
+] as const;
+
+const hasOwn = (value: any, key: string): boolean =>
+  Object.prototype.hasOwnProperty.call(value || {}, key);
+
+const CONFIGURATION_OBJECT_FIELDS = [
+  'requesterDetails',
+  'clientResources',
+  'serviceResources',
+];
+
+const configurationValue = (field: string, value: any): any =>
+  CONFIGURATION_OBJECT_FIELDS.includes(field) ? resourceObject(value) : value;
+
+const connectionConfiguration = (connection: any): Record<string, any> =>
+  PROPOSAL_FIELDS.reduce((configuration, field) => {
+    if (connection && connection[field] !== undefined) {
+      configuration[field] = configurationValue(field, connection[field]);
+    }
+    return configuration;
+  }, {} as Record<string, any>);
+
+const proposedConfiguration = (
+  existing: KeystoneConnectionRequest,
+  submitted: ConnectionRequestInput
+): Record<string, any> => {
+  const proposal = connectionConfiguration(existing);
+  PROPOSAL_FIELDS.forEach((field) => {
+    const value = (submitted as any)[field];
+    if (
+      hasOwn(submitted, field) &&
+      !(CONFIGURATION_OBJECT_FIELDS.includes(field) && value == null)
+    ) {
+      proposal[field] = configurationValue(field, value);
+    }
+  });
+  return proposal;
+};
 
 const preserveManagedR1Settings = (
   submitted: any,
@@ -112,18 +165,6 @@ class ConnectionService {
       body.serviceId
     );
 
-    assertEqual(
-      Boolean(
-        existing?.isApproved === true &&
-          body.isApproved === false &&
-          typeof body.isActive === 'boolean' &&
-          body.isActive !== Boolean(existing.isActive)
-      ),
-      false,
-      'isActive',
-      'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.'
-    );
-
     // Preserve each R1 setting managed by the authoritative policy while
     // retaining submitted changes to resource settings callers may customize.
     if (existing?.policyVersion === 'SDX.R1.00') {
@@ -141,6 +182,51 @@ class ConnectionService {
           R1_MANAGED_SERVICE_RESOURCE_PATHS
         );
       }
+    }
+
+    const configurationSubmitted = PROPOSAL_FIELDS.some(
+      (field) =>
+        hasOwn(body, field) &&
+        !(
+          CONFIGURATION_OBJECT_FIELDS.includes(field) &&
+          (body as any)[field] == null
+        ) &&
+        !isEqual(
+          configurationValue(field, (body as any)[field]),
+          configurationValue(field, (existing as any)?.[field])
+        )
+    );
+    const proposesApprovedChange = Boolean(
+      existing?.isApproved === true &&
+        (body.isApproved === false ||
+          (body.isApproved === undefined && configurationSubmitted))
+    );
+
+    // Runtime state is changed only through the explicit lifecycle endpoint.
+    // Legacy callers may still resend isActive with configuration updates; keep
+    // the approved connection's current runtime state in that case.
+    if (existing?.isApproved === true) {
+      delete body.isActive;
+    }
+
+    if (proposesApprovedChange) {
+      assertEqual(
+        clientSubsystem.organization.name === org ||
+          serviceSpec.organization.name === org,
+        true,
+        'clientId',
+        'Only the client or service organization can propose connection changes'
+      );
+      return await syncRecordsThrowErrors(
+        context,
+        'ConnectionRequest',
+        undefined,
+        {
+          clientId: body.clientId,
+          serviceId: body.serviceId,
+          proposedConfiguration: proposedConfiguration(existing!, body),
+        }
+      );
     }
 
     // `isApproved` is only an approval decision when it changes the stored value.
@@ -187,6 +273,244 @@ class ConnectionService {
       body
     );
     return result;
+  };
+
+  decideProposedConfiguration = async (
+    context: Keystone,
+    org: string,
+    clientId: string,
+    serviceId: string,
+    approve: boolean
+  ): Promise<BatchResult> => {
+    const existing = await this.findConnection(
+      (context as any).createContext({ skipAccessControl: true }),
+      clientId,
+      serviceId
+    );
+    assertEqual(Boolean(existing), true, 'clientId', 'Connection request not found');
+
+    const serviceSpec = await new OpenAPISpecService().findOpenAPISpecByName(
+      context,
+      serviceId
+    );
+    assertEqual(
+      serviceSpec.organization.name === org,
+      true,
+      'organization',
+      'Only the service owner can approve or reject proposed connection changes'
+    );
+
+    const proposal = parseJsonObject(existing!.proposedConfiguration);
+    assertEqual(
+      Object.keys(proposal).length > 0,
+      true,
+      'proposedConfiguration',
+      'This connection has no proposed changes awaiting approval'
+    );
+
+    const data: any = {
+      clientId,
+      serviceId,
+      proposedConfiguration: {},
+    };
+    if (approve) {
+      Object.assign(data, proposal, { isApproved: true });
+    }
+
+    return await syncRecordsThrowErrors(
+      context,
+      'ConnectionRequest',
+      undefined,
+      data
+    );
+  };
+
+  lifecycleConnection = async (
+    context: Keystone,
+    org: string,
+    id: string,
+    input: ConnectionLifecycleActionInput
+  ): Promise<BatchResult> => {
+    let connection: KeystoneConnectionRequest;
+    try {
+      connection = await this.getConnectionById(context, id);
+    } catch (err) {
+      if (input.action === 'retry' || input.action === 'revoke') {
+        return { status: 200, result: 'already-revoked', id };
+      }
+      throw err;
+    }
+
+    await this.assertRelatedOrganization(context, org, connection);
+    const policyError = lifecycleActionError(connection, input.action, input);
+    assertEqual(policyError, undefined, 'action', policyError || 'Invalid lifecycle action');
+
+    const currentIntent = parseJsonObject(connection.lifecycleIntent);
+    if (
+      input.action === 'revoke' ||
+      (input.action === 'retry' && currentIntent.action === 'revoke')
+    ) {
+      return await this.revokeConnection(context, org, connection);
+    }
+
+    const status = parseJsonObject(connection.provisionerStatus);
+    let targetActive: boolean;
+    if (input.action === 'retry') {
+      targetActive = status.operation === 'provision';
+    } else {
+      targetActive = input.action === 'activate';
+    }
+    const operationId = uuidv4();
+    const intent = {
+      action: input.action,
+      operationId,
+      phase: targetActive ? 'provision' : 'deprovision',
+    };
+
+    return await syncRecordsThrowErrors(
+      context,
+      'ConnectionRequest',
+      undefined,
+      {
+        clientId: connection.clientId,
+        serviceId: connection.serviceId,
+        isActive: targetActive,
+        lifecycleIntent: intent,
+      }
+    );
+  };
+
+  private revokeConnection = async (
+    context: Keystone,
+    org: string,
+    connection: KeystoneConnectionRequest
+  ): Promise<BatchResult> => {
+    let current = connection;
+    let status = parseJsonObject(current.provisionerStatus);
+    let intent = parseJsonObject(current.lifecycleIntent);
+    const operationId = intent.action === 'revoke' && intent.operationId
+      ? intent.operationId
+      : uuidv4();
+
+    if (current.isActive || status.status !== 'deprovisioned') {
+      try {
+        await syncRecordsThrowErrors(
+          context,
+          'ConnectionRequest',
+          undefined,
+          {
+            clientId: current.clientId,
+            serviceId: current.serviceId,
+            isActive: false,
+            lifecycleIntent: {
+              action: 'revoke',
+              operationId,
+              phase: 'deprovision',
+            },
+          }
+        );
+        current = await this.getConnectionById(context, current.id!);
+        status = parseJsonObject(current.provisionerStatus);
+      } catch (err) {
+        logger.error('Revoke cleanup failed for connection %s: %s', current.id, err);
+        assertEqual(
+          false,
+          true,
+          'action',
+          'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
+        );
+      }
+    }
+
+    assertEqual(
+      status.status,
+      'deprovisioned',
+      'action',
+      'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
+    );
+
+    const { clientSubsystem, serviceSpec } = await this.assertRelatedOrganization(
+      context,
+      org,
+      current
+    );
+    let deleteStatus: ConnectionRequestDeleteStatus;
+    try {
+      deleteStatus = await this.getConnectionDeleteStatus(
+        current,
+        clientSubsystem,
+        serviceSpec
+      );
+    } catch (err) {
+      logger.error('Unable to verify revoke cleanup for connection %s: %s', current.id, err);
+      assertEqual(
+        false,
+        true,
+        'action',
+        'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
+      );
+      throw err;
+    }
+    assertEqual(
+      deleteStatus.clientConfigCount + deleteStatus.serviceConfigCount,
+      0,
+      'action',
+      'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
+    );
+
+    try {
+      await syncRecordsThrowErrors(
+        context,
+        'ConnectionRequest',
+        undefined,
+        {
+          clientId: current.clientId,
+          serviceId: current.serviceId,
+          lifecycleIntent: {
+            action: 'revoke',
+            operationId,
+            phase: 'delete',
+          },
+        }
+      );
+      return await this.deleteConnection(context, org, current.id!);
+    } catch (err) {
+      logger.error('Final revoke deletion failed for connection %s: %s', current.id, err);
+      assertEqual(
+        false,
+        true,
+        'action',
+        'Access has been removed, but the connection record could not be deleted. The client no longer has access. Retry revoke to finish.'
+      );
+      throw err;
+    }
+  };
+
+  private assertRelatedOrganization = async (
+    context: Keystone,
+    org: string,
+    connection: KeystoneConnectionRequest
+  ): Promise<{
+    clientSubsystem: KeystoneSubsystem;
+    serviceSpec: KeystoneOpenApiSpec;
+  }> => {
+    const clientSubsystem = await new SubsystemService().findSubsystemByClientId(
+      context,
+      connection.clientId!
+    );
+    const serviceSpec = await new OpenAPISpecService().findOpenAPISpecByName(
+      context,
+      connection.serviceId!
+    );
+    assertEqual(
+      clientSubsystem.organization.name === org ||
+        serviceSpec.organization.name === org ||
+        serviceSpec.subsystem?.organization?.name === org,
+      true,
+      'organization',
+      'Organization not related to this connection request'
+    );
+    return { clientSubsystem, serviceSpec };
   };
 
   findConnection = async (

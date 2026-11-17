@@ -94,6 +94,22 @@ export class SdxMemberApiClient {
     return this.request('GET', `organizations/${enc(org)}/connections`);
   }
 
+  /** Run an explicit lifecycle action for an approved connection. */
+  lifecycleConnection(
+    org: string,
+    id: string,
+    body: {
+      action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+      confirmAbandonRevoke?: boolean;
+    }
+  ): Promise<BatchResult> {
+    return this.request(
+      'POST',
+      `organizations/${enc(org)}/connections/${enc(id)}/lifecycle`,
+      { body }
+    );
+  }
+
   /** `deleteConnection` — DELETE /organizations/{org}/connections/{id} */
   deleteConnection(org: string, id: string): Promise<BatchResult> {
     return this.request(

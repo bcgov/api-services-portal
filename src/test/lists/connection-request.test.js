@@ -14,7 +14,7 @@ jest.mock('../../services/provisioner/provisioner-service', () => ({
 const config = require('../../lists/ConnectionRequest');
 
 describe('ConnectionRequest lifecycle guardrails', () => {
-  it('rejects changing activity while marking an approved connection for re-approval', async () => {
+  it('requires explicit lifecycle actions for activity changes', async () => {
     await expect(
       config.hooks.resolveInput({
         operation: 'update',
@@ -23,7 +23,7 @@ describe('ConnectionRequest lifecycle guardrails', () => {
         resolvedData: { isApproved: false, isActive: false },
       })
     ).rejects.toThrow(
-      'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.'
+      'Use the explicit Activate, Deactivate, Retry, or Revoke connection action to change runtime access.'
     );
   });
 

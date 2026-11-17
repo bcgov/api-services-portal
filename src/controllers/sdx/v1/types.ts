@@ -64,6 +64,18 @@ export interface ConnectionRequestInput {
   clientResources?: any;
   /** Managed security settings are read-only on existing SDX.R1.00 connections. */
   serviceResources?: any;
+  proposedConfiguration?: {
+    policyVersion?: string;
+    environment?: string;
+    requesterDetails?: any;
+    clientResources?: any;
+    serviceResources?: any;
+  };
+  lifecycleIntent?: {
+    action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+    operationId: string;
+    phase: 'provision' | 'deprovision' | 'delete';
+  };
   provisionerStatus?: {
     message: string;
     status:
@@ -77,6 +89,11 @@ export interface ConnectionRequestInput {
     endpoint?: string;
     spec?: string;
   };
+}
+
+export interface ConnectionLifecycleActionInput {
+  action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+  confirmAbandonRevoke?: boolean;
 }
 
 export interface ExpressRequest extends Express.Request {}

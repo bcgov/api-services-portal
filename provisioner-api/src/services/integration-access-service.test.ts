@@ -143,6 +143,11 @@ function scopeCatalogForServices(
 
 function createService(options: FakeApiOptions = {}) {
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
+  const lifecycleWrites: Array<{
+    org: string;
+    id: string;
+    input: { action: string };
+  }> = [];
   const catalog = options.catalog || {};
   const api = {
     listCatalogScopes: async () =>
@@ -161,6 +166,14 @@ function createService(options: FakeApiOptions = {}) {
         ? options.upsert(org, input)
         : { status: 200, result: 'updated' };
     },
+    lifecycleConnection: async (
+      org: string,
+      id: string,
+      input: { action: string }
+    ) => {
+      lifecycleWrites.push({ org, id, input });
+      return { status: 200, result: 'updated' };
+    },
   } as unknown as SdxMemberApiClient;
 
   const service = new IntegrationAccessService(
@@ -168,7 +181,7 @@ function createService(options: FakeApiOptions = {}) {
     options.logger
   );
   Object.assign(service, { api });
-  return { service, writes };
+  return { service, writes, lifecycleWrites };
 }
 
 function existingConnection(
@@ -388,7 +401,6 @@ test('awaits a scope update and sends it to the provider organization', async ()
     clientId: 'consumer-subsystem',
     serviceId: 'service-a',
     isApproved: false,
-    isActive: false,
     requesterDetails: {
       submissionId: 'submission-2',
       requester: { name: 'Jane Doe', email: 'jane@example.test' },
@@ -411,7 +423,7 @@ test('awaits a scope update and sends it to the provider organization', async ()
 });
 
 test('reactivates an approved inactive connection on an exact resubmission', async () => {
-  const { service, writes } = createService({
+  const { service, writes, lifecycleWrites } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
     connections: [existingConnection({ isActive: false })],
   });
@@ -429,28 +441,14 @@ test('reactivates an approved inactive connection on an exact resubmission', asy
     ])
   );
 
-  assert.equal(writes.length, 1);
-  assert.deepEqual(writes[0].input, {
-    clientId: 'consumer-subsystem',
-    serviceId: 'service-a',
-    isApproved: true,
-    isActive: true,
-    requesterDetails: {
-      submissionId: 'submission-2',
-      requester: { name: 'Jane Doe', email: 'jane@example.test' },
-      scopes: ['read'],
-      client: {
-        integrationId: 'integration-a',
-        clientId: 'oauth-client-a',
-        privacyZone: 'citizen',
-      },
-      service: {
-        clientId: 'provider-a',
-        privacyZone: 'health',
-        version: '1.0.0',
-      },
+  assert.equal(writes.length, 0);
+  assert.deepEqual(lifecycleWrites, [
+    {
+      org: 'provider-a-org',
+      id: 'connection-1',
+      input: { action: 'activate' },
     },
-  });
+  ]);
   assert.deepEqual(response.results, {
     'service-a': 'reactivated approved connection',
   });
