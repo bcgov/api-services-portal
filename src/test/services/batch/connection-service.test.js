@@ -300,7 +300,7 @@ describe('ConnectionService', () => {
         fields: {
           isActive: {
             message:
-              'Cannot change connection activity while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.',
+              'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.',
           },
         },
       });
