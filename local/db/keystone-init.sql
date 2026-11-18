@@ -287,6 +287,8 @@ CREATE TABLE public."ConnectionRequest" (
     "requesterDetails" text NOT NULL,
     "clientResources" text NOT NULL,
     "serviceResources" text NOT NULL,
+    "proposedConfiguration" text NOT NULL,
+    "lifecycleIntent" text NOT NULL,
     "provisionerStatus" text NOT NULL,
     slug text,
     "updatedAt_utc" timestamp without time zone,
