@@ -4,6 +4,10 @@ on:
   push:
     branches: [dev, main, scan/*]
 
+permissions:
+  contents: read
+  security-events: write # upload SARIF to code scanning
+
 jobs:
   anchore-image-Scan:
     runs-on: ubuntu-latest
