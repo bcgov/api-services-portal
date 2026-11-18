@@ -162,4 +162,33 @@ describe('ProvisionerService connection lifecycle events', () => {
     expect(onFailure).toHaveBeenCalledWith(error);
   });
 
+  it('invokes the failure handler when payload preparation fails', async () => {
+    const onFailure = jest.fn().mockResolvedValue(undefined);
+    const provisioner = new ProvisionerService('http://provisioner/v1');
+
+    await provisioner.postConnectionRequestChangeEvent(
+      {
+        id: 'connection-1',
+        clientId: 'client-1',
+        serviceId: 'service-1',
+        policyVersion: 'SDX.R1.00',
+        environment: 'dev',
+        isApproved: true,
+        requesterDetails: '{invalid-json',
+        clientResources: '{}',
+        serviceResources: '{}',
+        provisionerStatus: JSON.stringify({
+          status: 'pending',
+          operation: 'provision',
+          operationId: 'operation-1',
+        }),
+      },
+      'apply',
+      true,
+      onFailure
+    );
+
+    expect(fetch).not.toHaveBeenCalled();
+    expect(onFailure).toHaveBeenCalledWith(expect.any(SyntaxError));
+  });
 });

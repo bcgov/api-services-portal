@@ -3,9 +3,12 @@ jest.mock('../../authz/enforcement', () => ({
   EnforcementPoint: {},
 }));
 
-jest.mock('../../services/notification/connection-request-notification.service', () => ({
-  ConnectionRequestNotificationService: jest.fn(),
-}));
+jest.mock(
+  '../../services/notification/connection-request-notification.service',
+  () => ({
+    ConnectionRequestNotificationService: jest.fn(),
+  })
+);
 
 jest.mock('../../services/provisioner/provisioner-service', () => ({
   ProvisionerService: jest.fn(),
@@ -38,6 +41,35 @@ describe('ConnectionRequest lifecycle guardrails', () => {
         resolvedData,
       })
     ).resolves.toBe(resolvedData);
+  });
+
+  it('uses the shared lifecycle policy to reject actions while an operation is running', async () => {
+    const intent = JSON.stringify({
+      action: 'deactivate',
+      operationId: 'operation-2',
+      phase: 'deprovision',
+    });
+    await expect(
+      config.hooks.resolveInput({
+        operation: 'update',
+        existingItem: {
+          isApproved: true,
+          isActive: true,
+          lifecycleIntent: '{}',
+          provisionerStatus: JSON.stringify({ status: 'pending' }),
+        },
+        originalInput: {
+          isActive: false,
+          lifecycleIntent: intent,
+        },
+        resolvedData: {
+          isActive: false,
+          lifecycleIntent: intent,
+        },
+      })
+    ).rejects.toThrow(
+      'Wait for the current connection lifecycle operation to finish.'
+    );
   });
 
   it('rejects deleting an active connection while changes await re-approval', async () => {

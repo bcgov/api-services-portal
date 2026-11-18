@@ -75,6 +75,7 @@ export interface ConnectionRequestInput {
     action: 'activate' | 'deactivate' | 'retry' | 'revoke';
     operationId: string;
     phase: 'provision' | 'deprovision' | 'delete';
+    confirmAbandonRevoke?: boolean;
   };
   provisionerStatus?: {
     message: string;

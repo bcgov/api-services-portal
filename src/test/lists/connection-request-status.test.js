@@ -14,6 +14,9 @@ jest.mock('../../services/provisioner/provisioner-service', () => ({
 jest.mock('../../services/batch/connection-status', () => ({
   updateConnectionProvisionerStatus: jest.fn(),
 }));
+jest.mock('../../services/keystone/activity', () => ({
+  recordActivityWithBlob: jest.fn(),
+}));
 jest.mock(
   '../../services/notification/connection-request-notification.service',
   () => ({
@@ -30,6 +33,7 @@ const {
 const {
   updateConnectionProvisionerStatus,
 } = require('../../services/batch/connection-status');
+const { recordActivityWithBlob } = require('../../services/keystone/activity');
 const {
   ConnectionRequestNotificationService,
 } = require('../../services/notification/connection-request-notification.service');
@@ -117,6 +121,7 @@ describe('ConnectionRequest provisioner status ordering', () => {
           },
         },
         existingItem: {
+          isApproved: true,
           isActive: !isActive,
           provisionerStatus: JSON.stringify({
             status: 'failed',
@@ -230,7 +235,9 @@ describe('ConnectionRequest provisioner callbacks', () => {
   });
 
   it('waits for the provisioner during revoke orchestration', async () => {
-    const postConnectionRequestChangeEvent = jest.fn().mockResolvedValue(undefined);
+    const postConnectionRequestChangeEvent = jest
+      .fn()
+      .mockResolvedValue(undefined);
     ProvisionerService.mockImplementation(() => ({
       postConnectionRequestChangeEvent,
     }));
@@ -340,6 +347,21 @@ describe('ConnectionRequest provisioner callbacks', () => {
         message:
           'Provisioning could not start because the provisioner could not be reached. Retry the operation.',
       })
+    );
+    expect(recordActivityWithBlob).toHaveBeenCalledWith(
+      expect.any(Object),
+      'activate',
+      'ConnectionRequest',
+      'connection-1',
+      expect.stringContaining('dispatch failed'),
+      'failed',
+      expect.any(String),
+      {
+        action: 'activate',
+        operationId: 'operation-1',
+        phase: 'dispatch',
+      },
+      ['sdxClient:client-1', 'sdxService:service-1']
     );
   });
 

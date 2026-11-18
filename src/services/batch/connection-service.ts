@@ -23,6 +23,7 @@ import { OpenAPISpecService } from './oas-service';
 import { strict as assert } from 'assert';
 import { assertEqual } from '../../controllers/ioc/assert';
 import { ProvisionerService } from '../provisioner';
+import { recordActivityWithBlob } from '../keystone/activity';
 import { cloneDeep, get, has, isEqual, set, unset } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 const {
@@ -78,7 +79,10 @@ const proposedConfiguration = (
   existing: KeystoneConnectionRequest,
   submitted: ConnectionRequestInput
 ): Record<string, any> => {
-  const proposal = connectionConfiguration(existing);
+  const proposal = {
+    ...connectionConfiguration(existing),
+    ...connectionConfiguration(parseJsonObject(existing.proposedConfiguration)),
+  };
   PROPOSAL_FIELDS.forEach((field) => {
     const value = (submitted as any)[field];
     if (
@@ -287,7 +291,12 @@ class ConnectionService {
       clientId,
       serviceId
     );
-    assertEqual(Boolean(existing), true, 'clientId', 'Connection request not found');
+    assertEqual(
+      Boolean(existing),
+      true,
+      'clientId',
+      'Connection request not found'
+    );
 
     const serviceSpec = await new OpenAPISpecService().findOpenAPISpecByName(
       context,
@@ -335,7 +344,12 @@ class ConnectionService {
     try {
       connection = await this.getConnectionById(context, id);
     } catch (err) {
-      if (input.action === 'retry' || input.action === 'revoke') {
+      const isMissingConnection =
+        err instanceof Error && err.message === 'Connection request not found';
+      if (
+        isMissingConnection &&
+        (input.action === 'retry' || input.action === 'revoke')
+      ) {
         return { status: 200, result: 'already-revoked', id };
       }
       throw err;
@@ -343,14 +357,24 @@ class ConnectionService {
 
     await this.assertRelatedOrganization(context, org, connection);
     const policyError = lifecycleActionError(connection, input.action, input);
-    assertEqual(policyError, undefined, 'action', policyError || 'Invalid lifecycle action');
+    assertEqual(
+      policyError,
+      undefined,
+      'action',
+      policyError || 'Invalid lifecycle action'
+    );
 
     const currentIntent = parseJsonObject(connection.lifecycleIntent);
     if (
       input.action === 'revoke' ||
       (input.action === 'retry' && currentIntent.action === 'revoke')
     ) {
-      return await this.revokeConnection(context, org, connection);
+      return await this.revokeConnection(
+        context,
+        org,
+        connection,
+        input.action
+      );
     }
 
     const status = parseJsonObject(connection.provisionerStatus);
@@ -365,6 +389,7 @@ class ConnectionService {
       action: input.action,
       operationId,
       phase: targetActive ? 'provision' : 'deprovision',
+      ...(input.confirmAbandonRevoke ? { confirmAbandonRevoke: true } : {}),
     };
 
     return await syncRecordsThrowErrors(
@@ -383,36 +408,60 @@ class ConnectionService {
   private revokeConnection = async (
     context: Keystone,
     org: string,
-    connection: KeystoneConnectionRequest
+    connection: KeystoneConnectionRequest,
+    requestedAction: 'retry' | 'revoke'
   ): Promise<BatchResult> => {
     let current = connection;
     let status = parseJsonObject(current.provisionerStatus);
     let intent = parseJsonObject(current.lifecycleIntent);
-    const operationId = intent.action === 'revoke' && intent.operationId
-      ? intent.operationId
-      : uuidv4();
+    const operationId =
+      intent.action === 'revoke' && intent.operationId
+        ? intent.operationId
+        : uuidv4();
+
+    await this.recordLifecycleActivity(
+      context,
+      org,
+      current,
+      requestedAction,
+      operationId,
+      status.status === 'deprovisioned' ? 'delete' : 'deprovision',
+      'pending',
+      `${requestedAction === 'retry' ? 'Retrying' : 'Revoking'} connection ${
+        current.clientId
+      } -> ${current.serviceId}.`
+    );
 
     if (current.isActive || status.status !== 'deprovisioned') {
       try {
-        await syncRecordsThrowErrors(
-          context,
-          'ConnectionRequest',
-          undefined,
-          {
-            clientId: current.clientId,
-            serviceId: current.serviceId,
-            isActive: false,
-            lifecycleIntent: {
-              action: 'revoke',
-              operationId,
-              phase: 'deprovision',
-            },
-          }
-        );
+        await syncRecordsThrowErrors(context, 'ConnectionRequest', undefined, {
+          clientId: current.clientId,
+          serviceId: current.serviceId,
+          isActive: false,
+          lifecycleIntent: {
+            action: 'revoke',
+            operationId,
+            phase: 'deprovision',
+          },
+        });
         current = await this.getConnectionById(context, current.id!);
         status = parseJsonObject(current.provisionerStatus);
       } catch (err) {
-        logger.error('Revoke cleanup failed for connection %s: %s', current.id, err);
+        logger.error(
+          'Revoke cleanup failed for connection %s: %s',
+          current.id,
+          err
+        );
+        await this.recordLifecycleActivity(
+          context,
+          org,
+          current,
+          'revoke',
+          operationId,
+          'deprovision',
+          'failed',
+          `Revoke failed while removing access configuration for ${current.clientId} -> ${current.serviceId}.`
+        );
         assertEqual(
           false,
           true,
@@ -422,6 +471,18 @@ class ConnectionService {
       }
     }
 
+    if (status.status !== 'deprovisioned') {
+      await this.recordLifecycleActivity(
+        context,
+        org,
+        current,
+        'revoke',
+        operationId,
+        'deprovision',
+        'failed',
+        `Revoke failed while removing access configuration for ${current.clientId} -> ${current.serviceId}.`
+      );
+    }
     assertEqual(
       status.status,
       'deprovisioned',
@@ -429,11 +490,8 @@ class ConnectionService {
       'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
     );
 
-    const { clientSubsystem, serviceSpec } = await this.assertRelatedOrganization(
-      context,
-      org,
-      current
-    );
+    const { clientSubsystem, serviceSpec } =
+      await this.assertRelatedOrganization(context, org, current);
     let deleteStatus: ConnectionRequestDeleteStatus;
     try {
       deleteStatus = await this.getConnectionDeleteStatus(
@@ -442,7 +500,21 @@ class ConnectionService {
         serviceSpec
       );
     } catch (err) {
-      logger.error('Unable to verify revoke cleanup for connection %s: %s', current.id, err);
+      logger.error(
+        'Unable to verify revoke cleanup for connection %s: %s',
+        current.id,
+        err
+      );
+      await this.recordLifecycleActivity(
+        context,
+        org,
+        current,
+        'revoke',
+        operationId,
+        'verify',
+        'failed',
+        `Revoke could not verify access removal for ${current.clientId} -> ${current.serviceId}.`
+      );
       assertEqual(
         false,
         true,
@@ -450,6 +522,21 @@ class ConnectionService {
         'Revoke failed while removing access configuration. Access may be partially removed. Retry revoke.'
       );
       throw err;
+    }
+    if (
+      deleteStatus.clientConfigCount + deleteStatus.serviceConfigCount !==
+      0
+    ) {
+      await this.recordLifecycleActivity(
+        context,
+        org,
+        current,
+        'revoke',
+        operationId,
+        'verify',
+        'failed',
+        `Revoke found remaining access configuration for ${current.clientId} -> ${current.serviceId}.`
+      );
     }
     assertEqual(
       deleteStatus.clientConfigCount + deleteStatus.serviceConfigCount,
@@ -459,23 +546,43 @@ class ConnectionService {
     );
 
     try {
-      await syncRecordsThrowErrors(
+      await syncRecordsThrowErrors(context, 'ConnectionRequest', undefined, {
+        clientId: current.clientId,
+        serviceId: current.serviceId,
+        lifecycleIntent: {
+          action: 'revoke',
+          operationId,
+          phase: 'delete',
+        },
+      });
+      const result = await this.deleteConnection(context, org, current.id!);
+      await this.recordLifecycleActivity(
         context,
-        'ConnectionRequest',
-        undefined,
-        {
-          clientId: current.clientId,
-          serviceId: current.serviceId,
-          lifecycleIntent: {
-            action: 'revoke',
-            operationId,
-            phase: 'delete',
-          },
-        }
+        org,
+        current,
+        'revoke',
+        operationId,
+        'delete',
+        'success',
+        `Revoked connection ${current.clientId} -> ${current.serviceId}.`
       );
-      return await this.deleteConnection(context, org, current.id!);
+      return result;
     } catch (err) {
-      logger.error('Final revoke deletion failed for connection %s: %s', current.id, err);
+      logger.error(
+        'Final revoke deletion failed for connection %s: %s',
+        current.id,
+        err
+      );
+      await this.recordLifecycleActivity(
+        context,
+        org,
+        current,
+        'revoke',
+        operationId,
+        'delete',
+        'failed',
+        `Access was removed but the connection record could not be deleted for ${current.clientId} -> ${current.serviceId}.`
+      );
       assertEqual(
         false,
         true,
@@ -483,6 +590,55 @@ class ConnectionService {
         'Access has been removed, but the connection record could not be deleted. The client no longer has access. Retry revoke to finish.'
       );
       throw err;
+    }
+  };
+
+  private recordLifecycleActivity = async (
+    context: Keystone,
+    org: string,
+    connection: KeystoneConnectionRequest,
+    action: 'activate' | 'deactivate' | 'retry' | 'revoke',
+    operationId: string,
+    phase: string,
+    result: 'pending' | 'success' | 'failed',
+    message: string
+  ): Promise<void> => {
+    try {
+      const activityContext = JSON.stringify({
+        message: '{action} connection {client} -> {service}: {result}',
+        params: {
+          action,
+          client: connection.clientId,
+          service: connection.serviceId,
+          result,
+        },
+      });
+      const activityContextClient =
+        typeof (context as any).sudo === 'function'
+          ? (context as any).sudo()
+          : context;
+      await recordActivityWithBlob(
+        activityContextClient,
+        action,
+        'ConnectionRequest',
+        connection.id!,
+        message,
+        result,
+        activityContext,
+        { action, operationId, phase },
+        [
+          `org:${org}`,
+          `sdxClient:${connection.clientId}`,
+          `sdxService:${connection.serviceId}`,
+        ]
+      );
+    } catch (err) {
+      logger.error(
+        'Unable to record %s lifecycle activity for connection %s: %s',
+        action,
+        connection.id,
+        err
+      );
     }
   };
 
@@ -494,10 +650,11 @@ class ConnectionService {
     clientSubsystem: KeystoneSubsystem;
     serviceSpec: KeystoneOpenApiSpec;
   }> => {
-    const clientSubsystem = await new SubsystemService().findSubsystemByClientId(
-      context,
-      connection.clientId!
-    );
+    const clientSubsystem =
+      await new SubsystemService().findSubsystemByClientId(
+        context,
+        connection.clientId!
+      );
     const serviceSpec = await new OpenAPISpecService().findOpenAPISpecByName(
       context,
       connection.serviceId!

@@ -8,6 +8,9 @@ const {
 } = require('../../../services/batch/connection-service');
 const { SubsystemService } = require('../../../services/batch/subsystem');
 const { OpenAPISpecService } = require('../../../services/batch/oas-service');
+const {
+  recordActivityWithBlob,
+} = require('../../../services/keystone/activity');
 
 jest.mock('../../../batch/feed-worker', () => ({
   deleteRecordByInternalId: jest.fn(),
@@ -27,6 +30,10 @@ jest.mock('../../../services/batch/oas-service', () => ({
   OpenAPISpecService: jest.fn().mockImplementation(() => ({
     findOpenAPISpecByName: jest.fn(),
   })),
+}));
+
+jest.mock('../../../services/keystone/activity', () => ({
+  recordActivityWithBlob: jest.fn().mockResolvedValue({ id: 'activity-1' }),
 }));
 
 describe('ConnectionService', () => {
@@ -301,6 +308,40 @@ describe('ConnectionService', () => {
       expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
         'isApproved'
       );
+    });
+
+    it('updates an existing proposal without discarding its other proposed fields', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          isApproved: true,
+          isActive: true,
+          environment: 'dev',
+          requesterDetails: JSON.stringify({ scopes: ['read'] }),
+          clientResources: JSON.stringify({ comment: 'approved' }),
+          proposedConfiguration: JSON.stringify({
+            environment: 'dev',
+            requesterDetails: { scopes: ['read'] },
+            clientResources: { comment: 'pending customization' },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({
+          isApproved: false,
+          requesterDetails: { scopes: ['read', 'write'] },
+        })
+      );
+
+      expect(
+        syncRecordsThrowErrors.mock.calls[0][3].proposedConfiguration
+      ).toMatchObject({
+        requesterDetails: { scopes: ['read', 'write'] },
+        clientResources: { comment: 'pending customization' },
+      });
     });
 
     it('ignores a legacy activity field while creating a proposal', async () => {
@@ -671,6 +712,26 @@ describe('ConnectionService', () => {
         'ministry-of-client',
         '123'
       );
+      const activities = recordActivityWithBlob.mock.calls.map((call) => ({
+        action: call[1],
+        result: call[5],
+        ...call[7],
+      }));
+      expect(activities).toEqual([
+        expect.objectContaining({
+          action: 'revoke',
+          phase: 'deprovision',
+          result: 'pending',
+        }),
+        expect.objectContaining({
+          action: 'revoke',
+          phase: 'delete',
+          result: 'success',
+        }),
+      ]);
+      expect(
+        new Set(activities.map(({ operationId }) => operationId)).size
+      ).toBe(1);
     });
 
     it('reports a retryable cleanup failure without deleting the record', async () => {
@@ -765,6 +826,19 @@ describe('ConnectionService', () => {
         result: 'already-revoked',
         id: '123',
       });
+    });
+
+    it('does not treat a connection lookup failure as an already completed revoke', async () => {
+      const service = new ConnectionService();
+      service.getConnectionById = jest
+        .fn()
+        .mockRejectedValue(new Error('database unavailable'));
+
+      await expect(
+        service.lifecycleConnection(context, 'ministry-of-client', '123', {
+          action: 'retry',
+        })
+      ).rejects.toThrow('database unavailable');
     });
   });
 
