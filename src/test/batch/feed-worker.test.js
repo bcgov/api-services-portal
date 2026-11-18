@@ -188,9 +188,14 @@ describe('ConnectionRequest status callbacks', () => {
       operation: 'provision',
       operationId: 'operation-1',
     });
-    const findOneAndUpdate = jest.fn().mockResolvedValue({
-      id: 'connection-1',
-    });
+    const update = jest.fn().mockResolvedValue(1);
+    const query = {
+      table: jest.fn(),
+      where: jest.fn(),
+      update,
+    };
+    query.table.mockReturnValue(query);
+    query.where.mockReturnValue(query);
     const executeGraphQL = jest.fn().mockResolvedValue({
       data: {
         allConnectionRequests: [
@@ -206,9 +211,10 @@ describe('ConnectionRequest status callbacks', () => {
     const context = {
       executeGraphQL,
       keystoneAdapter: {
-        name: 'mongoose',
+        name: 'knex',
         getListAdapterByKey: jest.fn().mockReturnValue({
-          model: { findOneAndUpdate },
+          tableName: 'ConnectionRequest',
+          _query: jest.fn().mockReturnValue(query),
         }),
       },
     };
@@ -231,9 +237,13 @@ describe('ConnectionRequest status callbacks', () => {
     });
 
     expect(executeGraphQL).toHaveBeenCalledTimes(1);
-    expect(findOneAndUpdate).toHaveBeenCalledTimes(1);
-    const nextStatus =
-      findOneAndUpdate.mock.calls[0][1].$set.provisionerStatus;
+    expect(query.table).toHaveBeenCalledWith('ConnectionRequest');
+    expect(query.where).toHaveBeenCalledWith({
+      id: 'connection-1',
+      provisionerStatus: currentStatus,
+    });
+    expect(update).toHaveBeenCalledTimes(1);
+    const nextStatus = update.mock.calls[0][0].provisionerStatus;
     expect(JSON.parse(nextStatus)).toEqual({
       endpoint: 'https://current.example',
       operation: 'provision',
