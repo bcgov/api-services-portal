@@ -28,37 +28,22 @@ export function operationMatches(
 }
 
 async function compareAndSet(
-  adapter: any,
   listAdapter: any,
   connectionId: string,
   expectedStatus: string,
   nextStatus: string
 ): Promise<boolean> {
   const updatedAt = new Date();
-
-  if (adapter.name === 'mongoose') {
-    const updated = await listAdapter.model.findOneAndUpdate(
-      { _id: connectionId, provisionerStatus: expectedStatus },
-      { $set: { provisionerStatus: nextStatus, updatedAt } },
-      { new: true, runValidators: true, context: 'query' }
-    );
-    return Boolean(updated);
-  }
-
-  if (adapter.name === 'knex') {
-    const count = await listAdapter
-      ._query()
-      .table(listAdapter.tableName)
-      .where({ id: connectionId, provisionerStatus: expectedStatus })
-      .update({
-        provisionerStatus: nextStatus,
-        updatedAt_utc: updatedAt,
-        updatedAt_offset: '+00:00',
-      });
-    return Array.isArray(count) ? count.length > 0 : Number(count) > 0;
-  }
-
-  return false;
+  const count = await listAdapter
+    ._query()
+    .table(listAdapter.tableName)
+    .where({ id: connectionId, provisionerStatus: expectedStatus })
+    .update({
+      provisionerStatus: nextStatus,
+      updatedAt_utc: updatedAt,
+      updatedAt_offset: '+00:00',
+    });
+  return Array.isArray(count) ? count.length > 0 : Number(count) > 0;
 }
 
 /**
@@ -74,7 +59,7 @@ export async function updateConnectionProvisionerStatus(
 ): Promise<BatchResult | null> {
   if (
     !adapter ||
-    !['mongoose', 'knex'].includes(adapter.name) ||
+    adapter.name !== 'knex' ||
     typeof adapter.getListAdapterByKey !== 'function'
   ) {
     return null;
@@ -110,7 +95,6 @@ export async function updateConnectionProvisionerStatus(
 
       if (
         await compareAndSet(
-          adapter,
           listAdapter,
           connectionId,
           expectedStatus,
