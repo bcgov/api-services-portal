@@ -9,6 +9,9 @@ const { UserAssertionError } = require('../services/user-assert');
 const {
   parseJsonObject,
 } = require('../services/batch/connection-lifecycle');
+const {
+  updateConnectionProvisionerStatus,
+} = require('../services/batch/connection-status');
 const { SubsystemService } = require('../services/batch/subsystem');
 
 const { logger } = require('../logger');
@@ -53,6 +56,18 @@ const lifecycleStatus = (isActive, operationId) => {
     operationId: operationId || uuidv4(),
     message: provisioning ? 'Provisioning started.' : 'Deprovisioning started.',
   };
+};
+
+const provisionerDispatchFailureStatus = (value) => {
+  const started = parseProvisionerStatus(value);
+  const deprovisioning = started.operation === 'deprovision';
+  return JSON.stringify({
+    ...started,
+    status: 'failed',
+    message: deprovisioning
+      ? 'Deprovisioning could not start because the provisioner could not be reached. Retry the operation.'
+      : 'Provisioning could not start because the provisioner could not be reached. Retry the operation.',
+  });
 };
 
 const operationMatches = (current, incoming) =>
@@ -440,10 +455,30 @@ module.exports = {
         process.env.PROVISIONER_URL
       );
       const lifecycleIntent = parseJsonObject(updatedItem.lifecycleIntent);
+      const startedStatus =
+        typeof updatedItem.provisionerStatus === 'string'
+          ? updatedItem.provisionerStatus
+          : JSON.stringify(updatedItem.provisionerStatus || {});
+      const lifecycleContext = context.createContext({
+        skipAccessControl: true,
+      });
       await provisionerService.postConnectionRequestChangeEvent(
         updatedItem,
         updatedItem.isActive ? 'apply' : 'delete',
-        lifecycleIntent.action === 'revoke'
+        lifecycleIntent.action === 'revoke',
+        async () => {
+          const result = await updateConnectionProvisionerStatus(
+            lifecycleContext.keystoneAdapter,
+            updatedItem.id,
+            startedStatus,
+            provisionerDispatchFailureStatus(startedStatus)
+          );
+          if (!result || result.status >= 400) {
+            throw new Error(
+              'Unable to persist the failed provisioner dispatch status.'
+            );
+          }
+        }
       );
 
       notifyChange(context, {

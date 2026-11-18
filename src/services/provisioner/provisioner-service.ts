@@ -124,7 +124,8 @@ export class ProvisionerService {
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
     action: 'apply' | 'delete',
-    waitForCompletion = false
+    waitForCompletion = false,
+    onFailure?: (error: unknown) => Promise<void> | void
   ): Promise<void> {
     // credentials will be using the gwa admin
 
@@ -172,9 +173,19 @@ export class ProvisionerService {
           r
         );
       })
-      .catch((err) => {
+      .catch(async (err) => {
         logger.error('Provisioner Sent: %s', body);
         logger.error('Provisioner Error: %s', err);
+        if (onFailure) {
+          try {
+            await onFailure(err);
+          } catch (statusError) {
+            logger.error(
+              'Unable to record provisioner dispatch failure: %s',
+              statusError
+            );
+          }
+        }
       });
 
     // Revoke is one orchestrated action: wait until the provisioner has

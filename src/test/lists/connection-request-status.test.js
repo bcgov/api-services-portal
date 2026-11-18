@@ -11,6 +11,9 @@ jest.mock('../../services/batch/oas-service', () => ({
 jest.mock('../../services/provisioner/provisioner-service', () => ({
   ProvisionerService: jest.fn(),
 }));
+jest.mock('../../services/batch/connection-status', () => ({
+  updateConnectionProvisionerStatus: jest.fn(),
+}));
 jest.mock(
   '../../services/notification/connection-request-notification.service',
   () => ({
@@ -24,6 +27,9 @@ const { OpenAPISpecService } = require('../../services/batch/oas-service');
 const {
   ProvisionerService,
 } = require('../../services/provisioner/provisioner-service');
+const {
+  updateConnectionProvisionerStatus,
+} = require('../../services/batch/connection-status');
 const {
   ConnectionRequestNotificationService,
 } = require('../../services/notification/connection-request-notification.service');
@@ -262,7 +268,78 @@ describe('ConnectionRequest provisioner callbacks', () => {
     expect(postConnectionRequestChangeEvent).toHaveBeenCalledWith(
       updatedItem,
       'delete',
-      true
+      true,
+      expect.any(Function)
+    );
+  });
+
+  it('records a retryable failure when the provisioner cannot be reached', async () => {
+    const startedStatus = JSON.stringify({
+      status: 'pending',
+      operation: 'provision',
+      operationId: 'operation-1',
+      message: 'Provisioning started.',
+    });
+    const postConnectionRequestChangeEvent = jest.fn(
+      async (_connection, _action, _waitForCompletion, onFailure) => {
+        await onFailure(new Error('offline'));
+      }
+    );
+    ProvisionerService.mockImplementation(() => ({
+      postConnectionRequestChangeEvent,
+    }));
+    ConnectionRequestNotificationService.mockImplementation(() => ({
+      notifyChange: jest.fn().mockResolvedValue(undefined),
+    }));
+    updateConnectionProvisionerStatus.mockResolvedValue({
+      status: 200,
+      result: 'updated',
+      id: 'connection-1',
+    });
+    const keystoneAdapter = { name: 'knex' };
+    const updatedItem = {
+      id: 'connection-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      isActive: true,
+      lifecycleIntent: JSON.stringify({
+        action: 'activate',
+        operationId: 'operation-1',
+        phase: 'provision',
+      }),
+      provisionerStatus: startedStatus,
+    };
+
+    await config.hooks.afterChange({
+      operation: 'update',
+      existingItem: { ...updatedItem, isActive: false },
+      originalInput: {
+        isActive: true,
+        lifecycleIntent: updatedItem.lifecycleIntent,
+      },
+      updatedItem,
+      context: {
+        createContext: jest.fn(() => ({ keystoneAdapter })),
+      },
+    });
+
+    expect(postConnectionRequestChangeEvent).toHaveBeenCalledWith(
+      updatedItem,
+      'apply',
+      false,
+      expect.any(Function)
+    );
+    expect(updateConnectionProvisionerStatus).toHaveBeenCalledWith(
+      keystoneAdapter,
+      'connection-1',
+      startedStatus,
+      JSON.stringify({
+        status: 'failed',
+        operation: 'provision',
+        operationId: 'operation-1',
+        message:
+          'Provisioning could not start because the provisioner could not be reached. Retry the operation.',
+      })
     );
   });
 
