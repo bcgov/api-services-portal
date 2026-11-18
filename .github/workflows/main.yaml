@@ -11,9 +11,15 @@ env:
   REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
+permissions:
+  contents: read
+
 jobs:
   release-on-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # tag + GitHub release
+      pull-requests: read # release-on-push-action reads PR labels
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:

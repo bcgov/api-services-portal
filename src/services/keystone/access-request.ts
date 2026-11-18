@@ -22,13 +22,11 @@ export async function getAccessRequestsByNamespace(
         requestor {
           name
           username
+          email
         }
         application {
           name
           appId
-        }
-        requestor {
-          username
         }
         productEnvironment {
           name

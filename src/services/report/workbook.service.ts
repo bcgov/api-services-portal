@@ -59,10 +59,8 @@ export class WorkbookService {
       namespaces
     );
     const consumer_access = await getConsumerAccess(
-      envCtx,
       this.keystone,
-      namespaces,
-      serviceLookup
+      namespaces
     );
     // const consumer_metrics = await getReportOfConsumerMetrics(
     //   this.keystone,
