@@ -103,7 +103,9 @@ const normalizedScopes = (requesterDetails: any): string[] | undefined => {
   ) {
     return undefined;
   }
-  return [...new Set(scopes as string[])].sort();
+  return [...new Set(scopes as string[])].sort((left, right) =>
+    left.localeCompare(right)
+  );
 };
 
 const applyConsumerScopeRevocations = (
