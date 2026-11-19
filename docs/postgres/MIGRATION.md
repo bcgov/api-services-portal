@@ -51,3 +51,16 @@ The migration reports and rejects orphaned or duplicate
 `SubsystemIntegration` rows instead of modifying them automatically. Back up
 the database, resolve any reported invalid data, and rerun the migration before
 deploying the application.
+
+## ConnectionRequest lifecycle state (APS-5115)
+
+New databases receive the proposal and lifecycle-intent columns from
+`local/db/keystone-init.sql`. Persistent environments must apply
+`migrations/portal/postgres/migrations/mig-3.0.13-sdx-connection-lifecycle.sql`
+from the `bcgov-c/api-serv-infra` repository before deploying the APS-5115
+application changes.
+
+The migration adds `proposedConfiguration` and `lifecycleIntent`, backfills
+existing rows with an empty JSON object, and makes both columns required. Back
+up the database before running the migration. The change is additive, so an
+application rollback does not require removing the columns.
