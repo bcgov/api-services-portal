@@ -46,10 +46,7 @@ type PlannedConnectionChange =
       connection: ConnectionRequest;
       request: PreparedServiceRequest;
       serviceOrgName: string;
-      result:
-        | 'updated scopes, submitted for re-approval'
-        | 'updated version, submitted for re-approval'
-        | 'updated scopes and version, submitted for re-approval';
+      result: string;
     }
   | {
       kind: 'reactivate';
@@ -231,7 +228,7 @@ export class IntegrationAccessService {
         });
         outcomes.push(outcome);
       } else if (change.kind === 'update') {
-        const outcome = await this.api.upsertConnection(change.serviceOrgName, {
+        const outcome = await this.api.upsertConnection(subsystemOrgName, {
           clientId: change.connection.clientId!,
           serviceId: change.connection.serviceId!,
           isApproved: false,
@@ -819,6 +816,14 @@ function planConnectionChange(
 
   const existingScopes = normalizeStoredScopes(existing, request.name);
   const scopesHaveChanged = !sameStrings(existingScopes, request.scopes);
+  const requestedScopes = new Set(request.scopes);
+  const existingScopeSet = new Set(existingScopes);
+  const removedScopes = existingScopes.filter(
+    (scope) => !requestedScopes.has(scope)
+  );
+  const addedScopes = request.scopes.filter(
+    (scope) => !existingScopeSet.has(scope)
+  );
   const existingVersion = existing.requesterDetails?.service?.version;
   const versionHasChanged =
     existingVersion !== undefined &&
@@ -851,19 +856,36 @@ function planConnectionChange(
     };
   }
 
-  const changed = [
-    scopesHaveChanged ? 'scopes' : undefined,
-    versionHasChanged ? 'version' : undefined,
-  ].filter(Boolean);
+  const result = (() => {
+    if (!existing.isApproved) {
+      const changed = [
+        scopesHaveChanged ? 'scopes' : undefined,
+        versionHasChanged ? 'version' : undefined,
+      ].filter(Boolean);
+      return `updated ${changed.join(' and ')}, pending approval`;
+    }
+
+    const applied = removedScopes.length > 0 ? 'revoked scopes applied' : '';
+    const pending = [
+      addedScopes.length > 0 ? 'added scopes' : undefined,
+      versionHasChanged ? 'updated version' : undefined,
+    ].filter(Boolean);
+    if (applied && pending.length > 0) {
+      return `${applied}; ${pending.join(
+        ' and '
+      )} submitted for re-approval`;
+    }
+    if (applied) {
+      return applied;
+    }
+    return `${pending.join(' and ')}, submitted for re-approval`;
+  })();
   return {
     kind: 'update',
     connection: existing,
     request,
     serviceOrgName,
-    result: `updated ${changed.join(' and ')}, submitted for re-approval` as
-      | 'updated scopes, submitted for re-approval'
-      | 'updated version, submitted for re-approval'
-      | 'updated scopes and version, submitted for re-approval',
+    result,
   };
 }
 

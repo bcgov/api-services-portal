@@ -95,6 +95,71 @@ const proposedConfiguration = (
   return proposal;
 };
 
+const normalizedScopes = (requesterDetails: any): string[] | undefined => {
+  const scopes = resourceObject(requesterDetails).scopes;
+  if (
+    !Array.isArray(scopes) ||
+    scopes.some((scope) => typeof scope !== 'string')
+  ) {
+    return undefined;
+  }
+  return [...new Set(scopes as string[])].sort();
+};
+
+const applyConsumerScopeRevocations = (
+  existing: KeystoneConnectionRequest,
+  submitted: ConnectionRequestInput
+):
+  | {
+      requesterDetails: Record<string, any>;
+      proposal: Record<string, any>;
+    }
+  | undefined => {
+  const approvedScopes = normalizedScopes(existing.requesterDetails);
+  const requestedScopes = normalizedScopes(submitted.requesterDetails);
+  if (!approvedScopes || !requestedScopes) {
+    return undefined;
+  }
+
+  const requested = new Set(requestedScopes);
+  const retainedScopes = approvedScopes.filter((scope) =>
+    requested.has(scope)
+  );
+  if (retainedScopes.length === approvedScopes.length) {
+    return undefined;
+  }
+
+  const approvedRequesterDetails = resourceObject(existing.requesterDetails);
+  const submittedRequesterDetails = resourceObject(submitted.requesterDetails);
+  const requesterDetails = cloneDeep(submittedRequesterDetails);
+  requesterDetails.scopes = retainedScopes;
+
+  // A service version change still requires provider approval. Apply the new
+  // submission metadata now so the immediate revocation callback can be
+  // correlated, while retaining the currently approved service version.
+  if (approvedRequesterDetails.service?.version !== undefined) {
+    requesterDetails.service = {
+      ...requesterDetails.service,
+      version: approvedRequesterDetails.service.version,
+    };
+  }
+
+  const proposal = proposedConfiguration(existing, submitted);
+  const configurationAfterRevocation: Record<string, any> = {
+    ...connectionConfiguration(existing),
+    requesterDetails,
+  };
+  const hasPendingChanges = PROPOSAL_FIELDS.some(
+    (field) =>
+      !isEqual(proposal[field], configurationAfterRevocation[field])
+  );
+
+  return {
+    requesterDetails,
+    proposal: hasPendingChanges ? proposal : {},
+  };
+};
+
 const preserveManagedR1Settings = (
   submitted: any,
   stored: any,
@@ -221,6 +286,11 @@ class ConnectionService {
         'clientId',
         'Only the client or service organization can propose connection changes'
       );
+      const consumerRevocation =
+        existing!.policyVersion === 'SDX.R1.00' &&
+        clientSubsystem.organization.name === org
+          ? applyConsumerScopeRevocations(existing!, body)
+          : undefined;
       return await syncRecordsThrowErrors(
         context,
         'ConnectionRequest',
@@ -228,7 +298,14 @@ class ConnectionService {
         {
           clientId: body.clientId,
           serviceId: body.serviceId,
-          proposedConfiguration: proposedConfiguration(existing!, body),
+          ...(consumerRevocation
+            ? {
+                requesterDetails: consumerRevocation.requesterDetails,
+                proposedConfiguration: consumerRevocation.proposal,
+              }
+            : {
+                proposedConfiguration: proposedConfiguration(existing!, body),
+              }),
         }
       );
     }

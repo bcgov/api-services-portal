@@ -353,7 +353,7 @@ test('merges duplicate services and scopes while allowing an empty scope set', a
   });
 });
 
-test('awaits a scope update and sends it to the provider organization', async () => {
+test('awaits an added scope and sends it through the consumer organization', async () => {
   let releaseWrite!: () => void;
   let signalWriteStarted!: () => void;
   const writeStarted = new Promise<void>((resolve) => {
@@ -396,7 +396,7 @@ test('awaits a scope update and sends it to the provider organization', async ()
   const response = await pending;
 
   assert.equal(writes.length, 1);
-  assert.equal(writes[0].org, 'provider-a-org');
+  assert.equal(writes[0].org, 'consumer-org');
   assert.deepEqual(writes[0].input, {
     clientId: 'consumer-subsystem',
     serviceId: 'service-a',
@@ -418,7 +418,76 @@ test('awaits a scope update and sends it to the provider organization', async ()
     },
   });
   assert.deepEqual(response.results, {
-    'service-a': 'updated scopes, submitted for re-approval',
+    'service-a': 'added scopes, submitted for re-approval',
+  });
+});
+
+test('reports an approved scope revocation as applied', async () => {
+  const approved = existingConnection({
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      scopes: ['read', 'write'],
+    },
+  });
+  const { service, writes } = createService({
+    catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    connections: [approved],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+    ])
+  );
+
+  assert.equal(writes[0].org, 'consumer-org');
+  assert.deepEqual(response.results, {
+    'service-a': 'revoked scopes applied',
+  });
+});
+
+test('reports mixed removals and additions separately', async () => {
+  const approved = existingConnection({
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      scopes: ['delete', 'read'],
+    },
+  });
+  const { service, writes } = createService({
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-a', 'dev', [
+        'delete',
+        'read',
+        'write',
+      ]),
+    },
+    connections: [approved],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read', 'write'] }],
+      },
+    ])
+  );
+
+  assert.equal(writes[0].org, 'consumer-org');
+  assert.deepEqual(response.results, {
+    'service-a':
+      'revoked scopes applied; added scopes submitted for re-approval',
   });
 });
 

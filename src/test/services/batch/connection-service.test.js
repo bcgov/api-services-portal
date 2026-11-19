@@ -310,6 +310,135 @@ describe('ConnectionService', () => {
       );
     });
 
+    it('applies a consumer scope revocation without provider approval', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          isActive: true,
+          environment: 'dev',
+          requesterDetails: JSON.stringify({
+            submissionId: 'submission-1',
+            scopes: ['read', 'write'],
+            requester: { name: 'Original' },
+            client: { integrationId: '100', clientId: 'oauth-client' },
+            service: { clientId: 'provider', version: '1.0.0' },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          isApproved: false,
+          requesterDetails: {
+            submissionId: 'submission-2',
+            scopes: ['read'],
+            requester: { name: 'Updated' },
+            client: { integrationId: '100', clientId: 'oauth-client' },
+            service: { clientId: 'provider', version: '1.0.0' },
+          },
+        })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toEqual({
+        clientId: 'LAB.MIN.CLIENT',
+        serviceId: 'LAB.MIN.SERVICE.v1',
+        requesterDetails: {
+          submissionId: 'submission-2',
+          scopes: ['read'],
+          requester: { name: 'Updated' },
+          client: { integrationId: '100', clientId: 'oauth-client' },
+          service: { clientId: 'provider', version: '1.0.0' },
+        },
+        proposedConfiguration: {},
+      });
+    });
+
+    it('applies removals and retains additions as a proposal', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          isActive: true,
+          environment: 'dev',
+          requesterDetails: JSON.stringify({
+            submissionId: 'submission-1',
+            scopes: ['delete', 'read'],
+            requester: { name: 'Original' },
+            client: { integrationId: '100', clientId: 'oauth-client' },
+            service: { clientId: 'provider', version: '1.0.0' },
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-client',
+        input({
+          isApproved: false,
+          requesterDetails: {
+            submissionId: 'submission-2',
+            scopes: ['read', 'write'],
+            requester: { name: 'Updated' },
+            client: { integrationId: '100', clientId: 'oauth-client' },
+            service: { clientId: 'provider', version: '1.0.0' },
+          },
+        })
+      );
+
+      const saved = syncRecordsThrowErrors.mock.calls[0][3];
+      expect(saved.requesterDetails).toEqual({
+        submissionId: 'submission-2',
+        scopes: ['read'],
+        requester: { name: 'Updated' },
+        client: { integrationId: '100', clientId: 'oauth-client' },
+        service: { clientId: 'provider', version: '1.0.0' },
+      });
+      expect(saved.proposedConfiguration.requesterDetails).toEqual({
+        submissionId: 'submission-2',
+        scopes: ['read', 'write'],
+        requester: { name: 'Updated' },
+        client: { integrationId: '100', clientId: 'oauth-client' },
+        service: { clientId: 'provider', version: '1.0.0' },
+      });
+      expect(saved).not.toHaveProperty('isApproved');
+      expect(saved).not.toHaveProperty('isActive');
+    });
+
+    it('keeps provider-originated scope removals pending approval', async () => {
+      getRecords.mockResolvedValue([
+        {
+          id: '1',
+          policyVersion: 'SDX.R1.00',
+          isApproved: true,
+          isActive: true,
+          environment: 'dev',
+          requesterDetails: JSON.stringify({
+            scopes: ['read', 'write'],
+          }),
+        },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({
+          isApproved: false,
+          requesterDetails: { scopes: ['read'] },
+        })
+      );
+
+      const saved = syncRecordsThrowErrors.mock.calls[0][3];
+      expect(saved).not.toHaveProperty('requesterDetails');
+      expect(saved.proposedConfiguration.requesterDetails).toEqual({
+        scopes: ['read'],
+      });
+    });
+
     it('updates an existing proposal without discarding its other proposed fields', async () => {
       getRecords.mockResolvedValue([
         {
