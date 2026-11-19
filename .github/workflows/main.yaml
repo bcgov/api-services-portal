@@ -8,8 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 permissions:
   contents: read
@@ -20,6 +18,7 @@ jobs:
     permissions:
       contents: write # tag + GitHub release
       pull-requests: read # release-on-push-action reads PR labels
+      packages: write # push release images to ghcr.io
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -32,8 +31,8 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: release
         uses: rymndhng/release-on-push-action@v0.20.0
@@ -72,7 +71,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
@@ -86,7 +84,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
@@ -100,6 +97,5 @@ jobs:
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/provisioner-svc:${{ steps.release.outputs.tag_name }}
           push: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
