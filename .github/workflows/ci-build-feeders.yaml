@@ -6,8 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 permissions:
   contents: read
@@ -35,6 +33,9 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push images to ghcr.io
     steps:
       - name: Docker meta
         id: docker_meta
@@ -80,8 +81,8 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/cache@v5
         with:
