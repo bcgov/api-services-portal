@@ -60,6 +60,9 @@ export type EnvironmentConfig = {
   sdx_token_exchange_token_url?: string;
   /** Issuers accepted for original and exchanged SDX access tokens. */
   sdx_trusted_issuers?: string[];
+  ape_pubsub_kafka_url?: string;
+  ape_pubsub_webhook_url?: string;
+  ape_event_token_audience?: string;
 };
 
 /** Environment fields that must be present before an R1 connection is built. */
@@ -184,7 +187,13 @@ function validate(parsed: unknown, path: string): EnvironmentsConfig {
     optionalString(entry, 'sdx_token_exchange_client_id', name, path);
     optionalString(entry, 'sdx_token_exchange_token_url', name, path);
     optionalStringArray(entry, 'sdx_trusted_issuers', name, path);
+    optionalString(entry, 'ape_pubsub_kafka_url', name, path);
+    optionalString(entry, 'ape_pubsub_webhook_url', name, path);
+    optionalString(entry, 'ape_event_token_audience', name, path);
     result[name] = {
+      ape_pubsub_kafka_url: entry.ape_pubsub_kafka_url as string | undefined,
+      ape_pubsub_webhook_url: entry.ape_pubsub_webhook_url as string | undefined,
+      ape_event_token_audience: entry.ape_event_token_audience as string | undefined,
       client_id: entry.client_id as string | undefined,
       oauth_token_url: entry.oauth_token_url as string,
       kong_admin_url: entry.kong_admin_url as string,

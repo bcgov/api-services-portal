@@ -1,3 +1,4 @@
+import { applyPubSubWebhooks } from './pubsub-webhook-service.js';
 import type { FastifyBaseLogger } from 'fastify';
 import type { Services } from './index.js';
 import type {
@@ -68,6 +69,11 @@ export class ResourceDispatcher {
         apply: (gatewayId, environment, r, action) =>
           services.commonSso.applyResources(gatewayId, environment, r, action),
       },
+      ape: {
+        name: 'ape',
+        apply: (_gatewayId, environment, resources, action) =>
+          applyPubSubWebhooks(environment, resources, action),
+      },
       aps: {
         name: 'aps',
         apply: (gatewayId, _environment, r, action) =>
@@ -89,6 +95,7 @@ export class ResourceDispatcher {
       GatewayKey: 'gwa',
       GatewayConsumer: 'gwa',
       IntegrationAllowedServices: 'css',
+      PubSubWebhook: 'ape',
     };
   }
 
@@ -152,6 +159,18 @@ export class ResourceDispatcher {
       this.logger?.info(current, 'applying resource batch');
 
       output.push(current);
+      if (
+        action === 'apply' &&
+        providerKey === 'ape' &&
+        output.some(
+          (result) =>
+            result.provider === this.providers.gwa.name &&
+            result.status === 'failed'
+        )
+      ) {
+        current.message = 'Publisher gateway route failed to provision.';
+        continue;
+      }
 
       try {
         const details = await provider.apply(

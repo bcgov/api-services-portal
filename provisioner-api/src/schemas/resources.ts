@@ -23,6 +23,7 @@ export const RESOURCE_KINDS = [
   'GatewayConsumer',
   // CSS (commonSso)
   'IntegrationAllowedServices',
+  'PubSubWebhook',
 ] as const;
 
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];

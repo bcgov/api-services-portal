@@ -40,7 +40,38 @@ namespace SDX {
                         "sdx-p2p-consumer-access.r1"?: {
                             integrationClientId?: String,
                         },
-                        "sdx-p2p-consumer.r1": {
+                        "sdx-async-subscriber.r1"?: {
+                            upstreamUrl: String,
+                            topic?: String,
+                            upgrades?: {
+                                mtlsAuth?: {},
+                                mtlsAcl?: {},
+                                sign?: {
+                                    alg?: String
+                                },
+                                verify?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
+                                token?: {
+                                    allowedIss?: Set<String>,
+                                    allowedAud?: String,
+                                    scope?: String,
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
+                                },
+                                acl?: {},
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
+                                    audience?: String,
+                                    scopes?: Set<String>
+                                }
+                            }
+                        },
+                        "sdx-p2p-consumer.r1"?: {
                             clientRuntimeOverride?: String,
                             stripPath?: Bool,
                             tlsVerify?: String,
@@ -75,7 +106,37 @@ namespace SDX {
                 serviceResources?: {
                     comment?: String,
                     gatewayPatterns?: {
-                        "sdx-p2p-provider.r1": {
+                        "sdx-async-publisher.r1"?: {
+                            topic: String,
+                            upgrades?: {
+                                mtlsAuth?: {},
+                                mtlsAcl?: {},
+                                sign?: {
+                                    alg?: String
+                                },
+                                verify?: {},
+                                counterSign?: {
+                                    signatureAlgorithm?: String
+                                },
+                                token?: {
+                                    allowedIss?: Set<String>,
+                                    allowedAud?: String,
+                                    scope?: String,
+                                    consumerMatch?: Bool,
+                                    consumerMatchClaim?: String,
+                                    consumerMatchClaimCustomId?: Bool,
+                                    consumerMatchIgnoreNotFound?: Bool
+                                },
+                                acl?: {},
+                                tokenExchange?: {
+                                    clientId: String,
+                                    tokenEndpoint: String,
+                                    audience?: String,
+                                    scopes?: Set<String>
+                                }
+                            }
+                        },
+                        "sdx-p2p-provider.r1"?: {
                             upstreamUrl?: String,
                             useSni?: String,
                             clientRuntimeOverride?: String,
@@ -123,7 +184,10 @@ namespace SDX {
                         client_runtime_override?: String,
                         sdx_token_exchange_client_id?: String,
                         sdx_token_exchange_token_url?: String,
-                        sdx_trusted_issuers?: Set<String>
+                        sdx_trusted_issuers?: Set<String>,
+                        ape_pubsub_kafka_url?: String,
+                        ape_pubsub_webhook_url?: String,
+                        ape_event_token_audience?: String
                     }
                 }
             }

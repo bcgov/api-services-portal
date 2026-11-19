@@ -55,7 +55,7 @@ export class GatewayServiceController extends Controller {
 
   /**
    * Creates or updates an OAS service for the specified organization.
-   * The OAS service is defined by an OpenAPI specification file uploaded as part of the request.
+   * Upload an OpenAPI or AsyncAPI 3.0.0/3.1.0 document as YAML or JSON.
    *
    * This endpoint processes the specification, creates necessary configurations, and registers
    * the service within the SDX environment.

@@ -24,7 +24,7 @@ export interface SDXP2PProviderPatternConfig extends Record<string, any> {
   clientRuntimeOverride?: string;
 }
 
-interface ProviderUpgrades {
+export interface ProviderUpgrades {
   mtlsAuth: {};
   mtlsAcl: {};
   acl: {};
@@ -216,8 +216,6 @@ export class SDXP2PProviderPattern implements PatternProcessor {
 
     const upstreamUrl = data.upstreamUrl;
 
-    const upgrades: ProviderUpgrades = inputs.upgrades || {};
-
     const routePathPrefix = getRoutePathPrefix(serviceLocator);
 
     return [
@@ -269,45 +267,53 @@ export class SDXP2PProviderPattern implements PatternProcessor {
             ],
           },
         ],
-        plugins: [
-          ...(upgrades.hasOwnProperty('mtlsAuth')
-            ? [upgradeToMTLSAuth(tags, data)]
-            : []),
-          ...(upgrades.hasOwnProperty('mtlsAcl')
-            ? [upgradeToMTLSACL(tags, data)]
-            : []),
-          ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
-          ...(upgrades.hasOwnProperty('sign')
-            ? [upgradeToTrustSign(tags, data, inputs)]
-            : []),
-          ...(upgrades.hasOwnProperty('verify')
-            ? [upgradeToTrustVerify(tags, data)]
-            : []),
-          ...(upgrades.hasOwnProperty('token')
-            ? [upgradeToJWTKeycloak(tags, data, inputs)]
-            : []),
-          ...(upgrades.hasOwnProperty('counterSign')
-            ? [upgradeToTrustKMS(tags, data, inputs)]
-            : []),
-          ...(upgrades.hasOwnProperty('tokenExchange')
-            ? [
-                upgradeToTokenExchange(
-                  tags,
-                  data,
-                  inputs as SDXP2PProviderPatternConfig
-                ),
-              ]
-            : []),
-        ],
+        plugins: providerUpgradePlugins(tags, data, inputs),
       },
     ] as any[];
   }
 }
 
+type ProviderPluginData = Pick<
+  SDXP2PProviderPatternData,
+  'service' | 'clientRG' | 'serviceRG'
+>;
+
+export function providerUpgradePlugins(
+  tags: string[],
+  data: ProviderPluginData,
+  inputs: Pick<SDXP2PProviderPatternConfig, 'upgrades'>
+) {
+  const upgrades = inputs.upgrades || {};
+  return [
+    ...(upgrades.hasOwnProperty('mtlsAuth')
+      ? [upgradeToMTLSAuth(tags, data)]
+      : []),
+    ...(upgrades.hasOwnProperty('mtlsAcl')
+      ? [upgradeToMTLSACL(tags, data)]
+      : []),
+    ...(upgrades.hasOwnProperty('acl') ? [upgradeToACL(tags, data)] : []),
+    ...(upgrades.hasOwnProperty('sign')
+      ? [upgradeToTrustSign(tags, data, inputs)]
+      : []),
+    ...(upgrades.hasOwnProperty('verify')
+      ? [upgradeToTrustVerify(tags, data)]
+      : []),
+    ...(upgrades.hasOwnProperty('token')
+      ? [upgradeToJWTKeycloak(tags, data, inputs)]
+      : []),
+    ...(upgrades.hasOwnProperty('counterSign')
+      ? [upgradeToTrustKMS(tags, data, inputs)]
+      : []),
+    ...(upgrades.hasOwnProperty('tokenExchange')
+      ? [upgradeToTokenExchange(tags, data, inputs)]
+      : []),
+  ];
+}
+
 function upgradeToJWTKeycloak(
   tags: string[],
-  data: SDXP2PProviderPatternData,
-  inputs: SDXP2PProviderPatternConfig
+  data: ProviderPluginData,
+  inputs: Pick<SDXP2PProviderPatternConfig, 'upgrades'>
 ) {
   const jwtKeycloakConfig = inputs.upgrades.token;
 
@@ -329,7 +335,7 @@ function upgradeToJWTKeycloak(
   };
 }
 
-function upgradeToMTLSAuth(tags: string[], data: SDXP2PProviderPatternData) {
+function upgradeToMTLSAuth(tags: string[], data: ProviderPluginData) {
   return {
     name: 'mtls-auth',
     tags: tags,
@@ -345,7 +351,7 @@ function upgradeToMTLSAuth(tags: string[], data: SDXP2PProviderPatternData) {
   };
 }
 
-function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
+function upgradeToMTLSACL(tags: string[], data: ProviderPluginData) {
   return {
     name: 'mtls-acl',
     tags: tags,
@@ -356,7 +362,7 @@ function upgradeToMTLSACL(tags: string[], data: SDXP2PProviderPatternData) {
   };
 }
 
-function upgradeToACL(tags: string[], data: SDXP2PProviderPatternData) {
+function upgradeToACL(tags: string[], data: ProviderPluginData) {
   return {
     name: 'acl',
     tags: tags,
@@ -368,8 +374,8 @@ function upgradeToACL(tags: string[], data: SDXP2PProviderPatternData) {
 
 function upgradeToTrustSign(
   tags: string[],
-  data: SDXP2PProviderPatternData,
-  inputs: SDXP2PProviderPatternConfig
+  data: ProviderPluginData,
+  inputs: Pick<SDXP2PProviderPatternConfig, 'upgrades'>
 ) {
   return {
     name: 'trust-sign',
@@ -383,16 +389,14 @@ function upgradeToTrustSign(
   };
 }
 
-function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
+function upgradeToTrustVerify(tags: string[], data: ProviderPluginData) {
   return {
     name: 'trust-verify-signature',
     tags: tags,
     config: {
       direction: 'request',
       signature_header_key: 'X-Edge-Token',
-      allowed_jwks_uri_prefix: [
-        edgeJwksUriPrefix(data.serviceRG.environment!),
-      ],
+      allowed_jwks_uri_prefix: [edgeJwksUriPrefix(data.serviceRG.environment!)],
       manifest_type: 'signature-only',
       iss_key_grace_period: 300,
     },
@@ -401,8 +405,8 @@ function upgradeToTrustVerify(tags: string[], data: SDXP2PProviderPatternData) {
 
 function upgradeToTokenExchange(
   tags: string[],
-  data: SDXP2PProviderPatternData,
-  inputs: SDXP2PProviderPatternConfig
+  data: ProviderPluginData,
+  inputs: Pick<SDXP2PProviderPatternConfig, 'upgrades'>
 ) {
   const tokenExchangeConfig = inputs.upgrades.tokenExchange;
 
@@ -422,8 +426,8 @@ function upgradeToTokenExchange(
 
 function upgradeToTrustKMS(
   tags: string[],
-  data: SDXP2PProviderPatternData,
-  inputs: SDXP2PProviderPatternConfig
+  data: ProviderPluginData,
+  inputs: Pick<SDXP2PProviderPatternConfig, 'upgrades'>
 ) {
   const member = data.service.subsystem.member;
   const memberText = `${member.memberClass}.${member.memberId}`.toLowerCase();

@@ -238,6 +238,97 @@ paths: {}
     );
   });
 
+  it.each([
+    ['3.0.0', 'YAML'],
+    ['3.1.0', 'JSON'],
+  ])('uploads AsyncAPI %s as %s', async (asyncapi, format) => {
+    const document = {
+      asyncapi,
+      info: { title: 'Orders Events', version: '1.0.0' },
+      channels: { orderEvents: { address: 'orders.created' } },
+      operations: {
+        publishOrder: {
+          action: 'send',
+          channel: { $ref: '#/channels/orderEvents' },
+          summary: 'Publish an order',
+        },
+        consumeOrder: { $ref: '#/components/operations/consumeOrder' },
+      },
+      components: {
+        operations: {
+          consumeOrder: {
+            action: 'receive',
+            channel: { $ref: '#/channels/orderEvents' },
+          },
+        },
+      },
+    };
+    const result = await LoadOpenAPISpec(
+      {},
+      {
+        organization: 'ministry-of-citz',
+        subsystem: 'MY-SVC',
+        environment: 'dev',
+        spec:
+          format === 'JSON'
+            ? JSON.stringify(document)
+            : YAML.stringify(document),
+      }
+    );
+
+    expect(mockValidateRuleset).not.toHaveBeenCalled();
+    expect(result.specVersion).toBe(`asyncapi=${asyncapi}`);
+    expect(result.description).toBe('');
+    expect(YAML.parse(result.spec)).toEqual(document);
+    expect(JSON.parse(result.operations)).toEqual([
+      {
+        operationId: 'publishOrder',
+        method: 'SEND',
+        path: 'orders.created',
+        summary: 'Publish an order',
+        scopes: [],
+      },
+      {
+        operationId: 'consumeOrder',
+        method: 'RECEIVE',
+        path: 'orders.created',
+        summary: '',
+        scopes: [],
+      },
+    ]);
+  });
+
+  it.each([
+    { asyncapi: '2.6.0' },
+    { asyncapi: '3.0.0' },
+    {
+      asyncapi: '3.0.0',
+      info: { title: 'Orders Events', version: '1.0.0' },
+      operations: {
+        publishOrder: {
+          action: 'send',
+          channel: { $ref: '#/channels/missing' },
+        },
+      },
+    },
+  ])('rejects unsupported or invalid AsyncAPI uploads', async (document) => {
+    await expect(
+      LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'dev',
+          spec: YAML.stringify(document),
+        }
+      )
+    ).rejects.toMatchObject({
+      status: 400,
+      fields: { spec: expect.any(Object) },
+    });
+    expect(mockBuildServiceName).not.toHaveBeenCalled();
+  });
+
   it('passes info.x-csbc-api-standard to the validation service', async () => {
     mockValidateRuleset.mockResolvedValue({
       version: 'v0.2.0-test',

@@ -1,3 +1,6 @@
+import { BadRequestError } from '../errors/api-errors.js';
+import { SDXAsyncPublisherPattern } from '../services/gateway-patterns/sdx-async-publisher.js';
+import { SDXAsyncSubscriberPattern } from '../services/gateway-patterns/sdx-async-subscriber.js';
 import type { Services } from '../services/index.js';
 import { ResourceDispatcher } from '../services/resource-dispatcher.js';
 import type {
@@ -44,6 +47,15 @@ export class PatternsController {
    * the providers that own each kind.
    */
   async process(input: ApplyPatternInput): Promise<TApplyResourcesResponse> {
+    if (
+      input.action !== 'preview' &&
+      (input.pattern === SDXAsyncPublisherPattern.ID ||
+        input.pattern === SDXAsyncSubscriberPattern.ID)
+    ) {
+      throw new BadRequestError(
+        'AsyncAPI patterns must be applied through a connection request'
+      );
+    }
     const resource =
       await this.services.patternsEvaluator.buildResourcesUsingPattern({
         patternName: input.pattern,

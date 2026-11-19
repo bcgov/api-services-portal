@@ -70,7 +70,6 @@ module.exports = {
     specVersion: {
       type: Text,
       isRequired: true,
-      access: { update: false },
     },
     subsystem: {
       type: Relationship,
@@ -83,8 +82,8 @@ module.exports = {
   access: EnforcementPoint,
   hooks: {
     resolveInput: ({ operation, resolvedData }) => {
-      if (operation === 'update') {
-        delete resolvedData['specVersion'];
+      if (operation === 'update' && resolvedData.spec === undefined) {
+        delete resolvedData.specVersion;
       }
       return resolvedData;
     },

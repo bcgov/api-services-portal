@@ -48,3 +48,33 @@ unless {
     context has environment &&
     (context.environment == "apsdev" || context.environment == "apstst" || context.environment == "dev")
 };
+
+forbid ( // Require approval and activation before applying AsyncAPI patterns
+    principal,
+    action == SDX::Action::"SubmitConnectionRequest",
+    resource is SDX::ConnectionRequest
+)
+when {
+    context.action == "apply" &&
+    ((context has serviceResources && context.serviceResources has gatewayPatterns &&
+      context.serviceResources.gatewayPatterns has "sdx-async-publisher.r1") ||
+     (context has clientResources && context.clientResources has gatewayPatterns &&
+      context.clientResources.gatewayPatterns has "sdx-async-subscriber.r1"))
+}
+unless {
+    context.isApproved && context has isActive && context.isActive
+};
+
+forbid ( // Require the subscriber route for publisher webhook delivery
+    principal,
+    action == SDX::Action::"SubmitConnectionRequest",
+    resource is SDX::ConnectionRequest
+)
+when {
+    context has serviceResources && context.serviceResources has gatewayPatterns &&
+    context.serviceResources.gatewayPatterns has "sdx-async-publisher.r1"
+}
+unless {
+    context has clientResources && context.clientResources has gatewayPatterns &&
+    context.clientResources.gatewayPatterns has "sdx-async-subscriber.r1"
+};

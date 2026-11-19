@@ -1,3 +1,5 @@
+import { SDXAsyncPublisherPattern } from './gateway-patterns/sdx-async-publisher.js';
+import { SDXAsyncSubscriberPattern } from './gateway-patterns/sdx-async-subscriber.js';
 import type { FastifyBaseLogger } from 'fastify';
 import {
   ConnectionRequestInput,
@@ -64,6 +66,8 @@ export class PatternsEvaluatorService {
     private readonly logger?: FastifyBaseLogger
   ) {
     this.patterns = {
+      [SDXAsyncPublisherPattern.ID]: new SDXAsyncPublisherPattern(sdx),
+      [SDXAsyncSubscriberPattern.ID]: new SDXAsyncSubscriberPattern(sdx),
       [SDXKeysPattern.ID]: new SDXKeysPattern(sdx, gatewayAdmin, logger),
       [SDXP2PConsumerAccessPattern.ID]: new SDXP2PConsumerAccessPattern(
         sdx,

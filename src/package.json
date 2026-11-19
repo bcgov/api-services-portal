@@ -60,6 +60,7 @@
     "start:coverage": "NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch --dns-result-order=ipv4first' nyc npm run start"
   },
   "dependencies": {
+    "@asyncapi/specs": "^6.11.1",
     "@bcgov/bc-sans": "^1.0.1",
     "@chakra-ui/react": "^1.6.0",
     "@emotion/react": "^11.4.1",
@@ -82,6 +83,8 @@
     "@keystonejs/utils": "^6.1.1",
     "@tailwindcss/postcss7-compat": "^2.0.2",
     "@tsoa/runtime": "^3.13.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "autoprefixer": "^9.8.6",
     "connect-mongo": "^3.2.0",
     "connect-redis": "^5.2.0",

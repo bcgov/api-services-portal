@@ -1,3 +1,8 @@
+import {
+  SDXAsyncPublisherPattern,
+  publisherWebhook,
+} from '../services/gateway-patterns/sdx-async-publisher.js';
+import { SDXAsyncSubscriberPattern } from '../services/gateway-patterns/sdx-async-subscriber.js';
 import type { Services } from '../services/index.js';
 import type {
   TConnectionChangeRequest,
@@ -54,7 +59,7 @@ export class ConnectionsController {
         id,
         action,
         service,
-        policyConnectionRequest
+        normalizeAsyncApiResources(policyConnectionRequest)
       );
 
       const results: TResourceResult[] = [];
@@ -71,7 +76,43 @@ export class ConnectionsController {
           ),
         };
       } else {
+        let asyncRouteFailed = false;
+        if (action === 'delete') {
+          const hasWebhook = (resource: { documents: { kind: string }[] }) =>
+            resource.documents.some((doc) => doc.kind === 'PubSubWebhook');
+          if (
+            !resourceSets.some(hasWebhook) &&
+            policyConnectionRequest.serviceResources?.gatewayPatterns?.[LEGACY_WEBHOOK_PATTERN]
+          ) {
+            resourceSets.unshift({
+              documents: [publisherWebhook({
+                connId: id,
+                clientId: connectionRequest.clientId,
+                serviceId: connectionRequest.serviceId,
+              })],
+            });
+          }
+          resourceSets.sort(
+            (left, right) => Number(hasWebhook(right)) - Number(hasWebhook(left))
+          );
+        }
         for (const resource of resourceSets) {
+          const managedWebhook = resource.documents.some(
+            (doc) => doc.kind === 'PubSubWebhook'
+          );
+          const asyncRoute = resource.documents.some(
+            (doc) =>
+              doc.kind === 'GatewayService' &&
+              doc.name?.startsWith('sdx.asyncapi.')
+          );
+          if (action === 'apply' && managedWebhook && asyncRouteFailed) {
+            results.push({
+              provider: 'ape',
+              status: 'skipped',
+              message: 'An AsyncAPI route failed to provision.',
+            });
+            continue;
+          }
           this.logger?.debug(
             'Dispatching: %s',
             resource.documents.map((doc) => doc.kind).join(', ')
@@ -89,6 +130,12 @@ export class ConnectionsController {
             newAction
           );
           results.push(...result);
+          if (
+            asyncRoute &&
+            result.some((entry) => entry.status !== 'applied')
+          ) {
+            asyncRouteFailed = true;
+          }
         }
 
         if (action !== 'diff') {
@@ -327,4 +374,58 @@ export class ConnectionsController {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+// Connections saved with the earlier resource placement still resolve to
+// the same route names and managed webhook IDs.
+const LEGACY_WEBHOOK_PATTERN = 'sdx-asyncapi-webhook.r1';
+
+function normalizeAsyncApiResources(
+  connection: TConnectionChangeRequest
+): TConnectionChangeRequest {
+  const client = connection.clientResources?.gatewayPatterns;
+  const service = connection.serviceResources?.gatewayPatterns;
+  const producer = SDXAsyncPublisherPattern.ID;
+  const subscriber = SDXAsyncSubscriberPattern.ID;
+  const webhook = LEGACY_WEBHOOK_PATTERN;
+  const oldPublisher = 'sdx-asyncapi-producer.r1';
+  const oldSubscriber = 'sdx-p2p-subscriber.r1';
+  const publisher =
+    service?.[producer] ??
+    client?.[producer] ??
+    service?.[oldPublisher] ??
+    client?.[oldPublisher];
+  const subscription =
+    client?.[subscriber] ??
+    service?.[subscriber] ??
+    client?.[oldSubscriber] ??
+    service?.[oldSubscriber];
+  if (!publisher && !subscription && !service?.[webhook]) return connection;
+
+  const clientPatterns = { ...client };
+  const servicePatterns = { ...service };
+  for (const patterns of [clientPatterns, servicePatterns]) {
+    delete patterns[producer];
+    delete patterns[subscriber];
+    delete patterns[oldPublisher];
+    delete patterns[oldSubscriber];
+  }
+  if (publisher) servicePatterns[producer] = publisher;
+  if (subscription) {
+    clientPatterns[subscriber] = publisher
+      ? { ...subscription, topic: publisher.topic }
+      : subscription;
+  }
+  delete servicePatterns[webhook];
+  return {
+    ...connection,
+    clientResources: {
+      ...connection.clientResources,
+      gatewayPatterns: clientPatterns,
+    },
+    serviceResources: {
+      ...connection.serviceResources,
+      gatewayPatterns: servicePatterns,
+    },
+  };
 }

@@ -137,6 +137,7 @@ export class ProvisionerService {
       policyVersion: connection.policyVersion,
       environment: connection.environment,
       isApproved: connection.isApproved,
+      isActive: connection.isActive,
       requesterDetails: JSON.parse(connection.requesterDetails),
       clientResources: JSON.parse(connection.clientResources),
       serviceResources: JSON.parse(connection.serviceResources),

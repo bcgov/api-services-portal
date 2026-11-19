@@ -6,6 +6,7 @@ import { Subsystem } from '../keystone/types';
 import { SubsystemService } from '../batch/subsystem';
 import { BuildServiceName } from '../gateway-patterns/catalog';
 import { OpenAPISpecValidationService } from './openapi-spec-validation-service';
+import { parseAsyncAPIOperations } from './asyncapi-spec';
 import { assertSdxEnvironment } from './sdx-environments';
 
 const logger = Logger('wf.OASLoader');
@@ -76,13 +77,28 @@ export const LoadOpenAPISpec = async (
     }
   }
 
-  const validationResult =
-    await new OpenAPISpecValidationService().validateRuleset(
-      spec.spec,
-      getCSBCApiStandard(oas)
+  const isOpenAPI = typeof oas?.openapi === 'string' && oas.openapi !== '';
+  const isAsyncAPI = typeof oas?.asyncapi === 'string' && oas.asyncapi !== '';
+  if (isOpenAPI === isAsyncAPI) {
+    throw new ValidateError(
+      { spec: { message: 'Specify exactly one of openapi or asyncapi.' } },
+      'Validation Failed'
     );
-  oas.info['x-csbc-api-standard'] = validationResult.version;
-  oas.info['x-csbc-api-standard-ruleset'] = validationResult.ruleset;
+  }
+
+  let operations: SpecOperations[];
+  if (isOpenAPI) {
+    const validationResult =
+      await new OpenAPISpecValidationService().validateRuleset(
+        spec.spec,
+        getCSBCApiStandard(oas)
+      );
+    oas.info['x-csbc-api-standard'] = validationResult.version;
+    oas.info['x-csbc-api-standard-ruleset'] = validationResult.ruleset;
+    operations = parseSpecOperations(oas);
+  } else {
+    operations = parseAsyncAPIOperations(oas);
+  }
 
   const serviceName = BuildServiceName(subsystemRecord, spec.environment, oas);
 
@@ -96,15 +112,18 @@ export const LoadOpenAPISpec = async (
   outSpec.environment = spec.environment;
   outSpec.title = oas.info?.title;
   outSpec.summary = oas.info?.summary;
-  outSpec.specVersion =
-    'openapi' in oas ? `openapi=${oas.openapi}` : `asyncapi=${oas.asyncapi}`;
+  outSpec.specVersion = isOpenAPI
+    ? `openapi=${oas.openapi}`
+    : `asyncapi=${oas.asyncapi}`;
   outSpec.version = oas.info?.version;
-  outSpec.description = oas.info?.description;
+  outSpec.description = isAsyncAPI
+    ? oas.info.description ?? ''
+    : oas.info?.description;
   outSpec.ref = outSpec.name;
   if (spec.upstreamUrl !== undefined) {
     outSpec.upstreamUrl = spec.upstreamUrl;
   }
-  outSpec.operations = JSON.stringify(parseSpecOperations(oas));
+  outSpec.operations = JSON.stringify(operations);
 
   return outSpec;
 };

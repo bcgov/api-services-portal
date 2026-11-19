@@ -77,6 +77,58 @@ Routes are served under the OpenAPI server prefix `/ds/api/sdxpro/v1`:
 - `POST /ds/api/sdxpro/v1/subsystems/{id}/access-requests`
   - declares the `provisionAllowedServices` callback (`PUT` to the partner)
 
+### AsyncAPI connection requests
+
+For an AsyncAPI 3.x producer, pass the following resources to
+`POST /connections/:id?action=preview` to inspect the generated endpoints.
+The same resources are applied by the existing connection lifecycle once the
+request is approved by the producer’s organization and active. These patterns are available under the
+`SDX.R0.00` policy in its existing development environments. The R1 policy
+continues to use its managed synchronous gateway patterns.
+
+```yaml
+policyVersion: SDX.R0.00
+clientResources:
+  gatewayPatterns:
+    sdx-async-subscriber.r1:
+      upstreamUrl: https://ui.example.com/webhooks/v1/address-changes
+serviceResources:
+  gatewayPatterns:
+    sdx-async-publisher.r1:
+      topic: abc.address.change.v1
+```
+
+- The producer endpoint is an HTTPS POST on the producer runtime. Kong checks
+  the producer runtime certificate and scoped OAuth bearer token, then proxies
+  to `pubsub-kafka`. POST the original JSON bytes and include the record-bound
+  JWT in `producer-authorization`. The Kafka key comes from `Kafka-Key` or
+  the JSON `addressId` when present.
+- The subscriber endpoint is an HTTPS POST on the subscriber runtime. The
+  provisioner registers its URL and topic with `pubsub-webhook`. APE forwards
+  the record bytes and assertion to that endpoint. The gateway checks the
+  OAuth assertion and the UI verifies its topic, digest and producer approval.
+- The published AsyncAPI send operation must declare the Kafka channel.
+  Producer automatically registers fan-out to the subscriber route. Both
+  patterns support the usual provider upgrades. When the catalog supplies a
+  single unambiguous OAuth scope, the gateway uses it by default. Use separate topics for different approved
+  data coverage. Create the Kafka topic and grant APE's producer and consumer
+  accounts their respective Kafka permissions before activating a request.
+- Keep the pattern configuration on the request when deactivating it so the
+  provisioner can remove its webhook registration and gateway routes. Webhook
+  delivery can retry a record, so the subscriber must accept duplicates safely.
+
+Set `ape_pubsub_kafka_url`, `ape_pubsub_webhook_url` and
+`ape_event_token_audience` in the environment config for the provisioner.
+The gateway uses `sdx_trusted_issuers` for JWT issuer discovery. Expose the
+APE endpoints only to their gateway or provisioner callers on the private
+network. The webhook function must be able to reach subscriber runtime hosts.
+
+For a SASL/OAUTHBEARER broker, set `KAFKA_BROKERS`, `KAFKA_OAUTH_TOKEN_URL`,
+`KAFKA_OAUTH_CLIENT_ID` and `KAFKA_OAUTH_CLIENT_SECRET` for each APE function.
+Set `KAFKA_OAUTH_SCOPE` if the broker's issuer requires a scope. Grant each
+deployment Deno network access to its broker and token endpoint hosts, and
+grant the webhook deployment access to the subscriber runtime hosts.
+
 ### R1 access migration prerequisite
 
 Before enabling the R1 integration-access callback, complete the APS-4992 audit and migration of legacy connection records so every `requesterDetails` object has an explicit `scopes` array. Submission and normal apply paths intentionally fail closed when scope data is missing or malformed. Delete/revocation remains available and skips malformed legacy rows with a structured warning so stale access can still be removed.
