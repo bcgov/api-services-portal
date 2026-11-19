@@ -87,7 +87,6 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           load: true
           build-args: |
-            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
             APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
@@ -413,9 +412,6 @@ jobs:
               value: keystonejs
             FEEDER_URL:
               value: 'http://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
-            GITHUB_API_TOKEN:
-              value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
-              secure: true
             OIDC_ISSUER:  
               value: '${{ secrets.OIDC_ISSUER }}'
             OIDC_CLIENT_ID:
