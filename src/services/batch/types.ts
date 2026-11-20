@@ -388,6 +388,12 @@ export interface ConnectionRequest {
   requesterDetails?: any; // toString
   clientResources?: any; // toString
   serviceResources?: any; // toString
+  proposedConfiguration?: any; // toString
+  lifecycleIntent?: any; // toString
+  lifecycleActions?: Record<
+    'activate' | 'deactivate' | 'retry' | 'revoke',
+    { allowed: boolean; requiresConfirmation?: boolean; message?: string }
+  >;
 }
 
 

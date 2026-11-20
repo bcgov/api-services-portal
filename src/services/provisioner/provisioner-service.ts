@@ -123,58 +123,87 @@ export class ProvisionerService {
 
   public async postConnectionRequestChangeEvent(
     connection: ConnectionRequest,
-    action: 'apply' | 'delete'
+    action: 'apply' | 'delete',
+    waitForCompletion = false,
+    onFailure?: (error: unknown) => Promise<void> | void
   ): Promise<void> {
     // credentials will be using the gwa admin
+    let body: string | undefined;
+    const request = (async () => {
+      try {
+        const provisionerStatus =
+          typeof connection.provisionerStatus === 'string'
+            ? JSON.parse(connection.provisionerStatus || '{}')
+            : connection.provisionerStatus || {};
+        const lifecycleIntent =
+          typeof connection.lifecycleIntent === 'string'
+            ? JSON.parse(connection.lifecycleIntent || '{}')
+            : connection.lifecycleIntent || {};
+        const payload = {
+          clientId: connection.clientId,
+          serviceId: connection.serviceId,
+          policyVersion: connection.policyVersion,
+          environment: connection.environment,
+          isApproved: connection.isApproved,
+          requesterDetails: JSON.parse(connection.requesterDetails),
+          clientResources: JSON.parse(connection.clientResources),
+          serviceResources: JSON.parse(connection.serviceResources),
+          operationId: provisionerStatus.operationId,
+          lifecycleAction: lifecycleIntent.action,
+        };
 
-    const provisionerStatus =
-      typeof connection.provisionerStatus === 'string'
-        ? JSON.parse(connection.provisionerStatus || '{}')
-        : connection.provisionerStatus || {};
-    const payload = {
-      clientId: connection.clientId,
-      serviceId: connection.serviceId,
-      policyVersion: connection.policyVersion,
-      environment: connection.environment,
-      isApproved: connection.isApproved,
-      requesterDetails: JSON.parse(connection.requesterDetails),
-      clientResources: JSON.parse(connection.clientResources),
-      serviceResources: JSON.parse(connection.serviceResources),
-      operationId: provisionerStatus.operationId,
-    };
+        logger.debug(
+          'Calling %s',
+          `${this.provisionerUrl}/connections/${connection.id}?action=${action}`
+        );
 
-    logger.debug(
-      'Calling %s',
-      `${this.provisionerUrl}/connections/${connection.id}?action=${action}`
-    );
+        body = JSON.stringify(payload);
+        const response = await fetch(
+          `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body,
+          }
+        )
+          .then(checkStatus)
+          .then((r) => r.json())
+          .then((r) => r as ConnectionRequestChangeEventResponse);
 
-    const body = JSON.stringify(payload);
-
-    fetch(
-      `${this.provisionerUrl}/connections/${connection.id}?action=${action}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      }
-    )
-      .then(checkStatus)
-      .then((r) => r.json())
-      .then((r) => r as ConnectionRequestChangeEventResponse)
-      .then((r) => {
         logger.debug(
           'Provisioner response: applied=%d, failed=%d : %j',
-          r.applied,
-          r.failed,
-          r
+          response.applied,
+          response.failed,
+          response
         );
-      })
-      .catch((err) => {
-        logger.error('Provisioner Sent: %s', body);
+      } catch (err) {
+        logger.error(
+          'Provisioner Sent: %s',
+          body || 'Payload preparation failed before dispatch.'
+        );
         logger.error('Provisioner Error: %s', err);
-      });
+        if (onFailure) {
+          try {
+            await onFailure(err);
+          } catch (statusError) {
+            logger.error(
+              'Unable to record provisioner dispatch failure: %s',
+              statusError
+            );
+          }
+        }
+      }
+    })();
+
+    // Revoke is one orchestrated action: wait until the provisioner has
+    // persisted its terminal callback before verifying cleanup and deleting
+    // the connection record. Other lifecycle events keep their established
+    // asynchronous response behavior.
+    if (waitForCompletion) {
+      await request;
+    }
   }
 
   public async deleteGateway(

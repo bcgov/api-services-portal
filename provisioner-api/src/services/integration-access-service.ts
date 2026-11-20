@@ -50,10 +50,7 @@ type PlannedConnectionChange =
       connection: ConnectionRequest;
       request: PreparedServiceRequest;
       serviceOrgName: string;
-      result:
-        | 'updated scopes, submitted for re-approval'
-        | 'updated version, submitted for re-approval'
-        | 'updated scopes and version, submitted for re-approval';
+      result: string;
     }
   | {
       kind: 'reactivate';
@@ -214,20 +211,26 @@ export class IntegrationAccessService {
           serviceResources: request.defaults.serviceResources,
         });
         outcomes.push(outcome);
-      } else if (
-        change.kind === 'update' ||
-        change.kind === 'reactivate' ||
-        change.kind === 'pin-version'
-      ) {
-        const reactivating = change.kind === 'reactivate';
-        const pinningVersion = change.kind === 'pin-version';
+      } else if (change.kind === 'update') {
+        const outcome = await this.api.upsertConnection(subsystemOrgName, {
+          clientId: change.connection.clientId!,
+          serviceId: change.connection.serviceId!,
+          isApproved: false,
+          requesterDetails: request.requesterDetails,
+        });
+        outcomes.push(outcome);
+      } else if (change.kind === 'reactivate') {
+        const outcome = await this.api.lifecycleConnection(
+          change.serviceOrgName,
+          change.connection.id!,
+          { action: 'activate' }
+        );
+        outcomes.push(outcome);
+      } else if (change.kind === 'pin-version') {
         const outcome = await this.api.upsertConnection(change.serviceOrgName, {
           clientId: change.connection.clientId!,
           serviceId: change.connection.serviceId!,
-          isApproved: pinningVersion
-            ? change.connection.isApproved
-            : reactivating,
-          isActive: pinningVersion ? change.connection.isActive : reactivating,
+          isApproved: change.connection.isApproved,
           requesterDetails: request.requesterDetails,
         });
         outcomes.push(outcome);
@@ -442,12 +445,11 @@ export class IntegrationAccessService {
       }
     );
 
-    const submissionId = latestSubmissionId(selectedConnections);
-
-    const allowedConnections = selectedConnections.filter(
-      // Approval determines the partner grant; activation controls routing.
-      (connection) => connection.isApproved === (status === 'approved')
+    const allowedConnections = connectionsForStatus(
+      selectedConnections,
+      status
     );
+    const submissionId = latestSubmissionId(allowedConnections);
 
     this.logger?.debug('Connections allowed %j', allowedConnections);
 
@@ -552,6 +554,34 @@ export class IntegrationAccessService {
       submissionId,
       resourceServers,
     };
+  }
+}
+
+function connectionsForStatus(
+  connections: ConnectionRequest[],
+  status: 'approved' | 'pending'
+): ConnectionRequest[] {
+  if (status === 'approved') {
+    return connections.filter((connection) => connection.isApproved === true);
+  }
+
+  return connections.flatMap((connection) => {
+    const proposal = parseObject(connection.proposedConfiguration);
+    if (Object.keys(proposal).length > 0) {
+      return [{ ...connection, ...proposal, isApproved: false }];
+    }
+    return connection.isApproved ? [] : [connection];
+  });
+}
+
+function parseObject(value: unknown): Record<string, any> {
+  if (value && typeof value === 'object') return value as Record<string, any>;
+  if (typeof value !== 'string' || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
   }
 }
 
@@ -829,6 +859,14 @@ function planConnectionChange(
 
   const existingScopes = normalizeStoredScopes(existing, request.name);
   const scopesHaveChanged = !sameStrings(existingScopes, request.scopes);
+  const requestedScopes = new Set(request.scopes);
+  const existingScopeSet = new Set(existingScopes);
+  const removedScopes = existingScopes.filter(
+    (scope) => !requestedScopes.has(scope)
+  );
+  const addedScopes = request.scopes.filter(
+    (scope) => !existingScopeSet.has(scope)
+  );
   const existingVersion = existing.requesterDetails?.service?.version;
   const versionHasChanged =
     existingVersion !== undefined &&
@@ -861,19 +899,36 @@ function planConnectionChange(
     };
   }
 
-  const changed = [
-    scopesHaveChanged ? 'scopes' : undefined,
-    versionHasChanged ? 'version' : undefined,
-  ].filter(Boolean);
+  const result = (() => {
+    if (!existing.isApproved) {
+      const changed = [
+        scopesHaveChanged ? 'scopes' : undefined,
+        versionHasChanged ? 'version' : undefined,
+      ].filter(Boolean);
+      return `updated ${changed.join(' and ')}, pending approval`;
+    }
+
+    const applied = removedScopes.length > 0 ? 'revoked scopes applied' : '';
+    const pending = [
+      addedScopes.length > 0 ? 'added scopes' : undefined,
+      versionHasChanged ? 'updated version' : undefined,
+    ].filter(Boolean);
+    if (applied && pending.length > 0) {
+      return `${applied}; ${pending.join(
+        ' and '
+      )} submitted for re-approval`;
+    }
+    if (applied) {
+      return applied;
+    }
+    return `${pending.join(' and ')}, submitted for re-approval`;
+  })();
   return {
     kind: 'update',
     connection: existing,
     request,
     serviceOrgName,
-    result: `updated ${changed.join(' and ')}, submitted for re-approval` as
-      | 'updated scopes, submitted for re-approval'
-      | 'updated version, submitted for re-approval'
-      | 'updated scopes and version, submitted for re-approval',
+    result,
   };
 }
 

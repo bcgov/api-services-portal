@@ -98,7 +98,23 @@ export interface ConnectionRequestInput {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  proposedConfiguration?: ConnectionProposedConfiguration;
+  lifecycleIntent?: ConnectionLifecycleIntent;
   provisionerStatus?: ProvisionerStatus;
+}
+
+export interface ConnectionProposedConfiguration {
+  policyVersion?: string;
+  environment?: string;
+  requesterDetails?: any;
+  clientResources?: any;
+  serviceResources?: any;
+}
+
+export interface ConnectionLifecycleIntent {
+  action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+  operationId: string;
+  phase: 'provision' | 'deprovision' | 'delete';
 }
 
 export interface ConnectionRequest {
@@ -112,6 +128,8 @@ export interface ConnectionRequest {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  proposedConfiguration?: ConnectionProposedConfiguration;
+  lifecycleIntent?: ConnectionLifecycleIntent;
   provisionerStatus?: ProvisionerStatus;
 }
 

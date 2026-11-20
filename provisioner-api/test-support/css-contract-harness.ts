@@ -135,7 +135,8 @@ const mock = createServer(async (req, res) => {
     const path = url.pathname.replace('/sdx/', '');
     if (path === 'catalog/subsystems') {
       send(
-        url.searchParams.get('integrationClientId') === 'integration'
+        input.onboarded !== false &&
+          url.searchParams.get('integrationClientId') === 'integration'
           ? [consumer]
           : []
       );
@@ -293,6 +294,8 @@ try {
         providerId,
         approved,
         active,
+        connectionScopes,
+        provisionerStatus,
         duplicateClient,
         cssStatus: nextCssStatus,
         disconnect,
@@ -311,6 +314,12 @@ try {
       )) {
         if (approved !== undefined) connection.isApproved = approved;
         if (active !== undefined) connection.isActive = active;
+        if (connectionScopes !== undefined) {
+          connection.requesterDetails.scopes = connectionScopes;
+        }
+        if (provisionerStatus !== undefined) {
+          connection.provisionerStatus = provisionerStatus;
+        }
       }
       if (duplicateClient) {
         const source = connections.find((c) => c.serviceId === service)!;

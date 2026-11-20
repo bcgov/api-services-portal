@@ -139,8 +139,12 @@ export class PatternsEvaluatorService {
         );
       }
 
-      const { provisionerStatus: _provisionerStatus, ...policyConnection } =
-        effectiveConnection;
+      const {
+        provisionerStatus: _provisionerStatus,
+        proposedConfiguration: _proposedConfiguration,
+        lifecycleIntent: _lifecycleIntent,
+        ...policyConnection
+      } = effectiveConnection;
       const policyContext = {
         ...policyConnection,
         combinedScopes,
