@@ -273,10 +273,34 @@ export async function getOrgActivity(
   const where: ActivityWhereInput =
     conditions.length === 1 ? conditions[0] : { AND: conditions };
 
-  logger.debug('[getOrgActivity] where: %j', where);
+  return getScopedActivity(context, where, cappedFirst, skip, sortBy);
+}
 
+export function getPersonalActivity(
+  context: any,
+  email: string,
+  first: number,
+  skip: number,
+  sortBy: ActivitySortOptions
+): Promise<Activity[]> {
+  return getScopedActivity(
+    context,
+    { filterKey1: `personal:${email}` },
+    Math.min(first, 100),
+    skip,
+    sortBy
+  );
+}
+
+async function getScopedActivity(
+  context: any,
+  where: ActivityWhereInput,
+  first: number,
+  skip: number,
+  sortBy: ActivitySortOptions
+): Promise<Activity[]> {
   const activities = await context.executeGraphQL({
-    query: `query OrgActivities($where: ActivityWhereInput!, $first: Int, $skip: Int, $sortBy: [SortActivitiesBy!]) {
+    query: `query ScopedActivities($where: ActivityWhereInput!, $first: Int, $skip: Int, $sortBy: [SortActivitiesBy!]) {
               allActivities(where: $where, first:$first, skip: $skip, sortBy: $sortBy) {
                 id
                 type
@@ -302,7 +326,7 @@ export async function getOrgActivity(
       `,
     variables: {
       where,
-      first: cappedFirst,
+      first,
       skip,
       sortBy: [
         sortBy === 'createdAtDesc'
@@ -312,10 +336,10 @@ export async function getOrgActivity(
     },
   });
   if (activities.errors) {
-    logger.error('[getOrgActivity] %j', activities.errors);
+    logger.error('[getScopedActivity] %j', activities.errors);
   }
   logger.debug(
-    '[getOrgActivity] returned=%d',
+    '[getScopedActivity] returned=%d',
     activities.data.allActivities.length
   );
   return activities.data.allActivities;

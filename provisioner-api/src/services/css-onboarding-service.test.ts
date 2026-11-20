@@ -261,7 +261,9 @@ test('unregistered integration is held and does not upsert connections', async (
   });
   assert.equal(ctx.activities.length, 1);
   assert.equal(ctx.activities[0].result, 'success');
-  assert.equal(ctx.activities[0].filterKey1, undefined);
+  assert.equal(ctx.activities[0].filterKey1, `personal:${request.requester.email}`);
+  assert.equal(ctx.activities[0].refId, response.submissionId);
+  assert.equal(ctx.activities[0].blob, undefined);
   assert.match(
     String(ctx.activities[0].message),
     /integration-a held for onboarding/
@@ -331,7 +333,12 @@ test('unknown service or policy returns 400 and writes no task', async () => {
       .submissionId,
     'original'
   );
-  assert.equal(ctx.activities.at(-1)?.result, 'failed');
+  assert.equal(ctx.activities.length, 2);
+  for (const activity of ctx.activities) {
+    assert.equal(activity.result, 'failed');
+    assert.equal(activity.filterKey1, `personal:${accessRequest().requester.email}`);
+    assert.equal(activity.blob, undefined);
+  }
 });
 
 test('registered integration still submits connections', async () => {
@@ -340,15 +347,22 @@ test('registered integration still submits connections', async () => {
 
   const response = await ctx.controller.createIntegrationAccessRequest({
     integrationId: 'integration-a',
-    request: accessRequest(['service-a']),
+    request: accessRequest(['service-a'], {
+      requester: { displayName: 'Jane Doe', email: ' Jane.Doe@Example.com ' },
+    }),
   });
 
   assert.equal(response.results['service-a'], 'submitted approval request');
   assert.equal(ctx.tasks.size, 0);
   assert.equal(ctx.writes.length, 1);
   assert.equal(ctx.writes[0].org, 'consumer-org');
+  assert.equal(ctx.activities.length, 2);
   assert.equal(ctx.activities[0].filterKey1, 'org:consumer-org');
   assert.equal(ctx.activities[0].result, 'success');
+  assert.equal(ctx.activities[1].filterKey1, 'personal:jane.doe@example.com');
+  assert.equal(ctx.activities[1].refId, response.submissionId);
+  assert.match(String(ctx.activities[1].message), /integration-a processed/);
+  assert.equal(ctx.activities[1].blob, undefined);
 });
 
 test('complete submits the stored request only after registration', async () => {
