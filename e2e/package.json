@@ -8,6 +8,7 @@
   "scripts": {
     "cy:open": "cypress open --config-file=cypress.config.ts --env TransferProtocol='http'",
     "cy:run": "npx cypress run --headed --config-file cypress.config.ts --env TransferProtocol='http' --browser ${BROWSER:-edge}",
+    "cy:run:ha": "cypress run --config-file cypress.config.ha.ts",
     "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",

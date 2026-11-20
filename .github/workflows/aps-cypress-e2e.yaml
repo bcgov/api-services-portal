@@ -121,6 +121,11 @@ jobs:
                 docker logs --tail 200 sdx-ui 2>&1 || true
                 echo "::endgroup::"
               fi
+              if [ "$(docker inspect --format '{{.State.Status}}' apsportal 2>/dev/null)" != "running" ]; then
+                echo "::group::apsportal logs"
+                docker logs --tail 200 apsportal 2>&1 || true
+                echo "::endgroup::"
+              fi
               echo "::group::Resource usage"
               free -m
               docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}'
