@@ -92,6 +92,17 @@ export interface ConnectionRequestInput {
   };
 }
 
+/**
+ * @tsoaModel
+ *
+ */
+export interface ConnectionApprovalInput {
+  clientId: string;
+  serviceId: string;
+  isApproved: boolean;
+  isActive?: boolean;
+}
+
 export interface ConnectionLifecycleActionInput {
   action: 'activate' | 'deactivate' | 'retry' | 'revoke';
   confirmAbandonRevoke?: boolean;

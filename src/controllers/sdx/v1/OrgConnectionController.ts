@@ -18,6 +18,7 @@ import { BatchResult } from '../../../batch/types';
 import { ConnectionRequest } from '../../../services/batch/types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import {
+  ConnectionApprovalInput,
   ConnectionLifecycleActionInput,
   ConnectionRequestInput,
 } from './types';
@@ -109,7 +110,7 @@ export class OrgConnectionController extends Controller {
   @Security('jwt', ['Connection.Manage'])
   public async updateConnectionApproval(
     @Path() org: string,
-    @Body() input: ConnectionRequestInput,
+    @Body() input: ConnectionApprovalInput,
     @Request() request: any
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
