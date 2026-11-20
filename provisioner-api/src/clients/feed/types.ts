@@ -68,6 +68,8 @@ export interface ConnectionRequest {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  proposedConfiguration?: any;
+  lifecycleIntent?: any;
   provisionerStatus?: ProvisionerStatus | string;
 }
 

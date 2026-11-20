@@ -20,7 +20,7 @@ describe('Access request submission and validation', () => {
   })
 
   for (const [description, change, status] of [
-    ['missing service', { name: 'missing-service' }, 502],
+    ['missing service', { name: 'missing-service' }, 400],
     ['stale version', { version: '0.9.0' }, 400],
     ['unknown scope', { scopes: ['admin'] }, 400],
     ['blank scope', { scopes: [' '] }, 400],
@@ -33,7 +33,7 @@ describe('Access request submission and validation', () => {
         url: submitUrl,
         body: submission('dev', change),
       }).then((result) => {
-        problem(result, status, status === 502 ? 'BAD_GATEWAY' : 'BAD_REQUEST')
+        problem(result, status, 'BAD_REQUEST')
         expect(result.writes).deep.eq([])
         expect(result.callbacks).deep.eq([])
       })
@@ -82,12 +82,18 @@ describe('Access request submission and validation', () => {
     })
   })
 
-  it('rejects an unknown integration on submission with 404', () => {
+  it('holds an unknown integration for onboarding without connection writes', () => {
     run({
       method: 'POST',
       url: '/v1/integrations/unknown/access-requests',
       body: submission(),
-    }).then((result) => problem(result, 404, 'NOT_FOUND'))
+    }).then((result) => {
+      expect(result.status).eq(200)
+      expect(result.body.results).deep.eq({ 'claims-dev': 'held for onboarding' })
+      expect(result.body.submissionId).to.be.a('string').and.not.be.empty
+      expect(result.writes).deep.eq([])
+      expect(result.callbacks).deep.eq([])
+    })
   })
 
   it('validates the entire submission before writing any connection', () => {
@@ -98,7 +104,7 @@ describe('Access request submission and validation', () => {
       scopes: ['read'],
     })
     run({ initial: 'empty', method: 'POST', url: submitUrl, body }).then((result) => {
-      problem(result, 502, 'BAD_GATEWAY')
+      problem(result, 400, 'BAD_REQUEST')
       expect(result.writes).deep.eq([])
     })
   })

@@ -6,7 +6,9 @@ import {
   OperationId,
   Patch,
   Path,
+  Post,
   Put,
+  Query,
   Request,
   Route,
   Security,
@@ -16,7 +18,11 @@ import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
 import { ConnectionRequest } from '../../../services/batch/types';
 import { KeystoneService } from '../../ioc/keystoneInjector';
-import { ConnectionRequestInput } from './types';
+import {
+  ConnectionApprovalInput,
+  ConnectionLifecycleActionInput,
+  ConnectionRequestInput,
+} from './types';
 import {
   parseJsonString,
   removeEmpty,
@@ -33,6 +39,9 @@ import {
 } from '../../../services/workflow';
 
 const logger = Logger('controller.org-connection');
+const {
+  lifecycleActionAvailability,
+} = require('../../../services/batch/connection-lifecycle');
 
 @injectable()
 @Route('/organizations/{org}/connections')
@@ -81,12 +90,14 @@ export class OrgConnectionController extends Controller {
   }
 
   /**
-   * Approve a connection request (`isApproved: true`), or withdraw the approval of an
-   * approved connection (`isApproved: false`). Pass `isActive: true` to
-   * approve and activate the connection in the same update.
+   * Approve a connection request (`isApproved: true`). Pass `isActive: true`
+   * to approve and activate an initial request in the same update. For an
+   * approved connection with proposed changes, true promotes the proposal and
+   * false discards it while preserving the approved connection and runtime state.
    *
-   * To reject a pending request, delete it with
-   * `DELETE /organizations/{org}/connections/{id}`.
+   * To reject an initial pending request, delete it with
+   * `DELETE /organizations/{org}/connections/{id}`. Use the lifecycle endpoint
+   * to revoke an approved connection.
    *
    * > `Required Scope:` Connection.Manage
    *
@@ -100,7 +111,7 @@ export class OrgConnectionController extends Controller {
   @Security('jwt', ['Connection.Manage'])
   public async updateConnectionApproval(
     @Path() org: string,
-    @Body() input: ConnectionRequestInput,
+    @Body() input: ConnectionApprovalInput,
     @Request() request: any
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
@@ -113,11 +124,35 @@ export class OrgConnectionController extends Controller {
       input.serviceId
     );
     assertIsDefined(existing, 'clientId', 'Connection request not found');
+    let proposal: Record<string, unknown> = {};
+    try {
+      proposal =
+        typeof existing.proposedConfiguration === 'string'
+          ? JSON.parse(existing.proposedConfiguration || '{}')
+          : existing.proposedConfiguration || {};
+    } catch {
+      proposal = {};
+    }
+    if (existing.isApproved && Object.keys(proposal).length > 0) {
+      return connectionService.decideProposedConfiguration(
+        ctx,
+        org,
+        input.clientId,
+        input.serviceId,
+        input.isApproved === true
+      );
+    }
     assertEqual(
       input.isApproved === false && !existing.isApproved,
       false,
       'isApproved',
       'A pending connection request is rejected by deleting it (DELETE /organizations/{org}/connections/{id})'
+    );
+    assertEqual(
+      input.isApproved === false && existing.isApproved,
+      false,
+      'isApproved',
+      'Use Revoke to permanently remove an approved connection'
     );
 
     const data: ConnectionRequestInput = {
@@ -142,8 +177,7 @@ export class OrgConnectionController extends Controller {
    * either of those scopes on.
    *
    * `provisionerStatus` describes the current provisioning or deprovisioning operation.
-   * Deactivate an active connection and wait for `deprovisioned` before deleting the
-   * connection record.
+   * Use the lifecycle endpoint for explicit Activate, Deactivate, Retry, and Revoke actions.
    *
    * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
    *
@@ -192,22 +226,53 @@ export class OrgConnectionController extends Controller {
           'requesterDetails',
           'clientResources',
           'serviceResources',
+          'proposedConfiguration',
+          'lifecycleIntent',
           'provisionerStatus',
         ])
       )
       .map((o) =>
         transformAllRefID(o, ['clientOrganization', 'serviceOrganization'])
-      );
+      )
+      .map((o) => ({
+        ...o,
+        lifecycleActions: lifecycleActionAvailability(o),
+      }));
   }
 
   /**
-   * Delete a connection request
-   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
+   * Run an explicit connection lifecycle action.
    *
-   * @param org
-   * @param id
-   * @param request
-   * @returns
+   * Activate provisions the approved configuration. Deactivate removes runtime
+   * access while retaining approval. Retry resumes the failed operation. Use
+   * `DELETE /organizations/{org}/connections/{id}?action=revoke` to revoke access.
+   *
+   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
+   */
+  @Post('/{id}/lifecycle')
+  @OperationId('runConnectionLifecycleAction')
+  @Security('jwt', ['System.Manage', 'Subsystem.Manage', 'Connection.Manage'])
+  public async runConnectionLifecycleAction(
+    @Path() org: string,
+    @Path('id') id: string,
+    @Body() input: ConnectionLifecycleActionInput,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const ctx = this.keystone.createContext(request, true);
+    return await new ConnectionService().lifecycleConnection(
+      ctx,
+      org,
+      id,
+      input
+    );
+  }
+
+  /**
+   * Delete a pending connection request, or revoke an approved connection when
+   * `action=revoke`. Revoke removes access and deletes the record only after
+   * cleanup is verified; repeating it resumes or confirms a completed revoke.
+   *
+   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
    */
   @Delete('/{id}')
   @OperationId('deleteConnection')
@@ -215,11 +280,14 @@ export class OrgConnectionController extends Controller {
   public async deleteConnection(
     @Path() org: string,
     @Path('id') id: string,
-    @Request() request: any
+    @Request() request: any,
+    @Query() action?: 'revoke'
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
     const service = new ConnectionService();
 
-    return await service.deleteConnection(ctx, org, id);
+    return action === 'revoke'
+      ? await service.revokeConnection(ctx, org, id)
+      : await service.deleteConnection(ctx, org, id);
   }
 }

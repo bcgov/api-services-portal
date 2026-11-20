@@ -6,10 +6,7 @@ import type {
   TResourceResult,
 } from '../schemas/resources.js';
 import { FastifyBaseLogger } from 'fastify/types/logger.js';
-import type {
-  Activity,
-  ProvisionerStatus,
-} from '../clients/feed/types.js';
+import type { Activity, ProvisionerStatus } from '../clients/feed/types.js';
 import { v4 as uuidv4 } from 'uuid';
 import { InternalError } from '../errors/api-errors.js';
 import type { PolicyRequesterDetails } from '../services/policy-service.js';
@@ -48,14 +45,18 @@ export class ConnectionsController {
 
     let response: TConnectionChangeResponse;
     try {
-      const { operationId: _operationId, ...policyConnectionRequest } =
-        connectionRequest;
-      const resourceSets = await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
-        id,
-        action,
-        service,
-        policyConnectionRequest
-      );
+      const {
+        operationId: _operationId,
+        lifecycleAction: _lifecycleAction,
+        ...policyConnectionRequest
+      } = connectionRequest;
+      const resourceSets =
+        await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
+          id,
+          action,
+          service,
+          policyConnectionRequest
+        );
 
       const results: TResourceResult[] = [];
 
@@ -239,10 +240,12 @@ export class ConnectionsController {
     serviceId: string,
     policyVersion: string
   ): Promise<TConnectionDefaultsResponse> {
-    const subsystem =
-      await this.services.sdxMember.api.getCatalogSubsystem(clientId);
-    const service =
-      await this.services.sdxMember.getSubsystemService(serviceId);
+    const subsystem = await this.services.sdxMember.api.getCatalogSubsystem(
+      clientId
+    );
+    const service = await this.services.sdxMember.getSubsystemService(
+      serviceId
+    );
 
     const requesterDetails: PolicyRequesterDetails = {
       submissionId: '',
@@ -286,31 +289,40 @@ export class ConnectionsController {
       results,
       error,
     });
+    const failed =
+      Boolean(error) || Boolean(results?.some((r) => r.status === 'failed'));
+    const lifecycleAction = connectionRequest.lifecycleAction;
+    const activityOutcome = failed ? 'failed' : 'succeeded';
+    const activityDescription = lifecycleAction
+      ? `${lifecycleAction} ${activityOutcome}`
+      : action === 'apply'
+      ? 'provisioned'
+      : 'removed';
     const activity: Activity = {
       id: uuidv4(),
       type: 'ConnectionRequest',
       action: 'publish',
-      result:
-        error || results?.some((r) => r.status === 'failed')
-          ? 'failed'
-          : 'success',
+      result: failed ? 'failed' : 'success',
       name: 'N/A',
-      message: `Connection ${connectionRequest.clientId} → ${
-        connectionRequest.serviceId
-      } ${action === 'apply' ? 'provisioned' : 'removed'}`,
+      message: `Connection ${connectionRequest.clientId} → ${connectionRequest.serviceId} ${activityDescription}`,
       refId: '',
       context: {
         message: 'Connection {client} → {service} {action}',
         params: {
           client: connectionRequest.clientId,
           service: connectionRequest.serviceId,
-          action: action === 'apply' ? 'provisioned' : 'removed',
+          action: activityDescription,
         },
       },
       blob: [
         {
           id: uuidv4(),
           blob: JSON.stringify({
+            lifecycle: {
+              action: lifecycleAction,
+              operationId: connectionRequest.operationId,
+              phase: action,
+            },
             input: connectionRequest,
             output: results || error,
           }),

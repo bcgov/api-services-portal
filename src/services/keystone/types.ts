@@ -1088,6 +1088,8 @@ export type ConnectionRequest = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  proposedConfiguration?: Maybe<Scalars['String']>;
+  lifecycleIntent?: Maybe<Scalars['String']>;
   provisionerStatus?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -1106,6 +1108,8 @@ export type ConnectionRequestCreateInput = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  proposedConfiguration?: Maybe<Scalars['String']>;
+  lifecycleIntent?: Maybe<Scalars['String']>;
   provisionerStatus?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
 };
@@ -1120,6 +1124,8 @@ export type ConnectionRequestUpdateInput = {
   requesterDetails?: Maybe<Scalars['String']>;
   clientResources?: Maybe<Scalars['String']>;
   serviceResources?: Maybe<Scalars['String']>;
+  proposedConfiguration?: Maybe<Scalars['String']>;
+  lifecycleIntent?: Maybe<Scalars['String']>;
   provisionerStatus?: Maybe<Scalars['String']>;
 };
 

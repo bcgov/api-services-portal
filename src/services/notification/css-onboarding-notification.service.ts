@@ -45,8 +45,6 @@ type OnboardingMailConfig = Pick<
   'apsOnboardingEmail' | 'sdxUiUrl'
 >;
 
-type MemberLookup = (email: string) => Promise<boolean>;
-
 export function cssOnboardingNotification(
   operation: string,
   existingItem: TaskItem | undefined,
@@ -77,8 +75,7 @@ export class CssOnboardingNotificationService {
         apsOnboardingEmail: notification.apsOnboardingEmail,
         sdxUiUrl: notification.sdxUiUrl,
       };
-    },
-    private readonly isExistingMember: MemberLookup = async () => false
+    }
   ) {}
 
   public async notifyChange({
@@ -140,7 +137,7 @@ export class CssOnboardingNotificationService {
       request,
       config
     );
-    if (requester.email && !(await this.requesterIsMember(requester.email))) {
+    if (requester.email) {
       await this.notification.notify(
         {
           email: requester.email,
@@ -157,15 +154,9 @@ export class CssOnboardingNotificationService {
           },
         }
       );
-    } else if (!requester.email) {
+    } else {
       logger.warn(
         'CSS onboarding invite skipped; requester email is missing for %s',
-        integrationId
-      );
-    } else {
-      logger.info(
-        'CSS onboarding invite skipped; %s is already an SDX member for %s',
-        requester.email,
         integrationId
       );
     }
@@ -192,19 +183,6 @@ export class CssOnboardingNotificationService {
         },
       }
     );
-  }
-
-  private async requesterIsMember(email: string): Promise<boolean> {
-    try {
-      return await this.isExistingMember(email.trim());
-    } catch (err) {
-      logger.warn(
-        'SDX membership lookup failed for %s; sending the invite. %s',
-        email,
-        err
-      );
-      return false;
-    }
   }
 
   private async notifyCompleted(

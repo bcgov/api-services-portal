@@ -72,16 +72,8 @@ describe('CSS onboarding Task hook', () => {
     sdxUiUrl: 'http://sdx-ui.example.com/',
   };
 
-  const serviceWith = (
-    notify,
-    config = mailConfig,
-    isExistingMember = async () => false
-  ) =>
-    new CssOnboardingNotificationService(
-      { notify },
-      () => config,
-      isExistingMember
-    );
+  const serviceWith = (notify, config = mailConfig) =>
+    new CssOnboardingNotificationService({ notify }, () => config);
 
   it('sends the Tech Lead invite and the APS notice when a pending task is created', async () => {
     const notify = jest.fn().mockResolvedValue(undefined);
@@ -122,49 +114,6 @@ describe('CSS onboarding Task hook', () => {
         connectionsUrl: 'http://sdx-ui.example.com',
       },
     });
-  });
-
-  it('skips the Tech Lead invite when that email is already an SDX member', async () => {
-    const notify = jest.fn().mockResolvedValue(undefined);
-    await serviceWith(notify, mailConfig, async () => true).notifyChange({
-      operation: 'create',
-      updatedItem: pendingTask,
-    });
-
-    expect(notify).toHaveBeenCalledTimes(1);
-    expect(notify.mock.calls[0][0].email).toBe('ops@example.com');
-    expect(notify.mock.calls[0][1].subject).toBe(
-      'New onboarding task - integration-a'
-    );
-  });
-
-  it('still invites the Tech Lead when the membership lookup fails', async () => {
-    const notify = jest.fn().mockResolvedValue(undefined);
-    await serviceWith(notify, mailConfig, async () => {
-      throw new Error('lookup failed');
-    }).notifyChange({
-      operation: 'create',
-      updatedItem: pendingTask,
-    });
-
-    expect(notify).toHaveBeenCalledTimes(2);
-    expect(notify.mock.calls[0][0].email).toBe('jane@example.gov.bc.ca');
-    expect(notify.mock.calls[1][0].email).toBe('ops@example.com');
-  });
-
-  it('still emails a member when onboarding is complete', async () => {
-    const notify = jest.fn().mockResolvedValue(undefined);
-    await serviceWith(notify, mailConfig, async () => true).notifyChange({
-      operation: 'update',
-      existingItem: pendingTask,
-      updatedItem: { ...pendingTask, status: 'processed' },
-    });
-
-    expect(notify).toHaveBeenCalledTimes(1);
-    expect(notify.mock.calls[0][0].email).toBe('jane@example.gov.bc.ca');
-    expect(notify.mock.calls[0][1].subject).toBe(
-      'SDX onboarding complete - integration-a'
-    );
   });
 
   it('sends no email when a pending task only updates its payload', async () => {
@@ -285,7 +234,6 @@ describe('CSS onboarding Task hook', () => {
     expect(invite).toContain(
       'APS Operations will onboard this application with you: a kickoff'
     );
-    expect(invite).not.toContain('View request');
     expect(aps).toContain('new onboarding task');
     expect(aps).toContain('Jane Doe');
     expect(aps).toContain('jane@example.gov.bc.ca');

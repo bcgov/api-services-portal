@@ -3,6 +3,8 @@ import {
   createConnection,
   deleteConnection,
   new_service,
+  revokeConnection,
+  runConnectionLifecycleAction,
   SDX_UI_URL,
   sdxUiLogin,
   updateConnection,
@@ -115,19 +117,6 @@ describe('Notification Service - Connection Request Emails', () => {
       })
     })
 
-    it('sends one rejected email when an active pending request is rejected', () => {
-      cy.get('@connectionCtx').then(({ org, clientId, serviceId }: any) => {
-        createConnection(org, clientId, serviceId, (id: string) => {
-          updateConnection(org, clientId, serviceId, { isActive: false })
-          deleteConnection(org, id)
-          cy.mailpitAssertMessageCount(
-            emailSubject('Connection Request Rejected', serviceId),
-            1
-          )
-        })
-      })
-    })
-
     it('sends one revoked email when an approved connection is revoked', () => {
       cy.get('@connectionCtx').then(({ org, clientId, serviceId }: any) => {
         createConnection(
@@ -136,16 +125,14 @@ describe('Notification Service - Connection Request Emails', () => {
           serviceId,
           (id: string) => {
             updateConnection(org, clientId, serviceId, { isApproved: true })
-            updateConnection(org, clientId, serviceId, { isActive: true })
+            runConnectionLifecycleAction(org, id, 'activate')
             waitForConnectionProvisioned(org, id)
             cy.mailpitAssertMessageCount(
               emailSubject('Connection Request Approved', serviceId),
               1
             )
 
-            // Revoking is a deactivate, then a delete once the config is gone
-            updateConnection(org, clientId, serviceId, { isActive: false })
-            deleteConnection(org, id)
+            revokeConnection(org, id)
             cy.mailpitAssertMessageCount(
               emailSubject('Connection Revoked', serviceId),
               1
