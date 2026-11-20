@@ -413,6 +413,46 @@ class ConnectionService {
     );
   };
 
+  revokeConnection = async (
+    context: Keystone,
+    org: string,
+    id: string
+  ): Promise<BatchResult> => {
+    let connection: KeystoneConnectionRequest;
+    try {
+      connection = await this.getConnectionById(context, id);
+    } catch (err) {
+      const isMissingConnection =
+        err instanceof Error && err.message === 'Connection request not found';
+      if (isMissingConnection) {
+        return { status: 200, result: 'already-revoked', id };
+      }
+      throw err;
+    }
+
+    await this.assertRelatedOrganization(context, org, connection);
+    const currentIntent = parseJsonObject(connection.lifecycleIntent);
+    const requestedAction =
+      currentIntent.action === 'revoke' ? 'retry' : 'revoke';
+    const policyError = lifecycleActionError(
+      connection,
+      requestedAction
+    );
+    assertEqual(
+      policyError,
+      undefined,
+      'action',
+      policyError || 'Invalid revoke action'
+    );
+
+    return await this.orchestrateRevoke(
+      context,
+      org,
+      connection,
+      requestedAction
+    );
+  };
+
   lifecycleConnection = async (
     context: Keystone,
     org: string,
@@ -426,8 +466,7 @@ class ConnectionService {
       const isMissingConnection =
         err instanceof Error && err.message === 'Connection request not found';
       if (
-        isMissingConnection &&
-        (input.action === 'retry' || input.action === 'revoke')
+        isMissingConnection && input.action === 'retry'
       ) {
         return { status: 200, result: 'already-revoked', id };
       }
@@ -444,11 +483,8 @@ class ConnectionService {
     );
 
     const currentIntent = parseJsonObject(connection.lifecycleIntent);
-    if (
-      input.action === 'revoke' ||
-      (input.action === 'retry' && currentIntent.action === 'revoke')
-    ) {
-      return await this.revokeConnection(
+    if (input.action === 'retry' && currentIntent.action === 'revoke') {
+      return await this.orchestrateRevoke(
         context,
         org,
         connection,
@@ -484,7 +520,7 @@ class ConnectionService {
     );
   };
 
-  private revokeConnection = async (
+  private orchestrateRevoke = async (
     context: Keystone,
     org: string,
     connection: KeystoneConnectionRequest,
@@ -634,7 +670,7 @@ class ConnectionService {
           phase: 'delete',
         },
       });
-      const result = await this.deleteConnection(context, org, current.id!);
+      const result = await this.deleteConnection(context, org, current.id!, true);
       await this.recordLifecycleActivity(
         context,
         org,
@@ -900,7 +936,8 @@ class ConnectionService {
   deleteConnection = async (
     context: Keystone,
     org: string,
-    id: string
+    id: string,
+    allowApproved = false
   ): Promise<BatchResult> => {
     const connection = await this.getConnectionById(context, id);
 
@@ -922,6 +959,13 @@ class ConnectionService {
       true,
       'organization',
       `Organization not related to this connection request`
+    );
+
+    assertEqual(
+      Boolean(connection.isApproved && !allowApproved),
+      false,
+      'action',
+      'Use DELETE with action=revoke to revoke an approved connection'
     );
 
     assertEqual(

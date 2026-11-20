@@ -104,7 +104,7 @@ export interface ConnectionApprovalInput {
 }
 
 export interface ConnectionLifecycleActionInput {
-  action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+  action: 'activate' | 'deactivate' | 'retry';
   confirmAbandonRevoke?: boolean;
 }
 

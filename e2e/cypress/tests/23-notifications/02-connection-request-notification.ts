@@ -3,6 +3,7 @@ import {
   createConnection,
   deleteConnection,
   new_service,
+  revokeConnection,
   runConnectionLifecycleAction,
   SDX_UI_URL,
   sdxUiLogin,
@@ -131,7 +132,7 @@ describe('Notification Service - Connection Request Emails', () => {
               1
             )
 
-            runConnectionLifecycleAction(org, id, 'revoke')
+            revokeConnection(org, id)
             cy.mailpitAssertMessageCount(
               emailSubject('Connection Revoked', serviceId),
               1

@@ -8,6 +8,7 @@ import {
   Path,
   Post,
   Put,
+  Query,
   Request,
   Route,
   Security,
@@ -243,8 +244,8 @@ export class OrgConnectionController extends Controller {
    * Run an explicit connection lifecycle action.
    *
    * Activate provisions the approved configuration. Deactivate removes runtime
-   * access while retaining approval. Retry resumes the failed operation. Revoke
-   * removes access and deletes the connection record only after cleanup is verified.
+   * access while retaining approval. Retry resumes the failed operation. Use
+   * `DELETE /organizations/{org}/connections/{id}?action=revoke` to revoke access.
    *
    * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
    */
@@ -267,13 +268,11 @@ export class OrgConnectionController extends Controller {
   }
 
   /**
-   * Delete a connection request
-   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
+   * Delete a pending connection request, or revoke an approved connection when
+   * `action=revoke`. Revoke removes access and deletes the record only after
+   * cleanup is verified; repeating it resumes or confirms a completed revoke.
    *
-   * @param org
-   * @param id
-   * @param request
-   * @returns
+   * > `Required Scope:` System.Manage, Subsystem.Manage, or Connection.Manage
    */
   @Delete('/{id}')
   @OperationId('deleteConnection')
@@ -281,11 +280,14 @@ export class OrgConnectionController extends Controller {
   public async deleteConnection(
     @Path() org: string,
     @Path('id') id: string,
-    @Request() request: any
+    @Request() request: any,
+    @Query() action?: 'revoke'
   ): Promise<BatchResult> {
     const ctx = this.keystone.createContext(request, true);
     const service = new ConnectionService();
 
-    return await service.deleteConnection(ctx, org, id);
+    return action === 'revoke'
+      ? await service.revokeConnection(ctx, org, id)
+      : await service.deleteConnection(ctx, org, id);
   }
 }

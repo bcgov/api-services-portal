@@ -815,9 +815,7 @@ describe('ConnectionService', () => {
         .mockResolvedValue({ status: 200, result: 'deleted', id: '123' });
 
       await expect(
-        service.lifecycleConnection(context, 'ministry-of-client', '123', {
-          action: 'revoke',
-        })
+        service.revokeConnection(context, 'ministry-of-client', '123')
       ).resolves.toMatchObject({ result: 'deleted' });
 
       const deprovision = syncRecordsThrowErrors.mock.calls[0][3];
@@ -839,7 +837,8 @@ describe('ConnectionService', () => {
       expect(service.deleteConnection).toHaveBeenCalledWith(
         context,
         'ministry-of-client',
-        '123'
+        '123',
+        true
       );
       const activities = recordActivityWithBlob.mock.calls.map((call) => ({
         action: call[1],
@@ -879,9 +878,7 @@ describe('ConnectionService', () => {
       service.deleteConnection = jest.fn();
 
       await expect(
-        service.lifecycleConnection(context, 'ministry-of-client', '123', {
-          action: 'revoke',
-        })
+        service.revokeConnection(context, 'ministry-of-client', '123')
       ).rejects.toMatchObject({
         fields: {
           action: {
@@ -1070,6 +1067,29 @@ describe('ConnectionService', () => {
       }));
     };
 
+    it('requires the explicit revoke action for an approved connection', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).rejects.toMatchObject({
+        fields: {
+          action: {
+            message:
+              'Use DELETE with action=revoke to revoke an approved connection',
+          },
+        },
+      });
+      expect(service.getConnectionDeleteStatus).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
+    });
+
     it('rejects revocation while an approved connection is active', async () => {
       const service = new ConnectionService();
       setupDeleteConnection(service, {
@@ -1084,7 +1104,7 @@ describe('ConnectionService', () => {
       });
 
       await expect(
-        service.deleteConnection(context, 'ministry-of-citz', '123')
+        service.deleteConnection(context, 'ministry-of-citz', '123', true)
       ).rejects.toMatchObject({
         fields: {
           isActive: {
@@ -1139,7 +1159,7 @@ describe('ConnectionService', () => {
       });
 
       await expect(
-        service.deleteConnection(context, 'ministry-of-citz', '123')
+        service.deleteConnection(context, 'ministry-of-citz', '123', true)
       ).rejects.toMatchObject({
         fields: {
           provisionerStatus: {
@@ -1196,7 +1216,8 @@ describe('ConnectionService', () => {
       const result = await service.deleteConnection(
         context,
         'ministry-of-citz',
-        '123'
+        '123',
+        true
       );
 
       expect(service.getConnectionById).toHaveBeenCalledWith(context, '123');
@@ -1229,7 +1250,7 @@ describe('ConnectionService', () => {
       });
 
       await expect(
-        service.deleteConnection(context, 'ministry-of-citz', '123')
+        service.deleteConnection(context, 'ministry-of-citz', '123', true)
       ).rejects.toThrow(
         'Connection request cannot be deleted because client gateway configuration still exists for tag ns.sdx-client-gateway.123.c'
       );
@@ -1247,7 +1268,7 @@ describe('ConnectionService', () => {
       });
 
       await expect(
-        service.deleteConnection(context, 'ministry-of-citz', '123')
+        service.deleteConnection(context, 'ministry-of-citz', '123', true)
       ).rejects.toThrow(
         'Connection request cannot be deleted because service gateway configuration still exists for tag ns.sdx-service-gateway.123.p'
       );
@@ -1265,7 +1286,7 @@ describe('ConnectionService', () => {
       });
 
       await expect(
-        service.deleteConnection(context, 'ministry-of-citz', '123')
+        service.deleteConnection(context, 'ministry-of-citz', '123', true)
       ).rejects.toThrow(
         'Connection request cannot be deleted because client gateway configuration still exists for tag ns.sdx-client-gateway.123.c and service gateway configuration still exists for tag ns.sdx-service-gateway.123.p'
       );

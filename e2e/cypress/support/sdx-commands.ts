@@ -199,7 +199,7 @@ export function updateConnection(
 export function runConnectionLifecycleAction(
   org: any,
   connectionId: string,
-  action: 'activate' | 'deactivate' | 'revoke'
+  action: 'activate' | 'deactivate' | 'retry'
 ) {
   cy.setRequestBody({ action })
   return cy
@@ -209,7 +209,19 @@ export function runConnectionLifecycleAction(
     )
     .then(({ apiRes: { status, body } }: any) => {
       expect(status, body.message).to.be.equal(200)
-      expect(body.result).to.be.equal(action === 'revoke' ? 'deleted' : 'updated')
+      expect(body.result).to.be.equal('updated')
+    })
+}
+
+export function revokeConnection(org: any, connectionId: string) {
+  return cy
+    .callAPI(
+      `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}?action=revoke`,
+      'DELETE'
+    )
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      expect(body.result).to.be.oneOf(['deleted', 'already-revoked'])
     })
 }
 

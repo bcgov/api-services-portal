@@ -99,7 +99,7 @@ export class SdxMemberApiClient {
     org: string,
     id: string,
     body: {
-      action: 'activate' | 'deactivate' | 'retry' | 'revoke';
+      action: 'activate' | 'deactivate' | 'retry';
       confirmAbandonRevoke?: boolean;
     }
   ): Promise<BatchResult> {
@@ -110,11 +110,16 @@ export class SdxMemberApiClient {
     );
   }
 
-  /** `deleteConnection` — DELETE /organizations/{org}/connections/{id} */
-  deleteConnection(org: string, id: string): Promise<BatchResult> {
+  /** Delete a pending request, or revoke an approved connection. */
+  deleteConnection(
+    org: string,
+    id: string,
+    action?: 'revoke'
+  ): Promise<BatchResult> {
+    const query = action ? `?action=${action}` : '';
     return this.request(
       'DELETE',
-      `organizations/${enc(org)}/connections/${enc(id)}`
+      `organizations/${enc(org)}/connections/${enc(id)}${query}`
     );
   }
 
