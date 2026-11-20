@@ -8,7 +8,7 @@ import {
   Route,
   Security,
   Tags,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
 import { KeystoneService } from '../../ioc/keystoneInjector';

@@ -21,6 +21,7 @@ import {
   CompositeKeyValue,
 } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
+import { updateConnectionProvisionerStatus } from '../services/batch/connection-status';
 
 const { metadata } = require('./data-rules');
 
@@ -167,6 +168,16 @@ export const deleteRecordByInternalId = async function (
   return { status: 200, result: 'deleted', id: result.id };
 };
 
+function jsonFieldsFor(md: {
+  transformations?: Record<string, { name?: string }>;
+}): string[] {
+  return Object.entries(md.transformations || {})
+    .filter(([, transformInfo]) =>
+      ['toString', 'toStringDefaultArray'].includes(transformInfo?.name ?? '')
+    )
+    .map(([field]) => field);
+}
+
 export const getFeedWorker = async (context: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const refKey = req.params['refKey'];
@@ -182,13 +193,29 @@ export const getFeedWorker = async (context: any, req: any, res: any) => {
 
   assert.strictEqual(md['sync'].includes(refKey), true, 'Unexpected ref key');
 
-  const recordReferences = await batchService.list(
+  // External sync only needs the reference columns. Entities that are not
+  // keyed by an external id return their sync fields, including JSON payloads.
+  const usesExternalId =
+    md.refKey === 'extForeignKey' ||
+    (Array.isArray(md.sync) && md.sync.includes('extForeignKey'));
+  const fields = usesExternalId
+    ? ['extForeignKey', 'extRecordHash']
+    : md.sync;
+  const records = await batchService.list(
     md.query,
     refKey,
     refKeyValue,
-    ['extForeignKey', 'extRecordHash']
+    fields
   );
-  res.json(recordReferences);
+  if (usesExternalId) {
+    res.json(records);
+    return;
+  }
+
+  const jsonFields = jsonFieldsFor(md);
+  res.json(
+    records.map((record: any) => parseJsonString({ ...record }, jsonFields))
+  );
 };
 
 const syncListOfRecords = async function (
@@ -324,11 +351,7 @@ export const listFeedWorker = async (
   const fields = buildQueryResponse(md).filter(
     (field) => field !== 'id'
   );
-  const jsonFields = Object.entries(md.transformations)
-    .filter(([, transformInfo]: [string, any]) =>
-      ['toString', 'toStringDefaultArray'].includes(transformInfo.name)
-    )
-    .map(([field]) => field);
+  const jsonFields = jsonFieldsFor(md);
 
   const records = await new BatchService(context).listAllPages(
     md.query,
@@ -641,6 +664,22 @@ export const syncRecords = async function (
           }
         }
       }
+      if (
+        entity === 'ConnectionRequest' &&
+        Object.keys(data).length === 1 &&
+        'provisionerStatus' in data
+      ) {
+        const statusResult = await updateConnectionProvisionerStatus(
+          context.keystoneAdapter,
+          localRecord.id,
+          localRecord.provisionerStatus,
+          data.provisionerStatus
+        );
+        if (statusResult) {
+          return { ...statusResult, childResults };
+        }
+      }
+
       if (Object.keys(data).length === 0) {
         logger.debug('[%s] [%s] no update', entity, localRecord.id);
         const firstChildResult = childResults

@@ -12,7 +12,7 @@ import {
   SuccessResponse,
   Tags,
   Query,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../../ioc/keystoneInjector';
 import { CreateNamespaceForOrganization } from '../../../services/workflow/create-namespace-sdx';

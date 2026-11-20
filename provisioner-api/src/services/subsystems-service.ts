@@ -30,20 +30,20 @@ export class SdxMemberService {
     this.api = new SdxMemberApiClient(client, logger);
   }
 
-  async getSubsystemByIntegrationClientId(
+  async findSubsystemByIntegrationClientId(
     integrationClientId: string
-  ): Promise<SubsystemEntry> {
+  ): Promise<SubsystemEntry | undefined> {
     const subsystems = await this.api.listCatalogSubsystems({
       integrationClientId,
     });
-    if (!subsystems || subsystems.length === 0) {
-      throw new NotFoundError(
-        `Subsystem with clientId ${integrationClientId} not found`
-      );
-    }
+    if (!subsystems || subsystems.length === 0) return undefined;
+    return selectSubsystemForIntegration(subsystems, integrationClientId);
+  }
 
-    const subsystem = selectSubsystemForIntegration(
-      subsystems,
+  async getSubsystemByIntegrationClientId(
+    integrationClientId: string
+  ): Promise<SubsystemEntry> {
+    const subsystem = await this.findSubsystemByIntegrationClientId(
       integrationClientId
     );
     if (!subsystem) {
@@ -51,13 +51,7 @@ export class SdxMemberService {
         `Subsystem with clientId ${integrationClientId} not found`
       );
     }
-
-    if (subsystem.organization === undefined) {
-      throw new NotFoundError(
-        `Organization for subsystem with clientId ${integrationClientId} not found`
-      );
-    }
-    return subsystem;
+    return subsystemWithOrganization(subsystem, integrationClientId);
   }
 
   /**
@@ -70,16 +64,7 @@ export class SdxMemberService {
   async getIntegrationStatus(
     integrationClientId: string
   ): Promise<TIntegrationStatus> {
-    const subsystems = await this.api.listCatalogSubsystems({
-      integrationClientId,
-    });
-
-    if (!subsystems || subsystems.length === 0) {
-      return { status: 'unregistered' };
-    }
-
-    const subsystem = selectSubsystemForIntegration(
-      subsystems,
+    const subsystem = await this.findSubsystemByIntegrationClientId(
       integrationClientId
     );
     if (!subsystem) {
@@ -162,6 +147,18 @@ export class SdxMemberService {
     }
     return service;
   }
+}
+
+export function subsystemWithOrganization(
+  subsystem: SubsystemEntry,
+  integrationClientId: string
+): SubsystemEntry {
+  if (subsystem.organization === undefined) {
+    throw new NotFoundError(
+      `Organization for subsystem with clientId ${integrationClientId} not found`
+    );
+  }
+  return subsystem;
 }
 
 export function selectSubsystemForIntegration(

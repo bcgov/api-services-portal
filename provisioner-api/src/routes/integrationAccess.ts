@@ -79,7 +79,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'List allowed access',
           operationId: 'getSubsystemAllowedServices',
           description:
-            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; a known integration with connections only in another environment returns an empty grant; no connections for the integration return 404; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Provider approval is sufficient for an approved grant regardless of activation; activation controls runtime routing. Approved versions remain pinned to the reviewed version.',
+            'Returns integration access filtered by environment and approval status. Unknown integrations or invalid query values return 400; a known integration without matching connections returns an empty grant; conflicting connection identity or scopes no longer declared by the catalog return 409. Upstream failures return 502. Provider approval is sufficient for an approved grant regardless of activation; activation controls runtime routing. Approved versions remain pinned to the reviewed version.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -103,7 +103,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
 
           response: {
             200: AllowedServicesResponse,
-            ...partnerErrors(400, 401, 403, 404, 409, 500, 502),
+            ...partnerErrors(400, 401, 403, 409, 500, 502),
           },
         },
       },
@@ -123,7 +123,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'New access request',
           operationId: 'createIntegrationAccessRequest',
           description:
-            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. Invalid or stale request values return 400; missing integration/organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Version or scope changes require re-approval. Approval triggers the `provisionAllowedServices` callback to the partner.',
+            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. When the integration is not registered in SDX, the request is held for onboarding and each service result is `held for onboarding`. Invalid or stale request values return 400; a registered integration with no organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Version or scope changes require re-approval. Approval of a registered request triggers the `provisionAllowedServices` callback to the partner.',
           security,
           params: Type.Object({
             integrationId: Type.String({

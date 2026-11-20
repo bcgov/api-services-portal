@@ -1,4 +1,8 @@
-const { listFeedWorker, syncRecords } = require('../../batch/feed-worker');
+const {
+  getFeedWorker,
+  listFeedWorker,
+  syncRecords,
+} = require('../../batch/feed-worker');
 
 describe('listFeedWorker', () => {
   it('lists the requested entity using its data-rule fields and transformations', async () => {
@@ -100,6 +104,90 @@ describe('listFeedWorker', () => {
   });
 });
 
+describe('getFeedWorker', () => {
+  it('returns a task by ref with its json blob parsed', async () => {
+    const queries = [];
+    const context = {
+      executeGraphQL: jest.fn().mockImplementation(async (request) => {
+        queries.push(request.query);
+        expect(request.variables).toEqual({
+          id: 'css-onboarding:integration-a',
+        });
+        return {
+          data: {
+            allTasks: [
+              {
+                id: 'task-1',
+                ref: 'css-onboarding:integration-a',
+                title: 'Onboard integration-a (Jane Doe)',
+                type: 'integrationAccessRequest-subsystemLinking',
+                status: 'pending',
+                jsonBlob:
+                  '{"integrationId":"integration-a","submissionId":"submission-1","request":{"clientId":"oauth"}}',
+              },
+            ],
+          },
+        };
+      }),
+    };
+    const json = jest.fn();
+
+    await getFeedWorker(
+      context,
+      {
+        params: {
+          entity: 'Task',
+          refKey: 'ref',
+          refKeyValue: 'css-onboarding:integration-a',
+        },
+      },
+      { json }
+    );
+
+    expect(queries[0]).toContain('allTasks');
+    expect(queries[0]).toContain('jsonBlob');
+    expect(queries[0]).not.toContain('extForeignKey');
+    expect(json).toHaveBeenCalledWith([
+      expect.objectContaining({
+        ref: 'css-onboarding:integration-a',
+        status: 'pending',
+        jsonBlob: {
+          integrationId: 'integration-a',
+          submissionId: 'submission-1',
+          request: { clientId: 'oauth' },
+        },
+      }),
+    ]);
+  });
+
+  it('keeps external reference fields for gateway consumers', async () => {
+    const queries = [];
+    const context = {
+      executeGraphQL: jest.fn().mockImplementation(async (request) => {
+        queries.push(request.query);
+        return { data: { allGatewayConsumers: [] } };
+      }),
+    };
+    const json = jest.fn();
+
+    await getFeedWorker(
+      context,
+      {
+        params: {
+          entity: 'GatewayConsumer',
+          refKey: 'username',
+          refKeyValue: 'alice',
+        },
+      },
+      { json }
+    );
+
+    expect(queries[0]).toContain('extForeignKey');
+    expect(queries[0]).toContain('extRecordHash');
+    expect(json).toHaveBeenCalledWith([]);
+  });
+});
+
 describe('syncRecords', () => {
   it('attaches a new child to its existing parent before validation', async () => {
     const context = {
@@ -178,6 +266,77 @@ describe('syncRecords', () => {
       status: 200,
       result: 'created',
       id: 'environment-a',
+    });
+  });
+});
+describe('ConnectionRequest status callbacks', () => {
+  it('uses compare-and-set instead of an unconditional GraphQL update', async () => {
+    const currentStatus = JSON.stringify({
+      status: 'pending',
+      operation: 'provision',
+      operationId: 'operation-1',
+    });
+    const update = jest.fn().mockResolvedValue(1);
+    const query = {
+      table: jest.fn(),
+      where: jest.fn(),
+      update,
+    };
+    query.table.mockReturnValue(query);
+    query.where.mockReturnValue(query);
+    const executeGraphQL = jest.fn().mockResolvedValue({
+      data: {
+        allConnectionRequests: [
+          {
+            id: 'connection-1',
+            clientId: 'client-1',
+            serviceId: 'service-1',
+            provisionerStatus: currentStatus,
+          },
+        ],
+      },
+    });
+    const context = {
+      executeGraphQL,
+      keystoneAdapter: {
+        name: 'knex',
+        getListAdapterByKey: jest.fn().mockReturnValue({
+          tableName: 'ConnectionRequest',
+          _query: jest.fn().mockReturnValue(query),
+        }),
+      },
+    };
+
+    await expect(
+      syncRecords(context, 'ConnectionRequest', undefined, {
+        clientId: 'client-1',
+        serviceId: 'service-1',
+        provisionerStatus: {
+          status: 'provisioned',
+          operation: 'provision',
+          operationId: 'operation-1',
+          endpoint: 'https://current.example',
+        },
+      })
+    ).resolves.toMatchObject({
+      status: 200,
+      result: 'updated',
+      id: 'connection-1',
+    });
+
+    expect(executeGraphQL).toHaveBeenCalledTimes(1);
+    expect(query.table).toHaveBeenCalledWith('ConnectionRequest');
+    expect(query.where).toHaveBeenCalledWith({
+      id: 'connection-1',
+      provisionerStatus: currentStatus,
+    });
+    expect(update).toHaveBeenCalledTimes(1);
+    const nextStatus = update.mock.calls[0][0].provisionerStatus;
+    expect(JSON.parse(nextStatus)).toEqual({
+      endpoint: 'https://current.example',
+      operation: 'provision',
+      operationId: 'operation-1',
+      status: 'provisioned',
     });
   });
 });

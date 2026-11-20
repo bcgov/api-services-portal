@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { FieldErrors, ValidateError } from 'tsoa';
+import { FieldErrors, ValidateError } from '@tsoa/runtime';
 import { Logger } from '../../logger';
 
 const logger = Logger('wf.OASValidation');

@@ -34,6 +34,7 @@ describe('ConnectionRequestNotificationService', () => {
     environment: 'prod',
     policyVersion: 'SDX.R1.00',
     requesterDetails: JSON.stringify({
+      scopes: ['service:read', 'service:write'],
       requester: {
         name: 'Request User',
         email: 'requester@example.com',
@@ -258,7 +259,11 @@ describe('ConnectionRequestNotificationService', () => {
 
   it('notifies the requester when a request is approved', async () => {
     const notify = jest.fn().mockResolvedValue(undefined);
-    const findService = jest.fn();
+    const findService = jest.fn().mockResolvedValue({
+      organization: { id: 'provider-id', name: 'provider-org' },
+      subsystem: { organization: { name: 'provider-org', title: 'Provider Ministry' } },
+      title: 'Provider API',
+    });
     const service = new ConnectionRequestNotificationService(
       { notify },
       findService,
@@ -281,13 +286,58 @@ describe('ConnectionRequestNotificationService', () => {
         subject: 'Connection Request Approved - LAB.MIN.SERVICE.v1',
         context: expect.objectContaining({
           headline: 'Connection request approved',
+          message: 'Your connection request was approved.',
+          serviceOrganization: 'Provider Ministry',
+          serviceName: 'Provider API',
+          scopes: 'service:read, service:write',
           connectionsUrl:
             'http://sdx-ui.example.com/connections?org=ministry-of-client',
         }),
       })
     );
     expect(findClient).toHaveBeenCalledWith({}, 'LAB.MIN.CLIENT');
-    expect(findService).not.toHaveBeenCalled();
+    expect(findService).toHaveBeenCalledWith({}, 'LAB.MIN.SERVICE.v1');
+    const [recipient, email] = notify.mock.calls[0];
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(recipient, email.template, email.context);
+    expect(content).toContain('Service name');
+    expect(content).toContain('Provider API');
+    expect(content).toContain('Provider Ministry');
+  });
+
+  it.each([
+    ['untitled service', { name: 'LAB.MIN.SERVICE.v1', organization: { name: 'provider-org' } }, 'provider-org'],
+    ['nested organization slug', { subsystem: { organization: { name: 'nested-org' } } }, 'nested-org'],
+    ['removed service', undefined, 'Not available'],
+  ])('renders approval details safely for %s', async (_, result, organization) => {
+    const notify = jest.fn().mockResolvedValue(undefined);
+    const findService = result
+      ? jest.fn().mockResolvedValue(result)
+      : jest.fn().mockRejectedValue(new Error('OpenAPI Spec not found'));
+    const service = new ConnectionRequestNotificationService(
+      { notify }, findService, undefined, undefined, findClient
+    );
+
+    await service.notifyChange({
+      context: {},
+      operation: 'update',
+      existingItem: connection,
+      updatedItem: { ...connection, isApproved: true },
+    });
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    const [recipient, email] = notify.mock.calls[0];
+    expect(email.context.serviceOrganization).toBe(organization);
+    expect(email.context.serviceName).toBeUndefined();
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(recipient, email.template, email.context);
+    expect(content).not.toContain('Service name');
+    expect(content).toContain(organization);
+    expect(content).toContain('LAB.MIN.SERVICE.v1');
   });
 
   it('supports the R1 requester string shape', async () => {
@@ -413,11 +463,41 @@ describe('ConnectionRequestNotificationService', () => {
         context: expect.objectContaining({
           headline: 'Connection request rejected',
           sdxClientId: 'LAB.MIN.CLIENT',
-          connectionsUrl:
-            'http://sdx-ui.example.com/connections?org=ministry-of-client',
+          connectionsUrl: '',
         }),
       })
     );
+  });
+
+  it.each(['rejected', 'revoked'])('omits the button from %s emails', async (event) => {
+    const notify = jest.fn().mockResolvedValue(undefined);
+    const service = new ConnectionRequestNotificationService(
+      { notify }, undefined, undefined, undefined, findClient
+    );
+    await service.notifyChange({
+      context: {},
+      operation: event === 'rejected' ? 'delete' : 'update',
+      existingItem: { ...connection, isApproved: event === 'revoked' },
+      updatedItem: event === 'revoked'
+        ? { ...connection, isApproved: true, isActive: false }
+        : undefined,
+      originalInput: event === 'revoked' ? { isActive: false } : {},
+    });
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    const email = notify.mock.calls[0][1];
+    expect(email.context.connectionsUrl).toBe('');
+    const renderer = new NotificationService({
+      getConfig: () => ({ notification: { enabled: false } }),
+    });
+    const content = renderer.templateToContent(
+      notify.mock.calls[0][0], email.template, email.context
+    );
+    expect(content).not.toContain('button-table');
+    expect(content).not.toContain('View activity');
+    expect(content).not.toContain('View request');
+    expect(content).toContain(email.context.headline);
+    expect(content).toContain('Open Secure Data Exchange');
   });
 
   describe('requester and link edge cases', () => {

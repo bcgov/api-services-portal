@@ -8,7 +8,6 @@ const { Keystone } = require('@keystonejs/keystone');
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
-const { generate } = require('@graphql-codegen/cli');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
@@ -64,27 +63,6 @@ const mongooseAdapterConfig = {
   pass: process.env.MONGO_PASSWORD,
 };
 
-// GraphQL TypeScript codegen. Will output a `types.d.ts` file to `./src`
-async function generateTypes() {
-  await Promise.all(
-    ['/nextapp/shared/types/query.types.ts', '/services/keystone/types.ts'].map(
-      async (path: string) => {
-        await generate(
-          {
-            schema: `http://localhost:3000${apiPath}`,
-            generates: {
-              [process.cwd() + path]: {
-                plugins: ['typescript'],
-              },
-            },
-          },
-          true
-        );
-      }
-    )
-  );
-}
-
 const adapter = process.env.ADAPTER ? process.env.ADAPTER : 'mongoose';
 
 require('dotenv').config();
@@ -100,10 +78,6 @@ const keystone = new Keystone({
     }
     console.log('CONNECTED!');
     state.connected = true;
-
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(() => generateTypes, 2000);
-    }
   },
   adapter:
     adapter == 'knex'
@@ -330,19 +304,25 @@ const configureExpress = (app: any) => {
     });
   });
   app.put('/feed/:entity', (req: any, res: any) => {
-    const context = keystone.createContext({
-      skipAccessControl: true,
-      authentication: {
-        item: { name: 'Feeder Bot', namespace: req.body?.namespace },
-      },
-    });
+    const context = Object.assign(
+      keystone.createContext({
+        skipAccessControl: true,
+        authentication: {
+          item: { name: 'Feeder Bot', namespace: req.body?.namespace },
+        },
+      }),
+      { keystoneAdapter: keystone.adapter }
+    );
     putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
     });
   });
   app.put('/feed/:entity/:id', (req: any, res: any) => {
-    const context = keystone.createContext({ skipAccessControl: true });
+    const context = Object.assign(
+      keystone.createContext({ skipAccessControl: true }),
+      { keystoneAdapter: keystone.adapter }
+    );
     putFeedWorker(context, req, res).catch((err: any) =>
       res.status(400).json({ result: 'error', error: '' + err })
     );

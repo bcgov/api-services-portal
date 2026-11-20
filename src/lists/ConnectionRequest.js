@@ -1,5 +1,6 @@
 const { Checkbox, Slug, Text, Relationship } = require('@keystonejs/fields');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { v4: uuidv4 } = require('uuid');
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
@@ -27,6 +28,50 @@ const notifyChange = (context, args) => {
     .catch((err) => {
       logger.error('Connection request notification failed: %s', err);
     });
+};
+
+const parseProvisionerStatus = (value) => {
+  if (typeof value !== 'string') {
+    return value || {};
+  }
+
+  try {
+    return JSON.parse(value || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const lifecycleStatus = (isActive) => {
+  const provisioning = Boolean(isActive);
+  return {
+    status: provisioning ? 'pending' : 'deprovisioning',
+    operation: provisioning ? 'provision' : 'deprovision',
+    operationId: uuidv4(),
+    message: provisioning ? 'Provisioning started.' : 'Deprovisioning started.',
+  };
+};
+
+const operationMatches = (current, incoming) =>
+  !current.operationId || current.operationId === incoming.operationId;
+
+const startsInactiveWithoutAccess = (operation, existingItem, resolvedData) => {
+  const isActive =
+    'isActive' in resolvedData
+      ? resolvedData.isActive
+      : Boolean(existingItem && existingItem.isActive);
+  if (isActive) {
+    return false;
+  }
+
+  if (operation === 'create') {
+    return true;
+  }
+
+  const currentStatus = parseProvisionerStatus(
+    existingItem && existingItem.provisionerStatus
+  );
+  return !existingItem.isActive && currentStatus.status === 'deprovisioned';
 };
 
 /*
@@ -124,6 +169,7 @@ module.exports = {
     resolveInput: async ({
       context,
       operation,
+      existingItem,
       originalInput,
       resolvedData,
     }) => {
@@ -138,6 +184,47 @@ module.exports = {
             'provisionerStatus must be updated on its own, without any other attributes'
           );
         }
+
+        const currentStatus = parseProvisionerStatus(
+          existingItem && existingItem.provisionerStatus
+        );
+        const incomingStatus = parseProvisionerStatus(
+          resolvedData.provisionerStatus
+        );
+        if (!operationMatches(currentStatus, incomingStatus)) {
+          logger.info(
+            'Ignoring stale provisioner status for operation %s; current operation is %s',
+            incomingStatus.operationId || 'legacy',
+            currentStatus.operationId
+          );
+          resolvedData.provisionerStatus = existingItem.provisionerStatus;
+        }
+      } else if (
+        startsInactiveWithoutAccess(operation, existingItem, resolvedData)
+      ) {
+        // A new pending request, or new request metadata on a connection whose
+        // access was already removed, has nothing to deprovision.
+        resolvedData.provisionerStatus = '{}';
+      } else {
+        const isActive =
+          'isActive' in resolvedData
+            ? resolvedData.isActive
+            : Boolean(existingItem && existingItem.isActive);
+        resolvedData.provisionerStatus = JSON.stringify(
+          lifecycleStatus(isActive)
+        );
+      }
+
+      if (
+        operation === 'update' &&
+        existingItem?.isApproved === true &&
+        originalInput?.isApproved === false &&
+        typeof originalInput?.isActive === 'boolean' &&
+        originalInput.isActive !== Boolean(existingItem.isActive)
+      ) {
+        throw new UserAssertionError(
+          'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.'
+        );
       }
 
       if (operation !== 'create') {
@@ -193,10 +280,28 @@ module.exports = {
         existingItem
       );
 
+      if (!existingItem.isApproved && existingItem.isActive) {
+        throw new UserAssertionError(
+          'Cannot reject changes by deleting an active connection. Existing access must be preserved; revoke the connection separately.'
+        );
+      }
+
       if (existingItem.isActive) {
         throw new UserAssertionError(
-          'Cannot delete an active connection request. Please set isActive to false before deleting.'
+          'Cannot revoke an active connection. Deactivate it and wait for access configuration removal to finish.'
         );
+      }
+
+      if (existingItem.isApproved) {
+        const provisionerStatus = parseProvisionerStatus(
+          existingItem.provisionerStatus
+        );
+
+        if (provisionerStatus.status !== 'deprovisioned') {
+          throw new UserAssertionError(
+            'Cannot revoke this connection until its access configuration has been removed. Deactivate it and wait for access configuration removal to finish.'
+          );
+        }
       }
     },
 
@@ -220,6 +325,18 @@ module.exports = {
         logger.debug(
           'Skipping provisioner callback because provisionerStatus was supplied directly'
         );
+        return;
+      }
+      if (startsInactiveWithoutAccess(operation, existingItem, updatedItem)) {
+        logger.debug(
+          'Skipping provisioner callback because the inactive connection has no access configuration'
+        );
+        notifyChange(context, {
+          operation,
+          existingItem,
+          originalInput,
+          updatedItem,
+        });
         return;
       }
       const provisionerService = new ProvisionerService(

@@ -43,7 +43,14 @@ export interface ServiceAccess {
 }
 
 export interface ProvisionerStatus {
-  status: 'pending' | 'provisioned' | 'failed';
+  status:
+    | 'pending'
+    | 'provisioned'
+    | 'deprovisioning'
+    | 'deprovisioned'
+    | 'failed';
+  operation?: 'provision' | 'deprovision';
+  operationId?: string;
   message?: string;
   endpoint?: string;
   spec?: string;
@@ -62,6 +69,15 @@ export interface ConnectionRequest {
   clientResources?: any;
   serviceResources?: any;
   provisionerStatus?: ProvisionerStatus | string;
+}
+
+/** Feed payload for a Portal Task. `ref` is the upsert key. `jsonBlob` is an object on write and parsed on read. */
+export interface TaskFeedRecord {
+  ref: string;
+  title: string;
+  type: string;
+  status: string;
+  jsonBlob: unknown;
 }
 
 export interface ConnectionProvisionerStatusUpdate {
