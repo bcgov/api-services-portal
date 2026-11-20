@@ -42,7 +42,7 @@ type Mailer = {
 
 type OnboardingMailConfig = Pick<
   NotificationConfig,
-  'apsOnboardingEmail' | 'sdxOnboardingInviteUrl' | 'sdxUiUrl'
+  'apsOnboardingEmail' | 'sdxUiUrl'
 >;
 
 type MemberLookup = (email: string) => Promise<boolean>;
@@ -66,21 +66,6 @@ export function cssOnboardingNotification(
   return undefined;
 }
 
-export function cssOnboardingInviteUrl(
-  integrationId: string,
-  config: Pick<OnboardingMailConfig, 'sdxOnboardingInviteUrl' | 'sdxUiUrl'>
-): string {
-  const id = encodeURIComponent(integrationId);
-  const configured = config.sdxOnboardingInviteUrl?.trim();
-  if (configured) {
-    return configured
-      .replace(/\{id\}/g, id)
-      .replace(/\{integrationId\}/g, id);
-  }
-  const base = withoutTrailingSlash(config.sdxUiUrl || '');
-  return `${base}/onboarding/invite?integrationId=${id}`;
-}
-
 export class CssOnboardingNotificationService {
   constructor(
     private readonly notification: Mailer = new NotificationService(
@@ -90,7 +75,6 @@ export class CssOnboardingNotificationService {
       const notification = new ConfigService().getConfig().notification;
       return {
         apsOnboardingEmail: notification.apsOnboardingEmail,
-        sdxOnboardingInviteUrl: notification.sdxOnboardingInviteUrl,
         sdxUiUrl: notification.sdxUiUrl,
       };
     },
@@ -170,7 +154,6 @@ export class CssOnboardingNotificationService {
             ...details,
             headline: 'Common SSO asked SDX for API access',
             message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration ${integrationId}, this access request will be submitted.`,
-            connectionsUrl: details.inviteUrl,
           },
         }
       );
@@ -303,7 +286,6 @@ function onboardingTemplateContext(
     environment: environments.join(', ') || 'Not specified',
     policyVersion: request.policyVersion || 'Not specified',
     brochureUrl,
-    inviteUrl: cssOnboardingInviteUrl(integrationId, config),
   };
 }
 

@@ -8,12 +8,7 @@ export interface NotificationConfig {
   pass: string;
   /** Inbox for new Common SSO onboarding tasks. Unset skips that email. */
   apsOnboardingEmail: string;
-  /**
-   * Tech Lead invite link. `{id}` is replaced with the integration id.
-   * Empty uses `${sdxUiUrl}/onboarding/invite?integrationId={id}`.
-   */
-  sdxOnboardingInviteUrl: string;
-  /** SDX UI origin used when `sdxOnboardingInviteUrl` is unset. */
+  /** SDX UI origin for onboarding notices. */
   sdxUiUrl: string;
 }
 
