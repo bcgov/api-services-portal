@@ -104,6 +104,8 @@ describe('CSS onboarding Task hook', () => {
         headline: 'Common SSO asked SDX for API access',
         message:
           'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
+        connectionsUrl:
+          'http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a',
       },
     });
     expect(notify.mock.calls[1][0]).toEqual({
@@ -254,6 +256,8 @@ describe('CSS onboarding Task hook', () => {
         headline: 'Common SSO asked SDX for API access',
         message:
           'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
+        connectionsUrl:
+          'http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a',
       }
     );
     const aps = renderer.templateToContent(
@@ -285,7 +289,9 @@ describe('CSS onboarding Task hook', () => {
     expect(invite).toContain(
       'APS Operations will onboard this application with you: a kickoff'
     );
-    expect(invite).not.toContain('View request');
+    expect(invite).toContain(
+      'href="http://sdx-ui.example.com/onboarding/invite?integrationId=integration-a"'
+    );
     expect(aps).toContain('new onboarding task');
     expect(aps).toContain('Jane Doe');
     expect(aps).toContain('jane@example.gov.bc.ca');

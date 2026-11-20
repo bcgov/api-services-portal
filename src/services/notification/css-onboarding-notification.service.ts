@@ -154,6 +154,10 @@ export class CssOnboardingNotificationService {
             ...details,
             headline: 'Common SSO asked SDX for API access',
             message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration ${integrationId}, this access request will be submitted.`,
+            connectionsUrl: onboardingInviteUrl(
+              details.brochureUrl,
+              integrationId
+            ),
           },
         }
       );
@@ -287,6 +291,16 @@ function onboardingTemplateContext(
     policyVersion: request.policyVersion || 'Not specified',
     brochureUrl,
   };
+}
+
+function onboardingInviteUrl(
+  brochureUrl: string,
+  integrationId: string
+): string {
+  if (!brochureUrl) return '';
+  const url = new URL(`${brochureUrl}/onboarding/invite`);
+  url.searchParams.set('integrationId', integrationId);
+  return url.toString();
 }
 
 function requestedServiceNames(request: OnboardingRequest): string {

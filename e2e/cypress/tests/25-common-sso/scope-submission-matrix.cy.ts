@@ -1,4 +1,4 @@
-import { grant, grantsUrl, problem, run, submission, submitUrl } from './helpers'
+import { grant, grantsUrl, run, submission, submitUrl } from './helpers'
 
 const storedScopes = ['read', 'write']
 const declaredScopes = [...storedScopes, 'manage']
@@ -74,7 +74,11 @@ describe('Common SSO scope submissions across SDX connection states', () => {
             )
 
             if (!state.onboarded) {
-              problem(result, 404, 'NOT_FOUND')
+              expect(result.status).eq(200)
+              expect(result.body.results).deep.eq({
+                [serviceId]: 'held for onboarding',
+              })
+              expect(result.body.submissionId).to.be.a('string').and.not.be.empty
               expect(result.connections).deep.eq([])
               expect(result.writes).deep.eq([])
               expect(mutations).deep.eq([])
