@@ -9,7 +9,7 @@ import type {
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../clients/sdx-member/index.js';
-import type { TaskFeedRecord } from '../clients/feed/types.js';
+import type { Activity, TaskFeedRecord } from '../clients/feed/types.js';
 import { IntegrationController } from '../controllers/integration-controller.js';
 import { NotFoundError } from '../errors/api-errors.js';
 import { resetEnvironmentsCache } from '../config/environments.js';
@@ -113,7 +113,7 @@ function setup() {
   const tasks = new Map<string, TaskFeedRecord>();
   const puts: TaskFeedRecord[] = [];
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
-  const activities: Array<Record<string, unknown>> = [];
+  const activities: Activity[] = [];
   const catalogReads: string[] = [];
   let connectionReads = 0;
   let subsystemLookups = 0;
@@ -185,7 +185,7 @@ function setup() {
       undefined
     ),
     activity: {
-      publishActivity: async (entry: Record<string, unknown>) => {
+      publishActivity: async (entry: Activity) => {
         activities.push(entry);
       },
     },
@@ -263,7 +263,7 @@ test('unregistered integration is held and does not upsert connections', async (
   assert.equal(ctx.activities[0].result, 'success');
   assert.equal(ctx.activities[0].filterKey1, `personal:${request.requester.email}`);
   assert.equal(ctx.activities[0].refId, response.submissionId);
-  assert.equal(ctx.activities[0].blob, undefined);
+  assert.deepEqual(JSON.parse(ctx.activities[0].blob![0].blob), request);
   assert.match(
     String(ctx.activities[0].message),
     /integration-a held for onboarding/
@@ -308,10 +308,14 @@ test('unknown service or policy returns 400 and writes no task', async () => {
     jsonBlob: { submissionId: 'original' },
   });
 
+  const missingService = accessRequest(['missing-service']);
+  const unknownPolicy = accessRequest(['service-a'], {
+    policyVersion: 'SDX.UNKNOWN',
+  });
   await expectStatus(
     ctx.controller.createIntegrationAccessRequest({
       integrationId: 'integration-a',
-      request: accessRequest(['missing-service']),
+      request: missingService,
     }),
     400,
     /missing-service/
@@ -319,7 +323,7 @@ test('unknown service or policy returns 400 and writes no task', async () => {
   await expectStatus(
     ctx.controller.createIntegrationAccessRequest({
       integrationId: 'integration-a',
-      request: accessRequest(['service-a'], { policyVersion: 'SDX.UNKNOWN' }),
+      request: unknownPolicy,
     }),
     400,
     /SDX.UNKNOWN not found in registry/
@@ -337,19 +341,23 @@ test('unknown service or policy returns 400 and writes no task', async () => {
   for (const activity of ctx.activities) {
     assert.equal(activity.result, 'failed');
     assert.equal(activity.filterKey1, `personal:${accessRequest().requester.email}`);
-    assert.equal(activity.blob, undefined);
   }
+  assert.deepEqual(
+    ctx.activities.map((activity) => JSON.parse(activity.blob![0].blob)),
+    [missingService, unknownPolicy]
+  );
 });
 
 test('registered integration still submits connections', async () => {
   const ctx = setup();
   ctx.register();
 
+  const request = accessRequest(['service-a'], {
+    requester: { displayName: 'Jane Doe', email: ' Jane.Doe@Example.com ' },
+  });
   const response = await ctx.controller.createIntegrationAccessRequest({
     integrationId: 'integration-a',
-    request: accessRequest(['service-a'], {
-      requester: { displayName: 'Jane Doe', email: ' Jane.Doe@Example.com ' },
-    }),
+    request,
   });
 
   assert.equal(response.results['service-a'], 'submitted approval request');
@@ -362,7 +370,7 @@ test('registered integration still submits connections', async () => {
   assert.equal(ctx.activities[1].filterKey1, 'personal:jane.doe@example.com');
   assert.equal(ctx.activities[1].refId, response.submissionId);
   assert.match(String(ctx.activities[1].message), /integration-a processed/);
-  assert.equal(ctx.activities[1].blob, undefined);
+  assert.deepEqual(JSON.parse(ctx.activities[1].blob![0].blob), request);
 });
 
 test('complete submits the stored request only after registration', async () => {
