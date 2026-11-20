@@ -176,7 +176,7 @@ export class IntegrationController {
           submissionId,
         },
       },
-      blob: [{ id: uuidv4(), blob: JSON.stringify(input.request) }],
+      blob: [{ id: uuidv4(), type: 'json', blob: JSON.stringify(input.request) }],
       filterKey1: `personal:${email}`,
     });
   }

@@ -263,6 +263,7 @@ test('unregistered integration is held and does not upsert connections', async (
   assert.equal(ctx.activities[0].result, 'success');
   assert.equal(ctx.activities[0].filterKey1, `personal:${request.requester.email}`);
   assert.equal(ctx.activities[0].refId, response.submissionId);
+  assert.equal(ctx.activities[0].blob?.[0].type, 'json');
   assert.deepEqual(JSON.parse(ctx.activities[0].blob![0].blob), request);
   assert.match(
     String(ctx.activities[0].message),

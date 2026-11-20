@@ -67,11 +67,12 @@ export class ActivityController extends Controller {
     );
 
     return transformActivity(records).map(
-      ({ message, params, result, activityAt }) => ({
+      ({ message, params, result, activityAt, blob }) => ({
         message,
         params,
         result,
         activityAt,
+        ...(blob?.blob ? { blob: JSON.parse(blob.blob) } : {}),
       })
     );
   }
