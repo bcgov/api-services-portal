@@ -81,6 +81,7 @@ export {
   lookupUsersByUsernames,
   lookupUser,
   lookupUsersByNamespace,
+  lookupUsersByEmail,
 } from './user';
 
 export {

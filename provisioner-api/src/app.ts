@@ -24,6 +24,7 @@ import { callbackSummaries } from './openapi/callback-summaries.js';
 import { componentSchemaDescriptions } from './openapi/component-descriptions.js';
 import { decorateOpenApi } from './openapi/decorate.js';
 import { registerIntegrationAccessRoutes } from './routes/integrationAccess.js';
+import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerGatewaysRoutes } from './routes/gateways.js';
 import { registerRuntimeGroupsRoutes } from './routes/runtime-groups.js';
 
@@ -96,6 +97,11 @@ export async function buildApp(
           ]
         : [
             {
+              name: 'Onboarding',
+              description:
+                'Operator actions that finish a held Common SSO onboarding and submit the stored access request.',
+            },
+            {
               name: 'Resource Provisioning',
               description:
                 'Evaluate SDX patterns and dispatch resources to providers.',
@@ -157,10 +163,15 @@ export async function buildApp(
         options.auth ?? partnerAuthConfig(),
         options.authKey
       );
-      await partnerApi.register(registerResourceServersRoutes, { prefix: API_PREFIX });
-      await partnerApi.register(registerIntegrationAccessRoutes, { prefix: API_PREFIX });
+      await partnerApi.register(registerResourceServersRoutes, {
+        prefix: API_PREFIX,
+      });
+      await partnerApi.register(registerIntegrationAccessRoutes, {
+        prefix: API_PREFIX,
+      });
     });
   } else {
+    await app.register(registerOnboardingRoutes, { prefix: API_PREFIX });
     await app.register(registerResourcesRoutes, { prefix: API_PREFIX });
     await app.register(registerPatternsRoutes, { prefix: API_PREFIX });
     await app.register(registerGatewaysRoutes, { prefix: API_PREFIX });
