@@ -62,5 +62,7 @@ application changes.
 
 The migration adds `proposedConfiguration` and `lifecycleIntent`, backfills
 existing rows with an empty JSON object, and makes both columns required. Back
-up the database before running the migration. The change is additive, so an
-application rollback does not require removing the columns.
+up the database before running the migration. Both columns default to an empty
+JSON object so a rolled-back application can continue creating connection
+records without supplying them. The change is additive, so an application
+rollback does not require removing the columns.
