@@ -16,7 +16,7 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
   before(() => {
     partnerAuthorization().as('partnerAuth')
     cy.mailpitDeleteAllMessages()
-    cy.fixture('toys.v1.yaml', null).as('toys.v1')
+    cy.fixture('toys.r1.yaml', null).as('toys.v1')
     cy.buildOrgGatewayDatasetAndProduct().then(({ org }: any) => {
       const suffix = String(org.name).split('-').pop()
       const providerName = `SUBSYS-${suffix}`

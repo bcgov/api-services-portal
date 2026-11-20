@@ -1,0 +1,29 @@
+openapi: 3.1.1
+info:
+  title: Toys
+  version: '1.0'
+  description: Scoped Toys service used by the SDX R1 onboarding test.
+servers:
+  - url: /
+    description: DEV environment
+paths:
+  /v1/toys:
+    get:
+      summary: Get a list of toys
+      operationId: toys_list
+      security:
+        - oauth2:
+            - nrs:toys:read
+      responses:
+        '200':
+          description: Successful response
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.gov.bc.ca/oauth/authorize
+          tokenUrl: https://example.gov.bc.ca/oauth/token
+          scopes:
+            nrs:toys:read: Read toys
