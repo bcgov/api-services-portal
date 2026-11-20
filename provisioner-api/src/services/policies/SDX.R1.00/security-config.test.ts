@@ -391,7 +391,6 @@ test('R1 defaults include the canonical managed security settings', () => {
 
     assert.deepEqual(Object.keys(consumer.upgrades || {}).sort(), [
       'acl',
-      'counterSign',
       'sign',
       'token',
       'tokenExchange',

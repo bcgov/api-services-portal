@@ -70,8 +70,8 @@ export class PatternsEvaluatorService {
         integrationAccessService,
         logger
       ),
-      [SDXP2PConsumerPattern.ID]: new SDXP2PConsumerPattern(sdx, logger),
-      [SDXP2PProviderPattern.ID]: new SDXP2PProviderPattern(sdx, logger),
+      [SDXP2PConsumerPattern.ID]: new SDXP2PConsumerPattern(sdx, logger, gatewayAdmin),
+      [SDXP2PProviderPattern.ID]: new SDXP2PProviderPattern(sdx, logger, gatewayAdmin),
       [SDXRuntimeGroupPattern.ID]: new SDXRuntimeGroupPattern(sdx, logger),
       [SDXServicePattern.ID]: new SDXServicePattern(sdx, logger),
       [SDXServiceOpsPattern.ID]: new SDXServiceOpsPattern(sdx, logger),
