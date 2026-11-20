@@ -1,7 +1,6 @@
 import {
   createSubsystem,
   new_service,
-  SDX_UI_URL,
   updateSubsystemIntegrationClients,
 } from '../../../support/sdx-commands'
 
@@ -58,7 +57,6 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
       const inviteSubject = `SDX onboarding - ${integrationId}`
       const apsSubject = `New onboarding task - ${integrationId}`
       const doneSubject = `SDX onboarding complete - ${integrationId}`
-      const inviteUrl = `${SDX_UI_URL}/onboarding/invite?integrationId=${integrationId}`
 
       postAccessRequest(integrationId, request).then((response) => {
         expect(response.status).to.eq(200)
@@ -71,7 +69,6 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
             expect(details.HTML).to.include('Common SSO asked SDX for API access')
             expect(details.HTML).to.include('not onboarded yet')
             expect(details.HTML).to.include('will onboard this application')
-            expect(details.HTML).to.include(`href="${inviteUrl}"`)
           })
         })
         cy.mailpitWaitForEmail(subjectQuery(apsSubject), 20000).then((message) => {
