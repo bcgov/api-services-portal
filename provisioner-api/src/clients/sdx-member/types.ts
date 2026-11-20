@@ -61,6 +61,21 @@ export interface ServiceCatalogEntry {
   subsystem: SubsystemEntry;
 }
 
+export interface ResourceScopeEntry {
+  name: string;
+  description?: string;
+  namespace?: string;
+  resourceType?: string;
+  subResourceTypes?: string[];
+  action?: string;
+  services: Array<{
+    name: string;
+    environment: string;
+    specVersion?: string;
+    version?: string;
+  }>;
+}
+
 /** Result of a batched provisioning operation, possibly nested. */
 export interface BatchResult {
   status: number;
@@ -101,7 +116,14 @@ export interface ConnectionRequest {
 }
 
 export interface ProvisionerStatus {
-  status: 'pending' | 'provisioned' | 'failed';
+  status:
+    | 'pending'
+    | 'provisioned'
+    | 'deprovisioning'
+    | 'deprovisioned'
+    | 'failed';
+  operation?: 'provision' | 'deprovision';
+  operationId?: string;
   message?: string;
   endpoint?: string;
   spec?: string;

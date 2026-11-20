@@ -11,7 +11,8 @@
     "sdx_token_exchange_token_url": "http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token",
     "sdx_trusted_issuers": [
       "http://keycloak.localtest.me:9081/auth/realms/master"
-    ]
+    ],
+    "client_runtime_override": "MIN.CITZ.pzgw"
   },
   "cyp": {
     "client_id": "sdx-provisioner",
@@ -25,6 +26,7 @@
     "sdx_token_exchange_token_url": "http://keycloak.localtest.me:9081/auth/realms/master/protocol/openid-connect/token",
     "sdx_trusted_issuers": [
       "http://keycloak.localtest.me:9081/auth/realms/master"
-    ]
+    ],
+    "client_runtime_override": "MIN.CITZ.pzgw"
   }
 }

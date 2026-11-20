@@ -9,6 +9,7 @@ import type {
   BatchResult,
   ConnectionRequest,
   ConnectionRequestInput,
+  ResourceScopeEntry,
   SdxMemberApiClient,
   ServiceCatalogEntry,
   SubsystemEntry,
@@ -29,6 +30,7 @@ before(() => {
       dev: {
         oauth_token_url: 'https://issuer.example/token',
         kong_admin_url: 'http://kong-admin',
+        client_runtime_override: 'MIN.CITZ.pzgw',
         sdx_token_exchange_client_id: 'sdx-edge-exchange',
         sdx_token_exchange_token_url: 'https://issuer.example/token',
         sdx_trusted_issuers: ['https://issuer.example'],
@@ -109,12 +111,42 @@ interface FakeApiOptions {
   subsystems?: SubsystemEntry[];
   upsert?: (org: string, input: ConnectionRequestInput) => Promise<BatchResult>;
   logger?: FastifyBaseLogger;
+  scopeCatalog?: ResourceScopeEntry[];
+}
+
+function scopeCatalogForServices(
+  services: ServiceCatalogEntry[]
+): ResourceScopeEntry[] {
+  const entries = new Map<string, ResourceScopeEntry>();
+  for (const service of services) {
+    for (const operation of service.operations) {
+      for (const scope of operation.scopes || []) {
+        if (typeof scope === 'string') continue;
+        const existing = entries.get(scope.name) || {
+          name: scope.name,
+          description: scope.description,
+          services: [],
+        };
+        if (!existing.services.some((entry) => entry.name === service.name)) {
+          existing.services.push({
+            name: service.name,
+            environment: service.environment,
+            version: service.version,
+          });
+        }
+        entries.set(scope.name, existing);
+      }
+    }
+  }
+  return Array.from(entries.values());
 }
 
 function createService(options: FakeApiOptions = {}) {
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
   const catalog = options.catalog || {};
   const api = {
+    listCatalogScopes: async () =>
+      options.scopeCatalog || scopeCatalogForServices(Object.values(catalog)),
     getOASService: async (name: string) => {
       const service = catalog[name];
       if (!service) throw new Error(`Unexpected catalog lookup: ${name}`);
@@ -286,6 +318,17 @@ test('merges duplicate services and scopes while allowing an empty scope set', a
         scopes: ['read', 'write'],
         integrationId: 'integration-a',
       },
+    ]
+  );
+  assert.deepEqual(
+    writes.map(
+      ({ input }) =>
+        (input.clientResources as any).gatewayPatterns['sdx-p2p-consumer.r1']
+          .upgrades.tokenExchange.scopes
+    ),
+    [
+      ['read', 'write'],
+      ['read', 'write'],
     ]
   );
   assert.deepEqual(response, {
@@ -598,7 +641,7 @@ test('builds deterministic allowed services after filtering the exact integratio
   });
 });
 
-test('does not derive callback metadata from unrelated connections', async () => {
+test('returns an empty callback without deriving metadata from unrelated connections', async () => {
   const { service } = createService({
     connections: [
       existingConnection({
@@ -610,10 +653,58 @@ test('does not derive callback metadata from unrelated connections', async () =>
     ],
   });
 
-  await assert.rejects(
-    service.buildIntegrationAllowedServices('integration-a', 'dev', 'approved'),
-    /No connections found for integration integration-a in environment dev/
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
   );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
+});
+
+test('returns an empty callback when a registered integration has no connections', async () => {
+  const { service } = createService();
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'pending'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
+});
+
+test('returns an empty callback when only an unidentifiable legacy connection remains', async () => {
+  const { service } = createService({
+    connections: [
+      existingConnection({
+        requesterDetails: {} as ConnectionRequest['requesterDetails'],
+      }),
+    ],
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: '',
+    submissionId: 'unknown',
+    resourceServers: [],
+  });
 });
 
 test('returns an empty callback when the integration has connections only in another environment', async () => {

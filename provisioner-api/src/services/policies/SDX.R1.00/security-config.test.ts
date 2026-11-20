@@ -17,12 +17,14 @@ import { SDXPolicy } from './index.js';
 import {
   buildR1SecurityConfig,
   enforceR1SecurityConfig,
+  managedApplicationScopesForEnvironment,
 } from './security-config.js';
 
 const environment: EnvironmentConfig = {
   client_id: 'control-plane-client',
   oauth_token_url: 'https://control.example/realms/aps/token',
   kong_admin_url: 'http://kong-admin',
+  client_runtime_override: 'MIN.CITZ.pzgw',
   sdx_token_exchange_client_id: 'sdx-edge-exchange',
   sdx_token_exchange_token_url:
     'https://ISSUER.EXAMPLE:443/realms/standard/protocol/openid-connect/token/',
@@ -64,15 +66,24 @@ const requesterDetails: PolicyRequesterDetails = {
   },
 };
 
+const managedApplicationScopes = [
+  'service:write',
+  'service:read',
+  'service:read',
+];
+const normalizedManagedApplicationScopes = ['service:read', 'service:write'];
+
 test('builds canonical R1 security settings from trusted sources', () => {
   assert.deepEqual(
     buildR1SecurityConfig({
+      managedApplicationScopes,
       environment: 'dev',
       environmentConfig: environment,
       service,
       requesterDetails,
     }),
     {
+      clientRuntimeOverride: 'MIN.CITZ.pzgw',
       consumer: {
         token: {
           allowedAud: 'sdx-edge-exchange',
@@ -87,7 +98,7 @@ test('builds canonical R1 security settings from trusted sources', () => {
           clientId: 'sdx-edge-exchange',
           tokenEndpoint:
             'https://issuer.example/realms/standard/protocol/openid-connect/token',
-          scopes: [],
+          scopes: normalizedManagedApplicationScopes,
           targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
         },
       },
@@ -102,8 +113,48 @@ test('builds canonical R1 security settings from trusted sources', () => {
   );
 });
 
+test('fails closed when the managed application scope catalog is missing or empty', () => {
+  for (const scopes of [undefined, []]) {
+    assert.throws(
+      () =>
+        buildR1SecurityConfig({
+          managedApplicationScopes: scopes,
+          environment: 'dev',
+          environmentConfig: environment,
+          service,
+          requesterDetails,
+        }),
+      /catalog\.scopes/
+    );
+  }
+});
+
+test('selects only scopes managed in the connection environment', () => {
+  assert.deepEqual(
+    managedApplicationScopesForEnvironment(
+      [
+        {
+          name: ' service:read ',
+          services: [{ name: 'dev-service', environment: 'dev' }],
+        },
+        {
+          name: 'service:read',
+          services: [{ name: 'dev-service', environment: 'dev' }],
+        },
+        {
+          name: 'service:prod',
+          services: [{ name: 'prod-service', environment: 'prod' }],
+        },
+      ],
+      'dev'
+    ),
+    ['service:read']
+  );
+});
+
 test('uses the exchange client as the required incoming subject-token audience', () => {
   const result = buildR1SecurityConfig({
+    managedApplicationScopes,
     environment: 'dev',
     environmentConfig: environment,
     service,
@@ -125,6 +176,7 @@ test('R1 preflight requires the explicit client, endpoint, and trusted issuers',
   assert.throws(
     () =>
       new PolicyService().preflightConnectionRequest('SDX.R1.00', {
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: {
           oauth_token_url: 'https://issuer.example/token',
@@ -136,6 +188,7 @@ test('R1 preflight requires the explicit client, endpoint, and trusted issuers',
     (error: Error & { details?: { missing?: string[] } }) => {
       assert.match(error.message, /SDX\.R1\.00 security configuration/);
       assert.deepEqual(error.details?.missing, [
+        'client_runtime_override',
         'sdx_token_exchange_client_id',
         'sdx_token_exchange_token_url',
         'sdx_trusted_issuers',
@@ -149,6 +202,7 @@ test('requires an explicit exchange endpoint even when control-plane OAuth uses 
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: {
           ...environment,
@@ -165,6 +219,7 @@ test('requires an explicit exchange endpoint even when control-plane OAuth uses 
 
 test('canonicalizes issuer and endpoint host case, default ports, and trailing slashes', () => {
   const result = buildR1SecurityConfig({
+    managedApplicationScopes,
     environment: 'dev',
     environmentConfig: environment,
     service,
@@ -184,6 +239,7 @@ test('rejects blank trusted issuer entries', () => {
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: {
           ...environment,
@@ -200,6 +256,7 @@ test('rejects an explicit exchange endpoint outside the trusted issuers', () => 
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: {
           ...environment,
@@ -217,6 +274,7 @@ test('rejects an invalid exchange endpoint URL', () => {
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: {
           ...environment,
@@ -233,6 +291,7 @@ test('rejects requester service identity that contradicts the catalog', () => {
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -252,6 +311,7 @@ test('rejects a provider privacy zone missing from the authoritative catalog', (
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service: {
@@ -268,6 +328,7 @@ test('rejects a missing or contradictory requester service privacy zone', () => 
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -282,6 +343,7 @@ test('rejects a missing or contradictory requester service privacy zone', () => 
   assert.throws(
     () =>
       buildR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -313,7 +375,8 @@ test('R1 defaults include the canonical managed security settings', () => {
         integrationClientIds: [],
       },
       service,
-      requesterDetails
+      requesterDetails,
+      managedApplicationScopes
     );
     const consumer = (
       defaults.clientResources as {
@@ -338,7 +401,7 @@ test('R1 defaults include the canonical managed security settings', () => {
       clientId: 'sdx-edge-exchange',
       tokenEndpoint:
         'https://issuer.example/realms/standard/protocol/openid-connect/token',
-      scopes: [],
+      scopes: normalizedManagedApplicationScopes,
       targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
     });
     assert.deepEqual(provider.upgrades?.token, {
@@ -360,6 +423,7 @@ test('R1 defaults include the canonical managed security settings', () => {
 
 test('expands legacy R1 resource snapshots with managed settings', () => {
   const result = enforceR1SecurityConfig({
+    managedApplicationScopes,
     environment: 'dev',
     environmentConfig: environment,
     service,
@@ -406,7 +470,7 @@ test('expands legacy R1 resource snapshots with managed settings', () => {
     clientId: 'sdx-edge-exchange',
     tokenEndpoint:
       'https://issuer.example/realms/standard/protocol/openid-connect/token',
-    scopes: [],
+    scopes: normalizedManagedApplicationScopes,
     targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
   });
   assert.deepEqual(provider.upgrades.token, {
@@ -418,6 +482,7 @@ test('expands legacy R1 resource snapshots with managed settings', () => {
 
 test('preserves a legacy configured audience while upgrading provider validation', () => {
   const result = enforceR1SecurityConfig({
+    managedApplicationScopes,
     environment: 'dev',
     environmentConfig: environment,
     service,
@@ -480,7 +545,7 @@ test('preserves a legacy configured audience while upgrading provider validation
     clientId: 'sdx-edge-exchange',
     tokenEndpoint:
       'https://issuer.example/realms/standard/protocol/openid-connect/token',
-    scopes: [],
+    scopes: normalizedManagedApplicationScopes,
     targetPrivacyZoneScope: 'urn:ca:bc:gov:provider',
     audience: 'legacy-provider-audience',
   });
@@ -491,10 +556,49 @@ test('preserves a legacy configured audience while upgrading provider validation
   });
 });
 
+test('refreshes a stored token-exchange allowlist when the scope catalog changes', () => {
+  const stored = enforceR1SecurityConfig({
+    managedApplicationScopes: ['service:read'],
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    clientResources: {
+      gatewayPatterns: {
+        'sdx-p2p-consumer.r1': { upgrades: {} },
+        'sdx-p2p-consumer-access.r1': {},
+      },
+    },
+    serviceResources: {
+      gatewayPatterns: { 'sdx-p2p-provider.r1': { upgrades: {} } },
+    },
+  });
+
+  const refreshed = enforceR1SecurityConfig({
+    managedApplicationScopes,
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    ...stored,
+  });
+
+  assert.deepEqual(
+    (
+      refreshed.clientResources.gatewayPatterns as Record<
+        string,
+        { upgrades: { tokenExchange: { scopes: string[] } } }
+      >
+    )['sdx-p2p-consumer.r1'].upgrades.tokenExchange.scopes,
+    normalizedManagedApplicationScopes
+  );
+});
+
 test('rejects caller-controlled R1 managed security settings', () => {
   assert.throws(
     () =>
       enforceR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -519,6 +623,7 @@ test('rejects caller-controlled R1 managed security settings', () => {
   assert.throws(
     () =>
       enforceR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -531,10 +636,9 @@ test('rejects caller-controlled R1 managed security settings', () => {
                   clientId: 'sdx-edge-exchange',
                   tokenEndpoint:
                     'https://issuer.example/realms/standard/protocol/openid-connect/token',
-                  scopes: [],
+                  scopes: normalizedManagedApplicationScopes,
                   audience: 'MIN.PROVIDER.API',
-                  targetPrivacyZoneScope:
-                    'urn:ca:bc:gov:caller-override',
+                  targetPrivacyZoneScope: 'urn:ca:bc:gov:caller-override',
                 },
               },
             },
@@ -553,6 +657,7 @@ test('rejects caller-controlled R1 managed security settings', () => {
   assert.throws(
     () =>
       enforceR1SecurityConfig({
+        managedApplicationScopes,
         environment: 'dev',
         environmentConfig: environment,
         service,
@@ -577,6 +682,7 @@ test('rejects caller-controlled R1 managed security settings', () => {
 
 test('Cedar requires the canonical managed R1 security shape', () => {
   const resources = enforceR1SecurityConfig({
+    managedApplicationScopes,
     environment: 'dev',
     environmentConfig: environment,
     service,
@@ -604,6 +710,7 @@ test('Cedar requires the canonical managed R1 security shape', () => {
     combinedScopes: requesterDetails.scopes,
     action: 'preview',
     globals: {
+      managedApplicationScopes: normalizedManagedApplicationScopes,
       environment: {
         client_id: 'control-plane-client',
         oauth_token_url: environment.oauth_token_url,
@@ -612,6 +719,7 @@ test('Cedar requires the canonical managed R1 security shape', () => {
         operator_edge_url: 'https://operator.example',
         ca_token_url: 'https://ca.example',
         public_url: 'https://sdx.example',
+        client_runtime_override: 'MIN.CITZ.pzgw',
         sdx_token_exchange_client_id: environment.sdx_token_exchange_client_id,
         sdx_token_exchange_token_url: environment.sdx_token_exchange_token_url,
         sdx_trusted_issuers: environment.sdx_trusted_issuers,
@@ -625,9 +733,8 @@ test('Cedar requires the canonical managed R1 security shape', () => {
 
   const legacyAudience = structuredClone(context);
   (
-    legacyAudience.clientResources.gatewayPatterns[
-      'sdx-p2p-consumer.r1'
-    ].upgrades.tokenExchange as { audience?: string }
+    legacyAudience.clientResources.gatewayPatterns['sdx-p2p-consumer.r1']
+      .upgrades.tokenExchange as { audience?: string }
   ).audience = 'legacy-provider-audience';
   const legacyAllowed = policy.validateConnectionRequest(
     'SDX.R1.00',
@@ -645,11 +752,28 @@ test('Cedar requires the canonical managed R1 security shape', () => {
     false
   );
 
+  const emptyAllowlist = structuredClone(context);
+  emptyAllowlist.clientResources.gatewayPatterns[
+    'sdx-p2p-consumer.r1'
+  ].upgrades.tokenExchange.scopes = [];
+  assert.equal(
+    policy.validateConnectionRequest('SDX.R1.00', emptyAllowlist).allowed,
+    false
+  );
+
+  const mismatchedAllowlist = structuredClone(context);
+  mismatchedAllowlist.clientResources.gatewayPatterns[
+    'sdx-p2p-consumer.r1'
+  ].upgrades.tokenExchange.scopes = ['caller:override'];
+  assert.equal(
+    policy.validateConnectionRequest('SDX.R1.00', mismatchedAllowlist).allowed,
+    false
+  );
+
   const invalidTargetScope = structuredClone(context);
   (
-    invalidTargetScope.clientResources.gatewayPatterns[
-      'sdx-p2p-consumer.r1'
-    ].upgrades.tokenExchange as { targetPrivacyZoneScope: string }
+    invalidTargetScope.clientResources.gatewayPatterns['sdx-p2p-consumer.r1']
+      .upgrades.tokenExchange as { targetPrivacyZoneScope: string }
   ).targetPrivacyZoneScope = 'urn:ca:bc:gov:caller-override';
   assert.equal(
     policy.validateConnectionRequest('SDX.R1.00', invalidTargetScope).allowed,
@@ -686,5 +810,50 @@ test('R0 preflight remains a no-op', () => {
       service,
       requesterDetails: undefined,
     })
+  );
+});
+
+test('R1 defaults share the environment runtime and reject either side overriding it', () => {
+  const input = {
+    environment: 'dev',
+    environmentConfig: environment,
+    service,
+    requesterDetails,
+    managedApplicationScopes,
+    clientResources: {
+      gatewayPatterns: {
+        'sdx-p2p-consumer.r1': { upgrades: {} },
+        'sdx-p2p-consumer-access.r1': {},
+      },
+    },
+    serviceResources: {
+      gatewayPatterns: { 'sdx-p2p-provider.r1': { upgrades: {} } },
+    },
+  };
+  const resources = enforceR1SecurityConfig(input);
+  for (const [side, pattern] of [
+    ['clientResources', 'sdx-p2p-consumer.r1'],
+    ['serviceResources', 'sdx-p2p-provider.r1'],
+  ] as const) {
+    const patterns = resources[side].gatewayPatterns as Record<string, any>;
+    assert.equal(patterns[pattern].clientRuntimeOverride, 'MIN.CITZ.pzgw');
+    const invalid = structuredClone(input) as any;
+    invalid[side].gatewayPatterns[pattern].clientRuntimeOverride =
+      'MIN.OTHER.rg0';
+    assert.throws(
+      () => enforceR1SecurityConfig(invalid),
+      /clientRuntimeOverride.*conflicts/
+    );
+  }
+  assert.throws(
+    () =>
+      buildR1SecurityConfig({
+        ...input,
+        environmentConfig: {
+          ...environment,
+          client_runtime_override: undefined,
+        },
+      }),
+    /client_runtime_override/
   );
 });

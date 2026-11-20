@@ -11,7 +11,7 @@ import {
   Security,
   Tags,
   SuccessResponse,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { Logger } from '../../logger';

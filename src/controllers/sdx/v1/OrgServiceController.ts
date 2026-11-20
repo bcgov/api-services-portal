@@ -13,7 +13,7 @@ import {
   Security,
   Tags,
   UploadedFile,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import YAML from 'yaml';
 import {

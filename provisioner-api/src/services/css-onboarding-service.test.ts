@@ -30,6 +30,7 @@ before(() => {
       dev: {
         oauth_token_url: 'https://issuer.example/token',
         kong_admin_url: 'http://kong-admin',
+        client_runtime_override: 'MIN.CITZ.pzgw',
         sdx_token_exchange_client_id: 'sdx-edge-exchange',
         sdx_token_exchange_token_url: 'https://issuer.example/token',
         sdx_trusted_issuers: ['https://issuer.example'],
@@ -124,6 +125,12 @@ function setup() {
     'service-b': catalogService('service-b'),
   };
   const api = {
+    listCatalogScopes: async () => [
+      {
+        name: 'read',
+        services: [{ name: 'service-a', environment: 'dev' }],
+      },
+    ],
     getOASService: async (name: string) => {
       catalogReads.push(name);
       const service = catalog[name];

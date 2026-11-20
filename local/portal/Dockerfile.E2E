@@ -26,7 +26,6 @@ COPY --chown=node src ./
 
 RUN npx nyc instrument --compact=false . --in-place
 
-ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
 ENV TEST_COVERAGE=on
 

@@ -242,7 +242,9 @@ export function deleteConnection(
     if (status === 200) {
       return
     }
-    expect(JSON.stringify(body), 'delete failed').to.include('configuration still exists')
+    expect(JSON.stringify(body), 'delete failed').to.match(
+      /access configuration has been removed|configuration still exists/
+    )
     expect(Date.now() - startedAt, 'timed out waiting for config removal').to.be.lessThan(
       timeoutMs
     )

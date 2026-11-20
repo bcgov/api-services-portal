@@ -269,3 +269,74 @@ describe('syncRecords', () => {
     });
   });
 });
+describe('ConnectionRequest status callbacks', () => {
+  it('uses compare-and-set instead of an unconditional GraphQL update', async () => {
+    const currentStatus = JSON.stringify({
+      status: 'pending',
+      operation: 'provision',
+      operationId: 'operation-1',
+    });
+    const update = jest.fn().mockResolvedValue(1);
+    const query = {
+      table: jest.fn(),
+      where: jest.fn(),
+      update,
+    };
+    query.table.mockReturnValue(query);
+    query.where.mockReturnValue(query);
+    const executeGraphQL = jest.fn().mockResolvedValue({
+      data: {
+        allConnectionRequests: [
+          {
+            id: 'connection-1',
+            clientId: 'client-1',
+            serviceId: 'service-1',
+            provisionerStatus: currentStatus,
+          },
+        ],
+      },
+    });
+    const context = {
+      executeGraphQL,
+      keystoneAdapter: {
+        name: 'knex',
+        getListAdapterByKey: jest.fn().mockReturnValue({
+          tableName: 'ConnectionRequest',
+          _query: jest.fn().mockReturnValue(query),
+        }),
+      },
+    };
+
+    await expect(
+      syncRecords(context, 'ConnectionRequest', undefined, {
+        clientId: 'client-1',
+        serviceId: 'service-1',
+        provisionerStatus: {
+          status: 'provisioned',
+          operation: 'provision',
+          operationId: 'operation-1',
+          endpoint: 'https://current.example',
+        },
+      })
+    ).resolves.toMatchObject({
+      status: 200,
+      result: 'updated',
+      id: 'connection-1',
+    });
+
+    expect(executeGraphQL).toHaveBeenCalledTimes(1);
+    expect(query.table).toHaveBeenCalledWith('ConnectionRequest');
+    expect(query.where).toHaveBeenCalledWith({
+      id: 'connection-1',
+      provisionerStatus: currentStatus,
+    });
+    expect(update).toHaveBeenCalledTimes(1);
+    const nextStatus = update.mock.calls[0][0].provisionerStatus;
+    expect(JSON.parse(nextStatus)).toEqual({
+      endpoint: 'https://current.example',
+      operation: 'provision',
+      operationId: 'operation-1',
+      status: 'provisioned',
+    });
+  });
+});

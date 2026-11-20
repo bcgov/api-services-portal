@@ -83,13 +83,19 @@ const defaults: PolicyDefaultsFn = (
   },
 });
 
-const managedDefaults: PolicyDefaultsFn = (subsystem, service, requester) => {
+const managedDefaults: PolicyDefaultsFn = (
+  subsystem,
+  service,
+  requester,
+  managedApplicationScopes
+) => {
   const base = defaults(subsystem, service, requester);
   return enforceR1SecurityConfig({
     environment: service.environment,
     environmentConfig: loadEnvironments()[service.environment],
     service,
     requesterDetails: requester,
+    managedApplicationScopes,
     ...base,
   });
 };

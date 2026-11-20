@@ -33,7 +33,11 @@ const connections: ConnectionRequest[] = [
 ];
 
 function preview(
-  options: { providerExchange?: boolean; targetScope?: string } = {}
+  options: {
+    providerExchange?: boolean;
+    scopes?: string[];
+    targetScope?: string;
+  } = {}
 ) {
   return {
     applied: 0,
@@ -58,7 +62,7 @@ function preview(
           {
             name: 'token-exchange',
             config: {
-              scopes: [],
+              scopes: options.scopes || ['service:read'],
               scope_source: 'verified_subject_token',
               audience: 'provider-client',
               target_privacy_zone_scope:
@@ -143,6 +147,24 @@ test('fails closed when the provisioned target privacy-zone scope is not authori
     listConnections: async () => connections,
     previewConnection: async () =>
       preview({ targetScope: 'urn:ca:bc:gov:caller-override' }),
+    applyConnection: async () => {
+      applyCalled = true;
+      return { applied: 1, failed: 0, skipped: 0, results: [] };
+    },
+    apply: true,
+  });
+
+  assert.equal(applyCalled, false);
+  assert.equal(summary.planned, 0);
+  assert.equal(summary.failed, 1);
+  assert.match(summary.issues[0].reason, /token exchange is not canonical/);
+});
+
+test('fails closed when the managed scope allowlist is empty', async () => {
+  let applyCalled = false;
+  const summary = await runAps4995Datafix({
+    listConnections: async () => connections,
+    previewConnection: async () => preview({ scopes: [] }),
     applyConnection: async () => {
       applyCalled = true;
       return { applied: 1, failed: 0, skipped: 0, results: [] };

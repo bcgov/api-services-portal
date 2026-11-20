@@ -1,5 +1,8 @@
 import { isDeepStrictEqual } from 'node:util';
-import type { ServiceCatalogEntry } from '../../../clients/sdx-member/index.js';
+import type {
+  ResourceScopeEntry,
+  ServiceCatalogEntry,
+} from '../../../clients/sdx-member/index.js';
 import type {
   EnvironmentConfig,
   R1EnvironmentConfig,
@@ -12,6 +15,7 @@ import {
 import type { PolicyRequesterDetails } from '../types.js';
 
 export interface R1SecurityConfig {
+  clientRuntimeOverride: string;
   consumer: {
     token: {
       allowedAud: string;
@@ -43,6 +47,7 @@ export interface R1SecurityConfigInput {
   environmentConfig: EnvironmentConfig | undefined;
   service: ServiceCatalogEntry;
   requesterDetails: PolicyRequesterDetails | undefined;
+  managedApplicationScopes?: string[];
 }
 
 /**
@@ -55,6 +60,7 @@ export function buildR1SecurityConfig({
   environmentConfig,
   service,
   requesterDetails,
+  managedApplicationScopes,
 }: R1SecurityConfigInput): R1SecurityConfig {
   const environmentName = nonBlank(environment);
   if (!environmentName) {
@@ -83,7 +89,9 @@ export function buildR1SecurityConfig({
     );
   }
 
+  const runtimeOverride = nonBlank(environmentConfig.client_runtime_override);
   const missing: string[] = [];
+  if (!runtimeOverride) missing.push('client_runtime_override');
   if (!exchangeClientId) missing.push('sdx_token_exchange_client_id');
   if (!tokenEndpointValue) missing.push('sdx_token_exchange_token_url');
   if (!Array.isArray(configuredIssuers) || configuredIssuers.length === 0) {
@@ -93,12 +101,22 @@ export function buildR1SecurityConfig({
     throw configurationError(environmentName, missing);
   }
 
+  if (!/^[A-Z0-9]+\.[A-Z0-9]+\.[a-z0-9]{3,8}$/.test(runtimeOverride!)) {
+    throw configurationError(environmentName, [
+      'valid client_runtime_override (MEMBER_CLASS.MEMBER_CODE.runtime)',
+    ]);
+  }
+
   const r1Environment = environmentConfig as R1EnvironmentConfig;
   const normalizedExchangeClientId = exchangeClientId as string;
   const trustedIssuerUrls = uniqueCanonicalUrls(
     environmentName,
     'sdx_trusted_issuers',
     r1Environment.sdx_trusted_issuers
+  );
+  const normalizedManagedApplicationScopes = normalizeManagedApplicationScopes(
+    environmentName,
+    managedApplicationScopes
   );
   const tokenEndpointUrl = parseHttpUrl(
     environmentName,
@@ -188,6 +206,7 @@ export function buildR1SecurityConfig({
   }
 
   return {
+    clientRuntimeOverride: runtimeOverride!,
     consumer: {
       token: {
         allowedAud: normalizedExchangeClientId,
@@ -201,7 +220,7 @@ export function buildR1SecurityConfig({
       tokenExchange: {
         clientId: normalizedExchangeClientId,
         tokenEndpoint,
-        scopes: [],
+        scopes: normalizedManagedApplicationScopes,
         targetPrivacyZoneScope: providerPrivacyZoneScope,
       },
     },
@@ -264,6 +283,13 @@ export function enforceR1SecurityConfig(
     'sdx-p2p-consumer.r1',
     input.environment
   );
+  setManagedSetting(
+    consumerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'clientResources.gatewayPatterns.sdx-p2p-consumer.r1.clientRuntimeOverride'
+  );
   const consumerUpgrades = recordOrEmpty(
     consumerPattern.upgrades,
     input.environment,
@@ -297,6 +323,13 @@ export function enforceR1SecurityConfig(
     'sdx-p2p-provider.r1',
     input.environment
   );
+  setManagedSetting(
+    providerPattern,
+    'clientRuntimeOverride',
+    security.clientRuntimeOverride,
+    input.environment,
+    'serviceResources.gatewayPatterns.sdx-p2p-provider.r1.clientRuntimeOverride'
+  );
   const providerUpgrades = recordOrEmpty(
     providerPattern.upgrades,
     input.environment,
@@ -325,7 +358,9 @@ export function enforceR1SecurityConfig(
 /**
  * R1 no longer generates a provider audience. Preserve a non-empty audience
  * already stored on a connection so older consumer configurations continue to
- * work, while keeping every active token-exchange setting authoritative.
+ * work, while keeping every active token-exchange setting authoritative. The
+ * scope allowlist is regenerated from the current catalog instead of trusting
+ * the copy stored on the connection.
  */
 function setManagedTokenExchange(
   target: Record<string, unknown>,
@@ -341,7 +376,10 @@ function setManagedTokenExchange(
 
   const existing = recordOrEmpty(target[key], environment, path);
   const { audience, ...managed } = existing;
-  if (!isDeepStrictEqual(managed, canonical)) {
+  delete managed.scopes;
+  const canonicalManaged = { ...canonical };
+  delete canonicalManaged.scopes;
+  if (!isDeepStrictEqual(managed, canonicalManaged)) {
     throw managedSettingError(
       environment,
       path,
@@ -356,8 +394,7 @@ function setManagedTokenExchange(
     );
   }
 
-  target[key] =
-    audience === undefined ? canonical : { ...canonical, audience };
+  target[key] = audience === undefined ? canonical : { ...canonical, audience };
 }
 
 /** Upgrade the former provider-client audience to the SDX exchange client. */
@@ -386,6 +423,41 @@ function setManagedProviderToken(
     }
   }
   target[key] = canonical;
+}
+
+export function managedApplicationScopesForEnvironment(
+  catalog: ResourceScopeEntry[],
+  environment: string
+): string[] {
+  return normalizeManagedApplicationScopes(
+    environment,
+    catalog
+      .filter((entry) =>
+        entry.services?.some((service) => service.environment === environment)
+      )
+      .map((entry) => entry.name)
+  );
+}
+
+function normalizeManagedApplicationScopes(
+  environment: string,
+  scopes: string[] | undefined
+): string[] {
+  if (!Array.isArray(scopes) || scopes.length === 0) {
+    throw configurationError(environment, ['catalog.scopes']);
+  }
+
+  const normalized = scopes.map((scope) => nonBlank(scope));
+  if (normalized.some((scope) => !scope || /\s/.test(scope))) {
+    throw withDetails(
+      new InternalError(
+        `SDX.R1.00 scope catalog contains an invalid OAuth scope for the configured environment`
+      ),
+      { environment, field: 'catalog.scopes' }
+    );
+  }
+
+  return Array.from(new Set(normalized as string[])).sort();
 }
 
 function providerAudience(service: ServiceCatalogEntry): string | undefined {

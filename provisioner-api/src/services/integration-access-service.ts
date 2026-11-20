@@ -23,6 +23,7 @@ import {
   type PolicyRequesterDetails,
 } from './policy-service.js';
 import { selectSubsystemForIntegration } from './subsystems-service.js';
+import { managedApplicationScopesForEnvironment } from './policies/SDX.R1.00/security-config.js';
 
 interface NormalizedServiceRequest {
   environment: string;
@@ -123,6 +124,10 @@ export class IntegrationAccessService {
     this.logger?.debug('Submission ID: %s', normalizedSubmissionId);
     this.logger?.debug('Full access request %j', input);
 
+    const scopeCatalog =
+      policyVersion === 'SDX.R1.00'
+        ? await this.api.listCatalogScopes()
+        : undefined;
     const preparedRequests: PreparedServiceRequest[] = [];
 
     for (const requested of validated.requests) {
@@ -152,7 +157,13 @@ export class IntegrationAccessService {
           policyVersion,
           subsystem,
           requested.service,
-          requesterDetails
+          requesterDetails,
+          scopeCatalog
+            ? managedApplicationScopesForEnvironment(
+                scopeCatalog,
+                requested.service.environment
+              )
+            : undefined
         ),
       });
     }
@@ -349,10 +360,9 @@ export class IntegrationAccessService {
 
     if (integrationConnections.length === 0) {
       // Partner clients query each configured environment in turn. Once the
-      // integration is known to SDX, an environment with no connections is an
-      // empty collection rather than a missing resource. Use the integration's
-      // identity from another environment, but continue to reject unknown or
-      // ambiguous integration identities.
+      // integration is registered in the catalog, the absence of matching
+      // connections is an empty collection rather than a missing
+      // resource. Reuse an authoritative identity from another environment when one exists.
       const integrationIdentity = selectAuthoritativeClientConnections(
         connections.filter(
           (connection) =>
@@ -368,9 +378,12 @@ export class IntegrationAccessService {
         this.logger
       );
       if (!integrationIdentity) {
-        throw new NotFoundError(
-          `No connections found for integration ${normalizedIntegrationId} in environment ${normalizedEnvironment}`
-        );
+        return {
+          integrationId: normalizedIntegrationId,
+          clientId: '',
+          submissionId: 'unknown',
+          resourceServers: [],
+        };
       }
 
       const submissionId = latestSubmissionId(integrationIdentity.connections);

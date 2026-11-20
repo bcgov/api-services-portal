@@ -13,6 +13,7 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import { InternalError } from '../errors/api-errors.js';
 import type { PolicyRequesterDetails } from '../services/policy-service.js';
+import { managedApplicationScopesForEnvironment } from '../services/policies/SDX.R1.00/security-config.js';
 
 export class ConnectionsController {
   constructor(
@@ -33,17 +34,27 @@ export class ConnectionsController {
       await this.updateProvisionerStatus(
         connectionRequest,
         'pending',
+        'provision',
         'Provisioning started.'
+      );
+    } else if (action === 'delete') {
+      await this.updateProvisionerStatus(
+        connectionRequest,
+        'deprovisioning',
+        'deprovision',
+        'Deprovisioning started.'
       );
     }
 
     let response: TConnectionChangeResponse;
     try {
+      const { operationId: _operationId, ...policyConnectionRequest } =
+        connectionRequest;
       const resourceSets = await this.services.patternsEvaluator.buildResourcesUsingConnectionRequest(
         id,
         action,
         service,
-        connectionRequest
+        policyConnectionRequest
       );
 
       const results: TResourceResult[] = [];
@@ -97,9 +108,7 @@ export class ConnectionsController {
         'Error processing connection request change'
       );
       if (action !== 'diff' && action !== 'preview') {
-        if (action === 'apply') {
-          await this.updateFailedStatusAfterException(connectionRequest);
-        }
+        await this.updateFailedStatusAfterException(connectionRequest, action);
         await this.logActivity(
           action,
           connectionRequest,
@@ -125,6 +134,7 @@ export class ConnectionsController {
         await this.updateProvisionerStatus(
           connectionRequest,
           'failed',
+          'provision',
           `Provisioning failed for ${unsuccessful} provider batch${
             unsuccessful === 1 ? '' : 'es'
           }${providers ? `: ${providers}` : ''}.`
@@ -133,10 +143,36 @@ export class ConnectionsController {
         await this.updateProvisionerStatus(
           connectionRequest,
           'provisioned',
+          'provision',
           `Provisioned ${response.applied} provider batch${
             response.applied === 1 ? '' : 'es'
           } successfully.`,
           this.collectProvisionerInformation(response.results)
+        );
+      }
+    } else if (action === 'delete') {
+      const unsuccessful = response.failed + response.skipped;
+      if (unsuccessful > 0) {
+        const providers = response.results
+          .filter((result) => result.status !== 'applied')
+          .map((result) => result.provider)
+          .join(', ');
+        await this.updateProvisionerStatus(
+          connectionRequest,
+          'failed',
+          'deprovision',
+          `Deprovisioning failed for ${unsuccessful} provider batch${
+            unsuccessful === 1 ? '' : 'es'
+          }${providers ? `: ${providers}` : ''}.`
+        );
+      } else {
+        await this.updateProvisionerStatus(
+          connectionRequest,
+          'deprovisioned',
+          'deprovision',
+          `Deprovisioned ${response.applied} provider batch${
+            response.applied === 1 ? '' : 'es'
+          } successfully.`
         );
       }
     }
@@ -147,6 +183,7 @@ export class ConnectionsController {
   private async updateProvisionerStatus(
     connectionRequest: TConnectionChangeRequest,
     status: ProvisionerStatus['status'],
+    operation: NonNullable<ProvisionerStatus['operation']>,
     message: string,
     information?: Record<string, unknown>
   ): Promise<void> {
@@ -154,6 +191,8 @@ export class ConnectionsController {
       connectionRequest.clientId,
       connectionRequest.serviceId,
       status,
+      operation,
+      connectionRequest.operationId,
       message,
       information
     );
@@ -175,13 +214,17 @@ export class ConnectionsController {
   }
 
   private async updateFailedStatusAfterException(
-    connectionRequest: TConnectionChangeRequest
+    connectionRequest: TConnectionChangeRequest,
+    action: 'apply' | 'delete'
   ): Promise<void> {
     try {
+      const deprovisioning = action === 'delete';
       await this.updateProvisionerStatus(
         connectionRequest,
         'failed',
-        'Provisioning failed unexpectedly. See provisioner logs for details.'
+        deprovisioning ? 'deprovision' : 'provision',
+        (deprovisioning ? 'Deprovisioning' : 'Provisioning') +
+          ' failed unexpectedly. See provisioner logs for details.'
       );
     } catch (statusError) {
       this.logger?.error(
@@ -212,11 +255,20 @@ export class ConnectionsController {
       },
     };
 
+    const managedApplicationScopes =
+      policyVersion === 'SDX.R1.00'
+        ? managedApplicationScopesForEnvironment(
+            await this.services.sdxMember.api.listCatalogScopes(),
+            service.environment
+          )
+        : undefined;
+
     return this.services.policyEngine.getDefaultResources(
       policyVersion,
       subsystem,
       service,
-      requesterDetails
+      requesterDetails,
+      managedApplicationScopes
     ) as TConnectionDefaultsResponse;
   }
 

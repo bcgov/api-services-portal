@@ -12,6 +12,7 @@ function connectionContext(policyVersion: string, includeVersion: boolean) {
     operator_edge_url: 'http://edge',
     ca_token_url: 'http://ca',
     public_url: 'http://edge',
+    client_runtime_override: 'MIN.CITZ.pzgw',
     sdx_token_exchange_client_id: 'sdx-edge-exchange',
     sdx_token_exchange_token_url: 'https://issuer.example/token',
     sdx_trusted_issuers: ['https://issuer.example'],
@@ -45,6 +46,7 @@ function connectionContext(policyVersion: string, includeVersion: boolean) {
       ...(includeVersion ? { version: '1.0.0' } : {}),
     },
   };
+  const managedApplicationScopes = ['demo.read'];
   // Apply the same managed security settings as production before Cedar validation.
   const resources = new PolicyService().enforceConnectionResources(
     policyVersion,
@@ -53,6 +55,7 @@ function connectionContext(policyVersion: string, includeVersion: boolean) {
       environmentConfig: environment,
       service,
       requesterDetails,
+      managedApplicationScopes,
     },
     {
       clientResources: {
@@ -77,13 +80,18 @@ function connectionContext(policyVersion: string, includeVersion: boolean) {
     ...resources,
     combinedScopes: ['demo.read'],
     action: 'apply',
-    globals: { environment },
+    globals: {
+      environment,
+      ...(policyVersion === 'SDX.R1.00' ? { managedApplicationScopes } : {}),
+    },
   };
 }
 
 for (const policyVersion of ['SDX.R0.00', 'SDX.R1.00']) {
   for (const includeVersion of [false, true]) {
-    test(`${policyVersion} accepts approved requester metadata ${includeVersion ? 'with' : 'without'} a pinned service version`, () => {
+    test(`${policyVersion} accepts approved requester metadata ${
+      includeVersion ? 'with' : 'without'
+    } a pinned service version`, () => {
       const result = new PolicyService().validateConnectionRequest(
         policyVersion,
         connectionContext(policyVersion, includeVersion)

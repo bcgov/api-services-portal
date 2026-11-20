@@ -9,6 +9,7 @@ import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { buildApp } from '../src/app.js';
 import type {
   ConnectionRequest,
+  ResourceScopeEntry,
   ServiceCatalogEntry,
   SubsystemEntry,
 } from '../src/clients/sdx-member/index.js';
@@ -20,6 +21,7 @@ process.env.LOG_LEVEL = 'silent';
 const configDirectory = mkdtempSync(join(tmpdir(), 'css-contract-'));
 const configPath = join(configDirectory, 'environments.json');
 const environmentConfig = {
+  client_runtime_override: 'MIN.CITZ.pzgw',
   client_id: 'fixture-provisioner',
   oauth_token_url: 'https://control.example/token',
   kong_admin_url: 'http://fixture-kong',
@@ -61,6 +63,14 @@ const catalog: ServiceCatalogEntry[] = ['dev', 'test'].map((environment) => ({
       scopes: [{ name: 'read' }, { name: 'write' }],
     },
   ],
+}));
+const scopeCatalog: ResourceScopeEntry[] = ['read', 'write'].map((name) => ({
+  name,
+  services: catalog.map((service) => ({
+    name: service.name,
+    environment: service.environment,
+    version: service.version,
+  })),
 }));
 const connections: ConnectionRequest[] =
   input.initial === 'empty'
@@ -136,6 +146,8 @@ const mock = createServer(async (req, res) => {
       send(consumer);
     } else if (path === 'catalog/services') {
       send(catalog);
+    } else if (path === 'catalog/scopes') {
+      send(scopeCatalog);
     } else if (path.startsWith('catalog/services/')) {
       const service = catalog.find(
         (s) =>

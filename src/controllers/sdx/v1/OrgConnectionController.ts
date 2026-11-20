@@ -11,7 +11,7 @@ import {
   Route,
   Security,
   Tags,
-} from 'tsoa';
+} from '@tsoa/runtime';
 import { inject, injectable } from 'tsyringe';
 import { BatchResult } from '../../../batch/types';
 import { ConnectionRequest } from '../../../services/batch/types';
@@ -82,7 +82,8 @@ export class OrgConnectionController extends Controller {
 
   /**
    * Approve a connection request (`isApproved: true`), or withdraw the approval of an
-   * approved connection (`isApproved: false`).
+   * approved connection (`isApproved: false`). Pass `isActive: true` to
+   * approve and activate the connection in the same update.
    *
    * To reject a pending request, delete it with
    * `DELETE /organizations/{org}/connections/{id}`.
@@ -124,7 +125,8 @@ export class OrgConnectionController extends Controller {
       serviceId: input.serviceId,
       isApproved: input.isApproved,
     };
-    if (input.isActive !== null) {
+    // Preserve explicit false and omit absent values when approving.
+    if (typeof input.isActive === 'boolean') {
       data['isActive'] = input.isActive;
     }
 
@@ -139,9 +141,9 @@ export class OrgConnectionController extends Controller {
    * only connections for services belonging to the subsystem gateways they've been granted
    * either of those scopes on.
    *
-   * `provisionerStatus` describes the most recent provisioning attempt. Deactivating a
-   * connection does not overwrite that history; use `isActive` as the authoritative current
-   * lifecycle state.
+   * `provisionerStatus` describes the current provisioning or deprovisioning operation.
+   * Deactivate an active connection and wait for `deprovisioned` before deleting the
+   * connection record.
    *
    * > `Required Scope:` System.Manage, Connection.Manage, or Subsystem.Manage
    *

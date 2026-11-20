@@ -43,7 +43,14 @@ export interface ServiceAccess {
 }
 
 export interface ProvisionerStatus {
-  status: 'pending' | 'provisioned' | 'failed';
+  status:
+    | 'pending'
+    | 'provisioned'
+    | 'deprovisioning'
+    | 'deprovisioned'
+    | 'failed';
+  operation?: 'provision' | 'deprovision';
+  operationId?: string;
   message?: string;
   endpoint?: string;
   spec?: string;

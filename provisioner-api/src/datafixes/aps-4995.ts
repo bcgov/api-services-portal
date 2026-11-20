@@ -140,7 +140,7 @@ function validatePreview(
   if (
     !exchange ||
     !Array.isArray(exchange.scopes) ||
-    exchange.scopes.length !== 0 ||
+    exchange.scopes.length === 0 ||
     exchange.scope_source !== 'verified_subject_token' ||
     typeof exchange.audience !== 'string' ||
     exchange.audience.length === 0 ||

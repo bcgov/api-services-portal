@@ -251,18 +251,60 @@ describe('ConnectionService', () => {
       ).rejects.toThrow('Validation Failed');
     });
 
-    it('keeps an approval change from the service organization', async () => {
+    it('approves and activates in the same service-owner update', async () => {
       getRecords.mockResolvedValue([{ id: '1', isApproved: false }]);
 
       await new ConnectionService().upsertConnection(
         context,
         'ministry-of-service',
-        input({ isApproved: true })
+        input({ isApproved: true, isActive: true })
       );
 
       expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
         isApproved: true,
+        isActive: true,
       });
+    });
+
+    it('preserves activity when an approved connection is marked for re-approval', async () => {
+      getRecords.mockResolvedValue([
+        { id: '1', isApproved: true, isActive: true },
+      ]);
+
+      await new ConnectionService().upsertConnection(
+        context,
+        'ministry-of-service',
+        input({ isApproved: false })
+      );
+
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).toMatchObject({
+        isApproved: false,
+      });
+      expect(syncRecordsThrowErrors.mock.calls[0][3]).not.toHaveProperty(
+        'isActive'
+      );
+    });
+
+    it('rejects deactivation while an approved connection is marked for re-approval', async () => {
+      getRecords.mockResolvedValue([
+        { id: '1', isApproved: true, isActive: true },
+      ]);
+
+      await expect(
+        new ConnectionService().upsertConnection(
+          context,
+          'ministry-of-service',
+          input({ isApproved: false, isActive: false })
+        )
+      ).rejects.toMatchObject({
+        fields: {
+          isActive: {
+            message:
+              'Cannot activate or deactivate a connection while marking an approved connection for re-approval. Existing access must be preserved; activate, deactivate, or revoke it separately.',
+          },
+        },
+      });
+      expect(syncRecordsThrowErrors).not.toHaveBeenCalled();
     });
 
     it('preserves managed settings and applies allowed R1 resource changes', async () => {
@@ -518,6 +560,9 @@ describe('ConnectionService', () => {
       id: '123',
       clientId: 'LAB.MIN.CITZ.MY-SUBSYSTEM',
       serviceId: 'LAB.MIN.CITZ.SERVICE-A.v1',
+      isApproved: true,
+      isActive: false,
+      provisionerStatus: JSON.stringify({ status: 'deprovisioned' }),
     };
     const clientSubsystem = {
       namespace: 'sdx-client-gateway',
@@ -546,6 +591,112 @@ describe('ConnectionService', () => {
         findOpenAPISpecByName: jest.fn().mockResolvedValue(serviceSpec),
       }));
     };
+
+    it('rejects revocation while an approved connection is active', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.getConnectionById.mockResolvedValue({
+        ...connection,
+        isActive: true,
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).rejects.toMatchObject({
+        fields: {
+          isActive: {
+            message:
+              'Cannot revoke an active connection. Deactivate it and wait for access configuration removal to finish.',
+          },
+        },
+      });
+      expect(service.getConnectionDeleteStatus).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('rejects deleting an active connection while changes await re-approval', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.getConnectionById.mockResolvedValue({
+        ...connection,
+        isApproved: false,
+        isActive: true,
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).rejects.toMatchObject({
+        fields: {
+          isActive: {
+            message:
+              'Cannot reject changes by deleting an active connection. Existing access must be preserved; revoke the connection separately.',
+          },
+        },
+      });
+      expect(service.getConnectionDeleteStatus).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('rejects revocation until an approved connection is deprovisioned', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.getConnectionById.mockResolvedValue({
+        ...connection,
+        provisionerStatus: JSON.stringify({ status: 'deprovisioning' }),
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).rejects.toMatchObject({
+        fields: {
+          provisionerStatus: {
+            message:
+              'Cannot revoke this connection until its access configuration has been removed. Deactivate it and wait for access configuration removal to finish.',
+          },
+        },
+      });
+      expect(service.getConnectionDeleteStatus).not.toHaveBeenCalled();
+      expect(deleteRecordByInternalIdThrowErrors).not.toHaveBeenCalled();
+    });
+
+    it('allows an unapproved pending request to be cancelled without a provisioner status', async () => {
+      const service = new ConnectionService();
+      setupDeleteConnection(service, {
+        clientTag: 'ns.sdx-client-gateway.123.c',
+        serviceTag: 'ns.sdx-service-gateway.123.p',
+        clientConfigCount: 0,
+        serviceConfigCount: 0,
+      });
+      service.getConnectionById.mockResolvedValue({
+        ...connection,
+        isApproved: false,
+        provisionerStatus: '{}',
+      });
+      deleteRecordByInternalIdThrowErrors.mockResolvedValue({
+        status: 200,
+        result: 'deleted',
+        id: '123',
+      });
+
+      await expect(
+        service.deleteConnection(context, 'ministry-of-citz', '123')
+      ).resolves.toMatchObject({ result: 'deleted' });
+    });
 
     it('deletes the connection request when client and service gateway config are removed', async () => {
       const service = new ConnectionService();
