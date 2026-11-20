@@ -1,6 +1,12 @@
 const { Text, Select } = require('@keystonejs/fields');
 const { EnforcementPoint } = require('../authz/enforcement');
 const { atTracking } = require('@keystonejs/list-plugins');
+const { logger } = require('../logger');
+const { lookupUsersByEmail } = require('../services/keystone/user');
+const {
+  CssOnboardingNotificationService,
+  cssOnboardingNotification,
+} = require('../services/notification/css-onboarding-notification.service');
 
 /**
  * Task manages a general task for approval with the following requests:
@@ -56,4 +62,19 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [atTracking()],
+  hooks: {
+    afterChange: function ({ operation, existingItem, updatedItem, context }) {
+      if (!cssOnboardingNotification(operation, existingItem, updatedItem)) {
+        return;
+      }
+      // Do not await SMTP. The feed write should return once the task is saved.
+      new CssOnboardingNotificationService(undefined, undefined, (email) =>
+        lookupUsersByEmail(context, email).then((users) => users.length > 0)
+      )
+        .notifyChange({ operation, existingItem, updatedItem })
+        .catch((err) => {
+          logger.error('CSS onboarding notification failed: %s', err);
+        });
+    },
+  },
 };

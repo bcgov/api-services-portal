@@ -17,6 +17,11 @@ export const pathSummaries: Record<
     description:
       'Accepts new integration access requests against the subsystem.',
   },
+  '/integrations/{integrationId}/onboarding/complete': {
+    summary: 'Submit a held onboarding request',
+    description:
+      'Replays a held Common SSO access request after the integration is linked to a subsystem.',
+  },
   '/resources': {
     summary: 'Resource dispatch',
     description:

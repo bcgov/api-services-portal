@@ -171,6 +171,28 @@ export async function lookupUsersByNamespace(
   return result.data.usersByNamespace;
 }
 
+export async function lookupUsersByEmail(
+  context: any,
+  email: string
+): Promise<User[]> {
+  const result = await context.executeGraphQL({
+    query: `query LookupUsersByEmail($email: String!) {
+                    allUsers(where: { email: $email }) {
+                      id
+                      name
+                      username
+                      email
+                    }
+                  }`,
+    variables: { email },
+  });
+  logger.debug('Query [lookupUsersByEmail] result %j', result);
+  if (result.errors || !Array.isArray(result.data?.allUsers)) {
+    throw new Error('SDX user lookup failed');
+  }
+  return result.data.allUsers.filter(Boolean);
+}
+
 export async function lookupProviderUserByEmail(
   context: any,
   email: string

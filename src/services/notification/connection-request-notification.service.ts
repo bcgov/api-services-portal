@@ -10,6 +10,7 @@ import { GetSubsystemEntryForSubsystem } from '../gateway-patterns/catalog';
 import { OrgGroupService } from '../org-groups/org-group-service';
 import { getEnvironmentContext } from '../workflow/get-namespaces';
 import { NotificationService } from './notification.service';
+import { withoutTrailingSlash } from './urls';
 
 const logger = Logger('connection-request-notification.service');
 
@@ -190,7 +191,7 @@ const brochureUrl = () => {
   if (!url) {
     throw new Error('SDX_UI_URL is required');
   }
-  return url.replace(/\/$/, '');
+  return withoutTrailingSlash(url);
 };
 
 const connectionEmailCopy: Record<

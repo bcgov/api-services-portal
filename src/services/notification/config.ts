@@ -6,6 +6,10 @@ export interface NotificationConfig {
   port: number;
   user: string;
   pass: string;
+  /** Inbox for new Common SSO onboarding tasks. Unset skips that email. */
+  apsOnboardingEmail: string;
+  /** SDX UI origin for onboarding notices. */
+  sdxUiUrl: string;
 }
 
 export interface EmailNotification {
