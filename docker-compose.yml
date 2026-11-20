@@ -9,10 +9,17 @@ secrets:
   npm_token:
     environment: 'NPM_TOKEN'
 
+x-keycloak-healthcheck: &keycloak-healthcheck
+  test: ["CMD", "bash", "/opt/keycloak/healthcheck.sh"]
+  interval: 5s
+  timeout: 5s
+
 services:
   # Two stateless Keycloak sites behind HAProxy. The service name, container name,
   # host port, and keycloak.localtest.me alias stay on the proxy so existing clients
   # keep using http://keycloak.localtest.me:9081/auth.
+  # This is one writable database. It proves the Keycloak behavior. Production
+  # failover stays in APS-5135, APS-5136, and APS-5137.
   keycloak-site-a:
     image: keycloak-quarkus:e2e
     container_name: keycloak-site-a
@@ -29,42 +36,29 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: local
       JAVA_OPTS_APPEND: "-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=70.0"
-    entrypoint: ["bash", "/opt/keycloak/start-site-a.sh"]
-    command:
-      [
-        'start',
-        '--optimized',
-        '--features=stateless',
-        '--cache-embedded-cluster-name=site-a',
-        '--hostname',
-        'http://keycloak.localtest.me:9081/auth',
-        '--db-url',
-        'jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}',
-        '--db-username',
-        'keycloakuser',
-        '--db-password',
-        'keycloakuser',
-        '--db-tls-mode=disabled',
-        '--http-enabled=true',
-        '--http-port=9081',
-        '--http-host=0.0.0.0',
-        '--http-management-port=9000',
-        '--http-management-host=0.0.0.0',
-        '--http-management-scheme=http',
-        '--import-realm',
-      ]
+      KC_FEATURES: stateless
+      KC_HOSTNAME: http://keycloak.localtest.me:9081/auth
+      KC_DB_URL: jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: keycloakuser
+      KC_DB_PASSWORD: keycloakuser
+      KC_DB_TLS_MODE: disabled
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: "9081"
+      KC_HTTP_HOST: 0.0.0.0
+      KC_HTTP_MANAGEMENT_PORT: "9000"
+      KC_HTTP_MANAGEMENT_HOST: 0.0.0.0
+      KC_HTTP_MANAGEMENT_SCHEME: http
+      KC_CACHE_EMBEDDED_CLUSTER_NAME: site-a
+    command: ["start", "--optimized", "--import-realm"]
     volumes:
       - ./local/keycloak/master-realm.json:/opt/keycloak/data/import/master-realm.json
-      - ./local/keycloak/start-site-a.sh:/opt/keycloak/start-site-a.sh:ro
       - ./local/keycloak/healthcheck.sh:/opt/keycloak/healthcheck.sh:ro
     ports:
       - 9001:9000
     networks:
       - aps-net
     healthcheck:
-      test: ["CMD", "bash", "/opt/keycloak/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
+      <<: *keycloak-healthcheck
       retries: 40
       start_period: 120s
   keycloak-site-b:
@@ -75,29 +69,10 @@ services:
     depends_on:
       keycloak-site-a:
         condition: service_healthy
-    environment: *keycloak-env
-    command:
-      [
-        'start',
-        '--optimized',
-        '--features=stateless',
-        '--cache-embedded-cluster-name=site-b',
-        '--hostname',
-        'http://keycloak.localtest.me:9081/auth',
-        '--db-url',
-        'jdbc:postgresql://kong-db/${KEYCLOAK_DB_NAME:-keycloak}',
-        '--db-username',
-        'keycloakuser',
-        '--db-password',
-        'keycloakuser',
-        '--db-tls-mode=disabled',
-        '--http-enabled=true',
-        '--http-port=9081',
-        '--http-host=0.0.0.0',
-        '--http-management-port=9000',
-        '--http-management-host=0.0.0.0',
-        '--http-management-scheme=http',
-      ]
+    environment:
+      <<: *keycloak-env
+      KC_CACHE_EMBEDDED_CLUSTER_NAME: site-b
+    command: ["start", "--optimized"]
     volumes:
       - ./local/keycloak/healthcheck.sh:/opt/keycloak/healthcheck.sh:ro
     ports:
@@ -105,9 +80,7 @@ services:
     networks:
       - aps-net
     healthcheck:
-      test: ["CMD", "bash", "/opt/keycloak/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
+      <<: *keycloak-healthcheck
       retries: 36
       start_period: 30s
   keycloak:

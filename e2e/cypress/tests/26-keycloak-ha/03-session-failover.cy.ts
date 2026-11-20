@@ -38,7 +38,7 @@ describe('Keycloak session failover', () => {
   })
 
   it('serves refresh, userinfo, and a new login after site A is drained', () => {
-    portalSessionGrant(publicUrl()).then((response) => {
+    portalSessionGrant(siteAUrl()).then((response) => {
       expect(response.status).to.eq(200)
       refreshToken = response.body.refresh_token
       accessToken = response.body.access_token
@@ -46,7 +46,7 @@ describe('Keycloak session failover', () => {
 
     haproxy('set server sites/site-a state drain')
 
-    cy.then(() => portalRefreshGrant(publicUrl(), refreshToken)).then((response) => {
+    cy.then(() => portalRefreshGrant(siteBUrl(), refreshToken)).then((response) => {
       expect(response.status).to.eq(200)
       accessToken = response.body.access_token
     })

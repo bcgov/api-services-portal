@@ -10,10 +10,12 @@ while true; do
         cd /e2e
         # added sleep to wait for initial data seeding
         sleep 1m
+        # Merge once, after both Cypress runs, so the portal aggregate is not
+        # fed back into mochawesome-merge.
         if [[ "$RUN_ENV" == "prod" ]]; then
-            npm run cy:run:rcd:html
+            npm run cy:run:rcd
         else
-            npm run cy:run:html
+            npm run cy:run
         fi
         portal_status=$?
         echo "Running Keycloak HA specs"
