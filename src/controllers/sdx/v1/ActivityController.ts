@@ -67,13 +67,25 @@ export class ActivityController extends Controller {
     );
 
     return transformActivity(records).map(
-      ({ message, params, result, activityAt, blob }) => ({
-        message,
-        params,
-        result,
-        activityAt,
-        ...(blob?.blob ? { blob: JSON.parse(blob.blob) } : {}),
-      })
+      ({ message, params, result, activityAt, blob }) => {
+        const payload = blob?.blob ? JSON.parse(blob.blob) : undefined;
+        const displayName = payload?.requester?.displayName;
+        if (
+          params.actor === 'Unknown Actor' &&
+          typeof displayName === 'string' &&
+          displayName.trim()
+        ) {
+          params = { ...params, actor: displayName.trim() };
+        }
+
+        return {
+          message,
+          params,
+          result,
+          activityAt,
+          blob: payload,
+        };
+      }
     );
   }
 }

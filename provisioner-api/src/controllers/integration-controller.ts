@@ -159,7 +159,7 @@ export class IntegrationController {
     submissionId: string,
     outcome: 'failed' | 'held for onboarding' | 'processed'
   ): Promise<void> {
-    const email = input.request.requester.email.trim().toLowerCase();
+    const { displayName, email } = input.request.requester;
     await this.services.activity.publishActivity({
       id: uuidv4(),
       type: 'IntegrationAccessRequest',
@@ -171,13 +171,14 @@ export class IntegrationController {
       context: {
         message: 'Integration access request for {client} {action}',
         params: {
+          actor: displayName.trim() || 'Unknown Actor',
           client: input.integrationId,
           action: outcome,
           submissionId,
         },
       },
       blob: [{ id: uuidv4(), type: 'json', blob: JSON.stringify(input.request) }],
-      filterKey1: `personal:${email}`,
+      filterKey1: `personal:${email.trim().toLowerCase()}`,
     });
   }
 }
