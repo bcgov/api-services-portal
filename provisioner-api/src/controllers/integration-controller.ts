@@ -53,44 +53,47 @@ export class IntegrationController {
   ): Promise<TNewIntegrationAccessRequestResponse> {
     // get submissionId from the http request header "X-Request-ID" or generate a new one if not present
     const submissionId = `submission-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    const registered =
-      await this.services.sdxMember.findSubsystemByIntegrationClientId(
-        input.integrationId
-      );
+    let outcome: 'failed' | 'held for onboarding' | 'processed' = 'failed';
+    try {
+      const registered =
+        await this.services.sdxMember.findSubsystemByIntegrationClientId(
+          input.integrationId
+        );
 
-    if (!registered) {
-      try {
+      if (!registered) {
         const result = await this.services.cssOnboarding.hold(
           input.integrationId,
           submissionId,
           input.request
         );
-        await this.logHoldActivity(input, result);
+        outcome = 'held for onboarding';
         return result;
+      }
+
+      const subsystem = subsystemWithOrganization(
+        registered,
+        input.integrationId
+      );
+
+      let result: TNewIntegrationAccessRequestResponse;
+      try {
+        result =
+          await this.services.integrationAccess.submitIntegrationAccessRequest(
+            submissionId,
+            subsystem,
+            input.integrationId,
+            input.request
+          );
       } catch (err) {
-        await this.logHoldActivity(input, undefined, err);
+        await this.logActivity(input, subsystem, undefined, err);
         throw err;
       }
-    }
 
-    const subsystem = subsystemWithOrganization(
-      registered,
-      input.integrationId
-    );
-
-    try {
-      const result =
-        await this.services.integrationAccess.submitIntegrationAccessRequest(
-          submissionId,
-          subsystem,
-          input.integrationId,
-          input.request
-        );
+      outcome = 'processed';
       await this.logActivity(input, subsystem, result);
       return result;
-    } catch (err) {
-      await this.logActivity(input, subsystem, undefined, err);
-      throw err;
+    } finally {
+      await this.logPersonalActivity(input, submissionId, outcome);
     }
   }
 
@@ -151,36 +154,31 @@ export class IntegrationController {
     await this.services.activity.publishActivity(activity);
   }
 
-  private async logHoldActivity(
-    request: CreateIntegrationAccessRequestInput,
-    result: TNewIntegrationAccessRequestResponse | undefined,
-    error?: unknown
+  private async logPersonalActivity(
+    input: CreateIntegrationAccessRequestInput,
+    submissionId: string,
+    outcome: 'failed' | 'held for onboarding' | 'processed'
   ): Promise<void> {
-    const activity: Activity = {
+    const { displayName, email } = input.request.requester;
+    await this.services.activity.publishActivity({
       id: uuidv4(),
       type: 'IntegrationAccessRequest',
       action: 'create',
-      result: error ? 'failed' : 'success',
-      name: 'N/A',
-      message: error
-        ? `Integration access request for ${request.integrationId} failed`
-        : `Integration access request for ${request.integrationId} held for onboarding`,
-      refId: '',
+      result: outcome === 'failed' ? 'failed' : 'success',
+      name: 'Integration access request',
+      message: `Integration access request for ${input.integrationId} ${outcome}`,
+      refId: submissionId,
       context: {
         message: 'Integration access request for {client} {action}',
         params: {
-          client: request.integrationId,
-          action: error ? 'failed' : 'held for onboarding',
+          actor: displayName.trim() || 'Unknown Actor',
+          client: input.integrationId,
+          action: outcome,
+          submissionId,
         },
       },
-      blob: [
-        {
-          id: uuidv4(),
-          blob: JSON.stringify({ input: request, output: result || error }),
-        },
-      ],
-    };
-
-    await this.services.activity.publishActivity(activity);
+      blob: [{ id: uuidv4(), type: 'json', blob: JSON.stringify(input.request) }],
+      filterKey1: `personal:${email.trim().toLowerCase()}`,
+    });
   }
 }

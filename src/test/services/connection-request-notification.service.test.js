@@ -195,6 +195,7 @@ describe('ConnectionRequestNotificationService', () => {
       {
         hasCssDetails: true,
         cssClientId: '{{connectionsUrl}}',
+        sdxClientId: 'sample-client',
         connectionsUrl: 'https://api.example.com/connections',
       }
     );
