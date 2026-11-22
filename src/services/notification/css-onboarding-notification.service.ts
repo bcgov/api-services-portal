@@ -177,17 +177,16 @@ export class CssOnboardingNotificationService {
     }
 
     const subject = `P2P onboarding needed: ${projectName}, CSS request ${integrationId}`;
-    const requestedServices = (request.resourceServers || [])
-      .flatMap((server) =>
-        (server.services || []).map((service) => {
-          const name = service.name || 'Not specified';
-          const version = service.version || 'Not specified';
-          const scopes = service.scopes?.join(', ') || 'None specified';
-          const environment = server.environment || 'Not specified';
-          return `"${name} ${version} ${scopes} ${environment}"`;
-        })
-      )
-      .join(', ');
+    const requestedServices: string[] = [];
+    for (const server of request.resourceServers || []) {
+      const environment = server.environment || 'Not specified';
+      for (const service of server.services || []) {
+        const name = service.name || 'Not specified';
+        const version = service.version || 'Not specified';
+        const scopes = service.scopes?.join(', ') || 'None specified';
+        requestedServices.push(`"${name} ${version} ${scopes} ${environment}"`);
+      }
+    }
     await this.notification.notify(
       { email: apsEmail, name: 'P2P Operations', username: '' },
       {
@@ -202,7 +201,7 @@ export class CssOnboardingNotificationService {
           requesterName: requester.displayName || 'Not specified',
           requesterEmail: requester.email || 'Not specified',
           consumerOrganization: request.consumerOrganization || '',
-          requestedServices: requestedServices || 'None specified',
+          requestedServices: requestedServices.join(', ') || 'None specified',
           onboardingTicketUrl: config.apsOnboardingTicketUrl?.trim() || '',
           brochureUrl: details.brochureUrl,
         },
