@@ -36,6 +36,92 @@
               <td class="content">
                 <p class="greeting">Hi {{name}},</p>
                 <p class="message">{{message}}</p>
+                {{#if isOnboardingInvite}}
+                <p class="section-title">What happens next</p>
+                <p class="message">A P2P operator will contact you to arrange an onboarding kickoff meeting and guide you through the setup. You do not need to take any action at this time.</p>
+                <p class="message">You may also receive emails from the Service Desk about your onboarding support ticket. If you have not used the Service Desk before, you may be asked to set up an account to follow the ticket.</p>
+                <p class="section-title">Your request</p>
+                <table class="details" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <th scope="row" align="left" class="label">Project name</th>
+                    <td class="value">{{projectName}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" align="left" class="label">CSS request ID</th>
+                    <td class="value mono">{{cssRequestId}}</td>
+                  </tr>
+                </table>
+                {{/if}}
+                {{#if isOperationsNotice}}
+                <p class="section-title">Next steps</p>
+                <ol class="message">
+                  <li>Create a JSM onboarding ticket on behalf of the requestor.</li>
+                  <li>Contact the requestor to arrange an onboarding kickoff meeting.</li>
+                  <li>Follow the P2P client onboarding playbook to guide setup and track progress.</li>
+                </ol>
+                {{/if}}
+                {{#if onboardingTicketUrl}}
+                <table class="button-table" role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td class="button-cell" bgcolor="#013366">
+                      <a class="button" href="{{onboardingTicketUrl}}">Create onboarding ticket in JSM</a>
+                    </td>
+                  </tr>
+                </table>
+                {{/if}}
+                {{#if isOperationsNotice}}
+                <p class="section-title">Request details</p>
+                <table class="details" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <th scope="row" align="left" class="label">Project name</th>
+                    <td class="value">{{projectName}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" align="left" class="label">CSS request ID</th>
+                    <td class="value">{{cssRequestId}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" align="left" class="label">Requested by</th>
+                    <td class="value">{{requesterName}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" align="left" class="label">Email</th>
+                    <td class="value">{{requesterEmail}}</td>
+                  </tr>
+                {{/if}}
+                {{#if consumerOrganization}}
+                  <tr>
+                    <th scope="row" align="left" class="label">Consumer organization</th>
+                    <td class="value">{{consumerOrganization}}</td>
+                  </tr>
+                {{/if}}
+                {{#if isOperationsNotice}}
+                </table>
+                <p class="section-title">Requested SDX services</p>
+                <table class="details service-details" width="100%" cellpadding="0" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Provider organization</th>
+                      <th scope="col">Service</th>
+                      <th scope="col">Version</th>
+                      <th scope="col">Production or non-production</th>
+                      <th scope="col">Requested scopes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each requestedServices}}
+                    <tr>
+                      <td class="value">{{providerOrganization}}</td>
+                      <td class="value">{{service}}</td>
+                      <td class="value">{{version}}</td>
+                      <td class="value">{{environment}}</td>
+                      <td class="value">{{scopes}}</td>
+                    </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+                {{/if}}
+                {{#unless hasOnboardingDetails}}
                 {{#if connectionsUrl}}
                 <table
                   class="button-table"
@@ -121,6 +207,7 @@
                   </tr>
                 </table>
                 {{/if}}
+                {{/unless}}
               </td>
             </tr>
             <tr>

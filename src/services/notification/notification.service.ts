@@ -36,26 +36,47 @@ export class NotificationService {
 
     logger.debug('Notification triggered [%s] %j', name, to);
     const values: EmailNotification['context'] = { name, ...context };
-    // {{#if key}}...{{/if}} blocks are kept only when the context value is truthy
+    // Process exclusions first so they can wrap existing conditional sections.
     const html = fs
       .readFileSync(
         path.resolve(__dirname, `templates/${templateName}.html`),
         'utf8'
       )
       .replace(
+        /[ \t]*{{#unless (\w+)}}\n?([\s\S]*?)[ \t]*{{\/unless}}\n?/g,
+        (_block, key, content) => (values[key] ? '' : content)
+      )
+      .replace(
         /[ \t]*{{#if (\w+)}}\n?([\s\S]*?)[ \t]*{{\/if}}\n?/g,
         (_block, key, content) => (values[key] ? content : '')
       );
-    // Mail clients ignore linked stylesheets, so a template's companion .css
-    // file is inlined into style attributes before values are substituted
-    const stylesheet = path.resolve(__dirname, `templates/${templateName}.css`);
-    const template = fs.existsSync(stylesheet)
-      ? juice.inlineContent(html, fs.readFileSync(stylesheet, 'utf8'))
-      : html;
-    // Single pass so substituted values can never introduce new placeholders
-    return template.replace(/{{(\w+)}}/g, (placeholder, key) =>
-      key in values ? escapeHtml(values[key]) : placeholder
+    // Substituted values are escaped and never interpreted as placeholders.
+    const rendered = html.replace(
+      /{{#each (\w+)}}([\s\S]*?){{\/each}}|{{(\w+)}}/g,
+      (placeholder, listKey: string, content: string, key: string) => {
+        if (listKey) {
+          const rows = values[listKey];
+          return Array.isArray(rows)
+            ? rows
+                .map((row) =>
+                  content.replace(/{{(\w+)}}/g, (token, field) =>
+                    Object.prototype.hasOwnProperty.call(row, field)
+                      ? escapeHtml(row[field])
+                      : token
+                  )
+                )
+                .join('')
+            : '';
+        }
+        const value = values[key];
+        return value !== undefined && !Array.isArray(value) ? escapeHtml(value) : placeholder;
+      }
     );
+    // Expand table rows before parsing the HTML to inline styles for email clients.
+    const stylesheet = path.resolve(__dirname, `templates/${templateName}.css`);
+    return fs.existsSync(stylesheet)
+      ? juice.inlineContent(rendered, fs.readFileSync(stylesheet, 'utf8'))
+      : rendered;
   }
 
   public async notify(user: User, email: EmailNotification) {

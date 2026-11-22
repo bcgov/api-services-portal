@@ -70,6 +70,7 @@ describe('CSS onboarding Task hook', () => {
   const mailConfig = {
     apsOnboardingEmail: 'ops@example.com',
     sdxUiUrl: 'http://sdx-ui.example.com/',
+    apsOnboardingTicketUrl: 'https://service-desk.example.test/create',
   };
 
   const serviceWith = (notify, config = mailConfig) =>
@@ -85,33 +86,41 @@ describe('CSS onboarding Task hook', () => {
     expect(notify).toHaveBeenCalledTimes(2);
     expect(notify.mock.calls[0][0]).toEqual({
       email: 'jane@example.gov.bc.ca',
-      name: 'Jane Doe',
+      name: 'Jane',
       username: '',
     });
     expect(notify.mock.calls[0][1]).toEqual({
       template: 'connection-rqst',
-      subject: 'SDX onboarding - integration-a',
+      subject: 'Your CSS request integration-a: P2P onboarding needed',
       context: {
-        ...letterDetails,
-        headline: 'Common SSO asked SDX for API access',
-        message:
-          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
+        isOnboardingInvite: true,
+        hasOnboardingDetails: true,
+        headline: 'Your CSS request integration-a: P2P onboarding needed',
+        message: expect.stringContaining('Your Common Hosted Single Sign-on (CSS) request'),
+        projectName: 'partner-app',
+        cssRequestId: 'integration-a',
+        brochureUrl: letterDetails.brochureUrl,
       },
     });
     expect(notify.mock.calls[1][0]).toEqual({
       email: 'ops@example.com',
-      name: 'APS Operations',
+      name: 'P2P Operations',
       username: '',
     });
-    expect(notify.mock.calls[1][1]).toEqual({
+    expect(notify.mock.calls[1][1]).toMatchObject({
       template: 'connection-rqst',
-      subject: 'New onboarding task - integration-a',
+      subject: 'P2P onboarding needed: partner-app, CSS request integration-a',
       context: {
-        ...letterDetails,
-        headline: 'A new onboarding task is waiting',
-        message:
-          'A new onboarding task is waiting for integration integration-a. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.',
-        connectionsUrl: 'http://sdx-ui.example.com',
+        isOperationsNotice: true,
+        projectName: 'partner-app',
+        cssRequestId: 'integration-a',
+        requesterName: 'Jane Doe',
+        requesterEmail: 'jane@example.gov.bc.ca',
+        onboardingTicketUrl: mailConfig.apsOnboardingTicketUrl,
+        requestedServices: [
+          { service: 'notes-svc', environment: 'dev', scopes: 'Notes.Read' },
+          { service: 'claims-svc', environment: 'dev', scopes: 'Claims.Read' },
+        ],
       },
     });
   });
@@ -191,54 +200,45 @@ describe('CSS onboarding Task hook', () => {
     expect(notify).not.toHaveBeenCalled();
   });
 
-  it('renders the onboarding letters with the connection template', () => {
+  it('renders the onboarding letters with their respective templates', async () => {
     const renderer = new NotificationService({
       getConfig: () => ({ notification: { enabled: false } }),
     });
-    const invite = renderer.templateToContent(
-      { name: 'Jane Doe' },
-      'connection-rqst',
-      {
-        ...letterDetails,
-        headline: 'Common SSO asked SDX for API access',
-        message:
-          'Common SSO asked SDX for API access for integration integration-a. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration integration-a, this access request will be submitted.',
-      }
-    );
-    const aps = renderer.templateToContent(
-      { name: 'APS Operations' },
-      'connection-rqst',
-      {
-        ...letterDetails,
-        headline: 'A new onboarding task is waiting',
-        message:
-          'A new onboarding task is waiting for integration integration-a. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.',
-        connectionsUrl: letterDetails.brochureUrl,
-      }
-    );
-    const done = renderer.templateToContent(
-      { name: 'Jane Doe' },
-      'connection-rqst',
-      {
-        ...letterDetails,
-        headline: 'Onboarding is done',
-        message:
-          'Onboarding for integration integration-a is done. The held request has been submitted for approval.',
-        connectionsUrl: letterDetails.brochureUrl,
-      }
+    const notify = jest.fn().mockResolvedValue(undefined);
+    const service = serviceWith(notify);
+    await service.notifyChange({ operation: 'create', updatedItem: pendingTask });
+    await service.notifyChange({
+      operation: 'update',
+      existingItem: pendingTask,
+      updatedItem: { ...pendingTask, status: 'processed' },
+    });
+    const [invite, aps, done] = notify.mock.calls.map(([user, email]) =>
+      renderer.templateToContent(user, email.template, email.context)
     );
 
-    expect(invite).toContain('Common SSO asked SDX for API access');
-    expect(invite).toContain('not onboarded yet');
-    expect(invite).toContain('access request is held');
-    expect(invite).toContain(
-      'APS Operations will onboard this application with you: a kickoff'
-    );
-    expect(aps).toContain('new onboarding task');
+    expect(invite).toContain('Hi Jane,');
+    expect(invite).toContain('What happens next');
+    expect(invite).toContain('Your request');
+    expect(invite).not.toContain('Service organization');
+    expect(aps).not.toContain('What happens next');
+    expect(invite).toMatch(/<table[\s\S]*Project name[\s\S]*partner-app[\s\S]*CSS request ID[\s\S]*integration-a[\s\S]*<\/table>/);
+    expect(aps).toContain('Hi P2P Operations,');
+    expect(aps).toContain('Next steps');
+    expect(aps).toContain('Request details');
+    expect(aps).toContain('Requested SDX services');
+    expect(Array.from(aps.matchAll(/<th scope="col">([^<]+)<\/th>/g), (match) => match[1])).toEqual([
+      'Provider organization',
+      'Service',
+      'Version',
+      'Production or non-production',
+      'Requested scopes',
+    ]);
+    expect(aps).toContain(`href="${mailConfig.apsOnboardingTicketUrl}"`);
+    expect(aps).not.toContain('Consumer organization');
+    expect(aps).not.toContain('{{');
     expect(aps).toContain('Jane Doe');
     expect(aps).toContain('jane@example.gov.bc.ca');
-    expect(aps).toContain('claims-svc, notes-svc');
-    expect(aps).toContain('Start with a kickoff, then create the SDX organization');
+    expect(aps).toMatch(/notes-svc[\s\S]*Notes.Read[\s\S]*claims-svc[\s\S]*Claims.Read/);
     expect(done).toContain('is done');
     expect(done).toContain('held request has');
     expect(done).toContain('submitted for approval');

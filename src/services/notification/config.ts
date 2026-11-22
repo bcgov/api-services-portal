@@ -10,12 +10,15 @@ export interface NotificationConfig {
   apsOnboardingEmail: string;
   /** SDX UI origin for onboarding notices. */
   sdxUiUrl: string;
+  apsOnboardingTicketUrl?: string;
 }
+
+export type EmailTemplateValue = string | number | boolean;
 
 export interface EmailNotification {
   template: string;
   subject: string;
-  context?: Record<string, string | number | boolean>;
+  context?: Record<string, EmailTemplateValue | Record<string, EmailTemplateValue>[]>;
 }
 
 export interface User {
