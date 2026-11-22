@@ -169,15 +169,3 @@ body {
   color: #1a5a96;
   text-decoration: underline;
 }
-
-.service-details th {
-  color: #606060;
-  text-align: left;
-  vertical-align: top;
-}
-
-.service-details th,
-.service-details td {
-  padding-right: 8px;
-  overflow-wrap: anywhere;
-}

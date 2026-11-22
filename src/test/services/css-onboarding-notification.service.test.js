@@ -34,8 +34,8 @@ const request = {
       id: 'claims',
       environment: 'dev',
       services: [
-        { name: 'notes-svc', scopes: ['Notes.Read'] },
-        { name: 'claims-svc', scopes: ['Claims.Read'] },
+        { name: 'notes-svc', version: '2.0.0', scopes: ['Notes.Read'] },
+        { name: 'claims-svc', version: '1.0.0', scopes: ['Claims.Read'] },
       ],
     },
   ],
@@ -94,7 +94,6 @@ describe('CSS onboarding Task hook', () => {
       subject: 'Your CSS request integration-a: P2P onboarding needed',
       context: {
         isOnboardingInvite: true,
-        hasOnboardingDetails: true,
         headline: 'Your CSS request integration-a: P2P onboarding needed',
         message: expect.stringContaining('Your Common Hosted Single Sign-on (CSS) request'),
         projectName: 'partner-app',
@@ -117,10 +116,7 @@ describe('CSS onboarding Task hook', () => {
         requesterName: 'Jane Doe',
         requesterEmail: 'jane@example.gov.bc.ca',
         onboardingTicketUrl: mailConfig.apsOnboardingTicketUrl,
-        requestedServices: [
-          { service: 'notes-svc', environment: 'dev', scopes: 'Notes.Read' },
-          { service: 'claims-svc', environment: 'dev', scopes: 'Claims.Read' },
-        ],
+        requestedServices: '"notes-svc 2.0.0 Notes.Read dev", "claims-svc 1.0.0 Claims.Read dev"',
       },
     });
   });
@@ -226,13 +222,8 @@ describe('CSS onboarding Task hook', () => {
     expect(aps).toContain('Next steps');
     expect(aps).toContain('Request details');
     expect(aps).toContain('Requested SDX services');
-    expect(Array.from(aps.matchAll(/<th scope="col">([^<]+)<\/th>/g), (match) => match[1])).toEqual([
-      'Provider organization',
-      'Service',
-      'Version',
-      'Production or non-production',
-      'Requested scopes',
-    ]);
+    expect(aps).toContain('Requested Services');
+    expect(aps).toContain('&quot;notes-svc 2.0.0 Notes.Read dev&quot;, &quot;claims-svc 1.0.0 Claims.Read dev&quot;');
     expect(aps).toContain(`href="${mailConfig.apsOnboardingTicketUrl}"`);
     expect(aps).not.toContain('Consumer organization');
     expect(aps).not.toContain('{{');

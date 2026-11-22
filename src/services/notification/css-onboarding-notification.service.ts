@@ -26,7 +26,6 @@ type OnboardingRequest = {
   requester?: { displayName?: string; email?: string };
   resourceServers?: Array<{
     environment?: string;
-    providerOrganization?: string;
     services?: Array<{ name?: string; version?: string; scopes?: string[] }>;
   }>;
 };
@@ -153,7 +152,6 @@ export class CssOnboardingNotificationService {
           subject: `Your CSS request ${integrationId}: P2P onboarding needed`,
           context: {
             isOnboardingInvite: true,
-            hasOnboardingDetails: true,
             headline: `Your CSS request ${integrationId}: P2P onboarding needed`,
             message: 'Your Common Hosted Single Sign-on (CSS) request includes SDX services. Before we can process your request for these services, we need to help you complete Peer-to-Peer (P2P) onboarding.',
             projectName,
@@ -179,15 +177,17 @@ export class CssOnboardingNotificationService {
     }
 
     const subject = `P2P onboarding needed: ${projectName}, CSS request ${integrationId}`;
-    const requestedServices = (request.resourceServers || []).flatMap((server) =>
-      (server.services || []).map((service) => ({
-        providerOrganization: server.providerOrganization || 'Not specified',
-        service: service.name || 'Not specified',
-        version: service.version || 'Not specified',
-        environment: server.environment || 'Not specified',
-        scopes: service.scopes?.join(', ') || 'None specified',
-      }))
-    );
+    const requestedServices = (request.resourceServers || [])
+      .flatMap((server) =>
+        (server.services || []).map((service) => {
+          const name = service.name || 'Not specified';
+          const version = service.version || 'Not specified';
+          const scopes = service.scopes?.join(', ') || 'None specified';
+          const environment = server.environment || 'Not specified';
+          return `"${name} ${version} ${scopes} ${environment}"`;
+        })
+      )
+      .join(', ');
     await this.notification.notify(
       { email: apsEmail, name: 'P2P Operations', username: '' },
       {
@@ -195,7 +195,6 @@ export class CssOnboardingNotificationService {
         subject,
         context: {
           isOperationsNotice: true,
-          hasOnboardingDetails: true,
           headline: subject,
           message: 'A Common Hosted Single Sign-on (CSS) request includes SDX services and requires P2P onboarding. Processing of the service access request is on hold until onboarding and CSS request ID linking are complete.',
           projectName,
@@ -203,7 +202,7 @@ export class CssOnboardingNotificationService {
           requesterName: requester.displayName || 'Not specified',
           requesterEmail: requester.email || 'Not specified',
           consumerOrganization: request.consumerOrganization || '',
-          requestedServices,
+          requestedServices: requestedServices || 'None specified',
           onboardingTicketUrl: config.apsOnboardingTicketUrl?.trim() || '',
           brochureUrl: details.brochureUrl,
         },

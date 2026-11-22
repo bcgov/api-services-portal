@@ -13,12 +13,10 @@ export interface NotificationConfig {
   apsOnboardingTicketUrl?: string;
 }
 
-export type EmailTemplateValue = string | number | boolean;
-
 export interface EmailNotification {
   template: string;
   subject: string;
-  context?: Record<string, EmailTemplateValue | Record<string, EmailTemplateValue>[]>;
+  context?: Record<string, string | number | boolean>;
 }
 
 export interface User {

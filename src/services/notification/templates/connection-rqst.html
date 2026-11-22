@@ -98,30 +98,13 @@
                 {{#if isOperationsNotice}}
                 </table>
                 <p class="section-title">Requested SDX services</p>
-                <table class="details service-details" width="100%" cellpadding="0" cellspacing="0">
-                  <thead>
-                    <tr>
-                      <th scope="col">Provider organization</th>
-                      <th scope="col">Service</th>
-                      <th scope="col">Version</th>
-                      <th scope="col">Production or non-production</th>
-                      <th scope="col">Requested scopes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {{#each requestedServices}}
-                    <tr>
-                      <td class="value">{{providerOrganization}}</td>
-                      <td class="value">{{service}}</td>
-                      <td class="value">{{version}}</td>
-                      <td class="value">{{environment}}</td>
-                      <td class="value">{{scopes}}</td>
-                    </tr>
-                    {{/each}}
-                  </tbody>
+                <table class="details" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <th scope="row" align="left" class="label">Requested Services</th>
+                    <td class="value">{{requestedServices}}</td>
+                  </tr>
                 </table>
                 {{/if}}
-                {{#unless hasOnboardingDetails}}
                 {{#if connectionsUrl}}
                 <table
                   class="button-table"
@@ -140,6 +123,7 @@
 
                 {{/if}}
 
+                {{#if sdxClientId}}
                 <p class="section-title">Secure Data Exchange</p>
                 <table
                   class="details"
@@ -160,12 +144,14 @@
                     <td class="label">Service organization</td>
                     <td class="value">{{serviceOrganization}}</td>
                   </tr>
+                {{/if}}
                   {{#if serviceName}}
                   <tr>
                     <td class="label">Service name</td>
                     <td class="value">{{serviceName}}</td>
                   </tr>
                   {{/if}}
+                {{#if sdxClientId}}
                   <tr>
                     <td class="label">Scopes</td>
                     <td class="value mono">{{scopes}}</td>
@@ -184,6 +170,7 @@
                   </tr>
                 </table>
 
+                {{/if}}
                 {{#if hasCssDetails}}
                 <p class="section-title">Common Single Sign-on</p>
                 <table
@@ -207,7 +194,6 @@
                   </tr>
                 </table>
                 {{/if}}
-                {{/unless}}
               </td>
             </tr>
             <tr>
