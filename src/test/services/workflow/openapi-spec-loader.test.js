@@ -417,4 +417,182 @@ paths: {}
 
     expect(mockBuildServiceName).not.toHaveBeenCalled();
   });
+
+  describe('operation scopes', () => {
+    const tokenUrl = 'https://issuer.example/token';
+    const authorizationUrl = 'https://issuer.example/auth';
+
+    const loadOperationScopes = async (securitySchemes, security) => {
+      const result = await LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'dev',
+          spec: YAML.stringify({
+            openapi: '3.1.0',
+            info: { title: 'Test API', version: '1.0.0' },
+            paths: {
+              '/cases': { get: { operationId: 'listCases', security } },
+            },
+            components: { securitySchemes },
+          }),
+        }
+      );
+      return JSON.parse(result.operations)[0].scopes;
+    };
+
+    beforeEach(() => {
+      mockValidateRuleset.mockResolvedValue({
+        version: 'v0.3.0-test',
+        ruleset: 'basic-ruleset',
+      });
+    });
+
+    it('collects scopes declared only under clientCredentials', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          sdx: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: {
+                  'sdpr:case:read': 'Read cases',
+                  'sdpr:case:note:write': 'Write case notes',
+                  'sdpr:case:delete': 'Not required by this operation',
+                },
+              },
+            },
+          },
+        },
+        [{ sdx: ['sdpr:case:read', 'sdpr:case:note:write'] }]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'sdpr:case:read', description: 'Read cases' },
+        { name: 'sdpr:case:note:write', description: 'Write case notes' },
+      ]);
+    });
+
+    it('collects scopes from every oauth2 scheme in every security requirement', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          staff: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl,
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Read cases' },
+              },
+            },
+          },
+          partner: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:write': 'Write cases' },
+              },
+            },
+          },
+          system: {
+            type: 'oauth2',
+            flows: {
+              password: {
+                tokenUrl,
+                scopes: { 'sdpr:case:audit': 'Audit cases' },
+              },
+            },
+          },
+          apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+          oidc: {
+            type: 'openIdConnect',
+            openIdConnectUrl: 'https://issuer.example/.well-known',
+          },
+        },
+        [
+          { apiKey: [], staff: ['sdpr:case:read'] },
+          { partner: ['sdpr:case:write'], oidc: ['openid'] },
+          { system: ['sdpr:case:audit'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'sdpr:case:read', description: 'Read cases' },
+        { name: 'sdpr:case:write', description: 'Write cases' },
+        { name: 'sdpr:case:audit', description: 'Audit cases' },
+      ]);
+    });
+
+    it('lists a scope declared in several flows and schemes once, authorizationCode first', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          first: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: {
+                  'sdpr:case:write': 'Write cases',
+                  'sdpr:case:read': 'Client credentials description',
+                },
+              },
+              implicit: {
+                authorizationUrl,
+                scopes: { 'sdpr:case:write': 'Implicit description' },
+              },
+            },
+          },
+          second: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl,
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Authorization code description' },
+              },
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Second scheme description' },
+              },
+            },
+          },
+        },
+        [
+          { first: ['sdpr:case:read', 'sdpr:case:write'] },
+          { second: ['sdpr:case:read'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        {
+          name: 'sdpr:case:read',
+          description: 'Authorization code description',
+        },
+        { name: 'sdpr:case:write', description: 'Write cases' },
+      ]);
+    });
+
+    it('ignores scopes required from schemes that are not oauth2', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          oidc: {
+            type: 'openIdConnect',
+            openIdConnectUrl: 'https://issuer.example/.well-known',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Read cases' },
+              },
+            },
+          },
+        },
+        [{ oidc: ['sdpr:case:read'] }]
+      );
+
+      expect(scopes).toEqual([]);
+    });
+  });
 });
