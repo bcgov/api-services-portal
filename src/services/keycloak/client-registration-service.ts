@@ -400,6 +400,7 @@ export class KeycloakClientRegistrationService {
         grantType: 'client_credentials',
         clientId: clientId,
         clientSecret: clientSecret,
+        scopes: ['kc-admin-api'],
       })
       .catch((err: any) => {
         logger.error('Login failed %s', err);

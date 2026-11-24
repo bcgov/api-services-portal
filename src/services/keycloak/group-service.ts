@@ -37,6 +37,7 @@ export class KeycloakGroupService {
         grantType: 'client_credentials',
         clientId: clientId,
         clientSecret: clientSecret,
+        scopes: ['kc-admin-api'],
       })
       .catch((err: any) => {
         logger.error('[login] Login failed %s', err);

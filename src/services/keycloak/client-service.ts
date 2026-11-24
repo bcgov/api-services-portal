@@ -175,6 +175,7 @@ export class KeycloakClientService {
         grantType: 'client_credentials',
         clientId: clientId,
         clientSecret: clientSecret,
+        scopes: ['kc-admin-api'],
       })
       .catch((err: any) => {
         console.log('Login failed ' + err);
