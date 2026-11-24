@@ -594,5 +594,76 @@ paths: {}
 
       expect(scopes).toEqual([]);
     });
+
+    describe('document-level security', () => {
+      const sdx = {
+        type: 'oauth2',
+        flows: {
+          authorizationCode: {
+            authorizationUrl,
+            tokenUrl,
+            scopes: {
+              'sdpr:case:read': 'Read cases',
+              'sdpr:case:admin': 'Administer cases',
+            },
+          },
+        },
+      };
+
+      // Loads a spec with one GET operation and returns that operation's scopes.
+      const loadScopes = async ({ rootSecurity, operationSecurity }) => {
+        const get = { operationId: 'listCases' };
+        if (operationSecurity !== undefined) {
+          get.security = operationSecurity;
+        }
+        const spec = {
+          openapi: '3.1.0',
+          info: { title: 'Test API', version: '1.0.0' },
+          paths: { '/cases': { get } },
+          components: { securitySchemes: { sdx } },
+        };
+        if (rootSecurity !== undefined) {
+          spec.security = rootSecurity;
+        }
+        const result = await LoadOpenAPISpec(
+          {},
+          {
+            organization: 'ministry-of-citz',
+            subsystem: 'MY-SVC',
+            environment: 'dev',
+            spec: YAML.stringify(spec),
+          }
+        );
+        return JSON.parse(result.operations)[0].scopes.map((s) => s.name);
+      };
+
+      it('inherits the document security when the operation has none', async () => {
+        expect(
+          await loadScopes({ rootSecurity: [{ sdx: ['sdpr:case:read'] }] })
+        ).toEqual(['sdpr:case:read']);
+      });
+
+      it('uses the operation security instead of the document security', async () => {
+        expect(
+          await loadScopes({
+            rootSecurity: [{ sdx: ['sdpr:case:read'] }],
+            operationSecurity: [{ sdx: ['sdpr:case:admin'] }],
+          })
+        ).toEqual(['sdpr:case:admin']);
+      });
+
+      it('treats an empty operation security as no security', async () => {
+        expect(
+          await loadScopes({
+            rootSecurity: [{ sdx: ['sdpr:case:read'] }],
+            operationSecurity: [],
+          })
+        ).toEqual([]);
+      });
+
+      it('lists no scopes when no security applies anywhere', async () => {
+        expect(await loadScopes({})).toEqual([]);
+      });
+    });
   });
 });

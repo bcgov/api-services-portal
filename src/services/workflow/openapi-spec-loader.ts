@@ -156,7 +156,12 @@ function parseSpecOperations(spec: any) {
             method: method.toUpperCase(),
             path,
             summary: op.summary || '',
-            scopes: parseScopes(spec.components?.securitySchemes, op.security),
+            // An operation's own security, even an empty array, replaces the
+            // document's security.
+            scopes: parseScopes(
+              spec.components?.securitySchemes,
+              op.security !== undefined ? op.security : spec.security
+            ),
           };
         });
 
