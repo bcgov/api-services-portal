@@ -3,6 +3,7 @@ import FormData from 'form-data';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
+import { authenticateAdminClient } from './admin-auth';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 import CertificateRepresentation from '@keycloak/keycloak-admin-client/lib/defs/certificateRepresentation';
 import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
@@ -170,13 +171,7 @@ export class KeycloakClientService {
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {
-    await this.kcAdminClient
-      .auth({
-        grantType: 'client_credentials',
-        clientId: clientId,
-        clientSecret: clientSecret,
-        scopes: ['kc-admin-api'],
-      })
+    await authenticateAdminClient(this.kcAdminClient, clientId, clientSecret)
       .catch((err: any) => {
         console.log('Login failed ' + err);
         throw err;

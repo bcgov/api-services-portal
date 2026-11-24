@@ -2126,7 +2126,8 @@
         "address",
         "phone",
         "offline_access",
-        "microprofile-jwt"
+        "microprofile-jwt",
+        "kc-admin-api"
       ],
       "authorizationSettings": {
         "allowRemoteResourceManagement": true,
