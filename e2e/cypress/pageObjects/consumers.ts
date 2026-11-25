@@ -158,6 +158,14 @@ export default class ConsumersPage {
   }
 
   approvePendingRequest(flag?: boolean) {
+    cy.get('body').then(($body) => {
+      if (
+        $body.find(this.approveBtn).length === 0 &&
+        $body.find(this.reviewBtn).length > 0
+      ) {
+        cy.get(this.reviewBtn).first().click({ force: true })
+      }
+    })
     if (flag) { 
       cy.get(this.approveBtn).click({ force: true, multiple : true })
     }
@@ -325,7 +333,7 @@ export default class ConsumersPage {
   }
 
   selectAuthorizationScope(scopes: any, isChecked = true) {
-    cy.contains("Authorization").click()
+    cy.get('[data-testid="ar-tabs"]').contains('Authorization').click()
     if (isChecked) {
       scopes.forEach(function (scope: string) {
         cy.get('[data-testid="client-scope-' + scope + '"]').find('[type="checkbox"]').check({ force: true });

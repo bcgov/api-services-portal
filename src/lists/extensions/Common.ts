@@ -247,19 +247,36 @@ export async function doClientLoginForCredentialIssuer(
   } as TokenExchangeResult;
 }
 
-export async function getResourceSets(envCtx: EnvironmentContext) {
-  logger.debug('[getResourceSets] for %s', envCtx.prodEnv.id);
-
+/**
+ * Token for the protection API. Creating or reading one namespace does not
+ * need a permission ticket for every resource the caller can access; that
+ * ticket grows with the suite and stalls Keycloak.
+ */
+export async function ensureProtectionApiToken(
+  envCtx: EnvironmentContext
+): Promise<void> {
+  const tokenApi = new KeycloakTokenService(envCtx.openid.token_endpoint);
+  const issuerEnvConfig = envCtx.issuerEnvConfig;
   if (isUserBasedResourceOwners(envCtx)) {
-    const issuerEnvConfig = envCtx.issuerEnvConfig;
-    const accessToken = await new KeycloakTokenService(
-      envCtx.openid.token_endpoint
-    ).tokenExchange(
+    envCtx.accessToken = await tokenApi.tokenExchange(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret,
       envCtx.subjectToken
     );
-    envCtx.accessToken = accessToken;
+    return;
+  }
+  envCtx.accessToken = await tokenApi.getKeycloakSession(
+    issuerEnvConfig.clientId,
+    issuerEnvConfig.clientSecret
+  );
+}
+
+export async function getResourceSets(envCtx: EnvironmentContext) {
+  logger.debug('[getResourceSets] for %s', envCtx.prodEnv.id);
+
+  if (isUserBasedResourceOwners(envCtx)) {
+    await ensureProtectionApiToken(envCtx);
+    const accessToken = envCtx.accessToken;
     const resourcesApi = new UMAResourceRegistrationService(
       envCtx.uma2.resource_registration_endpoint,
       accessToken
@@ -273,16 +290,10 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
     );
     return subjectOwnedResourceIds;
   } else {
-    const issuerEnvConfig = envCtx.issuerEnvConfig;
+    await ensureProtectionApiToken(envCtx);
     const resourceAccessScope =
       envCtx.prodEnv.credentialIssuer.resourceAccessScope;
-    const resSvrAccessToken = await new KeycloakTokenService(
-      envCtx.openid.token_endpoint
-    ).getKeycloakSession(
-      issuerEnvConfig.clientId,
-      issuerEnvConfig.clientSecret
-    );
-    envCtx.accessToken = resSvrAccessToken;
+    const resSvrAccessToken = envCtx.accessToken;
     const permApi = new UMAPermissionService(
       envCtx.uma2.permission_endpoint,
       resSvrAccessToken
@@ -309,13 +320,8 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
     'User-based resource owner is not supposed to be used for namespaces!'
   );
 
-  const issuerEnvConfig = envCtx.issuerEnvConfig;
-  //const resourceAccessScope =
-  //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
-  const resSvrAccessToken = await new KeycloakTokenService(
-    envCtx.openid.token_endpoint
-  ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
-  envCtx.accessToken = resSvrAccessToken;
+  await ensureProtectionApiToken(envCtx);
+  const resSvrAccessToken = envCtx.accessToken;
   const permApi = new UMAPermissionService(
     envCtx.uma2.permission_endpoint,
     resSvrAccessToken

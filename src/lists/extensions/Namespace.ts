@@ -147,11 +147,13 @@ module.exports = {
               );
               const getOrgAdmins = true;
               if (getOrgAdmins) {
-                const resource: any = await getResource(selectedNS, envCtx);
+              const resource: any = await getResource(selectedNS, envCtx);
+              if (resource) {
                 merged['id'] = resource['id'];
                 merged['scopes'] = resource['scopes'];
                 merged['displayName'] =
                   resource['displayName'] || `Gateway ${resource['name']}`;
+              }
               }
 
               if (merged.org) {

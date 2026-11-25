@@ -197,7 +197,7 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        {isSuccess && (
+        {(isSuccess || data) && (
           <AccessRequestsList
             labels={data?.allConsumerGroupLabels}
             queryKey={queryKey}
