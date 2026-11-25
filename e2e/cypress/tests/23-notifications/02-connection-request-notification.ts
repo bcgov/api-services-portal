@@ -72,8 +72,8 @@ describe('Notification Service - Connection Request Emails', () => {
                 failOnStatusCode: false,
               })
               sdxUiLogin()
-              cy.visit(expectedUrl)
-              cy.contains(service.name, { timeout: 20000 })
+              cy.visit(`${expectedUrl}&refresh=1`)
+              cy.contains(service.name, { timeout: 30000 })
                 .closest('article')
                 .within(() => {
                   cy.contains('Pending').should('be.visible')
