@@ -201,7 +201,12 @@ describe('Access manager approves developer access request for Client ID/Secret 
   })
 
   it('approves an access request', () => {
-    consumers.approvePendingRequest()
+    // The previous step looks for Review once and continues if the list has
+    // not rendered yet. Open the request here, then approve it.
+    cy.get(consumers.reviewBtn, { timeout: 20000 }).first().click({ force: true })
+    cy.get(consumers.approveBtn, { timeout: 20000 }).click({ force: true })
+    cy.wait(1000)
+    cy.verifyToastMessage('Access request approved')
   })
 
   after(() => {

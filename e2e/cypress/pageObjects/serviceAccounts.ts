@@ -46,7 +46,9 @@ class ServiceAccountsPage {
 
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {
-      cy.contains(scope).click()
+      // The dialog loads gateway scopes from Keycloak. After a long run that
+      // read can take longer than the default 4s command timeout.
+      cy.contains(scope, { timeout: 30000 }).click()
     })
   }
 

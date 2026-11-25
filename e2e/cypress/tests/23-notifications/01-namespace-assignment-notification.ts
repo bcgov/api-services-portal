@@ -128,8 +128,8 @@ describe('Notification Service - Namespace Assignment Emails', () => {
       cy.visit(`/manager/gateways/detail`)
       cy.wait(2000)
 
-      // Click "Add Organization" button to open the modal
-      cy.contains('button', 'Add Organization').click()
+      // The banner stays hidden until the current gateway query returns.
+      cy.contains('button', 'Add Organization', { timeout: 30000 }).click()
       cy.wait(1000)
 
       // Select the organization from the dropdown

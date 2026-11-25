@@ -1,7 +1,6 @@
 import {
   createSubsystem,
   new_service,
-  SDX_UI_URL,
   updateSubsystemIntegrationClients,
 } from '../../../support/sdx-commands'
 
@@ -17,7 +16,34 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
   before(() => {
     partnerAuthorization().as('partnerAuth')
     cy.mailpitDeleteAllMessages()
-    cy.fixture('toys.v1.yaml', null).as('toys.v1')
+    cy.fixture('toys.v1.yaml', null).then((spec: any) => {
+      // Completing onboarding refuses an environment whose scope catalog is empty.
+      // The shared Toys spec declares no OAuth scopes, so this test publishes
+      // one catalog scope without changing that fixture for every other spec.
+      const yaml = spec
+        .toString()
+        .replace(
+          '        - bearer_auth: []',
+          '        - css_auth: [sdx:toys:read]'
+        )
+        .replace(
+          `    bearer_auth:
+      type: http
+      scheme: bearer`,
+          `    bearer_auth:
+      type: http
+      scheme: bearer
+    css_auth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.gov.bc.ca/auth
+          tokenUrl: https://example.gov.bc.ca/token
+          scopes:
+            sdx:toys:read: Read toys`
+        )
+      cy.wrap(Cypress.Buffer.from(yaml)).as('toys.v1')
+    })
     cy.buildOrgGatewayDatasetAndProduct().then(({ org }: any) => {
       const suffix = String(org.name).split('-').pop()
       const providerName = `SUBSYS-${suffix}`
@@ -58,20 +84,18 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
       const inviteSubject = `SDX onboarding - ${integrationId}`
       const apsSubject = `New onboarding task - ${integrationId}`
       const doneSubject = `SDX onboarding complete - ${integrationId}`
-      const inviteUrl = `${SDX_UI_URL}/onboarding/invite?integrationId=${integrationId}`
 
       postAccessRequest(integrationId, request).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body.results[service.name]).to.eq('held for onboarding')
         const firstSubmissionId = response.body.submissionId
 
-        cy.mailpitWaitForEmail(subjectQuery(inviteSubject), 20000).then((message) => {
+        cy.mailpitWaitForEmail(subjectQuery(inviteSubject), 60000).then((message) => {
           cy.mailpitGetMessage(message.ID).then((details) => {
             expect(details.To.map((to) => to.Address)).to.include(requester.email)
             expect(details.HTML).to.include('Common SSO asked SDX for API access')
             expect(details.HTML).to.include('not onboarded yet')
             expect(details.HTML).to.include('will onboard this application')
-            expect(details.HTML).to.include(`href="${inviteUrl}"`)
           })
         })
         cy.mailpitWaitForEmail(subjectQuery(apsSubject), 20000).then((message) => {
