@@ -181,20 +181,12 @@ export async function GetCatalog(
 
 export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
   const catalog = await GetCatalog(ctx);
-  const scopes: ({ service: ScopedServiceOperations } & ResourceScopeParts)[] =
-    [];
+
+  // One entry per scope name. Each service that uses the scope appears once in
+  // it, listing every operation of that service that uses the scope.
+  const scopeGroups = new Map<string, ResourceScopeEntry>();
 
   catalog.forEach((service) => {
-    const serviceScopes = service.operations.reduce(
-      (acc: ResourceScope[], op) => {
-        if (op.scopes) {
-          return acc.concat(op.scopes);
-        }
-        return acc;
-      },
-      []
-    );
-
     const serviceBase = {
       name: service.name,
       environment: service.environment,
@@ -203,47 +195,36 @@ export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
       subsystem: service.subsystem,
     };
 
-    const scopeList = serviceScopes
-      .filter((scope) => typeof scope !== 'string')
-      .map(
-        (scope) =>
-          ({
-            ...parseScopeName(scope),
-            ...{
-              service: {
-                ...serviceBase,
-                subsystem: service.subsystem,
-                operationIds: service.operations
-                  .filter((op) => op.scopes && op.scopes.includes(scope))
-                  .map((op) => op.operationId),
-              },
-            },
-          } as { service: ScopedServiceOperations } & ResourceScopeParts)
-      );
+    // scope name -> this service's entry under that scope
+    const serviceEntries = new Map<string, ScopedServiceOperations>();
 
-    scopes.push(...scopeList);
-  });
+    for (const op of service.operations) {
+      for (const scope of op.scopes || []) {
+        if (typeof scope === 'string') {
+          continue;
+        }
 
-  // group the scopes by name to get all the ScopedServiceOperations
-  // to create the ResourceScopeEntry response
-  const scopeGroups: Record<string, ResourceScopeEntry> = {};
-  scopes.forEach((scope) => {
-    if (!scopeGroups[scope.name]) {
-      scopeGroups[scope.name] = {
-        name: scope.name,
-        description: scope.description,
-        namespace: scope.namespace,
-        resourceType: scope.resourceType,
-        subResourceTypes: scope.subResourceTypes,
-        action: scope.action,
-        services: [scope.service],
-      };
-    } else {
-      // if the scope already exists then we need to add the service to the existing entry
-      scopeGroups[scope.name].services.push(scope.service);
+        let group = scopeGroups.get(scope.name);
+        if (!group) {
+          group = { ...parseScopeName(scope), services: [] };
+          scopeGroups.set(scope.name, group);
+        }
+
+        let serviceEntry = serviceEntries.get(scope.name);
+        if (!serviceEntry) {
+          serviceEntry = { ...serviceBase, operationIds: [] };
+          serviceEntries.set(scope.name, serviceEntry);
+          group.services.push(serviceEntry);
+        }
+
+        if (!serviceEntry.operationIds.includes(op.operationId)) {
+          serviceEntry.operationIds.push(op.operationId);
+        }
+      }
     }
   });
-  return Object.values(scopeGroups);
+
+  return [...scopeGroups.values()];
 }
 
 /**
