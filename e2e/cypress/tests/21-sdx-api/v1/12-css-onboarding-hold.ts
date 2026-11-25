@@ -54,8 +54,8 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
     cy.get('@hold').then((hold: any) => {
       const { org, service, consumerName, integrationId, requester } = hold
       const request = accessRequest(service, requester)
-      const inviteSubject = `SDX onboarding - ${integrationId}`
-      const apsSubject = `New onboarding task - ${integrationId}`
+      const inviteSubject = `Your CSS request ${integrationId}: P2P onboarding needed`
+      const apsSubject = `P2P onboarding needed: ${request.clientId}, CSS request ${integrationId}`
       const doneSubject = `SDX onboarding complete - ${integrationId}`
 
       postAccessRequest(integrationId, request).then((response) => {
@@ -66,9 +66,10 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
         cy.mailpitWaitForEmail(subjectQuery(inviteSubject), 20000).then((message) => {
           cy.mailpitGetMessage(message.ID).then((details) => {
             expect(details.To.map((to) => to.Address)).to.include(requester.email)
-            expect(details.HTML).to.include('Common SSO asked SDX for API access')
-            expect(details.HTML).to.include('not onboarded yet')
-            expect(details.HTML).to.include('will onboard this application')
+            expect(details.HTML).to.include('Hi Jane,')
+            expect(details.HTML).to.include('complete Peer-to-Peer (P2P) onboarding')
+            expect(details.HTML).to.include('A P2P operator will contact you')
+            expect(details.HTML).to.include(integrationId)
           })
         })
         cy.mailpitWaitForEmail(subjectQuery(apsSubject), 20000).then((message) => {
@@ -76,7 +77,8 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
             expect(details.HTML).to.include(requester.displayName)
             expect(details.HTML).to.include(requester.email)
             expect(details.HTML).to.include(service.name)
-            expect(details.HTML).to.include('Start with a kickoff, then create the SDX organization')
+            expect(details.HTML).to.include('Create a JSM onboarding ticket on behalf of the requestor')
+            expect(details.HTML).to.include(integrationId)
           })
         })
 
