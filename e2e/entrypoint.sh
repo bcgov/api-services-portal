@@ -10,7 +10,7 @@ while true; do
         cd /e2e
         # added sleep to wait for initial data seeding
         sleep 1m
-        # Merge once, after both Cypress runs, so the portal aggregate is not
+        # Merge the JSON reports once at the end so an earlier aggregate is not
         # fed back into mochawesome-merge.
         if [[ "$RUN_ENV" == "prod" ]]; then
             npm run cy:run:rcd

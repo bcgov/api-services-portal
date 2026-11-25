@@ -1,5 +1,5 @@
 import {
-  ensureProtectionApiToken,
+  getResourceSets,
   isUserBasedResourceOwners,
 } from '../../lists/extensions/Common';
 import { Logger } from '../../logger';
@@ -69,10 +69,9 @@ export async function CreateNamespace(
   );
   await nsService.checkNamespaceAvailable(newNS);
 
-  // The protection API token is enough to create the resource. A permission
-  // ticket for every existing namespace is not required and stalls once the
-  // suite has created many of them.
-  await ensureProtectionApiToken(envCtx);
+  // This function gets all resources but also sets the accessToken in envCtx
+  // which we need to create the resource set
+  await getResourceSets(envCtx);
 
   const resourceApi = new UMAResourceRegistrationService(
     envCtx.uma2.resource_registration_endpoint,

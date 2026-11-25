@@ -12,7 +12,6 @@ import { clientTemplateSharedIdP } from './templates/client-template-shared-idp'
 import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
 
 import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
-import { authenticateAdminClient } from './admin-auth';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
 
@@ -396,7 +395,12 @@ export class KeycloakClientRegistrationService {
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {
-    await authenticateAdminClient(this.kcAdminClient, clientId, clientSecret)
+    await this.kcAdminClient
+      .auth({
+        grantType: 'client_credentials',
+        clientId: clientId,
+        clientSecret: clientSecret,
+      })
       .catch((err: any) => {
         logger.error('Login failed %s', err);
         throw err;

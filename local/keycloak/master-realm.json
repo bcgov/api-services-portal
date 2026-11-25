@@ -2120,14 +2120,14 @@
         "roles",
         "profile",
         "System.Write",
-        "email"
+        "email",
+        "kc-admin-api"
       ],
       "optionalClientScopes": [
         "address",
         "phone",
         "offline_access",
-        "microprofile-jwt",
-        "kc-admin-api"
+        "microprofile-jwt"
       ],
       "authorizationSettings": {
         "allowRemoteResourceManagement": true,
@@ -2268,14 +2268,14 @@
         "roles",
         "Namespace.Admin",
         "profile",
-        "email"
+        "email",
+        "kc-admin-api"
       ],
       "optionalClientScopes": [
         "address",
         "phone",
         "offline_access",
-        "microprofile-jwt",
-        "kc-admin-api"
+        "microprofile-jwt"
       ],
       "authorizationSettings": {
         "allowRemoteResourceManagement": true,

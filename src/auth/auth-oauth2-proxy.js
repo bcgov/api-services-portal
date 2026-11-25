@@ -196,14 +196,7 @@ class Oauth2ProxyAuthStrategy {
         },
       ],
       async (req, res, next) => {
-        try {
-          await this.register_user(req, res, next);
-        } catch (err) {
-          logger.error('[register_user] failed %s', err);
-          if (!res.headersSent) {
-            res.status(500).json({ error: 'register_user_failed' });
-          }
-        }
+        await this.register_user(req, res, next);
       }
     );
 
@@ -295,10 +288,7 @@ class Oauth2ProxyAuthStrategy {
     const businessName = oauthUser['business_name'];
     const email = oauthUser['email'];
     const username = oauthUser['preferred_username'];
-    // Keycloak omits the groups claim when the user has none. The session
-    // record requires the field, and a failed create used to throw after the
-    // response and exit the process.
-    const groups = JSON.stringify(oauthUser['groups'] || []);
+    const groups = JSON.stringify(oauthUser['groups']);
     const _roles = [];
     const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
 
@@ -464,8 +454,8 @@ class Oauth2ProxyAuthStrategy {
       logger.debug('Temporary Credential NOT FOUND - CREATING AUTOMATICALLY');
       const { errors } = await this.keystone.executeGraphQL({
         context: this.keystone.createContext({ skipAccessControl: true }),
-        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String, $businessName: String, $namespace: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
-                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername, businessName: $businessName, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
+        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String, $businessName: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
+                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername, businessName: $businessName, email: $email, isAdmin: false, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
                             id
                     } }`,
         variables: {
@@ -478,7 +468,6 @@ class Oauth2ProxyAuthStrategy {
           providerUserGuid,
           providerUsername,
           businessName,
-          namespace: '',
           groups,
           roles,
           scopes: '[]',
@@ -493,14 +482,6 @@ class Oauth2ProxyAuthStrategy {
     }
 
     const user = results[0];
-    if (!user) {
-      logger.error(
-        '[register_user] no temporary identity for %s',
-        username
-      );
-      res.status(500).json({ error: 'register_user_failed' });
-      return;
-    }
     user.groups = toJson(user.groups);
     user.roles = toJson(user.roles);
     user.scopes = toJson(user.scopes);

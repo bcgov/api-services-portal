@@ -1,7 +1,6 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
-import { authenticateAdminClient } from './admin-auth';
 import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 
@@ -33,7 +32,12 @@ export class KeycloakGroupService {
   ): Promise<KeycloakGroupService> {
     logger.debug('[login] %s', clientId);
 
-    await authenticateAdminClient(this.kcAdminClient, clientId, clientSecret)
+    await this.kcAdminClient
+      .auth({
+        grantType: 'client_credentials',
+        clientId: clientId,
+        clientSecret: clientSecret,
+      })
       .catch((err: any) => {
         logger.error('[login] Login failed %s', err);
         throw err;

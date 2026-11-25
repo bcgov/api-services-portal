@@ -12,7 +12,6 @@ import { getOrganizationUnit } from '../keystone';
 import { ResourceSet, UMAResourceRegistrationService } from '../uma2';
 import {
   EnvironmentContext,
-  ensureProtectionApiToken,
   getNamespaceResourceSets,
   getOrgPoliciesForResource,
 } from '../../lists/extensions/Common';
@@ -172,12 +171,14 @@ export async function getResource(
   selectedNS: string,
   envCtx: EnvironmentContext
 ) {
-  await ensureProtectionApiToken(envCtx);
+  const resourceIds = await getNamespaceResourceSets(envCtx);
   const resourcesApi = new UMAResourceRegistrationService(
     envCtx.uma2.resource_registration_endpoint,
     envCtx.accessToken
   );
-  const match = await resourcesApi.findResourceByName(selectedNS);
+  const namespaces = await resourcesApi.listResourcesByIdList(resourceIds);
+
+  const match = namespaces.find((ns) => ns.name === selectedNS);
   if (!match) {
     return undefined;
   }

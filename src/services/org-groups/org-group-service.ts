@@ -102,13 +102,8 @@ export class OrgGroupService {
   }
 
   public async backfillGroups(): Promise<void> {
-    try {
-      this.groups = await this.keycloakService.getAllGroups();
-      await this.traverseBackfill(this.groups);
-    } catch (err) {
-      logger.error('[backfillGroups] %s', err);
-      this.groups = this.groups || [];
-    }
+    this.groups = await this.keycloakService.getAllGroups();
+    await this.traverseBackfill(this.groups);
   }
 
   private async traverseBackfill(groups: GroupRepresentation[]): Promise<void> {
