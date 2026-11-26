@@ -129,17 +129,3 @@ The workbook row is the pass condition. This script checks the observable result
 | B.C. Design System fidelity | Header, buttons, and menus match the B.C. Design System treatment the workbook cites for that row. |
 | Responsive layout | Same expected outcome as the zoom section. |
 | Forced colours appearance | Same expected outcome as the forced-colours section. |
-
-## Note for APS-5099
-
-Paste after review. This spike does not post the comment.
-
-```
-Recommendation is in api-services-portal at e2e/sdx-catalogue-verification.md.
-
-Functional checks stay on the existing Cypress harness against the sdx-ui image (http://sdx-ui.localtest.me:5500). Catalogue specs live in e2e/cypress/tests/27-sdx-catalogue/ and run with `npm run cy:sdx-catalogue` from e2e/, outside the default CI spec list. Proof spec: 01-brochure-home.cy.ts (public home, no login). That spec passed locally on 25 Nov 2026 against the running sdx-ui container (Cypress 13.17.0, Electron 118 headless, 1 passing).
-
-Accessibility rules that axe can rerun are planned for APS-4971. Lighthouse stays an occasional second opinion. Keyboard, 400% zoom, forced colours, heading inspection, and a screen reader pass stay manual. The UX review workbook is the expected-result source, and APS-4971 covers it on this harness.
-
-The full suite remains APS-4971.
-```
