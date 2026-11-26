@@ -423,7 +423,10 @@ Cypress.Commands.add(
                   {
                     expect(response.stdout).to.contain('Config settings saved')
                     cy.executeCliCommand('gwa pg ' + fileName).then((response) => {
-                      expect(response.stdout).to.contain('Gateway config published')
+                      const output = `${response.stdout || ''}\n${response.stderr || ''}`
+                      expect(output, `gwa pg exit ${response.code}`).to.contain(
+                        'Gateway config published'
+                      )
                     })
                   }
                 })
