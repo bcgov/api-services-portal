@@ -185,6 +185,8 @@ export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
   // One entry per scope name. Each service that uses the scope appears once in
   // it, listing every operation of that service that uses the scope.
   const scopeGroups = new Map<string, ResourceScopeEntry>();
+  // service name + scope name pairs already logged as skipped
+  const skipped = new Set<string>();
 
   catalog.forEach((service) => {
     const serviceBase = {
@@ -201,6 +203,22 @@ export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
     for (const op of service.operations) {
       for (const scope of op.scopes || []) {
         if (typeof scope === 'string') {
+          continue;
+        }
+
+        // A name that does not have a namespace, a resource and an action
+        // cannot be listed. Skip it rather than fail the whole scope list:
+        // the provisioner reads this list for every SDX.R1.00 request.
+        if (!hasScopeNameParts(scope?.name)) {
+          const key = `${service.name}\u0000${scope?.name}`;
+          if (!skipped.has(key)) {
+            skipped.add(key);
+            logger.warn(
+              'Skipping scope %j of service %s: expected namespace:resource{:resource}:action',
+              scope?.name,
+              service.name
+            );
+          }
           continue;
         }
 
@@ -225,6 +243,11 @@ export async function GetScopes(ctx: any): Promise<ResourceScopeEntry[]> {
   });
 
   return [...scopeGroups.values()];
+}
+
+// True when a scope name has at least a namespace, a resource and an action.
+function hasScopeNameParts(name: unknown): name is string {
+  return typeof name === 'string' && name.split(':').length >= 3;
 }
 
 /**

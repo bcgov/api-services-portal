@@ -125,16 +125,51 @@ describe('SDX service catalog', () => {
       });
     });
 
-    it('rejects a catalog scope with fewer than three parts', async () => {
+    it('skips scope names it cannot parse and lists the rest', async () => {
       getRecords.mockResolvedValue([
         spec('APSDEV.MIN.TEC.VEHICLES.v1', [
-          { operationId: 'listVehicles', scopes: [{ name: 'ajc:read' }] },
+          {
+            operationId: 'listVehicles',
+            scopes: [{ name: 'ajc:read' }, read, { name: 'read' }],
+          },
+          {
+            operationId: 'updateVehicle',
+            scopes: [{ name: 'ajc:read' }, write],
+          },
+        ]),
+        spec('APSDEV.MIN.TEC.TRAILERS.v1', [
+          {
+            operationId: 'listTrailers',
+            scopes: [{ name: 'demo.read' }, read],
+          },
         ]),
       ]);
 
-      await expect(GetScopes({})).rejects.toMatchObject({
-        message: 'Invalid scope format',
-      });
+      const scopes = await GetScopes({});
+
+      expect(scopes.map((scope) => scope.name)).toEqual([
+        'ajc:vehicles:read',
+        'ajc:vehicles:write',
+      ]);
+      expect(
+        scopes[0].services.map((service) => [
+          service.name,
+          service.operationIds,
+        ])
+      ).toEqual([
+        ['APSDEV.MIN.TEC.VEHICLES.v1', ['listVehicles']],
+        ['APSDEV.MIN.TEC.TRAILERS.v1', ['listTrailers']],
+      ]);
+    });
+
+    it('returns no scopes when every name is unparseable', async () => {
+      getRecords.mockResolvedValue([
+        spec('APSDEV.MIN.TEC.VEHICLES.v1', [
+          { operationId: 'listVehicles', scopes: [{ name: 'ajc:read' }, {}] },
+        ]),
+      ]);
+
+      await expect(GetScopes({})).resolves.toEqual([]);
     });
   });
 });
