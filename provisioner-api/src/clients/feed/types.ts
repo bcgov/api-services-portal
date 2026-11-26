@@ -9,7 +9,7 @@ export interface Activity {
   message?: string;
   refId?: string;
   gatewayId?: string;
-  blob?: [{ id: string; blob: string }]; // JSON blob stored as string
+  blob?: [{ id: string; type?: 'json' | 'yaml'; blob: string }]; // JSON blob stored as string
   filterKey1?: string;
   filterKey2?: string;
   filterKey3?: string;
@@ -68,6 +68,8 @@ export interface ConnectionRequest {
   requesterDetails?: any;
   clientResources?: any;
   serviceResources?: any;
+  proposedConfiguration?: any;
+  lifecycleIntent?: any;
   provisionerStatus?: ProvisionerStatus | string;
 }
 

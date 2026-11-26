@@ -6,6 +6,14 @@ const {
   EnforcementPoint,
 } = require('../authz/enforcement');
 const { UserAssertionError } = require('../services/user-assert');
+const {
+  lifecycleActionError,
+  parseJsonObject,
+} = require('../services/batch/connection-lifecycle');
+const {
+  updateConnectionProvisionerStatus,
+} = require('../services/batch/connection-status');
+const { recordActivityWithBlob } = require('../services/keystone/activity');
 const { SubsystemService } = require('../services/batch/subsystem');
 
 const { logger } = require('../logger');
@@ -42,14 +50,26 @@ const parseProvisionerStatus = (value) => {
   }
 };
 
-const lifecycleStatus = (isActive) => {
+const lifecycleStatus = (isActive, operationId) => {
   const provisioning = Boolean(isActive);
   return {
     status: provisioning ? 'pending' : 'deprovisioning',
     operation: provisioning ? 'provision' : 'deprovision',
-    operationId: uuidv4(),
+    operationId: operationId || uuidv4(),
     message: provisioning ? 'Provisioning started.' : 'Deprovisioning started.',
   };
+};
+
+const provisionerDispatchFailureStatus = (value) => {
+  const started = parseProvisionerStatus(value);
+  const deprovisioning = started.operation === 'deprovision';
+  return JSON.stringify({
+    ...started,
+    status: 'failed',
+    message: deprovisioning
+      ? 'Deprovisioning could not start because the provisioner could not be reached. Retry the operation.'
+      : 'Provisioning could not start because the provisioner could not be reached. Retry the operation.',
+  });
 };
 
 const operationMatches = (current, incoming) =>
@@ -71,7 +91,58 @@ const startsInactiveWithoutAccess = (operation, existingItem, resolvedData) => {
   const currentStatus = parseProvisionerStatus(
     existingItem && existingItem.provisionerStatus
   );
-  return !existingItem.isActive && currentStatus.status === 'deprovisioned';
+  return (
+    !existingItem.isApproved &&
+    !existingItem.isActive &&
+    currentStatus.status === 'deprovisioned'
+  );
+};
+
+const PROVISIONING_FIELDS = new Set([
+  'isApproved',
+  'isActive',
+  'policyVersion',
+  'environment',
+  'requesterDetails',
+  'clientResources',
+  'serviceResources',
+]);
+
+const inputKeys = (input) =>
+  Object.keys(input || {}).filter(
+    (key) => !['clientId', 'serviceId'].includes(key)
+  );
+
+const startsLifecycleOperation = (
+  operation,
+  existingItem,
+  originalInput,
+  resolvedData
+) => {
+  if (operation === 'create') return Boolean(resolvedData.isActive);
+  const intent = parseJsonObject(
+    resolvedData.lifecycleIntent ||
+      (existingItem && existingItem.lifecycleIntent)
+  );
+  if (
+    originalInput &&
+    'lifecycleIntent' in originalInput &&
+    intent.action &&
+    intent.phase !== 'delete'
+  ) {
+    return true;
+  }
+  if (!inputKeys(originalInput).some((key) => PROVISIONING_FIELDS.has(key))) {
+    return false;
+  }
+  const active =
+    'isActive' in resolvedData
+      ? resolvedData.isActive
+      : Boolean(existingItem && existingItem.isActive);
+  // Configuration changes are applied immediately only when the approved
+  // connection is currently active. Inactive approved connections retain the
+  // promoted configuration until an explicit Activate action.
+  return Boolean(active);
 };
 
 /*
@@ -136,6 +207,18 @@ module.exports = {
       isRequired: true,
       defaultValue: '{}',
     },
+    proposedConfiguration: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
+      access: FieldEnforcementPoint,
+    },
+    lifecycleIntent: {
+      type: Text,
+      isRequired: true,
+      defaultValue: '{}',
+      access: FieldEnforcementPoint,
+    },
     provisionerStatus: {
       type: Text,
       isRequired: true,
@@ -198,6 +281,17 @@ module.exports = {
             currentStatus.operationId
           );
           resolvedData.provisionerStatus = existingItem.provisionerStatus;
+        } else {
+          const intent = parseJsonObject(
+            existingItem && existingItem.lifecycleIntent
+          );
+          if (
+            intent.action &&
+            intent.action !== 'revoke' &&
+            ['provisioned', 'deprovisioned'].includes(incomingStatus.status)
+          ) {
+            resolvedData.lifecycleIntent = '{}';
+          }
         }
       } else if (
         startsInactiveWithoutAccess(operation, existingItem, resolvedData)
@@ -205,14 +299,57 @@ module.exports = {
         // A new pending request, or new request metadata on a connection whose
         // access was already removed, has nothing to deprovision.
         resolvedData.provisionerStatus = '{}';
-      } else {
+      } else if (
+        startsLifecycleOperation(
+          operation,
+          existingItem,
+          originalInput,
+          resolvedData
+        )
+      ) {
         const isActive =
           'isActive' in resolvedData
             ? resolvedData.isActive
             : Boolean(existingItem && existingItem.isActive);
-        resolvedData.provisionerStatus = JSON.stringify(
-          lifecycleStatus(isActive)
+        const intent = parseJsonObject(
+          resolvedData.lifecycleIntent ||
+            (existingItem && existingItem.lifecycleIntent)
         );
+        resolvedData.provisionerStatus = JSON.stringify(
+          lifecycleStatus(isActive, intent.operationId)
+        );
+      }
+
+      if (
+        operation === 'update' &&
+        existingItem &&
+        originalInput &&
+        typeof originalInput.isActive === 'boolean' &&
+        originalInput.isActive !== Boolean(existingItem.isActive)
+      ) {
+        const intent = parseJsonObject(
+          resolvedData.lifecycleIntent || existingItem.lifecycleIntent
+        );
+        const initialApproval =
+          existingItem.isApproved === false &&
+          originalInput.isApproved === true;
+        if (intent.action && !initialApproval) {
+          const policyError = lifecycleActionError(
+            existingItem,
+            intent.action,
+            {
+              confirmAbandonRevoke: intent.confirmAbandonRevoke,
+            }
+          );
+          if (policyError) {
+            throw new UserAssertionError(policyError);
+          }
+        }
+        if (!intent.action && !initialApproval) {
+          throw new UserAssertionError(
+            'Use the explicit Activate, Deactivate, Retry, or Revoke connection action to change runtime access.'
+          );
+        }
       }
 
       if (
@@ -327,9 +464,17 @@ module.exports = {
         );
         return;
       }
-      if (startsInactiveWithoutAccess(operation, existingItem, updatedItem)) {
+      if (
+        startsInactiveWithoutAccess(operation, existingItem, updatedItem) ||
+        !startsLifecycleOperation(
+          operation,
+          existingItem,
+          originalInput,
+          updatedItem
+        )
+      ) {
         logger.debug(
-          'Skipping provisioner callback because the inactive connection has no access configuration'
+          'Skipping provisioner callback because the update does not start a runtime lifecycle operation'
         );
         notifyChange(context, {
           operation,
@@ -342,9 +487,76 @@ module.exports = {
       const provisionerService = new ProvisionerService(
         process.env.PROVISIONER_URL
       );
+      const lifecycleIntent = parseJsonObject(updatedItem.lifecycleIntent);
+      const startedStatus =
+        typeof updatedItem.provisionerStatus === 'string'
+          ? updatedItem.provisionerStatus
+          : JSON.stringify(updatedItem.provisionerStatus || {});
+      const lifecycleContext = context.createContext({
+        skipAccessControl: true,
+      });
       await provisionerService.postConnectionRequestChangeEvent(
         updatedItem,
-        updatedItem.isActive ? 'apply' : 'delete'
+        updatedItem.isActive ? 'apply' : 'delete',
+        lifecycleIntent.action === 'revoke',
+        async () => {
+          const result = await updateConnectionProvisionerStatus(
+            lifecycleContext.keystoneAdapter,
+            updatedItem.id,
+            startedStatus,
+            provisionerDispatchFailureStatus(startedStatus)
+          );
+          if (!result || result.status >= 400) {
+            throw new Error(
+              'Unable to persist the failed provisioner dispatch status.'
+            );
+          }
+          const action =
+            lifecycleIntent.action ||
+            (updatedItem.isActive ? 'activate' : 'deactivate');
+          try {
+            await recordActivityWithBlob(
+              lifecycleContext,
+              action,
+              'ConnectionRequest',
+              updatedItem.id,
+              `Connection ${updatedItem.clientId} -> ${updatedItem.serviceId} ${action} dispatch failed.`,
+              'failed',
+              JSON.stringify({
+                message:
+                  'Connection {client} -> {service} {action} dispatch failed',
+                params: {
+                  client: updatedItem.clientId,
+                  service: updatedItem.serviceId,
+                  action,
+                },
+              }),
+              {
+                action,
+                operationId: parseProvisionerStatus(startedStatus).operationId,
+                phase: 'dispatch',
+              },
+              [
+                ...(updatedItem.serviceOrganization?.name ||
+                updatedItem.clientOrganization?.name
+                  ? [
+                      `org:${
+                        updatedItem.serviceOrganization?.name ||
+                        updatedItem.clientOrganization?.name
+                      }`,
+                    ]
+                  : []),
+                `sdxClient:${updatedItem.clientId}`,
+                `sdxService:${updatedItem.serviceId}`,
+              ]
+            );
+          } catch (activityError) {
+            logger.error(
+              'Unable to record provisioner dispatch failure activity: %s',
+              activityError
+            );
+          }
+        }
       );
 
       notifyChange(context, {

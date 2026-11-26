@@ -196,6 +196,35 @@ export function updateConnection(
   )
 }
 
+export function runConnectionLifecycleAction(
+  org: any,
+  connectionId: string,
+  action: 'activate' | 'deactivate' | 'retry'
+) {
+  cy.setRequestBody({ action })
+  return cy
+    .callAPI(
+      `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}/lifecycle`,
+      'POST'
+    )
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      expect(body.result).to.be.equal('updated')
+    })
+}
+
+export function revokeConnection(org: any, connectionId: string) {
+  return cy
+    .callAPI(
+      `ds/api/sdx/v1/organizations/${org.name}/connections/${connectionId}?action=revoke`,
+      'DELETE'
+    )
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      expect(body.result).to.be.oneOf(['deleted', 'already-revoked'])
+    })
+}
+
 /**
  * Waits until the provisioner reports the connection as provisioned. The
  * provisioner only records status when applying, so this cannot be used to wait

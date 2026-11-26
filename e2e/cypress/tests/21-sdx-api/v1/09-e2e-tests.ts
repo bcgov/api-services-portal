@@ -10,6 +10,7 @@ import {
   createRuntimeGroup,
   createSubsystemAndOASService,
   createSubsystemGateway,
+  runConnectionLifecycleAction,
   uniqueSubsystemName,
   updateRuntimeGroupAddHostedOrg,
   updateSubsystemIntegrationClients,
@@ -154,6 +155,7 @@ describe('SDX E2E Tests', () => {
                   expect(typeof body.id).to.be.equal('string')
 
                   const connectionId = body.id
+                  conn.connectionId = connectionId
 
                   // The combined update must activate an initially inactive request.
                   cy.callAPI(
@@ -239,45 +241,32 @@ describe('SDX E2E Tests', () => {
       cy.get(consumers.productDetails).should('have.length', 1)
     })
 
-    it('PUT /organizations/{org}/connections - deactivate', () => {
+    it('POST /organizations/{org}/connections/{id}/lifecycle - deactivate', () => {
       const { org } = workingData
-      const { clientId, serviceId } = conn
+      const { clientId, serviceId, connectionId } = conn
 
       // disable access
-      cy.setRequestBody({
-        clientId: `${clientId}`,
-        serviceId: `${serviceId}`,
-        isActive: false,
-      })
-      cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'PUT').then(
-        ({ apiRes: { status, body } }: any) => {
-          expect(status).to.be.equal(200)
-          expect(body.result).to.be.equal('updated')
-          expect(typeof body.id).to.be.equal('string')
-          const connectionId = body.id
-
-          cy.callAPI(
-            `ds/api/sdx/v1/organizations/${org.name}/connections`,
-            'GET'
-          ).then(({ apiRes: { status, body } }: any) => {
+      runConnectionLifecycleAction(org, connectionId, 'deactivate').then(() => {
+        cy.callAPI(`ds/api/sdx/v1/organizations/${org.name}/connections`, 'GET').then(
+          ({ apiRes: { status, body } }: any) => {
             expect(status).to.be.equal(200)
             expect(body.find((c: any) => c.id === connectionId)).to.include({
               isActive: false,
               isApproved: true,
             })
-          })
+          }
+        )
 
-          // connection is de-activated; the provisioner runs asynchronously
-          // and kong control plane also pushes out changes to the data planes
-          // async, so retry until access is gone. Expect 401 or 404,
-          // depending on runtime group default routes
-          waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [401, 404]).then(
-            ({ status }: any) => {
-              expect([401, 404]).to.include(status)
-            }
-          )
-        }
-      )
+        // connection is de-activated; the provisioner runs asynchronously
+        // and kong control plane also pushes out changes to the data planes
+        // async, so retry until access is gone. Expect 401 or 404,
+        // depending on runtime group default routes
+        waitForSDXCall(clientId, `/sdx/0/${serviceId}/ping`, [401, 404]).then(
+          ({ status }: any) => {
+            expect([401, 404]).to.include(status)
+          }
+        )
+      })
     })
 
     it('removes the integration client from the gateway Consumers page', () => {

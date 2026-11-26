@@ -41,7 +41,7 @@ function setup(
   const activity: any[] = [];
   const dispatches: any[] = [];
   const policyRequests: any[] = [];
-  const services = ({
+  const services = {
     sdxMember: {
       getSubsystemService: async () => service,
     },
@@ -95,7 +95,7 @@ function setup(
     activity: {
       publishActivity: async (entry: unknown) => activity.push(entry),
     },
-  } as unknown) as Services;
+  } as unknown as Services;
 
   return {
     controller: new ConnectionsController(services),
@@ -342,5 +342,25 @@ test('delete writes failed after a thrown deprovisioning exception', async () =>
     operationId: '88a7d896-1d5a-4a86-9af4-ac9ca80185b0',
     message:
       'Deprovisioning failed unexpectedly. See provisioner logs for details.',
+  });
+});
+
+test('activity records the requested lifecycle action and operation id', async () => {
+  const { controller, activity } = setup();
+  await controller.onConnectionRequestChange(
+    'connection-1',
+    { ...connectionRequest, lifecycleAction: 'retry' },
+    'delete'
+  );
+
+  assert.equal(
+    activity[0].message,
+    'Connection client-1 → service-1 retry succeeded'
+  );
+  const blob = JSON.parse(activity[0].blob[0].blob);
+  assert.deepEqual(blob.lifecycle, {
+    action: 'retry',
+    operationId: connectionRequest.operationId,
+    phase: 'delete',
   });
 });

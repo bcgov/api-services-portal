@@ -123,6 +123,14 @@ export const ConnectionChangeRequest = Type.Object(
           'Correlates every status callback with the lifecycle operation that started it.',
       })
     ),
+    lifecycleAction: Type.Optional(
+      Type.Union([
+        Type.Literal('activate'),
+        Type.Literal('deactivate'),
+        Type.Literal('retry'),
+        Type.Literal('revoke'),
+      ])
+    ),
   },
   {
     $id: 'ConnectionChangeRequest',

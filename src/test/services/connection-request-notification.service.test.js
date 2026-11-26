@@ -59,9 +59,35 @@ describe('ConnectionRequestNotificationService', () => {
     [
       'reapproval',
       'update',
-      { ...connection, isApproved: true },
-      connection,
-      { isApproved: false },
+      { ...connection, isApproved: true, proposedConfiguration: '{}' },
+      {
+        ...connection,
+        isApproved: true,
+        proposedConfiguration: JSON.stringify({ requesterDetails: { scopes: ['read'] } }),
+      },
+      { proposedConfiguration: { requesterDetails: { scopes: ['read'] } } },
+    ],
+    [
+      'approved',
+      'update',
+      {
+        ...connection,
+        isApproved: true,
+        proposedConfiguration: JSON.stringify({ requesterDetails: { scopes: ['read'] } }),
+      },
+      { ...connection, isApproved: true, proposedConfiguration: '{}' },
+      { requesterDetails: { scopes: ['read'] }, proposedConfiguration: {} },
+    ],
+    [
+      'changesRejected',
+      'update',
+      {
+        ...connection,
+        isApproved: true,
+        proposedConfiguration: JSON.stringify({ requesterDetails: { scopes: ['read'] } }),
+      },
+      { ...connection, isApproved: true, proposedConfiguration: '{}' },
+      { proposedConfiguration: {} },
     ],
     [
       'approved',
@@ -70,32 +96,11 @@ describe('ConnectionRequestNotificationService', () => {
       { ...connection, isApproved: true },
       { isApproved: true },
     ],
-    [
-      'revoked',
-      'update',
-      { ...connection, isApproved: true },
-      { ...connection, isApproved: true, isActive: false },
-      { isActive: false },
-    ],
+    ['revoked', 'delete', { ...connection, isApproved: true, isActive: false }, undefined, {}],
     ['rejected', 'delete', { ...connection, isActive: false }, undefined, {}],
-    // A pending request that is deactivated is only announced when it is deleted
-    [
-      undefined,
-      'update',
-      connection,
-      { ...connection, isActive: false },
-      { isActive: false },
-    ],
+    [undefined, 'update', connection, { ...connection, isActive: false }, { isActive: false }],
     [undefined, 'update', undefined, connection, {}],
     [undefined, 'unknown', connection, connection, {}],
-    // An approved connection was announced when it was deactivated
-    [
-      undefined,
-      'delete',
-      { ...connection, isApproved: true, isActive: false },
-      undefined,
-      {},
-    ],
   ])(
     'identifies the %s lifecycle event',
     (expected, operation, existingItem, updatedItem, originalInput) => {
@@ -190,6 +195,7 @@ describe('ConnectionRequestNotificationService', () => {
       {
         hasCssDetails: true,
         cssClientId: '{{connectionsUrl}}',
+        sdxClientId: 'sample-client',
         connectionsUrl: 'https://api.example.com/connections',
       }
     );
@@ -476,12 +482,12 @@ describe('ConnectionRequestNotificationService', () => {
     );
     await service.notifyChange({
       context: {},
-      operation: event === 'rejected' ? 'delete' : 'update',
-      existingItem: { ...connection, isApproved: event === 'revoked' },
-      updatedItem: event === 'revoked'
-        ? { ...connection, isApproved: true, isActive: false }
-        : undefined,
-      originalInput: event === 'revoked' ? { isActive: false } : {},
+      operation: 'delete',
+      existingItem: {
+        ...connection,
+        isApproved: event === 'revoked',
+        isActive: false,
+      },
     });
 
     expect(notify).toHaveBeenCalledTimes(1);

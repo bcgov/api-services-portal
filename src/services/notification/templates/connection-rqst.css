@@ -112,12 +112,14 @@ body {
   margin-bottom: 8px;
 }
 
+.details th,
 .details td {
   border-top: 1px solid #e8e8e8;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
 }
 
+.details tr:last-child th,
 .details tr:last-child td {
   border-bottom: 1px solid #e8e8e8;
 }

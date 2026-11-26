@@ -11,6 +11,12 @@ jest.mock('../../services/batch/oas-service', () => ({
 jest.mock('../../services/provisioner/provisioner-service', () => ({
   ProvisionerService: jest.fn(),
 }));
+jest.mock('../../services/batch/connection-status', () => ({
+  updateConnectionProvisionerStatus: jest.fn(),
+}));
+jest.mock('../../services/keystone/activity', () => ({
+  recordActivityWithBlob: jest.fn(),
+}));
 jest.mock(
   '../../services/notification/connection-request-notification.service',
   () => ({
@@ -24,6 +30,10 @@ const { OpenAPISpecService } = require('../../services/batch/oas-service');
 const {
   ProvisionerService,
 } = require('../../services/provisioner/provisioner-service');
+const {
+  updateConnectionProvisionerStatus,
+} = require('../../services/batch/connection-status');
+const { recordActivityWithBlob } = require('../../services/keystone/activity');
 const {
   ConnectionRequestNotificationService,
 } = require('../../services/notification/connection-request-notification.service');
@@ -102,8 +112,16 @@ describe('ConnectionRequest provisioner status ordering', () => {
     async (isActive, expected) => {
       const resolved = await resolveInput({
         operation: 'update',
-        originalInput: { isActive },
+        originalInput: {
+          isActive,
+          lifecycleIntent: {
+            action: isActive ? 'activate' : 'deactivate',
+            operationId: 'operation-new',
+            phase: isActive ? 'provision' : 'deprovision',
+          },
+        },
         existingItem: {
+          isApproved: true,
           isActive: !isActive,
           provisionerStatus: JSON.stringify({
             status: 'failed',
@@ -112,15 +130,20 @@ describe('ConnectionRequest provisioner status ordering', () => {
             endpoint: 'https://stale.example',
           }),
         },
-        resolvedData: { isActive },
+        resolvedData: {
+          isActive,
+          lifecycleIntent: {
+            action: isActive ? 'activate' : 'deactivate',
+            operationId: 'operation-new',
+            phase: isActive ? 'provision' : 'deprovision',
+          },
+        },
       });
 
       const status = JSON.parse(resolved.provisionerStatus);
       expect(status).toEqual({
         ...expected,
-        operationId: expect.stringMatching(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-        ),
+        operationId: 'operation-new',
       });
       expect(status).not.toHaveProperty('endpoint');
     }
@@ -209,6 +232,137 @@ describe('ConnectionRequest provisioner status ordering', () => {
 describe('ConnectionRequest provisioner callbacks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('waits for the provisioner during revoke orchestration', async () => {
+    const postConnectionRequestChangeEvent = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    ProvisionerService.mockImplementation(() => ({
+      postConnectionRequestChangeEvent,
+    }));
+    ConnectionRequestNotificationService.mockImplementation(() => ({
+      notifyChange: jest.fn().mockResolvedValue(undefined),
+    }));
+    const updatedItem = {
+      id: 'connection-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      isActive: false,
+      lifecycleIntent: JSON.stringify({
+        action: 'revoke',
+        operationId: 'operation-1',
+        phase: 'deprovision',
+      }),
+      provisionerStatus: JSON.stringify({
+        status: 'deprovisioning',
+        operation: 'deprovision',
+        operationId: 'operation-1',
+      }),
+    };
+
+    await config.hooks.afterChange({
+      operation: 'update',
+      existingItem: { ...updatedItem, isActive: true },
+      originalInput: {
+        isActive: false,
+        lifecycleIntent: updatedItem.lifecycleIntent,
+      },
+      updatedItem,
+      context: { createContext: jest.fn(() => ({ skipAccessControl: true })) },
+    });
+
+    expect(postConnectionRequestChangeEvent).toHaveBeenCalledWith(
+      updatedItem,
+      'delete',
+      true,
+      expect.any(Function)
+    );
+  });
+
+  it('records a retryable failure when the provisioner cannot be reached', async () => {
+    const startedStatus = JSON.stringify({
+      status: 'pending',
+      operation: 'provision',
+      operationId: 'operation-1',
+      message: 'Provisioning started.',
+    });
+    const postConnectionRequestChangeEvent = jest.fn(
+      async (_connection, _action, _waitForCompletion, onFailure) => {
+        await onFailure(new Error('offline'));
+      }
+    );
+    ProvisionerService.mockImplementation(() => ({
+      postConnectionRequestChangeEvent,
+    }));
+    ConnectionRequestNotificationService.mockImplementation(() => ({
+      notifyChange: jest.fn().mockResolvedValue(undefined),
+    }));
+    updateConnectionProvisionerStatus.mockResolvedValue({
+      status: 200,
+      result: 'updated',
+      id: 'connection-1',
+    });
+    const keystoneAdapter = { name: 'knex' };
+    const updatedItem = {
+      id: 'connection-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      isActive: true,
+      lifecycleIntent: JSON.stringify({
+        action: 'activate',
+        operationId: 'operation-1',
+        phase: 'provision',
+      }),
+      provisionerStatus: startedStatus,
+    };
+
+    await config.hooks.afterChange({
+      operation: 'update',
+      existingItem: { ...updatedItem, isActive: false },
+      originalInput: {
+        isActive: true,
+        lifecycleIntent: updatedItem.lifecycleIntent,
+      },
+      updatedItem,
+      context: {
+        createContext: jest.fn(() => ({ keystoneAdapter })),
+      },
+    });
+
+    expect(postConnectionRequestChangeEvent).toHaveBeenCalledWith(
+      updatedItem,
+      'apply',
+      false,
+      expect.any(Function)
+    );
+    expect(updateConnectionProvisionerStatus).toHaveBeenCalledWith(
+      keystoneAdapter,
+      'connection-1',
+      startedStatus,
+      JSON.stringify({
+        status: 'failed',
+        operation: 'provision',
+        operationId: 'operation-1',
+        message:
+          'Provisioning could not start because the provisioner could not be reached. Retry the operation.',
+      })
+    );
+    expect(recordActivityWithBlob).toHaveBeenCalledWith(
+      expect.any(Object),
+      'activate',
+      'ConnectionRequest',
+      'connection-1',
+      expect.stringContaining('dispatch failed'),
+      'failed',
+      expect.any(String),
+      {
+        action: 'activate',
+        operationId: 'operation-1',
+        phase: 'dispatch',
+      },
+      ['sdxClient:client-1', 'sdxService:service-1']
+    );
   });
 
   it.each([

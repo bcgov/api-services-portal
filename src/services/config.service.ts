@@ -43,6 +43,7 @@ export class ConfigService {
         user: process.env.EMAIL_USER || '',
         pass: process.env.EMAIL_PASS || '',
         apsOnboardingEmail: process.env.APS_ONBOARDING_EMAIL || '',
+        apsOnboardingTicketUrl: process.env.APS_ONBOARDING_TICKET_URL || '',
         sdxUiUrl: process.env.SDX_UI_URL || '',
       },
     };

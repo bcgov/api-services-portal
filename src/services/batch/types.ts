@@ -366,6 +366,19 @@ export interface RuntimeGroup {
 }
 
 
+export interface LifecycleActionAvailability {
+  allowed: boolean;
+  requiresConfirmation?: boolean;
+  message?: string;
+}
+
+export interface ConnectionLifecycleActions {
+  activate: LifecycleActionAvailability;
+  deactivate: LifecycleActionAvailability;
+  retry: LifecycleActionAvailability;
+  revoke: LifecycleActionAvailability;
+}
+
 /**
  * @tsoaModel
  * @example {
@@ -388,6 +401,9 @@ export interface ConnectionRequest {
   requesterDetails?: any; // toString
   clientResources?: any; // toString
   serviceResources?: any; // toString
+  proposedConfiguration?: any; // toString
+  lifecycleIntent?: any; // toString
+  lifecycleActions?: ConnectionLifecycleActions;
 }
 
 

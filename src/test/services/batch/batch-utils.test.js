@@ -1,5 +1,6 @@
 import {
   parseJsonString,
+  syncRecords,
   parseBlobString,
   transformAllRefID,
   removeEmpty,
@@ -10,6 +11,40 @@ import {
 import YAML from 'js-yaml';
 
 describe('Batch Utilities', function () {
+  it('creates a JSON blob and connects it to personal activity', async function () {
+    const request = { requester: { email: 'jane@example.gov.bc.ca' } };
+    const payload = JSON.stringify(request);
+    const context = {
+      executeGraphQL: jest.fn()
+        .mockResolvedValueOnce({ data: { allActivities: [] } })
+        .mockResolvedValueOnce({ data: { allBlobs: [] } })
+        .mockResolvedValueOnce({ data: { createBlob: { id: 'saved-blob' } } })
+        .mockResolvedValueOnce({ data: { createActivity: { id: 'saved-activity' } } }),
+    };
+
+    const result = await syncRecords(context, 'Activity', 'activity-id', {
+      name: 'Integration access request',
+      type: 'IntegrationAccessRequest',
+      action: 'create',
+      result: 'success',
+      refId: 'submission-id',
+      filterKey1: 'personal:jane@example.gov.bc.ca',
+      blob: [{ id: 'blob-ref', type: 'json', blob: payload }],
+    });
+
+    expect(result).toMatchObject({ status: 200, id: 'saved-activity' });
+    expect(context.executeGraphQL).toHaveBeenNthCalledWith(3, {
+      query: expect.stringContaining('createBlob'),
+      variables: { data: { ref: 'blob-ref', type: 'json', blob: payload } },
+    });
+    expect(context.executeGraphQL).toHaveBeenNthCalledWith(4, {
+      query: expect.stringContaining('createActivity'),
+      variables: {
+        data: expect.objectContaining({ blob: { connect: { id: 'saved-blob' } } }),
+      },
+    });
+  });
+
   it('should get correct json result', async function () {
     const input = {
       name: 'sample name',

@@ -10,6 +10,7 @@ export interface NotificationConfig {
   apsOnboardingEmail: string;
   /** SDX UI origin for onboarding notices. */
   sdxUiUrl: string;
+  apsOnboardingTicketUrl?: string;
 }
 
 export interface EmailNotification {

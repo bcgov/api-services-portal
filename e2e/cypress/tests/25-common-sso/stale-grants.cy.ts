@@ -47,7 +47,7 @@ describe('Post-submission changes and grant reapproval', () => {
     })
   })
 
-  it('requires reapproval for scope changes and replaces CSS grants only after approval', () => {
+  it('removes revoked scopes from CSS grants before adding scopes after approval', () => {
     run({
       steps: [
         {
@@ -55,14 +55,17 @@ describe('Post-submission changes and grant reapproval', () => {
           url: submitUrl,
           body: submission('dev', { scopes: ['write'] }),
         },
-        { url: grantsUrl(), callback: true },
-        { approve: 'dev', url: grantsUrl(), callback: true },
+        // Model SDX's response after applying the removal, then after the
+        // provider approves the addition.
+        { mutate: { approved: true, connectionScopes: [] }, url: grantsUrl(), callback: true },
+        { approve: 'dev', mutate: { connectionScopes: ['write'] }, url: grantsUrl(), callback: true },
       ],
     }).then((result) => {
       expect(result.results[0].body.results['claims-dev']).eq(
-        'updated scopes, submitted for re-approval'
+        'revoked scopes applied; added scopes submitted for re-approval'
       )
-      expect(result.callbacks[0].body.resourceServers).deep.eq([])
+      expect(result.results[1].body.resourceServers).deep.eq(grant('dev', '1.0.0', []))
+      expect(result.callbacks[0].body.resourceServers).deep.eq(grant('dev', '1.0.0', []))
       expect(result.callbacks[1].body.resourceServers).deep.eq(
         grant('dev', '1.0.0', ['write'])
       )

@@ -1,4 +1,8 @@
-import { format, getOrgActivity } from '../../../services/keystone/activity';
+import {
+  format,
+  getOrgActivity,
+  getPersonalActivity,
+} from '../../../services/keystone/activity';
 import { PUBLIC_ORG_ACTIVITY } from '../../../services/workflow/org-activity-public';
 
 const sampleActivities = [
@@ -20,12 +24,12 @@ const sampleActivities = [
   },
 ];
 
-function mockOrgActivityContext(
+function mockActivityContext(
   activities: typeof sampleActivities = sampleActivities
 ): any {
   return {
     executeGraphQL: jest.fn(({ query, variables }: any) => {
-      if (!query.includes('OrgActivities')) {
+      if (!query.includes('ScopedActivities')) {
         return { errors: [{ message: 'Unexpected query' }] };
       }
       return { data: { allActivities: activities } };
@@ -144,19 +148,19 @@ describe('Activity Message Formatting', function () {
 });
 
 describe('getOrgActivity', function () {
-  it('queries OrgActivities and returns allActivities', async function () {
-    const ctx = mockOrgActivityContext();
+  it('queries ScopedActivities and returns allActivities', async function () {
+    const ctx = mockActivityContext();
     const result = await getOrgActivity(ctx, 'ministry-of-health');
 
     expect(ctx.executeGraphQL).toHaveBeenCalledTimes(1);
     expect(ctx.executeGraphQL.mock.calls[0][0].query).toContain(
-      'OrgActivities'
+      'ScopedActivities'
     );
     expect(result).toEqual(sampleActivities);
   });
 
   it('filters by org name when orgName is provided', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health');
 
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
@@ -165,7 +169,7 @@ describe('getOrgActivity', function () {
   });
 
   it('filters all org activities when orgName is omitted', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx);
 
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
@@ -174,7 +178,7 @@ describe('getOrgActivity', function () {
   });
 
   it('adds public activity OR clause when publicOnly is true', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health', 20, 0, true);
 
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
@@ -191,7 +195,7 @@ describe('getOrgActivity', function () {
   });
 
   it('pairs action and type with AND so non-allowlisted types do not leak', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, undefined, 20, 0, true);
 
     const where = ctx.executeGraphQL.mock.calls[0][0].variables.where;
@@ -219,7 +223,7 @@ describe('getOrgActivity', function () {
   });
 
   it('does not add public filter when publicOnly is false', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health', 20, 0, false);
 
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.where).toEqual({
@@ -228,18 +232,39 @@ describe('getOrgActivity', function () {
   });
 
   it('caps first at 100', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health', 500);
 
     expect(ctx.executeGraphQL.mock.calls[0][0].variables.first).toBe(100);
   });
 
   it('passes first and skip to GraphQL', async function () {
-    const ctx = mockOrgActivityContext();
+    const ctx = mockActivityContext();
     await getOrgActivity(ctx, 'ministry-of-health', 15, 30);
 
     const { first, skip } = ctx.executeGraphQL.mock.calls[0][0].variables;
     expect(first).toBe(15);
     expect(skip).toBe(30);
+  });
+});
+
+describe('getPersonalActivity', function () {
+  it('filters by an exact personal email key and applies pagination', async function () {
+    const ctx = mockActivityContext([]);
+    const result = await getPersonalActivity(
+      ctx,
+      'jane@example.gov.bc.ca',
+      500,
+      12,
+      'createdAtAsc'
+    );
+
+    expect(result).toEqual([]);
+    expect(ctx.executeGraphQL.mock.calls[0][0].variables).toEqual({
+      where: { filterKey1: 'personal:jane@example.gov.bc.ca' },
+      first: 100,
+      skip: 12,
+      sortBy: ['createdAt_ASC'],
+    });
   });
 });

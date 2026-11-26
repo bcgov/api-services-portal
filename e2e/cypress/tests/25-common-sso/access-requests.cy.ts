@@ -33,7 +33,7 @@ describe('Access request submission and validation', () => {
         url: submitUrl,
         body: submission('dev', change),
       }).then((result) => {
-        problem(result, status, status === 502 ? 'BAD_GATEWAY' : 'BAD_REQUEST')
+        problem(result, status, 'BAD_REQUEST')
         expect(result.writes).deep.eq([])
         expect(result.callbacks).deep.eq([])
       })
@@ -82,15 +82,17 @@ describe('Access request submission and validation', () => {
     })
   })
 
-  it('holds an unknown integration for onboarding', () => {
+  it('holds an unknown integration for onboarding without connection writes', () => {
     run({
       method: 'POST',
       url: '/v1/integrations/unknown/access-requests',
       body: submission(),
     }).then((result) => {
       expect(result.status).eq(200)
-      expect(result.body.results['claims-dev']).eq('held for onboarding')
+      expect(result.body.results).deep.eq({ 'claims-dev': 'held for onboarding' })
+      expect(result.body.submissionId).to.be.a('string').and.not.be.empty
       expect(result.writes).deep.eq([])
+      expect(result.callbacks).deep.eq([])
     })
   })
 

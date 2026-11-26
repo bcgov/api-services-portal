@@ -20,12 +20,13 @@ type TaskItem = {
 
 type OnboardingRequest = {
   clientId?: string;
+  consumerOrganization?: string;
   privacyZone?: string;
   policyVersion?: string;
   requester?: { displayName?: string; email?: string };
   resourceServers?: Array<{
     environment?: string;
-    services?: Array<{ name?: string }>;
+    services?: Array<{ name?: string; version?: string; scopes?: string[] }>;
   }>;
 };
 
@@ -42,10 +43,8 @@ type Mailer = {
 
 type OnboardingMailConfig = Pick<
   NotificationConfig,
-  'apsOnboardingEmail' | 'sdxUiUrl'
+  'apsOnboardingEmail' | 'apsOnboardingTicketUrl' | 'sdxUiUrl'
 >;
-
-type MemberLookup = (email: string) => Promise<boolean>;
 
 export function cssOnboardingNotification(
   operation: string,
@@ -75,10 +74,10 @@ export class CssOnboardingNotificationService {
       const notification = new ConfigService().getConfig().notification;
       return {
         apsOnboardingEmail: notification.apsOnboardingEmail,
+        apsOnboardingTicketUrl: notification.apsOnboardingTicketUrl,
         sdxUiUrl: notification.sdxUiUrl,
       };
-    },
-    private readonly isExistingMember: MemberLookup = async () => false
+    }
   ) {}
 
   public async notifyChange({
@@ -140,32 +139,30 @@ export class CssOnboardingNotificationService {
       request,
       config
     );
-    if (requester.email && !(await this.requesterIsMember(requester.email))) {
+    const projectName = request.clientId || 'Not specified';
+    if (requester.email) {
       await this.notification.notify(
         {
           email: requester.email,
-          name: requester.displayName || '',
+          name: requester.displayName?.trim().split(/\s+/)[0] || '',
           username: '',
         },
         {
           template: ONBOARDING_TEMPLATE,
-          subject: `SDX onboarding - ${integrationId}`,
+          subject: `Your CSS request ${integrationId}: P2P onboarding needed`,
           context: {
-            ...details,
-            headline: 'Common SSO asked SDX for API access',
-            message: `Common SSO asked SDX for API access for integration ${integrationId}. This application is not onboarded yet, so the access request is held. APS Operations will onboard this application with you: a kickoff, then the SDX organization and subsystem. After they link integration ${integrationId}, this access request will be submitted.`,
+            isOnboardingInvite: true,
+            headline: `Your CSS request ${integrationId}: P2P onboarding needed`,
+            message: 'Your Common Hosted Single Sign-on (CSS) request includes SDX services. Before we can process your request for these services, we need to help you complete Peer-to-Peer (P2P) onboarding.',
+            projectName,
+            cssRequestId: integrationId,
+            brochureUrl: details.brochureUrl,
           },
         }
       );
-    } else if (!requester.email) {
+    } else {
       logger.warn(
         'CSS onboarding invite skipped; requester email is missing for %s',
-        integrationId
-      );
-    } else {
-      logger.info(
-        'CSS onboarding invite skipped; %s is already an SDX member for %s',
-        requester.email,
         integrationId
       );
     }
@@ -179,32 +176,37 @@ export class CssOnboardingNotificationService {
       return;
     }
 
+    const subject = `P2P onboarding needed: ${projectName}, CSS request ${integrationId}`;
+    const requestedServices: string[] = [];
+    for (const server of request.resourceServers || []) {
+      const environment = server.environment || 'Not specified';
+      for (const service of server.services || []) {
+        const name = service.name || 'Not specified';
+        const version = service.version || 'Not specified';
+        const scopes = service.scopes?.join(', ') || 'None specified';
+        requestedServices.push(`"${name} ${version} ${scopes} ${environment}"`);
+      }
+    }
     await this.notification.notify(
-      { email: apsEmail, name: 'APS Operations', username: '' },
+      { email: apsEmail, name: 'P2P Operations', username: '' },
       {
         template: ONBOARDING_TEMPLATE,
-        subject: `New onboarding task - ${integrationId}`,
+        subject,
         context: {
-          ...details,
-          headline: 'A new onboarding task is waiting',
-          message: `A new onboarding task is waiting for integration ${integrationId}. Start with a kickoff, then create the SDX organization and subsystem. After this integration id is linked, submit the held access request.`,
-          connectionsUrl: details.brochureUrl,
+          isOperationsNotice: true,
+          headline: subject,
+          message: 'A Common Hosted Single Sign-on (CSS) request includes SDX services and requires P2P onboarding. Processing of the service access request is on hold until onboarding and CSS request ID linking are complete.',
+          projectName,
+          cssRequestId: integrationId,
+          requesterName: requester.displayName || 'Not specified',
+          requesterEmail: requester.email || 'Not specified',
+          consumerOrganization: request.consumerOrganization || '',
+          requestedServices: requestedServices.join(', ') || 'None specified',
+          onboardingTicketUrl: config.apsOnboardingTicketUrl?.trim() || '',
+          brochureUrl: details.brochureUrl,
         },
       }
     );
-  }
-
-  private async requesterIsMember(email: string): Promise<boolean> {
-    try {
-      return await this.isExistingMember(email.trim());
-    } catch (err) {
-      logger.warn(
-        'SDX membership lookup failed for %s; sending the invite. %s',
-        email,
-        err
-      );
-      return false;
-    }
   }
 
   private async notifyCompleted(
