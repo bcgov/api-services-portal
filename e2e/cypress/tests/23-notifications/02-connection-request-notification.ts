@@ -74,23 +74,8 @@ describe('Notification Service - Connection Request Emails', () => {
                 failOnStatusCode: false,
               })
               sdxUiLogin()
-              // The connections page is rendered once per visit. Reload the
-              // catalog until the new service is in that HTML.
-              const connectionsUrl = `${expectedUrl}&refresh=1`
-              const started = Date.now()
-              const openUntilListed = (): Cypress.Chainable<unknown> =>
-                cy.visit(connectionsUrl).then(() =>
-                  cy.get('body').then(($body) => {
-                    if ($body.text().includes(service.name)) return
-                    expect(
-                      Date.now() - started,
-                      `connections page never listed ${service.name}`
-                    ).to.be.lessThan(90000)
-                    return cy.wait(2000).then(() => openUntilListed())
-                  })
-                )
-              openUntilListed()
-              cy.contains(service.name, { timeout: 30000 })
+              cy.visit(expectedUrl)
+              cy.contains(service.name, { timeout: 20000 })
                 .closest('article')
                 .within(() => {
                   cy.contains('Pending').should('be.visible')

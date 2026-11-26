@@ -63,7 +63,7 @@ describe('CSS onboarding hold', { retries: 0 }, () => {
         expect(response.body.results[service.name]).to.eq('held for onboarding')
         const firstSubmissionId = response.body.submissionId
 
-        cy.mailpitWaitForEmail(subjectQuery(inviteSubject), 60000).then((message) => {
+        cy.mailpitWaitForEmail(subjectQuery(inviteSubject), 20000).then((message) => {
           cy.mailpitGetMessage(message.ID).then((details) => {
             expect(details.To.map((to) => to.Address)).to.include(requester.email)
             expect(details.HTML).to.include('Hi Jane,')

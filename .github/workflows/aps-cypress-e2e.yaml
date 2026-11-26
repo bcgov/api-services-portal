@@ -101,12 +101,8 @@ jobs:
 
       - name: Execute Tests & Clean Up
         run: |
-          # Start following logs in the background with continuous output.
-          # keycloak is the HAProxy in front of the two Keycloak sites.
-          # gwa-api keeps the publish traceback; the CLI only prints "Unexpected Error".
+          # Start following logs in the background with continuous output
           docker logs -f cypress-e2e 2>&1 &
-          docker logs -f keycloak 2>&1 &
-          docker logs -f gwa-api 2>&1 | awk '{print "[gwa-api]", $0; fflush()}' &
           LOG_PID=$!
 
           while true; do

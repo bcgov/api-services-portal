@@ -8,6 +8,7 @@ import {
   buildServicesYaml,
   configureGwaHost,
   extractServiceAccountCredsFromUi,
+  getProducts,
   issuerEnvDetails,
   jwtKeycloakPluginYaml,
   keyAuthAclPluginYaml,
@@ -180,10 +181,6 @@ describe('24 Self-issuing credentials — setup', () => {
       const environments = ['dev', 'test'].map((name) => {
         const env: any = {
           name,
-          // GET /products lists every product in the namespace and returned
-          // 500 in CI. These ids are accepted on create, so publish can use
-          // them without that read.
-          appId: uuidv4().replace(/-/g, '').toUpperCase().substring(0, 8),
           active: false,
           approval: false,
           flow: def.flow,
@@ -193,7 +190,6 @@ describe('24 Self-issuing credentials — setup', () => {
         }
         return env
       })
-      ;(def as any).environments = environments
 
       putProduct(gatewayId, {
         name: def.name,
@@ -207,61 +203,72 @@ describe('24 Self-issuing credentials — setup', () => {
   })
 
   it('publishes Kong services/plugins and saves suite state', () => {
+    useBearerToken(ownerToken)
     configureGwaHost()
 
     const productDefs = Cypress.env('sicProductDefs') as any[]
     const flows: Record<string, FlowConfig> = {}
-    const apiKeyItems: string[] = []
-    const jwtItems: string[] = []
 
-    productDefs.forEach((def) => {
-      const envs = def.environments.map((env: any) => {
-        const serviceName = `sic-${def.key}-${env.name}-${suffix}`.toLowerCase()
-        return {
-          name: env.name as 'dev' | 'test',
-          environmentAppId: env.appId as string,
-          serviceName,
-          host: `${serviceName}.api.gov.bc.ca`,
+    getProducts(gatewayId).then(({ apiRes }: any) => {
+      expect(apiRes.status).to.eq(200)
+      const products = apiRes.body as any[]
+
+      const apiKeyItems: string[] = []
+      const jwtItems: string[] = []
+
+      productDefs.forEach((def) => {
+        const product = products.find((p) => p.name === def.name)
+        expect(product, `product ${def.name} exists`).to.exist
+
+        const envs = ['dev', 'test'].map((envName) => {
+          const env = product.environments.find((e: any) => e.name === envName)
+          expect(env?.appId, `${def.name}/${envName} appId`).to.be.a('string')
+          const serviceName = `sic-${def.key}-${envName}-${suffix}`.toLowerCase()
+          return {
+            name: envName as 'dev' | 'test',
+            environmentAppId: env.appId as string,
+            serviceName,
+            host: `${serviceName}.api.gov.bc.ca`,
+          }
+        })
+
+        envs.forEach((env) => {
+          if (def.flow === 'kong-api-key-only') {
+            apiKeyItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                keyAuthPluginYaml(gatewayId)
+              )
+            )
+          } else if (def.flow === 'kong-api-key-acl') {
+            apiKeyItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                keyAuthAclPluginYaml(gatewayId, env.environmentAppId)
+              )
+            )
+          } else {
+            jwtItems.push(
+              serviceYamlItem(
+                env.serviceName,
+                gatewayId,
+                jwtKeycloakPluginYaml(gatewayId, Cypress.env('OIDC_ISSUER'))
+              )
+            )
+          }
+        })
+
+        flows[def.key] = {
+          key: def.key,
+          productName: def.name,
+          flow: def.flow,
+          authenticator: def.authenticator,
+          issuerName: def.issuerName,
+          envs,
         }
       })
-
-      envs.forEach((env: any) => {
-        if (def.flow === 'kong-api-key-only') {
-          apiKeyItems.push(
-            serviceYamlItem(
-              env.serviceName,
-              gatewayId,
-              keyAuthPluginYaml(gatewayId)
-            )
-          )
-        } else if (def.flow === 'kong-api-key-acl') {
-          apiKeyItems.push(
-            serviceYamlItem(
-              env.serviceName,
-              gatewayId,
-              keyAuthAclPluginYaml(gatewayId, env.environmentAppId)
-            )
-          )
-        } else {
-          jwtItems.push(
-            serviceYamlItem(
-              env.serviceName,
-              gatewayId,
-              jwtKeycloakPluginYaml(gatewayId, Cypress.env('OIDC_ISSUER'))
-            )
-          )
-        }
-      })
-
-      flows[def.key] = {
-        key: def.key,
-        productName: def.name,
-        flow: def.flow,
-        authenticator: def.authenticator,
-        issuerName: def.issuerName,
-        envs,
-      }
-    })
 
       const apiKeyPath = `${SUITE_FIXTURE_DIR}/gateway-services-apikey-${suffix}.yml`
       const jwtPath = `${SUITE_FIXTURE_DIR}/gateway-services-jwt-${suffix}.yml`
@@ -303,6 +310,7 @@ describe('24 Self-issuing credentials — setup', () => {
           saveSuiteState(suiteState)
         })
       })
+    })
   })
 
   after(() => {
