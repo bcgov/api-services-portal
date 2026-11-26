@@ -199,6 +199,7 @@ const OAUTH2_FLOWS = [
 /**
  * Returns the scopes an operation requires, from every oauth2 security scheme
  * named in any of its security requirements and every flow in those schemes.
+ * A scheme that is an in-document $ref is followed to the scheme it names.
  * Only scopes the operation requires are returned, each once, in a stable
  * order: authorizationCode scopes first, then the other flows in
  * OAUTH2_FLOWS order; within a flow, schemes in the order the requirements
@@ -209,35 +210,75 @@ function parseScopes(schemes: any, security: any): ResourceScope[] {
     return [];
   }
 
-  // scheme name -> scopes the operation requires from that scheme
-  const required = new Map<string, Set<string>>();
+  // scheme name -> the resolved scheme and the scopes the operation requires
+  // from it
+  const required = new Map<string, { scheme: any; names: Set<string> }>();
   for (const requirement of security) {
     for (const [schemeName, scopeNames] of Object.entries(requirement || {})) {
-      if (schemes?.[schemeName]?.type !== 'oauth2') {
+      const scheme = resolveSecurityScheme(schemes, schemeName);
+      if (scheme?.type !== 'oauth2') {
         continue;
       }
-      const names = required.get(schemeName) || new Set<string>();
+      const entry = required.get(schemeName) || {
+        scheme,
+        names: new Set<string>(),
+      };
       for (const name of Array.isArray(scopeNames) ? scopeNames : []) {
-        names.add(name);
+        entry.names.add(name);
       }
-      required.set(schemeName, names);
+      required.set(schemeName, entry);
     }
   }
 
   const found = new Map<string, ResourceScope>();
   for (const flowName of OAUTH2_FLOWS) {
-    for (const [schemeName, requiredNames] of required) {
-      const declared = declaredScopes(
-        schemes[schemeName].flows?.[flowName]?.scopes
-      );
+    for (const { scheme, names } of required.values()) {
+      const declared = declaredScopes(scheme.flows?.[flowName]?.scopes);
       for (const scope of declared) {
-        if (requiredNames.has(scope.name) && !found.has(scope.name)) {
+        if (names.has(scope.name) && !found.has(scope.name)) {
           found.set(scope.name, scope);
         }
       }
     }
   }
   return [...found.values()];
+}
+
+const SECURITY_SCHEME_REF = /^#\/components\/securitySchemes\/(.+)$/;
+
+/**
+ * Returns the security scheme with this name, following in-document
+ * `#/components/securitySchemes/{name}` references (a scheme may be a $ref to
+ * another, possibly through a chain). Returns undefined for a missing scheme,
+ * a reference to anything else (including another file), or a cycle.
+ */
+function resolveSecurityScheme(schemes: any, name: string): any {
+  const visited = new Set<string>();
+  let current = name;
+  while (!visited.has(current)) {
+    visited.add(current);
+    const scheme = schemes?.[current];
+    if (typeof scheme?.$ref !== 'string') {
+      return scheme;
+    }
+    const match = SECURITY_SCHEME_REF.exec(scheme.$ref);
+    if (!match) {
+      return undefined;
+    }
+    current = decodeJsonPointerToken(match[1]);
+  }
+  return undefined;
+}
+
+// Decodes one JSON Pointer token from a URI fragment (RFC 6901).
+function decodeJsonPointerToken(token: string): string {
+  let decoded = token;
+  try {
+    decoded = decodeURIComponent(token);
+  } catch {
+    // Not percent-encoded; use it as written.
+  }
+  return decoded.replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
 function declaredScopes(scopes: any): ResourceScope[] {

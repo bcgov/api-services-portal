@@ -575,6 +575,59 @@ paths: {}
       ]);
     });
 
+    it('follows a security scheme that is a $ref to an oauth2 scheme', async () => {
+      const oauth2 = {
+        type: 'oauth2',
+        flows: {
+          clientCredentials: {
+            tokenUrl,
+            scopes: {
+              'for:permit:read': 'Read permits',
+              'for:permit:write': 'Write permits',
+            },
+          },
+        },
+      };
+      const scopes = await loadOperationScopes(
+        {
+          oauth2,
+          oauth2Alias: { $ref: '#/components/securitySchemes/oauth2' },
+          // A chain of references, and a name that needs JSON Pointer decoding.
+          'sdx/alias~2': { $ref: '#/components/securitySchemes/oauth2Alias' },
+          chained: { $ref: '#/components/securitySchemes/sdx~1alias~02' },
+        },
+        [
+          { oauth2Alias: ['for:permit:read'] },
+          { chained: ['for:permit:write'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'for:permit:read', description: 'Read permits' },
+        { name: 'for:permit:write', description: 'Write permits' },
+      ]);
+    });
+
+    it('ignores $ref security schemes that cannot be resolved', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          loopA: { $ref: '#/components/securitySchemes/loopB' },
+          loopB: { $ref: '#/components/securitySchemes/loopA' },
+          self: { $ref: '#/components/securitySchemes/self' },
+          missing: { $ref: '#/components/securitySchemes/nowhere' },
+          external: { $ref: 'schemes.yaml#/oauth2' },
+        },
+        [
+          { loopA: ['for:permit:read'] },
+          { self: ['for:permit:read'] },
+          { missing: ['for:permit:read'] },
+          { external: ['for:permit:read'] },
+        ]
+      );
+
+      expect(scopes).toEqual([]);
+    });
+
     it('ignores scopes required from schemes that are not oauth2', async () => {
       const scopes = await loadOperationScopes(
         {
