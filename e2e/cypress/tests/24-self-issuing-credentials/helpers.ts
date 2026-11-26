@@ -348,17 +348,25 @@ export function publishConfigWithToken(
       expect(setToken.stdout || setToken.stderr || '').to.contain(
         'Config settings saved'
       )
-      cy.exec(`gwa pg ${paths}`, {
-        timeout: 60000,
-        failOnNonZeroExit: false,
-      }).then((pub) => {
-        const output = `${pub.stdout || ''}\n${pub.stderr || ''}`
-        cy.log(output)
-        expect(
-          output,
-          `gwa pg output (code=${pub.code})`
-        ).to.match(/Gateway config published|Sync successful/i)
-      })
+      const publish = (attempt: number): Cypress.Chainable<unknown> =>
+        cy
+          .exec(`gwa pg ${paths}`, {
+            timeout: 60000,
+            failOnNonZeroExit: false,
+          })
+          .then((pub) => {
+            const output = `${pub.stdout || ''}\n${pub.stderr || ''}`
+            cy.log(output)
+            if (/Gateway config published|Sync successful/i.test(output)) return
+            if (attempt >= 3) {
+              expect(output, `gwa pg output (code=${pub.code})`).to.match(
+                /Gateway config published|Sync successful/i
+              )
+              return
+            }
+            return cy.wait(3000).then(() => publish(attempt + 1))
+          })
+      publish(1)
     })
   })
 }

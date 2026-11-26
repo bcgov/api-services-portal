@@ -299,7 +299,9 @@ export function createRuntimeGroup(
       // Registering the gateway used to wait out a permission-ticket exchange.
       // Keep the request limit above that stall so a slow Keycloak still returns.
       const previousRequestTimeout = Cypress.config('requestTimeout')
-      Cypress.config('requestTimeout', 90000)
+      const previousResponseTimeout = Cypress.config('responseTimeout')
+      Cypress.config('requestTimeout', 120000)
+      Cypress.config('responseTimeout', 120000)
       return cy
         .callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupName}/gateway`,
@@ -307,6 +309,7 @@ export function createRuntimeGroup(
         )
         .then((result) => {
           Cypress.config('requestTimeout', previousRequestTimeout)
+          Cypress.config('responseTimeout', previousResponseTimeout)
           return result
         })
         .then(({ apiRes: { status, body } }: any) => {
