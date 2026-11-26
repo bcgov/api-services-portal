@@ -4,17 +4,37 @@ Recommendation for [APS-5099](https://dpdd.atlassian.net/browse/APS-5099). The f
 
 ## Decision
 
-Keep Cypress in this repo, pointed at the `sdx-ui` image Compose already runs.
+Use two layers. UI checks live in `aps-devops` next to `sdx/brochure-ui`. Journeys that need Keycloak, the SDX API, and seed data stay on Cypress in this repo.
 
 `docker-compose.yml` starts `ghcr.io/bcgov/aps-devops/sdx-ui`. `.github/workflows/aps-cypress-e2e.yaml` brings that container up with the rest of the stack. Cypress reaches the brochure at `http://sdx-ui.localtest.me:5500` (`SDX_UI_URL` in `e2e/cypress/support/sdx-commands.ts`). Authenticated journeys reuse `sdxUiLogin` and `clearSdxUiSession` with the existing Keycloak user `janis@idir` (`DEV_USERNAME` / `DEV_PASSWORD` in `e2e/cypress.config.ts`). `refresh=1` reloads the in-memory organization catalog after API setup. The notification spec already opens `/connections` and asserts a visible service name, Pending, and Approve / Reject.
 
-`aps-devops` publishes that image. A Cypress project on an `aps-devops` branch would still need this repo's Keycloak realm, SDX API, oauth2-proxy, login, and catalog refresh before an authenticated journey could run. Those already exist here, so the harness stays in this repo. Catalogue checks stay in their own spec layer, `e2e/cypress/tests/27-sdx-catalogue/`, so they are not chained to the default suite. That suite runs with `testIsolation: false` and depends on partner data created by earlier specs. Number 26 will be the Keycloak HA suite (`e2e/cypress/tests/26-keycloak-ha`). `27-sdx-catalogue` is off the ordered `specPattern` list in `e2e/cypress.config.ts`. `npm run cy:sdx-catalogue` sets `SDX_CATALOGUE_SPECS=1` and passes `--spec`, because `setupNodeEvents` replaces `specPattern` for the default suite and would otherwise drop this folder.
+Those full-stack journeys are login, catalog refresh, and provider connection review. They stay in `e2e/cypress/tests/27-sdx-catalogue/`, off the default suite. That suite runs with `testIsolation: false` and depends on partner data created by earlier specs. Number 26 will be the Keycloak HA suite (`e2e/cypress/tests/26-keycloak-ha`). `npm run cy:sdx-catalogue` sets `SDX_CATALOGUE_SPECS=1` and passes `--spec`, because `setupNodeEvents` replaces `specPattern` for the default suite and would otherwise drop this folder.
 
-Public pages need no seed data. Authenticated Catalogue journeys, when APS-4971 adds them, should call `sdxUiLogin` and the API helpers in `sdx-commands.ts`.
+`aps-devops` already has `Deno.test` files that render the server markup (`renderToStaticMarkup`), including connection status text and copy controls. `.github/workflows/sdx-brochure-ui.yaml` builds the `sdx-ui` image on pull requests and does not run those tests. The first step there is to run `deno test` in that workflow. Home, About, and Help do not need this repo's stack.
 
-**Accessibility.** On APS-4971, rerun the rules axe can check inside the logged-in browser (`cypress-axe` / axe-core): contrast, target size, nested interactive controls, button and link names, list and heading structure, and page language. This spike does not install `cypress-axe`. Keep Lighthouse as the occasional second opinion [APS-4962](https://dpdd.atlassian.net/browse/APS-4962) already used, outside the main Cypress job. Keep manual, using the [DevHub accessibility assessment](https://dpdd.atlassian.net/wiki/spaces/POSM/pages/1537671344/DevHub+Connected+Services+TechDocs+-+Accessibility+Assessment) method on brochure pages: Appendix A keyboard script, 400% zoom, forced colours, heading inspection, and a screen reader pass (NVDA on Chrome, plus the VoiceOver check APS-4962 already used for the copy control).
+### Cypress and Playwright
 
-**Design system and UX.** Assert observable outcomes: primary navigation order (Home, then About), Help content present, status shown as text, and dialog focus behaviour when a journey opens a dialog. Leave visual fidelity to the B.C. Design System, spacing, responsive layout, and forced-colours appearance to the manual script. There is no screenshot baseline. The UI is still the moving `dev` image.
+Playwright is the runner to add beside the UI. Cypress stays the full-stack runner. A second full-stack project, in Playwright or on an `aps-devops` branch, would rebuild the Keycloak realm, the SDX API, oauth2-proxy, login, and catalog refresh that already exist here.
+
+| | Cypress in this repo | Playwright beside the UI |
+| --- | --- | --- |
+| Fit | Login, `refresh=1`, and provider connection review. The proof spec shows this repo can open the image. | Browser checks on the brochure server: dialog focus, keyboard, and axe on a page. Home, About, and Help fit here. |
+| Speed | One brochure spec is about a second. The default portal suite is the long stateful run, and these specs stay off it. | Parallel by default. This is the direction for a new browser suite. |
+| Accessibility | `cypress-axe` in the logged-in browser, for a journey that needs the stack. Not installed in this spike. | `@axe-core/playwright` runs the same axe-core rules. This team has not used it yet. |
+| Markup checks | Cypress component testing mounts a component in a browser. The existing `Deno.test` files already check server-rendered HTML without a browser. | A page test against the brochure server covers focus and keyboard. A separate Playwright component project is optional. |
+
+### When they run
+
+| Layer | Where | Covers | Runs on |
+| --- | --- | --- | --- |
+| Unit and component | `aps-devops`, existing `Deno.test` | Rendered markup: status as text, copy controls, nav markup | Every `sdx/brochure-ui` pull request, once `sdx-brochure-ui.yaml` runs `deno test` |
+| Browser checks | `aps-devops`, Playwright if added | Dialog focus, keyboard, axe on a page. Home, About, Help | Every `sdx/brochure-ui` pull request |
+| End-to-end | This repo, Cypress | Login, catalog refresh, provider connection review | The new `sdx-ui` image before merge, and the `:dev` image. `aps-devops` can dispatch that workflow. Not the default portal Cypress job. |
+| Manual | This doc | Screen reader, 400% zoom, forced colours, design fidelity | Per release or iteration |
+
+**Accessibility.** axe on a public page or a component runs with the browser checks in `aps-devops` (`@axe-core/playwright`). axe on a logged-in journey runs with the Cypress layer (`cypress-axe`): contrast, target size, nested interactive controls, button and link names, list and heading structure, and page language. Neither package is installed in this spike. Keep Lighthouse as the occasional second opinion [APS-4962](https://dpdd.atlassian.net/browse/APS-4962) already used, outside either job. Keep manual, using the [DevHub accessibility assessment](https://dpdd.atlassian.net/wiki/spaces/POSM/pages/1537671344/DevHub+Connected+Services+TechDocs+-+Accessibility+Assessment) method on brochure pages: Appendix A keyboard script, 400% zoom, forced colours, heading inspection, and a screen reader pass (NVDA on Chrome, plus the VoiceOver check APS-4962 already used for the copy control).
+
+**Design system and UX.** Nav order, Help content, and status text are markup checks for the `Deno.test` or browser layer in `aps-devops`. Dialog focus is a browser check there. Visual fidelity to the B.C. Design System, spacing, responsive layout, and forced-colours appearance stay on the manual script. There is no screenshot baseline. The UI is still the moving `dev` image.
 
 ## Rerun
 
@@ -44,19 +64,19 @@ Each row is a check, where it comes from, the expected outcome, and whether the 
 | Check | Source | Expected outcome | Mode |
 | --- | --- | --- | --- |
 | Public Home | APS-4962 iteration 1 scope; `local/sdx-ui/config.yaml`; this spec | The public home page loads at `http://sdx-ui.localtest.me:5500` without login. The brochure shows the site title `Secure Data Exchange`. Primary navigation includes Home. | Automatic. Proved by `01-brochure-home.cy.ts`. |
-| About | Tuesday convo D03; Master findings O02, H02 | About sits immediately after Home in the primary navigation. An About page exists. The Home "About the Secure Data Exchange" panel links to it. | Automatic on APS-4971. This spike does not assert it. |
-| Help | Tuesday convo D04; Master findings O03, O04 | Help is Catalogue-specific and stays the help destination. The TechDocs link is removed. The wording is the content provided for APS-4962, which is not in the workbook. | Automatic on APS-4971 once that content is the oracle. |
+| About | Tuesday convo D03; Master findings O02, H02 | About sits immediately after Home in the primary navigation. An About page exists. The Home "About the Secure Data Exchange" panel links to it. | Browser or `Deno.test` check in `aps-devops`. This spike does not assert it. |
+| Help | Tuesday convo D04; Master findings O03, O04 | Help is Catalogue-specific and stays the help destination. The TechDocs link is removed. The wording is the content provided for APS-4962, which is not in the workbook. | Browser or `Deno.test` check in `aps-devops`, once that content is the oracle. |
 | Provider connection review | `e2e/cypress/tests/23-notifications/02-connection-request-notification.ts`; `docs/common-sso-partner-api-walkthrough.md` | After `sdxUiLogin`, `/connections?org=…&refresh=1` shows the service name, the text Pending, and Approve / Reject. `refresh=1` reloads the in-memory catalog. | Automatic. Already asserted by the notification spec, which is on the default suite. |
 | Member Console connection requests | [APS-5140](https://dpdd.atlassian.net/browse/APS-5140) (To Do) | No expected outcome until the updated pages are confirmed with the catalogue owner. | Unspecified. APS-5140 scope. |
 | Common SSO Integrations | APS-5140 (To Do) | No expected outcome until that section is confirmed. | Unspecified. APS-5140 scope. |
 
 ### UX review workbook (APS-4944 / APS-4962)
 
-The review is in [7 - SDX_Catalogue_UX_Review_Iteration1_preserved.xlsx](https://bcgov.sharepoint.com/:x:/r/teams/00108/Shared%20Documents/TM_APS/Connected%20Services/SDX%20Catalogue%20-%20UX%20UI%20Review%20and%20action%20options/7%20-%20SDX_Catalogue_UX_Review_Iteration1_preserved.xlsx?d=w647000d6259e48a5b11f42801ed8237d&csf=1&web=1&e=dzkqgr). [APS-4971](https://dpdd.atlassian.net/browse/APS-4971) covers it on this harness. The workbook is the expected outcome for each check.
+The review is in [7 - SDX_Catalogue_UX_Review_Iteration1_preserved.xlsx](https://bcgov.sharepoint.com/:x:/r/teams/00108/Shared%20Documents/TM_APS/Connected%20Services/SDX%20Catalogue%20-%20UX%20UI%20Review%20and%20action%20options/7%20-%20SDX_Catalogue_UX_Review_Iteration1_preserved.xlsx?d=w647000d6259e48a5b11f42801ed8237d&csf=1&web=1&e=dzkqgr). The workbook is the expected outcome for each check. The layer that runs it is in the Decision table.
 
 | Check | Source | Expected outcome | Mode |
 | --- | --- | --- | --- |
-| UX review workbook | [APS-4944](https://dpdd.atlassian.net/browse/APS-4944), [APS-4962](https://dpdd.atlassian.net/browse/APS-4962) | Covered on APS-4971. | Automatic where axe or a DOM assertion applies. Otherwise manual. |
+| UX review workbook | [APS-4944](https://dpdd.atlassian.net/browse/APS-4944), [APS-4962](https://dpdd.atlassian.net/browse/APS-4962) | Covered by the layer that matches the check: markup in `aps-devops`, full-stack journeys in this repo, the rest on the manual script. | See the table under Decision. |
 
 ### Accessibility method
 
@@ -64,8 +84,8 @@ Adapted from the DevHub assessment (WCAG 2.2 AA method) and from the tools APS-4
 
 | Check | Source | Expected outcome on the brochure | Mode |
 | --- | --- | --- | --- |
-| axe | DevHub §2.3; APS-4962 | axe-core reports no violations for contrast, target size, nested interactive controls, button and link names, list and heading structure, and page language, on the public pages and on a logged-in journey. | Automatic on APS-4971 (`cypress-axe`). Not installed here. |
-| Lighthouse | DevHub §2.3; APS-4962 | Accessibility audit used as a second opinion. It does not gate the Cypress job. | Occasional manual run, outside Cypress. |
+| axe | DevHub §2.3; APS-4962 | axe-core reports no violations for contrast, target size, nested interactive controls, button and link names, list and heading structure, and page language, on the public pages and on a logged-in journey. | Public pages: `@axe-core/playwright` in `aps-devops`, if that runner is added. Logged-in journey: `cypress-axe` in this repo. Neither is installed here. |
+| Lighthouse | DevHub §2.3; APS-4962 | Accessibility audit used as a second opinion. It does not gate either automated job. | Occasional manual run. |
 | Keyboard | DevHub Appendix A; APS-4962 | Tab order reaches each control, focus is visible, Enter/Space activate, a dialog takes focus and Esc returns focus to the trigger, and Shift+Tab reverses the order. Repeated at 400% zoom. | Manual. Script below. |
 | 400% zoom | DevHub §2.3; APS-4962, including the header note in the ticket comments | Content reflows with no loss of information or function and without page-level horizontal scrolling. Below an 800px layout width the compact header is used; at 800px and above the full navigation remains. Help and account stay outside the Menu. Verify at 320px width and at 400% zoom. | Manual. |
 | Forced colours | DevHub §2.3 (Chrome Rendering → Emulate forced-colors); APS-4962 | Text, controls, and focus remain visible. Status is available as text, not by colour alone. | Manual. |
