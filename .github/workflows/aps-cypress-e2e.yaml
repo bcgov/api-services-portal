@@ -101,8 +101,10 @@ jobs:
 
       - name: Execute Tests & Clean Up
         run: |
-          # Start following logs in the background with continuous output
+          # Start following logs in the background with continuous output.
+          # keycloak is the HAProxy in front of the two Keycloak sites.
           docker logs -f cypress-e2e 2>&1 &
+          docker logs -f keycloak 2>&1 &
           LOG_PID=$!
 
           while true; do
