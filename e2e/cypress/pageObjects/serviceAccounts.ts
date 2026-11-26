@@ -46,7 +46,7 @@ class ServiceAccountsPage {
 
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {
-      cy.contains(scope).click()
+      cy.contains(scope, { timeout: 30000 }).click()
     })
   }
 
