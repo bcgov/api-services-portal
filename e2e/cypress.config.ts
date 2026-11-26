@@ -35,9 +35,12 @@ export default defineConfig({
 
       // // It's IMPORTANT to return the config object
       // // with any changed environment variables
-      // Temporary diagnosis order. 23/02 and 24 do not depend on other
-      // folders. 02/14 needs 02/01–02/13, so that folder stays intact.
+      // Cypress runs the matched specs in alphabetical order, so this
+      // get-started spec is first. It points gwa at the local portal
+      // (host and scheme) and must run while no gateways exist.
+      // 02/14 needs 02/01–02/13, so that folder stays intact.
       config.specPattern = [
+        './cypress/tests/01-api-key/00-get-started.cy.ts',
         './cypress/tests/23-notifications/02-connection-request-notification.ts',
         './cypress/tests/24-self-issuing-credentials/*.cy.ts',
         './cypress/tests/02-*/*.ts',
