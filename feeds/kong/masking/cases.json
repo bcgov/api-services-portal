@@ -1,0 +1,886 @@
+{
+  "mask": "****",
+  "cases": [
+    {
+      "name": "Kong 3.x rate-limiting: nested redis object and legacy flat redis_* fields",
+      "kind": "plugin",
+      "input": {
+        "name": "rate-limiting",
+        "config": {
+          "minute": 100,
+          "policy": "redis",
+          "redis_host": "redis.platform.internal",
+          "redis_port": 6379,
+          "redis_password": "platform-password",
+          "redis_username": "platform-user",
+          "redis_ssl": false,
+          "redis": {
+            "host": "redis.platform.internal",
+            "port": 6379,
+            "password": "platform-password",
+            "username": "platform-user",
+            "database": 0,
+            "ssl": false,
+            "timeout": 2000
+          }
+        }
+      },
+      "expected": {
+        "name": "rate-limiting",
+        "config": {
+          "minute": 100,
+          "policy": "redis",
+          "redis_host": "****",
+          "redis_port": 6379,
+          "redis_password": "****",
+          "redis_username": "****",
+          "redis_ssl": false,
+          "redis": {
+            "host": "****",
+            "port": 6379,
+            "password": "****",
+            "username": "****",
+            "database": 0,
+            "ssl": false,
+            "timeout": 2000
+          }
+        }
+      }
+    },
+    {
+      "name": "redis sentinel credentials",
+      "kind": "plugin",
+      "input": {
+        "name": "rate-limiting",
+        "config": {
+          "redis": {
+            "sentinel_username": "sentinel-user",
+            "sentinel_password": "x"
+          }
+        }
+      },
+      "expected": {
+        "name": "rate-limiting",
+        "config": {
+          "redis": {
+            "sentinel_username": "****",
+            "sentinel_password": "****"
+          }
+        }
+      }
+    },
+    {
+      "name": "redis object nested deeper than config.redis",
+      "kind": "plugin",
+      "input": {
+        "name": "acme",
+        "config": {
+          "storage_config": {
+            "redis": {
+              "host": "r",
+              "password": "secret"
+            }
+          }
+        }
+      },
+      "expected": {
+        "name": "acme",
+        "config": {
+          "storage_config": {
+            "redis": {
+              "host": "****",
+              "password": "****"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "unset credentials stay null",
+      "kind": "plugin",
+      "input": {
+        "name": "rate-limiting",
+        "config": {
+          "policy": "local",
+          "redis_password": null,
+          "redis": {
+            "host": null,
+            "password": null,
+            "port": 6379
+          }
+        }
+      },
+      "expected": {
+        "name": "rate-limiting",
+        "config": {
+          "policy": "local",
+          "redis_password": null,
+          "redis": {
+            "host": null,
+            "password": null,
+            "port": 6379
+          }
+        }
+      }
+    },
+    {
+      "name": "plugin without config is unchanged",
+      "kind": "plugin",
+      "input": {
+        "name": "cors"
+      },
+      "expected": {
+        "name": "cors"
+      }
+    },
+    {
+      "name": "plugin without secrets is unchanged",
+      "kind": "plugin",
+      "input": {
+        "name": "acl",
+        "config": {
+          "allow": ["group-a"],
+          "hide_groups_header": false
+        }
+      },
+      "expected": {
+        "name": "acl",
+        "config": {
+          "allow": ["group-a"],
+          "hide_groups_header": false
+        }
+      }
+    },
+    {
+      "name": "aws-lambda keys",
+      "kind": "plugin",
+      "input": {
+        "name": "aws-lambda",
+        "config": {
+          "aws_key": "AKIA1",
+          "aws_secret": "s1",
+          "aws_region": "ca-central-1"
+        }
+      },
+      "expected": {
+        "name": "aws-lambda",
+        "config": {
+          "aws_key": "****",
+          "aws_secret": "****",
+          "aws_region": "ca-central-1"
+        }
+      }
+    },
+    {
+      "name": "azure-functions apikey and clientid",
+      "kind": "plugin",
+      "input": {
+        "name": "azure-functions",
+        "config": {
+          "apikey": "k1",
+          "clientid": "c1",
+          "appname": "app"
+        }
+      },
+      "expected": {
+        "name": "azure-functions",
+        "config": {
+          "apikey": "****",
+          "clientid": "****",
+          "appname": "app"
+        }
+      }
+    },
+    {
+      "name": "loggly key; host is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "loggly",
+        "config": {
+          "key": "k2",
+          "host": "logs-01.loggly.com"
+        }
+      },
+      "expected": {
+        "name": "loggly",
+        "config": {
+          "key": "****",
+          "host": "logs-01.loggly.com"
+        }
+      }
+    },
+    {
+      "name": "syslog host is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "syslog",
+        "config": {
+          "host": "syslog.internal",
+          "port": 514
+        }
+      },
+      "expected": {
+        "name": "syslog",
+        "config": {
+          "host": "syslog.internal",
+          "port": 514
+        }
+      }
+    },
+    {
+      "name": "oauth2 provision_key; booleans and numbers are never masked",
+      "kind": "plugin",
+      "input": {
+        "name": "oauth2",
+        "config": {
+          "provision_key": "p1",
+          "enable_password_grant": true,
+          "token_expiration": 7200
+        }
+      },
+      "expected": {
+        "name": "oauth2",
+        "config": {
+          "provision_key": "****",
+          "enable_password_grant": true,
+          "token_expiration": 7200
+        }
+      }
+    },
+    {
+      "name": "session secret",
+      "kind": "plugin",
+      "input": {
+        "name": "session",
+        "config": {
+          "secret": "s2",
+          "cookie_name": "session"
+        }
+      },
+      "expected": {
+        "name": "session",
+        "config": {
+          "secret": "****",
+          "cookie_name": "session"
+        }
+      }
+    },
+    {
+      "name": "standard-webhooks secret",
+      "kind": "plugin",
+      "input": {
+        "name": "standard-webhooks",
+        "config": {
+          "secret_v1": "s3"
+        }
+      },
+      "expected": {
+        "name": "standard-webhooks",
+        "config": {
+          "secret_v1": "****"
+        }
+      }
+    },
+    {
+      "name": "acme account and storage secrets",
+      "kind": "plugin",
+      "input": {
+        "name": "acme",
+        "config": {
+          "account_email": "a@b.c",
+          "eab_kid": "kid",
+          "eab_hmac_key": "h1",
+          "storage_config": {
+            "vault": {
+              "token": "t1",
+              "host": "vault"
+            },
+            "consul": {
+              "token": "t2"
+            }
+          }
+        }
+      },
+      "expected": {
+        "name": "acme",
+        "config": {
+          "account_email": "****",
+          "eab_kid": "****",
+          "eab_hmac_key": "****",
+          "storage_config": {
+            "vault": {
+              "token": "****",
+              "host": "vault"
+            },
+            "consul": {
+              "token": "****"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "ai-proxy auth",
+      "kind": "plugin",
+      "input": {
+        "name": "ai-proxy",
+        "config": {
+          "auth": {
+            "header_name": "Authorization",
+            "header_value": "v1",
+            "param_name": "key",
+            "param_value": "v2",
+            "aws_access_key_id": "AKIA2",
+            "aws_secret_access_key": "s4",
+            "gcp_service_account_json": "{}"
+          }
+        }
+      },
+      "expected": {
+        "name": "ai-proxy",
+        "config": {
+          "auth": {
+            "header_name": "Authorization",
+            "header_value": "****",
+            "param_name": "key",
+            "param_value": "****",
+            "aws_access_key_id": "****",
+            "aws_secret_access_key": "****",
+            "gcp_service_account_json": "****"
+          }
+        }
+      }
+    },
+    {
+      "name": "BC Gov oidc secrets",
+      "kind": "plugin",
+      "input": {
+        "name": "oidc",
+        "config": {
+          "client_id": "my-client",
+          "client_secret": "s5",
+          "session_secret": "s6",
+          "ssl_client_priv_key": "/keys/k.pem",
+          "token_endpoint_auth_method": "client_secret_post"
+        }
+      },
+      "expected": {
+        "name": "oidc",
+        "config": {
+          "client_id": "my-client",
+          "client_secret": "****",
+          "session_secret": "****",
+          "ssl_client_priv_key": "****",
+          "token_endpoint_auth_method": "client_secret_post"
+        }
+      }
+    },
+    {
+      "name": "BC Gov pep auth header value",
+      "kind": "plugin",
+      "input": {
+        "name": "pep",
+        "config": {
+          "auth_header_name": "X-PEP-Auth",
+          "auth_header_value": "v3",
+          "target_url": "https://pep"
+        }
+      },
+      "expected": {
+        "name": "pep",
+        "config": {
+          "auth_header_name": "X-PEP-Auth",
+          "auth_header_value": "****",
+          "target_url": "https://pep"
+        }
+      }
+    },
+    {
+      "name": "more secret field names; booleans kept",
+      "kind": "plugin",
+      "input": {
+        "name": "custom-plugin",
+        "config": {
+          "pwd": "p1",
+          "db_pass": "p2",
+          "key_passphrase": "p3",
+          "authorization_value": "v4",
+          "partner_credentials": {
+            "id": "c1"
+          },
+          "hide_credentials": true,
+          "pass_stripped_path": false
+        }
+      },
+      "expected": {
+        "name": "custom-plugin",
+        "config": {
+          "pwd": "****",
+          "db_pass": "****",
+          "key_passphrase": "****",
+          "authorization_value": "****",
+          "partner_credentials": "****",
+          "hide_credentials": true,
+          "pass_stripped_path": false
+        }
+      }
+    },
+    {
+      "name": "transformer Name:value lists",
+      "kind": "plugin",
+      "input": {
+        "name": "request-transformer",
+        "config": {
+          "add": {
+            "headers": [
+              "Authorization:Bearer abc.def",
+              "X-API-Key:k3",
+              "X-Request-Source:portal"
+            ],
+            "querystring": ["api_key:k4", "format:json"],
+            "body": ["client_secret:s7", "grant_type:client_credentials"]
+          },
+          "replace": {
+            "headers": ["x-auth-token: t3"],
+            "querystring": [],
+            "body": []
+          },
+          "append": {
+            "headers": ["Cookie:session=abc"]
+          },
+          "remove": {
+            "headers": ["Authorization"]
+          },
+          "rename": {
+            "headers": ["X-Old:X-New"]
+          }
+        }
+      },
+      "expected": {
+        "name": "request-transformer",
+        "config": {
+          "add": {
+            "headers": [
+              "Authorization:****",
+              "X-API-Key:****",
+              "X-Request-Source:portal"
+            ],
+            "querystring": ["api_key:****", "format:json"],
+            "body": ["client_secret:****", "grant_type:client_credentials"]
+          },
+          "replace": {
+            "headers": ["x-auth-token:****"],
+            "querystring": [],
+            "body": []
+          },
+          "append": {
+            "headers": ["Cookie:****"]
+          },
+          "remove": {
+            "headers": ["Authorization"]
+          },
+          "rename": {
+            "headers": ["X-Old:X-New"]
+          }
+        }
+      }
+    },
+    {
+      "name": "rename lists hold old:new names, not values",
+      "kind": "plugin",
+      "input": {
+        "name": "request-transformer",
+        "config": {
+          "rename": {
+            "headers": ["X-API-Key:X-Upstream-Key"],
+            "querystring": ["apikey:key"],
+            "body": ["token:access_token"]
+          }
+        }
+      },
+      "expected": {
+        "name": "request-transformer",
+        "config": {
+          "rename": {
+            "headers": ["X-API-Key:X-Upstream-Key"],
+            "querystring": ["apikey:key"],
+            "body": ["token:access_token"]
+          }
+        }
+      }
+    },
+    {
+      "name": "more credential header and parameter names",
+      "kind": "plugin",
+      "input": {
+        "name": "request-transformer",
+        "config": {
+          "add": {
+            "headers": ["X-Auth:a1", "X-Signature:s8", "X-Request-Id:r1"]
+          },
+          "url": "https://h/p?sig=s1&pwd=p1&pass=p2&code=c1"
+        }
+      },
+      "expected": {
+        "name": "request-transformer",
+        "config": {
+          "add": {
+            "headers": ["X-Auth:****", "X-Signature:****", "X-Request-Id:r1"]
+          },
+          "url": "https://h/p?sig=****&pwd=****&pass=****&code=c1"
+        }
+      }
+    },
+    {
+      "name": "response-signer lists; key file path is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "response-signer",
+        "config": {
+          "add": {
+            "headers": ["X-Signing-Key:k5"],
+            "json": ["token:t4", "status:ok"]
+          },
+          "private_key_location": "/keys/sign.pem"
+        }
+      },
+      "expected": {
+        "name": "response-signer",
+        "config": {
+          "add": {
+            "headers": ["X-Signing-Key:****"],
+            "json": ["token:****", "status:ok"]
+          },
+          "private_key_location": "/keys/sign.pem"
+        }
+      }
+    },
+    {
+      "name": "WWW-Authenticate challenge parameters are not credentials",
+      "kind": "plugin",
+      "input": {
+        "name": "response-transformer",
+        "config": {
+          "add": {
+            "headers": ["WWW-Authenticate:Bearer realm=\"api\""]
+          },
+          "message": "use Bearer abc123def"
+        }
+      },
+      "expected": {
+        "name": "response-transformer",
+        "config": {
+          "add": {
+            "headers": ["WWW-Authenticate:Bearer realm=\"api\""]
+          },
+          "message": "use Bearer ****"
+        }
+      }
+    },
+    {
+      "name": "header map",
+      "kind": "plugin",
+      "input": {
+        "name": "http-log",
+        "config": {
+          "http_endpoint": "https://logs.example.com/ingest",
+          "headers": {
+            "Authorization": "Splunk abc",
+            "X-Api-Key": "k6",
+            "X-Source": "kong"
+          }
+        }
+      },
+      "expected": {
+        "name": "http-log",
+        "config": {
+          "http_endpoint": "https://logs.example.com/ingest",
+          "headers": {
+            "Authorization": "****",
+            "X-Api-Key": "****",
+            "X-Source": "kong"
+          }
+        }
+      }
+    },
+    {
+      "name": "credentials inside URLs",
+      "kind": "plugin",
+      "input": {
+        "name": "http-log",
+        "config": {
+          "http_endpoint": "https://svc-user:svc-pass@logs.example.com/ingest?token=t5&source=kong",
+          "queue": {
+            "name": "q"
+          }
+        }
+      },
+      "expected": {
+        "name": "http-log",
+        "config": {
+          "http_endpoint": "https://****@logs.example.com/ingest?token=****&source=kong",
+          "queue": {
+            "name": "q"
+          }
+        }
+      }
+    },
+    {
+      "name": "Kong vault references stay visible",
+      "kind": "plugin",
+      "input": {
+        "name": "rate-limiting",
+        "config": {
+          "redis": {
+            "password": "{vault://env/redis-pass}",
+            "host": "redis.internal"
+          },
+          "client_secret": "{vault://hcv/oidc/secret}",
+          "add": {
+            "headers": ["X-Api-Key:{vault://env/upstream-key}"]
+          }
+        }
+      },
+      "expected": {
+        "name": "rate-limiting",
+        "config": {
+          "redis": {
+            "password": "{vault://env/redis-pass}",
+            "host": "****"
+          },
+          "client_secret": "{vault://hcv/oidc/secret}",
+          "add": {
+            "headers": ["X-Api-Key:{vault://env/upstream-key}"]
+          }
+        }
+      }
+    },
+    {
+      "name": "PEM private keys and bearer tokens in code; certificates kept",
+      "kind": "plugin",
+      "input": {
+        "name": "pre-function",
+        "config": {
+          "access": [
+            "local key = [[-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA\nabc\n-----END RSA PRIVATE KEY-----]]",
+            "kong.service.request.set_header(\"Authorization\", \"Bearer eyJhbGciOi.payload.sig\")"
+          ],
+          "some_cert": "-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----"
+        }
+      },
+      "expected": {
+        "name": "pre-function",
+        "config": {
+          "access": [
+            "local key = ****",
+            "kong.service.request.set_header(\"Authorization\", \"****\")"
+          ],
+          "some_cert": "-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----"
+        }
+      }
+    },
+    {
+      "name": "secrets in code are masked and the code stays readable",
+      "kind": "plugin",
+      "note": "Known gap: a secret under a name that does not look secret (local partner) is not found.",
+      "input": {
+        "name": "post-function",
+        "config": {
+          "access": [
+            "local api_key = \"k7\"\nkong.service.request.set_header(\"X-Api-Key\", api_key)",
+            "kong.service.request.set_header(\"Authorization\", \"Bearer abc123def\")",
+            "kong.response.set_header(\"X-Partner-Key\", \"k9\")",
+            "ngx.header[\"X-Auth-Token\"] = \"t6\"",
+            "kong.response.set_header(\"Content-Type\", \"application/json\")",
+            "local partner = \"p7\""
+          ],
+          "log": []
+        }
+      },
+      "expected": {
+        "name": "post-function",
+        "config": {
+          "access": [
+            "local api_key = \"****\"\nkong.service.request.set_header(\"X-Api-Key\", api_key)",
+            "kong.service.request.set_header(\"Authorization\", \"****\")",
+            "kong.response.set_header(\"X-Partner-Key\", \"****\")",
+            "ngx.header[\"X-Auth-Token\"] = \"****\"",
+            "kong.response.set_header(\"Content-Type\", \"application/json\")",
+            "local partner = \"p7\""
+          ],
+          "log": []
+        }
+      }
+    },
+    {
+      "name": "secret-named assignments in strings",
+      "kind": "plugin",
+      "input": {
+        "name": "custom-plugin",
+        "config": {
+          "json_body": "{\"client_secret\":\"s9\",\"grant_type\":\"client_credentials\"}",
+          "script": "local api_key = \"k1\"\nlocal region = \"ca\"",
+          "dsn": "Server=db;User Id=u;Password=p9;"
+        }
+      },
+      "expected": {
+        "name": "custom-plugin",
+        "config": {
+          "json_body": "{\"client_secret\":\"****\",\"grant_type\":\"client_credentials\"}",
+          "script": "local api_key = \"****\"\nlocal region = \"ca\"",
+          "dsn": "Server=db;User Id=u;Password=****;"
+        }
+      }
+    },
+    {
+      "name": "tokens, JWTs, AWS key IDs and PGP keys in any string",
+      "kind": "plugin",
+      "input": {
+        "name": "custom-plugin",
+        "config": {
+          "values": [
+            "authorization: bearer abcdefghijk",
+            "Splunk 1234-abcd",
+            "Token t0k3n",
+            "local t = \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig\"",
+            "AKIAABCDEFGHIJKLMNOP",
+            "-----BEGIN PGP PRIVATE KEY BLOCK-----\nabc\n-----END PGP PRIVATE KEY BLOCK-----"
+          ]
+        }
+      },
+      "expected": {
+        "name": "custom-plugin",
+        "config": {
+          "values": [
+            "authorization: bearer ****",
+            "Splunk ****",
+            "Token ****",
+            "local t = \"****\"",
+            "****",
+            "****"
+          ]
+        }
+      }
+    },
+    {
+      "name": "key-auth config is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "key-auth",
+        "config": {
+          "key_names": ["X-API-KEY"],
+          "hide_credentials": true,
+          "key_in_header": true,
+          "anonymous": null
+        }
+      },
+      "expected": {
+        "name": "key-auth",
+        "config": {
+          "key_names": ["X-API-KEY"],
+          "hide_credentials": true,
+          "key_in_header": true,
+          "anonymous": null
+        }
+      }
+    },
+    {
+      "name": "jwt-keycloak config is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "jwt-keycloak",
+        "config": {
+          "allowed_iss": ["https://sso/realms/r"],
+          "cookie_names": [],
+          "header_names": ["Authorization"],
+          "secret_is_base64": false
+        }
+      },
+      "expected": {
+        "name": "jwt-keycloak",
+        "config": {
+          "allowed_iss": ["https://sso/realms/r"],
+          "cookie_names": [],
+          "header_names": ["Authorization"],
+          "secret_is_base64": false
+        }
+      }
+    },
+    {
+      "name": "cors config is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "cors",
+        "config": {
+          "origins": ["*"],
+          "credentials": true,
+          "headers": ["Authorization", "Content-Type"]
+        }
+      },
+      "expected": {
+        "name": "cors",
+        "config": {
+          "origins": ["*"],
+          "credentials": true,
+          "headers": ["Authorization", "Content-Type"]
+        }
+      }
+    },
+    {
+      "name": "kong-upstream-jwt key file paths are not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "kong-upstream-jwt",
+        "config": {
+          "private_key_location": "/etc/keys/key.pem",
+          "key_id": "kid-1",
+          "header": "GW-JWT"
+        }
+      },
+      "expected": {
+        "name": "kong-upstream-jwt",
+        "config": {
+          "private_key_location": "/etc/keys/key.pem",
+          "key_id": "kid-1",
+          "header": "GW-JWT"
+        }
+      }
+    },
+    {
+      "name": "trust-kms config is not secret",
+      "kind": "plugin",
+      "input": {
+        "name": "trust-kms",
+        "config": {
+          "key_id": "k",
+          "signature_header_key": "X-Signature"
+        }
+      },
+      "expected": {
+        "name": "trust-kms",
+        "config": {
+          "key_id": "k",
+          "signature_header_key": "X-Signature"
+        }
+      }
+    },
+    {
+      "name": "deck diff: private key in a JSON string",
+      "kind": "text",
+      "input": "-  \"key\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADAN\\n-----END PRIVATE KEY-----\",\n+  \"key\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADAN\\n-----END PRIVATE KEY-----\",\n   \"cert\": \"-----BEGIN CERTIFICATE-----\\nMIIB\\n-----END CERTIFICATE-----\"",
+      "expected": "-  \"key\": \"****\",\n+  \"key\": \"****\",\n   \"cert\": \"-----BEGIN CERTIFICATE-----\\nMIIB\\n-----END CERTIFICATE-----\""
+    },
+    {
+      "name": "deck diff: secret-named JSON fields",
+      "kind": "text",
+      "input": "-      \"client_secret\": \"s9\",\n+      \"client_secret\": \"s10\",\n       \"client_id\": \"my-client\",\n       \"password\": \"p1\"",
+      "expected": "-      \"client_secret\": \"****\",\n+      \"client_secret\": \"****\",\n       \"client_id\": \"my-client\",\n       \"password\": \"****\""
+    },
+    {
+      "name": "deck diff: Authorization header entry",
+      "kind": "text",
+      "input": "+        \"Authorization:Bearer abc123def\",\n         \"X-Request-Source:portal\"",
+      "expected": "+        \"Authorization:Bearer ****\",\n         \"X-Request-Source:portal\""
+    }
+  ]
+}
