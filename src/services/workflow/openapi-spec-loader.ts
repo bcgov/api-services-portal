@@ -156,7 +156,12 @@ function parseSpecOperations(spec: any) {
             method: method.toUpperCase(),
             path,
             summary: op.summary || '',
-            scopes: parseScopes(spec.components.securitySchemes, op.security),
+            // An operation's own security, even an empty array, replaces the
+            // document's security.
+            scopes: parseScopes(
+              spec.components?.securitySchemes,
+              op.security !== undefined ? op.security : spec.security
+            ),
           };
         });
 
@@ -181,28 +186,109 @@ function parseSpecOperations(spec: any) {
   return flattenedOperations;
 }
 
+// OAuth2 flows in the order their scopes are read. authorizationCode comes
+// first so a scope declared in several flows keeps its authorizationCode
+// description, as it did when only that flow was read.
+const OAUTH2_FLOWS = [
+  'authorizationCode',
+  'clientCredentials',
+  'implicit',
+  'password',
+];
+
+/**
+ * Returns the scopes an operation requires, from every oauth2 security scheme
+ * named in any of its security requirements and every flow in those schemes.
+ * A scheme that is an in-document $ref is followed to the scheme it names.
+ * Only scopes the operation requires are returned, each once, in a stable
+ * order: authorizationCode scopes first, then the other flows in
+ * OAUTH2_FLOWS order; within a flow, schemes in the order the requirements
+ * name them and scopes in the order the scheme declares them.
+ */
 function parseScopes(schemes: any, security: any): ResourceScope[] {
-  if (!security || !security[0]) {
+  if (!Array.isArray(security)) {
     return [];
   }
-  // get the first scheme to get the required scopes for this operation
-  const firstScheme = Object.keys(security[0])[0];
-  const requiredScopes = security[0][firstScheme];
 
-  const scopes = schemes[firstScheme].flows?.authorizationCode?.scopes || [];
+  // scheme name -> the resolved scheme and the scopes the operation requires
+  // from it
+  const required = new Map<string, { scheme: any; names: Set<string> }>();
+  for (const requirement of security) {
+    for (const [schemeName, scopeNames] of Object.entries(requirement || {})) {
+      const scheme = resolveSecurityScheme(schemes, schemeName);
+      if (scheme?.type !== 'oauth2') {
+        continue;
+      }
+      const entry = required.get(schemeName) || {
+        scheme,
+        names: new Set<string>(),
+      };
+      for (const name of Array.isArray(scopeNames) ? scopeNames : []) {
+        entry.names.add(name);
+      }
+      required.set(schemeName, entry);
+    }
+  }
 
+  const found = new Map<string, ResourceScope>();
+  for (const flowName of OAUTH2_FLOWS) {
+    for (const { scheme, names } of required.values()) {
+      const declared = declaredScopes(scheme.flows?.[flowName]?.scopes);
+      for (const scope of declared) {
+        if (names.has(scope.name) && !found.has(scope.name)) {
+          found.set(scope.name, scope);
+        }
+      }
+    }
+  }
+  return [...found.values()];
+}
+
+const SECURITY_SCHEME_REF = /^#\/components\/securitySchemes\/(.+)$/;
+
+/**
+ * Returns the security scheme with this name, following in-document
+ * `#/components/securitySchemes/{name}` references (a scheme may be a $ref to
+ * another, possibly through a chain). Returns undefined for a missing scheme,
+ * a reference to anything else (including another file), or a cycle.
+ */
+function resolveSecurityScheme(schemes: any, name: string): any {
+  const visited = new Set<string>();
+  let current = name;
+  while (!visited.has(current)) {
+    visited.add(current);
+    const scheme = schemes?.[current];
+    if (typeof scheme?.$ref !== 'string') {
+      return scheme;
+    }
+    const match = SECURITY_SCHEME_REF.exec(scheme.$ref);
+    if (!match) {
+      return undefined;
+    }
+    current = decodeJsonPointerToken(match[1]);
+  }
+  return undefined;
+}
+
+// Decodes one JSON Pointer token from a URI fragment (RFC 6901).
+function decodeJsonPointerToken(token: string): string {
+  let decoded = token;
+  try {
+    decoded = decodeURIComponent(token);
+  } catch {
+    // Not percent-encoded; use it as written.
+  }
+  return decoded.replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
+function declaredScopes(scopes: any): ResourceScope[] {
   if (Array.isArray(scopes)) {
-    return scopes
-      .filter((s) => requiredScopes.includes(s))
-      .map((s) => ({ name: s }));
-  } else if (typeof scopes === 'object') {
-    return Object.keys(scopes)
-      .filter((s) => requiredScopes.includes(s))
-      .map((s) => ({
-        name: s,
-        description: scopes[s],
-      }));
-  } else {
-    return [];
+    return scopes.map((s) => ({ name: s }));
+  } else if (scopes && typeof scopes === 'object') {
+    return Object.keys(scopes).map((s) => ({
+      name: s,
+      description: scopes[s],
+    }));
   }
+  return [];
 }

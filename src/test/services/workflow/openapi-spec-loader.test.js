@@ -417,4 +417,306 @@ paths: {}
 
     expect(mockBuildServiceName).not.toHaveBeenCalled();
   });
+
+  describe('operation scopes', () => {
+    const tokenUrl = 'https://issuer.example/token';
+    const authorizationUrl = 'https://issuer.example/auth';
+
+    const loadOperationScopes = async (securitySchemes, security) => {
+      const result = await LoadOpenAPISpec(
+        {},
+        {
+          organization: 'ministry-of-citz',
+          subsystem: 'MY-SVC',
+          environment: 'dev',
+          spec: YAML.stringify({
+            openapi: '3.1.0',
+            info: { title: 'Test API', version: '1.0.0' },
+            paths: {
+              '/cases': { get: { operationId: 'listCases', security } },
+            },
+            components: { securitySchemes },
+          }),
+        }
+      );
+      return JSON.parse(result.operations)[0].scopes;
+    };
+
+    beforeEach(() => {
+      mockValidateRuleset.mockResolvedValue({
+        version: 'v0.3.0-test',
+        ruleset: 'basic-ruleset',
+      });
+    });
+
+    it('collects scopes declared only under clientCredentials', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          sdx: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: {
+                  'sdpr:case:read': 'Read cases',
+                  'sdpr:case:note:write': 'Write case notes',
+                  'sdpr:case:delete': 'Not required by this operation',
+                },
+              },
+            },
+          },
+        },
+        [{ sdx: ['sdpr:case:read', 'sdpr:case:note:write'] }]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'sdpr:case:read', description: 'Read cases' },
+        { name: 'sdpr:case:note:write', description: 'Write case notes' },
+      ]);
+    });
+
+    it('collects scopes from every oauth2 scheme in every security requirement', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          staff: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl,
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Read cases' },
+              },
+            },
+          },
+          partner: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:write': 'Write cases' },
+              },
+            },
+          },
+          system: {
+            type: 'oauth2',
+            flows: {
+              password: {
+                tokenUrl,
+                scopes: { 'sdpr:case:audit': 'Audit cases' },
+              },
+            },
+          },
+          apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+          oidc: {
+            type: 'openIdConnect',
+            openIdConnectUrl: 'https://issuer.example/.well-known',
+          },
+        },
+        [
+          { apiKey: [], staff: ['sdpr:case:read'] },
+          { partner: ['sdpr:case:write'], oidc: ['openid'] },
+          { system: ['sdpr:case:audit'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'sdpr:case:read', description: 'Read cases' },
+        { name: 'sdpr:case:write', description: 'Write cases' },
+        { name: 'sdpr:case:audit', description: 'Audit cases' },
+      ]);
+    });
+
+    it('lists a scope declared in several flows and schemes once, authorizationCode first', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          first: {
+            type: 'oauth2',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: {
+                  'sdpr:case:write': 'Write cases',
+                  'sdpr:case:read': 'Client credentials description',
+                },
+              },
+              implicit: {
+                authorizationUrl,
+                scopes: { 'sdpr:case:write': 'Implicit description' },
+              },
+            },
+          },
+          second: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl,
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Authorization code description' },
+              },
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Second scheme description' },
+              },
+            },
+          },
+        },
+        [
+          { first: ['sdpr:case:read', 'sdpr:case:write'] },
+          { second: ['sdpr:case:read'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        {
+          name: 'sdpr:case:read',
+          description: 'Authorization code description',
+        },
+        { name: 'sdpr:case:write', description: 'Write cases' },
+      ]);
+    });
+
+    it('follows a security scheme that is a $ref to an oauth2 scheme', async () => {
+      const oauth2 = {
+        type: 'oauth2',
+        flows: {
+          clientCredentials: {
+            tokenUrl,
+            scopes: {
+              'for:permit:read': 'Read permits',
+              'for:permit:write': 'Write permits',
+            },
+          },
+        },
+      };
+      const scopes = await loadOperationScopes(
+        {
+          oauth2,
+          oauth2Alias: { $ref: '#/components/securitySchemes/oauth2' },
+          // A chain of references, and a name that needs JSON Pointer decoding.
+          'sdx/alias~2': { $ref: '#/components/securitySchemes/oauth2Alias' },
+          chained: { $ref: '#/components/securitySchemes/sdx~1alias~02' },
+        },
+        [
+          { oauth2Alias: ['for:permit:read'] },
+          { chained: ['for:permit:write'] },
+        ]
+      );
+
+      expect(scopes).toEqual([
+        { name: 'for:permit:read', description: 'Read permits' },
+        { name: 'for:permit:write', description: 'Write permits' },
+      ]);
+    });
+
+    it('ignores $ref security schemes that cannot be resolved', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          loopA: { $ref: '#/components/securitySchemes/loopB' },
+          loopB: { $ref: '#/components/securitySchemes/loopA' },
+          self: { $ref: '#/components/securitySchemes/self' },
+          missing: { $ref: '#/components/securitySchemes/nowhere' },
+          external: { $ref: 'schemes.yaml#/oauth2' },
+        },
+        [
+          { loopA: ['for:permit:read'] },
+          { self: ['for:permit:read'] },
+          { missing: ['for:permit:read'] },
+          { external: ['for:permit:read'] },
+        ]
+      );
+
+      expect(scopes).toEqual([]);
+    });
+
+    it('ignores scopes required from schemes that are not oauth2', async () => {
+      const scopes = await loadOperationScopes(
+        {
+          oidc: {
+            type: 'openIdConnect',
+            openIdConnectUrl: 'https://issuer.example/.well-known',
+            flows: {
+              clientCredentials: {
+                tokenUrl,
+                scopes: { 'sdpr:case:read': 'Read cases' },
+              },
+            },
+          },
+        },
+        [{ oidc: ['sdpr:case:read'] }]
+      );
+
+      expect(scopes).toEqual([]);
+    });
+
+    describe('document-level security', () => {
+      const sdx = {
+        type: 'oauth2',
+        flows: {
+          authorizationCode: {
+            authorizationUrl,
+            tokenUrl,
+            scopes: {
+              'sdpr:case:read': 'Read cases',
+              'sdpr:case:admin': 'Administer cases',
+            },
+          },
+        },
+      };
+
+      // Loads a spec with one GET operation and returns that operation's scopes.
+      const loadScopes = async ({ rootSecurity, operationSecurity }) => {
+        const get = { operationId: 'listCases' };
+        if (operationSecurity !== undefined) {
+          get.security = operationSecurity;
+        }
+        const spec = {
+          openapi: '3.1.0',
+          info: { title: 'Test API', version: '1.0.0' },
+          paths: { '/cases': { get } },
+          components: { securitySchemes: { sdx } },
+        };
+        if (rootSecurity !== undefined) {
+          spec.security = rootSecurity;
+        }
+        const result = await LoadOpenAPISpec(
+          {},
+          {
+            organization: 'ministry-of-citz',
+            subsystem: 'MY-SVC',
+            environment: 'dev',
+            spec: YAML.stringify(spec),
+          }
+        );
+        return JSON.parse(result.operations)[0].scopes.map((s) => s.name);
+      };
+
+      it('inherits the document security when the operation has none', async () => {
+        expect(
+          await loadScopes({ rootSecurity: [{ sdx: ['sdpr:case:read'] }] })
+        ).toEqual(['sdpr:case:read']);
+      });
+
+      it('uses the operation security instead of the document security', async () => {
+        expect(
+          await loadScopes({
+            rootSecurity: [{ sdx: ['sdpr:case:read'] }],
+            operationSecurity: [{ sdx: ['sdpr:case:admin'] }],
+          })
+        ).toEqual(['sdpr:case:admin']);
+      });
+
+      it('treats an empty operation security as no security', async () => {
+        expect(
+          await loadScopes({
+            rootSecurity: [{ sdx: ['sdpr:case:read'] }],
+            operationSecurity: [],
+          })
+        ).toEqual([]);
+      });
+
+      it('lists no scopes when no security applies anywhere', async () => {
+        expect(await loadScopes({})).toEqual([]);
+      });
+    });
+  });
 });
