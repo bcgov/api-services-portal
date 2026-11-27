@@ -31,6 +31,7 @@ RUN --mount=type=secret,id=npm_token \
   npm install
 
 COPY e2e/cypress.config.ts /e2e
+COPY e2e/cypress.config.ha.ts /e2e
 COPY e2e/tsconfig.json /e2e
 COPY e2e/*.yml /e2e
 COPY e2e/entrypoint.sh /tmp

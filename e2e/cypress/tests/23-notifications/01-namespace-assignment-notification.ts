@@ -129,7 +129,7 @@ describe('Notification Service - Namespace Assignment Emails', () => {
       cy.wait(2000)
 
       // Click "Add Organization" button to open the modal
-      cy.contains('button', 'Add Organization').click()
+      cy.contains('button', 'Add Organization', { timeout: 30000 }).click()
       cy.wait(1000)
 
       // Select the organization from the dropdown

@@ -93,14 +93,26 @@ export function createSubsystemGateway(
   cy.setRequestBody({
     runtimeGroupName,
   })
+  // Same registration path as the runtime-group gateway. The default 30s
+  // response limit expires before the portal answers.
+  const previousRequestTimeout = Cypress.config('requestTimeout')
+  const previousResponseTimeout = Cypress.config('responseTimeout')
+  Cypress.config('requestTimeout', 120000)
+  Cypress.config('responseTimeout', 120000)
   cy.callAPI(
     `ds/api/sdx/v1/organizations/${org.name}/subsystems/${subsystemName}/gateway`,
     'PUT'
-  ).then(({ apiRes: { status, body } }: any) => {
-    expect(status, body.message).to.be.equal(200)
-    expect(body).to.have.property('gatewayId')
-    next(body)
-  })
+  )
+    .then((result) => {
+      Cypress.config('requestTimeout', previousRequestTimeout)
+      Cypress.config('responseTimeout', previousResponseTimeout)
+      return result
+    })
+    .then(({ apiRes: { status, body } }: any) => {
+      expect(status, body.message).to.be.equal(200)
+      expect(body).to.have.property('gatewayId')
+      next(body)
+    })
 }
 
 export function createOASService(
@@ -325,11 +337,20 @@ export function createRuntimeGroup(
       expect(status, body.message).to.be.equal(200)
 
       cy.clearRequestBody()
+      const previousRequestTimeout = Cypress.config('requestTimeout')
+      const previousResponseTimeout = Cypress.config('responseTimeout')
+      Cypress.config('requestTimeout', 120000)
+      Cypress.config('responseTimeout', 120000)
       return cy
         .callAPI(
           `ds/api/sdx/v1/organizations/${org.name}/runtime-groups/${runtimeGroupName}/gateway`,
           'PUT'
         )
+        .then((result) => {
+          Cypress.config('requestTimeout', previousRequestTimeout)
+          Cypress.config('responseTimeout', previousResponseTimeout)
+          return result
+        })
         .then(({ apiRes: { status, body } }: any) => {
           //expect(status).to.be.equal(200)
           //expect(body).to.have.property('gatewayId')

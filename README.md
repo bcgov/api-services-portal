@@ -58,6 +58,17 @@ gwa gateway create --gateway-id gw-12345
 
 Keycloak is initialized with `master` realm. The realm configuration is saved in `local/keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
 
+### Keycloak high availability
+
+A root `docker compose up` is the normal local Keycloak: two stateless Keycloak 26.8 sites behind HAProxy. The public URL stays [http://keycloak.localtest.me:9081](http://keycloak.localtest.me:9081). `docker compose --profile testsuite up` runs the portal Cypress suite against that same Keycloak, then the HA specs in `e2e/cypress/tests/26-keycloak-ha`.
+
+With the stack already up, the HA specs alone are:
+
+```sh
+cd e2e
+npx cypress run --config-file cypress.config.ha.ts
+```
+
 ### Development
 
 Use the following configuration to run the Portal locally (outside of Docker) against the support components deployed with `docker compose`. Changes to the Portal code will live update instead of requiring `docker build`.
