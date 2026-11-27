@@ -316,10 +316,10 @@ test('masks PEM private keys and bearer tokens in any string', () => {
       some_cert: '-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----',
     },
   });
-  assert.equal(config.access[0], 'local key = [[****]]');
+  assert.equal(config.access[0], 'local key = ****');
   assert.equal(
     config.access[1],
-    'kong.service.request.set_header("Authorization", "Bearer ****")'
+    'kong.service.request.set_header("Authorization", "****")'
   );
   // certificates are public
   assert.equal(config.some_cert.includes('BEGIN CERTIFICATE'), true);
@@ -370,4 +370,176 @@ test('does not mask non-secret config of common plugins', () => {
     plugins.map((p) => mask(structuredClone(p))),
     plugins
   );
+});
+
+test('masks secrets in pre-function and post-function code, keeping the code', () => {
+  ['pre-function', 'post-function'].forEach((name) => {
+    const { config } = mask({
+      name,
+      config: {
+        access: [
+          'local api_key = "k7"\nkong.service.request.set_header("X-Api-Key", api_key)',
+          'kong.service.request.set_header("Authorization", "Bearer abc123def")',
+          'kong.response.set_header("X-Partner-Key", "k9")',
+          'ngx.header["X-Auth-Token"] = "t6"',
+          'kong.response.set_header("Content-Type", "application/json")',
+          'local partner = "p7"',
+        ],
+        log: [],
+      },
+    });
+    assert.deepEqual(config, {
+      access: [
+        'local api_key = "****"\nkong.service.request.set_header("X-Api-Key", api_key)',
+        'kong.service.request.set_header("Authorization", "****")',
+        'kong.response.set_header("X-Partner-Key", "****")',
+        'ngx.header["X-Auth-Token"] = "****"',
+        'kong.response.set_header("Content-Type", "application/json")',
+        // a secret under a name that does not look secret is not found
+        'local partner = "p7"',
+      ],
+      log: [],
+    });
+  });
+});
+
+test('masks the redis host but not other host fields', () => {
+  const plugins = [
+    { name: 'loggly', config: { host: 'logs-01.loggly.com', key: 'k8' } },
+    { name: 'syslog', config: { host: 'syslog.internal', port: 514 } },
+    { name: 'rate-limiting', config: { redis: { host: 'redis.internal' } } },
+  ].map(mask);
+  assert.equal(plugins[0].config.host, 'logs-01.loggly.com');
+  assert.equal(plugins[1].config.host, 'syslog.internal');
+  assert.equal(plugins[2].config.redis.host, '****');
+});
+
+test('keeps rename lists, which hold names rather than values', () => {
+  const { config } = mask({
+    name: 'request-transformer',
+    config: {
+      rename: {
+        headers: ['X-API-Key:X-Upstream-Key'],
+        querystring: ['apikey:key'],
+        body: ['token:access_token'],
+      },
+    },
+  });
+  assert.deepEqual(config.rename, {
+    headers: ['X-API-Key:X-Upstream-Key'],
+    querystring: ['apikey:key'],
+    body: ['token:access_token'],
+  });
+});
+
+test('keeps Kong vault references visible', () => {
+  const { config } = mask({
+    name: 'rate-limiting',
+    config: {
+      redis: { password: '{vault://env/redis-pass}', host: 'redis.internal' },
+      client_secret: '{vault://hcv/oidc/secret}',
+      add: { headers: ['X-Api-Key:{vault://env/upstream-key}'] },
+    },
+  });
+  assert.equal(config.redis.password, '{vault://env/redis-pass}');
+  assert.equal(config.redis.host, '****');
+  assert.equal(config.client_secret, '{vault://hcv/oidc/secret}');
+  assert.deepEqual(config.add.headers, [
+    'X-Api-Key:{vault://env/upstream-key}',
+  ]);
+});
+
+test('keeps WWW-Authenticate challenge parameters', () => {
+  const { config } = mask({
+    name: 'response-transformer',
+    config: {
+      add: { headers: ['WWW-Authenticate:Bearer realm="api"'] },
+      message: 'use Bearer abc123def',
+    },
+  });
+  assert.deepEqual(config.add.headers, ['WWW-Authenticate:Bearer realm="api"']);
+  assert.equal(config.message, 'use Bearer ****');
+});
+
+test('masks more secret field names', () => {
+  const { config } = mask({
+    name: 'custom-plugin',
+    config: {
+      pwd: 'p1',
+      db_pass: 'p2',
+      key_passphrase: 'p3',
+      authorization_value: 'v4',
+      partner_credentials: { id: 'c1' },
+      hide_credentials: true,
+      pass_stripped_path: false,
+    },
+  });
+  assert.deepEqual(config, {
+    pwd: '****',
+    db_pass: '****',
+    key_passphrase: '****',
+    authorization_value: '****',
+    partner_credentials: '****',
+    hide_credentials: true,
+    pass_stripped_path: false,
+  });
+});
+
+test('masks more credential header and parameter names', () => {
+  const { config } = mask({
+    name: 'request-transformer',
+    config: {
+      add: {
+        headers: ['X-Auth:a1', 'X-Signature:s8', 'X-Request-Id:r1'],
+      },
+      url: 'https://h/p?sig=s1&pwd=p1&pass=p2&code=c1',
+    },
+  });
+  assert.deepEqual(config.add.headers, [
+    'X-Auth:****',
+    'X-Signature:****',
+    'X-Request-Id:r1',
+  ]);
+  assert.equal(config.url, 'https://h/p?sig=****&pwd=****&pass=****&code=c1');
+});
+
+test('masks secret-named assignments inside strings', () => {
+  const { config } = mask({
+    name: 'custom-plugin',
+    config: {
+      json_body: '{"client_secret":"s9","grant_type":"client_credentials"}',
+      script: 'local api_key = "k1"\nlocal region = "ca"',
+      dsn: 'Server=db;User Id=u;Password=p9;',
+    },
+  });
+  assert.equal(
+    config.json_body,
+    '{"client_secret":"****","grant_type":"client_credentials"}'
+  );
+  assert.equal(config.script, 'local api_key = "****"\nlocal region = "ca"');
+  assert.equal(config.dsn, 'Server=db;User Id=u;Password=****;');
+});
+
+test('masks tokens, JWTs, AWS key IDs and PGP keys in any string', () => {
+  const { config } = mask({
+    name: 'custom-plugin',
+    config: {
+      values: [
+        'authorization: bearer abcdefghijk',
+        'Splunk 1234-abcd',
+        'Token t0k3n',
+        'local t = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig"',
+        'AKIAABCDEFGHIJKLMNOP',
+        '-----BEGIN PGP PRIVATE KEY BLOCK-----\nabc\n-----END PGP PRIVATE KEY BLOCK-----',
+      ],
+    },
+  });
+  assert.deepEqual(config.values, [
+    'authorization: bearer ****',
+    'Splunk ****',
+    'Token ****',
+    'local t = "****"',
+    '****',
+    '****',
+  ]);
 });
