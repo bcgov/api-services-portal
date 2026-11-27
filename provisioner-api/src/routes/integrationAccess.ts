@@ -123,7 +123,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
           summary: 'New access request',
           operationId: 'createIntegrationAccessRequest',
           description:
-            'Validates all requested services, environments, optional catalog versions and scopes before creating or updating access requests. When the integration is not registered in SDX, the request is held for onboarding and each service result is `held for onboarding`. Invalid or stale request values return 400; a registered integration with no organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Consumer scope revocations are applied immediately. Added scopes and version changes require provider approval. Approval of a registered request triggers the `provisionAllowedServices` callback to the partner.',
+            'Treats resourceServers as the complete desired access snapshot across all environments after validating all requested services, optional catalog versions and scopes. Omitted approved connections are revoked and omitted pending requests are deleted. When the integration is not registered in SDX, the request is held for onboarding and each service result is `held for onboarding`. Invalid or stale request values return 400; a registered integration with no organization returns 404; conflicting existing connections return 409; SDX catalog failures (including removed services) return 502. Consumer scope revocations are applied immediately. Added scopes and version changes require provider approval. Approval or revocation of a registered request triggers the `provisionAllowedServices` callback containing the complete approved state across all environments.',
           security,
           params: Type.Object({
             integrationId: Type.String({
@@ -153,7 +153,7 @@ export const registerIntegrationAccessRoutes: FastifyPluginAsyncTypebox =
                   responses: {
                     '2XX': {
                       description:
-                        'Partner acknowledged receipt of the provisioning instruction.',
+                        'Partner acknowledged receipt of the complete approved-state snapshot.',
                     },
                   },
                 },

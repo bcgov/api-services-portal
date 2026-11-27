@@ -72,6 +72,14 @@ type PlannedConnectionChange =
       result: 'already approved' | 'pending approval';
     };
 
+interface PlannedConnectionRemoval {
+  connection: ConnectionRequest;
+  connectionId: string;
+  serviceId: string;
+  action?: 'revoke';
+  result: 'revoked approved connection' | 'deleted pending request';
+}
+
 /**
  * Gets subsystem details, builds allowed access, and raises connection requests.
  */
@@ -122,7 +130,7 @@ export class IntegrationAccessService {
     this.logger?.debug('Full access request %j', input);
 
     const scopeCatalog =
-      policyVersion === 'SDX.R1.00'
+      policyVersion === 'SDX.R1.00' && validated.requests.length > 0
         ? await this.api.listCatalogScopes()
         : undefined;
     const preparedRequests: PreparedServiceRequest[] = [];
@@ -167,9 +175,18 @@ export class IntegrationAccessService {
 
     const existingConnections =
       await this.api.listConnections(subsystemOrgName);
-    for (const environment of uniqueSorted(
-      preparedRequests.map((request) => request.environment)
-    )) {
+    for (const environment of uniqueSorted([
+      ...preparedRequests.map((request) => request.environment),
+      ...existingConnections
+        .filter(
+          (connection) =>
+            connection.clientId === subsystem.clientId &&
+            connection.requesterDetails?.client?.integrationId?.trim() ===
+              normalizedIntegrationId
+        )
+        .map((connection) => connection.environment)
+        .filter((environment): environment is string => Boolean(environment)),
+    ])) {
       enforceRequestClientIdentity(
         existingConnections,
         subsystem,
@@ -189,6 +206,46 @@ export class IntegrationAccessService {
         request
       )
     );
+    const requestedServices = new Set(
+      preparedRequests.map((request) => request.name)
+    );
+    const removals = existingConnections
+      .filter(
+        (connection) =>
+          connection.clientId === subsystem.clientId &&
+          connection.requesterDetails?.client?.integrationId?.trim() ===
+            normalizedIntegrationId &&
+          connection.requesterDetails?.client?.clientId?.trim() ===
+            oauthClientId &&
+          !requestedServices.has(connection.serviceId || '')
+      )
+      .map((connection): PlannedConnectionRemoval => {
+        const connectionId = requireNonBlank(
+          connection.id,
+          'Omitted connection ID'
+        );
+        const serviceId = requireNonBlank(
+          connection.serviceId,
+          'Service ID for omitted connection ' + connectionId
+        );
+        return connection.isApproved
+          ? {
+              connection,
+              connectionId,
+              serviceId,
+              action: 'revoke',
+              result: 'revoked approved connection',
+            }
+          : {
+              connection,
+              connectionId,
+              serviceId,
+              result: 'deleted pending request',
+            };
+      })
+      .sort((left, right) =>
+        compareConnections(left.connection, right.connection)
+      );
 
     const submission: TNewIntegrationAccessRequestResponse = {
       submissionId: normalizedSubmissionId,
@@ -237,6 +294,19 @@ export class IntegrationAccessService {
       }
 
       submission.results[request.name] = change.result;
+    }
+
+    // The request is an authoritative snapshot. Apply retained changes before
+    // removing omitted connections so each revocation callback sees the newest
+    // approved state for the services that remain.
+    for (const removal of removals) {
+      const outcome = await this.api.deleteConnection(
+        subsystemOrgName,
+        removal.connectionId,
+        removal.action
+      );
+      outcomes.push(outcome);
+      submission.results[removal.serviceId] = removal.result;
     }
 
     this.logger?.debug(
@@ -301,7 +371,7 @@ export class IntegrationAccessService {
   }
 
   /**
-   * Builds the allowed-services callback for one integration and environment.
+   * Builds allowed services for one integration and environment.
    */
   async buildIntegrationAllowedServices(
     integrationId: string,
@@ -309,13 +379,55 @@ export class IntegrationAccessService {
     status: 'approved' | 'pending',
     options: {
       skipMalformedConnections?: boolean;
+      excludeConnectionIds?: string[];
     } = {}
+  ): Promise<TIntegrationAccessRequest> {
+    return this.buildIntegrationAllowedServicesSnapshot(
+      integrationId,
+      environment,
+      status,
+      options
+    );
+  }
+
+  /**
+   * Builds the complete allowed-services callback for one integration across
+   * every SDX environment.
+   */
+  async buildCompleteIntegrationAllowedServices(
+    integrationId: string,
+    status: 'approved' | 'pending',
+    options: {
+      skipMalformedConnections?: boolean;
+      excludeConnectionIds?: string[];
+    } = {}
+  ): Promise<TIntegrationAccessRequest> {
+    return this.buildIntegrationAllowedServicesSnapshot(
+      integrationId,
+      undefined,
+      status,
+      options
+    );
+  }
+
+  private async buildIntegrationAllowedServicesSnapshot(
+    integrationId: string,
+    environment: string | undefined,
+    status: 'approved' | 'pending',
+    options: {
+      skipMalformedConnections?: boolean;
+      excludeConnectionIds?: string[];
+    }
   ): Promise<TIntegrationAccessRequest> {
     const normalizedIntegrationId = requireNonBlank(
       integrationId,
       'Integration ID'
     );
-    const normalizedEnvironment = requireNonBlank(environment, 'Environment');
+    const normalizedEnvironment =
+      environment === undefined
+        ? undefined
+        : requireNonBlank(environment, 'Environment');
+    const environmentContext = normalizedEnvironment || 'all environments';
 
     const subsystems = await this.api.listCatalogSubsystems({
       integrationClientId: normalizedIntegrationId,
@@ -349,13 +461,18 @@ export class IntegrationAccessService {
     const connections = await this.api.listConnections(subsystemOrgName);
     this.logger?.debug('Connections = %j', connections);
 
-    // Filter to the exact integration and environment before deriving any
-    // client or submission metadata. The member API does not guarantee order.
+    // Filter to the exact integration and, for the read endpoint, environment
+    // before deriving any client or submission metadata. Callback snapshots
+    // omit the filter so they represent the complete state. The member API
+    // does not guarantee order.
+    const excludedConnectionIds = new Set(options.excludeConnectionIds || []);
     const integrationConnections = connections
       .filter(
         (connection) =>
+          !excludedConnectionIds.has(connection.id || '') &&
           connection.clientId === subsystem.clientId &&
-          connection.environment === normalizedEnvironment &&
+          (normalizedEnvironment === undefined ||
+            connection.environment === normalizedEnvironment) &&
           connection.requesterDetails?.client?.integrationId ===
             normalizedIntegrationId
       )
@@ -376,7 +493,7 @@ export class IntegrationAccessService {
         {
           subsystemId: subsystem.clientId,
           integrationId: normalizedIntegrationId,
-          environment: normalizedEnvironment,
+          environment: environmentContext,
         },
         this.logger
       );
@@ -427,13 +544,13 @@ export class IntegrationAccessService {
       {
         subsystemId: subsystem.clientId,
         integrationId: normalizedIntegrationId,
-        environment: normalizedEnvironment,
+        environment: environmentContext,
       },
       this.logger
     );
     if (!authoritative) {
       throw new ConflictError(
-        `Integration ${normalizedIntegrationId} has no usable OAuth client in environment ${normalizedEnvironment}`
+        `Integration ${normalizedIntegrationId} has no usable OAuth client in ${environmentContext}`
       );
     }
     const selectedConnections = requireUniqueServiceConnections(
@@ -441,7 +558,7 @@ export class IntegrationAccessService {
       {
         subsystemId: subsystem.clientId,
         integrationId: normalizedIntegrationId,
-        environment: normalizedEnvironment,
+        environment: environmentContext,
       }
     );
 
@@ -453,9 +570,16 @@ export class IntegrationAccessService {
 
     this.logger?.debug('Connections allowed %j', allowedConnections);
 
-    const servicesBySubsystem = new Map<
+    const resourceServersByEnvironmentAndSubsystem = new Map<
       string,
-      Map<string, { name: string; scopes: string[]; version: string }>
+      {
+        id: string;
+        environment: string;
+        services: Map<
+          string,
+          { name: string; scopes: string[]; version: string }
+        >;
+      }
     >();
 
     for (const connection of allowedConnections) {
@@ -470,9 +594,21 @@ export class IntegrationAccessService {
             `Catalog lookup for service '${serviceId}' returned '${service.name}'`
           );
         }
-        if (service.environment !== normalizedEnvironment) {
+        const connectionEnvironment = requireNonBlank(
+          connection.environment,
+          `Connection environment for service '${serviceId}'`
+        );
+        if (
+          normalizedEnvironment !== undefined &&
+          connectionEnvironment !== normalizedEnvironment
+        ) {
           throw new BadRequestError(
-            `Connection service '${serviceId}' environment '${service.environment}' does not match requested environment '${normalizedEnvironment}'`
+            `Connection service '${serviceId}' environment '${connectionEnvironment}' does not match requested environment '${normalizedEnvironment}'`
+          );
+        }
+        if (service.environment !== connectionEnvironment) {
+          throw new BadRequestError(
+            `Connection service '${serviceId}' environment '${service.environment}' does not match connection environment '${connectionEnvironment}'`
           );
         }
 
@@ -486,10 +622,19 @@ export class IntegrationAccessService {
             `Provider for service '${serviceId}' changed after submission; submit updated access for re-approval`
           );
         }
-        let subsystemServices = servicesBySubsystem.get(subsystemId);
-        if (!subsystemServices) {
-          subsystemServices = new Map();
-          servicesBySubsystem.set(subsystemId, subsystemServices);
+        const resourceServerKey = `${connectionEnvironment}\u0000${subsystemId}`;
+        let resourceServer =
+          resourceServersByEnvironmentAndSubsystem.get(resourceServerKey);
+        if (!resourceServer) {
+          resourceServer = {
+            id: subsystemId,
+            environment: connectionEnvironment,
+            services: new Map(),
+          };
+          resourceServersByEnvironmentAndSubsystem.set(
+            resourceServerKey,
+            resourceServer
+          );
         }
 
         if (typeof service.version !== 'string' || !service.version.trim()) {
@@ -510,8 +655,8 @@ export class IntegrationAccessService {
         }
         const version =
           connection.requesterDetails?.service?.version || service.version;
-        const existingService = subsystemServices.get(serviceId);
-        subsystemServices.set(serviceId, {
+        const existingService = resourceServer.services.get(serviceId);
+        resourceServer.services.set(serviceId, {
           name: serviceId,
           scopes: uniqueSorted([...(existingService?.scopes || []), ...scopes]),
           version,
@@ -531,12 +676,17 @@ export class IntegrationAccessService {
     }
 
     const resourceServers: TResourceServerAccess[] = Array.from(
-      servicesBySubsystem.entries()
+      resourceServersByEnvironmentAndSubsystem.values()
     )
-      .sort(([left], [right]) => compareStrings(left, right))
-      .map(([id, services]) => ({
+      .sort((left, right) =>
+        compareStrings(
+          `${left.environment}\u0000${left.id}`,
+          `${right.environment}\u0000${right.id}`
+        )
+      )
+      .map(({ id, environment: resourceEnvironment, services }) => ({
         id,
-        environment: normalizedEnvironment,
+        environment: resourceEnvironment,
         services: Array.from(services.values()).sort((left, right) =>
           compareStrings(left.name, right.name)
         ),
