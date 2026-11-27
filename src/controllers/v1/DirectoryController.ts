@@ -3,6 +3,7 @@ import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { Product } from '@/services/keystone/types';
+import { removeKeys } from '../../batch/feed-worker';
 @injectable()
 @Route('/directory')
 export class DirectoryController extends Controller {
@@ -31,9 +32,22 @@ export class DirectoryController extends Controller {
       variables: { id },
     });
     return transform(
-      transformSetAnonymous(result.data.allDiscoverableProducts)
+      transformRemoveServices(
+        transformSetAnonymous(result.data.allDiscoverableProducts)
+      )
     )[0];
   }
+}
+
+// services (and their plugin config) are only needed to set `anonymous`;
+// they must not be returned by this unauthenticated endpoint
+function transformRemoveServices(products: Product[]) {
+  products.forEach((prod) => {
+    prod.environments.forEach((env) => {
+      removeKeys(env, ['services']);
+    });
+  });
+  return products;
 }
 
 function transformSetAnonymous(products: Product[]) {
