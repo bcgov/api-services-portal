@@ -147,8 +147,9 @@ export class OrgSubsystemController extends Controller {
   }
 
   /**
-   * Creates a gateway for the specified subsystem. This involves creating necessary configurations
-   * and infrastructure to enable the subsystem to be hosted on a runtime group.
+   * Creates a gateway for the specified subsystem. Re-registering with the same
+   * runtime group refreshes permitted domains from all hosted environments.
+   * The runtime group name of an existing gateway cannot be changed.
    *
    * The gateway is used to setup routing policies on the particular runtime group
    * for the subsystem (such as incoming connections from clients and outbound connections to services
