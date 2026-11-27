@@ -72,6 +72,14 @@ type PlannedConnectionChange =
       result: 'already approved' | 'pending approval';
     };
 
+interface PlannedConnectionRemoval {
+  connection: ConnectionRequest;
+  connectionId: string;
+  serviceId: string;
+  action?: 'revoke';
+  result: 'revoked approved connection' | 'deleted pending request';
+}
+
 /**
  * Gets subsystem details, builds allowed access, and raises connection requests.
  */
@@ -122,7 +130,7 @@ export class IntegrationAccessService {
     this.logger?.debug('Full access request %j', input);
 
     const scopeCatalog =
-      policyVersion === 'SDX.R1.00'
+      policyVersion === 'SDX.R1.00' && validated.requests.length > 0
         ? await this.api.listCatalogScopes()
         : undefined;
     const preparedRequests: PreparedServiceRequest[] = [];
@@ -167,9 +175,18 @@ export class IntegrationAccessService {
 
     const existingConnections =
       await this.api.listConnections(subsystemOrgName);
-    for (const environment of uniqueSorted(
-      preparedRequests.map((request) => request.environment)
-    )) {
+    for (const environment of uniqueSorted([
+      ...preparedRequests.map((request) => request.environment),
+      ...existingConnections
+        .filter(
+          (connection) =>
+            connection.clientId === subsystem.clientId &&
+            connection.requesterDetails?.client?.integrationId?.trim() ===
+              normalizedIntegrationId
+        )
+        .map((connection) => connection.environment)
+        .filter((environment): environment is string => Boolean(environment)),
+    ])) {
       enforceRequestClientIdentity(
         existingConnections,
         subsystem,
@@ -189,6 +206,46 @@ export class IntegrationAccessService {
         request
       )
     );
+    const requestedServices = new Set(
+      preparedRequests.map((request) => request.name)
+    );
+    const removals = existingConnections
+      .filter(
+        (connection) =>
+          connection.clientId === subsystem.clientId &&
+          connection.requesterDetails?.client?.integrationId?.trim() ===
+            normalizedIntegrationId &&
+          connection.requesterDetails?.client?.clientId?.trim() ===
+            oauthClientId &&
+          !requestedServices.has(connection.serviceId || '')
+      )
+      .map((connection): PlannedConnectionRemoval => {
+        const connectionId = requireNonBlank(
+          connection.id,
+          'Omitted connection ID'
+        );
+        const serviceId = requireNonBlank(
+          connection.serviceId,
+          'Service ID for omitted connection ' + connectionId
+        );
+        return connection.isApproved
+          ? {
+              connection,
+              connectionId,
+              serviceId,
+              action: 'revoke',
+              result: 'revoked approved connection',
+            }
+          : {
+              connection,
+              connectionId,
+              serviceId,
+              result: 'deleted pending request',
+            };
+      })
+      .sort((left, right) =>
+        compareConnections(left.connection, right.connection)
+      );
 
     const submission: TNewIntegrationAccessRequestResponse = {
       submissionId: normalizedSubmissionId,
@@ -237,6 +294,19 @@ export class IntegrationAccessService {
       }
 
       submission.results[request.name] = change.result;
+    }
+
+    // The request is an authoritative snapshot. Apply retained changes before
+    // removing omitted connections so each revocation callback sees the newest
+    // approved state for the services that remain.
+    for (const removal of removals) {
+      const outcome = await this.api.deleteConnection(
+        subsystemOrgName,
+        removal.connectionId,
+        removal.action
+      );
+      outcomes.push(outcome);
+      submission.results[removal.serviceId] = removal.result;
     }
 
     this.logger?.debug(
@@ -309,6 +379,7 @@ export class IntegrationAccessService {
     status: 'approved' | 'pending',
     options: {
       skipMalformedConnections?: boolean;
+      excludeConnectionIds?: string[];
     } = {}
   ): Promise<TIntegrationAccessRequest> {
     const normalizedIntegrationId = requireNonBlank(
@@ -351,9 +422,11 @@ export class IntegrationAccessService {
 
     // Filter to the exact integration and environment before deriving any
     // client or submission metadata. The member API does not guarantee order.
+    const excludedConnectionIds = new Set(options.excludeConnectionIds || []);
     const integrationConnections = connections
       .filter(
         (connection) =>
+          !excludedConnectionIds.has(connection.id || '') &&
           connection.clientId === subsystem.clientId &&
           connection.environment === normalizedEnvironment &&
           connection.requesterDetails?.client?.integrationId ===

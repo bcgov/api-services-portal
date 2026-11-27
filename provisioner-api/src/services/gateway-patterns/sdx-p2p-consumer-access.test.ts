@@ -30,7 +30,7 @@ const allowedAccess = {
   resourceServers: [{ services: [{ name: 'TEST.SERVICE.v1' }] }],
 };
 
-function buildPattern(access = allowedAccess) {
+function buildPattern(access = allowedAccess, calls: unknown[][] = []) {
   const sdx = {
     getCatalogSubsystem: async () => client,
     listConnections: async () => [connection],
@@ -38,7 +38,10 @@ function buildPattern(access = allowedAccess) {
     getOASService: async () => service,
   };
   const integrationAccessService = {
-    buildIntegrationAllowedServices: async () => access,
+    buildIntegrationAllowedServices: async (...args: unknown[]) => {
+      calls.push(args);
+      return access;
+    },
   };
   return new SDXP2PConsumerAccessPattern(
     sdx as never,
@@ -93,15 +96,35 @@ test('marks the ServiceAccess for removal when the consumer keeps other access',
 });
 
 test('marks the ServiceAccess for removal on a full delete', async () => {
-  const pattern = buildPattern({
-    clientId: 'integration-client',
-    resourceServers: [],
-  });
+  const calls: unknown[][] = [];
+  const pattern = buildPattern(
+    {
+      clientId: 'integration-client',
+      resourceServers: [],
+    },
+    calls
+  );
   const { data, documents } = await run(pattern, inputs, 'delete');
 
   assert.equal(pattern.deleteHandling(data), 'delete');
   const serviceAccess = documents.find((d) => d.kind === 'ServiceAccess');
   assert.equal(serviceAccess._action, 'delete');
+  assert.deepEqual(calls, [
+    [
+      'integration-1',
+      'test',
+      'approved',
+      {
+        skipMalformedConnections: true,
+        excludeConnectionIds: ['conn-1'],
+      },
+    ],
+  ]);
+  const allowedServices = documents.find(
+    (d) => d.kind === 'IntegrationAllowedServices'
+  );
+  assert.equal(allowedServices.environment, 'test');
+  assert.deepEqual(allowedServices.resourceServers, []);
 });
 
 test('rejects an empty integration client ID from an empty access grant', async () => {

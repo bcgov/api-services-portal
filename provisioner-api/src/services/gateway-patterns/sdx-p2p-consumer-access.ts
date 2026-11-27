@@ -97,7 +97,11 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
           connection?.requesterDetails.client?.integrationId,
           connection?.environment!,
           'approved',
-          { skipMalformedConnections: ctx?.action === 'delete' }
+          {
+            skipMalformedConnections: ctx?.action === 'delete',
+            excludeConnectionIds:
+              ctx?.action === 'delete' ? [inputs.connId] : undefined,
+          }
         );
 
       assert.strictEqual(
@@ -195,6 +199,7 @@ function buildIntegrationAllowAccess(
   return {
     ...{
       kind: 'IntegrationAllowedServices',
+      environment: data.service.environment,
     },
     ...data.allowedAccess,
   };

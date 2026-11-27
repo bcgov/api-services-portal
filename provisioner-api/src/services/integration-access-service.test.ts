@@ -110,6 +110,11 @@ interface FakeApiOptions {
   connections?: ConnectionRequest[];
   subsystems?: SubsystemEntry[];
   upsert?: (org: string, input: ConnectionRequestInput) => Promise<BatchResult>;
+  remove?: (
+    org: string,
+    id: string,
+    action?: 'revoke'
+  ) => Promise<BatchResult>;
   logger?: FastifyBaseLogger;
   scopeCatalog?: ResourceScopeEntry[];
 }
@@ -143,6 +148,8 @@ function scopeCatalogForServices(
 
 function createService(options: FakeApiOptions = {}) {
   const writes: Array<{ org: string; input: ConnectionRequestInput }> = [];
+  const removals: Array<{ org: string; id: string; action?: 'revoke' }> = [];
+  const operations: string[] = [];
   const lifecycleWrites: Array<{
     org: string;
     id: string;
@@ -162,9 +169,21 @@ function createService(options: FakeApiOptions = {}) {
       options.subsystems || [consumerSubsystem],
     upsertConnection: async (org: string, input: ConnectionRequestInput) => {
       writes.push({ org, input });
+      operations.push('upsert:' + input.serviceId);
       return options.upsert
         ? options.upsert(org, input)
         : { status: 200, result: 'updated' };
+    },
+    deleteConnection: async (
+      org: string,
+      id: string,
+      action?: 'revoke'
+    ) => {
+      removals.push({ org, id, action });
+      operations.push('remove:' + id);
+      return options.remove
+        ? options.remove(org, id, action)
+        : { status: 200, result: action ? 'revoked' : 'deleted' };
     },
     lifecycleConnection: async (
       org: string,
@@ -181,7 +200,7 @@ function createService(options: FakeApiOptions = {}) {
     options.logger
   );
   Object.assign(service, { api });
-  return { service, writes, lifecycleWrites };
+  return { service, writes, removals, operations, lifecycleWrites };
 }
 
 function existingConnection(
@@ -491,6 +510,144 @@ test('reports mixed removals and additions separately', async () => {
   });
 });
 
+test('revokes every approved connection omitted from an empty snapshot', async () => {
+  const connections = [
+    existingConnection({ id: 'connection-a', serviceId: 'service-a' }),
+    existingConnection({ id: 'connection-b', serviceId: 'service-b' }),
+  ];
+  const { service, writes, removals } = createService({ connections });
+  let scopeCatalogReads = 0;
+  Object.assign(service.api, {
+    listCatalogScopes: async () => {
+      scopeCatalogReads++;
+      throw new Error('scope catalog must not block a revoke-all');
+    },
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([])
+  );
+
+  assert.equal(scopeCatalogReads, 0);
+  assert.deepEqual(writes, []);
+  assert.deepEqual(removals, [
+    { org: 'consumer-org', id: 'connection-a', action: 'revoke' },
+    { org: 'consumer-org', id: 'connection-b', action: 'revoke' },
+  ]);
+  assert.deepEqual(response, {
+    submissionId: 'submission-2',
+    results: {
+      'service-a': 'revoked approved connection',
+      'service-b': 'revoked approved connection',
+    },
+  });
+});
+
+test('updates retained access before removing omitted approved and pending connections', async () => {
+  const retained = existingConnection({
+    id: 'connection-a',
+    serviceId: 'service-a',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      scopes: ['read', 'write'],
+    },
+  });
+  const omittedApproved = existingConnection({
+    id: 'connection-b',
+    serviceId: 'service-b',
+  });
+  const omittedPending = existingConnection({
+    id: 'connection-c',
+    serviceId: 'service-c',
+    isApproved: false,
+    isActive: false,
+  });
+  const { service, removals, operations } = createService({
+    catalog: { 'service-a': catalogService('service-a', 'provider-a') },
+    connections: [retained, omittedApproved, omittedPending],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+    ])
+  );
+
+  assert.deepEqual(operations, [
+    'upsert:service-a',
+    'remove:connection-b',
+    'remove:connection-c',
+  ]);
+  assert.deepEqual(removals, [
+    { org: 'consumer-org', id: 'connection-b', action: 'revoke' },
+    { org: 'consumer-org', id: 'connection-c', action: undefined },
+  ]);
+  assert.deepEqual(response.results, {
+    'service-a': 'revoked scopes applied',
+    'service-b': 'revoked approved connection',
+    'service-c': 'deleted pending request',
+  });
+});
+
+test('does not remove connections belonging to another consuming subsystem', async () => {
+  const { service, removals } = createService({
+    connections: [
+      existingConnection({
+        id: 'unrelated',
+        clientId: 'another-subsystem',
+      }),
+    ],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([])
+  );
+
+  assert.deepEqual(removals, []);
+  assert.deepEqual(response.results, {});
+});
+
+test('ignores another integration connected in a different environment', async () => {
+  const { service, removals } = createService({
+    connections: [
+      existingConnection({
+        id: 'other-integration',
+        environment: 'prod',
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          client: {
+            integrationId: 'integration-b',
+            clientId: 'oauth-client-b',
+          },
+        },
+      }),
+    ],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([])
+  );
+
+  assert.deepEqual(removals, []);
+  assert.deepEqual(response.results, {});
+});
+
 test('reactivates an approved inactive connection on an exact resubmission', async () => {
   const { service, writes, lifecycleWrites } = createService({
     catalog: { 'service-a': catalogService('service-a', 'provider-a') },
@@ -705,6 +862,26 @@ test('builds deterministic allowed services after filtering the exact integratio
         ],
       },
     ],
+  });
+});
+
+test('excludes a revoking connection while retaining its callback identity', async () => {
+  const { service } = createService({
+    connections: [existingConnection()],
+  });
+
+  const response = await service.buildIntegrationAllowedServices(
+    'integration-a',
+    'dev',
+    'approved',
+    { excludeConnectionIds: ['connection-1'] }
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-100-a',
+    resourceServers: [],
   });
 });
 
