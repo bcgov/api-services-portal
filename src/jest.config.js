@@ -12,6 +12,8 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {
+    // first match wins: controllers use decorators that Babel cannot compile
+    '/controllers/.+\\.ts$': '<rootDir>/test/transform-decorators.js',
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
   },
   transformIgnorePatterns: [
