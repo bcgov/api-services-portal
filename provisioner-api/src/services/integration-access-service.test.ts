@@ -35,6 +35,14 @@ before(() => {
         sdx_token_exchange_token_url: 'https://issuer.example/token',
         sdx_trusted_issuers: ['https://issuer.example'],
       },
+      prod: {
+        oauth_token_url: 'https://issuer.example/token',
+        kong_admin_url: 'http://kong-admin',
+        client_runtime_override: 'MIN.CITZ.pzgw',
+        sdx_token_exchange_client_id: 'sdx-edge-exchange',
+        sdx_token_exchange_token_url: 'https://issuer.example/token',
+        sdx_trusted_issuers: ['https://issuer.example'],
+      },
     })
   );
   previousEnvironmentPath = process.env.ENVIRONMENTS_CONFIG_FILE;
@@ -599,6 +607,125 @@ test('updates retained access before removing omitted approved and pending conne
   });
 });
 
+test('retains requested production access while revoking omitted non-production access', async () => {
+  const nonProduction = existingConnection({
+    id: 'connection-non-production',
+    serviceId: 'service-non-production',
+    environment: 'dev',
+  });
+  const production = existingConnection({
+    id: 'connection-production',
+    serviceId: 'service-production',
+    environment: 'prod',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-shared',
+      },
+    },
+  });
+  const { service, writes, removals } = createService({
+    catalog: {
+      'service-production': catalogService(
+        'service-production',
+        'provider-shared',
+        'prod'
+      ),
+    },
+    connections: [nonProduction, production],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-shared',
+        environment: 'prod',
+        services: [{ name: 'service-production', scopes: ['read'] }],
+      },
+    ])
+  );
+
+  assert.deepEqual(writes, []);
+  assert.deepEqual(removals, [
+    {
+      org: 'consumer-org',
+      id: 'connection-non-production',
+      action: 'revoke',
+    },
+  ]);
+  assert.deepEqual(response.results, {
+    'service-production': 'already approved',
+    'service-non-production': 'revoked approved connection',
+  });
+});
+
+test('repeating the complete multi-environment snapshot is idempotent', async () => {
+  const production = existingConnection({
+    id: 'connection-production',
+    serviceId: 'service-production',
+    environment: 'prod',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-shared',
+      },
+    },
+  });
+  const { service, writes, removals, lifecycleWrites } = createService({
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-shared'),
+      'service-production': catalogService(
+        'service-production',
+        'provider-shared',
+        'prod'
+      ),
+    },
+    connections: [
+      existingConnection({
+        requesterDetails: {
+          ...existingConnection().requesterDetails,
+          service: {
+            ...existingConnection().requesterDetails.service,
+            clientId: 'provider-shared',
+          },
+        },
+      }),
+      production,
+    ],
+  });
+
+  const response = await service.submitIntegrationAccessRequest(
+    'submission-2',
+    consumerSubsystem,
+    'integration-a',
+    accessRequest([
+      {
+        id: 'provider-shared',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'] }],
+      },
+      {
+        id: 'provider-shared',
+        environment: 'prod',
+        services: [{ name: 'service-production', scopes: ['read'] }],
+      },
+    ])
+  );
+
+  assert.deepEqual(writes, []);
+  assert.deepEqual(removals, []);
+  assert.deepEqual(lifecycleWrites, []);
+  assert.deepEqual(response.results, {
+    'service-a': 'already approved',
+    'service-production': 'already approved',
+  });
+});
+
 test('does not remove connections belonging to another consuming subsystem', async () => {
   const { service, removals } = createService({
     connections: [
@@ -913,6 +1040,62 @@ test('builds complete approved state across every environment', async () => {
       },
     ],
   });
+});
+
+test('keeps one resource server as separate entries in each environment', async () => {
+  const devConnection = existingConnection({
+    id: 'connection-dev',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-shared',
+      },
+    },
+  });
+  const prodConnection = existingConnection({
+    id: 'connection-prod',
+    serviceId: 'service-prod',
+    environment: 'prod',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-shared',
+      },
+    },
+  });
+  const { service } = createService({
+    connections: [devConnection, prodConnection],
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-shared', 'dev'),
+      'service-prod': catalogService(
+        'service-prod',
+        'provider-shared',
+        'prod'
+      ),
+    },
+  });
+
+  const response = await service.buildCompleteIntegrationAllowedServices(
+    'integration-a',
+    'approved'
+  );
+
+  assert.deepEqual(response.resourceServers, [
+    {
+      id: 'provider-shared',
+      environment: 'dev',
+      services: [{ name: 'service-a', scopes: ['read'], version: '1.0.0' }],
+    },
+    {
+      id: 'provider-shared',
+      environment: 'prod',
+      services: [
+        { name: 'service-prod', scopes: ['read'], version: '1.0.0' },
+      ],
+    },
+  ]);
 });
 
 test('complete state retains other environments while excluding a revoked connection', async () => {
