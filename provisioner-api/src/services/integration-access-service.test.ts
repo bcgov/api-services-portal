@@ -865,14 +865,108 @@ test('builds deterministic allowed services after filtering the exact integratio
   });
 });
 
+test('builds complete approved state across every environment', async () => {
+  const prodConnection = existingConnection({
+    id: 'connection-prod',
+    serviceId: 'service-prod',
+    environment: 'prod',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      submissionId: 'submission-200-prod',
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-prod',
+      },
+    },
+  });
+  const { service } = createService({
+    connections: [existingConnection({ id: 'connection-dev' }), prodConnection],
+    catalog: {
+      'service-a': catalogService('service-a', 'provider-a', 'dev'),
+      'service-prod': catalogService('service-prod', 'provider-prod', 'prod', [
+        'read',
+      ]),
+    },
+  });
+
+  const response = await service.buildCompleteIntegrationAllowedServices(
+    'integration-a',
+    'approved'
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-200-prod',
+    resourceServers: [
+      {
+        id: 'provider-a',
+        environment: 'dev',
+        services: [{ name: 'service-a', scopes: ['read'], version: '1.0.0' }],
+      },
+      {
+        id: 'provider-prod',
+        environment: 'prod',
+        services: [
+          { name: 'service-prod', scopes: ['read'], version: '1.0.0' },
+        ],
+      },
+    ],
+  });
+});
+
+test('complete state retains other environments while excluding a revoked connection', async () => {
+  const prodConnection = existingConnection({
+    id: 'connection-prod',
+    serviceId: 'service-prod',
+    environment: 'prod',
+    requesterDetails: {
+      ...existingConnection().requesterDetails,
+      submissionId: 'submission-200-prod',
+      service: {
+        ...existingConnection().requesterDetails.service,
+        clientId: 'provider-prod',
+      },
+    },
+  });
+  const { service } = createService({
+    connections: [existingConnection({ id: 'connection-dev' }), prodConnection],
+    catalog: {
+      'service-prod': catalogService('service-prod', 'provider-prod', 'prod', [
+        'read',
+      ]),
+    },
+  });
+
+  const response = await service.buildCompleteIntegrationAllowedServices(
+    'integration-a',
+    'approved',
+    { excludeConnectionIds: ['connection-dev'] }
+  );
+
+  assert.deepEqual(response, {
+    integrationId: 'integration-a',
+    clientId: 'oauth-client-a',
+    submissionId: 'submission-200-prod',
+    resourceServers: [
+      {
+        id: 'provider-prod',
+        environment: 'prod',
+        services: [
+          { name: 'service-prod', scopes: ['read'], version: '1.0.0' },
+        ],
+      },
+    ],
+  });
+});
+
 test('excludes a revoking connection while retaining its callback identity', async () => {
   const { service } = createService({
     connections: [existingConnection()],
   });
 
-  const response = await service.buildIntegrationAllowedServices(
+  const response = await service.buildCompleteIntegrationAllowedServices(
     'integration-a',
-    'dev',
     'approved',
     { excludeConnectionIds: ['connection-1'] }
   );

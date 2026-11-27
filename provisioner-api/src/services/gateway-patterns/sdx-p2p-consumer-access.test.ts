@@ -27,7 +27,18 @@ const connection = {
 
 const allowedAccess = {
   clientId: 'integration-client',
-  resourceServers: [{ services: [{ name: 'TEST.SERVICE.v1' }] }],
+  resourceServers: [
+    {
+      id: 'provider-test',
+      environment: 'test',
+      services: [{ name: 'TEST.SERVICE.v1' }],
+    },
+    {
+      id: 'provider-prod',
+      environment: 'prod',
+      services: [{ name: 'TEST.PROD-SERVICE.v1' }],
+    },
+  ],
 };
 
 function buildPattern(access = allowedAccess, calls: unknown[][] = []) {
@@ -38,7 +49,7 @@ function buildPattern(access = allowedAccess, calls: unknown[][] = []) {
     getOASService: async () => service,
   };
   const integrationAccessService = {
-    buildIntegrationAllowedServices: async (...args: unknown[]) => {
+    buildCompleteIntegrationAllowedServices: async (...args: unknown[]) => {
       calls.push(args);
       return access;
     },
@@ -71,6 +82,14 @@ test('emits the ServiceAccess after the GatewayConsumer', async () => {
     documents.map((d) => d.kind),
     ['GatewayConsumer', 'IntegrationAllowedServices', 'ServiceAccess']
   );
+  assert.deepEqual(documents[0].acls, [
+    { group: 'TEST.SERVICE.v1' },
+    { group: 'TEST.CLIENT' },
+  ]);
+  assert.deepEqual(documents[1], {
+    kind: 'IntegrationAllowedServices',
+    ...allowedAccess,
+  });
   assert.deepEqual(documents[2], {
     kind: 'ServiceAccess',
     name: 'conn-1:TEST.SERVICE.v1',
@@ -95,6 +114,27 @@ test('marks the ServiceAccess for removal when the consumer keeps other access',
   assert.equal(serviceAccess._action, 'delete');
 });
 
+test('removes environment-scoped gateway access while the callback retains another environment', async () => {
+  const prodOnlyAccess = {
+    clientId: 'integration-client',
+    resourceServers: [allowedAccess.resourceServers[1]],
+  };
+  const pattern = buildPattern(prodOnlyAccess);
+  const { data, documents } = await run(pattern, inputs, 'delete');
+
+  assert.equal(pattern.deleteHandling(data), 'delete');
+  assert.deepEqual(documents[0].acls, [{ group: 'TEST.CLIENT' }]);
+  assert.deepEqual(
+    documents.find(
+      (document) => document.kind === 'IntegrationAllowedServices'
+    ),
+    {
+      kind: 'IntegrationAllowedServices',
+      ...prodOnlyAccess,
+    }
+  );
+});
+
 test('marks the ServiceAccess for removal on a full delete', async () => {
   const calls: unknown[][] = [];
   const pattern = buildPattern(
@@ -112,7 +152,6 @@ test('marks the ServiceAccess for removal on a full delete', async () => {
   assert.deepEqual(calls, [
     [
       'integration-1',
-      'test',
       'approved',
       {
         skipMalformedConnections: true,
@@ -123,7 +162,7 @@ test('marks the ServiceAccess for removal on a full delete', async () => {
   const allowedServices = documents.find(
     (d) => d.kind === 'IntegrationAllowedServices'
   );
-  assert.equal(allowedServices.environment, 'test');
+  assert.equal('environment' in allowedServices, false);
   assert.deepEqual(allowedServices.resourceServers, []);
 });
 

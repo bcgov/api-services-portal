@@ -45,9 +45,9 @@ export class CommonSsoService {
   }
 
   /**
-   * Delivers the approved allowed-services grant to Common SSO. The PUT
-   * replaces the partner-side view of the integration access request,
-   * mirroring the `provisionAllowedServices` callback contract.
+   * Delivers the complete approved allowed-services state to Common SSO. The
+   * PUT replaces the partner-side view across every environment, mirroring
+   * the `provisionAllowedServices` callback contract.
    */
   async provisionAllowedServices(
     request: TIntegrationAccessRequest

@@ -164,13 +164,6 @@ export const IntegrationAccessRequest = Type.Object(
       examples: ['9f3c2f3a-1c1e-4c79-8e34-9f6f2b6b9d8a'],
     }),
     clientId: Type.String({ examples: ['client-a-111'] }),
-    environment: Type.Optional(
-      Type.String({
-        description:
-          'SDX environment represented by this authoritative callback. Required by consumers when resourceServers is empty.',
-        examples: ['apsdev'],
-      })
-    ),
     resourceServers: Type.Array(Type.Ref(ResourceServerAccess)),
   },
   {

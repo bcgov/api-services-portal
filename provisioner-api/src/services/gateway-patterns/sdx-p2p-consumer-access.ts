@@ -24,11 +24,13 @@ export interface SDXP2PConsumerPatternData {
   allowedAccess: {
     clientId: string;
     resourceServers: Array<{
+      environment?: string;
       services: Array<{
         name: string;
       }>;
     }>;
   };
+  completeAllowedAccess?: TIntegrationAccessRequest;
 }
 
 /**
@@ -92,10 +94,9 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
         },
       };
     } else {
-      const allowedAccess =
-        await this.integrationAccessService.buildIntegrationAllowedServices(
+      const completeAllowedAccess =
+        await this.integrationAccessService.buildCompleteIntegrationAllowedServices(
           connection?.requesterDetails.client?.integrationId,
-          connection?.environment!,
           'approved',
           {
             skipMalformedConnections: ctx?.action === 'delete',
@@ -103,9 +104,16 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
               ctx?.action === 'delete' ? [inputs.connId] : undefined,
           }
         );
+      const allowedAccess = {
+        ...completeAllowedAccess,
+        resourceServers: completeAllowedAccess.resourceServers.filter(
+          (resourceServer) =>
+            resourceServer.environment === connection?.environment
+        ),
+      };
 
       assert.strictEqual(
-        Boolean(allowedAccess.clientId),
+        Boolean(completeAllowedAccess.clientId),
         true,
         `No client ID available for integration access for consumer ${inputs.clientId}`
       );
@@ -116,6 +124,7 @@ export class SDXP2PConsumerAccessPattern implements PatternProcessor {
         client: orgClient,
         service,
         allowedAccess,
+        completeAllowedAccess,
       };
     }
   }
@@ -197,10 +206,7 @@ function buildIntegrationAllowAccess(
   data: SDXP2PConsumerPatternData
 ) {
   return {
-    ...{
-      kind: 'IntegrationAllowedServices',
-      environment: data.service.environment,
-    },
-    ...data.allowedAccess,
+    kind: 'IntegrationAllowedServices',
+    ...(data.completeAllowedAccess || data.allowedAccess),
   };
 }
