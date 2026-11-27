@@ -54,6 +54,10 @@ Many tests cannot be run independently because they depend on state established 
 - Run `npm run cy:run` to execute the tests and print the results to the console
 - Run `npm run cy:run:html` to execute the tests and generate the `mochawesome` HTML report under `results/report` folder
 
+#### SDX Catalogue
+
+Catalogue verification is separate from `npm run cy:run`. The recommendation, coverage map, and manual script are in [sdx-catalogue-verification.md](sdx-catalogue-verification.md). From this directory, `npm run cy:sdx-catalogue` runs the public-home proof against a local `sdx-ui` container.
+
 ### Docker Compose
 
 - Run `docker compose up` to spin up a local development environment, which includes Cypress as one of the services and it executes all the tests and generates the HTML report

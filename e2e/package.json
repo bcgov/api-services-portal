@@ -8,6 +8,7 @@
   "scripts": {
     "cy:open": "cypress open --config-file=cypress.config.ts --env TransferProtocol='http'",
     "cy:run": "npx cypress run --headed --config-file cypress.config.ts --env TransferProtocol='http' --browser ${BROWSER:-edge}",
+    "cy:sdx-catalogue": "SDX_CATALOGUE_SPECS=1 npx cypress run --headless --config-file cypress.config.ts --env TransferProtocol='http' --browser ${BROWSER:-electron} --spec cypress/tests/27-sdx-catalogue/01-brochure-home.cy.ts",
     "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
