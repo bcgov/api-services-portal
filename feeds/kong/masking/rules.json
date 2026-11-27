@@ -1,0 +1,132 @@
+{
+  "mask": "****",
+  "vaultReference": "^\\{vault:\\/\\/[^{}]+\\}$",
+  "secretFields": {
+    "names": [
+      "account_email",
+      "aws_assume_role_arn",
+      "clientid",
+      "eab_kid",
+      "gcp_service_account_json",
+      "key_alt",
+      "redis_host"
+    ],
+    "patterns": [
+      "passw(?:or)?d",
+      "passphrase|pwd|(?:^|_)pass$",
+      "secret",
+      "credential",
+      "api_?key",
+      "(?:^|_)token$",
+      "(?:^|_)username$",
+      "(?:^|_)priv(?:ate)?_key$",
+      "(?:^|_)(?:aws_access_key_id|access_key|aws_key)$",
+      "(?:^|_)(?:hmac|provision|signing)_key$",
+      "^key$",
+      "(?:^|_)(?:header|param|authorization)_value$"
+    ],
+    "byParent": {
+      "redis": ["host"]
+    }
+  },
+  "secretNames": {
+    "names": [
+      "authorization",
+      "proxyauthorization",
+      "cookie",
+      "setcookie",
+      "pass",
+      "sig"
+    ],
+    "contains": [
+      "apikey",
+      "token",
+      "secret",
+      "password",
+      "passwd",
+      "passphrase",
+      "pwd",
+      "credential",
+      "signature"
+    ],
+    "prefixes": ["xauth"],
+    "suffixes": ["auth", "key"]
+  },
+  "nameValueLists": {
+    "fields": ["headers", "querystring", "body", "json"],
+    "except": ["rename"]
+  },
+  "headerMaps": ["headers"],
+  "textRules": [
+    {
+      "name": "private-key-block",
+      "pattern": "-----BEGIN [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----[\\s\\S]*?-----END [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----",
+      "mask": "match"
+    },
+    {
+      "name": "jwt",
+      "pattern": "\\beyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*",
+      "mask": "match"
+    },
+    {
+      "name": "aws-access-key-id",
+      "pattern": "\\b(?:AKIA|ASIA)[0-9A-Z]{16}\\b",
+      "mask": "match"
+    },
+    {
+      "name": "url-userinfo",
+      "pattern": "\\b([a-z][a-z0-9+.-]*://)([^\\s/?#@]+)(@)",
+      "ignoreCase": true,
+      "mask": "group",
+      "group": 2
+    },
+    {
+      "name": "url-query-param",
+      "pattern": "([?&])([^=&#\\s]+)(=)([^&#\\s]*)",
+      "mask": "group-if-secret-name",
+      "group": 4,
+      "nameGroup": 2
+    },
+    {
+      "name": "quoted-name-assignment",
+      "pattern": "([\"'])([^\"'\\s]+)(\\1)(\\]?\\s*[:=]\\s*)([\"'])((?:\\\\.|(?!\\5)[^\\\\])*)(\\5)",
+      "mask": "group-if-secret-name",
+      "group": 6,
+      "nameGroup": 2
+    },
+    {
+      "name": "header-call-arguments",
+      "pattern": "(\\(\\s*)([\"'])([^\"'\\n]+)(\\2)(\\s*,\\s*)([\"'])((?:\\\\.|(?!\\6)[^\\\\])*)(\\6)",
+      "mask": "group-if-secret-name",
+      "group": 7,
+      "nameGroup": 3
+    },
+    {
+      "name": "quoted-value-assignment",
+      "pattern": "\\b([A-Za-z_][\\w.-]*)(\\s*[:=]\\s*)([\"'])((?:\\\\.|(?!\\3)[^\\\\])*)(\\3)",
+      "mask": "group-if-secret-name",
+      "group": 4,
+      "nameGroup": 1
+    },
+    {
+      "name": "unquoted-assignment",
+      "pattern": "(^|[;,\\s])([A-Za-z][\\w.-]*)(\\s*=\\s*)([^;&,\\s\"']+)",
+      "mask": "group-if-secret-name",
+      "group": 4,
+      "nameGroup": 2
+    },
+    {
+      "name": "bearer-basic",
+      "pattern": "\\b(Bearer|Basic)(\\s+)(?!(?:realm|scope|error|error_description|charset)=)([A-Za-z0-9][A-Za-z0-9._~+/=-]*)",
+      "ignoreCase": true,
+      "mask": "group",
+      "group": 3
+    },
+    {
+      "name": "token-splunk",
+      "pattern": "\\b(Token|Splunk)(\\s+)([A-Za-z0-9][A-Za-z0-9._~+/=-]*)",
+      "mask": "group",
+      "group": 3
+    }
+  ]
+}
